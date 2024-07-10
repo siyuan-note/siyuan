@@ -1,0 +1,386 @@
+{
+	"ID": "20240530101000-5k5d5i3",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-r42oidf",
+		"id": "20240530101000-5k5d5i3",
+		"title": "アセットの内容検索",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-8d3pmzu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ao948gk",
+				"id": "20240530101000-8d3pmzu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ インターフェースの右上にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "アセットファイルの内容を検索"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を有効にすると、アセットファイルの内容を検索できます。現在、以下のファイル形式に対応しています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dy607mr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-gui4fuq",
+				"id": "20240530101000-dy607mr",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-423ygdo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-d6fzgev",
+						"id": "20240530101000-423ygdo",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-5htsgo0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lunnpt0",
+								"id": "20240530101000-5htsgo0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テキストファイル (.txt, .md, .json, .log, .sql, .html, .xml, .java, .h, .c, .cpp, .go, .rs, .swift, .kt, . py, .php, .js, .css, .ts, .sh, .bat, .cmd, .ini, .yaml, .rst, .adoc, .textile, .opml, .org, .wiki)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ddgjyye",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-jhc3a4i",
+						"id": "20240530101000-ddgjyye"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-alu1ygl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cznhpu3",
+								"id": "20240530101000-alu1ygl",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".docx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-t8ewu5o",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0t3jtob",
+						"id": "20240530101000-t8ewu5o"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-afub9kt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-isl867u",
+								"id": "20240530101000-afub9kt",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pptx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-6c3or97",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-79w2hmi",
+						"id": "20240530101000-6c3or97"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-p5qs8ir",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zo7jhc4",
+								"id": "20240530101000-p5qs8ir",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".xlsx"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-napqxcr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nm831gm",
+						"id": "20240530101000-napqxcr"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vknnawk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-l05rbi9",
+								"id": "20240530101000-vknnawk"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": ".pdf"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ij3rhof",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-oybdbq7",
+				"id": "20240530101000-ij3rhof",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-c4z21t9",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-4gt9eff",
+				"id": "20240530101000-c4z21t9",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-dkjb03j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-swc2vcf",
+						"id": "20240530101000-dkjb03j",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-u0itvi6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-txtx1zs",
+								"id": "20240530101000-u0itvi6",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "4MB を超えるテキストファイルはサポートされていません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-5d6dt08",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-njys8is",
+						"id": "20240530101000-5d6dt08",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-p0utdqc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-tnggjxf",
+								"id": "20240530101000-p0utdqc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "1024 ページを超える PDF はサポートされていません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-nzydytm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-bxd7kv3",
+						"id": "20240530101000-nzydytm",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7fn0hl2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lkstyj3",
+								"id": "20240530101000-7fn0hl2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デフォルトでは 128MB を超える PDF はサポートされていません。環境変数 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を設定することで、上限値を変更できます (バイト単位)。たとえば、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "SIYUAN_PDF_ASSET_CONTENT_INDEX_MAX_SIZE=256000000"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ に設定すると、上限値が256MB に変更されます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-877kxuv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-788nfw5",
+						"id": "20240530101000-877kxuv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-g3jocdo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-gsg96j5",
+								"id": "20240530101000-g3jocdo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Android/iOS では PDF の内容検索はサポートされていません"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gkqdufr",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-j5csnxr",
+				"id": "20240530101000-gkqdufr"
+			}
+		}
+	]
+}

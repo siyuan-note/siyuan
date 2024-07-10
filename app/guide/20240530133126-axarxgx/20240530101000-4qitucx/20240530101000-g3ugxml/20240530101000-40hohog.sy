@@ -1,0 +1,273 @@
+{
+	"ID": "20240530101000-40hohog",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-nizi36m",
+		"id": "20240530101000-40hohog",
+		"title": "ブラウザ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-yllodqo",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-vn1tvf6",
+				"id": "20240530101000-yllodqo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブラウザでの使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jea0mtn",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-geiuqut",
+				"id": "20240530101000-jea0mtn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "情報"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブラウザで使用"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ブラウザで開く"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ からブラウザで SiYuan を直接使用できます。LAN で使用する場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "127.0.0.1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を LAN の IP アドレスに置き換えてください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8fajyrp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ehzd9yn",
+				"id": "20240530101000-8fajyrp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "LAN での利用に加えて、以下の 2 つの方法で公衆ネットワークでも利用できます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ve769rz",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-yddq6s5",
+				"id": "20240530101000-ve769rz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-bpe32wv",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-6ss8ui4",
+						"id": "20240530101000-bpe32wv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-bd4p584",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nrfqxud",
+								"id": "20240530101000-bd4p584",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "NAT トラバーサル技術を利用してローカルカーネルサービスを公衆ネットワークに公開する (比較的面倒で不安定なため推奨しません)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-fdqpeu8",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-r2ydp2p",
+						"id": "20240530101000-fdqpeu8",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e25wxs7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-11mpu9p",
+								"id": "20240530101000-e25wxs7",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "独自の SiYuan Server を構築する (推奨)"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ak3x2ah",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-qoaep8q",
+				"id": "20240530101000-ak3x2ah",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これらの 2 つの解決策に着手する前に、まず SiYuan の"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note/siyuan",
+					"TextMarkTextContent": "技術アーキテクチャ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を理解することから始めてください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b6ssy52",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-zvy840s",
+				"id": "20240530101000-b6ssy52",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アクセス認証"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xf6aq6t",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-irzzx5o",
+				"id": "20240530101000-xf6aq6t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "情報"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ からブラウザアクセス認証用のパスワードを設定できます。空欄のままにすると認証は有効になりません。これは、オフィスや公衆ネットワークなどのオープンなネットワークで役に立ち、認証を通過した場合のみワークスペースにアクセスできます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4ocdywp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-83ekc6g",
+				"id": "20240530101000-4ocdywp"
+			}
+		}
+	]
+}

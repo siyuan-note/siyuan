@@ -1,7 +1,7 @@
 import {isIPad} from "../../protyle/util/compatibility";
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
-import {fileAnnotationRefMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
+import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
 import {App} from "../../index";
 import {Protyle} from "../../protyle";
 import {getCurrentEditor} from "../../mobile/editor";
@@ -121,6 +121,11 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
             }
             if (types.includes("a")) {
                 linkMenu(editor.protyle, target);
+                return true;
+            }
+            const inlineMathElement = hasClosestByAttribute(target, "data-type", "inline-math");
+            if (inlineMathElement) {
+                inlineMathMenu(editor.protyle, inlineMathElement);
                 return true;
             }
         }

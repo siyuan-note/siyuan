@@ -71,17 +71,17 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 			delete(ret.IAL, "scroll")
 		} else {
 			if zoomInId := scroll["zoomInId"]; nil != zoomInId {
-				if nil == treenode.GetBlockTree(zoomInId.(string)) {
+				if !treenode.ExistBlockTree(zoomInId.(string)) {
 					delete(ret.IAL, "scroll")
 				}
 			} else {
 				if startId := scroll["startId"]; nil != startId {
-					if nil == treenode.GetBlockTree(startId.(string)) {
+					if !treenode.ExistBlockTree(startId.(string)) {
 						delete(ret.IAL, "scroll")
 					}
 				}
 				if endId := scroll["endId"]; nil != endId {
-					if nil == treenode.GetBlockTree(endId.(string)) {
+					if !treenode.ExistBlockTree(endId.(string)) {
 						delete(ret.IAL, "scroll")
 					}
 				}

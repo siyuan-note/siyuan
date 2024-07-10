@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20240517003750"
+		"updated": "20240524085755"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133532-44ubczo",
-				"updated": "20240517003750"
+				"updated": "20240524085755"
 			},
 			"Children": [
 				{
@@ -40,7 +40,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210106154101-qrojg1b",
-				"updated": "20240426100644"
+				"updated": "20240523114032"
 			},
 			"Children": [
 				{
@@ -1306,6 +1306,96 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "Unsplit"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings - Shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Unsplit All"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings - Shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "Doc tree panel"
 								}
 							]
@@ -2306,7 +2396,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183314-2tdx7d1",
-				"updated": "20240517003750"
+				"updated": "20240524085755"
 			},
 			"Children": [
 				{
@@ -3040,7 +3130,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20240517003750"
+				"updated": "20240524085755"
 			},
 			"Children": [
 				{
@@ -3059,7 +3149,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20240517003750"
+				"updated": "20240524085755"
 			},
 			"Children": [
 				{
@@ -3079,7 +3169,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20240516235223"
+				"updated": "20240524085755"
 			},
 			"Children": [
 				{
@@ -6960,6 +7050,105 @@
 								{
 									"Type": "NodeText",
 									"Data": "Go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings - Shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Duplicate"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "For database block is "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Duplicate mirror"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, go to "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Settings - Shortcuts"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to configure"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Duplicate completely"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Available only for database blocks, go to "
 								},
 								{
 									"Type": "NodeTextMark",

@@ -1,0 +1,1399 @@
+{
+	"ID": "20240530101000-bpj42r0",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-rtlfc17",
+		"id": "20240530101000-bpj42r0",
+		"title": "テーマ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-51zq99v",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-xm2cpmo",
+				"id": "20240530101000-51zq99v",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vayts14",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-avi2g75",
+				"id": "20240530101000-vayts14",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーマをカスタマイズするには以下の 2 つの方法があります:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-h8x7nw4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-2h7ryur",
+				"id": "20240530101000-h8x7nw4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-n9fv2ir",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-5kz50f3",
+						"id": "20240530101000-n9fv2ir",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-w1bkzpd",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-yxaows4",
+								"id": "20240530101000-w1bkzpd",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コードスニペット"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-5smkcju",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-oktfnzy",
+						"id": "20240530101000-5smkcju",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-dkjn83n",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-rzmftj0",
+								"id": "20240530101000-dkjn83n",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テーマパック"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jscq707",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-qlk99nz",
+				"id": "20240530101000-jscq707",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コードスニペット"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xcqie6f",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-9cg5rtu",
+				"id": "20240530101000-xcqie6f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-4wzco4a",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-x46eb8o",
+						"id": "20240530101000-4wzco4a",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-m6yns9u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-llezsqn",
+								"id": "20240530101000-m6yns9u",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を開き、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "コードスニペットの設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ をクリックして CSS タブを選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-8fjf4cb",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-36fmhrc",
+						"id": "20240530101000-8fjf4cb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-orpozhw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y6bvbz9",
+								"id": "20240530101000-orpozhw",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "スニペットのタイトルを入力します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bjxyn1f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-cqdhydw",
+						"id": "20240530101000-bjxyn1f",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-lqv9vdg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-rc511aa",
+								"id": "20240530101000-lqv9vdg",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テーマと "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ の変数を参照し、以下の形式で記述したコードをコードスニペットに入力します"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-tdmmpe4",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"ID": "20240530101000-xhmwnww",
+								"id": "20240530101000-tdmmpe4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "Y3Nz"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "html[data-light-theme=\"daylight\"][data-theme-mode=\"light\"] {\n    --b3-theme-primary: red;\n}\n\nhtml[data-light-theme=\"daylight\"][data-theme-mode=\"dark\"] {\n    --b3-theme-primary: blue;\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ti1p2s6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-xt43zy6",
+						"id": "20240530101000-ti1p2s6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-9ujjfze",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8r094ba",
+								"id": "20240530101000-9ujjfze",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "コードスニペットを有効にします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-m3elc2w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NS4=",
+						"Num": 5
+					},
+					"Properties": {
+						"ID": "20240530101000-adhdn1e",
+						"id": "20240530101000-m3elc2w",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-n6kyto7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nh5qh66",
+								"id": "20240530101000-n6kyto7",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "確認ボタンをクリックします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-e1rqa5t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-75geurh",
+				"id": "20240530101000-e1rqa5t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーマパック"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pn8rlmc",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-1c2bszz",
+				"id": "20240530101000-pn8rlmc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーマパックはコミュニティマーケットプレイスからダウンロードするか手動でインストールできます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-foh7a5f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-pj2qt5j",
+				"id": "20240530101000-foh7a5f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コミュニティマーケットプレイス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-c64pear",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-4lh6wae",
+				"id": "20240530101000-c64pear",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-awu4146",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-oc2opvc",
+						"id": "20240530101000-awu4146",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-41iytpk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-26noejm",
+								"id": "20240530101000-41iytpk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "マーケットプレイス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から、コミュニティの開発者が作成したテーマを閲覧できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wpk42ta",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-19tg0sd",
+						"id": "20240530101000-wpk42ta",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-j4ljkpp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ds5unj8",
+								"id": "20240530101000-j4ljkpp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "必要なテーマを選択してインストールやアップデートができます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ei4f29x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-1gm1l6d",
+				"id": "20240530101000-ei4f29x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動インストール"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yenj3fj",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-p5bs87t",
+				"id": "20240530101000-yenj3fj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-d90e3o2",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-4n532py",
+						"id": "20240530101000-d90e3o2",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-cwi184w",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-69gshp3",
+								"id": "20240530101000-cwi184w",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テーマを入手して解凍します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-2fp34g8",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-ybolo9o",
+						"id": "20240530101000-2fp34g8",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-n82uhqw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7lu4j3i",
+								"id": "20240530101000-n82uhqw",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマフォルダを開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ti8mah6",
+					"Type": "NodeListItem",
+					"Data": "3",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mw==",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-qnlxak8",
+						"id": "20240530101000-ti8mah6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-guamjxp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ylbw1s6",
+								"id": "20240530101000-guamjxp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "このフォルダにテーマをコピーします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-s7kf4bl",
+					"Type": "NodeListItem",
+					"Data": "4",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 4,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NA==",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-p0arthv",
+						"id": "20240530101000-s7kf4bl",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-96amlnm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-rkjqmwo",
+								"id": "20240530101000-96amlnm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan を再起動し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ からインストールしたテーマを選択します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dik7qz7",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-m92cdqb",
+				"id": "20240530101000-dik7qz7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開発"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9nkaihq",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-6pz8s9i",
+				"id": "20240530101000-9nkaihq",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手順"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bo6l8c1",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-w4ueh95",
+				"id": "20240530101000-bo6l8c1",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-n8xk1v1",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-soq72ch",
+						"id": "20240530101000-n8xk1v1",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-rfnd3uq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y2ss8mg",
+								"id": "20240530101000-rfnd3uq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テーマにわかりやすい名前を付けます (例: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wqqdogy",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-90dqhxu",
+						"id": "20240530101000-wqqdogy",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tru6zje",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-xnvfvs5",
+								"id": "20240530101000-tru6zje",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマフォルダを開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-tazi33j",
+					"Type": "NodeListItem",
+					"Data": "3",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mw==",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-ms6dfu8",
+						"id": "20240530101000-tazi33j",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zqqfphq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-r4q1tkp",
+								"id": "20240530101000-zqqfphq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開いたフォルダに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という新しいフォルダを作成し、その中に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ と "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.json"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ の 2 つのファイルを作成します。具体的な例は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/theme-sample",
+									"TextMarkTextContent": "siyuan-note/theme-sample"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を参考にしてください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-rokr1na",
+					"Type": "NodeListItem",
+					"Data": "4",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 4,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NA==",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-9qze5c3",
+						"id": "20240530101000-rokr1na",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0rok9l0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-j9mw5mf",
+								"id": "20240530101000-0rok9l0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ファイルを開いてコーディングします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-dnbmqqq",
+					"Type": "NodeListItem",
+					"Data": "5",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 5,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NQ==",
+						"Num": 5
+					},
+					"Properties": {
+						"ID": "20240530101000-6b7a4gm",
+						"id": "20240530101000-dnbmqqq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-88pwd3m",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8x9fb4p",
+								"id": "20240530101000-88pwd3m",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan を再起動し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "テーマ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ からインストールしたテーマを選択します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8qf0tmt",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-qiqvdvm",
+				"id": "20240530101000-8qf0tmt",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーマの制作"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yvr3cee",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-qopm0a9",
+				"id": "20240530101000-yvr3cee",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-gk7u68e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-603zfnr",
+						"id": "20240530101000-gk7u68e",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-4y1au23",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-9uofs75",
+								"id": "20240530101000-4y1au23",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://developer.mozilla.org/ja/docs/Web/CSS",
+									"TextMarkTextContent": "CSS"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " の基本を理解している必要があります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-lfl6x7c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2a6ikrn",
+						"id": "20240530101000-lfl6x7c",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0ciov1o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-drsmu3g",
+								"id": "20240530101000-0ciov1o",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ":root{...}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 内のカラースキームを変更します。⚠️デフォルトで設定されている変数は削除しないでください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-5l7oky3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-9w833ig",
+						"id": "20240530101000-5l7oky3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-m59kwbk",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-bqys9c6",
+								"id": "20240530101000-m59kwbk",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "theme.css"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ファイルを開いてコーディングします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-66su770",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-cgxqpe3",
+						"id": "20240530101000-66su770",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-xil54hs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-pyzfcam",
+								"id": "20240530101000-xil54hs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Chrome の開発者ツールで "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Network"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ タブの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Disable cache"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ にチェックを入れ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "window.location.reload()"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を実行して最終的な結果を確認します\n​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "custom-theme2.png"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/custom-theme2-20210512172321-1qkspzd.png"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-n914h99",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-hg6ub7x",
+				"id": "20240530101000-n914h99",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスに公開する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v3uk4ec",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-nab9u3u",
+				"id": "20240530101000-v3uk4ec",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9fz39lq",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-frdfzzx",
+				"id": "20240530101000-9fz39lq"
+			}
+		}
+	]
+}

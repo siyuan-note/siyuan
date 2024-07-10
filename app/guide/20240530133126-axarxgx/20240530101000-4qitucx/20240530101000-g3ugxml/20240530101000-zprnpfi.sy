@@ -1,0 +1,520 @@
+{
+	"ID": "20240530101000-zprnpfi",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-qx6a010",
+		"id": "20240530101000-zprnpfi",
+		"title": "ハイパーリンク",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-1d00f3r",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-p3shnw1",
+				"id": "20240530101000-1d00f3r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mcr1380",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cw7ccbj",
+				"id": "20240530101000-mcr1380",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ブラウザやハイパーリンクに対応している他のソフトウェアなど、別の場所から SiYuan デスクトップアプリケーションを起動したい場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ハイパーリンクを使用できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-atz1u4t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-s870g9d",
+				"id": "20240530101000-atz1u4t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リンク形式"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ryg6y11",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-saqs1jz",
+				"id": "20240530101000-ryg6y11",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​: コンテンツブロックを直接開きます。ブロックが存在するノートブックがすでに開かれている必要があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ttimz1h",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-y7kv4lp",
+				"id": "20240530101000-ttimz1h",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クエリ文字列にパラメータ "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "focus=1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ("
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "siyuan://blocks/{id}?focus=1"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​) を追加すると、フォーカスされた状態で開きます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7tdwl9i",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-hjna0sl",
+				"id": "20240530101000-7tdwl9i",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-s94kv5d",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-x3tl5bx",
+				"id": "20240530101000-s94kv5d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-aqzoylx",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-p59ymq6",
+						"id": "20240530101000-aqzoylx",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-bbu7m77",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hrcm6ii",
+								"id": "20240530101000-bbu7m77",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Windows と macOS では、起動後にシステムに対して自動的に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "siyuan://"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ プロトコルの登録を行います"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bxuweaf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-9xkdp7w",
+						"id": "20240530101000-bxuweaf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sn6l0x8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-tnbropu",
+								"id": "20240530101000-sn6l0x8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Linux では以下の手順を実行してください"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-8x55r7l",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-09b87b5",
+								"id": "20240530101000-8x55r7l",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-pz8o8kg",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-x8iytyu",
+										"id": "20240530101000-pz8o8kg",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-f0wsvfd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-bgha12g",
+												"id": "20240530101000-f0wsvfd",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "siyuan.desktop"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ ファイルを作成するか既存のものを編集用として開きます:"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-brxc3a1",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"ID": "20240530101000-6ufghzs",
+												"id": "20240530101000-brxc3a1",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"ID": "20240530101000-9fuf32j",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"ID": "20240530101000-xwu541w",
+														"id": "20240530101000-9fuf32j"
+													},
+													"Children": [
+														{
+															"ID": "20240530101000-a88md1a",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"ID": "20240530101000-rqunpm3",
+																"id": "20240530101000-a88md1a"
+															},
+															"Children": [
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "MimeType=MimeType=x-scheme-handler/siyuan;"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20240530101000-rbwsif1",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"ID": "20240530101000-a6sl35d",
+														"id": "20240530101000-rbwsif1",
+														"updated": "20240530101000"
+													},
+													"Children": [
+														{
+															"ID": "20240530101000-m1yqkf2",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"ID": "20240530101000-0zyqusx",
+																"id": "20240530101000-m1yqkf2",
+																"updated": "20240530101000"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "​"
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ の末尾に "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "%u"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ を追加します。つまり "
+																},
+																{
+																	"Type": "NodeTextMark",
+																	"TextMarkType": "code",
+																	"TextMarkTextContent": "Exec=実行ファイルのパス %u"
+																},
+																{
+																	"Type": "NodeText",
+																	"Data": "​ となります"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-nlxjqxc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-ayrtz86",
+										"id": "20240530101000-nlxjqxc",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-jrbis41",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-0wo6e9v",
+												"id": "20240530101000-jrbis41",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "以下のコマンドを実行します:"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-0ijiroc",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"ID": "20240530101000-03q3owh",
+												"id": "20240530101000-0ijiroc"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "amF2YQ=="
+												},
+												{
+													"Type": "NodeCodeBlockCode",
+													"Data": "sudo update-desktop-database\nxdg-mime default siyuan.desktop x-scheme-handler/siyuan\nxdg-settings set default-url-scheme-handler siyuan siyuan.desktop\n"
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-zh59sx0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-n1h9qu6",
+												"id": "20240530101000-zh59sx0",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "より詳しい情報は "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://www.freedesktop.org/wiki/Software/xdg-utils/",
+													"TextMarkTextContent": "xdg-utils"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " を参照してください。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-1cgvrp3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-oqj9m0v",
+						"id": "20240530101000-1cgvrp3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-dxmqbet",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-95qb9b9",
+								"id": "20240530101000-dxmqbet",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ブロックメニュー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "コピー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ブロックのハイパーリンクをコピー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ でリンクをコピーします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3fvp1q9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-i9knffd",
+				"id": "20240530101000-3fvp1q9"
+			}
+		}
+	]
+}

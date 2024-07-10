@@ -928,7 +928,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+Click"
+					"TextMarkTextContent": "Ctrl+点击"
 				},
 				{
 					"Type": "NodeText",

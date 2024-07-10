@@ -76,11 +76,12 @@ type AppConf struct {
 	Stat           *conf.Stat       `json:"stat"`           // 统计
 	Api            *conf.API        `json:"api"`            // API
 	Repo           *conf.Repo       `json:"repo"`           // 数据仓库
+	Publish        *conf.Publish    `json:"publish"`        // 发布服务
 	OpenHelp       bool             `json:"openHelp"`       // 启动后是否需要打开用户指南
 	ShowChangelog  bool             `json:"showChangelog"`  // 是否显示版本更新日志
 	CloudRegion    int              `json:"cloudRegion"`    // 云端区域，0：中国大陆，1：北美
 	Snippet        *conf.Snpt       `json:"snippet"`        // 代码片段
-	State          int              `json:"state"`          // 运行状态，0：已经正常退出，1：运行中
+	DataIndexState int              `json:"dataIndexState"` // 数据索引状态，0：已索引，1：未索引
 
 	m *sync.Mutex
 }
@@ -277,7 +278,9 @@ func InitConf() {
 
 	if nil == Conf.System {
 		Conf.System = conf.NewSystem()
-		Conf.OpenHelp = true
+		if util.ContainerIOS != util.Container {
+			Conf.OpenHelp = true
+		}
 	} else {
 		if 0 < semver.Compare("v"+util.Ver, "v"+Conf.System.KernelVersion) {
 			logging.LogInfof("upgraded from version [%s] to [%s]", Conf.System.KernelVersion, util.Ver)
@@ -353,6 +356,13 @@ func InitConf() {
 
 	if nil == Conf.Bazaar {
 		Conf.Bazaar = conf.NewBazaar()
+	}
+
+	if nil == Conf.Publish {
+		Conf.Publish = conf.NewPublish()
+	}
+	if Conf.OpenHelp && Conf.Publish.Enable {
+		Conf.OpenHelp = false
 	}
 
 	if nil == Conf.Repo {
@@ -457,8 +467,8 @@ func InitConf() {
 
 	Conf.LocalIPs = util.GetLocalIPs()
 
-	if 1 == Conf.State {
-		// 上次未正常退出
+	if 1 == Conf.DataIndexState {
+		// 上次未正常完成数据索引
 		go func() {
 			util.WaitForUILoaded()
 			time.Sleep(2 * time.Second)
@@ -470,7 +480,7 @@ func InitConf() {
 		}()
 	}
 
-	Conf.State = 1 // 运行中
+	Conf.DataIndexState = 0
 
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
@@ -620,7 +630,6 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	Conf.Close()
 	sql.CloseDatabase()
-	treenode.SaveBlockTree(false)
 	util.SaveAssetsTexts()
 	clearWorkspaceTemp()
 	clearCorruptedNotebooks()
@@ -710,7 +719,6 @@ func (conf *AppConf) save0(data []byte) {
 }
 
 func (conf *AppConf) Close() {
-	conf.State = 0 // 已经正常退出
 	conf.Save()
 }
 
@@ -811,34 +819,13 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
-	initialized := false
-	if 1 > treenode.CountBlocks() {
-		if gulu.File.IsExist(util.BlockTreePath) {
-			util.IncBootProgress(20, Conf.Language(91))
-			go func() {
-				for i := 0; i < 40; i++ {
-					util.RandomSleep(50, 100)
-					util.IncBootProgress(1, Conf.Language(91))
-				}
-			}()
-
-			treenode.InitBlockTree(false)
-			initialized = true
-		}
-	} else { // 大于 1 的话说明在同步阶段已经加载过了
-		initialized = true
-	}
-
+	initialized := 0 < treenode.CountBlocks()
 	for _, box := range Conf.GetOpenedBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {
 			index(box.ID)
 		}
-	}
-
-	if !initialized {
-		treenode.SaveBlockTree(true)
 	}
 
 	var dbSize string
@@ -886,6 +873,24 @@ func GetMaskedConf() (ret *AppConf, err error) {
 		ret.AccessAuthCode = MaskedAccessAuthCode
 	}
 	return
+}
+
+// REF: https://github.com/siyuan-note/siyuan/issues/11364
+// HideConfSecret 隐藏设置中的秘密信息
+func HideConfSecret(c *AppConf) {
+	c.AI = &conf.AI{}
+	c.Api = &conf.API{}
+	c.Flashcard = &conf.Flashcard{}
+	c.LocalIPs = []string{}
+	c.Publish = &conf.Publish{}
+	c.Repo = &conf.Repo{}
+	c.Sync = &conf.Sync{}
+	c.System.AppDir = ""
+	c.System.ConfDir = ""
+	c.System.DataDir = ""
+	c.System.HomeDir = ""
+	c.System.Name = ""
+	c.System.NetworkProxy = &conf.NetworkProxy{}
 }
 
 func clearPortJSON() {
@@ -953,7 +958,8 @@ func clearWorkspaceTemp() {
 	os.RemoveAll(filepath.Join(util.TempDir, "import"))
 	os.RemoveAll(filepath.Join(util.TempDir, "repo"))
 	os.RemoveAll(filepath.Join(util.TempDir, "os"))
-	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块数数据
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree.msgpack")) // v2.7.2 前旧版的块树数据
+	os.RemoveAll(filepath.Join(util.TempDir, "blocktree"))         // v3.1.0 前旧版的块树数据
 
 	// 退出时自动删除超过 7 天的安装包 https://github.com/siyuan-note/siyuan/issues/6128
 	install := filepath.Join(util.TempDir, "install")

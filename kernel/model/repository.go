@@ -634,6 +634,8 @@ func checkoutRepo(id string) {
 	WaitForWritingFiles()
 	CloseWatchAssets()
 	defer WatchAssets()
+	CloseWatchEmojis()
+	defer WatchEmojis()
 
 	// 恢复快照时自动暂停同步，避免刚刚恢复后的数据又被同步覆盖
 	syncEnabled := Conf.Sync.Enabled
@@ -1411,6 +1413,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 	// 可能需要重新加载部分功能
 	var needReloadFlashcard, needReloadOcrTexts, needReloadPlugin bool
 	upsertPluginSet := hashset.New()
+	needUnindexBoxes, needIndexBoxes := map[string]bool{}, map[string]bool{}
 	for _, file := range mergeResult.Upserts {
 		upserts = append(upserts, file.Path)
 		if strings.HasPrefix(file.Path, "/storage/riff/") {
@@ -1423,6 +1426,9 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
+			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
+			needUnindexBoxes[boxID] = true
+			needIndexBoxes[boxID] = true
 		}
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
@@ -1454,6 +1460,8 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasSuffix(file.Path, "/.siyuan/conf.json") {
 			needReloadFiletree = true
+			boxID := strings.TrimSuffix(strings.TrimPrefix(file.Path, "/"), "/.siyuan/conf.json")
+			needUnindexBoxes[boxID] = true
 		}
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
@@ -1505,6 +1513,20 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 	if exit { // 退出时同步不用推送事件
 		return
+	}
+
+	for boxID := range needUnindexBoxes {
+		if box := Conf.GetBox(boxID); nil != box {
+			box.Unindex()
+		}
+	}
+	for boxID := range needIndexBoxes {
+		if box := Conf.GetBox(boxID); nil != box {
+			box.Index()
+		}
+	}
+	if 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes) {
+		util.ReloadUI()
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)

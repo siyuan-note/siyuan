@@ -82,7 +82,7 @@ func LoadAssets() {
 			}
 			return nil
 		}
-		if strings.HasSuffix(info.Name(), ".sya") || strings.HasPrefix(info.Name(), ".") {
+		if strings.HasSuffix(info.Name(), ".sya") || strings.HasPrefix(info.Name(), ".") || filelock.IsHidden(path) {
 			return nil
 		}
 

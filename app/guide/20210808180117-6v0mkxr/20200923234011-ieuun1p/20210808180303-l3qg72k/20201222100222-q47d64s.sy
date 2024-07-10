@@ -6,7 +6,7 @@
 		"id": "20201222100222-q47d64s",
 		"title": "Type filtering",
 		"type": "doc",
-		"updated": "20220312005526"
+		"updated": "20240611173239"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210210104024-efd1ar6",
-				"updated": "20210302223513"
+				"updated": "20240611173239"
 			},
 			"Children": [
 				{
@@ -39,7 +39,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20201224092621-haejkkh",
-				"updated": "20220312005526"
+				"updated": "20240611173239"
 			},
 			"Children": [
 				{
@@ -61,13 +61,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "d"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " Document block (Only search on the document name, will not search for the document containing content blocks)"
+									"Data": "​ Document block (Only search on the document name, will not search for the document containing content blocks)"
 								}
 							]
 						}
@@ -92,13 +96,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "h"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " Heading block (Search only on the heading name, not the content blocks below the heading block)"
+									"Data": "​ Heading block (Search only on the heading name, not the content blocks below the heading block)"
 								}
 							]
 						}
@@ -123,13 +131,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "l"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " List block (including ordered list block, unordered list block and task list block)"
+									"Data": "​ List block (including ordered list block, unordered list block and task list block)"
 								}
 							]
 						}
@@ -154,106 +166,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "i"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " List item block"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20201224120448-2eln6e1",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20201224120448-2eln6e1"
-					},
-					"Children": [
-						{
-							"ID": "20210210104014-hp14o29",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210210104014-hp14o29"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "c"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " Code block"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20201224120448-n8mu5sk",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20201224120448-n8mu5sk"
-					},
-					"Children": [
-						{
-							"ID": "20210210104014-zy55cgi",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210210104014-zy55cgi"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "m"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " Mathematical formula block"
-								}
-							]
-						}
-					]
-				},
-				{
-					"ID": "20201224120448-1ijl3c0",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20201224120448-1ijl3c0"
-					},
-					"Children": [
-						{
-							"ID": "20210210104014-ptxclb2",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20210210104014-ptxclb2"
-							},
-							"Children": [
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "t"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " Table block"
+									"Data": "​ List item block"
 								}
 							]
 						}
@@ -278,13 +201,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "b"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " Blockquote block"
+									"Data": "​ Blockquote block"
 								}
 							]
 						}
@@ -309,13 +236,17 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "s"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " Super block"
+									"Data": "​ Super block"
 								}
 							]
 						}
@@ -340,13 +271,345 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "p"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " Paragraph block"
+									"Data": "​ Paragraph block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120448-2eln6e1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201224120448-2eln6e1"
+					},
+					"Children": [
+						{
+							"ID": "20210210104014-hp14o29",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210210104014-hp14o29"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "c"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Code block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120448-n8mu5sk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201224120448-n8mu5sk"
+					},
+					"Children": [
+						{
+							"ID": "20210210104014-zy55cgi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210210104014-zy55cgi",
+								"updated": "20240611171602"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "m"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Formula block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20201224120448-1ijl3c0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20201224120448-1ijl3c0"
+					},
+					"Children": [
+						{
+							"ID": "20210210104014-ptxclb2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20210210104014-ptxclb2"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "t"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Table block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-iaisurk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-iaisurk",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-ef6aoqh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-ef6aoqh",
+								"updated": "20240611173102"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "av"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Database block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-kntt0fc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-kntt0fc",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-3fkhgc4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-3fkhgc4",
+								"updated": "20240611173119"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "query_embed"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Embed block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-9ta82xk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-9ta82xk",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-xngyae8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-xngyae8",
+								"updated": "20240611173141"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "video"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Video block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-hqidgw4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-hqidgw4",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-ekimyd2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-ekimyd2",
+								"updated": "20240611173142"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "audio"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Audio block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-n4xvbhv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-n4xvbhv",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-c0am6yv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-c0am6yv",
+								"updated": "20240611173144"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "widget"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Widget block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173034-purxyj1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173034-purxyj1",
+						"updated": "20240611173034"
+					},
+					"Children": [
+						{
+							"ID": "20240611173034-kzcirl0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173034-kzcirl0",
+								"updated": "20240611173034"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "iframe"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ IFrame block"
 								}
 							]
 						}
@@ -373,13 +636,54 @@
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
 									"TextMarkTextContent": "html"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " HTML block"
+									"Data": "​ HTML block"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240611173209-9dul866",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240611173209-9dul866",
+						"updated": "20240611173239"
+					},
+					"Children": [
+						{
+							"ID": "20240611173209-vzp5yod",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240611173209-vzp5yod",
+								"updated": "20240611173239"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "tb"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ Thematic break"
 								}
 							]
 						}

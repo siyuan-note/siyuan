@@ -1,0 +1,190 @@
+{
+	"spec": 0,
+	"ID": "20240530133134-wlxgyny",
+	"name": "請求書",
+	"keyValues": [
+		{
+			"key": {
+				"ID": "20240530101000-sr9mgm6",
+				"name": "メンバー",
+				"type": "block",
+				"icon": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-9x0d8po",
+					"keyID": "20240530101000-sr9mgm6",
+					"blockID": "20240530101000-veq5qz2",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381347000,
+					"updatedAt": 1707381347000,
+					"block": {
+						"ID": "20240530101000-veq5qz2",
+						"content": "Vanessa",
+						"created": 1707384947609,
+						"updated": 1707385000686
+					}
+				},
+				{
+					"ID": "20240530101000-2a2sjas",
+					"keyID": "20240530101000-sr9mgm6",
+					"blockID": "20240530101000-vtvezcd",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707381400000,
+					"updatedAt": 1707381400000,
+					"block": {
+						"ID": "20240530101000-vtvezcd",
+						"content": "Daniel",
+						"created": 1707385000748,
+						"updated": 1707385005315
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-eb1t8f3",
+				"name": "食事代",
+				"type": "number",
+				"icon": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-tgqb4mj",
+					"keyID": "20240530101000-eb1t8f3",
+					"blockID": "20240530101000-veq5qz2",
+					"type": "number",
+					"createdAt": 1707381394000,
+					"updatedAt": 1707381394000,
+					"number": {
+						"content": 200,
+						"isNotEmpty": true,
+						"format": "",
+						"formattedContent": ""
+					}
+				},
+				{
+					"ID": "20240530101000-zmtnj1n",
+					"keyID": "20240530101000-eb1t8f3",
+					"blockID": "20240530101000-vtvezcd",
+					"type": "number",
+					"createdAt": 1707381402000,
+					"updatedAt": 1707381402000,
+					"number": {
+						"content": 100,
+						"isNotEmpty": true,
+						"format": "",
+						"formattedContent": ""
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-63yyflw",
+				"name": "衣装代",
+				"type": "number",
+				"icon": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"ID": "20240530101000-mynirul",
+					"keyID": "20240530101000-63yyflw",
+					"blockID": "20240530101000-veq5qz2",
+					"type": "number",
+					"createdAt": 1707381398000,
+					"updatedAt": 1707381398000,
+					"number": {
+						"content": 200,
+						"isNotEmpty": true,
+						"format": "",
+						"formattedContent": ""
+					}
+				},
+				{
+					"ID": "20240530101000-tqf89zr",
+					"keyID": "20240530101000-63yyflw",
+					"blockID": "20240530101000-vtvezcd",
+					"type": "number",
+					"createdAt": 1707381403000,
+					"updatedAt": 1707381403000,
+					"number": {
+						"content": 100,
+						"isNotEmpty": true,
+						"format": "",
+						"formattedContent": ""
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"ID": "20240530101000-jgh4bsl",
+				"name": "テンプレート",
+				"type": "template",
+				"icon": "",
+				"numberFormat": "",
+				"template": ".action{ addf .食事代 .衣装代 }"
+			}
+		}
+	],
+	"viewID": "20240530101000-mypxa3f",
+	"views": [
+		{
+			"ID": "20240530101000-mypxa3f",
+			"icon": "",
+			"name": "テーブル",
+			"hideAttrViewName": false,
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"ID": "20240530101000-ys87y7w",
+				"columns": [
+					{
+						"ID": "20240530101000-sr9mgm6",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"ID": "20240530101000-eb1t8f3",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "110px"
+					},
+					{
+						"ID": "20240530101000-63yyflw",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "119px"
+					},
+					{
+						"ID": "20240530101000-jgh4bsl",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					}
+				],
+				"rowIds": [
+					"20240530101000-veq5qz2",
+					"20240530101000-vtvezcd"
+				],
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50
+			}
+		}
+	]
+}

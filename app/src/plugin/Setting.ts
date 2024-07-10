@@ -7,6 +7,7 @@ export class Setting {
     private destroyCallback: () => void;
     private width: string;
     private height: string;
+    public dialog:Dialog;
 
     constructor(options: {
         height?: string,
@@ -97,5 +98,6 @@ export class Setting {
             }
             dialog.destroy();
         });
+        this.dialog = dialog;
     }
 }

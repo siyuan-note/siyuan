@@ -1,5 +1,5 @@
 import {openModel} from "../menu/model";
-import {getEventName} from "../../protyle/util/compatibility";
+import {getEventName, isIPhone} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {closePanel} from "../util/closePanel";
 import {processSync} from "../../dialog/processSystem";
@@ -12,10 +12,11 @@ import {hideElements} from "../../protyle/ui/hideElements";
 import {Constants} from "../../constants";
 
 export const showAccountInfo = () => {
-    const payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
+    const hideIphone = isIPhone() ? " fn__none" : "";
+    const payHTML = `<a class="b3-button b3-button--big${hideIphone}" href="${getIndexURL("pricing.html")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user?.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
 </a>
-<div class="fn__hr--b"></div>
+<div class="fn__hr--b${hideIphone}"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
     <svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>
     ${window.siyuan.languages.freeSub}
@@ -44,7 +45,7 @@ export const showAccountInfo = () => {
     ${window.siyuan.languages.account6} 
     ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} 
     ${window.siyuan.languages.day} 
-    <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
+    <a class="${hideIphone}" href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>
 </div>`;
         if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
             subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
@@ -86,8 +87,8 @@ ${renewHTML}`;
 </div>
 <div class="config-account__info">
     <div class="fn__flex">
-        <a class="b3-button b3-button--text" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.manage}</a>
-        <span class="fn__space"></span>
+        <a class="b3-button b3-button--text${hideIphone}" href="${getCloudURL("settings")}" target="_blank">${window.siyuan.languages.manage}</a>
+        <span class="fn__space${hideIphone}"></span>
         <button class="b3-button b3-button--cancel" id="logout">
             ${window.siyuan.languages.logout}
         </button>
@@ -119,6 +120,14 @@ ${renewHTML}`;
                 bindLoginEvent(dialog.element.querySelector(".b3-dialog__body"), true);
                 dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
             });
+            const trialSubElement = modelMainElement.querySelector("#trialSub");
+            if (trialSubElement) {
+                trialSubElement.addEventListener("click", () => {
+                    fetchPost("/api/account/startFreeTrial", {}, () => {
+                        modelMainElement.querySelector("#refresh").dispatchEvent(new Event("click"));
+                    });
+                });
+            }
             const refreshElement = modelMainElement.querySelector("#refresh");
             refreshElement.addEventListener("click", () => {
                 const svgElement = refreshElement.firstElementChild;

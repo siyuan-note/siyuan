@@ -15,7 +15,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
 };
 
 export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mouseIsEnter: boolean) => {
-    if (document.body.classList.contains("body--blur")) {
+    if (document.body.classList.contains("body--blur") || document.getElementById("progress")) {
         // 非激活状态下不执行 https://ld246.com/article/1693474547631
         return;
     }

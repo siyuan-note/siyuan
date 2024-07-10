@@ -27,8 +27,6 @@ class App {
     public appId: string;
 
     constructor() {
-        addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
-        addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
         addBaseURL();
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
@@ -53,6 +51,14 @@ class App {
                         switch (data.cmd) {
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);
+                                break;
+                            case "reloadEmojiConf":
+                                fetchPost("/api/system/getEmojiConf", {}, response => {
+                                    window.siyuan.emojis = response.data as IEmoji[];
+                                });
+                                break;
+                            case "reloaddoc":
+                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false);
                                 break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);
@@ -137,6 +143,8 @@ class App {
             }),
         };
         fetchPost("/api/system/getConf", {}, async (response) => {
+            addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
+            addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
             await loadPlugins(this);
             getLocalStorage(() => {

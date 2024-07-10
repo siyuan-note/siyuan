@@ -47,6 +47,7 @@ import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {pasteAsPlainText, pasteEscaped, pasteText} from "../util/paste";
+import {escapeHtml} from "../../util/escape";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -1283,7 +1284,7 @@ export class Toolbar {
                 html += `<div class="b3-list-item">${item.replace(lowerCaseValue, "<b>" + lowerCaseValue + "</b>")}</div>`;
             });
             if (inputElement.value.trim() && !matchInput) {
-                html = `<div class="b3-list-item"><b>${inputElement.value.replace(/`| /g, "_")}</b></div>${html}`;
+                html = `<div class="b3-list-item"><b>${escapeHtml(inputElement.value.replace(/`| /g, "_"))}</b></div>${html}`;
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;

@@ -1,0 +1,334 @@
+{
+	"ID": "20240530101000-vql5s27",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-7nk3h0k",
+		"id": "20240530101000-vql5s27",
+		"title": "受信トレイ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-bfx9n7x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-kr937pw",
+				"id": "20240530101000-bfx9n7x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lklmkvg",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-u2e537a",
+				"id": "20240530101000-lklmkvg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "受信トレイは外部から収集した情報を一元管理できる便利な機能で、受信トレイパネルからノートブックに情報を直接送信して整理できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-8u6hlrx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-eggiun9",
+				"id": "20240530101000-8u6hlrx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vlm9n3p",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-x90g7ol",
+				"id": "20240530101000-vlm9n3p",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "現在、以下の方法でデータにアクセスできます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4zg20l6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-3klh481",
+				"id": "20240530101000-4zg20l6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "API"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-uv4myjr",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-eqn7xz5",
+				"id": "20240530101000-uv4myjr",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-akfvuxa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-e2p397z",
+						"id": "20240530101000-akfvuxa",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-dmcw3wu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-th5fnvm",
+								"id": "20240530101000-dmcw3wu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "POST "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "https://liuyun.io/apis/siyuan/inbox/addCloudShorthand"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-02ej6s3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-9ykrlsq",
+						"id": "20240530101000-02ej6s3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-hp168sn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-n3ek55v",
+								"id": "20240530101000-hp168sn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Body"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-82ts1fi",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"ID": "20240530101000-ni7m1hs",
+								"id": "20240530101000-82ts1fi",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker",
+									"CodeBlockInfo": "anNvbg=="
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": "{\n    \"title\": \"シンプルなテキストタイトル\",\n    \"content\": \"**Markdown** によるコンテンツ\"\n}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-4xo0ycg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-iy96a4g",
+						"id": "20240530101000-4xo0ycg",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-kraj1ik",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-wgqvnm4",
+								"id": "20240530101000-kraj1ik",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "認証するには HTTP リクエストヘッダー "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Authorization"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "token {Your API Token}"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ の値を設定してください (大文字、小文字、スペースに注意)。API トークンは、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io/settings/account",
+									"TextMarkTextContent": "[LiuYun] - [設定] - [アカウント]"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " で確認できます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-oasgxm3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rks6apt",
+				"id": "20240530101000-oasgxm3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6k7n3z4",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-9boazdo",
+				"id": "20240530101000-6k7n3z4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-qwh7t0q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-3kloyyc",
+						"id": "20240530101000-qwh7t0q",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7cuwrv3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-czk8ejq",
+								"id": "20240530101000-7cuwrv3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "レート制限: 24 時間あたり最大 128 件まで挿入できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-phstloo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5ar7qk6",
+				"id": "20240530101000-phstloo",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

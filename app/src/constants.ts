@@ -65,6 +65,7 @@ export abstract class Constants {
     public static readonly CUSTOM_RIFF_DECKS: string = "custom-riff-decks";
 
     // size
+    public static readonly SIZE_DATABASE_MAZ_SIZE: number = 102400;
     public static readonly SIZE_SCROLL_TB: number = 24;
     public static readonly SIZE_SCROLL_STEP: number = 256;
     public static readonly SIZE_LINK_TEXT_MAX: number = 64;
@@ -191,7 +192,7 @@ export abstract class Constants {
         en_US: "20210808180117-6v0mkxr",
         fr_FR: "20210808180117-6v0mkxr",
         es_ES: "20210808180117-6v0mkxr",
-        ja_JP: "20210808180117-6v0mkxr",
+        ja_JP: "20240530133126-axarxgx",
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 
@@ -349,25 +350,14 @@ export abstract class Constants {
             closeRight: {default: "", custom: ""},
             tabToWindow: {default: "", custom: ""},
             addToDatabase: {default: "", custom: ""},
+            unsplit: {default: "", custom: ""},
+            unsplitAll: {default: "", custom: ""},
         },
         editor: {
             general: {
                 duplicate: {default: "⌘D", custom: "⌘D"},
                 expandDown: {default: "⌥⇧↓", custom: "⌥⇧↓"},
                 expandUp: {default: "⌥⇧↑", custom: "⌥⇧↑"},
-                copyPlainText: {default: "", custom: ""},
-                copyID: {default: "", custom: ""},
-                copyProtocolInMd: {default: "", custom: ""},
-                netImg2LocalAsset: {default: "", custom: ""},
-                netAssets2LocalAssets: {default: "", custom: ""},
-                optimizeTypography: {default: "", custom: ""},
-                hLayout: {default: "", custom: ""},
-                vLayout: {default: "", custom: ""},
-                refPopover: {default: "", custom: ""},
-                copyText: {default: "", custom: ""},
-                exitFocus: {default: "", custom: ""},
-                ai: {default: "", custom: ""},
-                switchReadonly: {default: "", custom: ""},
                 expand: {default: "⌘↓", custom: "⌘↓"},
                 collapse: {default: "⌘↑", custom: "⌘↑"},
                 insertBottom: {default: "⌥⌘.", custom: "⌥⌘."},
@@ -404,7 +394,21 @@ export abstract class Constants {
                 jumpToParentPrev: {default: "⇧⌘M", custom: "⇧⌘M"},
                 jumpToParent: {default: "⇧⌘J", custom: "⇧⌘J"},
                 moveToUp: {default: "⇧⌘↑", custom: "⇧⌘↑"},
-                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"}
+                moveToDown: {default: "⇧⌘↓", custom: "⇧⌘↓"},
+                duplicateCompletely: {default: "", custom: ""},
+                copyPlainText: {default: "", custom: ""},
+                copyID: {default: "", custom: ""},
+                copyProtocolInMd: {default: "", custom: ""},
+                netImg2LocalAsset: {default: "", custom: ""},
+                netAssets2LocalAssets: {default: "", custom: ""},
+                optimizeTypography: {default: "", custom: ""},
+                hLayout: {default: "", custom: ""},
+                vLayout: {default: "", custom: ""},
+                refPopover: {default: "", custom: ""},
+                copyText: {default: "", custom: ""},
+                exitFocus: {default: "", custom: ""},
+                ai: {default: "", custom: ""},
+                switchReadonly: {default: "", custom: ""},
             },
             insert: {
                 appearance: {default: "⌥⌘X", custom: "⌥⌘X"},
@@ -424,6 +428,8 @@ export abstract class Constants {
                 "inline-code": {default: "⌘G", custom: "⌘G"},
                 link: {default: "⌘K", custom: "⌘K"},
                 check: {default: "⌘L", custom: "⌘L"},
+                "ordered-list": {default: "", custom: ""},
+                list: {default: "", custom: ""},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},
                 clearInline: {default: "⌘\\", custom: "⌘\\"},
@@ -633,7 +639,7 @@ export abstract class Constants {
 
     // assets
     public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"];
-    public static readonly SIYUAN_ASSETS_AUDIO: string[] = [".mp3", ".wav", ".ogg", ".m4a"];
+    public static readonly SIYUAN_ASSETS_AUDIO: string[] = [".mp3", ".wav", ".ogg", ".m4a", ".aac"];
     public static readonly SIYUAN_ASSETS_VIDEO: string[] = [".mov", ".weba", ".mkv", ".mp4", ".webm"];
     public static readonly SIYUAN_ASSETS_EXTS: string[] = [".pdf"].concat(Constants.SIYUAN_ASSETS_IMAGE).concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO);
     public static readonly SIYUAN_ASSETS_SEARCH: string[] = [".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",

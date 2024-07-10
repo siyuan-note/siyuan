@@ -4,7 +4,8 @@ import * as dayjs from "dayjs";
 
 export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: HTMLElement, editElement: HTMLElement, range: Range) => {
     if (type !== "NodeCodeBlock" &&
-        blockElement.parentElement.getAttribute("data-subtype") !== "t" &&
+        // 任务列表首块不需要再更新为任务列表
+        !blockElement.previousElementSibling?.classList.contains("protyle-action--task") &&
         (
             ["[ ]", "[x]", "[X]", "【 】", "【x】", "【X】"].includes(editElement.innerHTML.substring(0, 3)) ||
             ["[]", "【】"].includes(editElement.innerHTML.substring(0, 2))
@@ -57,16 +58,16 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
                 action: "delete",
                 id: emptyId
             }], [{
-                action: "update",
-                id,
-                data: oldHTML,
-            }, {
                 action: "move",
                 id,
                 previousID: newId,
             }, {
                 action: "delete",
                 id: newId
+            }, {
+                action: "update",
+                id,
+                data: oldHTML,
             }]);
             blockElement.outerHTML = `<div data-subtype="t" data-node-id="${newId}" data-type="NodeList" class="list" updated="${newId.split("-")[0]}"><div data-marker="*" data-subtype="t" data-node-id="${liItemId}" data-type="NodeListItem" class="li${isDone ? " protyle-task--done" : ""}" updated="${liItemId.split("-")[0]}"><div class="protyle-action protyle-action--task" draggable="true"><svg><use xlink:href="#icon${isDone ? "C" : "Unc"}heck"></use></svg></div>${blockElement.outerHTML}<div class="protyle-attr" contenteditable="false"></div></div><div class="protyle-attr" contenteditable="false"></div></div>`;
             focusByWbr(protyle.wysiwyg.element, range);

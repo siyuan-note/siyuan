@@ -1,0 +1,1225 @@
+{
+	"ID": "20240530101000-hkgs92c",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-tnitvbj",
+		"icon": "1f50f",
+		"id": "20240530101000-hkgs92c",
+		"title": "データセキュリティ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-k8a8009",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-dpi3c51",
+				"id": "20240530101000-k8a8009",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pr3ekop",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-prl0p1s",
+				"id": "20240530101000-pr3ekop",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データセキュリティは主に以下の 2 つの側面に分けられます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cctk2jn",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-av99bny",
+				"id": "20240530101000-cctk2jn",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-0w78o2y",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-qttkghi",
+						"id": "20240530101000-0w78o2y",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-geiupn9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mh4zo32",
+								"id": "20240530101000-geiupn9",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref strong",
+									"TextMarkBlockRefID": "20240530101000-cpm26sr",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "可用性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": データが失われることなく完全性と一貫性が保たれること"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-mm7iwk4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ftizgsr",
+						"id": "20240530101000-mm7iwk4",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-cn4bu4h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-x18zhqv",
+								"id": "20240530101000-cn4bu4h",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "機密性"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": データが漏洩したり改ざんされたりしないこと"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3fefby0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-uemfdk6",
+				"id": "20240530101000-3fefby0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan はこの両面のデータセキュリティをサポートしています。以下にその詳細を説明します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sd0ouhh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-0d97j83",
+				"id": "20240530101000-sd0ouhh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プレーンテキストストレージ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m845928",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-zadfwqw",
+				"id": "20240530101000-m845928",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は、ローカルファイルシステムにデータをプレーンテキストで保存します。これは、以下のことを意味します:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-kee288g",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-c6aylcg",
+				"id": "20240530101000-kee288g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-33g54am",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rzk3n5n",
+						"id": "20240530101000-33g54am",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-vgoyokm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lrz8q0l",
+								"id": "20240530101000-vgoyokm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "オペレーティングシステムにアクセスできる人やソフトウェアであれば、その中のデータを読むことが可能です"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-b5tntj3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-k34lw7l",
+						"id": "20240530101000-b5tntj3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-i29ghrp",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-9e8187z",
+								"id": "20240530101000-i29ghrp",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データの可用性は記憶装置とオペレーティングシステムの可用性に依存します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-sdog73s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-3do0c4s",
+				"id": "20240530101000-sdog73s",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エンドツーエンド暗号化"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-blfof6r",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-k0gjazs",
+				"id": "20240530101000-blfof6r",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan のクラウド同期は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-qtljhep",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "エンドツーエンド暗号化"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を利用しています。パスワードは組み込みのキーによる暗号化でローカルに保存され、ユーザー以外の第三者はクラウド上のデータを復号できません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7qbfl1x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-kxph0xq",
+				"id": "20240530101000-7qbfl1x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "推奨事項"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0z456vo",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-13eu4m7",
+				"id": "20240530101000-0z456vo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-6jiq6li",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ngscwsq",
+						"id": "20240530101000-6jiq6li",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gy37xgn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-lvbzzaf",
+								"id": "20240530101000-gy37xgn",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データの定期的なバックアップを推奨します。バックアップの 3-2-1 ルール (3 つのコピー、2 種類のメディア、1 つのオフサイトストレージ) を参考にしてください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bzti36i",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hdihozi",
+						"id": "20240530101000-bzti36i",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ipozgdv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-3tglp37",
+								"id": "20240530101000-ipozgdv",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "重要なパスワード、キー、重要機密を保存するには、専用のソフトウェア、機器、オフラインストレージの利用をお勧めします"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nbia71d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-y7gkz9k",
+				"id": "20240530101000-nbia71d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "脅威モデル"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3zbzgy2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bvf0tvv",
+				"id": "20240530101000-3zbzgy2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "主にローカルデータのセキュリティと SiYuan クラウドストレージのセキュリティを評価します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nthp1us",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-en03ex1",
+				"id": "20240530101000-nthp1us",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "前提条件"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0zlq6xm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-6lygfz7",
+				"id": "20240530101000-0zlq6xm",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-8r5rw91",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-xtz6cks",
+						"id": "20240530101000-8r5rw91",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8zr01fc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-k7qw87k",
+								"id": "20240530101000-8zr01fc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ローカルのオペレーティングシステムが完全に信頼できる環境であること。これがデータセキュリティの最も基本的な前提であり、この前提に基づいて以下の項目が保証されます:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-4m8iq28",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-lisw61l",
+								"id": "20240530101000-4m8iq28",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-5z5vovc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-ivhdh88",
+										"id": "20240530101000-5z5vovc",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-fcez2gd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-tcbaczi",
+												"id": "20240530101000-fcez2gd",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "元のデータの可用性"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-n730ft0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-j0fsdrm",
+										"id": "20240530101000-n730ft0",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-jt3o2cd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-xzsmnoo",
+												"id": "20240530101000-jt3o2cd",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "元のデータが漏洩しない"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-k8myq0s",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-rogdi4a",
+										"id": "20240530101000-k8myq0s",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-y66pka4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-kbdfp70",
+												"id": "20240530101000-y66pka4",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "キーの安全性"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qs6c319",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-v8heanx",
+						"id": "20240530101000-qs6c319",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-64bak0h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-236n7nz",
+								"id": "20240530101000-64bak0h",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ユーザーが攻撃者にキーを漏らさないこと"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-6msy6dv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-7po6rxu",
+						"id": "20240530101000-6msy6dv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-iq5cjih",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-vuq1f2t",
+								"id": "20240530101000-iq5cjih",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドストレージ内のデータが削除されないこと"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-g40iwef",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0nyi44d",
+						"id": "20240530101000-g40iwef",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-b9eo2zo",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-k5ue6hr",
+								"id": "20240530101000-b9eo2zo",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "AES-GCM 暗号化アルゴリズムが解読されないこと"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-yxlchid",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nthawdv",
+						"id": "20240530101000-yxlchid",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8qreezr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-3u89clu",
+								"id": "20240530101000-8qreezr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "攻撃者が総当たり攻撃に必要な計算能力を持っていないこと"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tmk74nb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-pj58y31",
+				"id": "20240530101000-tmk74nb",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウドストレージで保証できること"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4tel6kv",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-bmo2l20",
+				"id": "20240530101000-4tel6kv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-kbi71pq",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-vwda9sq",
+						"id": "20240530101000-kbi71pq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tmt117u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2wvy3on",
+								"id": "20240530101000-tmt117u",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データは正しいキーでしか復号できません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vgafzmf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-g2x6pbm",
+						"id": "20240530101000-vgafzmf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-htsfpz6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-63hzzle",
+								"id": "20240530101000-htsfpz6",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "改ざんされたデータは復号できません"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vco590z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-nsvmvuz",
+				"id": "20240530101000-vco590z",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "通常の例"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r1r4tnh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-adgrffk",
+				"id": "20240530101000-r1r4tnh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上記の前提条件と保証に基づいて、攻撃者が実行できる操作の例を以下に示します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-odp6q7c",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-vj49kez",
+				"id": "20240530101000-odp6q7c",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "攻撃者がクラウドストレージの読み取り専用アクセス権を持つ場合:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-j1nnux7",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-o8pz3ek",
+				"id": "20240530101000-j1nnux7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-g3ul8di",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-fhc3vhg",
+						"id": "20240530101000-g3ul8di",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-91kwkt3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-rl9j8t9",
+								"id": "20240530101000-91kwkt3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "暗号化されたデータを取得して総当たり攻撃を試みることができます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-bdsg68m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-dcprm5a",
+						"id": "20240530101000-bdsg68m",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-abjob5o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2nsbn5n",
+								"id": "20240530101000-abjob5o",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "インデックス情報からデータサイズを推測できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1qfxpi2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cgpt8lk",
+				"id": "20240530101000-1qfxpi2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "攻撃者がネットワークを乗っ取ることができた場合:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7oiygrw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-k4g67vy",
+				"id": "20240530101000-7oiygrw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-gsaihka",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-8jncc07",
+						"id": "20240530101000-gsaihka",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-obucbdm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-bn7sf8r",
+								"id": "20240530101000-obucbdm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データを改ざんして可用性を損なうことができます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-3224p09",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-uaaka2v",
+						"id": "20240530101000-3224p09",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-khwojz4",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-01h4k3v",
+								"id": "20240530101000-khwojz4",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ユーザー ID の情報を取得できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-yvu30tn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-im4ec4u",
+						"id": "20240530101000-yvu30tn",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-xmraw6y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-elswiaj",
+								"id": "20240530101000-xmraw6y",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "トラフィック情報からデータサイズを推測できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-i9cfqmx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-ba32akz",
+				"id": "20240530101000-i9cfqmx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "例外的な例"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-17u4cio",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-wyweepr",
+				"id": "20240530101000-17u4cio",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上記の前提条件または保証が破られた場合、攻撃者が実行できる操作の例を以下に示します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ddn57ja",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-mnmrgyc",
+				"id": "20240530101000-ddn57ja",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "攻撃者がローカルのオペレーティングシステムを侵害できた場合:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ln3zwsj",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-3um5oqe",
+				"id": "20240530101000-ln3zwsj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-tm2u647",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nohwadk",
+						"id": "20240530101000-tm2u647",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ua9akjs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-pmiqutw",
+								"id": "20240530101000-ua9akjs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "元のデータを変更または削除して可用性を損なうことができます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-gzlsy2l",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-sha3jiy",
+						"id": "20240530101000-gzlsy2l",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-m663m5p",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-xp2f5xt",
+								"id": "20240530101000-m663m5p",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "元のデータを取得できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-171fxuw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-8sjic73",
+						"id": "20240530101000-171fxuw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zjs38qb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-e6fqva0",
+								"id": "20240530101000-zjs38qb",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "キーを取得できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-y14qaer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-d12siht",
+				"id": "20240530101000-y14qaer",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "攻撃者がクラウドストレージの書き込みアクセス権を持つ場合:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-p57pt64",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-iaamqyk",
+				"id": "20240530101000-p57pt64",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-jbc8pan",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2eek3n6",
+						"id": "20240530101000-jbc8pan",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-b7zjie2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-98i8uxh",
+								"id": "20240530101000-b7zjie2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "クラウドストレージを変更または削除して保存されているデータの可用性を損なうことができます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rzuus1w",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5ucys7c",
+				"id": "20240530101000-rzuus1w"
+			}
+		}
+	]
+}

@@ -6,6 +6,7 @@ import {getIdFromSYProtocol, isLocalPath} from "../util/pathName";
 import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
+import {isTouchDevice} from "../util/functions";
 
 let popoverTargetElement: HTMLElement;
 export const initBlockPopover = (app: App) => {
@@ -20,6 +21,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
+            hasClosestByClassName(event.target, "av__calc--ashow") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
@@ -32,21 +34,28 @@ export const initBlockPopover = (app: App) => {
                 } else {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
-                            tip = aElement.firstElementChild.getAttribute("data-href");
+                            tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
                         }
                     }
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
                         aElement.style.overflow = "auto";
                         if (aElement.scrollWidth > aElement.clientWidth + 2) {
-                            tip = getCellText(aElement);
+                            tip = Lute.EscapeHTMLStr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";
                     }
                 }
+            } else if (aElement.classList.contains("av__celltext--url")) {
+                tip = `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><br>${aElement.getAttribute("data-name")}`;
+            } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
+                tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
             }
             if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";
-                tip = href.substring(0, Constants.SIZE_TITLE) || "";
+                // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
+                if (href) {
+                    tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
+                }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
                     let assetTip = tip;
@@ -67,7 +76,12 @@ export const initBlockPopover = (app: App) => {
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
-                showTooltip(decodeURIComponent(tip), aElement);
+                try {
+                    showTooltip(decodeURIComponent(tip), aElement);
+                } catch (e) {
+                    // https://ld246.com/article/1718235737991
+                    showTooltip(tip, aElement);
+                }
                 event.stopPropagation();
             } else {
                 hideTooltip();
@@ -125,7 +139,7 @@ export const initBlockPopover = (app: App) => {
 
 const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     // pad 端点击后 event.target 不会更新。
-    const target = document.elementFromPoint(event.clientX, event.clientY);
+    const target = isTouchDevice() ? document.elementFromPoint(event.clientX, event.clientY) : event.target as HTMLElement;
     if (!target) {
         return false;
     }

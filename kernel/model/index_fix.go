@@ -478,7 +478,7 @@ func reindexTree0(tree *parse.Tree, i, size int) {
 		tree.Root.SetIALAttr("updated", updated)
 		indexWriteTreeUpsertQueue(tree)
 	} else {
-		treenode.IndexBlockTree(tree)
+		treenode.UpsertBlockTree(tree)
 		sql.IndexTreeQueue(tree)
 	}
 

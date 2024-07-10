@@ -1,0 +1,448 @@
+{
+	"ID": "20240530101000-3ourzoa",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-qb0hs7p",
+		"id": "20240530101000-3ourzoa",
+		"title": "タイポグラフィの最適化",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-s7xycmj",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-i4b82rm",
+				"id": "20240530101000-s7xycmj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ba01vo3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5dtpccq",
+				"id": "20240530101000-ba01vo3",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コンテンツを記述するときに、インラインコードや日本語と欧文のテキストの間にスペースを入れ忘れることはよく起こります。そうするとコンテンツが洗練されていないように見え、後から見直す際に視覚的に混乱するかもしれません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-lb5vvru",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-tsz7bp8",
+				"id": "20240530101000-lb5vvru",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ce8zphf",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-6tolftk",
+				"id": "20240530101000-ce8zphf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "エディタの右上にある "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "︙"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ メニューから \"タイポグラフィの最適化\" を実行すると、以下の要素の前後にスペースが自動的に挿入されます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rgj3lrw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-vvre67v",
+				"id": "20240530101000-rgj3lrw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-7la5n8q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-k9wc86o",
+						"id": "20240530101000-7la5n8q",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-v6397jq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-p8iczka",
+								"id": "20240530101000-v6397jq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "インラインコード"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "Code"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-cds0o5x",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-kkkeexb",
+						"id": "20240530101000-cds0o5x",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-y3nhdbe",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nz4ucn9",
+								"id": "20240530101000-y3nhdbe",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "インライン数式"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "inline-math",
+									"TextMarkInlineMathContent": "a^2 + b^2 = \\color{red}c^2"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "\n"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3x582l7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-3w17xut",
+				"id": "20240530101000-3x582l7",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "さらに、以下の要素で日本語と欧文の間にスペースが挿入されます:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pemrcgc",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-lcdy9jz",
+				"id": "20240530101000-pemrcgc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-7toqlf0",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0wu42tp",
+						"id": "20240530101000-7toqlf0",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-c4gqtrz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-aldvfr7",
+								"id": "20240530101000-c4gqtrz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "mark",
+									"TextMarkTextContent": "ハイライト"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-m9rweex",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-b8zc4wj",
+						"id": "20240530101000-m9rweex",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qdkoxvl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7wn0b9l",
+								"id": "20240530101000-qdkoxvl",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "s",
+									"TextMarkTextContent": "取り消し線"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-7tvcy9q",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-73ph8tp",
+						"id": "20240530101000-7tvcy9q",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-59s9idy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-spqo659",
+								"id": "20240530101000-59s9idy",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://liuyun.io",
+									"TextMarkTextContent": "ハイパーリンク"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-luc23wv",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-twv7nia",
+						"id": "20240530101000-luc23wv",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-trp3psi",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-vin3xie",
+								"id": "20240530101000-trp3psi",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "通常テキスト"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ssgh677",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-uaakqph",
+						"id": "20240530101000-ssgh677",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7jfli3d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8f77f2l",
+								"id": "20240530101000-7jfli3d",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "em",
+									"TextMarkTextContent": "斜体"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-b9ums6v",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-tfdid6n",
+						"id": "20240530101000-b9ums6v",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-e0ugnl3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4c77nfx",
+								"id": "20240530101000-e0ugnl3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "太字"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-37tww9e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-4qpn99w",
+				"id": "20240530101000-37tww9e",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "自動バックアップ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tph7nw4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-amhth8e",
+				"id": "20240530101000-tph7nw4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は、タイポグラフィの最適化を実行する前にドキュメントを自動的にバックアップします。これにより、最適化の結果に満足できない場合は"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-txrc7z1",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "データ履歴"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "からロールバックが行えます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b3dsa37",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-gr55ph7",
+				"id": "20240530101000-b3dsa37"
+			}
+		}
+	]
+}

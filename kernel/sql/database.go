@@ -82,6 +82,7 @@ func InitDatabase(forceRebuild bool) (err error) {
 	}
 
 	initDBConnection()
+	treenode.InitBlockTree(forceRebuild)
 
 	if !forceRebuild {
 		// 检查数据库结构版本，如果版本不一致的话说明改过表结构，需要重建
@@ -100,9 +101,6 @@ func InitDatabase(forceRebuild bool) (err error) {
 			util.PushClearProgress()
 			err = nil
 		}
-	}
-	if gulu.File.IsExist(util.BlockTreePath) {
-		treenode.InitBlockTree(true)
 	}
 
 	initDBConnection()
@@ -1278,6 +1276,11 @@ func CloseDatabase() {
 		logging.LogErrorf("close history database failed: %s", err)
 		return
 	}
+	if err := assetContentDB.Close(); nil != err {
+		logging.LogErrorf("close asset content database failed: %s", err)
+		return
+	}
+	treenode.CloseDatabase()
 	logging.LogInfof("closed database")
 }
 

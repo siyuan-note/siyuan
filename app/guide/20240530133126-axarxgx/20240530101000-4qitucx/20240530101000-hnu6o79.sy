@@ -1,0 +1,239 @@
+{
+	"ID": "20240530101000-hnu6o79",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-5cy3xru",
+		"icon": "1f371",
+		"id": "20240530101000-hnu6o79",
+		"title": "エディタ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-hx763vk",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-ymnekuv",
+				"id": "20240530101000-hx763vk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-mafk7cf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-m2p4v1t",
+						"id": "20240530101000-mafk7cf",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-3q0sxeh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-fvn6mp2",
+								"id": "20240530101000-3q0sxeh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "あらゆる要素をブロックとして自由に操る編集機能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-fuwivvt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-y10tq5t",
+						"id": "20240530101000-fuwivvt",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-mxb4585",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-yoegjnl",
+								"id": "20240530101000-mxb4585",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アウトラインと子階層のインデントの有無をサポートするリスト機能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-k48srqh",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-fsmcqt6",
+						"id": "20240530101000-k48srqh",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-yji6o2e",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8b4h0yg",
+								"id": "20240530101000-yji6o2e",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "フォーカスしたいコンテンツのみを表示するズーム機能"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-e2vekun",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-wjxh8if",
+						"id": "20240530101000-e2vekun",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ici6fky",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-mh8x6j9",
+								"id": "20240530101000-ici6fky",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "大規模なドキュメントでもストレスなく閲覧できる動的読み込み"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-lz2mwev",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-rxblt32",
+						"id": "20240530101000-lz2mwev",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-1n6fion",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-kci7tue",
+								"id": "20240530101000-1n6fion",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックアイコンをドラッグするだけで自由に変更できるレイアウト"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-nsk2raj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0qvec9m",
+				"id": "20240530101000-nsk2raj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-3qhz7br",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "書式要素"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tzn0itl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rvtxwys",
+				"id": "20240530101000-tzn0itl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-3ourzoa",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "タイポグラフィの最適化"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4ex2qdj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-m2fedjt",
+				"id": "20240530101000-4ex2qdj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-gcdp3gl",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "見出しとリストによるアウトライン"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-48icsc4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-1wyq56l",
+				"id": "20240530101000-48icsc4"
+			}
+		}
+	]
+}

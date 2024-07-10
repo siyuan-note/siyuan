@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20240517004202"
+		"updated": "20240524085244"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240112150737-e41yt1y",
-				"updated": "20240517004202"
+				"updated": "20240524085244"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-ovwnk1y",
-				"updated": "20240517004202"
+				"updated": "20240523113529"
 			},
 			"Children": [
 				{
@@ -1304,6 +1304,96 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "取消分屏"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置 - 快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "取消全部分屏"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置 - 快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "文档树面板"
 								}
 							]
@@ -2304,7 +2394,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210826183308-g4ck02v",
-				"updated": "20240517002048"
+				"updated": "20240524085244"
 			},
 			"Children": [
 				{
@@ -3038,7 +3128,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20240517002048"
+				"updated": "20240524085244"
 			},
 			"Children": [
 				{
@@ -3053,7 +3143,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20240517002048"
+				"updated": "20240524085244"
 			},
 			"Children": [
 				{
@@ -3077,7 +3167,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20240516234645"
+				"updated": "20240524085244"
 			},
 			"Children": [
 				{
@@ -6996,6 +7086,105 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "复制为副本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "对于数据库块是 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制为镜像副本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置- 快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "复制为完整副本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "仅对数据库块可用，可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "设置- 快捷键"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "网络图片转换为本地图片"
 								}
 							]
@@ -7264,7 +7453,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210102174148-tq925jm",
-				"updated": "20240517002048"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -8484,7 +8673,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-n64nfza",
-				"updated": "20240517003731"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -8864,7 +9053,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-x02vhoh",
-				"updated": "20240517003731"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -9186,7 +9375,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-xpgtzbg",
-				"updated": "20240517003636"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -9790,7 +9979,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240516222136-248xd1v",
-				"updated": "20240517003636"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -10157,7 +10346,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230316151845-nszzteq",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -11050,7 +11239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220618235609-cuv0am5",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -11065,7 +11254,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210708000243-4s325nw",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -11461,7 +11650,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221105225606-ei8q9u9",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -11889,7 +12078,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000226-0pq4qe4",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -12199,7 +12388,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001156-26volkp",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -12513,7 +12702,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20221107214439-v40c6qz",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -12702,7 +12891,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000529-ns8rmiz",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -12863,7 +13052,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619000241-hjxmjgy",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -13060,7 +13249,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619001133-tyykggw",
-				"updated": "20240517003111"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -13245,7 +13434,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220901210205-d5z8hhk",
-				"updated": "20220902201044"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -13264,7 +13453,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902201053-imb47bl",
-				"updated": "20231107182113"
+				"updated": "20240524084648"
 			},
 			"Children": [
 				{
@@ -13281,7 +13470,7 @@
 									"Children": [
 										{
 											"Type": "NodeText",
-											"Data": "名稱"
+											"Data": "名称"
 										}
 									]
 								},

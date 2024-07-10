@@ -1,0 +1,1541 @@
+{
+	"ID": "20240530101000-jp793ic",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-nmkk65t",
+		"icon": "2753",
+		"id": "20240530101000-jp793ic",
+		"title": "よくある質問",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-8up071z",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-cxeqe3k",
+				"id": "20240530101000-8up071z",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan はどこにデータを保存しているの？"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xtx5f76",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-za9qke6",
+				"id": "20240530101000-xtx5f76",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-4p096e8",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "ワークスペース"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "の workspace/data/ フォルダの中に保存されます。それぞれのフォルダの内容は:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1jtqnm2",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-c3dgugw",
+				"id": "20240530101000-1jtqnm2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-3u60k55",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-ombb69l",
+						"id": "20240530101000-3u60k55",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-38s05qu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zpny0ox",
+								"id": "20240530101000-38s05qu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "assets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 挿入されたすべての"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-1m5un7l",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "アセット"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-9ggkb0l",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-gpp1anb",
+						"id": "20240530101000-9ggkb0l",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-bgd1b7a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-badh8vo",
+								"id": "20240530101000-bgd1b7a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "emojis"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 絵文字画像"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-acdkviy",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-1vuet16",
+						"id": "20240530101000-acdkviy",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-j79bord",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-m35cl8l",
+								"id": "20240530101000-j79bord",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "snippets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: コードスニペット"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-e0bkyb6",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-oixj3ar",
+						"id": "20240530101000-e0bkyb6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-2048czr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-w8gjiw8",
+								"id": "20240530101000-2048czr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "storage"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: クエリ条件、レイアウト、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-ynpmvl7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "フラッシュカード"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "など"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qo4rpnq",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-1exv5ab",
+						"id": "20240530101000-qo4rpnq",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-wjwhgaa",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-7ov4ypf",
+								"id": "20240530101000-wjwhgaa",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "templates"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-6x9ivi7",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "テンプレートスニペット"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ziecays",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-nxl2tjg",
+						"id": "20240530101000-ziecays",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-xgltg21",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ncfs6cf",
+								"id": "20240530101000-xgltg21",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "widgets"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-5gi76ax",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ウィジェット"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-lchtsbo",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-jgzaph8",
+						"id": "20240530101000-lchtsbo",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-6lk163o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-j6nyl9g",
+								"id": "20240530101000-6lk163o",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "plugins"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-8m2dowc",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "プラグイン"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-szaufiw",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-tlmvf3w",
+						"id": "20240530101000-szaufiw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-85uu10u",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-y6c7lbi",
+								"id": "20240530101000-85uu10u",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "public"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: 公開データ"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qjpknj6",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-tmb2uts",
+						"id": "20240530101000-qjpknj6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-b8k62b9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-f8pe9hl",
+								"id": "20240530101000-b8k62b9",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "残りのフォルダはユーザーが作成したノートブックフォルダで、その中に .sy という拡張子の JSON 形式のファイルによってドキュメントデータが保存されます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-kibjam5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-kzr1stl",
+				"id": "20240530101000-kibjam5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティの同期ソフトでデータを同期できる？"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vtdiqmt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-8defrs9",
+				"id": "20240530101000-vtdiqmt",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "サードパーティの同期ソフトによるデータ同期はサポートされておらず、データが破損する可能性がありますが、サードパーティの"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-na9sys7",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "クラウドストレージとの連携"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "はサポートされています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4bed6jj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-fzhenyg",
+				"id": "20240530101000-4bed6jj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "また、データのエクスポートとインポートを手動で行うことでデータ同期が可能です:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-dc55vlo",
+			"Type": "NodeList",
+			"ListData": {
+				"Tight": true,
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-215dpj2",
+				"id": "20240530101000-dc55vlo",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-zgsohz6",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-v2y1fe0",
+						"id": "20240530101000-zgsohz6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qf51d1d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5cxr6xj",
+								"id": "20240530101000-qf51d1d",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "デスクトップ"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-fgvjudu",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-igj6g8t",
+						"id": "20240530101000-fgvjudu",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-jjauibs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-93fnvsy",
+								"id": "20240530101000-jjauibs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "モバイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": ": "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "右パネル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "情報"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "エクスポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "インポート Data"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-hx6kozp",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-e2t5ly8",
+				"id": "20240530101000-hx6kozp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan はオープンソースなの？",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k3j7458",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-mv5igat",
+				"id": "20240530101000-k3j7458",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は完全にオープンソースであり、ソースコードは "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://github.com/siyuan-note",
+					"TextMarkTextContent": "GitHub"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " で入手できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-koxcm1m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-zzi4hcc",
+				"id": "20240530101000-koxcm1m",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "新しいバージョンにアップグレードする方法は？",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-m9hbtpx",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-e74hr3y",
+				"id": "20240530101000-m9hbtpx",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-d7sx7ym",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ke1xxg1",
+						"id": "20240530101000-d7sx7ym",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-epa3km2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-n61x4xz",
+								"id": "20240530101000-epa3km2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリストアからインストールした場合はアプリストアからアップデートしてください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-8s9aebg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ytqityo",
+						"id": "20240530101000-8s9aebg",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-h7rotnf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-fzsf35i",
+								"id": "20240530101000-h7rotnf",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップ版をインストーラーからインストールした場合は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "情報"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "更新パッケージの自動ダウンロード"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を有効にすると、最新バージョンが公開されるとインストールパッケージを自動的にダウンロードしてインストールを促します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-madn5i3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-udaggvt",
+						"id": "20240530101000-madn5i3",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ind6vgj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-nb2qzv0",
+								"id": "20240530101000-ind6vgj",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "モバイル版をインストールパッケージからインストールした場合は、新しいパッケージをダウンロードしてインストールしてください。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cmehye5",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-486vf8j",
+				"id": "20240530101000-cmehye5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "[設定] - [情報] - [現在のバージョン] で更新を確認するか、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/",
+					"TextMarkTextContent": "公式サイト"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をフォローして新しいバージョンを入手できます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-1u51q5t",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-owjuw7q",
+				"id": "20240530101000-1u51q5t",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "一部のブロックでブロックアイコンが見つからないんだけど？",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-iryhc7k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-lvkbcyv",
+				"id": "20240530101000-iryhc7k",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リスト項目の最初のサブブロックはブロックアイコンが省略されています。カーソルをこのブロックに移動して、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl+/"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ でブロックメニューを呼び出してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-r8dsete",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-xkwaw8d",
+				"id": "20240530101000-r8dsete",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データリポジトリキーをなくしたら？"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-uqxlw8g",
+			"Type": "NodeList",
+			"ListData": {
+				"BulletChar": 42,
+				"Padding": 2,
+				"Marker": "Kg==",
+				"Num": -1
+			},
+			"Properties": {
+				"ID": "20240530101000-86x5uzc",
+				"id": "20240530101000-uqxlw8g",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-qwvljpb",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-19bohb0",
+						"id": "20240530101000-qwvljpb",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-sa4zw1a",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-l1h5udu",
+								"id": "20240530101000-sa4zw1a",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複数のデバイスでデータリポジトリキーが正しく初期化されている場合、すべてのデバイスでキーは同じになり、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "情報"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データリポジトリキー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "キー文字列をコピー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から取得できます。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-idjxzo9",
+					"Type": "NodeListItem",
+					"Data": "*",
+					"ListData": {
+						"Tight": true,
+						"BulletChar": 42,
+						"Padding": 2,
+						"Marker": "Kg==",
+						"Num": -1
+					},
+					"Properties": {
+						"ID": "20240530101000-508zmqc",
+						"id": "20240530101000-idjxzo9",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-z69cpib",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-tspwa80",
+								"id": "20240530101000-z69cpib",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複数のデバイスでデータリポジトリキーが正しく設定されていない場合、またはすべてのデバイスのキー文字列を取得できない場合は、以下の手順でキーをリセットします:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-bkcq3ah",
+							"Type": "NodeList",
+							"ListData": {
+								"Typ": 1,
+								"Tight": true,
+								"Start": 1,
+								"Delimiter": 46,
+								"Padding": 3,
+								"Marker": "MQ==",
+								"Num": 1
+							},
+							"Properties": {
+								"ID": "20240530101000-kiyyp29",
+								"id": "20240530101000-bkcq3ah",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-j626kwo",
+									"Type": "NodeListItem",
+									"Data": "1",
+									"ListData": {
+										"Typ": 1,
+										"Tight": true,
+										"Start": 1,
+										"Delimiter": 46,
+										"Padding": 3,
+										"Marker": "MQ==",
+										"Num": 1
+									},
+									"Properties": {
+										"ID": "20240530101000-m67unc5",
+										"id": "20240530101000-j626kwo",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-f7nk7ay",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-l0xrhri",
+												"id": "20240530101000-f7nk7ay",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "設定"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "エクスポート"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "エクスポート Data"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ からデータをバックアップするか、ファイルシステムの "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "workspace/data/"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ フォルダをコピーします。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-nbh4zn7",
+									"Type": "NodeListItem",
+									"Data": "2",
+									"ListData": {
+										"Typ": 1,
+										"Tight": true,
+										"Start": 2,
+										"Delimiter": 46,
+										"Padding": 3,
+										"Marker": "Mg==",
+										"Num": 2
+									},
+									"Properties": {
+										"ID": "20240530101000-y8ykhvp",
+										"id": "20240530101000-nbh4zn7",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-2bzatij",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-zl7ne0h",
+												"id": "20240530101000-2bzatij",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "設定"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "情報"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "データリポジトリキー"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ からデータリポジトリのリセットを実行します。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-shu4th0",
+									"Type": "NodeListItem",
+									"Data": "3",
+									"ListData": {
+										"Typ": 1,
+										"Tight": true,
+										"Start": 3,
+										"Delimiter": 46,
+										"Padding": 3,
+										"Marker": "Mw==",
+										"Num": 3
+									},
+									"Properties": {
+										"ID": "20240530101000-ziowgm5",
+										"id": "20240530101000-shu4th0",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-au0mf5v",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-glsf17c",
+												"id": "20240530101000-au0mf5v",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "データリポジトリキーを再初期化します。一台のデバイスでキーを初期化した後、他のデバイスでキーをインポートします。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-fl0ix0m",
+									"Type": "NodeListItem",
+									"Data": "4",
+									"ListData": {
+										"Typ": 1,
+										"Tight": true,
+										"Start": 4,
+										"Delimiter": 46,
+										"Padding": 3,
+										"Marker": "NA==",
+										"Num": 4
+									},
+									"Properties": {
+										"ID": "20240530101000-725q7r8",
+										"id": "20240530101000-fl0ix0m",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-91zw5g6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-cv34uf4",
+												"id": "20240530101000-91zw5g6",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "クラウドでは新しい同期ディレクトリが使用され、古い同期ディレクトリは削除できます。"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-lcrcoyt",
+									"Type": "NodeListItem",
+									"Data": "5",
+									"ListData": {
+										"Typ": 1,
+										"Tight": true,
+										"Start": 5,
+										"Delimiter": 46,
+										"Padding": 3,
+										"Marker": "NQ==",
+										"Num": 5
+									},
+									"Properties": {
+										"ID": "20240530101000-42rthkp",
+										"id": "20240530101000-lcrcoyt",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-rhl7rel",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-qmq7x4y",
+												"id": "20240530101000-rhl7rel",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "クラウドでは新しいクラウドスナップショットが使用され、古いクラウドスナップショットは削除できます。"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zzt7ueu",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-r2jzxjs",
+				"id": "20240530101000-zzt7ueu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "お金を払わないと使えないの？",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9v8uoem",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-l38vpcd",
+				"id": "20240530101000-9v8uoem",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ほとんどの機能は商用利用を含め無料です。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qpmlidy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-5yask4p",
+				"id": "20240530101000-qpmlidy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-cb37szr",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "メンバーシップサービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を利用するには有料会員登録が必要です。詳しくは"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/pricing.html",
+					"TextMarkTextContent": "料金ページ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "をご覧ください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6cg9mi2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-hectwle",
+				"id": "20240530101000-6cg9mi2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeHeadingC8hMarker",
+					"Data": "## ",
+					"Properties": {
+						"id": ""
+					}
+				},
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan という名前の由来は？",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-cg2z3j6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-publukn",
+				"id": "20240530101000-cg2z3j6",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan (思源) という名前は、中国の故事成語である「飲水思源」に由来しています。これは、「水を飲むとき、その源を思い起こす」という意味で、自分のルーツを忘れず、感謝の心を持つことの大切さを表しています。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-aobqxmk",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-uk461bn",
+				"id": "20240530101000-aobqxmk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は、この「飲水思源」の精神を体現するツールとして、知識管理を行う人々が知識の源泉や繋がりを忘れず、さらに重要なこととして、学んだことを社会や人類全体に貢献することを忘れてほしくないという願いが込められています。",
+					"Properties": {
+						"id": ""
+					}
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0jv3mn1",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-bkvrf87",
+				"id": "20240530101000-0jv3mn1",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

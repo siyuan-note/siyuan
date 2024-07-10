@@ -2,10 +2,18 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
-import {genCellValueByElement, getTypeByCellElement, popTextCell, renderCell, renderCellAttr} from "./cell";
+import {
+    addDragFill,
+    genCellValueByElement,
+    getTypeByCellElement,
+    popTextCell,
+    renderCell,
+    renderCellAttr
+} from "./cell";
 import {fetchPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
+import {Constants} from "../../../constants";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -124,9 +132,19 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
     });
     let html = "";
     srcIDs.forEach((id) => {
-        html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
+      const blockCellElement =  blockElement.querySelector(`[data-block-id="${id}"]`);
+        if (!blockCellElement) {
+            html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
     ${colHTML}
 </div>`;
+        } else {
+            blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+                item.classList.remove("av__cell--select", "av__cell--active");
+                item.querySelector(".av__drag-fill")?.remove();
+            });
+            addDragFill(blockCellElement);
+            blockCellElement.classList.add("av__cell--select");
+        }
     });
     previousElement.insertAdjacentHTML("afterend", html);
     if (avId) {
@@ -349,6 +367,20 @@ export const setPageSize = (options: {
             updatePageSize({
                 currentPageSize,
                 newPageSize: "100",
+                protyle: options.protyle,
+                avID: options.avID,
+                nodeElement: options.nodeElement
+            });
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
+        checked: currentPageSize === Constants.SIZE_DATABASE_MAZ_SIZE.toString(),
+        label: window.siyuan.languages.all,
+        click() {
+            updatePageSize({
+                currentPageSize,
+                newPageSize: Constants.SIZE_DATABASE_MAZ_SIZE.toString(),
                 protyle: options.protyle,
                 avID: options.avID,
                 nodeElement: options.nodeElement

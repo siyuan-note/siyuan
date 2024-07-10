@@ -125,6 +125,10 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 					// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
 					u = unescaped
 				}
+				if strings.Contains(u, ":") {
+					u = strings.TrimPrefix(u, "/")
+				}
+
 				if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
 					return ast.WalkSkipChildren
 				}
@@ -299,6 +303,10 @@ func NetAssets2LocalAssets(rootID string) (err error) {
 				// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
 				u = unescaped
 			}
+			if strings.Contains(u, ":") {
+				u = strings.TrimPrefix(u, "/")
+			}
+
 			if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
 				return ast.WalkContinue
 			}
@@ -688,6 +696,10 @@ func RemoveUnusedAssets() (ret []string) {
 	for _, p := range unusedAssets {
 		historyPath := filepath.Join(historyDir, p)
 		if p = filepath.Join(util.DataDir, p); filelock.IsExist(p) {
+			if filelock.IsHidden(p) {
+				continue
+			}
+
 			if err = filelock.Copy(p, historyPath); nil != err {
 				return
 			}
@@ -750,7 +762,7 @@ func RemoveUnusedAsset(p string) (ret string) {
 	return
 }
 
-func RenameAsset(oldPath, newName string) (err error) {
+func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(110))
 	defer util.PushClearProgress()
 
@@ -769,7 +781,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 	}
 
 	newName = util.AssetName(newName + filepath.Ext(oldPath))
-	newPath := "assets/" + newName
+	newPath = "assets/" + newName
 	if err = filelock.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); nil != err {
 		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
 		return
@@ -821,7 +833,7 @@ func RenameAsset(oldPath, newName string) (err error) {
 					continue
 				}
 
-				treenode.IndexBlockTree(tree)
+				treenode.UpsertBlockTree(tree)
 				sql.UpsertTreeQueue(tree)
 
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
@@ -830,7 +842,6 @@ func RenameAsset(oldPath, newName string) (err error) {
 	}
 
 	IncSync()
-	util.ReloadUI()
 	return
 }
 

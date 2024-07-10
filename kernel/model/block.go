@@ -268,20 +268,31 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	return
 }
 
-func IsBlockFolded(id string) bool {
+func IsBlockFolded(id string) (isFolded, isRoot bool) {
+	tree, _ := LoadTreeByBlockID(id)
+	if nil == tree {
+		return
+	}
+
+	if tree.Root.ID == id {
+		isRoot = true
+	}
+
 	for i := 0; i < 32; i++ {
 		b, _ := getBlock(id, nil)
 		if nil == b {
-			return false
+			return
 		}
 
 		if "1" == b.IAL["fold"] {
-			return true
+			isFolded = true
+			return
 		}
 
 		id = b.ParentID
+
 	}
-	return false
+	return
 }
 
 func RecentUpdatedBlocks() (ret []*Block) {

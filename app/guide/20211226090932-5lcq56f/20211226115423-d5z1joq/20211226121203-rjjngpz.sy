@@ -7,7 +7,7 @@
 		"id": "20211226121203-rjjngpz",
 		"title": "通用作業",
 		"type": "doc",
-		"updated": "20240508003139"
+		"updated": "20240612234711"
 	},
 	"Children": [
 		{
@@ -398,6 +398,23 @@
 					"TextMarkBlockRefID": "20230104151953-48hwkwf",
 					"TextMarkBlockRefSubtype": "d",
 					"TextMarkTextContent": "分享文檔"
+				}
+			]
+		},
+		{
+			"ID": "20240612234710-b6wmah7",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240612234710-b6wmah7",
+				"updated": "20240612234711"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240517031052-mgoxs16",
+					"TextMarkBlockRefSubtype": "d",
+					"TextMarkTextContent": "發布服務"
 				}
 			]
 		}

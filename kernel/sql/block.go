@@ -139,6 +139,10 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 
 func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool,
 	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) string {
+	if nil == node {
+		return ""
+	}
+
 	if ast.NodeAttributeView == node.Type {
 		if fullAttrView {
 			return getAttributeViewContent(node.AttributeViewID, GetBlockAttrsWithoutWaitWriting)
@@ -194,7 +198,7 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 			var linkDestStr, ocrText string
 			if nil != linkDest {
 				linkDestStr = linkDest.TokensStr()
-				ocrText = util.GetAssetText(linkDestStr, false)
+				ocrText = util.GetAssetText(linkDestStr)
 			}
 
 			linkText := n.ChildByType(ast.NodeLinkText)

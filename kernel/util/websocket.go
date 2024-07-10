@@ -32,6 +32,26 @@ var (
 	sessions = sync.Map{} // {appId, {sessionId, session}}
 )
 
+func BroadcastByTypeAndApp(typ, app, cmd string, code int, msg string, data interface{}) {
+	appSessions, ok := sessions.Load(app)
+	if !ok {
+		return
+	}
+
+	appSessions.(*sync.Map).Range(func(key, value interface{}) bool {
+		session := value.(*melody.Session)
+		if t, ok := session.Get("type"); ok && typ == t {
+			event := NewResult()
+			event.Cmd = cmd
+			event.Code = code
+			event.Msg = msg
+			event.Data = data
+			session.Write(event.Bytes())
+		}
+		return true
+	})
+}
+
 // BroadcastByType 广播所有实例上 typ 类型的会话。
 func BroadcastByType(typ, cmd string, code int, msg string, data interface{}) {
 	typeSessions := SessionsByType(typ)
@@ -244,6 +264,10 @@ func PushProtyleReload(rootID string) {
 
 func PushProtyleLoading(rootID, msg string) {
 	BroadcastByType("protyle", "addLoading", 0, msg, rootID)
+}
+
+func PushReloadEmojiConf() {
+	BroadcastByType("main", "reloadEmojiConf", 0, "", nil)
 }
 
 func PushDownloadProgress(id string, percent float32) {

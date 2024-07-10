@@ -50,7 +50,6 @@ const renderCompare = (app: App, element: HTMLElement) => {
             action: [Constants.CB_GET_HISTORY],
             render: {
                 background: false,
-                title: false,
                 gutter: false,
                 breadcrumb: false,
                 breadcrumbDocName: false,
@@ -66,7 +65,6 @@ const renderCompare = (app: App, element: HTMLElement) => {
             },
             render: {
                 background: false,
-                title: false,
                 gutter: false,
                 breadcrumb: false,
                 breadcrumbDocName: false,

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20240517004210"
+		"updated": "20240524085750"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-0t4c1qf",
-				"updated": "20240517004210"
+				"updated": "20240524085750"
 			},
 			"Children": [
 				{
@@ -36,7 +36,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20211226122652-4e9hm9i",
-				"updated": "20240517004210"
+				"updated": "20240523113830"
 			},
 			"Children": [
 				{
@@ -1298,6 +1298,96 @@
 							"Children": [
 								{
 									"Type": "NodeText",
+									"Data": "取消並排分頁"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置 - 快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "取消全部並排分頁"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置 - 快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
 									"Data": "文檔樹面板"
 								}
 							]
@@ -2298,7 +2388,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-3q2xsbj",
-				"updated": "20240517002058"
+				"updated": "20240524085750"
 			},
 			"Children": [
 				{
@@ -3032,7 +3122,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20240517002058"
+				"updated": "20240524085750"
 			},
 			"Children": [
 				{
@@ -3047,7 +3137,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20240517002058"
+				"updated": "20240524085750"
 			},
 			"Children": [
 				{
@@ -3067,7 +3157,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20240516235214"
+				"updated": "20240524085750"
 			},
 			"Children": [
 				{
@@ -7015,6 +7105,105 @@
 								{
 									"Type": "NodeText",
 									"Data": "可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製為副本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "對於資料庫區塊是 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製為鏡像副本"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，可前往 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設置-\u0026gt;快捷鍵"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 中配置"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "複製為完整副本"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "-"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "僅對資料庫區塊可用，可前往 "
 								},
 								{
 									"Type": "NodeTextMark",

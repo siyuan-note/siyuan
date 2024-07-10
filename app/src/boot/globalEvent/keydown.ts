@@ -71,6 +71,7 @@ import {filterHotkey} from "./commonHotkey";
 import {setReadOnly} from "../../config/util/setReadOnly";
 import {copyPNGByLink} from "../../menus/util";
 import {globalCommand} from "./command/global";
+import {duplicateCompletely} from "../../protyle/render/av/action";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -286,7 +287,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event)) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.quickMakeCard.custom, event) && !window.siyuan.config.readonly) {
         if (protyle.title?.editElement.contains(range.startContainer)) {
             quickMakeCard(protyle, [protyle.title.element]);
         } else {
@@ -315,7 +316,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
         fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
             openCardByData(app, response.data, "doc", protyle.block.rootID, protyle.title?.editElement.textContent || window.siyuan.languages.untitled);
         });
@@ -333,7 +334,8 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         return true;
     }
 
-    if (!isFileFocus && !event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
+    if (!isFileFocus && !event.repeat && !protyle.disabled &&
+        matchHotKey(window.siyuan.config.keymap.editor.general.duplicate.custom, event)) {
         event.preventDefault();
         event.stopPropagation();
         let selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -445,6 +447,15 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         } else {
             copyPlainText(range.toString());
         }
+        event.preventDefault();
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.duplicateCompletely.custom, event)) {
+        const nodeElement = hasClosestBlock(range.startContainer);
+        if (!nodeElement || !nodeElement.classList.contains("av")) {
+            return false;
+        }
+        duplicateCompletely(protyle, nodeElement);
         event.preventDefault();
         return true;
     }
@@ -582,7 +593,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     const pathString = liElements[0].getAttribute("data-path");
     const isFile = liElements[0].getAttribute("data-type") === "navigation-file";
 
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event)) {
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
         if (isFile) {
             const id = liElements[0].getAttribute("data-node-id");
             fetchPost("/api/riff/getTreeRiffDueCards", {rootID: id}, (response) => {
@@ -1561,6 +1572,16 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     if (matchHotKey(window.siyuan.config.keymap.general.stickSearch.custom, event)) {
         globalCommand("stickSearch", app);
         event.preventDefault();
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.unsplit.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("unsplit", app);
+        return;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.general.unsplitAll.custom, event) && !event.repeat) {
+        event.preventDefault();
+        globalCommand("unsplitAll", app);
         return;
     }
     if (editKeydown(app, event)) {

@@ -1,0 +1,196 @@
+{
+	"ID": "20240530101000-mrlr6e9",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-rkowqnr",
+		"id": "20240530101000-mrlr6e9",
+		"title": "インデックスから除外",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-e2zx50s",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-i1yve3t",
+				"id": "20240530101000-e2zx50s",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wlwkdbt",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-8hk8gwl",
+				"id": "20240530101000-wlwkdbt",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ドキュメントのデータをデータベースにインデックス化せず、データを完全に検索不可能にしてデータベースのサイズを削減します。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ky4bdz8",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-xgjmbei",
+				"id": "20240530101000-ky4bdz8",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-bhyig8v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ned17uu",
+				"id": "20240530101000-bhyig8v",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ファイルシステム上に "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "workspace/data/.siyuan/indexignore"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ というテキストファイルを作成して編集します。各行が除外するパスとして機能する gitignore 構文をサポートしています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wwdpzfw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-3h7ii5q",
+				"id": "20240530101000-wwdpzfw",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-otfou8m",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ketj3v8",
+						"id": "20240530101000-otfou8m",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-1qphtwm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-1qphtwm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: data/20210808180117-6v0mkxr というノートブックにある 20200923234011-ieuun1p.sy というドキュメントのインデックスを除外します。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jjxwjqa",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-pkp7xgn",
+						"id": "20240530101000-jjxwjqa",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-l8q4tbj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240530101000-l8q4tbj",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "20210808180117-6v0mkxr/**/*"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: data/20210808180117-6v0mkxr というノートブックにあるすべてのドキュメントのインデックスを除外します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-3iwxa5b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-2hze5e6",
+				"id": "20240530101000-3iwxa5b",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "設定ファイルを変更した後は手動でインデックスを再構築する必要があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-6wnsued",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-yitptkt",
+				"id": "20240530101000-6wnsued"
+			}
+		}
+	]
+}

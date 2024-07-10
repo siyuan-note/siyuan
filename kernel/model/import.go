@@ -48,7 +48,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -62,6 +61,13 @@ func HTML2Markdown(htmlStr string) (markdown string, withMath bool, err error) {
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
+		}
+
+		if ast.NodeText == n.Type {
+			if n.ParentIs(ast.NodeTableCell) {
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("|"), []byte("\\|"))
+			}
 		}
 
 		if ast.NodeInlineMath == n.Type {
@@ -300,70 +306,30 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			av.BatchUpsertBlockRel(avNodes)
 		}
 
-		// 如果数据库中绑定的块不在导入的文档中
-		cachedTrees, saveTrees := map[string]*parse.Tree{}, map[string]*parse.Tree{}
+		// 如果数据库中绑定的块不在导入的文档中，则需要单独更新这些绑定块的属性
+		var attrViewIDs []string
+		for _, avID := range avIDs {
+			attrViewIDs = append(attrViewIDs, avID)
+		}
+		updateBoundBlockAvsAttribute(attrViewIDs)
+
+		// 插入关联关系 https://github.com/siyuan-note/siyuan/issues/11628
+		relationAvs := map[string]string{}
 		for _, avID := range avIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil == attrView {
 				continue
 			}
 
-			blockKeyValues := attrView.GetBlockKeyValues()
-			for _, blockValue := range blockKeyValues.Values {
-				if blockValue.IsDetached {
-					continue
+			for _, keyValues := range attrView.KeyValues {
+				if nil != keyValues.Key && av.KeyTypeRelation == keyValues.Key.Type && nil != keyValues.Key.Relation {
+					relationAvs[avID] = keyValues.Key.Relation.AvID
 				}
-				bt := treenode.GetBlockTree(blockValue.BlockID)
-				if nil == bt {
-					continue
-				}
-
-				tree := cachedTrees[bt.RootID]
-				if nil == tree {
-					tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-					if nil == tree {
-						continue
-					}
-					cachedTrees[bt.RootID] = tree
-				}
-
-				node := treenode.GetNodeInTree(tree, blockValue.BlockID)
-				if nil == node {
-					continue
-				}
-
-				attrs := parse.IAL2Map(node.KramdownIAL)
-				if "" == attrs[av.NodeAttrNameAvs] {
-					attrs[av.NodeAttrNameAvs] = avID
-				} else {
-					nodeAvIDs := strings.Split(attrs[av.NodeAttrNameAvs], ",")
-					nodeAvIDs = append(nodeAvIDs, avID)
-					nodeAvIDs = gulu.Str.RemoveDuplicatedElem(nodeAvIDs)
-					attrs[av.NodeAttrNameAvs] = strings.Join(nodeAvIDs, ",")
-					saveTrees[bt.RootID] = tree
-				}
-
-				avNames := getAvNames(attrs[av.NodeAttrNameAvs])
-				if "" != avNames {
-					attrs[av.NodeAttrViewNames] = avNames
-				}
-
-				oldAttrs, setErr := setNodeAttrs0(node, attrs)
-				if nil != setErr {
-					continue
-				}
-				cache.PutBlockIAL(node.ID, parse.IAL2Map(node.KramdownIAL))
-				pushBroadcastAttrTransactions(oldAttrs, node)
 			}
 		}
 
-		for _, saveTree := range saveTrees {
-			if treeErr := indexWriteTreeUpsertQueue(saveTree); nil != treeErr {
-				logging.LogErrorf("index write tree upsert queue failed: %s", treeErr)
-			}
-
-			avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
-			av.BatchUpsertBlockRel(avNodes)
+		for srcAvID, destAvID := range relationAvs {
+			av.UpsertAvBackRel(srcAvID, destAvID)
 		}
 	}
 
@@ -773,6 +739,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			targetPaths[curRelPath] = targetPath
 
 			if info.IsDir() {
+				if subMdFiles := util.GetFilePathsByExts(currentPath, []string{".md", ".markdown"}); 1 > len(subMdFiles) {
+					// 如果该文件夹中不包含 Markdown 文件则不处理 https://github.com/siyuan-note/siyuan/issues/11567
+					return nil
+				}
+
 				tree = treenode.NewTree(boxID, targetPath, hPath, title)
 				importTrees = append(importTrees, tree)
 				return nil
@@ -995,7 +966,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	if nil == ret {
 		return
 	}
-	genTreeID(ret)
+	normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return

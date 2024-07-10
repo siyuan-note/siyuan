@@ -48,4 +48,4 @@ jobs:
 
       - name: Build the Docker image
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t 851708184/siyuan:latest -t 851708184/siyuan:v3.0.15 .
+          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t 851708184/siyuan:latest -t 851708184/siyuan:v3.1.0 .

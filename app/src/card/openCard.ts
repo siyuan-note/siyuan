@@ -174,7 +174,6 @@ export const bindCardEvent = async (options: {
         action: [Constants.CB_GET_ALL],
         render: {
             background: false,
-            title: false,
             gutter: true,
             breadcrumbDocName: true,
         },
@@ -673,6 +672,9 @@ const emitEvent = (app: App, card: ICard, type: string) => {
 };
 
 export const openCard = (app: App) => {
+    if (window.siyuan.config.readonly) {
+        return;
+    }
     fetchPost("/api/riff/getRiffDueCards", {deckID: ""}, (cardsResponse) => {
         openCardByData(app, cardsResponse.data, "all");
     });

@@ -164,8 +164,7 @@ func html2BlockDOM(c *gin.Context) {
 		})
 	}
 
-	// 复制带超链接的图片无法保存到本地 https://github.com/siyuan-note/siyuan/issues/5993
-	parse.NestedInlines2FlattedSpans(tree, false)
+	parse.NestedInlines2FlattedSpansHybrid(tree, false)
 
 	renderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	output := renderer.Render()

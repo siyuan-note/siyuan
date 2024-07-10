@@ -1,0 +1,511 @@
+{
+	"ID": "20240530101000-3xv6jjr",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-lk8crgz",
+		"icon": "1f4c4",
+		"id": "20240530101000-3xv6jjr",
+		"title": "プライバシーポリシーと利用規約",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-h6ylp3d",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-iprrgze",
+				"id": "20240530101000-h6ylp3d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プライバシーポリシー"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-me46fdi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ndrtxd4",
+				"id": "20240530101000-me46fdi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "更新日: 2022年2月9日"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vkm7aa2",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-98p72f4",
+				"id": "20240530101000-vkm7aa2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan のプライバシーポリシー文書は、ユーザーのプライバシー保護への取り組みを宣言するものです。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-elhjhw0",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-14elwe9",
+				"id": "20240530101000-elhjhw0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "個人情報やデータは収集されますか？"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-04tu4x8",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-jar606h",
+				"id": "20240530101000-04tu4x8",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cf05zhc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-kmy0gyw",
+						"id": "20240530101000-cf05zhc",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-qxj9l29",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-z12p630",
+								"id": "20240530101000-qxj9l29",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ユーザーの個人情報や利用データ (メモ、アセットファイル、操作記録、プログラムログなど) は収集されません"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vmxum62",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-dlydn65",
+						"id": "20240530101000-vmxum62",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-oz6ch92",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ee0ule8",
+								"id": "20240530101000-oz6ch92",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "すべてのデータはユーザーの完全な管理下にあるデバイス上に保持されます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xdlzqj5",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-lp00ttf",
+				"id": "20240530101000-xdlzqj5",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開発者の情報と連絡先"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-gqpy4z0",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-i7z9uqj",
+				"id": "20240530101000-gqpy4z0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-r5uvfn4",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-i2qojxq",
+						"id": "20240530101000-r5uvfn4",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-en1kbrm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-pfdd8fa",
+								"id": "20240530101000-en1kbrm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan は Yunnan Liandi Technology Co., Ltd. によって設計・開発されています"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-isc4tk1",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-cjzzsrf",
+						"id": "20240530101000-isc4tk1",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-k7zxawt",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-xletnbn",
+								"id": "20240530101000-k7zxawt",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "連絡先: 845765@qq.com"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mytbvcv",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-bjnhsnt",
+				"id": "20240530101000-mytbvcv",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "プライバシーポリシーの閲覧"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tkcftci",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-m6qf3ku",
+				"id": "20240530101000-tkcftci",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-ag5stll",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-pu3pbiq",
+						"id": "20240530101000-ag5stll",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-o4um42v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-x3lab0q",
+								"id": "20240530101000-o4um42v",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ウェブページ "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://b3log.org/siyuan/en/privacy.html",
+									"TextMarkTextContent": "https://b3log.org/siyuan/en/privacy.html"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " にアクセスする"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jop14yd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-8da606n",
+						"id": "20240530101000-jop14yd",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ynti11v",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-wjl3tiy",
+								"id": "20240530101000-ynti11v",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ソフトウェアで「ユーザーガイド」をクリックし、開いた「SiYuan ユーザーガイド」内の「プライバシーポリシーと利用規約」ドキュメントを開く"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-4pf0i63",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-f3md1en",
+				"id": "20240530101000-4pf0i63",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "利用規約"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-fr2hzco",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-83k0r83",
+				"id": "20240530101000-fr2hzco",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-cl80kjm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-resh1wv",
+						"id": "20240530101000-cl80kjm",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-q3qwkoc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jzmz0ra",
+								"id": "20240530101000-q3qwkoc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "発行日: 2022年2月11日"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-nrqb11f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nognxkt",
+						"id": "20240530101000-nrqb11f",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-5cdckge",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-zvv1kaq",
+								"id": "20240530101000-5cdckge",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "更新日: 2022年5月26日"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7spxshp",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-msxdhrs",
+				"id": "20240530101000-7spxshp",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://www.gnu.org/licenses/#AGPL",
+					"TextMarkTextContent": "AGPLv3 オープンソースライセンス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " を使用しています。必ずこれに従ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2r72nch",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"ID": "20240530101000-9xuk8iw",
+				"id": "20240530101000-2r72nch",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20240530101000-i4rw6w5",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"ID": "20240530101000-j7uqvp6",
+						"id": "20240530101000-i4rw6w5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "// This program is free software: you can redistribute it and/or modify\n// it under the terms of the GNU Affero General Public License as published by\n// the Free Software Foundation, either version 3 of the License, or\n// (at your option) any later version.\n//\n// This program is distributed in the hope that it will be useful,\n// but WITHOUT ANY WARRANTY; without even the implied warranty of\n// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the\n// GNU Affero General Public License for more details.\n//\n// You should have received a copy of the GNU Affero General Public License\n// along with this program.  If not, see "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "a",
+							"TextMarkAHref": "https://www.gnu.org/licenses/",
+							"TextMarkTextContent": "https://www.gnu.org/licenses/"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "."
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-92enkwe",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-0156xnp",
+				"id": "20240530101000-92enkwe",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan クラウドサービスでのユーザーアカウントの共有は禁止されています。違反したアカウントは停止されます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-t4dip8u",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-yrgkesl",
+				"id": "20240530101000-t4dip8u"
+			}
+		}
+	]
+}

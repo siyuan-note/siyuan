@@ -1,0 +1,572 @@
+{
+	"ID": "20240530101000-cpm26sr",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-g78orro",
+		"id": "20240530101000-cpm26sr",
+		"title": "データ可用性の保証",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-hju8n1m",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-gemdixd",
+				"id": "20240530101000-hju8n1m",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ローカルデバイス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-grikgfu",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-migun97",
+				"id": "20240530101000-grikgfu",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan はローカルデバイスでのデータの可用性を高めるため様々な対策を講じています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-k0rqy1f",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-4r38tjf",
+				"id": "20240530101000-k0rqy1f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-wlxxabu",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-1tvenrt",
+						"id": "20240530101000-wlxxabu",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0zklptz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-saz9rrl",
+								"id": "20240530101000-0zklptz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "エディタで変更された内容は自動的に保存されます。保存にかかる時間はドキュメントのサイズによって異なりますが、通常は 1 秒以内に完了します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-4u51q0c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-3o9jy11",
+						"id": "20240530101000-4u51q0c",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-rd10o0d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-utkgy5i",
+								"id": "20240530101000-rd10o0d",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-ueeidu9",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "ファイル履歴"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "のサポート"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-lienq97",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-ai1n0gk",
+						"id": "20240530101000-lienq97",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-7mgwg64",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-ydpcna5",
+								"id": "20240530101000-7mgwg64",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-sy5cmkg",
+									"TextMarkBlockRefSubtype": "s",
+									"TextMarkTextContent": "データスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "のサポート"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-a1q0tns",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nkz0vx0",
+						"id": "20240530101000-a1q0tns",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tqbcujx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-29d9d5r",
+								"id": "20240530101000-tqbcujx",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データのエクスポートとインポートをサポート"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vb5vm7t",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-1n29oad",
+						"id": "20240530101000-vb5vm7t",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8p6xztj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-k68qx68",
+								"id": "20240530101000-8p6xztj",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ファイルの破損を避けるため、サードパーティ製の同期ソフトウェアによるデータ同期は禁止されています"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-i54s0in",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-a1mk0cz",
+				"id": "20240530101000-i54s0in",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "ただし、これらの保証はデバイスやストレージに障害や事故がない場合に限られることにご注意ください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-mpn2wd4",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-c1ay3p3",
+				"id": "20240530101000-mpn2wd4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "クラウド同期"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xli18xb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-7ku8f21",
+				"id": "20240530101000-xli18xb",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20240530101000-wo49zvq",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "クラウドデータ同期"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "は必須要件であり、ローカルデバイスと同期後のデータ両方の可用性が最大限に確保されています:"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rbpy8yh",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-b04m0f8",
+				"id": "20240530101000-rbpy8yh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-6h84xoe",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nw0wxrb",
+						"id": "20240530101000-6h84xoe",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-y40dg4y",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-c44rcr5",
+								"id": "20240530101000-y40dg4y",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期前にデータスナップショットを生成しておくことで、予期しない同期結果が発生した場合にスナップショットを通じてロールバックできます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-k1rgbx6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-44zvvcx",
+						"id": "20240530101000-k1rgbx6",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-0ivreyq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-2syqfww",
+								"id": "20240530101000-0ivreyq",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "同期中にファイルの競合が発生した場合:"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-z7cb4zm",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-udd885v",
+								"id": "20240530101000-z7cb4zm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-dmi0gly",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-gc57pzk",
+										"id": "20240530101000-dmi0gly",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-yb162az",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-445uf9t",
+												"id": "20240530101000-yb162az",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "自動的にファイル履歴が生成され、ファイル履歴を通じてロールバックできます"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-o3dtpkx",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-akguhci",
+										"id": "20240530101000-o3dtpkx",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-23vu06z",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-u7jut00",
+												"id": "20240530101000-23vu06z",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "設定"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "クラウド"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "同期の競合時に競合ドキュメントを生成する"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を有効にすると、競合が発生した両方のファイルが保持され手動で解決できます"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-mf4c8af",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-nyzun0d",
+						"id": "20240530101000-mf4c8af",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-uhpkagj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8udeowr",
+								"id": "20240530101000-uhpkagj",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データ履歴"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "データスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クラウドスナップショット"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から、クラウドスナップショットの閲覧とダウンロードが行えます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wieu43b",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-e3nuntk",
+				"id": "20240530101000-wieu43b",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "まとめ"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-v82qhhl",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-geqygil",
+				"id": "20240530101000-v82qhhl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "上記の安全策により、データの可用性に関する懸念は大幅に低減されています。安心してこのサービスをご利用いただけます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-xwn2e9k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-rxttex5",
+				"id": "20240530101000-xwn2e9k",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "万が一の事態に備え、バックアップの 3-2-1 ルール (3 つのコピー、2 種類のメディア、1 つのオフサイトストレージ) に基づいたデータバックアップをおすすめします。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-j001igy",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-oa2gzhr",
+				"id": "20240530101000-j001igy",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データの可用性は最優先事項であり、皆様のご協力のもと継続的な改善を行っています。さらなるフィードバックやご提案をお待ちしています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0gnjsl9",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-k38egkr",
+				"id": "20240530101000-0gnjsl9",
+				"updated": "20240530101000"
+			}
+		}
+	]
+}

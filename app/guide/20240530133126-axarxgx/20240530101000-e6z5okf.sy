@@ -1,0 +1,302 @@
+{
+	"ID": "20240530101000-e6z5okf",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-h31xkta",
+		"icon": "1f4f1",
+		"id": "20240530101000-e6z5okf",
+		"title": "モバイルアプリ",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-2nn9stf",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-peznsnc",
+				"id": "20240530101000-2nn9stf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-pnwqee0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-ysty1wf",
+				"id": "20240530101000-pnwqee0",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "SiYuan は Android と iOS のアプリも提供しています。アプリストアで "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "SiYuan"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を検索してください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-tylg3qg",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-2lg2mb6",
+				"id": "20240530101000-tylg3qg",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスの利用"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vma8ggh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-stdxnih",
+				"id": "20240530101000-vma8ggh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アプリストアの審査の都合上、現在マーケットプレイスをアプリ上で直接提供することはできません。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2ydz6oj",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-4ppspg1",
+				"id": "20240530101000-2ydz6oj",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスを利用するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​- "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "情報"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "ネットワークサービス"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を有効にして、デスクトップブラウザから設定にアクセスしてください。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-zx8lkgl",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-yx7xlm6",
+				"id": "20240530101000-zx8lkgl",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vg6rjty",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-355qyas",
+				"id": "20240530101000-vg6rjty",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-502th4f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-60p9bne",
+						"id": "20240530101000-502th4f",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-gf939t8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4ca3l4l",
+								"id": "20240530101000-gf939t8",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリをアンインストールするとローカルデータが完全に削除され、復旧できなくなります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-286lfpp",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2vsx7me",
+						"id": "20240530101000-286lfpp",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-w6mhqnc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-8e3p06k",
+								"id": "20240530101000-w6mhqnc",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アプリを終了するときは、右側のパネルの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アプリケーションの終了"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から終了してください。スワイプして終了するとデータの同期が行われません。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-yoktfm7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-0flh6w7",
+						"id": "20240530101000-yoktfm7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-p0zphjs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-f7stnt5",
+								"id": "20240530101000-p0zphjs",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "iOS でアプリを切り替えると接続が中断されます。確認ボックスのボタンをクリックして手動で再接続してください。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-dvacc03",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-e7wxqk0",
+						"id": "20240530101000-dvacc03",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-fcln511",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-e3nl321",
+								"id": "20240530101000-fcln511",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "データ同期中はアプリを切り替えず、画面をオンのままにしてください。そうしないとデータ同期が失敗します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-wps7kn8",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-qpexeys",
+				"id": "20240530101000-wps7kn8"
+			}
+		}
+	]
+}

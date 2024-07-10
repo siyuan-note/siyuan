@@ -63,17 +63,13 @@ func RemoveRecentDoc(ids []string) {
 	return
 }
 
-func SetRecentDocByTree(tree *parse.Tree) {
+func setRecentDocByTree(tree *parse.Tree) {
 	recentDoc := &RecentDoc{
 		RootID: tree.Root.ID,
 		Icon:   tree.Root.IALAttr("icon"),
 		Title:  tree.Root.IALAttr("title"),
 	}
 
-	SetRecentDoc(recentDoc)
-}
-
-func SetRecentDoc(doc *RecentDoc) (err error) {
 	recentDocLock.Lock()
 	defer recentDocLock.Unlock()
 
@@ -83,13 +79,13 @@ func SetRecentDoc(doc *RecentDoc) (err error) {
 	}
 
 	for i, c := range recentDocs {
-		if c.RootID == doc.RootID {
+		if c.RootID == recentDoc.RootID {
 			recentDocs = append(recentDocs[:i], recentDocs[i+1:]...)
 			break
 		}
 	}
 
-	recentDocs = append([]*RecentDoc{doc}, recentDocs...)
+	recentDocs = append([]*RecentDoc{recentDoc}, recentDocs...)
 	if 32 < len(recentDocs) {
 		recentDocs = recentDocs[:32]
 	}
@@ -161,10 +157,10 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 
 type Criterion struct {
 	Name         string                 `json:"name"`
-	Sort         int                    `json:"sort"`       //  0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
+	Sort         int                    `json:"sort"`       // 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时）
 	Group        int                    `json:"group"`      // 0：不分组，1：按文档分组
 	HasReplace   bool                   `json:"hasReplace"` // 是否有替换
-	Method       int                    `json:"method"`     //  0：文本，1：查询语法，2：SQL，3：正则表达式
+	Method       int                    `json:"method"`     // 0：文本，1：查询语法，2：SQL，3：正则表达式
 	HPath        string                 `json:"hPath"`
 	IDPath       []string               `json:"idPath"`
 	K            string                 `json:"k"`            // 搜索关键字

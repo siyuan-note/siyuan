@@ -19,6 +19,7 @@ import {avRender} from "../render/av/render";
 import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
+import {getContenteditableElement} from "../wysiwyg/getBlock";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -180,6 +181,15 @@ const setHTML = (options: {
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }
+    // https://github.com/siyuan-note/siyuan/issues/10528
+    if (!protyle.block.showAll && protyle.wysiwyg.element.childElementCount === 1 && protyle.wysiwyg.element.firstElementChild.classList.contains("p")) {
+        const editElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);
+        if (editElement && editElement.textContent === "") {
+            editElement.classList.add("protyle-wysiwyg--empty");
+            editElement.setAttribute("placeholder", window.siyuan.languages.emptyPlaceholder);
+        }
+    }
+
     if (options.action.includes(Constants.CB_GET_BACKLINK)) {
         foldPassiveType(options.expand, protyle.wysiwyg.element);
     }
@@ -290,10 +300,9 @@ export const disabledProtyle = (protyle: IProtyle) => {
     window.siyuan.menus.menu.remove();
     hideElements(["gutter", "toolbar", "select", "hint", "util"], protyle);
     protyle.disabled = true;
-    if (protyle.title) {
-        const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
-        titleElement.setAttribute("contenteditable", "false");
-        titleElement.style.userSelect = "text";
+    if (protyle.title && protyle.title.editElement) {
+        protyle.title.editElement.setAttribute("contenteditable", "false");
+        protyle.title.editElement.style.userSelect = "text";
     }
     /// #if MOBILE
     document.getElementById("toolbarName").setAttribute("readonly", "readonly");
@@ -351,10 +360,9 @@ export const enableProtyle = (protyle: IProtyle) => {
     }
     // 用于区分移动端样式
     protyle.wysiwyg.element.setAttribute("data-readonly", "false");
-    if (protyle.title) {
-        const titleElement = protyle.title.element.querySelector(".protyle-title__input") as HTMLElement;
-        titleElement.setAttribute("contenteditable", "true");
-        titleElement.style.userSelect = "";
+    if (protyle.title && protyle.title.editElement) {
+        protyle.title.editElement.setAttribute("contenteditable", "true");
+        protyle.title.editElement.style.userSelect = "";
     }
     if (protyle.background) {
         protyle.background.element.classList.add("protyle-background--enable");

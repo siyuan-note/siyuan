@@ -87,7 +87,7 @@
     font-weight: bold;
 
     &:empty::after {
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-surface-light);
       content: attr(data-tip);
     }
   }
@@ -191,6 +191,10 @@
         font-size: 75%;
         white-space: nowrap;
         cursor: pointer;
+
+        &[data-dtype="lineNumber"] {
+          cursor: inherit;
+        }
 
         &:first-child {
           padding-left: 1.625em;

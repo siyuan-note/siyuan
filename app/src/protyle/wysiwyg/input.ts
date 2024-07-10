@@ -13,6 +13,7 @@ import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
+import {setFold} from "../../menus/protyle";
 
 export const input = async (protyle: IProtyle, blockElement: HTMLElement, range: Range, needRender = true, event?: InputEvent) => {
     if (!blockElement.parentElement) {
@@ -63,7 +64,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         }
     }
     const id = blockElement.getAttribute("data-node-id");
-    if (type !== "NodeCodeBlock" && (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
+    if ((type !== "NodeCodeBlock" && type !== "NodeHeading") && // https://github.com/siyuan-note/siyuan/issues/11851
+        (editElement.innerHTML.endsWith("\n<wbr>") || editElement.innerHTML.endsWith("\n<wbr>\n"))) {
         // 软换行
         updateTransaction(protyle, id, blockElement.outerHTML, protyle.wysiwyg.lastHTMLs[id] || blockElement.outerHTML.replace("\n<wbr>", "<wbr>"));
         wbrElement.remove();
@@ -84,7 +86,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         brElement.remove();
     }
 
-    if (editElement.innerHTML === "》<wbr>" || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
+    if (editElement.innerHTML.startsWith("》<wbr>") || editElement.innerHTML.indexOf("\n》<wbr>") > -1) {
         editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
     }
     const trimStartText = editElement.innerHTML.trimStart();
@@ -155,6 +157,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     ) {
         log("SpinBlockDOM", blockElement.outerHTML, "argument", protyle.options.debugger);
         log("SpinBlockDOM", html, "result", protyle.options.debugger);
+        if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1" &&
+            tempElement.content.firstElementChild.getAttribute("data-subtype") !== blockElement.dataset.subtype) {
+            setFold(protyle, blockElement, undefined, undefined, false);
+            html = html.replace(' fold="1"', "");
+            protyle.wysiwyg.lastHTMLs[id] = blockElement.outerHTML;
+        }
         let scrollLeft: number;
         if (blockElement.classList.contains("table")) {
             scrollLeft = blockElement.firstElementChild.scrollLeft;

@@ -23,10 +23,10 @@ import {
 } from "./wysiwyg/transaction";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
-import {Title} from "./header/Title";
 import {updatePanelByEditor} from "../editor/util";
 import {setPanelFocus} from "../layout/util";
 /// #endif
+import {Title} from "./header/Title";
 import {Background} from "./header/Background";
 import {onGet, setReadonlyByConfig} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
@@ -77,11 +77,9 @@ export class Protyle {
         if (mergedOptions.render.breadcrumb) {
             this.protyle.breadcrumb = new Breadcrumb(this.protyle);
         }
-        /// #if !MOBILE
         if (mergedOptions.render.title) {
             this.protyle.title = new Title(this.protyle);
         }
-        /// #endif
         if (mergedOptions.render.background) {
             this.protyle.background = new Background(this.protyle);
         }
@@ -178,7 +176,8 @@ export class Protyle {
                                 }
                             }
                             if (this.protyle.options.render.title && this.protyle.block.parentID === data.data.id) {
-                                if (getSelection().rangeCount > 0 && this.protyle.title.editElement.contains(getSelection().getRangeAt(0).startContainer)) {
+                                if (!document.body.classList.contains("body--blur") && getSelection().rangeCount > 0 &&
+                                    this.protyle.title.editElement?.contains(getSelection().getRangeAt(0).startContainer)) {
                                     // 标题编辑中的不用更新 https://github.com/siyuan-note/siyuan/issues/6565
                                 } else {
                                     this.protyle.title.setTitle(data.data.title);
@@ -228,6 +227,8 @@ export class Protyle {
             if (options.backlinkData) {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
+                // 为了满足 eventPath0.style.paddingLeft 从而显示块标 https://github.com/siyuan-note/siyuan/issues/11578
+                this.protyle.wysiwyg.element.style.paddingLeft = "16px";
                 return;
             }
             if (!options.blockId) {

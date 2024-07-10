@@ -5,6 +5,11 @@
   user-select: auto;
   overflow-x: clip;
 
+  &--empty:empty:before {
+    color: var(--b3-empty-color);
+    content: attr(placeholder);
+  }
+
   .protyle-breadcrumb__bar {
     font-size: 14px;
   }
@@ -195,6 +200,7 @@
       border-bottom: 1px solid;
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);
+      cursor: pointer; // 预览导出无此元素，只读和编辑状态都需要点击 https://github.com/siyuan-note/siyuan/issues/11854
     }
 
     span[data-type~="a"] {
@@ -445,6 +451,11 @@
     background-color: var(--b3-theme-primary-lightest) !important;
   }
 
+  // https://github.com/siyuan-note/siyuan/issues/11589
+  .hljs wbr {
+    display: none;
+  }
+
   &--hl,
   &--hl .hljs {
     transition: var(--b3-background-transition);
@@ -591,7 +602,6 @@
 // 导出 html 不需要编辑样式
 .protyle-wysiwyg[data-readonly="false"] {
   span[data-type~="inline-math"],
-  span[data-type~="tag"],
   .protyle-action__language,
   .render-node {
     cursor: pointer;
@@ -627,7 +637,10 @@
   }
 
   .render-node .img:hover .protyle-icons,
-  .render-node .render-node:hover > .protyle-icons {
+  .render-node .render-node:hover > .protyle-icons,
+  // https://github.com/siyuan-note/siyuan/issues/11879
+  .protyle-wysiwyg__embed .img:hover .protyle-action__drag,
+  .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
     display: none;
   }
 }

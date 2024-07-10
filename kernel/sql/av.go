@@ -33,7 +33,7 @@ import (
 )
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string,
-	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (ret *av.Table, err error) {
+	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (ret *av.Table) {
 	if nil == GetBlockAttrsWithoutWaitWriting {
 		GetBlockAttrsWithoutWaitWriting = func(id string) (ret map[string]string) {
 			ret = cache.GetBlockIAL(id)
@@ -59,8 +59,21 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, col := range view.Table.Columns {
 		key, getErr := attrView.GetKey(col.ID)
 		if nil != getErr {
-			err = getErr
-			return
+			// 找不到字段则在视图中删除
+
+			switch view.LayoutType {
+			case av.LayoutTypeTable:
+				for i, column := range view.Table.Columns {
+					if column.ID == col.ID {
+						view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+						break
+					}
+				}
+			}
+
+			logging.LogWarnf("get key [%s] failed: %s", col.ID, getErr)
+			av.SaveAttributeView(attrView)
+			continue
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
@@ -98,6 +111,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 
 	// 过滤掉不存在的行
 	var notFound []string
+	var toCheckBlockIDs []string
 	for blockID, keyValues := range rows {
 		blockValue := getRowBlockValue(keyValues)
 		if nil == blockValue {
@@ -114,7 +128,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			continue
 		}
 
-		if nil == treenode.GetBlockTree(blockID) {
+		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
+	}
+	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
+	for blockID, exist := range checkRet {
+		if !exist {
 			notFound = append(notFound, blockID)
 		}
 	}
@@ -160,22 +178,6 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			case av.KeyTypeRelation: // 清空关联列值，后面再渲染 https://ld246.com/article/1703831044435
 				if nil != tableCell.Value && nil != tableCell.Value.Relation {
 					tableCell.Value.Relation.Contents = nil
-				}
-			case av.KeyTypeText:
-				if nil != tableCell.Value && nil != tableCell.Value.Text {
-					tableCell.Value.Text.Content = util.EscapeHTML(tableCell.Value.Text.Content)
-				}
-			case av.KeyTypeEmail:
-				if nil != tableCell.Value && nil != tableCell.Value.Email {
-					tableCell.Value.Email.Content = util.EscapeHTML(tableCell.Value.Email.Content)
-				}
-			case av.KeyTypeURL:
-				if nil != tableCell.Value && nil != tableCell.Value.URL {
-					tableCell.Value.URL.Content = util.EscapeHTML(tableCell.Value.URL.Content)
-				}
-			case av.KeyTypePhone:
-				if nil != tableCell.Value && nil != tableCell.Value.Phone {
-					tableCell.Value.Phone.Content = util.EscapeHTML(tableCell.Value.Phone.Content)
 				}
 			}
 
@@ -337,16 +339,25 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	// 根据搜索条件过滤
 	query = strings.TrimSpace(query)
 	if "" != query {
+		// 将连续空格转换为一个空格
+		query = strings.Join(strings.Fields(query), " ")
+		// 按空格分割关键字
 		keywords := strings.Split(query, " ")
+		// 使用 AND 逻辑 https://github.com/siyuan-note/siyuan/issues/11535
 		var hitRows []*av.TableRow
 		for _, row := range ret.Rows {
 			hit := false
 			for _, cell := range row.Cells {
+				allKeywordsHit := true
 				for _, keyword := range keywords {
-					if strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
-						hit = true
+					if !strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
+						allKeywordsHit = false
 						break
 					}
+				}
+				if allKeywordsHit {
+					hit = true
+					break
 				}
 			}
 			if hit {
@@ -594,12 +605,7 @@ func getAttributeViewContent(avID string,
 		return
 	}
 
-	table, err := RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
-	if nil != err {
-		content = strings.TrimSpace(buf.String())
-		return
-	}
-
+	table := RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
 	for _, col := range table.Columns {
 		buf.WriteString(col.Name)
 		buf.WriteByte(' ')

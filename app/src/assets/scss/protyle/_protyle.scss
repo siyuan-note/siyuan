@@ -395,7 +395,7 @@
 
     &:empty:after {
       content: attr(data-tip);
-      color: var(--b3-theme-on-surface);
+      color: var(--b3-theme-on-surface-light);
       cursor: text;
     }
 

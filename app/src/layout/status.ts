@@ -4,13 +4,13 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
 import {mountHelp} from "../util/mount";
 /// #if !BROWSER
-import { ipcRenderer } from "electron";
+import {ipcRenderer} from "electron";
 /// #endif
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Constants} from "../constants";
 import {toggleDockBar} from "./dock/util";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {isIPad, updateHotkeyTip} from "../protyle/util/compatibility";
 
 export const initStatus = (isWindow = false) => {
     /// #if !MOBILE
@@ -67,6 +67,7 @@ export const initStatus = (isWindow = false) => {
                 window.siyuan.menus.menu.append(new MenuItem({
                     label: window.siyuan.languages.userGuide,
                     icon: "iconHelp",
+                    ignore: isIPad() || window.siyuan.config.readonly,
                     click: () => {
                         mountHelp();
                     }
@@ -195,7 +196,7 @@ export const renderStatusbarCounter = (stat: {
     imageCount: number,
     refCount: number
 }) => {
-    if(!stat) {
+    if (!stat) {
         return;
     }
     let html = `<span class="ft__on-surface">${window.siyuan.languages.runeCount}</span>&nbsp;${stat.runeCount}<span class="fn__space"></span>

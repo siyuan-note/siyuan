@@ -357,6 +357,7 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         rootID: source === "av" ? "" : protyle.block.rootID,
+        isDatabase: source === "av",
         isSquareBrackets: ["[[", "【【"].includes(protyle.hint.splitChar)
     }, (response) => {
         const dataList: IHintData[] = [];
@@ -403,6 +404,7 @@ export const hintEmbed = (key: string, protyle: IProtyle): IHintData[] => {
     const nodeElement = hasClosestBlock(getEditorRange(protyle.wysiwyg.element).startContainer);
     fetchPost("/api/search/searchRefBlock", {
         k: key,
+        isDatabase: false,
         beforeLen: Math.floor((Math.max(protyle.element.clientWidth / 2, 320) - 58) / 28.8),
         id: nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.parentID,
         rootID: protyle.block.rootID,

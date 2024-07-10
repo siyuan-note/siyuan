@@ -1,0 +1,1563 @@
+{
+	"ID": "20240530101000-hq9sn3k",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-vulgxvp",
+		"id": "20240530101000-hq9sn3k",
+		"title": "アイコン",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-zxczszi",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-opc5fld",
+				"id": "20240530101000-zxczszi",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-opr6teb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-umjkbir",
+				"id": "20240530101000-opr6teb",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アイコンパックをコミュニティマーケットプレイスからダウンロードするか手動でインストールできます。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-76iu5iz",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-epqfxh3",
+				"id": "20240530101000-76iu5iz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "コミュニティマーケットプレイス"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-0np5anz",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-s01ojo2",
+				"id": "20240530101000-0np5anz",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-pmqoe3u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-lvsdta7",
+						"id": "20240530101000-pmqoe3u",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-8uwd9k0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-48kkche",
+								"id": "20240530101000-8uwd9k0",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "マーケットプレイス"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ から、コミュニティの開発者が作成したアイコンを閲覧できます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ckebrqw",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-wzkg2cb",
+						"id": "20240530101000-ckebrqw",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-dy3sjtr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-grj5oju",
+								"id": "20240530101000-dy3sjtr",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "必要なアイコンを選択してインストールやアップデートができます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-b7c3qgh",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-u7lghjh",
+				"id": "20240530101000-b7c3qgh",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手動インストール"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-2ko3w3m",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Tight": true,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-yd2qoxp",
+				"id": "20240530101000-2ko3w3m",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-x0ceyyx",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-4k2fkz6",
+						"id": "20240530101000-x0ceyyx",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ailmbd7",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hiu6vt6",
+								"id": "20240530101000-ailmbd7",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アイコンを入手して解凍します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-46ic1lt",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-euecoer",
+						"id": "20240530101000-46ic1lt",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-g0f1qn3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hz7vact",
+								"id": "20240530101000-g0f1qn3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコンフォルダを開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-jy03tzk",
+					"Type": "NodeListItem",
+					"Data": "3",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mw==",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-0syuevv",
+						"id": "20240530101000-jy03tzk",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-rjgexeu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-z6rcj4v",
+								"id": "20240530101000-rjgexeu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "このフォルダにアイコンをコピーします"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-wnvu72r",
+					"Type": "NodeListItem",
+					"Data": "4",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 4,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NA==",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-8f9v2kl",
+						"id": "20240530101000-wnvu72r",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-xlw3b5j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-hmi5bgo",
+								"id": "20240530101000-xlw3b5j",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan を再起動し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ からインストールしたアイコンを選択します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-yzw65g2",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-0arkvyy",
+				"id": "20240530101000-yzw65g2",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "開発"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ig8iq3f",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-w83jkho",
+				"id": "20240530101000-ig8iq3f",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "手順"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-vgjcaki",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1,
+				"Start": 1,
+				"Delimiter": 46,
+				"Padding": 3,
+				"Marker": "MQ==",
+				"Num": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-kvhl3gf",
+				"id": "20240530101000-vgjcaki",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-jvtrmwl",
+					"Type": "NodeListItem",
+					"Data": "1",
+					"ListData": {
+						"Typ": 1,
+						"Start": 1,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "MQ==",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-cr1p02g",
+						"id": "20240530101000-jvtrmwl",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-srv2uwx",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-u4to09t",
+								"id": "20240530101000-srv2uwx",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アイコンにわかりやすい名前を付けます (例: "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​)"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-igefuuj",
+					"Type": "NodeListItem",
+					"Data": "2",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 2,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mg==",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-5uxfs0f",
+						"id": "20240530101000-igefuuj",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-h498ila",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-vtw0n09",
+								"id": "20240530101000-h498ila",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコンフォルダを開く"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を選択します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-47f997n",
+					"Type": "NodeListItem",
+					"Data": "3",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 3,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "Mw==",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-62s4b5j",
+						"id": "20240530101000-47f997n",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-87eghbu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-qmwojkw",
+								"id": "20240530101000-87eghbu",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "開いたフォルダに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "alice"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という新しいフォルダを作成し、その中に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "icon.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ と "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "icon.json"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ の 2 つのファイルを作成します。具体的な例は、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://github.com/siyuan-note/icon-sample",
+									"TextMarkTextContent": "siyuan-note/icon-sample"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " を参考にしてください"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-6taz8mi",
+					"Type": "NodeListItem",
+					"Data": "4",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 4,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NA==",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-lg75zog",
+						"id": "20240530101000-6taz8mi",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-1eythwg",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-cpmbqrq",
+								"id": "20240530101000-1eythwg",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "icon.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ファイルを開いて完成したアイコンを貼り付けます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-ue909p4",
+					"Type": "NodeListItem",
+					"Data": "5",
+					"ListData": {
+						"Typ": 1,
+						"Tight": true,
+						"Start": 5,
+						"Delimiter": 46,
+						"Padding": 3,
+						"Marker": "NQ==",
+						"Num": 5
+					},
+					"Properties": {
+						"ID": "20240530101000-03qmv6a",
+						"id": "20240530101000-ue909p4",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-uqproib",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-l0p1xa8",
+								"id": "20240530101000-uqproib",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "SiYuan を再起動し、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "スタイル"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "アイコン"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ からインストールしたアイコンを選択します"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rdo6n3x",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"ID": "20240530101000-iv74gkd",
+				"id": "20240530101000-rdo6n3x",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "アイコンの制作"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-rpp4jhf",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-1hx01rf",
+				"id": "20240530101000-rpp4jhf",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-qzkbns7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-5zu6pmd",
+						"id": "20240530101000-qzkbns7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-apu30a3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-v4lacw6",
+								"id": "20240530101000-apu30a3",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アイコンフォルダ内の "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "index.html"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ ファイルをブラウザで開きます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-kkutj53",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-kqrwcyu",
+						"id": "20240530101000-kkutj53",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-f6gl3ej",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-uijxdux",
+								"id": "20240530101000-f6gl3ej",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "アイコン名と形状に基づいて同様のアイコンを作成します"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-79oo5v5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-y3ge71b",
+								"id": "20240530101000-79oo5v5",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-p75eoye",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-l9fyec8",
+										"id": "20240530101000-p75eoye",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-h826tb5",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-cs5djyk",
+												"id": "20240530101000-h826tb5",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://icones.js.org/",
+													"TextMarkTextContent": "Icones"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " や "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://iconify.design/",
+													"TextMarkTextContent": "iconify"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " からお気に入りのアイコンを探して SVG 形式でダウンロードします"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-ozlr9f9",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-q37w7vn",
+										"id": "20240530101000-ozlr9f9",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-c4cr3wh",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-0ubd4ol",
+												"id": "20240530101000-c4cr3wh",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ベクターグラフィックツールを使用して SVG 形式で独自のアイコンを作成します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-p199zvc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-l1kuokc",
+										"id": "20240530101000-p199zvc",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-x7myud6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-usrpjkz",
+												"id": "20240530101000-x7myud6",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://www.pngtosvg.com/",
+													"TextMarkTextContent": "pngtosvg"
+												},
+												{
+													"Type": "NodeText",
+													"Data": " にアクセスし、画像を SVG 形式に変換します"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-b1hpn7s",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-slm0gwx",
+						"id": "20240530101000-b1hpn7s",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-oahvd7g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5egh5kn",
+								"id": "20240530101000-oahvd7g",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "a",
+									"TextMarkAHref": "https://icomoon.io/app/#/select",
+									"TextMarkTextContent": "IcoMoon App"
+								},
+								{
+									"Type": "NodeText",
+									"Data": " にアクセスし、"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "icon.js"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を作成します"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-dodqk5j",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-a6nv1qt",
+								"id": "20240530101000-dodqk5j",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-eu9sy81",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-uusy1m0",
+										"id": "20240530101000-eu9sy81",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-at30tyr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-tdwgm5b",
+												"id": "20240530101000-at30tyr",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "左上の "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "Import Icons"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ をクリックして、前の手順で作成した画像をインポートします"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-sy0zel1",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-wsucnui",
+										"id": "20240530101000-sy0zel1",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-d32xnci",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-z1skfoj",
+												"id": "20240530101000-d32xnci",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "アイコンを選択して SVG を生成します\n​"
+												},
+												{
+													"Type": "NodeImage",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeBang"
+														},
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "custom-icon1.png"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "assets/custom-icon1-20210512172156-jaoyrnz.png"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-8a34nsv",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-a4mscbq",
+										"id": "20240530101000-8a34nsv",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-ymnhaq8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-nhea30u",
+												"id": "20240530101000-ymnhaq8",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "サイズを変更してダウンロードします\n​"
+												},
+												{
+													"Type": "NodeImage",
+													"Data": "span",
+													"Children": [
+														{
+															"Type": "NodeBang"
+														},
+														{
+															"Type": "NodeOpenBracket"
+														},
+														{
+															"Type": "NodeLinkText",
+															"Data": "custom-icon2.png"
+														},
+														{
+															"Type": "NodeCloseBracket"
+														},
+														{
+															"Type": "NodeOpenParen"
+														},
+														{
+															"Type": "NodeLinkDest",
+															"Data": "assets/custom-icon2-20210512172204-dphc486.png"
+														},
+														{
+															"Type": "NodeCloseParen"
+														}
+													]
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-n3thvk2",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-ukt9s87",
+										"id": "20240530101000-n3thvk2",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-um0b82q",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-zhh5rk9",
+												"id": "20240530101000-um0b82q",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "\u0026lt;symbol id=\u0026quot;iconMarkdown\u0026quot; viewBox=\u0026quot;0 0 32 32\u0026quot;\u0026gt;"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "id"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "index.html"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ に対応するアイコン名に変更します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-joeqhte",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-0ia6g9c",
+										"id": "20240530101000-joeqhte",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-73eiucg",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-z89o8wf",
+												"id": "20240530101000-73eiucg",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "\u0026lt;defs\u0026gt;...\u0026lt;/defs\u0026gt;"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の内容を "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "icon.js"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の対応する位置に置き換えます"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-pswp01d",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-hsq7xf9",
+						"id": "20240530101000-pswp01d",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-d5g0fdm",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-6pwlzu3",
+								"id": "20240530101000-d5g0fdm",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "テスト"
+								}
+							]
+						},
+						{
+							"ID": "20240530101000-8skzmut",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"ID": "20240530101000-cd1ikcv",
+								"id": "20240530101000-8skzmut",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"ID": "20240530101000-q0x3jnr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-hpzo8pb",
+										"id": "20240530101000-q0x3jnr",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-smrpa6v",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-vo1ncsn",
+												"id": "20240530101000-smrpa6v",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "index.html"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ の "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "material"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "alice"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ に置き換えます"
+												}
+											]
+										},
+										{
+											"ID": "20240530101000-60h9c7s",
+											"Type": "NodeCodeBlock",
+											"IsFencedCodeBlock": true,
+											"Properties": {
+												"ID": "20240530101000-lsqi0oo",
+												"id": "20240530101000-60h9c7s"
+											},
+											"Children": [
+												{
+													"Type": "NodeCodeBlockFenceOpenMarker",
+													"Data": "```"
+												},
+												{
+													"Type": "NodeCodeBlockFenceInfoMarker",
+													"CodeBlockInfo": "aHRtbA=="
+												},
+												{
+													"ID": "20240530101000-6regnhi",
+													"Type": "NodeCodeBlockCode",
+													"Data": "\u003cscript src=\"material/icon.js\"\u003e\u003c/script\u003e\n",
+													"Properties": {
+														"ID": "20240530101000-tsvstz0",
+														"id": "20240530101000-6regnhi"
+													}
+												},
+												{
+													"Type": "NodeCodeBlockFenceCloseMarker",
+													"Data": "```"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-hesantw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-azgswtc",
+										"id": "20240530101000-hesantw",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-lykzr27",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-brh7exf",
+												"id": "20240530101000-lykzr27",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": "index.html"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ を更新して最終結果を確認します"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20240530101000-rmdghsz",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"ID": "20240530101000-y0sqdlr",
+										"id": "20240530101000-rmdghsz",
+										"updated": "20240530101000"
+									},
+									"Children": [
+										{
+											"ID": "20240530101000-15usdci",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"ID": "20240530101000-9h5llqm",
+												"id": "20240530101000-15usdci",
+												"updated": "20240530101000"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "SiYuan を開いて "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "設定"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "外観"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ - "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "アイコン"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ で開発したアイコンを選択して確認します"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-jo4oflk",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-57m4og9",
+				"id": "20240530101000-jo4oflk",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "マーケットプレイスに公開する"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-9ph0up4",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-y31e26q",
+				"id": "20240530101000-9ph0up4",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://b3log.org/siyuan/en/community.html",
+					"TextMarkTextContent": "コミュニティマーケットプレイスのリポジトリ"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "を参照してください。"
+				}
+			]
+		}
+	]
+}

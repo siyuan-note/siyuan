@@ -125,7 +125,8 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
             .replace(/\^/g, "\\^")
             .replace(/\|/g, "\\|")
             .replace(/\./g, "\\.");
-        pasteText(protyle, clipText, nodeElement);
+        // 转义文本不能使用 DOM 结构 https://github.com/siyuan-note/siyuan/issues/11778
+        pasteText(protyle, clipText, nodeElement, false);
     } catch (e) {
         console.log(e);
     }
@@ -172,13 +173,13 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
             // insertHTML 会进行内部反转义
-            insertHTML(content, protyle);
+            insertHTML(content, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);
         });
     }
 };
 
-export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element) => {
+export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置
@@ -197,7 +198,7 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
             }
         }
     }
-    insertHTML(protyle.lute.Md2BlockDOM(textPlain), protyle);
+    insertHTML(toBlockDOM ? protyle.lute.Md2BlockDOM(textPlain) : textPlain, protyle, false, false, true);
 
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);
@@ -355,10 +356,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.setAttribute("contenteditable", "true");
         });
         const tempInnerHTML = tempElement.innerHTML;
-        if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[{") && tempInnerHTML.endsWith("}]")) {
+        if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);
-                if (json.length > 0 && json[0].id && json[0].type) {
+                if (json.length > 0 && json[0].length > 0 && json[0][0].id && json[0][0].type) {
                     insertHTML(textPlain, protyle, isBlock);
                 } else {
                     insertHTML(tempInnerHTML, protyle, isBlock);
@@ -367,7 +368,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempInnerHTML, protyle, isBlock);
             }
         } else {
-            insertHTML(tempInnerHTML, protyle, isBlock);
+            insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         filterClipboardHint(protyle, protyle.lute.BlockDOM2StdMd(tempInnerHTML));
         blockRender(protyle, protyle.wysiwyg.element);
@@ -379,7 +380,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             // 原有代码在行内元素中粘贴会嵌套
             insertHTML(code, protyle);
         } else {
-            insertHTML(code, protyle, true);
+            insertHTML(code, protyle, true, false, true);
             highlightRender(protyle.wysiwyg.element);
         }
         hideElements(["hint"], protyle);
@@ -412,7 +413,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             fetchPost("/api/lute/html2BlockDOM", {
                 dom: tempElement.innerHTML
             }, (response) => {
-                insertHTML(response.data, protyle);
+                insertHTML(response.data, protyle, false, false, true);
                 protyle.wysiwyg.element.querySelectorAll('[data-type~="block-ref"]').forEach(item => {
                     if (item.textContent === "") {
                         fetchPost("/api/block/getRefText", {id: item.getAttribute("data-id")}, (response) => {
@@ -459,7 +460,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
-            insertHTML(textPlainDom, protyle);
+            insertHTML(textPlainDom, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);
         }
         blockRender(protyle, protyle.wysiwyg.element);

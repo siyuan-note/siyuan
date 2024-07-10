@@ -15,11 +15,9 @@ import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";
 /// #if !MOBILE
-import {getInstanceById} from "../../layout/util";
-import {Tab} from "../../layout/Tab";
+import {getAllEditor} from "../../layout/getAll";
 import {updatePanelByEditor} from "../../editor/util";
 /// #endif
-import {Editor} from "../../editor";
 import {blockRender} from "../render/blockRender";
 import {uploadLocalFiles} from "../upload";
 import {insertHTML} from "./insertHTML";
@@ -28,6 +26,7 @@ import {hideElements} from "../ui/hideElements";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
+import {zoomOut} from "../../menus/protyle";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -511,28 +510,52 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     }
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
         // 拖拽后，sb 只剩下一个元素
-        const sbData = cancelSB(protyle, oldSourceParentElement);
-        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
-        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
+        if (isSameDoc) {
+            const sbData = cancelSB(protyle, oldSourceParentElement);
+            doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+            undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
+        } else {
+            /// #if !MOBILE
+            const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
+            if (otherProtyleElement) {
+                getAllEditor().find(item => {
+                    if (item.protyle.element.isSameNode(otherProtyleElement)) {
+                        const otherSbData = cancelSB(item.protyle, oldSourceParentElement);
+                        doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
+                        undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
+                        // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
+                        item.protyle.undo.clear();
+                        return true;
+                    }
+                });
+            }
+            /// #endif
+        }
     } else if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.innerHTML === "") {
         /// #if !MOBILE
         // 拖拽后，根文档原内容为空，且不为悬浮窗
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement && !protyleElement.classList.contains("block__edit")) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor && editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
-                const newId = Lute.NewNodeID();
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: genEmptyElement(false, false, newId).outerHTML,
-                    parentID: editor.model.editor.protyle.block.parentID
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
-                });
-            }
+        if (protyleElement) {
+            getAllEditor().find(item => {
+                if (item.protyle.element.isSameNode(protyleElement)) {
+                    if (item.protyle.block.id === item.protyle.block.rootID) {
+                        const newId = Lute.NewNodeID();
+                        doOperations.splice(0, 0, {
+                            action: "insert",
+                            id: newId,
+                            data: genEmptyElement(false, false, newId).outerHTML,
+                            parentID: item.protyle.block.parentID
+                        });
+                        undoOperations.splice(0, 0, {
+                            action: "delete",
+                            id: newId,
+                        });
+                    } else {
+                        zoomOut({protyle: item.protyle, id: item.protyle.block.rootID});
+                    }
+                    return true;
+                }
+            });
         }
         /// #endif
     }
@@ -671,28 +694,52 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     }
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
         // 拖拽后，sb 只剩下一个元素
-        const sbData = cancelSB(protyle, oldSourceParentElement);
-        doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
-        undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
-    } else if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
-        /// #if !MOBILE
-        // 拖拽后，根文档原内容为空，且不为悬浮窗
-        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
-        if (protyleElement && !protyleElement.classList.contains("block__edit")) {
-            const editor = getInstanceById(protyleElement.getAttribute("data-id")) as Tab;
-            if (editor && editor.model instanceof Editor && editor.model.editor.protyle.block.id === editor.model.editor.protyle.block.rootID) {
-                const newId = Lute.NewNodeID();
-                doOperations.splice(0, 0, {
-                    action: "insert",
-                    id: newId,
-                    data: genEmptyElement(false, false, newId).outerHTML,
-                    parentID: editor.model.editor.protyle.block.parentID
-                });
-                undoOperations.splice(0, 0, {
-                    action: "delete",
-                    id: newId,
+        if (isSameDoc) {
+            const sbData = cancelSB(protyle, oldSourceParentElement);
+            doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
+            undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
+        } else {
+            /// #if !MOBILE
+            const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
+            if (otherProtyleElement) {
+                getAllEditor().find(item => {
+                    if (item.protyle.element.isSameNode(otherProtyleElement)) {
+                        const otherSbData = cancelSB(item.protyle, oldSourceParentElement);
+                        doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
+                        undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
+                        // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
+                        item.protyle.undo.clear();
+                        return true;
+                    }
                 });
             }
+            /// #endif
+        }
+    } else if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("protyle-wysiwyg") && oldSourceParentElement.childElementCount === 0) {
+        /// #if !MOBILE
+        // 拖拽后，根文档原内容为空
+        const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
+        if (protyleElement) {
+            getAllEditor().find(item => {
+                if (item.protyle.element.isSameNode(protyleElement)) {
+                    if (item.protyle.block.id === item.protyle.block.rootID) {
+                        const newId = Lute.NewNodeID();
+                        doOperations.splice(0, 0, {
+                            action: "insert",
+                            id: newId,
+                            data: genEmptyElement(false, false, newId).outerHTML,
+                            parentID: item.protyle.block.parentID
+                        });
+                        undoOperations.splice(0, 0, {
+                            action: "delete",
+                            id: newId,
+                        });
+                    } else {
+                        zoomOut({protyle: item.protyle, id: item.protyle.block.rootID});
+                    }
+                    return true;
+                }
+            });
         }
         /// #endif
     }
@@ -880,7 +927,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 行内拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
                                     doOperations.push({
@@ -941,6 +988,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             dragSame(protyle, sourceElements, targetElement, targetClass.includes("dragover__bottom"), event.ctrlKey);
                         }
                     }
+
+                    // https://github.com/siyuan-note/siyuan/issues/10528#issuecomment-2205165824
+                    editorElement.querySelectorAll(".protyle-wysiwyg--empty").forEach(item => {
+                        item.classList.remove("protyle-wysiwyg--empty");
+                    });
+
                     // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
                     sourceElements.forEach(item => {
                         if (item.getAttribute("data-type") === "NodeBlockQueryEmbed") {

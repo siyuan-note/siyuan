@@ -165,6 +165,9 @@ export class MenuItem {
     public element: HTMLElement;
 
     constructor(options: IMenu) {
+        if (options.ignore) {
+            return;
+        }
         if (options.type === "empty") {
             this.element = document.createElement("div");
             this.element.innerHTML = options.label;

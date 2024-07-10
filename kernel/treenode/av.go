@@ -49,10 +49,9 @@ func GetMirrorAttrViewBlockIDs(avID string) (ret []string) {
 	}
 
 	blockIDs := avBlocks[avID]
-	for _, blockID := range blockIDs {
-		if nil != GetBlockTree(blockID) {
-			ret = append(ret, blockID)
-		}
+	bts := GetBlockTrees(blockIDs)
+	for blockID := range bts {
+		ret = append(ret, blockID)
 	}
 	return
 }
@@ -87,11 +86,8 @@ func BatchGetMirrorAttrViewBlocks(avIDs []string) (ret []*AvBlock) {
 
 	for _, avID := range avIDs {
 		var blockIDs []string
-		for _, blockID := range avBlocks[avID] {
-			if nil == GetBlockTree(blockID) {
-				continue
-			}
-
+		bts := GetBlockTrees(avBlocks[avID])
+		for blockID := range bts {
 			blockIDs = append(blockIDs, blockID)
 		}
 		avBlock := &AvBlock{

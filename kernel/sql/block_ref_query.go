@@ -17,6 +17,7 @@
 package sql
 
 import (
+	"bytes"
 	"database/sql"
 	"sort"
 	"strings"
@@ -43,18 +44,18 @@ func GetRefDuplicatedDefRootIDs() (ret []string) {
 	return
 }
 
-func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
+func QueryVirtualRefKeywords(name, alias, anchor, doc bool, searchIgnoreLines, refSearchIgnoreLines []string) (ret []string) {
 	if name {
-		ret = append(ret, queryNames()...)
+		ret = append(ret, queryNames(searchIgnoreLines)...)
 	}
 	if alias {
-		ret = append(ret, queryAliases()...)
+		ret = append(ret, queryAliases(searchIgnoreLines)...)
 	}
 	if anchor {
-		ret = append(ret, queryRefTexts()...)
+		ret = append(ret, queryRefTexts(refSearchIgnoreLines)...)
 	}
 	if doc {
-		ret = append(ret, queryDocTitles()...)
+		ret = append(ret, queryDocTitles(searchIgnoreLines)...)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	sort.SliceStable(ret, func(i, j int) bool {
@@ -63,9 +64,16 @@ func QueryVirtualRefKeywords(name, alias, anchor, doc bool) (ret []string) {
 	return
 }
 
-func queryRefTexts() (ret []string) {
+func queryRefTexts(refSearchIgnoreLines []string) (ret []string) {
 	ret = []string{}
-	sqlStmt := "SELECT DISTINCT content FROM refs LIMIT 10240"
+	sqlStmt := "SELECT DISTINCT content FROM refs WHERE 1 = 1"
+	buf := bytes.Buffer{}
+	for _, line := range refSearchIgnoreLines {
+		buf.WriteString(" AND ")
+		buf.WriteString(line)
+	}
+	sqlStmt += buf.String()
+	sqlStmt += " LIMIT 10240"
 	rows, err := query(sqlStmt)
 	if nil != err {
 		logging.LogErrorf("sql query failed: %s", sqlStmt, err)
@@ -352,10 +360,20 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []
 	return
 }
 
-func QueryRefsRecent(onlyDoc bool) (ret []*Ref) {
+func QueryRefsRecent(onlyDoc bool, ignoreLines []string) (ret []*Ref) {
 	stmt := "SELECT * FROM refs AS r"
 	if onlyDoc {
 		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.type = 'd' AND b.id = r.def_block_id"
+	}
+	stmt += " WHERE 1 = 1"
+	if 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		buf := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			buf.WriteString(" AND ")
+			buf.WriteString(line)
+		}
+		stmt += buf.String()
 	}
 	stmt += " GROUP BY r.def_block_id ORDER BY r.id DESC LIMIT 32"
 	rows, err := query(stmt)

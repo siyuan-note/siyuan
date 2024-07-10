@@ -17,6 +17,8 @@
 package util
 
 import (
+	"errors"
+	"fmt"
 	"sync"
 	"time"
 
@@ -43,10 +45,15 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	}
 
 	request := httpclient.NewCloudRequest30s()
-	_, err := request.SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
+	resp, err := request.SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
 	if nil != err {
 		logging.LogErrorf("get version info failed: %s", err)
 		return nil, err
+	}
+	if 200 != resp.StatusCode {
+		msg := fmt.Sprintf("get rhy result failed: %d", resp.StatusCode)
+		logging.LogErrorf(msg)
+		return nil, errors.New(msg)
 	}
 	rhyResultCacheTime = now
 	return cachedRhyResult, nil

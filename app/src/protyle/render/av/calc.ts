@@ -108,6 +108,9 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         oldOperator = calcElement.dataset.operator;
         blockID = blockElement.dataset.nodeId;
     }
+    if (type === "lineNumber") {
+        return;
+    }
     const menu = new Menu("av-calc", () => {
         if (rowElement) {
             rowElement.classList.remove("av__row--show");

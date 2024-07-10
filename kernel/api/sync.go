@@ -18,12 +18,13 @@ package api
 
 import (
 	"encoding/hex"
-	"github.com/siyuan-note/logging"
 	"io"
 	"net/http"
 	"os"
 	"path/filepath"
 	"time"
+
+	"github.com/siyuan-note/logging"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -380,6 +381,10 @@ func getSyncInfo(c *gin.Context) {
 func getBootSync(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
+
+	if !model.IsAdminRoleContext(c) {
+		return
+	}
 
 	if model.Conf.Sync.Enabled && 1 == model.BootSyncSucc {
 		ret.Code = 1

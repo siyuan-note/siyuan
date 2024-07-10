@@ -7,7 +7,7 @@ import {Constants} from "../constants";
 import {escapeGreat, escapeHtml} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
-import {showTooltip} from "../dialog/tooltip";
+import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
@@ -67,7 +67,7 @@ export class Tab {
                         this.headElement.setAttribute("aria-label", escapeGreat(response.data));
                     });
                 } else {
-                    this.headElement.setAttribute("aria-label", escapeGreat(options.title));
+                    this.headElement.setAttribute("aria-label", escapeGreat(this.title));
                 }
             });
             this.headElement.addEventListener("dragstart", (event: DragEvent & { target: HTMLElement }) => {
@@ -77,6 +77,7 @@ export class Tab {
                     return;
                 }
                 window.getSelection().removeAllRanges();
+                hideTooltip();
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     event.dataTransfer.setData("text/html", tabElement.outerHTML);

@@ -36,6 +36,25 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
+	ret, tmpCache := map[string]*parse.Tree{}, map[string]*parse.Tree{}
+	bts := treenode.GetBlockTrees(ids)
+	luteEngine := util.NewLute()
+	for id, bt := range bts {
+		tree := tmpCache[bt.RootID]
+		if nil == tree {
+			tree, _ = LoadTree(bt.BoxID, bt.Path, luteEngine)
+			if nil == tree {
+				logging.LogWarnf("load tree [%s] failed: %s", id, bt.Path)
+				continue
+			}
+			tmpCache[bt.RootID] = tree
+		}
+		ret[id] = tree
+	}
+	return
+}
+
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
@@ -88,7 +107,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
 				} else {
 					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
-					treenode.IndexBlockTree(parentTree)
+					treenode.UpsertBlockTree(parentTree)
 				}
 			} else {
 				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
@@ -137,7 +156,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 		newP := treenode.NewParagraph()
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
-		treenode.IndexBlockTree(tree)
+		treenode.UpsertBlockTree(tree)
 	}
 
 	filePath = filepath.Join(util.DataDir, tree.Box, tree.Path)

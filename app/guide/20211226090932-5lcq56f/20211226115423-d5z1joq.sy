@@ -8,7 +8,7 @@
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240508011452"
+		"updated": "20240612234708"
 	},
 	"Children": [
 		{
@@ -1062,7 +1062,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20240508003607-ly1ymgz",
-				"updated": "20240508011452"
+				"updated": "20240612234708"
 			},
 			"Children": [
 				{
@@ -1077,7 +1077,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20240508003213-9bmv8pp",
-						"updated": "20240508003607"
+						"updated": "20240612234708"
 					},
 					"Children": [
 						{
@@ -1094,7 +1094,7 @@
 							"Properties": {
 								"id": "20240508003014-k4zlgm3",
 								"style": "background-color: var(--b3-font-background5);",
-								"updated": "20240508003027"
+								"updated": "20240612234708"
 							},
 							"Children": [
 								{
@@ -1108,7 +1108,7 @@
 							"Type": "NodeSuperBlock",
 							"Properties": {
 								"id": "20240508003208-gg30n9v",
-								"updated": "20240508003027"
+								"updated": "20240612234708"
 							},
 							"Children": [
 								{
@@ -1347,7 +1347,7 @@
 									"Type": "NodeSuperBlock",
 									"Properties": {
 										"id": "20240508003205-qtrvst8",
-										"updated": "20240508003208"
+										"updated": "20240612234708"
 									},
 									"Children": [
 										{
@@ -1541,6 +1541,23 @@
 													"TextMarkBlockRefID": "20230104151953-48hwkwf",
 													"TextMarkBlockRefSubtype": "d",
 													"TextMarkTextContent": "分享文檔"
+												}
+											]
+										},
+										{
+											"ID": "20240612234708-qdfuqu7",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20240612234708-qdfuqu7",
+												"updated": "20240612234708"
+											},
+											"Children": [
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "block-ref",
+													"TextMarkBlockRefID": "20240517031052-mgoxs16",
+													"TextMarkBlockRefSubtype": "d",
+													"TextMarkTextContent": "發布服務"
 												}
 											]
 										},

@@ -562,7 +562,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 id: itemId,
                 data: item.outerHTML
             });
-        } else if ((item.getAttribute("data-subtype") === "u" || item.getAttribute("data-subtype") === "0") &&
+        } else if ((item.getAttribute("data-subtype") === "u" || item.getAttribute("data-subtype") === "o") &&
             parentLiItemElement.getAttribute("data-subtype") === "t") {
             undoOperations.push({
                 action: "update",

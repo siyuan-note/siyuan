@@ -34,7 +34,7 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
 };
 
 export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: string) => {
-    if (protyle.title?.editElement.contains(range.startContainer) || type === "title") {
+    if (protyle.title?.editElement?.contains(range.startContainer) || type === "title") {
         openSearchAV("", protyle.breadcrumb.element, (listItemElement) => {
             const avID = listItemElement.dataset.avId;
             transaction(protyle, [{

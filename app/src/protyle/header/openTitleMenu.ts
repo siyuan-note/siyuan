@@ -22,6 +22,7 @@ import {openNewWindowById} from "../../window/openNewWindow";
 import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
+import {openFileById} from "../../editor/util";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -108,62 +109,63 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 openFileAttr(response.data.ial, "bookmark", protyle);
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.wechatReminder,
-            icon: "iconMp",
-            click() {
-                openFileWechatNotify(protyle);
-            }
-        }).element);
-        const riffCardMenu = [{
-            iconHTML: "",
-            label: window.siyuan.languages.spaceRepetition,
-            accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
-            click: () => {
-                fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
-                    openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
-                });
-            }
-        }, {
-            iconHTML: "",
-            label: window.siyuan.languages.manage,
-            click: () => {
-                fetchPost("/api/filetree/getHPathByID", {
-                    id: protyle.block.rootID
-                }, (response) => {
-                    viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
-                });
-            }
-        }, {
-            iconHTML: "",
-            label: window.siyuan.languages.quickMakeCard,
-            accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
-            click: () => {
-                let titleElement = protyle.title?.element;
-                if (!titleElement) {
-                    titleElement = document.createElement("div");
-                    titleElement.setAttribute("data-node-id", protyle.block.rootID);
-                    titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
+        if (!window.siyuan.config.readonly) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.wechatReminder,
+                icon: "iconMp",
+                click() {
+                    openFileWechatNotify(protyle);
                 }
-                quickMakeCard(protyle, [titleElement]);
-            }
-        }];
-        if (window.siyuan.config.flashcard.deck) {
-            riffCardMenu.push({
+            }).element);
+            const riffCardMenu: IMenu[] = [{
                 iconHTML: "",
-                label: window.siyuan.languages.addToDeck,
+                label: window.siyuan.languages.spaceRepetition,
+                accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
                 click: () => {
-                    makeCard(protyle.app, [protyle.block.rootID]);
+                    fetchPost("/api/riff/getTreeRiffDueCards", {rootID: protyle.block.rootID}, (response) => {
+                        openCardByData(protyle.app, response.data, "doc", protyle.block.rootID, response.data.name);
+                    });
                 }
-            });
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.manage,
+                click: () => {
+                    fetchPost("/api/filetree/getHPathByID", {
+                        id: protyle.block.rootID
+                    }, (response) => {
+                        viewCards(protyle.app, protyle.block.rootID, pathPosix().join(getNotebookName(protyle.notebookId), (response.data)), "Tree");
+                    });
+                }
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.quickMakeCard,
+                accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
+                click: () => {
+                    let titleElement = protyle.title?.element;
+                    if (!titleElement) {
+                        titleElement = document.createElement("div");
+                        titleElement.setAttribute("data-node-id", protyle.block.rootID);
+                        titleElement.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);
+                    }
+                    quickMakeCard(protyle, [titleElement]);
+                }
+            }];
+            if (window.siyuan.config.flashcard.deck) {
+                riffCardMenu.push({
+                    iconHTML: "",
+                    label: window.siyuan.languages.addToDeck,
+                    click: () => {
+                        makeCard(protyle.app, [protyle.block.rootID]);
+                    }
+                });
+            }
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.riffCard,
+                type: "submenu",
+                icon: "iconRiffCard",
+                submenu: riffCardMenu,
+            }).element);
         }
-        window.siyuan.menus.menu.append(new MenuItem({
-            label: window.siyuan.languages.riffCard,
-            type: "submenu",
-            icon: "iconRiffCard",
-            submenu: riffCardMenu,
-        }).element);
-
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.search,
             icon: "iconSearch",
@@ -195,6 +197,21 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             transferBlockRef(protyle.block.rootID);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        /// #if !MOBILE
+        if (!protyle.model) {
+            window.siyuan.menus.menu.append(new MenuItem({
+                label: window.siyuan.languages.openInNewTab,
+                icon: "iconLayoutRight",
+                click() {
+                    openFileById({
+                        app: protyle.app,
+                        id: protyle.block.id,
+                        action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT],
+                    });
+                }
+            }).element);
+        }
+        /// #endif
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.openByNewWindow,

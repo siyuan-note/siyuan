@@ -259,12 +259,6 @@ func checkSync(boot, exit, byHand bool) bool {
 		}
 	}
 
-	if isSyncing.Load() {
-		logging.LogWarnf("sync is in progress")
-		planSyncAfter(fixSyncInterval)
-		return false
-	}
-
 	if 7 < autoSyncErrCount && !byHand {
 		logging.LogErrorf("failed to auto-sync too many times, delay auto-sync 64 minutes")
 		util.PushErrMsg(Conf.Language(125), 1000*60*60)
@@ -352,7 +346,7 @@ func upsertIndexes(upsertFilePaths []string) (upsertRootIDs []string) {
 		if nil != err0 {
 			continue
 		}
-		treenode.IndexBlockTree(tree)
+		treenode.UpsertBlockTree(tree)
 		sql.UpsertTreeQueue(tree)
 
 		bts := treenode.GetBlockTreesByRootID(tree.ID)
@@ -633,6 +627,7 @@ func getSyncIgnoreLines() (ret []string) {
 	ret = append(ret, "20210808180117-6v0mkxr/**/*")
 	ret = append(ret, "20210808180117-czj9bvb/**/*")
 	ret = append(ret, "20211226090932-5lcq56f/**/*")
+	ret = append(ret, "20240530133126-axarxgx/**/*")
 
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return

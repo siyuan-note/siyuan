@@ -235,6 +235,13 @@ func getWorkspaces(c *gin.Context) {
 		return
 	}
 
+	if role := model.GetGinContextRole(c); !model.IsValidRole(role, []model.Role{
+		model.RoleAdministrator,
+	}) {
+		ret.Data = []*Workspace{}
+		return
+	}
+
 	var workspaces, openedWorkspaces, closedWorkspaces []*Workspace
 	for _, p := range workspacePaths {
 		closed := !util.IsWorkspaceLocked(p)

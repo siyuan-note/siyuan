@@ -65,7 +65,6 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                                 width: 1,
                             },
                             roam: true,
-                            // @ts-ignores
                             symbol: (value: number, params: { data?: { children?: string } }) => {
                                 if (params?.data?.children) {
                                     return "circle";

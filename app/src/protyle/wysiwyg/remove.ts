@@ -197,13 +197,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         removeBlock(protyle, blockElement, range, type);
         return;
     }
-    // 设置 bq 和代码块光标
-    if (["NodeCodeBlock", "NodeTable", "NodeAttributeView"].includes(blockType)) {
-        if (blockElement.previousElementSibling) {
-            focusBlock(blockElement.previousElementSibling, undefined, false);
-        }
-        return;
-    }
+
     if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
         range.insertNode(document.createElement("wbr"));
         const blockParentElement = blockElement.parentElement;
@@ -245,8 +239,34 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         return;
     }
 
-    if (blockElement.parentElement.classList.contains("li") && blockElement.previousElementSibling.classList.contains("protyle-action")) {
+    if (blockElement.parentElement.classList.contains("li") && blockElement.getAttribute("data-type") !== "NodeHeading" &&
+        blockElement.previousElementSibling.classList.contains("protyle-action")) {
         removeLi(protyle, blockElement, range, type === "Delete");
+        return;
+    }
+    const previousElement = getPreviousBlock(blockElement) as HTMLElement;
+    // 设置 bq 和代码块光标
+    // 需放在列表处理后 https://github.com/siyuan-note/siyuan/issues/11606
+    if (["NodeCodeBlock", "NodeTable", "NodeAttributeView"].includes(blockType)) {
+        if (previousElement) {
+            if (previousElement.classList.contains("p") && getContenteditableElement(previousElement).textContent === "") {
+                // 空块向后删除时移除改块 https://github.com/siyuan-note/siyuan/issues/11732
+                const ppElement = getPreviousBlock(previousElement);
+                transaction(protyle, [{
+                    action: "delete",
+                    id: previousElement.getAttribute("data-node-id"),
+                }], [{
+                    action: "insert",
+                    data: previousElement.outerHTML,
+                    id: previousElement.getAttribute("data-node-id"),
+                    parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID,
+                    previousID: ppElement ? ppElement.getAttribute("data-node-id") : undefined
+                }]);
+                previousElement.remove();
+            } else {
+                focusBlock(previousElement, undefined, false);
+            }
+        }
         return;
     }
     if (blockType === "NodeHeading") {
@@ -262,7 +282,6 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         return;
     }
 
-    const previousElement = getPreviousBlock(blockElement) as HTMLElement;
     if (!previousElement) {
         if (protyle.wysiwyg.element.childElementCount > 1 && getContenteditableElement(blockElement).textContent === "") {
             focusBlock(protyle.wysiwyg.element.firstElementChild.nextElementSibling);

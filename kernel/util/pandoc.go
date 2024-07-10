@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -29,9 +30,11 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+var ErrPandocNotFound = errors.New("not found executable pandoc")
+
 func ConvertPandoc(dir string, args ...string) (path string, err error) {
 	if "" == PandocBinPath || ContainerStd != Container {
-		err = errors.New("not found executable pandoc")
+		err = ErrPandocNotFound
 		return
 	}
 
@@ -55,6 +58,11 @@ func ConvertPandoc(dir string, args ...string) (path string, err error) {
 }
 
 func Pandoc(from, to, o, content string) (err error) {
+	if "" == PandocBinPath || ContainerStd != Container {
+		err = ErrPandocNotFound
+		return
+	}
+
 	if "" == from || "" == to || "md" == to {
 		if err = gulu.File.WriteFileSafer(o, []byte(content), 0644); nil != err {
 			logging.LogErrorf("write export markdown file [%s] failed: %s", o, err)
@@ -123,9 +131,15 @@ func InitPandoc() {
 	defer eventbus.Publish(EvtConfPandocInitialized)
 
 	if gulu.OS.IsWindows() {
-		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
-	} else if gulu.OS.IsDarwin() || gulu.OS.IsLinux() {
+		if "amd64" == runtime.GOARCH {
+			PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc.exe")
+		}
+	} else if gulu.OS.IsDarwin() {
 		PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
+	} else if gulu.OS.IsLinux() {
+		if "amd64" == runtime.GOARCH {
+			PandocBinPath = filepath.Join(pandocDir, "bin", "pandoc")
+		}
 	}
 	pandocVer := getPandocVer(PandocBinPath)
 	if "" != pandocVer {
@@ -143,6 +157,13 @@ func InitPandoc() {
 			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
 		}
 	}
+
+	if !gulu.File.IsExist(pandocZip) {
+		PandocBinPath = ""
+		logging.LogErrorf("pandoc zip [%s] not found", pandocZip)
+		return
+	}
+
 	if err := gulu.Zip.Unzip(pandocZip, pandocDir); nil != err {
 		logging.LogErrorf("unzip pandoc failed: %s", err)
 		return

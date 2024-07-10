@@ -1,0 +1,354 @@
+{
+	"ID": "20240530101000-ei5t6tt",
+	"Spec": "1",
+	"Type": "NodeDocument",
+	"Properties": {
+		"ID": "20240530101000-9hsymiv",
+		"id": "20240530101000-ei5t6tt",
+		"title": "人工知能",
+		"type": "doc",
+		"updated": "20240530101000"
+	},
+	"Children": [
+		{
+			"ID": "20240530101000-btov157",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-noa17yw",
+				"id": "20240530101000-btov157",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "概要"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-7kshm3d",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-nvrrjbc",
+				"id": "20240530101000-7kshm3d",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": " "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "a",
+					"TextMarkAHref": "https://openai.com/",
+					"TextMarkTextContent": "OpenAI"
+				},
+				{
+					"Type": "NodeText",
+					"Data": " の Chat API を通じたテキスト対話をサポートしています。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-78iawbc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-9rofw67",
+				"id": "20240530101000-78iawbc",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "使い方"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-ag9sb0b",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"ID": "20240530101000-1kqjrxs",
+				"id": "20240530101000-ag9sb0b",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-vy4hzw5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"ID": "20240530101000-14wce04",
+						"id": "20240530101000-vy4hzw5",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-obqaeh6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-jadulwq",
+								"id": "20240530101000-obqaeh6",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OpenAI アカウントを登録して API キーを作成します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-vnybgmg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"ID": "20240530101000-jjn6r2u",
+						"id": "20240530101000-vnybgmg",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-pr2uplh",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-n02ui98",
+								"id": "20240530101000-pr2uplh",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "設定"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ で設定を行います"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-qtjo1bc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "My4=",
+						"Num": 3
+					},
+					"Properties": {
+						"ID": "20240530101000-omszf90",
+						"id": "20240530101000-qtjo1bc",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-ntri2px",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-5a33y7n",
+								"id": "20240530101000-ntri2px",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "/AI Chat"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ でダイアログボックスを呼び出し、質問や要求を入力して確認します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-p5zjqep",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "NC4=",
+						"Num": 4
+					},
+					"Properties": {
+						"ID": "20240530101000-et4k52w",
+						"id": "20240530101000-p5zjqep",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-hjqke28",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-4awt4up",
+								"id": "20240530101000-hjqke28",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ブロックメニューの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "AI"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ を通じてさらに多くの操作を実行できます"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-qklo4ox",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"ID": "20240530101000-9jssmuw",
+				"id": "20240530101000-qklo4ox",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-agtro2w",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"ID": "20240530101000-j0lewas",
+				"id": "20240530101000-agtro2w",
+				"updated": "20240530101000"
+			},
+			"Children": [
+				{
+					"ID": "20240530101000-7mvxcr7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-2qe774o",
+						"id": "20240530101000-7mvxcr7",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-tpk7vd2",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-k0zlxbg",
+								"id": "20240530101000-tpk7vd2",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "この機能は関連するテキストを OpenAI に送信します"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240530101000-2crq67r",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"ID": "20240530101000-vtgzi5k",
+						"id": "20240530101000-2crq67r",
+						"updated": "20240530101000"
+					},
+					"Children": [
+						{
+							"ID": "20240530101000-zsn95lz",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"ID": "20240530101000-niw2moo",
+								"id": "20240530101000-zsn95lz",
+								"updated": "20240530101000"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "OpenAI API の呼び出しには使用料がかかります"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-kpjptzi",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-pqeyvgu",
+				"id": "20240530101000-kpjptzi"
+			}
+		}
+	]
+}

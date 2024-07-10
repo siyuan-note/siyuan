@@ -15,7 +15,7 @@ import {isWindow} from "../../../util/functions";
 import {openRecentDocs} from "../../../business/openRecentDocs";
 import {openSearch} from "../../../search/spread";
 import {goBack, goForward} from "../../../util/backForward";
-import {getAllTabs} from "../../../layout/getAll";
+import {getAllTabs, getAllWnds} from "../../../layout/getAll";
 import {getInstanceById} from "../../../layout/util";
 import {
     closeTabByType,
@@ -39,6 +39,8 @@ import {lockScreen} from "../../../dialog/processSystem";
 import {newFile} from "../../../util/newFile";
 import {openCard} from "../../../card/openCard";
 import {syncGuide} from "../../../sync/syncGuide";
+import {Wnd} from "../../../layout/Wnd";
+import {unsplitWnd} from "../../../menus/tab";
 
 const selectOpenTab = () => {
     /// #if MOBILE
@@ -231,6 +233,29 @@ export const globalCommand = (command: string, app: App) => {
             if (unmodifiedTabs.length > 0) {
                 closeTabByType(tab, "other", unmodifiedTabs);
             }
+        }
+        return true;
+    }
+    if (command === "unsplitAll") {
+        unsplitWnd(window.siyuan.layout.centerLayout, window.siyuan.layout.centerLayout, false);
+        return true;
+    }
+    if (command === "unsplit") {
+        const tab = getActiveTab(false);
+        if (tab) {
+            let wndsTemp: Wnd[] = [];
+            let layout = tab.parent.parent;
+            while (layout.id !== window.siyuan.layout.centerLayout.id) {
+                wndsTemp = [];
+                getAllWnds(layout, wndsTemp);
+                if (wndsTemp.length > 1) {
+                    break;
+                } else {
+                    layout = layout.parent;
+                }
+            }
+            unsplitWnd(tab.parent.parent.children[0], layout, true);
+            resizeTabs();
         }
         return true;
     }

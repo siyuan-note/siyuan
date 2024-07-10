@@ -178,6 +178,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 return true;
             }
         });
+        const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
+        const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
         if (!cellElements) {
             menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
             bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -203,6 +205,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             menuElement.innerHTML = getSelectHTML(data.view, cellElements);
             bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         }
+        menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
     });
     if (menu.isOpen) {
         return;
@@ -251,6 +254,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         return true;
                     }
                 });
+                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
+                const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                     bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -276,6 +281,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
                 }
+                menuElement.querySelector(".b3-menu__items").scrollTop =  oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
             });
         }
     });
@@ -325,6 +331,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         return true;
                     }
                 });
+                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                     bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -351,6 +358,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
                 }
+                menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
                 name = inputElement.value;
                 color = (index + 1).toString();
                 return true;
@@ -528,9 +536,12 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
     if (colData.type === "select") {
         menuElement.parentElement.remove();
     } else {
+        const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
+        const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
         menuElement.innerHTML = getSelectHTML(data.view, cellElements);
         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         menuElement.querySelector("input").focus();
+        menuElement.querySelector(".b3-menu__items").scrollTop =  oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
     }
 };
 
@@ -558,7 +569,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
     });
 
     return `<div class="b3-menu__items">
-<div class="b3-chips">
+<div class="b3-chips" style="max-width: 50vw">
     ${selectedHTML}
     <input>
 </div>

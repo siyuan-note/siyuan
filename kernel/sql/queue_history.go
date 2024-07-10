@@ -41,7 +41,7 @@ type historyDBQueueOperation struct {
 	action      string // index/deleteOutdated
 
 	histories []*History // index
-	before    string     // deleteOutdated
+	before    int64      // deleteOutdated
 }
 
 func FlushHistoryTxJob() {
@@ -121,7 +121,7 @@ func execHistoryOp(op *historyDBQueueOperation, tx *sql.Tx, context map[string]i
 	return
 }
 
-func DeleteOutdatedHistories(before string) {
+func DeleteOutdatedHistories(before int64) {
 	historyDBQueueLock.Lock()
 	defer historyDBQueueLock.Unlock()
 

@@ -17,7 +17,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"sync"
 	"time"
@@ -38,17 +37,17 @@ var (
 	BroadcastChannels = sync.Map{}
 )
 
-/*
-broadcast create a broadcast channel WebSocket connection
-
-@param
-
-- query.channel: channel name
-
-@example
-
-	URL: "ws://localhost:6806/ws/broadcast?channel=test"
-*/
+// broadcast create a broadcast channel WebSocket connection
+//
+// @param
+//
+//	{
+//		channel: string, // channel name
+//	}
+//
+// @example
+//
+//	"ws://localhost:6806/ws/broadcast?channel=test"
 func broadcast(c *gin.Context) {
 	var (
 		channel          string = c.Query("channel")
@@ -137,19 +136,26 @@ func subscribe(c *gin.Context, broadcastChannel *melody.Melody, channel string) 
 	}
 }
 
-/*
-postMessage send string message to a broadcast channel
-
-@param
-
-	body.channel: channel name
-	body.message: message payload
-
-@returns
-
-	body.data.channel.name: channel name
-	body.data.channel.count: indicate how many websocket session received the message
-*/
+// postMessage send string message to a broadcast channel
+// @param
+//
+//	{
+//		channel: string // channel name
+//		message: string // message payload
+//	}
+//
+// @returns
+//
+//	{
+//		code: int,
+//		msg: string,
+//		data: {
+//			channel: {
+//				name: string, //channel name
+//				count: string, //listener count
+//			},
+//		},
+//	}
 func postMessage(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -159,16 +165,14 @@ func postMessage(c *gin.Context) {
 		return
 	}
 
-	channel := arg["channel"].(string)
 	message := arg["message"].(string)
+	channel := &Channel{
+		Name:  arg["channel"].(string),
+		Count: 0,
+	}
 
-	if _broadcastChannel, ok := BroadcastChannels.Load(channel); !ok {
-		err := fmt.Errorf("broadcast channel [%s] not found", channel)
-		logging.LogWarnf(err.Error())
-
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if _broadcastChannel, ok := BroadcastChannels.Load(channel.Name); !ok {
+		channel.Count = 0
 	} else {
 		var broadcastChannel = _broadcastChannel.(*melody.Melody)
 		if err := broadcastChannel.Broadcast([]byte(message)); nil != err {
@@ -179,27 +183,33 @@ func postMessage(c *gin.Context) {
 			return
 		}
 
-		count := broadcastChannel.Len()
-		ret.Data = map[string]interface{}{
-			"channel": &Channel{
-				Name:  channel,
-				Count: count,
-			},
-		}
+		channel.Count = broadcastChannel.Len()
+	}
+	ret.Data = map[string]interface{}{
+		"channel": channel,
 	}
 }
 
-/*
-getChannelInfo gets the information of a broadcast channel
-
-@param
-
-	body.name: channel name
-
-@returns
-
-	body.data.channel: the channel information
-*/
+// getChannelInfo gets the information of a broadcast channel
+//
+// @param
+//
+//	{
+//		name: string, // channel name
+//	}
+//
+// @returns
+//
+//	{
+//		code: int,
+//		msg: string,
+//		data: {
+//			channel: {
+//				name: string, //channel name
+//				count: string, //listener count
+//			},
+//		},
+//	}
 func getChannelInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -209,38 +219,37 @@ func getChannelInfo(c *gin.Context) {
 		return
 	}
 
-	name := arg["name"].(string)
+	channel := &Channel{
+		Name:  arg["name"].(string),
+		Count: 0,
+	}
 
-	if _broadcastChannel, ok := BroadcastChannels.Load(name); !ok {
-		err := fmt.Errorf("broadcast channel [%s] not found", name)
-		logging.LogWarnf(err.Error())
-
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
+	if _broadcastChannel, ok := BroadcastChannels.Load(channel.Name); !ok {
+		channel.Count = 0
 	} else {
 		var broadcastChannel = _broadcastChannel.(*melody.Melody)
+		channel.Count = broadcastChannel.Len()
+	}
 
-		count := broadcastChannel.Len()
-		ret.Data = map[string]interface{}{
-			"channel": &Channel{
-				Name:  name,
-				Count: count,
-			},
-		}
+	ret.Data = map[string]interface{}{
+		"channel": channel,
 	}
 }
 
-/*
-getChannels gets the channel name and lintener number of all broadcast chanel
-
-@returns
-
-	body.data.channels: {
-		name: channel name
-		count: listener count
-	}[]
-*/
+// getChannels gets the channel name and lintener number of all broadcast chanel
+//
+// @returns
+//
+//	{
+//		code: int,
+//		msg: string,
+//		data: {
+//			channels: {
+//				name: string, //channel name
+//				count: string, //listener count
+//			}[],
+//		},
+//	}
 func getChannels(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

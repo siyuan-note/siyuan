@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
@@ -555,6 +556,8 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 	assets := assetsLinkDestsInTree(tree)
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
+	avAssets := assetsLinkDestsInAttributeViewNodes(tree)
+	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if nil != err {
@@ -1090,6 +1093,46 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 			src := tokens[idx+len("src=\""):]
 			src = src[:bytes.Index(src, []byte("\""))]
 			ret = append(ret, string(src))
+		}
+		return ast.WalkContinue
+	})
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func assetsLinkDestsInAttributeViewNodes(tree *parse.Tree) (ret []string) {
+	// The images in the databases are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/11948
+
+	ret = []string{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || ast.NodeAttributeView != n.Type {
+			return ast.WalkContinue
+		}
+
+		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
+		if nil == attrView {
+			return ast.WalkContinue
+		}
+
+		for _, keyValues := range attrView.KeyValues {
+			if av.KeyTypeMAsset != keyValues.Key.Type {
+				continue
+			}
+
+			for _, value := range keyValues.Values {
+				if 1 > len(value.MAsset) {
+					continue
+				}
+
+				for _, asset := range value.MAsset {
+					dest := asset.Content
+					if !treenode.IsRelativePath([]byte(dest)) {
+						continue
+					}
+
+					ret = append(ret, strings.TrimSpace(dest))
+				}
+			}
 		}
 		return ast.WalkContinue
 	})

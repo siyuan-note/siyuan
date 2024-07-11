@@ -21,7 +21,6 @@ import (
 	"encoding/csv"
 	"errors"
 	"fmt"
-	"github.com/88250/pdfcpu/pkg/font"
 	"net/http"
 	"net/url"
 	"os"
@@ -38,9 +37,11 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/88250/pdfcpu/pkg/api"
+	"github.com/88250/pdfcpu/pkg/font"
 	"github.com/88250/pdfcpu/pkg/pdfcpu"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
@@ -2216,7 +2217,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 		mdTableHead.AppendChild(mdTableHeadRow)
 		for _, col := range table.Columns {
 			cell := &ast.Node{Type: ast.NodeTableCell}
-			cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(col.Name)})
+			name := string(lex.EscapeProtyleMarkers([]byte(col.Name)))
+			cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(name)})
 			mdTableHeadRow.AppendChild(cell)
 		}
 
@@ -2229,7 +2231,19 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 				mdTableRow.AppendChild(mdTableCell)
 				var val string
 				if nil != cell.Value {
-					if av.KeyTypeDate == cell.Value.Type {
+					if av.KeyTypeText == cell.Value.Type {
+						if nil != cell.Value.Text {
+							// 文本字段需要替换换行符并转义标记符 https://github.com/siyuan-note/siyuan/issues/11945
+							val = cell.Value.Text.Content
+							val = string(lex.EscapeProtyleMarkers([]byte(val)))
+							lines := strings.Split(val, "\n")
+							for _, line := range lines {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+							}
+							continue
+						}
+					} else if av.KeyTypeDate == cell.Value.Type {
 						if nil != cell.Value.Date {
 							cell.Value.Date = av.NewFormattedValueDate(cell.Value.Date.Content, cell.Value.Date.Content2, av.DateFormatNone, cell.Value.Date.IsNotTime, cell.Value.Date.HasEndDate)
 						}

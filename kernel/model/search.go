@@ -360,10 +360,15 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 
 	ret = fullTextSearchRefBlock(keyword, beforeLen, onlyDoc)
 	tmp := ret[:0]
+	var btsID []string
+	for _, b := range ret {
+		btsID = append(btsID, b.RootID)
+	}
+	bts := treenode.GetBlockTrees(btsID)
 	for _, b := range ret {
 		tree := cachedTrees[b.RootID]
 		if nil == tree {
-			tree, _ = LoadTreeByBlockID(b.RootID)
+			tree, _ = loadTreeByBlockTree(bts[b.RootID])
 		}
 		if nil == tree {
 			continue
@@ -376,7 +381,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
 			tree := cachedTrees[b.RootID]
 			if nil == tree {
-				tree, _ = LoadTreeByBlockID(b.RootID)
+				tree, _ = loadTreeByBlockTree(bts[b.RootID])
 				cachedTrees[b.RootID] = tree
 			}
 			if nil != tree {

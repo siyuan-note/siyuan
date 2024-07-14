@@ -140,9 +140,14 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 		return
 	}
 
+	var rootIDs []string
+	for _, doc := range tmp {
+		rootIDs = append(rootIDs, doc.RootID)
+	}
+	bts := treenode.GetBlockTrees(rootIDs)
 	var notExists []string
 	for _, doc := range tmp {
-		if bt := treenode.GetBlockTree(doc.RootID); nil != bt {
+		if bt := bts[doc.RootID]; nil != bt {
 			doc.Title = path.Base(bt.HPath) // Recent docs not updated after renaming https://github.com/siyuan-note/siyuan/issues/7827
 			ret = append(ret, doc)
 		} else {

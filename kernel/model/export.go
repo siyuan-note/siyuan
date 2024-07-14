@@ -2220,6 +2220,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 		for _, col := range table.Columns {
 			cell := &ast.Node{Type: ast.NodeTableCell}
 			name := string(lex.EscapeProtyleMarkers([]byte(col.Name)))
+			name = strings.ReplaceAll(name, "\\|", "|")
+			name = strings.ReplaceAll(name, "|", "\\|")
 			cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(name)})
 			mdTableHeadRow.AppendChild(cell)
 		}
@@ -2233,11 +2235,25 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 				mdTableRow.AppendChild(mdTableCell)
 				var val string
 				if nil != cell.Value {
-					if av.KeyTypeText == cell.Value.Type {
+					if av.KeyTypeBlock == cell.Value.Type {
+						if nil != cell.Value.Block {
+							val = cell.Value.Block.Content
+							val = string(lex.EscapeProtyleMarkers([]byte(val)))
+							val = strings.ReplaceAll(val, "\\|", "|")
+							val = strings.ReplaceAll(val, "|", "\\|")
+							lines := strings.Split(val, "\n")
+							for _, line := range lines {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+							}
+							continue
+						}
+					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
-							// 文本字段需要替换换行符并转义标记符 https://github.com/siyuan-note/siyuan/issues/11945
 							val = cell.Value.Text.Content
 							val = string(lex.EscapeProtyleMarkers([]byte(val)))
+							val = strings.ReplaceAll(val, "\\|", "|")
+							val = strings.ReplaceAll(val, "|", "\\|")
 							lines := strings.Split(val, "\n")
 							for _, line := range lines {
 								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})

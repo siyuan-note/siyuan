@@ -112,6 +112,7 @@
     "strong": "Bold",
     "inlineMath": "Inline formula",
     "inlineMemo": "Inline memo",
+    "blockRef": "Ref anchor text",
     "kbd": "Keyboard",
     "mark": "Mark",
     "s": "Strikethrough",

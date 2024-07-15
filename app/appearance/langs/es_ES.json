@@ -112,6 +112,7 @@
     "strong": "negrita",
     "inlineMath": "Fórmula en línea",
     "inlineMemo": "Nota en línea",
+    "blockRef": "texto de anclaje de referencia",
     "kbd": "Teclado",
     "mark": "Marca",
     "s": "Tachado",

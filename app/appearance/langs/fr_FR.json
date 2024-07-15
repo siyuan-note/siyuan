@@ -112,6 +112,7 @@
     "strong": "Audacieux",
     "inlineMath": "Formule en ligne",
     "inlineMemo": "Mémo en ligne",
+    "blockRef": "texte d'ancrage de référence",
     "kbd": "Clavier",
     "mark": "Marquer",
     "s": "Barré",

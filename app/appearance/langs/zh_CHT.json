@@ -112,6 +112,7 @@
     "strong": "粗體",
     "inlineMath": "行級公式",
     "inlineMemo": "行級備註",
+    "blockRef": "引用錨文本",
     "kbd": "鍵盤",
     "mark": "高亮",
     "s": "刪除",

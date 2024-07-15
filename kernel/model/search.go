@@ -747,6 +747,22 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "text")
+					} else if n.IsTextMarkType("block-ref") {
+						if !replaceTypes["blockRef"] {
+							return ast.WalkContinue
+						}
+
+						if 0 == method {
+							if strings.Contains(n.TextMarkTextContent, keyword) {
+								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+								n.TextMarkBlockRefSubtype = "s"
+							}
+						} else if 3 == method {
+							if nil != r && r.MatchString(n.TextMarkTextContent) {
+								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+								n.TextMarkBlockRefSubtype = "s"
+							}
+						}
 					}
 				}
 				return ast.WalkContinue

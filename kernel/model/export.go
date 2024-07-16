@@ -2009,8 +2009,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
-			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
-			blockRefLink.KramdownIAL = n.KramdownIAL
+			var blockRefLink *ast.Node
+			if 0 < len(n.KramdownIAL) {
+				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
+				blockRefLink.KramdownIAL = n.KramdownIAL
+			} else {
+				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 4: // 脚注

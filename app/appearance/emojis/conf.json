@@ -11385,6 +11385,188 @@
         "description_ja_jp": "黒枠四角",
         "description_zh_cn": "黑色方形按钮",
         "keywords": "button,geometric,square,ボタン,四角,正方形,几何,几何图形,按钮,方形,黑线方形按钮,黑线正方形按钮,黑色正方形按钮,黑边线方形按钮,黑边线正方形按钮"
+      },
+      {
+        "unicode": "1f1e6",
+        "description": "Regional indicator symbol letter A",
+        "description_ja_jp": "地域指示記号英字 A",
+        "description_zh_cn": "区域指示符字母 A",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e7",
+        "description": "Regional indicator symbol letter B",
+        "description_ja_jp": "地域指示記号英字 B",
+        "description_zh_cn": "区域指示符字母 B",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e8",
+        "description": "Regional indicator symbol letter C",
+        "description_ja_jp": "地域指示記号英字 C",
+        "description_zh_cn": "区域指示符字母 C",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e9",
+        "description": "Regional indicator symbol letter D",
+        "description_ja_jp": "地域指示記号英字 D",
+        "description_zh_cn": "区域指示符字母 D",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ea",
+        "description": "Regional indicator symbol letter E",
+        "description_ja_jp": "地域指示記号英字 E",
+        "description_zh_cn": "区域指示符字母 E",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1eb",
+        "description": "Regional indicator symbol letter F",
+        "description_ja_jp": "地域指示記号英字 F",
+        "description_zh_cn": "区域指示符字母 F",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ec",
+        "description": "Regional indicator symbol letter G",
+        "description_ja_jp": "地域指示記号英字 G",
+        "description_zh_cn": "区域指示符字母 G",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ed",
+        "description": "Regional indicator symbol letter H",
+        "description_ja_jp": "地域指示記号英字 H",
+        "description_zh_cn": "区域指示符字母 H",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ee",
+        "description": "Regional indicator symbol letter I",
+        "description_ja_jp": "地域指示記号英字 I",
+        "description_zh_cn": "区域指示符字母 I",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ef",
+        "description": "Regional indicator symbol letter J",
+        "description_ja_jp": "地域指示記号英字 J",
+        "description_zh_cn": "区域指示符字母 J",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f0",
+        "description": "Regional indicator symbol letter K",
+        "description_ja_jp": "地域指示記号英字 K",
+        "description_zh_cn": "区域指示符字母 K",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f1",
+        "description": "Regional indicator symbol letter L",
+        "description_ja_jp": "地域指示記号英字 L",
+        "description_zh_cn": "区域指示符字母 L",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f2",
+        "description": "Regional indicator symbol letter M",
+        "description_ja_jp": "地域指示記号英字 M",
+        "description_zh_cn": "区域指示符字母 M",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f3",
+        "description": "Regional indicator symbol letter N",
+        "description_ja_jp": "地域指示記号英字 N",
+        "description_zh_cn": "区域指示符字母 N",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f4",
+        "description": "Regional indicator symbol letter O",
+        "description_ja_jp": "地域指示記号英字 O",
+        "description_zh_cn": "区域指示符字母 O",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f5",
+        "description": "Regional indicator symbol letter P",
+        "description_ja_jp": "地域指示記号英字 P",
+        "description_zh_cn": "区域指示符字母 P",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f6",
+        "description": "Regional indicator symbol letter Q",
+        "description_ja_jp": "地域指示記号英字 Q",
+        "description_zh_cn": "区域指示符字母 Q",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f7",
+        "description": "Regional indicator symbol letter R",
+        "description_ja_jp": "地域指示記号英字 R",
+        "description_zh_cn": "区域指示符字母 R",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f8",
+        "description": "Regional indicator symbol letter S",
+        "description_ja_jp": "地域指示記号英字 S",
+        "description_zh_cn": "区域指示符字母 S",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f9",
+        "description": "Regional indicator symbol letter T",
+        "description_ja_jp": "地域指示記号英字 T",
+        "description_zh_cn": "区域指示符字母 T",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fa",
+        "description": "Regional indicator symbol letter U",
+        "description_ja_jp": "地域指示記号英字 U",
+        "description_zh_cn": "区域指示符字母 U",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fb",
+        "description": "Regional indicator symbol letter V",
+        "description_ja_jp": "地域指示記号英字 V",
+        "description_zh_cn": "区域指示符字母 V",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fc",
+        "description": "Regional indicator symbol letter W",
+        "description_ja_jp": "地域指示記号英字 W",
+        "description_zh_cn": "区域指示符字母 W",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fd",
+        "description": "Regional indicator symbol letter X",
+        "description_ja_jp": "地域指示記号英字 X",
+        "description_zh_cn": "区域指示符字母 X",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fe",
+        "description": "Regional indicator symbol letter Y",
+        "description_ja_jp": "地域指示記号英字 Y",
+        "description_zh_cn": "区域指示符字母 Y",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ff",
+        "description": "Regional indicator symbol letter Z",
+        "description_ja_jp": "地域指示記号英字 Z",
+        "description_zh_cn": "区域指示符字母 Z",
+        "keywords": ""
       }
     ]
   },

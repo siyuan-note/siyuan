@@ -3692,7 +3692,175 @@
         "description": "Family: Adult, Child, Child",
         "description_ja_jp": "家族: 大人一人と子供二人",
         "description_zh_cn": "单亲二孩家庭",
-        "keywords": "adult,child,family,大人一人,子供二人,家族,親子,二孩,单亲,孩子,家庭,母亲,父亲"
+        "keywords": "adult,child,family,大人一人,子供二人,家族,親子,二孩,单亲,孩子,家庭,母亲,父亲",
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467",
+        "description": "Family: man,woman,girl",
+        "description_ja_jp": "家族: 男性,女性,女の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩",
+        "keywords": "family,father,mother,,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男人,女人,男,女,男人,女人,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467-200d-1f466",
+        "description": "Family: man,woman,girl,boy",
+        "description_ja_jp": "家族: 男性,女性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩,男孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f466-200d-1f466",
+        "description": "Family: man,woman,boy,boy",
+        "description_ja_jp": "家族: 男性,女性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,女人,男孩,男孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467-200d-1f467",
+        "description": "Family: man,woman,girl,girl",
+        "description_ja_jp": "家族: 男性,女性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩,女孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f466",
+        "description": "Family: woman,woman,boy",
+        "description_ja_jp": "家族: 女性,女性,男の子",
+        "description_zh_cn": "家庭: 女人,女人,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467",
+        "description": "Family: woman,woman,girl",
+        "description_ja_jp": "家族: 女性,女性,女の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467-200d-1f466",
+        "description": "Family: woman,woman,girl,boy",
+        "description_ja_jp": "家族: 女性,女性,女の子,男の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f466-200d-1f466",
+        "description": "Family: woman,woman,boy,boy",
+        "description_ja_jp": "家族: 女性,女性,男の子,男の子",
+        "description_zh_cn": "家庭: 女人,女人,男孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467-200d-1f467",
+        "description": "Family: woman,woman,girl,girl",
+        "description_ja_jp": "家族: 女性,女性,女の子,女の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f466",
+        "description": "Family: man,man,boy",
+        "description_ja_jp": "家族: 男性,男性,男の子",
+        "description_zh_cn": "家庭: 男人,男人,男孩",
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467",
+        "description": "Family: man,man,girl",
+        "description_ja_jp": "家族: 男性,男性,女の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩",
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467-200d-1f466",
+        "description": "Family: man,man,girl,boy",
+        "description_ja_jp": "家族: 男性,男性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩,男孩",
+        "keywords": "family,father,man,male,men,boy,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f466-200d-1f466",
+        "description": "Family: man,man,boy,boy",
+        "description_ja_jp": "家族: 男性,男性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,男人,男孩,男孩",
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467-200d-1f467",
+        "description": "Family: man,man,girl,girl",
+        "description_ja_jp": "家族: 男性,男性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩,女孩",
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f466",
+        "description": "Family: woman,boy",
+        "description_ja_jp": "家族: 女性,男の子",
+        "description_zh_cn": "家庭: 女人,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467",
+        "description": "Family: woman,girl",
+        "description_ja_jp": "家族: 女性,女の子",
+        "description_zh_cn": "家庭: 女人,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467-200d-1f466",
+        "description": "Family: woman,girl,boy",
+        "description_ja_jp": "家族: 女性,女の子,男の子",
+        "description_zh_cn": "家庭: 女人,女孩,男孩",
+        "keywords": "family,mother,woman,female,male,girl,boy,child,家族,親子,亲子,家庭,母亲,女人,女性,男性,女孩,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f466-200d-1f466",
+        "description": "Family: woman,boy,boy",
+        "description_ja_jp": "家族: 女性,男の子,男の子",
+        "description_zh_cn": "家庭: 女人,男孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467-200d-1f467",
+        "description": "Family: woman,girl,girl",
+        "description_ja_jp": "家族: 女性,女の子,女の子",
+        "description_zh_cn": "家庭: 女人,女孩,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f466",
+        "description": "Family: man,boy",
+        "description_ja_jp": "家族: 男性,男の子",
+        "description_zh_cn": "家庭: 男人,男孩",
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467",
+        "description": "Family: man,girl",
+        "description_ja_jp": "家族: 男性,女の子",
+        "description_zh_cn": "家庭: 男人,女孩",
+        "keywords": "family,father,man,male,female,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,女性,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467-200d-1f466",
+        "description": "Family: man,girl,boy",
+        "description_ja_jp": "家族: 男性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,女孩,男孩",
+        "keywords": "family,father,man,male,men,boy,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f466-200d-1f466",
+        "description": "Family: man,boy,boy",
+        "description_ja_jp": "家族: 男性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,男孩,男孩",
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467-200d-1f467",
+        "description": "Family: man,girl,girl",
+        "description_ja_jp": "家族: 男性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,女孩,女孩",
+        "keywords": "family,father,man,male,female,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,女性,女孩,儿童"
       },
       {
         "unicode": "1f463",

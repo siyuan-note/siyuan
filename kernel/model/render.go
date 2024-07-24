@@ -76,7 +76,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 			tokens = bytes.ReplaceAll(tokens, []byte(" "), []byte("&nbsp;")) // 大纲面板条目中无法显示多个空格 https://github.com/siyuan-note/siyuan/issues/4370
 			buf.Write(tokens)
 		case ast.NodeBackslashContent:
-			buf.Write(n.Tokens)
+			buf.Write(html.EscapeHTML(n.Tokens))
 		case ast.NodeTextMark:
 			dom := luteEngine.RenderNodeBlockDOM(n)
 			buf.WriteString(dom)

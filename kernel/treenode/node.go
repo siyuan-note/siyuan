@@ -244,6 +244,9 @@ func ParentNodesWithHeadings(node *ast.Node) (parents []*ast.Node) {
 		// 标题下方块编辑后刷新标题块更新时间
 		// The heading block update time is refreshed after editing the blocks under the heading https://github.com/siyuan-note/siyuan/issues/11374
 		parentHeadingLevel := 7
+		if ast.NodeHeading == n.Type {
+			parentHeadingLevel = n.HeadingLevel
+		}
 		for prev := n.Previous; nil != prev; prev = prev.Previous {
 			if ast.NodeHeading == prev.Type {
 				if prev.HeadingLevel >= parentHeadingLevel {

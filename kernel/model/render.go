@@ -201,7 +201,20 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					if "d" == sqlBlock.Type {
 						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
 						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-					} // 标题块不需要再单独解析，直接使用 Markdown，函数开头处会处理
+					} else if "h" == sqlBlock.Type {
+						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+						var hChildren []*ast.Node
+						hChildren = append(hChildren, h)
+						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+						mdBuf := &bytes.Buffer{}
+						for _, hChild := range hChildren {
+							md, _ = lute.FormatNodeSync(hChild, luteEngine.ParseOptions, luteEngine.RenderOptions)
+							mdBuf.WriteString(md)
+							mdBuf.WriteString("\n\n")
+						}
+						md = mdBuf.String()
+					}
 
 					buf := &bytes.Buffer{}
 					lines := strings.Split(md, "\n")

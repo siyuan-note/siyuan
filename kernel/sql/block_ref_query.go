@@ -363,7 +363,7 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []
 func QueryRefsRecent(onlyDoc bool, typeFilter string, ignoreLines []string) (ret []*Ref) {
 	stmt := "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type IN " + typeFilter
 	if onlyDoc {
-		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.type = 'd' AND b.id = r.def_block_id"
+		stmt = "SELECT r.* FROM refs AS r, blocks AS b WHERE b.id = r.def_block_id AND b.type = 'd'"
 	}
 	if 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089

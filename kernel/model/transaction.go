@@ -1039,6 +1039,10 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
 	avs := insertedNode.IALAttr(av.NodeAttrNameAvs)
 	for _, avID := range strings.Split(avs, ",") {
+		if !ast.IsNodeIDPattern(avID) {
+			continue
+		}
+
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,

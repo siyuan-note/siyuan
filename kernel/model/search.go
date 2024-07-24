@@ -322,8 +322,9 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 	if "" == keyword {
 		// 查询为空时默认的块引排序规则按最近使用优先 https://github.com/siyuan-note/siyuan/issues/3218
 
+		typeFilter := Conf.Search.TypeFilter()
 		ignoreLines := getRefSearchIgnoreLines()
-		refs := sql.QueryRefsRecent(onlyDoc, ignoreLines)
+		refs := sql.QueryRefsRecent(onlyDoc, typeFilter, ignoreLines)
 		var btsID []string
 		for _, ref := range refs {
 			btsID = append(btsID, ref.DefBlockRootID)

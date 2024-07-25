@@ -1878,6 +1878,10 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 	now := time.Now().UnixMilli()
 	for _, src := range srcs {
 		srcID := src["id"].(string)
+		if !ast.IsNodeIDPattern(srcID) {
+			continue
+		}
+
 		isDetached := src["isDetached"].(bool)
 		var tree *parse.Tree
 		if !isDetached {

@@ -9,7 +9,7 @@ import {getContenteditableElement, getNextBlock, hasNextSibling, isNotEditBlock}
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
-import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {headingTurnIntoList, turnIntoTaskList} from "./turnIntoList";
 import {updateAVName} from "../render/av/action";
@@ -176,8 +176,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             blockElement.outerHTML = html.replace("</span><wbr>", "</span>" + Constants.ZWSP + "<wbr>");
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`).forEach((item: HTMLElement) => {
-            if (item.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
-                !hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+            if (!isInEmbedBlock(item)) {
                 blockElement = item;
             }
         });

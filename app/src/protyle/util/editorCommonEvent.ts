@@ -4,7 +4,7 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByTag,
-    hasTopClosestByAttribute
+    hasTopClosestByAttribute, isInEmbedBlock
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
@@ -829,8 +829,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
                 if (window.siyuan.dragElement) {
                     window.siyuan.dragElement.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
-                        if (elementItem.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
-                            !hasClosestByAttribute(elementItem, "data-type", "NodeBlockQueryEmbed")) {
+                        if (!isInEmbedBlock(elementItem)) {
                             sourceElements.push(elementItem);
                         }
                     });
@@ -838,8 +837,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const targetProtyleElement = document.createElement("template");
                     targetProtyleElement.innerHTML = `<div>${event.dataTransfer.getData(gutterType)}</div>`;
                     targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
-                        if (elementItem.getAttribute("data-type") === "NodeBlockQueryEmbed" ||
-                            !hasClosestByAttribute(elementItem, "data-type", "NodeBlockQueryEmbed")) {
+                        if (!isInEmbedBlock(elementItem)) {
                             sourceElements.push(elementItem);
                         }
                     });
@@ -1309,7 +1307,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (isSelf) {
                 return;
             }
-            if (hasClosestByAttribute(targetElement.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+            if (isInEmbedBlock(targetElement)) {
                 // 不允许托入嵌入块
                 return;
             }

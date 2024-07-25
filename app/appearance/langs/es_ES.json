@@ -85,7 +85,7 @@
   "addToDatabase": "Agregar a la base de datos",
   "clearContext": "Borrar contexto",
   "cloudStoragePurge": "Borrar almacenamiento en la nube",
-  "cloudStoragePurgeConfirm": "Nota:<ul class='fn__list'><li>Asegúrese de que otros dispositivos hayan pausado la sincronización antes de la ejecución</li><li>La operación de purga requiere mucho tiempo; asegúrese de que la red esté estable</li></ul>¿Está seguro de ejecutarla ahora?",
+  "cloudStoragePurgeConfirm": "Al purgar el almacenamiento en la nube se eliminarán por completo todas las instantáneas sin referencia y los objetos de datos relacionados.<ul class='fn__list'><li>Asegúrese de que otros dispositivos hayan pausado la sincronización antes de la ejecución</li><li>La operación de purga requiere mucho tiempo; asegúrese de que la red esté estable</li></ul>¿Está seguro de ejecutarla ahora?",
   "dragFill": "Arrastra verticalmente para rellenar el valor",
   "switchReadonly": "Cambiar modo de sólo lectura",
   "original": "Original",

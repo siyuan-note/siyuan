@@ -260,7 +260,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                     data: previousElement.outerHTML,
                     id: previousElement.getAttribute("data-node-id"),
                     parentID: previousElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID,
-                    previousID: ppElement ? ppElement.getAttribute("data-node-id") : undefined
+                    previousID: (ppElement && (!previousElement.previousElementSibling || !previousElement.previousElementSibling.classList.contains("protyle-action"))) ? ppElement.getAttribute("data-node-id") : undefined
                 }]);
                 previousElement.remove();
             } else {

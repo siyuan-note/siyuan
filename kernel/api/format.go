@@ -35,7 +35,7 @@ func netAssets2LocalAssets(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	err := model.NetAssets2LocalAssets(id)
+	err := model.NetAssets2LocalAssets(id, false, "")
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -58,7 +58,7 @@ func netImg2LocalAssets(c *gin.Context) {
 	if urlArg := arg["url"]; nil != urlArg {
 		url = urlArg.(string)
 	}
-	err := model.NetImg2LocalAssets(id, url)
+	err := model.NetAssets2LocalAssets(id, true, url)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

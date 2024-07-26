@@ -1055,6 +1055,35 @@ func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
 		node.TextMarkAHref = strings.ReplaceAll(node.TextMarkAHref, oldDest, dest)
 	} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
 		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
+	} else if ast.NodeAttributeView == node.Type {
+		needWrite := false
+		attrView, _ := av.ParseAttributeView(node.AttributeViewID)
+		if nil == attrView {
+			return
+		}
+
+		for _, keyValues := range attrView.KeyValues {
+			if av.KeyTypeMAsset != keyValues.Key.Type {
+				continue
+			}
+
+			for _, value := range keyValues.Values {
+				if 1 > len(value.MAsset) {
+					continue
+				}
+
+				for _, asset := range value.MAsset {
+					if oldDest == asset.Content && oldDest != dest {
+						asset.Content = dest
+						needWrite = true
+					}
+				}
+			}
+		}
+
+		if needWrite {
+			av.SaveAttributeView(attrView)
+		}
 	}
 }
 

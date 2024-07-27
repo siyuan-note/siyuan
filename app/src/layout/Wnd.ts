@@ -12,7 +12,12 @@ import {Tab} from "./Tab";
 import {Model} from "./Model";
 import {Editor} from "../editor";
 import {Graph} from "./dock/Graph";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    isInEmbedBlock
+} from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 /// #if !BROWSER
 import {webFrame, ipcRenderer} from "electron";
@@ -460,7 +465,7 @@ export class Wnd {
                 // 在新页签中打开，但不跳转到新页签，但切换到新页签时需调整滚动
                 let nodeElement: HTMLElement;
                 Array.from(currentTab.model.editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${keepCursorId}"]`)).find((item: HTMLElement) => {
-                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed", true)) {
+                    if (!isInEmbedBlock(item)) {
                         nodeElement = item;
                         return true;
                     }

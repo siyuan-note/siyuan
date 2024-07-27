@@ -268,7 +268,7 @@ func recreateTree(tree *parse.Tree, absPath string) {
 	treenode.RemoveBlockTreesByPathPrefix(strings.TrimSuffix(tree.Path, ".sy"))
 	treenode.RemoveBlockTreesByRootID(tree.ID)
 
-	resetTree(tree, "")
+	resetTree(tree, "", true)
 	if err := filesys.WriteTree(tree); nil != err {
 		logging.LogWarnf("write tree [%s] failed: %s", tree.Path, err)
 		return

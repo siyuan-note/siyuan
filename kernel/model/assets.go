@@ -75,7 +75,7 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
-func NetImg2LocalAssets(rootID, originalURL string) (err error) {
+func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if nil != err {
 		return
@@ -95,32 +95,19 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 	browserClient := req.C().
 		SetUserAgent(util.UserAgent).
 		SetTimeout(30 * time.Second).
-		EnableInsecureSkipVerify(). // HTTPS certificate is no longer verified when `Convert network images to local images` https://github.com/siyuan-note/siyuan/issues/9080
+		EnableInsecureSkipVerify().
 		SetProxy(httpclient.ProxyFromEnvironment)
 
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
+	destNodes := getRemoteAssetsLinkDestsInTree(tree, onlyImg)
+	for _, destNode := range destNodes {
+		dests := getRemoteAssetsLinkDests(destNode, onlyImg)
+		if 1 > len(dests) {
+			continue
 		}
-		if ast.NodeImage == n.Type {
-			linkDest := n.ChildByType(ast.NodeLinkDest)
-			linkText := n.ChildByType(ast.NodeLinkText)
-			if nil == linkText {
-				linkText = &ast.Node{Type: ast.NodeLinkText, Tokens: []byte("image")}
-				if openBracket := n.ChildByType(ast.NodeOpenBracket); nil != openBracket {
-					openBracket.InsertAfter(linkText)
-				}
-			}
 
-			dest := linkDest.Tokens
-			if util.IsAssetLinkDest(dest) {
-				return ast.WalkSkipChildren
-			}
-
-			if bytes.HasPrefix(bytes.ToLower(dest), []byte("file://")) {
-				// `网络图片转换为本地图片` 支持处理 `file://` 本地路径图片 https://github.com/siyuan-note/siyuan/issues/6546
-
-				u := string(dest)[7:]
+		for _, dest := range dests {
+			if strings.HasPrefix(strings.ToLower(dest), "file://") { // 处理本地文件链接
+				u := dest[7:]
 				unescaped, _ := url.PathUnescape(u)
 				if unescaped != u {
 					// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
@@ -131,35 +118,32 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				}
 
 				if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
-					return ast.WalkSkipChildren
+					continue
 				}
 
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
-				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
-					linkText.Tokens = []byte(name)
-				}
-				name = "net-img-" + name
+				name = "network-asset-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.Copy(u, writePath); nil != err {
 					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
-					return ast.WalkSkipChildren
+					continue
 				}
 
-				linkDest.Tokens = []byte("assets/" + name)
+				setAssetsLinkDest(destNode, dest, "assets/"+name)
 				files++
-				return ast.WalkSkipChildren
+				continue
 			}
 
-			if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
-				if bytes.HasPrefix(dest, []byte("//")) {
+			if strings.HasPrefix(strings.ToLower(dest), "https://") || strings.HasPrefix(strings.ToLower(dest), "http://") || strings.HasPrefix(dest, "//") {
+				if strings.HasPrefix(dest, "//") {
 					// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
-					dest = append([]byte("https:"), dest...)
+					dest = "https:" + dest
 				}
 
-				u := string(dest)
+				u := dest
 				if strings.Contains(u, "qpic.cn") {
 					// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
 					if strings.Contains(u, "http://") {
@@ -174,25 +158,41 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 					//	u = strings.Replace(u, "/0?", "/640?", 1)
 					//}
 				}
-				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
+
+				displayU := u
+				if 64 < len(displayU) {
+					displayU = displayU[:64] + "..."
+				}
+				util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), displayU), 15000)
 				request := browserClient.R()
 				request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
 				if "" != originalURL {
 					request.SetHeader("Referer", originalURL) // 改进浏览器剪藏扩展转换本地图片成功率 https://github.com/siyuan-note/siyuan/issues/7464
 				}
 				resp, reqErr := request.Get(u)
+				if strings.Contains(strings.ToLower(resp.GetContentType()), "text/html") {
+					// 忽略超链接网页 `Convert network assets to local` no longer process webpage https://github.com/siyuan-note/siyuan/issues/9965
+					continue
+				}
+
 				if nil != reqErr {
-					logging.LogErrorf("download net img [%s] failed: %s", u, reqErr)
-					return ast.WalkSkipChildren
+					logging.LogErrorf("download network asset [%s] failed: %s", u, reqErr)
+					continue
 				}
 				if 200 != resp.StatusCode {
-					logging.LogErrorf("download net img [%s] failed: %d", u, resp.StatusCode)
-					return ast.WalkSkipChildren
+					logging.LogErrorf("download network asset [%s] failed: %d", u, resp.StatusCode)
+					continue
 				}
+
+				if 1024*1024*96 < resp.ContentLength {
+					logging.LogWarnf("network asset [%s]' size [%s] is large then [96 MB], ignore it", u, humanize.IBytes(uint64(resp.ContentLength)))
+					continue
+				}
+
 				data, repErr := resp.ToBytes()
 				if nil != repErr {
-					logging.LogErrorf("download net img [%s] failed: %s", u, repErr)
-					return ast.WalkSkipChildren
+					logging.LogErrorf("download network asset [%s] failed: %s", u, repErr)
+					continue
 				}
 				var name string
 				if strings.Contains(u, "?") {
@@ -221,213 +221,19 @@ func NetImg2LocalAssets(rootID, originalURL string) (err error) {
 				name = strings.TrimSuffix(name, ext)
 				name = util.FilterUploadFileName(name)
 				name = util.TruncateLenFileName(name)
-				if 1 > len(bytes.TrimSpace(linkText.Tokens)) {
-					linkText.Tokens = []byte(name)
-				}
-				name = "net-img-" + name + "-" + ast.NewNodeID() + ext
+				name = "network-asset-" + name + "-" + ast.NewNodeID() + ext
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); nil != err {
-					logging.LogErrorf("write downloaded net img [%s] to local assets [%s] failed: %s", u, writePath, err)
-					return ast.WalkSkipChildren
+					logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
+					continue
 				}
 
-				linkDest.Tokens = []byte("assets/" + name)
+				setAssetsLinkDest(destNode, dest, "assets/"+name)
 				files++
+				continue
 			}
-			return ast.WalkSkipChildren
-		}
-		return ast.WalkContinue
-	})
-	if 0 < files {
-		util.PushUpdateMsg(msgId, Conf.Language(113), 7000)
-		if err = writeTreeUpsertQueue(tree); nil != err {
-			return
-		}
-		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
-	} else {
-		util.PushUpdateMsg(msgId, Conf.Language(121), 3000)
-	}
-	return
-}
-
-func NetAssets2LocalAssets(rootID string) (err error) {
-	tree, err := LoadTreeByBlockID(rootID)
-	if nil != err {
-		return
-	}
-
-	var files int
-	msgId := gulu.Rand.String(7)
-
-	docDirLocalPath := filepath.Join(util.DataDir, tree.Box, path.Dir(tree.Path))
-	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, tree.Box), docDirLocalPath)
-	if !gulu.File.IsExist(assetsDirPath) {
-		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
-			return
 		}
 	}
-
-	browserClient := req.C().
-		SetUserAgent(util.UserAgent).
-		SetTimeout(30 * time.Second).
-		EnableInsecureSkipVerify().
-		SetProxy(httpclient.ProxyFromEnvironment)
-
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || (ast.NodeLinkDest != n.Type && !n.IsTextMarkType("a") && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type) {
-			return ast.WalkContinue
-		}
-
-		var dest []byte
-		if ast.NodeLinkDest == n.Type {
-			dest = n.Tokens
-		} else if n.IsTextMarkType("a") {
-			dest = []byte(n.TextMarkAHref)
-		} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
-			if srcIndex := bytes.Index(n.Tokens, []byte("src=\"")); 0 < srcIndex {
-				src := n.Tokens[srcIndex+len("src=\""):]
-				if srcIndex = bytes.Index(src, []byte("\"")); 0 < srcIndex {
-					src = src[:bytes.Index(src, []byte("\""))]
-					dest = bytes.TrimSpace(src)
-				}
-			}
-		}
-
-		if util.IsAssetLinkDest(dest) {
-			return ast.WalkContinue
-		}
-
-		if bytes.HasPrefix(bytes.ToLower(dest), []byte("file://")) { // 处理本地文件链接
-			u := string(dest)[7:]
-			unescaped, _ := url.PathUnescape(u)
-			if unescaped != u {
-				// `Convert network images/assets to local` supports URL-encoded local file names https://github.com/siyuan-note/siyuan/issues/9929
-				u = unescaped
-			}
-			if strings.Contains(u, ":") {
-				u = strings.TrimPrefix(u, "/")
-			}
-
-			if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
-				return ast.WalkContinue
-			}
-
-			name := filepath.Base(u)
-			name = util.FilterUploadFileName(name)
-			name = util.TruncateLenFileName(name)
-			name = "network-asset-" + name
-			name = util.AssetName(name)
-			writePath := filepath.Join(assetsDirPath, name)
-			if err = filelock.Copy(u, writePath); nil != err {
-				logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
-				return ast.WalkContinue
-			}
-
-			if ast.NodeLinkDest == n.Type {
-				n.Tokens = []byte("assets/" + name)
-			} else if n.IsTextMarkType("a") {
-				n.TextMarkAHref = "assets/" + name
-			} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
-				n.Tokens = bytes.ReplaceAll(n.Tokens, dest, []byte("assets/"+name))
-			}
-			files++
-			return ast.WalkContinue
-		}
-
-		if bytes.HasPrefix(bytes.ToLower(dest), []byte("https://")) || bytes.HasPrefix(bytes.ToLower(dest), []byte("http://")) || bytes.HasPrefix(dest, []byte("//")) {
-			if bytes.HasPrefix(dest, []byte("//")) {
-				// `Convert network images to local` supports `//` https://github.com/siyuan-note/siyuan/issues/10598
-				dest = append([]byte("https:"), dest...)
-			}
-
-			u := string(dest)
-			if strings.Contains(u, "qpic.cn") {
-				// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/5052
-				if strings.Contains(u, "http://") {
-					u = strings.Replace(u, "http://", "https://", 1)
-				}
-
-				// 改进 `网络图片转换为本地图片` 微信图片拉取 https://github.com/siyuan-note/siyuan/issues/6431
-				// 下面这部分需要注释掉，否则会导致响应 400
-				//if strings.HasSuffix(u, "/0") {
-				//	u = strings.Replace(u, "/0", "/640", 1)
-				//} else if strings.Contains(u, "/0?") {
-				//	u = strings.Replace(u, "/0?", "/640?", 1)
-				//}
-			}
-			util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(119), u), 15000)
-			request := browserClient.R()
-			request.SetRetryCount(1).SetRetryFixedInterval(3 * time.Second)
-			resp, reqErr := request.Get(u)
-			if strings.Contains(strings.ToLower(resp.GetContentType()), "text/html") {
-				// 忽略超链接网页 `Convert network assets to local` no longer process webpage https://github.com/siyuan-note/siyuan/issues/9965
-				return ast.WalkContinue
-			}
-
-			if nil != reqErr {
-				logging.LogErrorf("download network asset [%s] failed: %s", u, reqErr)
-				return ast.WalkContinue
-			}
-			if 200 != resp.StatusCode {
-				logging.LogErrorf("download network asset [%s] failed: %d", u, resp.StatusCode)
-				return ast.WalkContinue
-			}
-
-			if 1024*1024*96 < resp.ContentLength {
-				logging.LogWarnf("network asset [%s]' size [%s] is large then [96 MB], ignore it", u, humanize.IBytes(uint64(resp.ContentLength)))
-				return ast.WalkContinue
-			}
-
-			data, repErr := resp.ToBytes()
-			if nil != repErr {
-				logging.LogErrorf("download network asset [%s] failed: %s", u, repErr)
-				return ast.WalkContinue
-			}
-			var name string
-			if strings.Contains(u, "?") {
-				name = u[:strings.Index(u, "?")]
-				name = path.Base(name)
-			} else {
-				name = path.Base(u)
-			}
-			if strings.Contains(name, "#") {
-				name = name[:strings.Index(name, "#")]
-			}
-			name, _ = url.PathUnescape(name)
-			ext := path.Ext(name)
-			if "" == ext {
-				if mtype := mimetype.Detect(data); nil != mtype {
-					ext = mtype.Extension()
-				}
-			}
-			if "" == ext {
-				contentType := resp.Header.Get("Content-Type")
-				exts, _ := mime.ExtensionsByType(contentType)
-				if 0 < len(exts) {
-					ext = exts[0]
-				}
-			}
-			name = strings.TrimSuffix(name, ext)
-			name = util.FilterUploadFileName(name)
-			name = util.TruncateLenFileName(name)
-			name = "network-asset-" + name + "-" + ast.NewNodeID() + ext
-			writePath := filepath.Join(assetsDirPath, name)
-			if err = filelock.WriteFile(writePath, data); nil != err {
-				logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
-				return ast.WalkContinue
-			}
-
-			if ast.NodeLinkDest == n.Type {
-				n.Tokens = []byte("assets/" + name)
-			} else if n.IsTextMarkType("a") {
-				n.TextMarkAHref = "assets/" + name
-			} else if ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
-				n.Tokens = bytes.ReplaceAll(n.Tokens, dest, []byte("assets/"+name))
-			}
-			files++
-		}
-		return ast.WalkContinue
-	})
 
 	if 0 < files {
 		util.PushUpdateMsg(msgId, Conf.Language(113), 7000)
@@ -1239,6 +1045,143 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 			ret[i] = dest + "/"
 		}
 	}
+	return
+}
+
+func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
+	if ast.NodeLinkDest == node.Type {
+		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
+	} else if node.IsTextMarkType("a") {
+		node.TextMarkAHref = strings.ReplaceAll(node.TextMarkAHref, oldDest, dest)
+	} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
+		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
+	} else if ast.NodeAttributeView == node.Type {
+		needWrite := false
+		attrView, _ := av.ParseAttributeView(node.AttributeViewID)
+		if nil == attrView {
+			return
+		}
+
+		for _, keyValues := range attrView.KeyValues {
+			if av.KeyTypeMAsset != keyValues.Key.Type {
+				continue
+			}
+
+			for _, value := range keyValues.Values {
+				if 1 > len(value.MAsset) {
+					continue
+				}
+
+				for _, asset := range value.MAsset {
+					if oldDest == asset.Content && oldDest != dest {
+						asset.Content = dest
+						needWrite = true
+					}
+				}
+			}
+		}
+
+		if needWrite {
+			av.SaveAttributeView(attrView)
+		}
+	}
+}
+
+func getRemoteAssetsLinkDests(node *ast.Node, onlyImg bool) (ret []string) {
+	if onlyImg {
+		if ast.NodeLinkDest == node.Type {
+			if node.ParentIs(ast.NodeImage) {
+				if !util.IsAssetLinkDest(node.Tokens) {
+					ret = append(ret, string(node.Tokens))
+				}
+
+			}
+		} else if ast.NodeAttributeView == node.Type {
+			attrView, _ := av.ParseAttributeView(node.AttributeViewID)
+			if nil == attrView {
+				return
+			}
+
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeMAsset != keyValues.Key.Type {
+					continue
+				}
+
+				for _, value := range keyValues.Values {
+					if 1 > len(value.MAsset) {
+						continue
+					}
+
+					for _, asset := range value.MAsset {
+						if av.AssetTypeImage != asset.Type {
+							continue
+						}
+
+						dest := asset.Content
+						if !util.IsAssetLinkDest([]byte(dest)) {
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				}
+			}
+		}
+	} else {
+		if ast.NodeLinkDest == node.Type {
+			if !util.IsAssetLinkDest(node.Tokens) {
+				ret = append(ret, string(node.Tokens))
+			}
+		} else if node.IsTextMarkType("a") {
+			if !util.IsAssetLinkDest([]byte(node.TextMarkAHref)) {
+				ret = append(ret, node.TextMarkAHref)
+			}
+		} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
+			src := treenode.GetNodeSrcTokens(node)
+			if !util.IsAssetLinkDest([]byte(src)) {
+				ret = append(ret, src)
+			}
+		} else if ast.NodeAttributeView == node.Type {
+			attrView, _ := av.ParseAttributeView(node.AttributeViewID)
+			if nil == attrView {
+				return
+			}
+
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeMAsset != keyValues.Key.Type {
+					continue
+				}
+
+				for _, value := range keyValues.Values {
+					if 1 > len(value.MAsset) {
+						continue
+					}
+
+					for _, asset := range value.MAsset {
+						dest := asset.Content
+						if !util.IsAssetLinkDest([]byte(dest)) {
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+func getRemoteAssetsLinkDestsInTree(tree *parse.Tree, onlyImg bool) (nodes []*ast.Node) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		dests := getRemoteAssetsLinkDests(n, onlyImg)
+		if 1 > len(dests) {
+			return ast.WalkContinue
+		}
+
+		nodes = append(nodes, n)
+		return ast.WalkContinue
+	})
 	return
 }
 

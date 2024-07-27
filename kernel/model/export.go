@@ -2009,8 +2009,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
-			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
-			blockRefLink.KramdownIAL = n.KramdownIAL
+			var blockRefLink *ast.Node
+			if 0 < len(n.KramdownIAL) {
+				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
+				blockRefLink.KramdownIAL = n.KramdownIAL
+			} else {
+				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 4: // 脚注
@@ -2241,10 +2246,16 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 							val = string(lex.EscapeProtyleMarkers([]byte(val)))
 							val = strings.ReplaceAll(val, "\\|", "|")
 							val = strings.ReplaceAll(val, "|", "\\|")
-							lines := strings.Split(val, "\n")
-							for _, line := range lines {
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+							col := table.GetColumn(cell.Value.KeyID)
+							if nil != col && col.Wrap {
+								lines := strings.Split(val, "\n")
+								for _, line := range lines {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+								}
+							} else {
+								val = strings.ReplaceAll(val, "\n", " ")
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
 							}
 							continue
 						}
@@ -2254,10 +2265,38 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 							val = string(lex.EscapeProtyleMarkers([]byte(val)))
 							val = strings.ReplaceAll(val, "\\|", "|")
 							val = strings.ReplaceAll(val, "|", "\\|")
-							lines := strings.Split(val, "\n")
-							for _, line := range lines {
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+							col := table.GetColumn(cell.Value.KeyID)
+							if nil != col && col.Wrap {
+								lines := strings.Split(val, "\n")
+								for _, line := range lines {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+								}
+							} else {
+								val = strings.ReplaceAll(val, "\n", " ")
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+							}
+							continue
+						}
+					} else if av.KeyTypeTemplate == cell.Value.Type {
+						if nil != cell.Value.Template {
+							val = cell.Value.Template.Content
+							if "<no value>" == val {
+								val = ""
+							}
+
+							val = strings.ReplaceAll(val, "\\|", "|")
+							val = strings.ReplaceAll(val, "|", "\\|")
+							col := table.GetColumn(cell.Value.KeyID)
+							if nil != col && col.Wrap {
+								lines := strings.Split(val, "\n")
+								for _, line := range lines {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+								}
+							} else {
+								val = strings.ReplaceAll(val, "\n", " ")
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
 							}
 							continue
 						}

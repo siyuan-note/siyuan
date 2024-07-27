@@ -320,8 +320,6 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		headingChildren = treenode.GetHeadingFold(headingChildren)
 	}
 
-	refreshHeadingChildrenUpdated(srcNode, time.Now().Format("20060102150405"))
-
 	var srcEmptyList *ast.Node
 	if ast.NodeListItem == srcNode.Type && srcNode.Parent.FirstChild == srcNode && srcNode.Parent.LastChild == srcNode {
 		// 列表中唯一的列表项被移除后，该列表就为空了
@@ -373,8 +371,6 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if nil != srcEmptyList {
 			srcEmptyList.Unlink()
 		}
-
-		refreshHeadingChildrenUpdated(srcNode, time.Now().Format("20060102150405"))
 
 		refreshUpdated(srcNode)
 		refreshUpdated(srcTree.Root)
@@ -453,8 +449,6 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			srcEmptyList.Unlink()
 		}
 	}
-
-	refreshHeadingChildrenUpdated(srcNode, time.Now().Format("20060102150405"))
 
 	refreshUpdated(srcNode)
 	refreshUpdated(srcTree.Root)
@@ -765,8 +759,6 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		node.Next.Unlink()
 	}
 
-	refreshHeadingChildrenUpdated(node, time.Now().Format("20060102150405"))
-
 	node.Unlink()
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
 		// 保持空列表项
@@ -1026,8 +1018,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	refreshHeadingChildrenUpdated(insertedNode, time.Now().Format("20060102150405"))
-
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	if err = tx.writeTree(tree); nil != err {
@@ -1035,6 +1025,20 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	upsertAvBlockRel(insertedNode)
+
+	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
+	avs := insertedNode.IALAttr(av.NodeAttrNameAvs)
+	for _, avID := range strings.Split(avs, ",") {
+		if !ast.IsNodeIDPattern(avID) {
+			continue
+		}
+
+		AddAttributeViewBlock(tx, []map[string]interface{}{{
+			"id":         insertedNode.ID,
+			"isDetached": false,
+		}}, avID, "", previousID, false)
+		util.PushReloadAttrView(avID)
+	}
 
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
@@ -1115,8 +1119,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		treenode.MoveFoldHeading(updatedNode, oldNode)
 	}
 
-	refreshHeadingChildrenUpdated(oldNode, time.Now().Format("20060102150405"))
-
 	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
 
 	// 替换为新节点
@@ -1124,7 +1126,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	oldNode.Unlink()
 
 	createdUpdated(updatedNode)
-	refreshHeadingChildrenUpdated(updatedNode, updatedNode.IALAttr("updated"))
 
 	tx.nodes[updatedNode.ID] = updatedNode
 	if err = tx.writeTree(tree); nil != err {
@@ -1135,19 +1136,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	checkUpsertInUserGuide(tree)
 	return
-}
-
-func refreshHeadingChildrenUpdated(heading *ast.Node, updated string) {
-	if nil == heading || ast.NodeHeading != heading.Type {
-		return
-	}
-
-	// 将非标题块更新为标题块时需要更新下方块的 parent id
-	// The parent block field of the blocks under the heading block is calculated incorrectly https://github.com/siyuan-note/siyuan/issues/9869
-	children := treenode.HeadingChildren(heading)
-	for _, child := range children {
-		child.SetIALAttr("updated", updated)
-	}
 }
 
 func upsertAvBlockRel(node *ast.Node) {

@@ -76,7 +76,7 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 			tokens = bytes.ReplaceAll(tokens, []byte(" "), []byte("&nbsp;")) // 大纲面板条目中无法显示多个空格 https://github.com/siyuan-note/siyuan/issues/4370
 			buf.Write(tokens)
 		case ast.NodeBackslashContent:
-			buf.Write(n.Tokens)
+			buf.Write(html.EscapeHTML(n.Tokens))
 		case ast.NodeTextMark:
 			dom := luteEngine.RenderNodeBlockDOM(n)
 			buf.WriteString(dom)
@@ -201,7 +201,20 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					if "d" == sqlBlock.Type {
 						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
 						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-					} // 标题块不需要再单独解析，直接使用 Markdown，函数开头处会处理
+					} else if "h" == sqlBlock.Type {
+						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+						var hChildren []*ast.Node
+						hChildren = append(hChildren, h)
+						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+						mdBuf := &bytes.Buffer{}
+						for _, hChild := range hChildren {
+							md, _ = lute.FormatNodeSync(hChild, luteEngine.ParseOptions, luteEngine.RenderOptions)
+							mdBuf.WriteString(md)
+							mdBuf.WriteString("\n\n")
+						}
+						md = mdBuf.String()
+					}
 
 					buf := &bytes.Buffer{}
 					lines := strings.Split(md, "\n")

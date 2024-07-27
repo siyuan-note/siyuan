@@ -23,7 +23,7 @@ import {avRender} from "../render/av/render";
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
-        filter: ["模版", "moban", "mb", "template"],
+        filter: ["模版", "moban", "muban", "mb", "template"],
         value: Constants.ZWSP,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
     }, {
@@ -35,7 +35,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: Constants.ZWSP + 2,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconImage"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.assets}</span></div>`,
     }, {
-        filter: ["块引用", "yinyong", "yy", "block reference"],
+        filter: ["块引用", "kuaiyinyong", "kyy", "block reference"],
         value: "((",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconRef"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.ref}</span><span class="b3-list-item__meta">((</span></div>`,
     }, {
@@ -51,13 +51,13 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconDatabase"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.database}</span></div>`,
     }, {
-        filter: ["文档", "wendang", "wd", "xjwd", "new doc"],
+        filter: ["新建文档并引用", "xinjianwendangbingyinyong","xjwdbyy", "new doc"],
         value: Constants.ZWSP + 4,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFile}</span><span class="b3-menu__accelerator">${updateHotkeyTip(window.siyuan.config.keymap.general.newFile.custom)}</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newFileRef}</span></div>`,
     }, {
-        filter: ["子文档", "ziwendang", "zwd", "xjzwd", "create sub doc"],
+        filter: ["新建子文档并引用", "xinjianziwendangbingyinyong", "xjzwdbyy", "create sub doc"],
         value: Constants.ZWSP + 6,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newSubDoc}</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconFile"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.newSubDocRef}</span></div>`,
     }, {
         value: "",
         html: "separator",
@@ -165,11 +165,11 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "tag",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconTags"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.tag}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.tag.custom))}</span></div>`,
     }, {
-        filter: ["行内代码", "hangneidaima", "hndm", "inline code"],
+        filter: ["行级代码", "hangjidaima", "hjdm", "行内代码", "hangneidaima", "hndm", "inline code"],
         value: "code",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconInlineCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-code"]}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-code"].custom))}</span></div>`,
     }, {
-        filter: ["行内数学公式", "hangneishuxuegongshi", "hnsxgs", "inline math"],
+        filter: ["行级公式", "hangjigongshi", "hjgs", "行级数学公式", "hangjishuxuegongshi", "hjsxgs", "行内数学公式", "hangneishuxuegongshi", "hnsxgs", "inline math"],
         value: "inline-math",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMath"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-math"]}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-math"].custom))}</span></div>`,
     }, {

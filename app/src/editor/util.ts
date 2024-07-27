@@ -18,7 +18,12 @@ import {ipcRenderer, shell} from "electron";
 import {pushBack} from "../util/backForward";
 import {Asset} from "../asset";
 import {Layout} from "../layout";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName,} from "../protyle/util/hasClosest";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    isInEmbedBlock,
+} from "../protyle/util/hasClosest";
 import {zoomOut} from "../menus/protyle";
 import {countBlockWord, countSelectWord} from "../layout/status";
 import {showMessage} from "../dialog/message";
@@ -349,7 +354,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     }
     let nodeElement: Element;
     Array.from(editor.editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${options.id}"]`)).find(item => {
-        if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+        if (!isInEmbedBlock(item)) {
             nodeElement = item;
             return true;
         }

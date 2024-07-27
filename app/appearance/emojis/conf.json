@@ -1494,119 +1494,126 @@
         "description": "Flexed Biceps",
         "description_ja_jp": "力こぶ",
         "description_zh_cn": "肌肉",
-        "keywords": "arm,beast,bench press,biceps,body,bodybuilder,bro,comic,curls,flex,flexing,gains,gym,jacked,muscle,ripped,strong,weightlift,weightlifter,ボディビル,ムキムキ,体,筋トレ,筋肉,腕,二头肌,健身房,强壮"
+        "keywords": "arm,beast,bench press,biceps,body,bodybuilder,bro,comic,curls,flex,flexing,gains,gym,jacked,muscle,ripped,strong,weightlift,weightlifter,ボディビル,ムキムキ,体,身体,筋トレ,筋肉,腕,二头肌,健身房,强壮"
       },
       {
         "unicode": "1f9be",
         "description": "Mechanical Arm",
         "description_ja_jp": "義手",
         "description_zh_cn": "机械手臂",
-        "keywords": "accessibility,prosthetic,アクセシビリティ,人工装具,体,腕,义肢,手臂,无障碍"
+        "keywords": "accessibility,prosthetic,アクセシビリティ,人工装具,体,身体,四肢,腕,义肢,手臂,无障碍"
       },
       {
         "unicode": "1f9bf",
         "description": "Mechanical Leg",
         "description_ja_jp": "義足",
         "description_zh_cn": "机械腿",
-        "keywords": "accessibility,prosthetic,アクセシビリティ,人工装具,体,脚,足,义肢,无障碍,腿"
+        "keywords": "accessibility,prosthetic,アクセシビリティ,人工装具,体,身体,四肢,脚,足,义肢,无障碍,腿"
+      },
+      {
+        "unicode": "1f9b5",
+        "description": "Leg",
+        "description_ja_jp": "足",
+        "description_zh_cn": "腿",
+        "keywords": "body,kick,limb,キック,体,身体,踢腿,四肢"
       },
       {
         "unicode": "1f9b6",
         "description": "Foot",
         "description_ja_jp": "足",
         "description_zh_cn": "脚",
-        "keywords": "ankle,feet,kick,stomp,くるぶし,キック,ダンス,体,足首,踏みつける,足踝,踏,踝,踢,踩,踱"
+        "keywords": "ankle,feet,kick,stomp,くるぶし,キック,ダンス,体,身体,四肢,足首,踏みつける,足踝,踏,踝,踢,踩,踱"
       },
       {
         "unicode": "1f442",
         "description": "Ear",
         "description_ja_jp": "耳",
         "description_zh_cn": "耳朵",
-        "keywords": "body,ears,hear,hearing,listen,listening,sound,体,聞き耳,聞く,仔细听,听,耳"
+        "keywords": "body,ears,hear,hearing,listen,listening,sound,体,身体,聞き耳,聞く,仔细听,听,耳"
       },
       {
         "unicode": "1f9bb",
         "description": "Ear with Hearing Aid",
         "description_ja_jp": "補聴器を付けた耳",
         "description_zh_cn": "戴助听器的耳朵",
-        "keywords": "accessibility,hard of hearing,アクセシビリティ,体,耳,聴覚,難聴,助听器,听力障碍,听障,失聪,无障碍,耳聋,聋"
+        "keywords": "accessibility,hard of hearing,アクセシビリティ,体,身体,耳,聴覚,難聴,助听器,听力障碍,听障,失聪,无障碍,耳聋,聋"
       },
       {
         "unicode": "1f443",
         "description": "Nose",
         "description_ja_jp": "鼻",
         "description_zh_cn": "鼻子",
-        "keywords": "body,noses,nosey,odor,smell,smells,体,嗅,气味,闻,鼻"
+        "keywords": "body,noses,nosey,odor,smell,smells,体,身体,嗅,气味,闻,鼻"
       },
       {
         "unicode": "1f9e0",
         "description": "Brain",
         "description_ja_jp": "脳",
         "description_zh_cn": "脑",
-        "keywords": "intelligent,smart,体,知識,脳みそ,頭,大脑,头脑,智慧,智能,聪明"
+        "keywords": "intelligent,smart,体,身体,知識,脳みそ,頭,大脑,头脑,智慧,智能,聪明"
       },
       {
         "unicode": "1fac0",
         "description": "Anatomical Heart",
         "description_ja_jp": "心臓",
         "description_zh_cn": "心脏器官",
-        "keywords": "anatomical,beat,cardiology,heart,heartbeat,organ,pulse,real heart,red,体,心拍,脈,臓器,鼓動,中心,器官,心率,心脏,心脏病学,心跳,真心,红心,解剖,身体"
+        "keywords": "anatomical,beat,cardiology,heart,heartbeat,organ,pulse,real heart,red,体,身体,心拍,脈,臓器,鼓動,中心,器官,心率,心脏,心脏病学,心跳,真心,红心,解剖,身体"
       },
       {
         "unicode": "1fac1",
         "description": "Lungs",
         "description_ja_jp": "肺",
         "description_zh_cn": "肺",
-        "keywords": "breath,breathe,exhalation,inhalation,lung,organ,respiration,体,呼吸,臓器,吸气,呼吸作用,呼气,器官,肺部,身体"
+        "keywords": "breath,breathe,exhalation,inhalation,lung,organ,respiration,体,身体,呼吸,臓器,吸气,呼吸作用,呼气,器官,肺部,身体"
       },
       {
         "unicode": "1f9b7",
         "description": "Tooth",
         "description_ja_jp": "歯",
         "description_zh_cn": "牙齿",
-        "keywords": "dentist,pearly,teeth,white,体,歯医者,白い歯,牙医,牙科医生,珍珠色,白色"
+        "keywords": "dentist,pearly,teeth,white,体,身体,歯医者,白い歯,牙医,牙科医生,珍珠色,白色"
       },
       {
         "unicode": "1f9b4",
         "description": "Bone",
         "description_ja_jp": "骨",
         "description_zh_cn": "骨头",
-        "keywords": "bones,dog,skeleton,wishbone,体,犬,骨格,叉骨,狗,骨骼"
+        "keywords": "bones,dog,skeleton,wishbone,体,身体,犬,骨格,叉骨,狗,骨骼"
       },
       {
         "unicode": "1f440",
         "description": "Eyes",
         "description_ja_jp": "目",
         "description_zh_cn": "双眼",
-        "keywords": "body,eye,face,googly,look,looking,omg,peep,see,seeing,両目,体,動く目玉,看,眼睛,窥视,身体"
+        "keywords": "body,eye,face,googly,look,looking,omg,peep,see,seeing,両目,体,身体,動く目玉,看,眼睛,窥视,身体"
       },
       {
         "unicode": "1f441-fe0f",
         "description": "Eye",
         "description_ja_jp": "片目",
         "description_zh_cn": "眼睛",
-        "keywords": "body,one eye,一つ目,体,目,单眼,看,眼,身体"
+        "keywords": "body,one eye,一つ目,体,身体,目,单眼,看,眼,身体"
       },
       {
         "unicode": "1f445",
         "description": "Tongue",
         "description_ja_jp": "舌",
         "description_zh_cn": "舌头",
-        "keywords": "body,lick,slurp,べろ,べー,体,啧啧地喝,舌,舔,身体"
+        "keywords": "body,lick,slurp,べろ,べー,体,身体,啧啧地喝,舌,舔,身体"
       },
       {
         "unicode": "1f444",
         "description": "Mouth",
         "description_ja_jp": "口",
         "description_zh_cn": "嘴",
-        "keywords": "beauty,body,kiss,kissing,lips,lipstick,キス,体,唇,口,口红,吻,唇膏"
+        "keywords": "beauty,body,kiss,kissing,lips,lipstick,キス,体,身体,唇,口,口红,吻,唇膏"
       },
       {
         "unicode": "1fae6",
         "description": "Biting Lip",
         "description_ja_jp": "唇を咬んでいる口",
         "description_zh_cn": "咬住嘴唇",
-        "keywords": "anxious,bite,fear,flirt,flirting,kiss,lip,lipstick,nervous,sexy,uncomfortable,worried,worry,セクシー,チッ,体,口,唇,悔しい,誘惑,不舒服,口红,咬嘴唇,嘴唇,害怕,性感,担心,接吻,焦虑,紧张,调情"
+        "keywords": "anxious,bite,fear,flirt,flirting,kiss,lip,lipstick,nervous,sexy,uncomfortable,worried,worry,セクシー,チッ,体,身体,口,唇,悔しい,誘惑,不舒服,口红,咬嘴唇,嘴唇,害怕,性感,担心,接吻,焦虑,紧张,调情"
       },
       {
         "unicode": "1f476",
@@ -3146,7 +3153,21 @@
         "description": "Person in Suit Levitating",
         "description_ja_jp": "浮いてるビジネスマン",
         "description_zh_cn": "西装革履的人",
-        "keywords": "business,person,suit,スレンダーマン,スーツ,ビジネスマン,男,男性,都市伝説,商务,正装,西装革履"
+        "keywords": "business,person,suit,スレンダーマン,スーツ,ビジネスマン,男,男性,都市伝説,商务,业务,正装,西装革履"
+      },
+      {
+        "unicode": "1f574-fe0f-200d-2642-fe0f",
+        "description": "Man in Suit Levitating",
+        "description_ja_jp": "浮いてるスーツの男性",
+        "description_zh_cn": "西装革履的男人",
+        "keywords": "business,suit,man,male,men,スレンダーマン,スーツ,ビジネスマン,都市伝説,商务,正装,西装革履,业务,西装,男,男性,男子"
+      },
+      {
+        "unicode": "1f574-fe0f-200d-2640-fe0f",
+        "description": "Woman in Suit Levitating",
+        "description_ja_jp": "浮いてるスーツの女性",
+        "description_zh_cn": "西装革履的女人",
+        "keywords": "business,suit,woman,female,women,スレンダーマン,スーツ,ビジネスマン,都市伝説,商务,正装,西装革履,业务,西装,女,女性,妇女"
       },
       {
         "unicode": "1f46f",
@@ -3693,6 +3714,174 @@
         "description_ja_jp": "家族: 大人一人と子供二人",
         "description_zh_cn": "单亲二孩家庭",
         "keywords": "adult,child,family,大人一人,子供二人,家族,親子,二孩,单亲,孩子,家庭,母亲,父亲"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467",
+        "description": "Family: man,woman,girl",
+        "description_ja_jp": "家族: 男性,女性,女の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩",
+        "keywords": "family,father,mother,,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男人,女人,男,女,男人,女人,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467-200d-1f466",
+        "description": "Family: man,woman,girl,boy",
+        "description_ja_jp": "家族: 男性,女性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩,男孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f466-200d-1f466",
+        "description": "Family: man,woman,boy,boy",
+        "description_ja_jp": "家族: 男性,女性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,女人,男孩,男孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f469-200d-1f467-200d-1f467",
+        "description": "Family: man,woman,girl,girl",
+        "description_ja_jp": "家族: 男性,女性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,女人,女孩,女孩",
+        "keywords": "family,father,mother,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f466",
+        "description": "Family: woman,woman,boy",
+        "description_ja_jp": "家族: 女性,女性,男の子",
+        "description_zh_cn": "家庭: 女人,女人,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467",
+        "description": "Family: woman,woman,girl",
+        "description_ja_jp": "家族: 女性,女性,女の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467-200d-1f466",
+        "description": "Family: woman,woman,girl,boy",
+        "description_ja_jp": "家族: 女性,女性,女の子,男の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f466-200d-1f466",
+        "description": "Family: woman,woman,boy,boy",
+        "description_ja_jp": "家族: 女性,女性,男の子,男の子",
+        "description_zh_cn": "家庭: 女人,女人,男孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f469-200d-1f467-200d-1f467",
+        "description": "Family: woman,woman,girl,girl",
+        "description_ja_jp": "家族: 女性,女性,女の子,女の子",
+        "description_zh_cn": "家庭: 女人,女人,女孩,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f466",
+        "description": "Family: man,man,boy",
+        "description_ja_jp": "家族: 男性,男性,男の子",
+        "description_zh_cn": "家庭: 男人,男人,男孩",
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467",
+        "description": "Family: man,man,girl",
+        "description_ja_jp": "家族: 男性,男性,女の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩",
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467-200d-1f466",
+        "description": "Family: man,man,girl,boy",
+        "description_ja_jp": "家族: 男性,男性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩,男孩",
+        "keywords": "family,father,man,male,men,boy,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f466-200d-1f466",
+        "description": "Family: man,man,boy,boy",
+        "description_ja_jp": "家族: 男性,男性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,男人,男孩,男孩",
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+      },
+      {
+        "unicode": "1f468-200d-1f468-200d-1f467-200d-1f467",
+        "description": "Family: man,man,girl,girl",
+        "description_ja_jp": "家族: 男性,男性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,男人,女孩,女孩",
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+      },
+      {
+        "unicode": "1f469-200d-1f466",
+        "description": "Family: woman,boy",
+        "description_ja_jp": "家族: 女性,男の子",
+        "description_zh_cn": "家庭: 女人,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467",
+        "description": "Family: woman,girl",
+        "description_ja_jp": "家族: 女性,女の子",
+        "description_zh_cn": "家庭: 女人,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467-200d-1f466",
+        "description": "Family: woman,girl,boy",
+        "description_ja_jp": "家族: 女性,女の子,男の子",
+        "description_zh_cn": "家庭: 女人,女孩,男孩",
+        "keywords": "family,mother,woman,female,male,girl,boy,child,家族,親子,亲子,家庭,母亲,女人,女性,男性,女孩,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f466-200d-1f466",
+        "description": "Family: woman,boy,boy",
+        "description_ja_jp": "家族: 女性,男の子,男の子",
+        "description_zh_cn": "家庭: 女人,男孩,男孩",
+        "keywords": "family,mother,woman,female,women,boy,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,儿童"
+      },
+      {
+        "unicode": "1f469-200d-1f467-200d-1f467",
+        "description": "Family: woman,girl,girl",
+        "description_ja_jp": "家族: 女性,女の子,女の子",
+        "description_zh_cn": "家庭: 女人,女孩,女孩",
+        "keywords": "family,mother,woman,female,women,girl,child,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f466",
+        "description": "Family: man,boy",
+        "description_ja_jp": "家族: 男性,男の子",
+        "description_zh_cn": "家庭: 男人,男孩",
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467",
+        "description": "Family: man,girl",
+        "description_ja_jp": "家族: 男性,女の子",
+        "description_zh_cn": "家庭: 男人,女孩",
+        "keywords": "family,father,man,male,female,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,女性,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467-200d-1f466",
+        "description": "Family: man,girl,boy",
+        "description_ja_jp": "家族: 男性,女の子,男の子",
+        "description_zh_cn": "家庭: 男人,女孩,男孩",
+        "keywords": "family,father,man,male,men,boy,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f466-200d-1f466",
+        "description": "Family: man,boy,boy",
+        "description_ja_jp": "家族: 男性,男の子,男の子",
+        "description_zh_cn": "家庭: 男人,男孩,男孩",
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+      },
+      {
+        "unicode": "1f468-200d-1f467-200d-1f467",
+        "description": "Family: man,girl,girl",
+        "description_ja_jp": "家族: 男性,女の子,女の子",
+        "description_zh_cn": "家庭: 男人,女孩,女孩",
+        "keywords": "family,father,man,male,female,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,女性,女孩,儿童"
       },
       {
         "unicode": "1f463",
@@ -6763,6 +6952,13 @@
         "description_ja_jp": "鳥居",
         "description_zh_cn": "神社",
         "keywords": "religion,shinto,shrine,宗教,建物,建築物,神社,神道,日本,神道教"
+      },
+      {
+        "unicode": "e50a",
+        "description": "Shibuya",
+        "description_ja_jp": "渋谷",
+        "description_zh_cn": "涩谷",
+        "keywords": "109,shibuya,建物,建築物,渋谷区,日本,涩谷区"
       },
       {
         "unicode": "1f54b",
@@ -11385,6 +11581,188 @@
         "description_ja_jp": "黒枠四角",
         "description_zh_cn": "黑色方形按钮",
         "keywords": "button,geometric,square,ボタン,四角,正方形,几何,几何图形,按钮,方形,黑线方形按钮,黑线正方形按钮,黑色正方形按钮,黑边线方形按钮,黑边线正方形按钮"
+      },
+      {
+        "unicode": "1f1e6",
+        "description": "Regional indicator symbol letter A",
+        "description_ja_jp": "地域指示記号英字 A",
+        "description_zh_cn": "区域指示符字母 A",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e7",
+        "description": "Regional indicator symbol letter B",
+        "description_ja_jp": "地域指示記号英字 B",
+        "description_zh_cn": "区域指示符字母 B",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e8",
+        "description": "Regional indicator symbol letter C",
+        "description_ja_jp": "地域指示記号英字 C",
+        "description_zh_cn": "区域指示符字母 C",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1e9",
+        "description": "Regional indicator symbol letter D",
+        "description_ja_jp": "地域指示記号英字 D",
+        "description_zh_cn": "区域指示符字母 D",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ea",
+        "description": "Regional indicator symbol letter E",
+        "description_ja_jp": "地域指示記号英字 E",
+        "description_zh_cn": "区域指示符字母 E",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1eb",
+        "description": "Regional indicator symbol letter F",
+        "description_ja_jp": "地域指示記号英字 F",
+        "description_zh_cn": "区域指示符字母 F",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ec",
+        "description": "Regional indicator symbol letter G",
+        "description_ja_jp": "地域指示記号英字 G",
+        "description_zh_cn": "区域指示符字母 G",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ed",
+        "description": "Regional indicator symbol letter H",
+        "description_ja_jp": "地域指示記号英字 H",
+        "description_zh_cn": "区域指示符字母 H",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ee",
+        "description": "Regional indicator symbol letter I",
+        "description_ja_jp": "地域指示記号英字 I",
+        "description_zh_cn": "区域指示符字母 I",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ef",
+        "description": "Regional indicator symbol letter J",
+        "description_ja_jp": "地域指示記号英字 J",
+        "description_zh_cn": "区域指示符字母 J",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f0",
+        "description": "Regional indicator symbol letter K",
+        "description_ja_jp": "地域指示記号英字 K",
+        "description_zh_cn": "区域指示符字母 K",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f1",
+        "description": "Regional indicator symbol letter L",
+        "description_ja_jp": "地域指示記号英字 L",
+        "description_zh_cn": "区域指示符字母 L",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f2",
+        "description": "Regional indicator symbol letter M",
+        "description_ja_jp": "地域指示記号英字 M",
+        "description_zh_cn": "区域指示符字母 M",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f3",
+        "description": "Regional indicator symbol letter N",
+        "description_ja_jp": "地域指示記号英字 N",
+        "description_zh_cn": "区域指示符字母 N",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f4",
+        "description": "Regional indicator symbol letter O",
+        "description_ja_jp": "地域指示記号英字 O",
+        "description_zh_cn": "区域指示符字母 O",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f5",
+        "description": "Regional indicator symbol letter P",
+        "description_ja_jp": "地域指示記号英字 P",
+        "description_zh_cn": "区域指示符字母 P",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f6",
+        "description": "Regional indicator symbol letter Q",
+        "description_ja_jp": "地域指示記号英字 Q",
+        "description_zh_cn": "区域指示符字母 Q",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f7",
+        "description": "Regional indicator symbol letter R",
+        "description_ja_jp": "地域指示記号英字 R",
+        "description_zh_cn": "区域指示符字母 R",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f8",
+        "description": "Regional indicator symbol letter S",
+        "description_ja_jp": "地域指示記号英字 S",
+        "description_zh_cn": "区域指示符字母 S",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1f9",
+        "description": "Regional indicator symbol letter T",
+        "description_ja_jp": "地域指示記号英字 T",
+        "description_zh_cn": "区域指示符字母 T",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fa",
+        "description": "Regional indicator symbol letter U",
+        "description_ja_jp": "地域指示記号英字 U",
+        "description_zh_cn": "区域指示符字母 U",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fb",
+        "description": "Regional indicator symbol letter V",
+        "description_ja_jp": "地域指示記号英字 V",
+        "description_zh_cn": "区域指示符字母 V",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fc",
+        "description": "Regional indicator symbol letter W",
+        "description_ja_jp": "地域指示記号英字 W",
+        "description_zh_cn": "区域指示符字母 W",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fd",
+        "description": "Regional indicator symbol letter X",
+        "description_ja_jp": "地域指示記号英字 X",
+        "description_zh_cn": "区域指示符字母 X",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1fe",
+        "description": "Regional indicator symbol letter Y",
+        "description_ja_jp": "地域指示記号英字 Y",
+        "description_zh_cn": "区域指示符字母 Y",
+        "keywords": ""
+      },
+      {
+        "unicode": "1f1ff",
+        "description": "Regional indicator symbol letter Z",
+        "description_ja_jp": "地域指示記号英字 Z",
+        "description_zh_cn": "区域指示符字母 Z",
+        "keywords": ""
       }
     ]
   },

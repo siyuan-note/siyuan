@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestBlock, isInEmbedBlock} from "../util/hasClosest";
 import {Constants} from "../../constants";
 
 export const getPreviousBlock = (element: Element) => {
@@ -19,7 +19,7 @@ export const getPreviousBlock = (element: Element) => {
 export const getLastBlock = (element: Element) => {
     let lastElement;
     Array.from(element.querySelectorAll("[data-node-id]")).reverse().find(item => {
-        if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed")) {
+        if (!isInEmbedBlock(item)) {
             lastElement = item;
             return true;
         }
@@ -30,8 +30,7 @@ export const getLastBlock = (element: Element) => {
 export const getFirstBlock = (element: Element) => {
     let firstElement;
     Array.from(element.querySelectorAll("[data-node-id]")).find(item => {
-        if (!hasClosestByAttribute(item.parentElement, "data-type", "NodeBlockQueryEmbed") &&
-            !item.classList.contains("li") && !item.classList.contains("sb")) {
+        if (!isInEmbedBlock(item) && !item.classList.contains("li") && !item.classList.contains("sb")) {
             firstElement = item;
             return true;
         }

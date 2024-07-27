@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../../util/hasClosest";
 import {stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
@@ -206,7 +206,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let avBackground = "--av-background:var(--b3-theme-background)";
                 if (e.style.backgroundColor) {
                     avBackground = "--av-background:" + e.style.backgroundColor;
-                } else if (hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed")) {
+                } else if (isInEmbedBlock(e)) {
                     avBackground = "--av-background:var(--b3-theme-surface)";
                 }
                 e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">

@@ -489,7 +489,24 @@ const initKernel = (workspace, port, lang) => {
                         });
                     });
                 };
-                await getAvailablePort();
+                // always start with default port, only try with available port when it's not available.
+                const chekcDefaultPortIsInUse = () => {
+                    return new Promise((portResolve, _portReject) => {
+                        const server = gNet.createServer();
+                        server.on("error", error => {
+                            writeLog(error);
+                            writeLog(`port(${kernelPort}) is likely occupied, will try with available port`);
+                            portResolve(true);
+                        });
+                        server.listen(kernelPort, () => {
+                            server.close(() => portResolve(false));
+                        });
+                    });
+                }
+                if (await chekcDefaultPortIsInUse()) {
+                    await getAvailablePort();
+                    writeLog(`get new available port (${kernelPort})`);
+                }
             }
         }
         writeLog("got kernel port [" + kernelPort + "]");

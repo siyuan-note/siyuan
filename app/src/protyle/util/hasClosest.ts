@@ -140,4 +140,4 @@ export const isInEmbedBlock = (element: Element) => {
     } else {
         return false;
     }
-}
+};

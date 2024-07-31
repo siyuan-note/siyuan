@@ -610,6 +610,9 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	// Close the user guide when exiting https://github.com/siyuan-note/siyuan/issues/10322
 	closeUserGuide()
 
+	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
+	sql.WaitForWritingDatabase()
+
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
 	if !skipNewVerInstallPkg() {
@@ -1082,8 +1085,6 @@ func closeUserGuide() {
 		if removeErr := filelock.Remove(boxDirPath); nil != removeErr {
 			logging.LogErrorf("remove corrupted user guide box [%s] failed: %s", boxDirPath, removeErr)
 		}
-
-		sql.WaitForWritingDatabase()
 
 		util.PushClearMsg(msgId)
 		logging.LogInfof("closed user guide box [%s]", boxID)

@@ -479,7 +479,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ and "
+					"Data": "​ or "
 				},
 				{
 					"Type": "NodeTextMark",

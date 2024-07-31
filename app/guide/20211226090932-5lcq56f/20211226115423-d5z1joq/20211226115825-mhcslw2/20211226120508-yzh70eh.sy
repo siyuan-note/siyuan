@@ -6,7 +6,7 @@
 		"id": "20211226120508-yzh70eh",
 		"title": "嵌入內容塊",
 		"type": "doc",
-		"updated": "20240508085352"
+		"updated": "20240731204705"
 	},
 	"Children": [
 		{
@@ -400,7 +400,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120744-jsi9w11",
-				"updated": "20211226130358"
+				"updated": "20240731204705"
 			},
 			"Children": [
 				{
@@ -414,12 +414,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120744-4akirlb",
-				"updated": "20211226160327"
+				"updated": "20240731204705"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "查詢同時包含標簽 "
+					"Data": "查詢包含標簽 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -428,7 +428,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": "​ 或 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -437,7 +437,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 的段落塊："
+					"Data": "​ 的段落塊："
 				}
 			]
 		},

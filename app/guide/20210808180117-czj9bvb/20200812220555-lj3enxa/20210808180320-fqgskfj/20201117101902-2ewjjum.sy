@@ -6,7 +6,7 @@
 		"id": "20201117101902-2ewjjum",
 		"title": "嵌入内容块",
 		"type": "doc",
-		"updated": "20240508085440"
+		"updated": "20240731205621"
 	},
 	"Children": [
 		{
@@ -90,7 +90,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20201224120447-e6zyfti"
+				"id": "20201224120447-e6zyfti",
+				"updated": "20240731205613"
 			},
 			"Children": [
 				{
@@ -370,7 +371,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120447-fnapz6h"
+				"id": "20201224120447-fnapz6h",
+				"updated": "20240731205613"
 			},
 			"Children": [
 				{
@@ -419,7 +421,8 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20210111224926-ju1sd4d",
-				"updated": "20240508085440"
+				"style": "height: 90px;",
+				"updated": "20240731205613"
 			},
 			"Children": [
 				{
@@ -445,7 +448,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120447-ickbh88"
+				"id": "20201224120447-ickbh88",
+				"updated": "20240731205621"
 			},
 			"Children": [
 				{
@@ -462,12 +466,13 @@
 			"ID": "20201224120447-53y8c84",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20201224120447-53y8c84"
+				"id": "20201224120447-53y8c84",
+				"updated": "20240731205621"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "查询同时包含标签 "
+					"Data": "查询包含标签 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -476,7 +481,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 和 "
+					"Data": "​ 或 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -485,7 +490,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 的段落块："
+					"Data": "​ 的段落块："
 				}
 			]
 		},
@@ -494,7 +499,8 @@
 			"Type": "NodeBlockQueryEmbed",
 			"Properties": {
 				"id": "20201224120447-veyqmvr",
-				"updated": "20211222185428"
+				"style": "height: 90px;",
+				"updated": "20240731205615"
 			},
 			"Children": [
 				{

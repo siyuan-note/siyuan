@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.2
-        version: 2.1.2(electron@31.3.1)
+        version: 2.1.2(electron@30.3.1)
     devDependencies:
       '@types/node':
         specifier: ^18.13.0
@@ -34,8 +34,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.5
       electron:
-        specifier: 31.3.1
-        version: 31.3.1
+        specifier: 30.3.1
+        version: 30.3.1
       electron-builder:
         specifier: 24.9.1
         version: 24.9.1
@@ -925,8 +925,8 @@ packages:
   electron-to-chromium@1.4.186:
     resolution: {integrity: sha512-YoVeFrGd/7ROjz4R9uPoND1K/hSRC/xADy9639ZmIZeJSaBnKdYx3I6LMPsY7CXLpK7JFgKQVzeZ/dk2br6Eaw==}
 
-  electron@31.3.1:
-    resolution: {integrity: sha512-9fiuWlRhBfygtcT+auRd/WdBK/f8LZZcrpx0RjpXhH2DPTP/PfnkC4JB1PW55qCbGbh4wAgkYbf4ExIag8oGCA==}
+  electron@30.3.1:
+    resolution: {integrity: sha512-Ai/OZ7VlbFAVYMn9J5lyvtr+ZWyEbXDVd5wBLb5EVrp4352SRmMAmN5chcIe3n9mjzcgehV9n4Hwy15CJW+YbA==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2249,9 +2249,9 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@electron/remote@2.1.2(electron@31.3.1)':
+  '@electron/remote@2.1.2(electron@30.3.1)':
     dependencies:
-      electron: 31.3.1
+      electron: 30.3.1
 
   '@electron/universal@1.4.1':
     dependencies:
@@ -3142,7 +3142,7 @@ snapshots:
 
   electron-to-chromium@1.4.186: {}
 
-  electron@31.3.1:
+  electron@30.3.1:
     dependencies:
       '@electron/get': 2.0.2
       '@types/node': 20.14.5

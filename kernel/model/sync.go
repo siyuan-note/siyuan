@@ -583,6 +583,7 @@ func formatRepoErrorMsg(err error) string {
 	} else if errors.Is(err, cloud.ErrCloudServiceUnavailable) {
 		msg = Conf.language(219)
 	} else {
+		logging.LogErrorf("sync failed caused by network: %s", msg)
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 			msg = Conf.Language(33)
@@ -595,7 +596,6 @@ func formatRepoErrorMsg(err error) string {
 		} else if strings.Contains(msgLowerCase, "net/http: request canceled while waiting for connection") || strings.Contains(msgLowerCase, "exceeded while awaiting") || strings.Contains(msgLowerCase, "context deadline exceeded") || strings.Contains(msgLowerCase, "timeout") || strings.Contains(msgLowerCase, "context cancellation while reading body") {
 			msg = Conf.Language(24)
 		} else if strings.Contains(msgLowerCase, "connection was") || strings.Contains(msgLowerCase, "reset by peer") || strings.Contains(msgLowerCase, "refused") || strings.Contains(msgLowerCase, "socket") || strings.Contains(msgLowerCase, "closed idle connection") || strings.Contains(msgLowerCase, "eof") {
-			logging.LogErrorf("sync failed caused by network: %s", msg)
 			msg = Conf.Language(28)
 		}
 	}

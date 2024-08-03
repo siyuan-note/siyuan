@@ -1093,24 +1093,30 @@ func DuplicateDoc(tree *parse.Tree) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
-	previousID := tree.Root.ID
 	resetTree(tree, "Duplicated", false)
 	createTreeTx(tree)
 	WaitForWritingFiles()
 
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
-	avs := tree.Root.IALAttr(av.NodeAttrNameAvs)
-	for _, avID := range strings.Split(avs, ",") {
-		if !ast.IsNodeIDPattern(avID) {
-			continue
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
 		}
 
-		AddAttributeViewBlock(nil, []map[string]interface{}{{
-			"id":         tree.Root.ID,
-			"isDetached": false,
-		}}, avID, "", previousID, false)
-		util.PushReloadAttrView(avID)
-	}
+		avs := n.IALAttr(av.NodeAttrNameAvs)
+		for _, avID := range strings.Split(avs, ",") {
+			if !ast.IsNodeIDPattern(avID) {
+				continue
+			}
+
+			AddAttributeViewBlock(nil, []map[string]interface{}{{
+				"id":         n.ID,
+				"isDetached": false,
+			}}, avID, "", "", false)
+			util.PushReloadAttrView(avID)
+		}
+		return ast.WalkContinue
+	})
 	return
 }
 

@@ -2,7 +2,7 @@
 
 ## 获取源码
 
-* `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
+* `git clone git@github.com:siyuan-note/siyuan.git`
 * 切换到 dev 分支 `git checkout dev`
 
 ## NPM 依赖

@@ -2,7 +2,7 @@
 
 ## Get the source code
 
-* `git clone --depth=1 git@github.com:siyuan-note/siyuan.git`
+* `git clone git@github.com:siyuan-note/siyuan.git`
 * switch to dev branch `git checkout dev`
 
 ## User Interface

@@ -350,11 +350,16 @@ func importRepoKey(c *gin.Context) {
 	}
 
 	base64Key := arg["key"].(string)
-	if err := model.ImportRepoKey(base64Key); nil != err {
+	retKey, err := model.ImportRepoKey(base64Key)
+	if nil != err {
 		ret.Code = -1
 		ret.Msg = fmt.Sprintf(model.Conf.Language(137), err)
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"key": retKey,
 	}
 }
 

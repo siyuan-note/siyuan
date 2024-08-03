@@ -179,8 +179,8 @@ export const initAbout = () => {
                             passwordDialog.destroy();
                         });
                         btnsElement[1].addEventListener("click", () => {
-                            fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, () => {
-                                window.siyuan.config.repo.key = textAreaElement.value;
+                            fetchPost("/api/repo/importRepoKey", {key: textAreaElement.value}, (response) => {
+                                window.siyuan.config.repo.key = response.data.key;
                                 importKeyElement.parentElement.classList.add("fn__none");
                                 importKeyElement.parentElement.nextElementSibling.classList.remove("fn__none");
                                 passwordDialog.destroy();

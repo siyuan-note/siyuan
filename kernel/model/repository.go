@@ -424,23 +424,23 @@ func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	return
 }
 
-func ImportRepoKey(base64Key string) (err error) {
+func ImportRepoKey(base64Key string) (retKey string, err error) {
 	util.PushMsg(Conf.Language(136), 3000)
 
-	base64Key = strings.TrimSpace(base64Key)
-	base64Key = gulu.Str.RemoveInvisible(base64Key)
-	if 1 > len(base64Key) {
+	retKey = strings.TrimSpace(base64Key)
+	retKey = gulu.Str.RemoveInvisible(retKey)
+	if 1 > len(retKey) {
 		err = errors.New(Conf.Language(142))
 		return
 	}
 
-	key, err := base64.StdEncoding.DecodeString(base64Key)
+	key, err := base64.StdEncoding.DecodeString(retKey)
 	if nil != err {
 		logging.LogErrorf("import data repo key failed: %s", err)
-		return errors.New(Conf.Language(157))
+		return "", errors.New(Conf.Language(157))
 	}
 	if 32 != len(key) {
-		return errors.New(Conf.Language(157))
+		return "", errors.New(Conf.Language(157))
 	}
 
 	Conf.Repo.Key = key

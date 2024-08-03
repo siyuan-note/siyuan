@@ -772,12 +772,8 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		WaitForWritingFiles()
-		syncDelete2AttributeView(node)
-		syncDelete2Block(node)
-	}()
+	syncDelete2AttributeView(node)
+	syncDelete2Block(node)
 	return
 }
 

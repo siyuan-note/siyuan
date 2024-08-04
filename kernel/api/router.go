@@ -155,7 +155,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/search/updateEmbedBlock", model.CheckAuth, updateEmbedBlock)
 	ginServer.Handle("POST", "/api/search/fullTextSearchBlock", model.CheckAuth, fullTextSearchBlock)
 	ginServer.Handle("POST", "/api/search/searchAsset", model.CheckAuth, searchAsset)
-	ginServer.Handle("POST", "/api/search/findReplace", model.CheckAuth, findReplace)
+	ginServer.Handle("POST", "/api/search/findReplace", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, findReplace)
 	ginServer.Handle("POST", "/api/search/fullTextSearchAssetContent", model.CheckAuth, fullTextSearchAssetContent)
 	ginServer.Handle("POST", "/api/search/getAssetContent", model.CheckAuth, getAssetContent)
 	ginServer.Handle("POST", "/api/search/listInvalidBlockRefs", model.CheckAuth, listInvalidBlockRefs)

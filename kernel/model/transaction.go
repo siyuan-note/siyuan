@@ -1253,13 +1253,32 @@ func refreshUpdated(node *ast.Node) {
 }
 
 func createdUpdated(node *ast.Node) {
+	// 补全子节点的更新时间 Improve block update time filling https://github.com/siyuan-note/siyuan/issues/12182
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type {
+			return ast.WalkContinue
+		}
+
+		updated := n.IALAttr("updated")
+		if "" == updated && ast.IsNodeIDPattern(n.ID) {
+			created := util.TimeFromID(n.ID)
+			updated = created
+			if updated < created {
+				updated = created
+			}
+
+			n.SetIALAttr("updated", updated)
+		}
+		return ast.WalkContinue
+	})
+
 	created := util.TimeFromID(node.ID)
 	updated := node.IALAttr("updated")
 	if "" == updated {
 		updated = created
 	}
 	if updated < created {
-		updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
+		updated = created
 	}
 	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段

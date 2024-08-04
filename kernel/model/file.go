@@ -1653,6 +1653,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 
 	allRemoveRootIDs := []string{tree.ID}
 	allRemoveRootIDs = append(allRemoveRootIDs, removeIDs...)
+	allRemoveRootIDs = gulu.Str.RemoveDuplicatedElem(allRemoveRootIDs)
 	for _, rootID := range allRemoveRootIDs {
 		removeTree, _ := LoadTreeByBlockID(rootID)
 		if nil == removeTree {

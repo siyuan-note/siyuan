@@ -780,41 +780,45 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 func syncDelete2Block(node *ast.Node) {
 	var changedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
+		if !entering || ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeAttributeView == n.Type {
-			avID := n.AttributeViewID
-			if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
-				changedAvIDs = append(changedAvIDs, avID)
-			}
+		avID := n.AttributeViewID
+		isMirror := av.IsMirror(avID)
+		if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
+			changedAvIDs = append(changedAvIDs, avID)
+		}
 
-			attrView, err := av.ParseAttributeView(avID)
-			if nil != err {
-				return ast.WalkContinue
-			}
+		if isMirror {
+			// 删除镜像数据库节点后不需要解绑块，因为其他镜像节点还在使用
+			return ast.WalkContinue
+		}
 
-			trees, nodes := getAttrViewBoundNodes(attrView)
-			for _, toChangNode := range nodes {
-				avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
-				if "" != avs {
-					avIDs := strings.Split(avs, ",")
-					avIDs = gulu.Str.RemoveElem(avIDs, avID)
-					if 1 > len(avIDs) {
-						toChangNode.RemoveIALAttr(av.NodeAttrNameAvs)
-					} else {
-						toChangNode.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
-					}
+		attrView, err := av.ParseAttributeView(avID)
+		if nil != err {
+			return ast.WalkContinue
+		}
+
+		trees, nodes := getAttrViewBoundNodes(attrView)
+		for _, toChangNode := range nodes {
+			avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
+			if "" != avs {
+				avIDs := strings.Split(avs, ",")
+				avIDs = gulu.Str.RemoveElem(avIDs, avID)
+				if 1 > len(avIDs) {
+					toChangNode.RemoveIALAttr(av.NodeAttrNameAvs)
+				} else {
+					toChangNode.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 				}
-				avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
-				oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
-				toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-				pushBroadcastAttrTransactions(oldAttrs, toChangNode)
 			}
-			for _, tree := range trees {
-				indexWriteTreeUpsertQueue(tree)
-			}
+			avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
+			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
+			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
+			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
+		}
+		for _, tree := range trees {
+			indexWriteTreeUpsertQueue(tree)
 		}
 		return ast.WalkContinue
 	})

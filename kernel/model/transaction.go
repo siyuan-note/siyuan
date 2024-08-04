@@ -1262,12 +1262,7 @@ func createdUpdated(node *ast.Node) {
 		updated := n.IALAttr("updated")
 		if "" == updated && ast.IsNodeIDPattern(n.ID) {
 			created := util.TimeFromID(n.ID)
-			updated = created
-			if updated < created {
-				updated = created
-			}
-
-			n.SetIALAttr("updated", updated)
+			n.SetIALAttr("updated", created)
 		}
 		return ast.WalkContinue
 	})

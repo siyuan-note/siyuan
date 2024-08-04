@@ -1207,6 +1207,11 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 				return nil
 			}
 
+			if filelock.IsHidden(path) {
+				// 清理资源文件时忽略隐藏文件 Ignore hidden files when cleaning unused assets https://github.com/siyuan-note/siyuan/issues/12172
+				return nil
+			}
+
 			if info.IsDir() && "assets" == info.Name() {
 				filelock.Walk(path, func(assetPath string, info fs.FileInfo, err error) error {
 					if path == assetPath {
@@ -1245,6 +1250,12 @@ func allAssetAbsPaths() (assetsAbsPathMap map[string]string, err error) {
 			}
 			return nil
 		}
+
+		if filelock.IsHidden(assetPath) {
+			// 清理资源文件时忽略隐藏文件 Ignore hidden files when cleaning unused assets https://github.com/siyuan-note/siyuan/issues/12172
+			return nil
+		}
+
 		relPath := filepath.ToSlash(assetPath)
 		relPath = relPath[strings.Index(relPath, "assets/"):]
 		if info.IsDir() {

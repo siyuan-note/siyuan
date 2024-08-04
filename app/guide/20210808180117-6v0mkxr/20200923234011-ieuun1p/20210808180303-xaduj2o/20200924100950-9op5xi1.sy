@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20240524085755"
+		"updated": "20240804220606"
 	},
 	"Children": [
 		{
@@ -13230,7 +13230,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220902200437-58why4v",
-				"updated": "20240517002700"
+				"updated": "20240804220606"
 			},
 			"Children": [
 				{
@@ -13249,7 +13249,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902200448-06bh19l",
-				"updated": "20240517002700"
+				"updated": "20240804220606"
 			},
 			"Children": [
 				{
@@ -13309,7 +13309,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+C"
+									"TextMarkTextContent": "Ctrl+C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13318,7 +13318,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘C"
+									"TextMarkTextContent": "⌘C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13406,6 +13406,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥Drag"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Paste as plain text"
 								},
 								{
 									"Type": "NodeText",

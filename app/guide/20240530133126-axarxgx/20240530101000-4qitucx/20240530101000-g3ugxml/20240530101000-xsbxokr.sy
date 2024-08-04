@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240804220709"
 	},
 	"Children": [
 		{
@@ -13794,7 +13794,7 @@
 			"Properties": {
 				"ID": "20240530101000-84m3izj",
 				"id": "20240530101000-q5l68vs",
-				"updated": "20240530101000"
+				"updated": "20240804220709"
 			},
 			"Children": [
 				{
@@ -13821,10 +13821,9 @@
 				0
 			],
 			"Properties": {
-				"ID": "20240530101000-gmel1qs",
 				"colgroup": "|",
 				"id": "20240530101000-4pvglr9",
-				"updated": "20240530101000"
+				"updated": "20240804220709"
 			},
 			"Children": [
 				{
@@ -13888,7 +13887,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+C"
+									"TextMarkTextContent": "Ctrl+C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13897,7 +13896,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘C"
+									"TextMarkTextContent": "⌘C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13993,6 +13992,15 @@
 								},
 								{
 									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "プレーンテキストとして貼り付け"
+								},
+								{
+									"Type": "NodeText",
 									"Data": "​"
 								},
 								{
@@ -14004,15 +14012,6 @@
 					]
 				}
 			]
-		},
-		{
-			"ID": "20240530101000-grohhs2",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-aeclfoy",
-				"id": "20240530101000-grohhs2",
-				"updated": "20240530101000"
-			}
 		}
 	]
 }

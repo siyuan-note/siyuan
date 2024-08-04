@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20240524085750"
+		"updated": "20240804220556"
 	},
 	"Children": [
 		{
@@ -13549,7 +13549,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220902195608-jh61ukq",
-				"updated": "20240517002648"
+				"updated": "20240804220556"
 			},
 			"Children": [
 				{
@@ -13568,7 +13568,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902195638-92scg94",
-				"updated": "20240517002648"
+				"updated": "20240804220556"
 			},
 			"Children": [
 				{
@@ -13628,7 +13628,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+C"
+									"TextMarkTextContent": "Ctrl+C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13637,7 +13637,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌘C"
+									"TextMarkTextContent": "⌘C/V"
 								},
 								{
 									"Type": "NodeText",
@@ -13725,6 +13725,15 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥拖拽"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "貼上為純文字"
 								},
 								{
 									"Type": "NodeText",

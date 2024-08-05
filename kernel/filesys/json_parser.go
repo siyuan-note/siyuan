@@ -186,8 +186,8 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 
 		if node.ID != node.IALAttr("id") {
 			//某些情况下会导致 ID 和属性 id 不相同 https://ld246.com/article/1722826829447
-			*needFix = true
 			node.SetIALAttr("id", node.ID)
+			*needFix = true
 		}
 
 		if 0 < len(node.Children) && ast.NodeBr.String() == node.Children[len(node.Children)-1].TypeStr {

@@ -680,7 +680,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 	boxLocalPath = filepath.Join(util.DataDir, boxID)
 
-	if gulu.File.IsDir(localPath) {
+	hPathsIDs := map[string]string{}
+	idPaths := map[string]string{}
+
+	if gulu.File.IsDir(localPath) { // 导入文件夹
 		// 收集所有资源文件
 		assets := map[string]string{}
 		filelock.Walk(localPath, func(currentPath string, info os.FileInfo, walkErr error) error {
@@ -843,6 +846,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			reassignIDUpdated(tree)
 			importTrees = append(importTrees, tree)
+
+			hPathsIDs[tree.HPath] = tree.ID
+			idPaths[tree.ID] = tree.Path
 			return nil
 		})
 	} else { // 导入单个文件
@@ -953,6 +959,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 		importTrees = []*parse.Tree{}
 		searchLinks = map[string]string{}
+
+		// 按照路径排序 Improve sort when importing markdown files https://github.com/siyuan-note/siyuan/issues/11390
+		var paths, hPaths []string
+		for hPath := range hPathsIDs {
+			hPaths = append(hPaths, hPath)
+		}
+		sort.Strings(hPaths)
+		for _, hPath := range hPaths {
+			paths = append(paths, idPaths[hPathsIDs[hPath]])
+		}
+		ChangeFileTreeSort(boxID, paths)
 	}
 
 	IncSync()

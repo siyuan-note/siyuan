@@ -113,10 +113,12 @@ func genTreeByJSON(node *ast.Node, tree *parse.Tree, idMap *map[string]bool, nee
 			node.Children = nil
 		}
 
-		if node.ID != node.IALAttr("id") {
-			//某些情况下会导致 ID 和属性 id 不相同 https://ld246.com/article/1722826829447
-			*needFix = true
-			node.SetIALAttr("id", node.ID)
+		if node.IsBlock() {
+			if node.ID != node.IALAttr("id") {
+				//某些情况下会导致 ID 和属性 id 不相同 https://ld246.com/article/1722826829447
+				*needFix = true
+				node.SetIALAttr("id", node.ID)
+			}
 		}
 
 		switch node.Type {

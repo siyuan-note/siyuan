@@ -257,7 +257,9 @@ export const copyTab = (app: App, tab: Tab) => {
                     app,
                     tab: newTab,
                     blockId: tab.model.editor.protyle.block.id,
-                    rootId: tab.model.editor.protyle.block.rootID
+                    rootId: tab.model.editor.protyle.block.rootID,
+                    // https://github.com/siyuan-note/siyuan/issues/12150
+                    action: tab.model.editor.protyle.block.action,
                 });
             } else if (tab.model instanceof Asset) {
                 model = new Asset({

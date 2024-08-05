@@ -518,7 +518,8 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 			strings.Contains(strings.ToLower(pkg.Description.ZhCN), keyword) ||
 			strings.Contains(strings.ToLower(pkg.Description.ZhCHT), keyword) ||
 			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) ||
-			strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), keyword) {
+			strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), keyword) ||
+			strings.Contains(strings.ToLower(pkg.Author), keyword) {
 			return true
 		}
 

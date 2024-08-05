@@ -1051,11 +1051,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
 	if nil != err {
-		if errors.Is(err, ErrBlockNotFound) {
-			logging.LogWarnf("not found block [%s]", id)
-			return
-		}
-
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}

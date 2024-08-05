@@ -131,7 +131,7 @@ func GetBlockRefText(id string) string {
 
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {
-		return ErrTreeNotFound.Error()
+		return ""
 	}
 
 	node := treenode.GetNodeInTree(tree, id)

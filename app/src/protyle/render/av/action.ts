@@ -85,6 +85,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return true;
     }
 
+    /// #if !MOBILE
     const searchIconElement = hasClosestByAttribute(event.target, "data-type", "av-search-icon");
     if (searchIconElement) {
         const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
@@ -98,7 +99,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
-
+    /// #endif
     const viewItemElement = hasClosestByClassName(event.target, "item");
     if (viewItemElement && viewItemElement.parentElement.classList.contains("layout-tab-bar")) {
         if (viewItemElement.classList.contains("item--focus")) {

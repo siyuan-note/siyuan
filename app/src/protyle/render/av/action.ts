@@ -91,7 +91,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
-        searchElement.value = Constants.ZWSP;
+        searchElement.value = "t";
         // setTimeout(() => {
         //     searchElement.focus();
         // }, Constants.TIMEOUT_TRANSITION);
@@ -496,7 +496,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     });
 };
 
-export const duplicateCompletely = (protyle:IProtyle, nodeElement:HTMLElement) => {
+export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement) => {
     fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
         nodeElement.classList.remove("protyle-wysiwyg--select");
         const tempElement = document.createElement("template");

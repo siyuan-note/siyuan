@@ -91,10 +91,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
-        searchElement.value = "t";
-        // setTimeout(() => {
-        //     searchElement.focus();
-        // }, Constants.TIMEOUT_TRANSITION);
+        setTimeout(() => {
+            searchElement.focus();
+        }, Constants.TIMEOUT_TRANSITION);
         event.preventDefault();
         event.stopPropagation();
         return true;

@@ -91,7 +91,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
-        searchElement.value = " ";
+        searchElement.value = Constants.ZWSP;
         setTimeout(() => {
             searchElement.focus();
         }, Constants.TIMEOUT_TRANSITION);

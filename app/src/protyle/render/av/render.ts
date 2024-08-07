@@ -10,7 +10,6 @@ import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
-import {isMobile} from "../../../util/functions";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -84,7 +83,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
                 viewID: newViewID,
-                query
+                query: query.trim()
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {
@@ -236,11 +235,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-search-icon" class="block__icon${isMobile() ? " fn__none" : ""}">
+            <span data-type="av-search-icon" class="block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </span>
             <div style="position: relative" class="fn__flex">
-                <input style="${(isSearching || query || isMobile()) ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
+                <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" class="block__icon">
@@ -348,7 +347,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 }
                 const viewsElement = e.querySelector(".av__views") as HTMLElement;
                 searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-                searchInputElement.value = query;
+                searchInputElement.value = query || "";
                 if (isSearching) {
                     searchInputElement.focus();
                 }
@@ -366,7 +365,6 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 searchInputElement.addEventListener("compositionend", () => {
                     updateSearch(e, protyle);
                 });
-                /// #if !MOBILE
                 searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
                     if (event.isComposing) {
                         return;
@@ -378,7 +376,6 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         searchInputElement.style.paddingRight = "0";
                     }
                 });
-                /// #endif
                 addClearButton({
                     inputElement: searchInputElement,
                     right: 0,
@@ -386,11 +383,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     height: searchInputElement.clientHeight,
                     clearCB() {
                         viewsElement.classList.remove("av__views--show");
-                        /// #if !MOBILE
                         searchInputElement.style.width = "0";
                         searchInputElement.style.paddingLeft = "0";
                         searchInputElement.style.paddingRight = "0";
-                        /// #endif
                         focusBlock(e);
                         updateSearch(e, protyle);
                     }

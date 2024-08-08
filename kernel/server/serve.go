@@ -172,7 +172,8 @@ func rewritePortJSON(pid, port string) {
 }
 
 func serveExport(ginServer *gin.Engine) {
-	ginServer.Static("/export/", filepath.Join(util.TempDir, "export"))
+	exportGroup := ginServer.Group("/export/", model.CheckAuth)
+	exportGroup.Static("/", filepath.Join(util.TempDir, "export"))
 }
 
 func serveWidgets(ginServer *gin.Engine) {

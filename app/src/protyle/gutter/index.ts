@@ -1506,7 +1506,7 @@ export class Gutter {
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         if (isInAndroid()) {
-                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2Md(response.data), response.data + Constants.ZWSP);
+                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
                         } else {
                             writeText(response.data + Constants.ZWSP);
                         }
@@ -1519,7 +1519,7 @@ export class Gutter {
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
                         if (isInAndroid()) {
-                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2Md(response.data), response.data + Constants.ZWSP);
+                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
                         } else {
                             writeText(response.data + Constants.ZWSP);
                         }

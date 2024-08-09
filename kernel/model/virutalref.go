@@ -195,8 +195,6 @@ func processVirtualRef(n *ast.Node, unlinks *[]*ast.Node, virtualBlockRefKeyword
 			}
 		}
 
-		// Wrong parsing virtual reference with `\` before it https://github.com/siyuan-note/siyuan/issues/7821
-		newContent = strings.ReplaceAll(newContent, "\\"+search.GetMarkSpanStart(search.VirtualBlockRefDataType), "\\\\"+search.GetMarkSpanStart(search.VirtualBlockRefDataType))
 		n.Tokens = []byte(newContent)
 		linkTree := parse.Inline("", n.Tokens, luteEngine.ParseOptions)
 		var children []*ast.Node

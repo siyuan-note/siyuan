@@ -170,6 +170,7 @@ interface Window {
         openExternal(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
+        writeHTMLClipboard(html: string): void
         writeImageClipboard(uri: string): void
         readClipboard(): string
         getBlockURL(): string

@@ -1,4 +1,5 @@
 {
+  "clearContextSucc": "コンテキストがクリアされました",
   "emptyPlaceholder": "何か書いてください。コマンドの場合は「/」",
   "publish": "公開する",
   "publishService": "サービスを公開",

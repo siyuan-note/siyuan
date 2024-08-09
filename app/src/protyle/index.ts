@@ -282,7 +282,7 @@ export class Protyle {
     private afterOnGet(mergedOptions: IOptions) {
         if (this.protyle.model) {
             /// #if !MOBILE
-            if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS)) {
+            if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS) || mergedOptions.action?.includes(Constants.CB_GET_OPENNEW)) {
                 setPanelFocus(this.protyle.model.element.parentElement.parentElement);
             }
             updatePanelByEditor({

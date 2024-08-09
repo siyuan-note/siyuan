@@ -10,7 +10,6 @@ import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
-import {pathPosix} from "../../util/pathName";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
 import {isPaidUser} from "../../util/needSubscribe";
@@ -661,7 +660,8 @@ const onExport = (data: IWebSocketData, filePath: string, exportOption: IExportO
     <link rel="stylesheet" type="text/css" id="baseStyle" href="stage/build/export/base.css?${Constants.SIYUAN_VERSION}"/>
     <link rel="stylesheet" type="text/css" id="themeDefaultStyle" href="appearance/themes/${themeName}/theme.css?${Constants.SIYUAN_VERSION}"/>
     ${themeStyle}
-    <title>${pathPosix().basename(filePath)} - ${window.siyuan.languages.siyuanNote}  v${Constants.SIYUAN_VERSION}</title>
+    <title>${data.data.name}</title>
+    <!-- Exported by SiYuan v${Constants.SIYUAN_VERSION} -->
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${setInlineStyle(false)}

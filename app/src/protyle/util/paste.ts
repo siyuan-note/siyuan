@@ -241,6 +241,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.items;
         }
     }
+
+    // Improve the pasting of selected text in PDF rectangular annotation https://github.com/siyuan-note/siyuan/issues/11629
+    textPlain = textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n");
+
     /// #if !BROWSER
     // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {

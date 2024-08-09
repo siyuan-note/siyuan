@@ -215,7 +215,10 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 			return
 		}
 
-		logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, logging.ShortStack())
+		stack := logging.ShortStack()
+		if !strings.Contains(stack, "BuildBlockBreadcrumb") {
+			logging.LogWarnf("block tree not found [id=%s], stack: [%s]", id, stack)
+		}
 		return nil, ErrTreeNotFound
 	}
 

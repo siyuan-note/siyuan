@@ -135,6 +135,11 @@ func initDBTables() {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_id] failed: %s", err)
 	}
 
+	_, err = db.Exec("CREATE INDEX idx_blocks_parent_id ON blocks(parent_id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_parent_id] failed: %s", err)
+	}
+
 	_, err = db.Exec("CREATE INDEX idx_blocks_root_id ON blocks(root_id)")
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocks_root_id] failed: %s", err)

@@ -174,7 +174,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     if (customHTML) {
         customHTML = `<div class="b3-menu__separator"></div>${customHTML}`;
     }
-    const clearContext = "Clear context"
+    const clearContext = "Clear context";
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -237,7 +237,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                             fillContent(protyle, response.data, elements);
                         });
                         if (currentElement.dataset.action === clearContext) {
-                            showMessage(window.siyuan.languages.clearContextSucc)
+                            showMessage(window.siyuan.languages.clearContextSucc);
                         } else {
                             menu.close();
                         }
@@ -272,7 +272,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                                 fillContent(protyle, response.data, elements);
                             });
                             if (target.dataset.action === clearContext) {
-                               showMessage(window.siyuan.languages.clearContextSucc)
+                               showMessage(window.siyuan.languages.clearContextSucc);
                             } else {
                                 menu.close();
                             }

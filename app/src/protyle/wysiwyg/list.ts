@@ -542,6 +542,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             item.querySelector(".protyle-action").outerHTML = '<div class="protyle-action" draggable="true"><svg><use xlink:href="#iconDot"></use></svg></div>';
             item.setAttribute("data-subtype", "u");
             item.setAttribute("data-marker", "*");
+            item.classList.remove("protyle-task--done");
             doOperations.push({
                 action: "update",
                 id: itemId,

@@ -39,6 +39,11 @@ type Theme struct {
 func Themes() (ret []*Theme) {
 	ret = []*Theme{}
 
+	isOnline := isBazzarOnline()
+	if !isOnline {
+		return
+	}
+
 	stageIndex, err := getStageIndex("themes")
 	if nil != err {
 		return

@@ -37,6 +37,11 @@ type Icon struct {
 func Icons() (icons []*Icon) {
 	icons = []*Icon{}
 
+	isOnline := isBazzarOnline()
+	if !isOnline {
+		return
+	}
+
 	stageIndex, err := getStageIndex("icons")
 	if nil != err {
 		return

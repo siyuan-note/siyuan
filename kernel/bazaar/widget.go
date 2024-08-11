@@ -37,6 +37,11 @@ type Widget struct {
 func Widgets() (widgets []*Widget) {
 	widgets = []*Widget{}
 
+	isOnline := isBazzarOnline()
+	if !isOnline {
+		return
+	}
+
 	stageIndex, err := getStageIndex("widgets")
 	if nil != err {
 		return

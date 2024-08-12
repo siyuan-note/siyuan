@@ -772,8 +772,36 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	syncDelete2AttributeView(node)
-	syncDelete2Block(node)
+	// 如果是断开列表时的删除列表项事务，则不需要删除数据库绑定块，因为断开列表事务后面会再次插入相同 ID 的列表项
+	// List item disconnection no longer affects database binding blocks https://github.com/siyuan-note/siyuan/issues/12235
+	needSyncDel2AvBlock := true
+	if ast.NodeListItem == node.Type {
+		for _, op := range tx.DoOperations {
+			// 不可能出现相同 ID 先插入再删除的情况，只可能出现先删除再插入的情况，所以这里只需要查找插入操作
+			if "insert" == op.Action {
+				data := strings.ReplaceAll(op.Data.(string), editor.FrontEndCaret, "")
+				subTree := tx.luteEngine.BlockDOM2Tree(data)
+				ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || ast.NodeListItem != n.Type {
+						return ast.WalkContinue
+					}
+
+					if n.ID == operation.ID {
+						needSyncDel2AvBlock = false
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+
+				break
+			}
+		}
+	}
+
+	if needSyncDel2AvBlock {
+		syncDelete2AttributeView(node)
+		syncDelete2Block(node)
+	}
 	return
 }
 

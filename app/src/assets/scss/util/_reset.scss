@@ -13,7 +13,6 @@ body {
   text-rendering: optimizeLegibility;
   margin: 0;
   font-family: var(--b3-font-family);
-  font-size: 14px;
   color: var(--b3-theme-on-background);
   background-color: var(--b3-theme-background);
   -webkit-font-smoothing: antialiased;
@@ -22,6 +21,11 @@ body {
   box-sizing: border-box;
   max-height: 100%;
   overflow: hidden;
+
+  // body 使用字号导致显示不全 https://github.com/siyuan-note/siyuan/issues/11670#issuecomment-2282329358
+  & > #dockBottom, & > .fn__flex-1 {
+    font-size: 14px;
+  }
 
   &.body--blur {
     .toolbar {

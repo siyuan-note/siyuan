@@ -538,7 +538,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	tree, _ := LoadTreeByBlockID(id)
-	tree = exportTree(tree, false, false,
+	tree = exportTree(tree, false, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -643,7 +643,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	tree = exportTree(tree, true, false,
+	tree = exportTree(tree, true, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -793,7 +793,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
-	tree = exportTree(tree, true, keepFold,
+	tree = exportTree(tree, true, keepFold, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -1840,7 +1840,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 	blockRefTextLeft, blockRefTextRight string,
 	addTitle bool,
 	defBlockIDs []string) (ret string) {
-	tree = exportTree(tree, false, false,
+	tree = exportTree(tree, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
@@ -1929,7 +1929,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 	return
 }
 
-func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
+func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
@@ -2223,6 +2223,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 		mdTableHeadRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
 		mdTableHead.AppendChild(mdTableHeadRow)
 		for _, col := range table.Columns {
+			if avHiddenCol && col.Hidden {
+				// 按需跳过隐藏列 Improve database table view exporting https://github.com/siyuan-note/siyuan/issues/12232
+				continue
+			}
+
 			cell := &ast.Node{Type: ast.NodeTableCell}
 			name := string(lex.EscapeProtyleMarkers([]byte(col.Name)))
 			name = strings.ReplaceAll(name, "\\|", "|")
@@ -2236,6 +2241,12 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold bool,
 			mdTableRow := &ast.Node{Type: ast.NodeTableRow, TableAligns: aligns}
 			mdTable.AppendChild(mdTableRow)
 			for _, cell := range row.Cells {
+				if avHiddenCol && nil != cell.Value {
+					if col := table.GetColumn(cell.Value.KeyID); nil != col && col.Hidden {
+						continue
+					}
+				}
+
 				mdTableCell := &ast.Node{Type: ast.NodeTableCell}
 				mdTableRow.AppendChild(mdTableCell)
 				var val string

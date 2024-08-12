@@ -38,6 +38,11 @@ type Template struct {
 func Templates() (templates []*Template) {
 	templates = []*Template{}
 
+	isOnline := isBazzarOnline()
+	if !isOnline {
+		return
+	}
+
 	stageIndex, err := getStageIndex("templates")
 	if nil != err {
 		return

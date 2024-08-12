@@ -39,6 +39,11 @@ type Plugin struct {
 func Plugins(frontend string) (plugins []*Plugin) {
 	plugins = []*Plugin{}
 
+	isOnline := isBazzarOnline()
+	if !isOnline {
+		return
+	}
+
 	stageIndex, err := getStageIndex("plugins")
 	if nil != err {
 		return

@@ -85,6 +85,11 @@ func initDBTables() {
 	if nil != err {
 		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create table [blocktrees] failed: %s", err)
 	}
+
+	_, err = db.Exec("CREATE INDEX idx_blocktrees_id ON blocktrees(id)")
+	if nil != err {
+		logging.LogFatalf(logging.ExitCodeReadOnlyDatabase, "create index [idx_blocktrees_id] failed: %s", err)
+	}
 }
 
 func initDBConnection() {

@@ -6,7 +6,7 @@
 		"id": "20201117112518-dott91x",
 		"title": "Embed Content Block",
 		"type": "doc",
-		"updated": "20240508085416"
+		"updated": "20240731204825"
 	},
 	"Children": [
 		{
@@ -446,7 +446,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20201224120448-gx2xvjh"
+				"id": "20201224120448-gx2xvjh",
+				"updated": "20240731204825"
 			},
 			"Children": [
 				{
@@ -464,12 +465,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20201224120448-e0ohbtq",
-				"updated": "20220623201429"
+				"updated": "20240731204825"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Query paragraph blocks that contain both tags "
+					"Data": "Query for paragraph blocks containing the tag "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -478,7 +479,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and "
+					"Data": "​ or "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -487,7 +488,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ":"
+					"Data": "​:"
 				}
 			]
 		},

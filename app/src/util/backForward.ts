@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {getContenteditableElement} from "../protyle/wysiwyg/getBlock";
 import {focusByOffset, focusByRange, getSelectionOffset} from "../protyle/util/selection";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -97,7 +97,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 focusByOffset(protyle.title.editElement, stack.position.start, stack.position.end);
             } else {
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
-                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                    if (!isInEmbedBlock(item)) {
                         blockElement = item;
                         return true;
                     }
@@ -122,7 +122,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
         return true;
     }
     Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
-        if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+        if (!isInEmbedBlock(item)) {
             blockElement = item;
             return true;
         }
@@ -165,7 +165,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                     protyle: stack.protyle,
                     afterCB() {
                         Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
-                            if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                            if (!isInEmbedBlock(item)) {
                                 blockElement = item;
                                 return true;
                             }
@@ -193,7 +193,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
             isPushBack: false,
             callback: () => {
                 Array.from(stack.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${stack.id}"]`)).find((item: HTMLElement) => {
-                    if (!hasClosestByAttribute(item, "data-type", "NodeBlockQueryEmbed")) {
+                    if (!isInEmbedBlock(item)) {
                         blockElement = item;
                         return true;
                     }

@@ -110,6 +110,15 @@ func (row *TableRow) GetValue(keyID string) (ret *Value) {
 	return
 }
 
+func (table *Table) GetColumn(id string) *TableColumn {
+	for _, column := range table.Columns {
+		if column.ID == id {
+			return column
+		}
+	}
+	return nil
+}
+
 func (table *Table) GetType() LayoutType {
 	return LayoutTypeTable
 }

@@ -1380,7 +1380,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				tree.Box = boxID
 				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
 
-				resetTree(tree, "Conflicted")
+				resetTree(tree, "Conflicted", true)
 				createTreeTx(tree)
 			}
 

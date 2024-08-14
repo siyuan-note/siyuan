@@ -128,3 +128,16 @@ export const hasClosestByClassName = (element: Node, className: string, top = fa
     }
     return isClosest && e;
 };
+
+export const isInEmbedBlock = (element: Element) => {
+    const embedElement = hasTopClosestByAttribute(element, "data-type", "NodeBlockQueryEmbed");
+    if (embedElement) {
+        if (embedElement.isSameNode(element)) {
+            return false;
+        } else {
+            return embedElement;
+        }
+    } else {
+        return false;
+    }
+};

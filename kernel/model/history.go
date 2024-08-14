@@ -446,7 +446,7 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	}
 
 	ago := time.Now().Add(-24 * time.Hour * time.Duration(Conf.Editor.HistoryRetentionDays))
-	stmt += " AND created > '" + fmt.Sprintf("%d", ago.Unix()) + "'"
+	stmt += " AND CAST(created AS INTEGER) > " + fmt.Sprintf("%d", ago.Unix()) + ""
 	return
 }
 
@@ -619,7 +619,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 
 	// 清理历史库
-	sql.DeleteOutdatedHistories(fmt.Sprintf("%d", ago))
+	sql.DeleteOutdatedHistories(ago)
 }
 
 var boxLatestHistoryTime = map[string]time.Time{}

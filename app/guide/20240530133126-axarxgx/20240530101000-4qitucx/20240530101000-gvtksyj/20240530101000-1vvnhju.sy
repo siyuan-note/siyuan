@@ -7,7 +7,7 @@
 		"id": "20240530101000-1vvnhju",
 		"title": "埋め込みコンテンツブロック",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240731205025"
 	},
 	"Children": [
 		{
@@ -434,7 +434,7 @@
 			"Properties": {
 				"ID": "20240530101000-eiazno1",
 				"id": "20240530101000-wi5nstx",
-				"updated": "20240530101000"
+				"updated": "20240731205025"
 			},
 			"Children": [
 				{
@@ -447,9 +447,8 @@
 			"ID": "20240530101000-06nikcu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-47j0rp0",
 				"id": "20240530101000-06nikcu",
-				"updated": "20240530101000"
+				"updated": "20240731205025"
 			},
 			"Children": [
 				{
@@ -463,7 +462,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ と "
+					"Data": "​ または "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -472,7 +471,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ の両方のタグを含む段落ブロックを検索します:"
+					"Data": "​ のタグを含む段落ブロックを検索します:"
 				}
 			]
 		},

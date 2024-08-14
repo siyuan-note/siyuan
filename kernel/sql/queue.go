@@ -61,7 +61,7 @@ func FlushTxJob() {
 func WaitForWritingDatabase() {
 	var printLog bool
 	var lastPrintLog bool
-	for i := 0; isWritingDatabase(); i++ {
+	for i := 0; isWritingDatabase(util.SQLFlushInterval + 50*time.Millisecond); i++ {
 		time.Sleep(50 * time.Millisecond)
 		if 200 < i && !printLog { // 10s 后打日志
 			logging.LogWarnf("database is writing: \n%s", logging.ShortStack())
@@ -74,8 +74,14 @@ func WaitForWritingDatabase() {
 	}
 }
 
-func isWritingDatabase() bool {
-	time.Sleep(util.SQLFlushInterval + 50*time.Millisecond)
+func WaitForWritingDatabaseIn(duration time.Duration) {
+	for i := 0; isWritingDatabase(duration); i++ {
+		time.Sleep(50 * time.Millisecond)
+	}
+}
+
+func isWritingDatabase(d time.Duration) bool {
+	time.Sleep(d)
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()
 	if 0 < len(operationQueue) || isWriting {

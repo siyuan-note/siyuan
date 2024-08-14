@@ -2106,6 +2106,11 @@ declare namespace Config {
          */
         inlineMemo?: boolean;
         /**
+         * Replace block refs
+         * @default false
+         */
+        blockRef?: boolean;
+        /**
          * Replace kdb elements
          * @default true
          */

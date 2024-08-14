@@ -39,7 +39,7 @@ import (
 	"golang.org/x/time/rate"
 )
 
-func resetTree(tree *parse.Tree, titleSuffix string) {
+func resetTree(tree *parse.Tree, titleSuffix string, removeAvBinding bool) {
 	tree.ID = ast.NewNodeID()
 	tree.Root.ID = tree.ID
 
@@ -121,8 +121,10 @@ func resetTree(tree *parse.Tree, titleSuffix string) {
 		return ast.WalkContinue
 	})
 
-	// 清空文档绑定的数据库
-	tree.Root.RemoveIALAttr(av.NodeAttrNameAvs)
+	if removeAvBinding {
+		// 清空文档绑定的数据库
+		tree.Root.RemoveIALAttr(av.NodeAttrNameAvs)
+	}
 }
 
 func pagedPaths(localPath string, pageSize int) (ret map[int][]string) {
@@ -212,6 +214,11 @@ func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 		return nil, ErrTreeNotFound
 	}
 
+	ret, err = loadTreeByBlockTree(bt)
+	return
+}
+
+func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 	luteEngine := util.NewLute()
 	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
 	return

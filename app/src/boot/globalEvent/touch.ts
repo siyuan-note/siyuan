@@ -1,5 +1,10 @@
 import {isIPad} from "../../protyle/util/compatibility";
-import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasTopClosestByTag,
+    isInEmbedBlock
+} from "../../protyle/util/hasClosest";
 import {initFileMenu, initNavigationMenu} from "../../menus/navigation";
 import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, tagMenu} from "../../menus/protyle";
 import {App} from "../../index";
@@ -80,7 +85,7 @@ export const globalTouchEnd = (event: TouchEvent, yDiff: number, time: number, a
             return true;
         }
         // 内元素弹出菜单
-        if (target.tagName === "SPAN" && !hasClosestByAttribute(target, "data-type", "NodeBlockQueryEmbed")) {
+        if (target.tagName === "SPAN" && !isInEmbedBlock(target)) {
             let editor: Protyle;
             /// #if !MOBILE
             const tabContainerElement = hasClosestByClassName(target, "protyle", true);

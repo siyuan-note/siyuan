@@ -1,4 +1,5 @@
 {
+  "clearContextSucc": "The context has been cleared",
   "emptyPlaceholder": "Write something, ' / ' for commands",
   "publish": "Publish",
   "publishService": "Publish service",

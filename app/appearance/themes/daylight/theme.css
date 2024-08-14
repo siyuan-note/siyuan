@@ -29,6 +29,7 @@
     --b3-font-family-graph: mononoki;
     --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
     --b3-font-family-math: KaTeX_Math;
+    --b3-font-size: 14px;
 
     /* 顶部工具栏 */
     --b3-toolbar-background: var(--b3-theme-surface);

@@ -890,7 +890,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.preventDefault();
                         return;
                     }
-                    if (position.start === 1 && !inlineElement && editElement.textContent.startsWith(Constants.ZWSP)) {
+                    if (position.start === 1 && !inlineElement && editElement.textContent.startsWith(Constants.ZWSP) &&
+                        // https://github.com/siyuan-note/siyuan/issues/12149
+                        editElement.textContent.length > 1) {
                         setFirstNodeRange(editElement, range);
                         removeBlock(protyle, nodeElement, range, "Backspace");
                         event.stopPropagation();

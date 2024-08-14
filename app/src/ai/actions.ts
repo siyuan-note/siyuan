@@ -174,6 +174,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
     if (customHTML) {
         customHTML = `<div class="b3-menu__separator"></div>${customHTML}`;
     }
+    const clearContext = "Clear context";
     menu.addItem({
         iconHTML: "",
         type: "empty",
@@ -194,7 +195,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
         <div class="b3-list-item b3-list-item--narrow" data-action="${window.siyuan.languages.aiFixGrammarSpell}">
             ${window.siyuan.languages.aiFixGrammarSpell}
         </div>
-        <div class="b3-list-item b3-list-item--narrow" data-action="Clear context">
+        <div class="b3-list-item b3-list-item--narrow" data-action="${clearContext}">
             ${window.siyuan.languages.clearContext}
         </div>
         <div class="b3-menu__separator"></div>
@@ -227,6 +228,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
                     if (currentElement.dataset.type === "custom") {
                         customDialog(protyle, ids, elements);
+                        menu.close();
                     } else {
                         fetchPost("/api/ai/chatGPTWithAction", {
                             ids,
@@ -234,8 +236,12 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                         }, (response) => {
                             fillContent(protyle, response.data, elements);
                         });
+                        if (currentElement.dataset.action === clearContext) {
+                            showMessage(window.siyuan.languages.clearContextSucc);
+                        } else {
+                            menu.close();
+                        }
                     }
-                    menu.close();
                 }
             });
             inputElement.addEventListener("compositionend", () => {
@@ -260,12 +266,17 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                     } else if (target.classList.contains("b3-list-item")) {
                         if (target.dataset.type === "custom") {
                             customDialog(protyle, ids, elements);
+                            menu.close();
                         } else {
                             fetchPost("/api/ai/chatGPTWithAction", {ids, action: target.dataset.action}, (response) => {
                                 fillContent(protyle, response.data, elements);
                             });
+                            if (target.dataset.action === clearContext) {
+                               showMessage(window.siyuan.languages.clearContextSucc);
+                            } else {
+                                menu.close();
+                            }
                         }
-                        menu.close();
                         event.stopPropagation();
                         event.preventDefault();
                         break;

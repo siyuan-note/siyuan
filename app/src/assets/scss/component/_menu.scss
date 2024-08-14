@@ -6,6 +6,7 @@
   background-color: var(--b3-menu-background);
   padding: 8px 0;
   box-sizing: border-box;
+  font-size: var(--b3-font-size);
 
   &::-webkit-scrollbar,
   &__submenu::-webkit-scrollbar {

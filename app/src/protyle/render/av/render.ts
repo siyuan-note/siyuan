@@ -83,7 +83,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
                 viewID: newViewID,
-                query
+                query: query.trim()
             }, (response) => {
                 const data = response.data.view as IAVTable;
                 if (!e.dataset.pageSize) {
@@ -347,7 +347,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 }
                 const viewsElement = e.querySelector(".av__views") as HTMLElement;
                 searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-                searchInputElement.value = query;
+                searchInputElement.value = query || "";
                 if (isSearching) {
                     searchInputElement.focus();
                 }

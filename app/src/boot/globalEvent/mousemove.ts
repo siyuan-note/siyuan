@@ -35,6 +35,7 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
     coordinates.screenX = event.screenX;
     coordinates.screenY = event.screenY;
 
+    // breadcrumb
     if (window.siyuan.hideBreadcrumb) {
         window.siyuan.hideBreadcrumb = false;
         getAllEditor().forEach(item => {
@@ -44,6 +45,8 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
             }
         });
     }
+
+    // Dock
     if (!mouseIsEnter &&
         event.buttons === 0 &&  // 鼠标按键被按下时不触发
         window.siyuan.layout.bottomDock &&
@@ -79,6 +82,8 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
             window.siyuan.layout.bottomDock.showDock();
         }
     }
+
+    // gutter
     const eventPath0 = event.composedPath()[0] as HTMLElement;
     if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("protyle-wysiwyg") && eventPath0.style.paddingLeft) {
         // 光标在编辑器右边也需要进行显示
@@ -177,6 +182,13 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
             });
         }
         return;
+    }
+
+    if (!hasClosestByClassName(event.target, "protyle", true)) {
+        document.querySelectorAll(".protyle-gutters").forEach(item => {
+            item.classList.add("fn__none");
+            item.innerHTML = "";
+        });
     }
 
     const target = event.target as Element;

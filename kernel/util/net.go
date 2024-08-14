@@ -111,7 +111,7 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 	}
 	c.SetUserAgent(UserAgent)
 
-	for i := 0; i < 3; i++ {
+	for i := 0; i < 2; i++ {
 		resp, err := c.R().Get(checkURL)
 
 		if resp.GetHeader("Location") != "" {

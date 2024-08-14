@@ -183,19 +183,17 @@ func fixLegacyData(tip, node *ast.Node, idMap *map[string]bool, needFix, needMig
 			node.SetIALAttr("id", node.ID)
 			*needFix = true
 		}
+
+		if node.ID != node.IALAttr("id") {
+			//某些情况下会导致 ID 和属性 id 不相同 https://ld246.com/article/1722826829447
+			node.SetIALAttr("id", node.ID)
+			*needFix = true
+		}
+
 		if 0 < len(node.Children) && ast.NodeBr.String() == node.Children[len(node.Children)-1].TypeStr {
 			// 剔除块尾多余的软换行 https://github.com/siyuan-note/siyuan/issues/6191
 			node.Children = node.Children[:len(node.Children)-1]
 			*needFix = true
-		}
-
-		for _, kv := range node.KramdownIAL {
-			if strings.Contains(kv[0], "custom-av-key-") {
-				// TODO: 数据库正式上线以后移除这里的修复
-				// 删除数据库属性键值对 https://github.com/siyuan-note/siyuan/issues/9293
-				node.RemoveIALAttr(kv[0])
-				*needFix = true
-			}
 		}
 	}
 	if "" != node.ID {

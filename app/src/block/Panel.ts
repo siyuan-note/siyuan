@@ -183,9 +183,6 @@ export class BlockPanel {
                 },
                 typewriterMode: false,
                 after: (editor) => {
-                    editorElement.addEventListener("mouseleave", () => {
-                        hideElements(["gutter"], editor.protyle);
-                    });
                     if (response.data.rootID !== this.nodeIds[index]) {
                         editor.protyle.breadcrumb.element.parentElement.lastElementChild.classList.remove("fn__none");
                     }

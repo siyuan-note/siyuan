@@ -98,7 +98,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         event.stopPropagation();
         return true;
     }
-
     const viewItemElement = hasClosestByClassName(event.target, "item");
     if (viewItemElement && viewItemElement.parentElement.classList.contains("layout-tab-bar")) {
         if (viewItemElement.classList.contains("item--focus")) {
@@ -496,7 +495,7 @@ export const removeAttrViewColAnimation = (blockElement: Element, id: string) =>
     });
 };
 
-export const duplicateCompletely = (protyle:IProtyle, nodeElement:HTMLElement) => {
+export const duplicateCompletely = (protyle: IProtyle, nodeElement: HTMLElement) => {
     fetchPost("/api/av/duplicateAttributeViewBlock", {avID: nodeElement.getAttribute("data-av-id")}, (response) => {
         nodeElement.classList.remove("protyle-wysiwyg--select");
         const tempElement = document.createElement("template");

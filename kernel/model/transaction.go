@@ -772,53 +772,81 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	go func() {
-		time.Sleep(50 * time.Millisecond)
-		WaitForWritingFiles()
+	// 如果是断开列表时的删除列表项事务，则不需要删除数据库绑定块，因为断开列表事务后面会再次插入相同 ID 的列表项
+	// List item disconnection no longer affects database binding blocks https://github.com/siyuan-note/siyuan/issues/12235
+	needSyncDel2AvBlock := true
+	if ast.NodeListItem == node.Type {
+		for _, op := range tx.DoOperations {
+			// 不可能出现相同 ID 先插入再删除的情况，只可能出现先删除再插入的情况，所以这里只需要查找插入操作
+			if "insert" == op.Action {
+				data := strings.ReplaceAll(op.Data.(string), editor.FrontEndCaret, "")
+				subTree := tx.luteEngine.BlockDOM2Tree(data)
+				ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering || ast.NodeListItem != n.Type {
+						return ast.WalkContinue
+					}
+
+					if n.ID == operation.ID {
+						needSyncDel2AvBlock = false
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+
+				break
+			}
+		}
+	}
+
+	if needSyncDel2AvBlock {
 		syncDelete2AttributeView(node)
 		syncDelete2Block(node)
-	}()
+	}
 	return
 }
 
 func syncDelete2Block(node *ast.Node) {
 	var changedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
+		if !entering || ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeAttributeView == n.Type {
-			avID := n.AttributeViewID
-			if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
-				changedAvIDs = append(changedAvIDs, avID)
-			}
+		avID := n.AttributeViewID
+		isMirror := av.IsMirror(avID)
+		if changed := av.RemoveBlockRel(avID, n.ID, treenode.ExistBlockTree); changed {
+			changedAvIDs = append(changedAvIDs, avID)
+		}
 
-			attrView, err := av.ParseAttributeView(avID)
-			if nil != err {
-				return ast.WalkContinue
-			}
+		if isMirror {
+			// 删除镜像数据库节点后不需要解绑块，因为其他镜像节点还在使用
+			return ast.WalkContinue
+		}
 
-			trees, nodes := getAttrViewBoundNodes(attrView)
-			for _, toChangNode := range nodes {
-				avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
-				if "" != avs {
-					avIDs := strings.Split(avs, ",")
-					avIDs = gulu.Str.RemoveElem(avIDs, avID)
-					if 1 > len(avIDs) {
-						toChangNode.RemoveIALAttr(av.NodeAttrNameAvs)
-					} else {
-						toChangNode.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
-					}
+		attrView, err := av.ParseAttributeView(avID)
+		if nil != err {
+			return ast.WalkContinue
+		}
+
+		trees, nodes := getAttrViewBoundNodes(attrView)
+		for _, toChangNode := range nodes {
+			avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
+			if "" != avs {
+				avIDs := strings.Split(avs, ",")
+				avIDs = gulu.Str.RemoveElem(avIDs, avID)
+				if 1 > len(avIDs) {
+					toChangNode.RemoveIALAttr(av.NodeAttrNameAvs)
+				} else {
+					toChangNode.SetIALAttr(av.NodeAttrNameAvs, strings.Join(avIDs, ","))
 				}
-				avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
-				oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
-				toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
-				pushBroadcastAttrTransactions(oldAttrs, toChangNode)
 			}
-			for _, tree := range trees {
-				indexWriteTreeUpsertQueue(tree)
-			}
+			avNames := getAvNames(toChangNode.IALAttr(av.NodeAttrNameAvs))
+			oldAttrs := parse.IAL2Map(toChangNode.KramdownIAL)
+			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
+			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
+		}
+		for _, tree := range trees {
+			indexWriteTreeUpsertQueue(tree)
 		}
 		return ast.WalkContinue
 	})
@@ -1051,11 +1079,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
 	if nil != err {
-		if errors.Is(err, ErrBlockNotFound) {
-			logging.LogWarnf("not found block [%s]", id)
-			return
-		}
-
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -1253,13 +1276,27 @@ func refreshUpdated(node *ast.Node) {
 }
 
 func createdUpdated(node *ast.Node) {
+	// 补全子节点的更新时间 Improve block update time filling https://github.com/siyuan-note/siyuan/issues/12182
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() || ast.NodeKramdownBlockIAL == n.Type {
+			return ast.WalkContinue
+		}
+
+		updated := n.IALAttr("updated")
+		if "" == updated && ast.IsNodeIDPattern(n.ID) {
+			created := util.TimeFromID(n.ID)
+			n.SetIALAttr("updated", created)
+		}
+		return ast.WalkContinue
+	})
+
 	created := util.TimeFromID(node.ID)
 	updated := node.IALAttr("updated")
 	if "" == updated {
 		updated = created
 	}
 	if updated < created {
-		updated = created // 复制粘贴块后创建时间小于更新时间 https://github.com/siyuan-note/siyuan/issues/3624
+		updated = created
 	}
 	parents := treenode.ParentNodesWithHeadings(node)
 	for _, parent := range parents { // 更新所有父节点的更新时间字段

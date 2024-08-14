@@ -51,7 +51,7 @@ const openDockMenu = (app: App) => {
             });
         });
     });
-    menu.fullscreen("bottom");
+    menu.fullscreen();
     if (menu.element.lastElementChild.innerHTML === "") {
         showMessage(window.siyuan.languages._kernel[122]);
     }

@@ -114,18 +114,9 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     }
 
     if (!isWindow() || isMobile()) {
-        const unPinMenu: IMenu[] = [];
         plugin.topBarIcons.forEach(element => {
             if (isMobile()) {
-                if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
-                    unPinMenu.push({
-                        iconHTML: element.firstElementChild.outerHTML,
-                        label: element.textContent.trim(),
-                        click() {
-                            element.dispatchEvent(new CustomEvent("click"));
-                        }
-                    });
-                } else {
+                if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
                     document.querySelector("#menuAbout").after(element);
                 }
             } else if (!isWindow()) {
@@ -135,9 +126,6 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
-        if (isMobile() && unPinMenu.length > 0) {
-            return unPinMenu;
-        }
     }
     /// #if !MOBILE
     resizeTopBar();

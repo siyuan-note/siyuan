@@ -8,6 +8,7 @@
   width: 100%;
   height: 100%;
   display: flex;
+  font-size: var(--b3-font-size);
 
   &--open {
     .b3-dialog__scrim {

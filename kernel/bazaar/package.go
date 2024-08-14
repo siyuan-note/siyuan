@@ -482,6 +482,15 @@ func isOutdatedTemplate(template *Template, bazaarTemplates []*Template) bool {
 	return false
 }
 
+func isBazzarOnline() (ret bool) {
+	// Improve marketplace loading when offline https://github.com/siyuan-note/siyuan/issues/12050
+	ret = util.IsOnline(util.BazaarOSSServer, true)
+	if !ret {
+		util.PushErrMsg(util.Langs[util.Lang][24], 5000)
+	}
+	return
+}
+
 func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	repoURLHash := repoURL + "@" + repoHash
 

@@ -4,7 +4,7 @@ import {getCurrentEditor} from "../../mobile/editor";
 import {getAllEditor} from "../../layout/getAll";
 /// #endif
 
-// "gutter", "toolbar", "select", "hint", "util", "dialog"
+// "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
     if (!protyle) {
         if (panels.includes("dialog")) {

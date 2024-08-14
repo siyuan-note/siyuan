@@ -9,7 +9,15 @@ import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
 import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
-import {copyPlainText, isMac, isOnlyMeta, openByMobile, updateHotkeyTip, writeText} from "../util/compatibility";
+import {
+    copyPlainText,
+    isInAndroid,
+    isMac,
+    isOnlyMeta,
+    openByMobile,
+    updateHotkeyTip,
+    writeText
+} from "../util/compatibility";
 import {
     transaction,
     turnsIntoOneTransaction,
@@ -1497,7 +1505,11 @@ export class Gutter {
                 label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
-                        writeText(response.data + Constants.ZWSP);
+                        if (isInAndroid()) {
+                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                        } else {
+                            writeText(response.data + Constants.ZWSP);
+                        }
                     });
                 }
             }).element);
@@ -1506,7 +1518,11 @@ export class Gutter {
                 label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
-                        writeText(response.data + Constants.ZWSP);
+                        if (isInAndroid()) {
+                            window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
+                        } else {
+                            writeText(response.data + Constants.ZWSP);
+                        }
                         fetchPost("/api/block/getHeadingDeleteTransaction", {
                             id,
                         }, (response) => {

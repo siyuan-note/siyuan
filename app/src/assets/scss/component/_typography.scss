@@ -554,36 +554,31 @@
     }
   }
 
-  &-linenumber {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+  &-linenumber__rows {
+    pointer-events: none;
+    user-select: none;
+    counter-reset: linenumber;
+    font-size: 85%;
+    box-sizing: border-box;
+    font-family: var(--b3-font-family-code);
+    margin-right: 1em;
+    min-width: 1.2em;
+    text-align: right;
 
-    &__rows {
+    & > span {
       pointer-events: none;
-      user-select: none;
-      counter-reset: linenumber;
-      font-size: 85%;
-      box-sizing: border-box;
-      font-family: var(--b3-font-family-code);
-      margin-right: 1em;
-      min-width: 1.2em;
-      text-align: right;
+      display: block;
 
-      & > span {
-        pointer-events: none;
+      &::before {
+        counter-increment: linenumber;
+        content: counter(linenumber);
+        color: var(--b3-theme-on-surface);
         display: block;
-
-        &::before {
-          counter-increment: linenumber;
-          content: counter(linenumber);
-          color: var(--b3-theme-on-surface);
-          display: block;
-          text-align: right;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          direction: rtl;
-        }
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        direction: rtl;
       }
     }
   }

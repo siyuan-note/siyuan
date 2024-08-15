@@ -2100,8 +2100,8 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
         }
         nodeElement.removeAttribute("fold");
         // https://github.com/siyuan-note/siyuan/issues/4411
-        nodeElement.querySelectorAll(".protyle-linenumber").forEach((item: HTMLElement) => {
-            lineNumberRender(item);
+        nodeElement.querySelectorAll(".protyle-linenumber__rows").forEach((item: HTMLElement) => {
+            lineNumberRender(item.parentElement);
         });
     } else {
         if (typeof isOpen === "boolean" && isOpen) {

@@ -28,7 +28,8 @@ export const resize = (protyle: IProtyle) => {
                     }
                 });
             }
-            protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber").forEach((block: HTMLElement) => {
+            protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((item: HTMLElement) => {
+                const block = item.parentElement;
                 if ((window.siyuan.config.editor.codeSyntaxHighlightLineNum && block.parentElement.getAttribute("lineNumber") !== "false" &&
                         window.siyuan.config.editor.codeLineWrap && block.parentElement.getAttribute("linewrap") !== "false") ||
                     (block.parentElement.getAttribute("lineNumber") === "true" && block.parentElement.getAttribute("linewrap") === "true")) {

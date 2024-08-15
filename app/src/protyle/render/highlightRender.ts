@@ -89,8 +89,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 const codeText = block.textContent;
                 if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
                     // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
-                    block.classList.add("protyle-linenumber");
-                    block.innerHTML = '<div class="protyle-linenumber__rows"></div><div style="flex: 1"></div>'
+                    block.firstElementChild.classList.add("protyle-linenumber__rows")
                     lineNumberRender(block);
                 }
 
@@ -116,11 +115,10 @@ export const lineNumberRender = (block: HTMLElement) => {
     if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && lineNumber !== "true") {
         return;
     }
-    block.classList.add("protyle-linenumber");
     // clientHeight 总是取的整数
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
     const lineNumberTemp = document.createElement("div");
-    lineNumberTemp.className = "hljs protyle-linenumber";
+    lineNumberTemp.className = "hljs";
     lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: calc(100% - 3.6em);position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);

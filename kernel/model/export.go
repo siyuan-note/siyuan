@@ -1939,7 +1939,8 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	id := tree.Root.ID
 
 	// 解析查询嵌入节点
-	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{})
+	depth := 0
+	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
 
 	// 收集引用转脚注
 	var refFootnotes []*refAsFootnotes

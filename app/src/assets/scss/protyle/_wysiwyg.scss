@@ -177,6 +177,7 @@
           flex: 1;
           box-sizing: border-box;
           margin-right: 24px;
+          min-width: 1px;
 
           &:nth-last-child(2),
           &:last-child {

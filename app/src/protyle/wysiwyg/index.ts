@@ -1513,7 +1513,7 @@ export class WYSIWYG {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
                     range.insertNode(document.createElement("wbr"));
-                    getContenteditableElement(nodeElement).removeAttribute("data-render");
+                    nodeElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
                     highlightRender(nodeElement);
                 }
                 if (nodeElement.parentElement.parentElement && !isFoldHeading && !nodeElement.classList.contains("av")) {

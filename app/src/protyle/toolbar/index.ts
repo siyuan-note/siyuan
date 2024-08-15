@@ -1196,7 +1196,7 @@ export class Toolbar {
             processRender(nodeElement);
         } else {
             (editElement as HTMLElement).textContent = editElement.textContent;
-            editElement.removeAttribute("data-render");
+            editElement.parentElement.removeAttribute("data-render");
             highlightRender(nodeElement);
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

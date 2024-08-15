@@ -150,7 +150,6 @@
 
     /* 代码片段背景 */
     --b3-protyle-code-background: rgba(240, 246, 252, .15);
-    --b3-protyle-code-linenumber-hl: #26364a;
 
     /* 所见即所得行内元素颜色 */
     --b3-protyle-inline-strong-color: #e8eaed;

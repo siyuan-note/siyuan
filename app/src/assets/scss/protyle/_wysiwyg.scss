@@ -446,25 +446,14 @@
     }
   }
 
-  &--select,
-  &--select .hljs {
-    background-color: var(--b3-theme-primary-lightest) !important;
-  }
-
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;
   }
 
-  &--hl,
-  &--hl .hljs {
+  &--hl {
     transition: var(--b3-background-transition);
     background-color: var(--b3-theme-primary-lightest) !important;
-  }
-
-  &--hl .protyle-linenumber__rows,
-  &--select .protyle-linenumber__rows {
-    background-color: var(--b3-protyle-code-linenumber-hl) !important;
   }
 
   .dragover {

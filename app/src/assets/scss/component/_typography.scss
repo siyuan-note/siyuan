@@ -268,10 +268,11 @@
 
   .code-block {
     position: relative;
-    padding: 0;
+    padding: 2em 1em 1.6em;
     margin: 1em 0;
     display: flex;
     flex-direction: row-reverse;
+    background-color: var(--b3-protyle-code-background);
 
     .protyle-action {
       left: 4px;
@@ -307,7 +308,6 @@
 
   .hljs {
     border-radius: var(--b3-border-radius);
-    padding: 2em 4px 1.6em 4px;
     font-size: 85%;
     overflow: auto;
     font-family: var(--b3-font-family-code);
@@ -315,6 +315,8 @@
     overflow-x: overlay;
     tab-size: 4;
     flex: 1;
+    display: flex;
+    background-color: transparent;
   }
 
   [data-subtype="echarts"],
@@ -561,12 +563,11 @@
       user-select: none;
       counter-reset: linenumber;
       font-size: 85%;
-      background-color: var(--b3-theme-surface);
-      padding: 2em 4px 1.6em 4px;
       box-sizing: border-box;
-      border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
-      width: 3.6em;
       font-family: var(--b3-font-family-code);
+      margin-right: 1em;
+      min-width: 1.2em;
+      text-align: right;
 
       & > span {
         pointer-events: none;

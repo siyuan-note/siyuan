@@ -636,9 +636,11 @@ func GetBlockKramdown(id string) (ret string) {
 }
 
 type ChildBlock struct {
-	ID      string `json:"id"`
-	Type    string `json:"type"`
-	SubType string `json:"subType,omitempty"`
+	ID       string `json:"id"`
+	Type     string `json:"type"`
+	SubType  string `json:"subType,omitempty"`
+	Content  string `json:"content,omitempty"`
+	Markdown string `json:"markdown,omitempty"`
 }
 
 func GetChildBlocks(id string) (ret []*ChildBlock) {
@@ -660,10 +662,13 @@ func GetChildBlocks(id string) (ret []*ChildBlock) {
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
+			block := sql.BuildBlockFromNode(c, tree)
 			ret = append(ret, &ChildBlock{
-				ID:      c.ID,
-				Type:    treenode.TypeAbbr(c.Type.String()),
-				SubType: treenode.SubTypeAbbr(c),
+				ID:       c.ID,
+				Type:     treenode.TypeAbbr(c.Type.String()),
+				SubType:  treenode.SubTypeAbbr(c),
+				Content:  block.Content,
+				Markdown: block.Markdown,
 			})
 		}
 		return
@@ -678,10 +683,13 @@ func GetChildBlocks(id string) (ret []*ChildBlock) {
 			continue
 		}
 
+		block := sql.BuildBlockFromNode(c, tree)
 		ret = append(ret, &ChildBlock{
-			ID:      c.ID,
-			Type:    treenode.TypeAbbr(c.Type.String()),
-			SubType: treenode.SubTypeAbbr(c),
+			ID:       c.ID,
+			Type:     treenode.TypeAbbr(c.Type.String()),
+			SubType:  treenode.SubTypeAbbr(c),
+			Content:  block.Content,
+			Markdown: block.Markdown,
 		})
 	}
 	return
@@ -707,10 +715,13 @@ func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
 		children := treenode.HeadingChildren(node)
 		for i := len(children) - 1; 0 <= i; i-- {
 			c := children[i]
+			block := sql.BuildBlockFromNode(c, tree)
 			ret = append(ret, &ChildBlock{
-				ID:      c.ID,
-				Type:    treenode.TypeAbbr(c.Type.String()),
-				SubType: treenode.SubTypeAbbr(c),
+				ID:       c.ID,
+				Type:     treenode.TypeAbbr(c.Type.String()),
+				SubType:  treenode.SubTypeAbbr(c),
+				Content:  block.Content,
+				Markdown: block.Markdown,
 			})
 			if n == len(ret) {
 				return
@@ -728,10 +739,13 @@ func GetTailChildBlocks(id string, n int) (ret []*ChildBlock) {
 			continue
 		}
 
+		block := sql.BuildBlockFromNode(c, tree)
 		ret = append(ret, &ChildBlock{
-			ID:      c.ID,
-			Type:    treenode.TypeAbbr(c.Type.String()),
-			SubType: treenode.SubTypeAbbr(c),
+			ID:       c.ID,
+			Type:     treenode.TypeAbbr(c.Type.String()),
+			SubType:  treenode.SubTypeAbbr(c),
+			Content:  block.Content,
+			Markdown: block.Markdown,
 		})
 
 		if n == len(ret) {

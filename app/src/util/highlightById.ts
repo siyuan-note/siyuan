@@ -40,8 +40,19 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
 
 export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, behavior: ScrollBehavior = "auto") => {
     if (!protyle.disabled && !top && getSelection().rangeCount > 0) {
-        const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
+        const range = getSelection().getRangeAt(0)
+        const blockElement = hasClosestBlock(range.startContainer);
         if (blockElement) {
+            // https://github.com/siyuan-note/siyuan/issues/10769
+            if (blockElement.classList.contains("code-block")) {
+                const brElement = document.createElement('br');
+                range.insertNode(brElement);
+                brElement.scrollIntoView({
+                    block: 'end',
+                });
+                brElement.remove();
+                return;
+            }
             // undo 时禁止数据库滚动
             if (blockElement.classList.contains("av") && blockElement.dataset.render === "true" &&
                 (blockElement.querySelector(".av__row--header").getAttribute("style")?.indexOf("transform") > -1 || blockElement.querySelector(".av__row--footer").getAttribute("style")?.indexOf("transform") > -1)) {

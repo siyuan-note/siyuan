@@ -100,7 +100,7 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 				return
 			}
 			f.Close()
-			succMap[baseName] = "assets/" + fName
+			succMap[fName] = "assets/" + fName
 		}
 	}
 	IncSync()
@@ -284,7 +284,7 @@ func Upload(c *gin.Context) {
 				os.RemoveAll(tmpDir2)
 			}
 
-			succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			succMap[fName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
 		}
 	}
 

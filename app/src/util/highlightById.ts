@@ -47,9 +47,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
             if (blockElement.classList.contains("code-block")) {
                 const brElement = document.createElement('br');
                 range.insertNode(brElement);
-                brElement.scrollIntoView({
-                    block: 'end',
-                });
+                brElement.scrollIntoView({block: "center", behavior});
                 brElement.remove();
                 return;
             }
@@ -58,8 +56,11 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
                 (blockElement.querySelector(".av__row--header").getAttribute("style")?.indexOf("transform") > -1 || blockElement.querySelector(".av__row--footer").getAttribute("style")?.indexOf("transform") > -1)) {
                 return;
             }
+
+            const br2Element = document.createElement('br');
+            range.insertNode(br2Element);
             const editorElement = protyle.contentElement;
-            const cursorTop = getSelectionPosition(editorElement).top - editorElement.getBoundingClientRect().top;
+            const cursorTop = br2Element.getBoundingClientRect().top - editorElement.getBoundingClientRect().top;
             let scrollTop = 0;
             if (cursorTop < 0) {
                 scrollTop = editorElement.scrollTop + cursorTop;
@@ -69,6 +70,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
             if (scrollTop !== 0) {
                 editorElement.scroll({top: scrollTop, behavior});
             }
+            br2Element.remove();
             return;
         }
     }

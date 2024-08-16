@@ -423,7 +423,7 @@
   "sortByRankDesc": "Relevance DESC",
   "sortByRankAsc": "Relevance ASC",
   "saveCriterion": "Save query criteria",
-  "useCriterion": "Search criteria will be saved for next query",
+  "useCriterion": "The next query will no longer use the current query criteria",
   "removeCriterion": "Remove query criteria",
   "group": "Group",
   "noGroupBy": "No grouping",

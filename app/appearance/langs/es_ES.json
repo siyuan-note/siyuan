@@ -423,7 +423,7 @@
   "sortByRankDesc": "Relevancia DESC",
   "sortByRankAsc": "Relevancia ASC",
   "saveCriterion": "Guardar criterios de consulta",
-  "useCriterion": "Los criterios de búsqueda se guardarán para la siguiente consulta",
+  "useCriterion": "Las condiciones de consulta actuales ya no se utilizarán para la siguiente consulta",
   "removeCriterion": "Eliminar criterios de consulta",
   "grupo": "Grupo",
   "noGroupBy": "Sin agrupar",

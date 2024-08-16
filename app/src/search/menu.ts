@@ -317,7 +317,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
         saveDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        const inputElement = saveDialog.element.querySelector("input")
+        const inputElement = saveDialog.element.querySelector("input");
         const value = inputElement.value.trim();
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);

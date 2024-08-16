@@ -1,5 +1,5 @@
 import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest";
-import {getEditorRange, getSelectionPosition} from "../protyle/util/selection";
+import {getEditorRange} from "../protyle/util/selection";
 
 export const bgFade = (element: Element) => {
     element.classList.add("protyle-wysiwyg--hl");
@@ -40,12 +40,12 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
 
 export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = false, behavior: ScrollBehavior = "auto") => {
     if (!protyle.disabled && !top && getSelection().rangeCount > 0) {
-        const range = getSelection().getRangeAt(0)
+        const range = getSelection().getRangeAt(0);
         const blockElement = hasClosestBlock(range.startContainer);
         if (blockElement) {
             // https://github.com/siyuan-note/siyuan/issues/10769
             if (blockElement.classList.contains("code-block")) {
-                const brElement = document.createElement('br');
+                const brElement = document.createElement("br");
                 range.insertNode(brElement);
                 brElement.scrollIntoView({block: "center", behavior});
                 brElement.remove();
@@ -57,7 +57,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
                 return;
             }
 
-            const br2Element = document.createElement('br');
+            const br2Element = document.createElement("br");
             range.insertNode(br2Element);
             const editorElement = protyle.contentElement;
             const cursorTop = br2Element.getBoundingClientRect().top - editorElement.getBoundingClientRect().top;

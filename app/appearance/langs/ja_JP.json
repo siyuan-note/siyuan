@@ -423,7 +423,7 @@
   "sortByRankDesc": "関連性 (降順)",
   "sortByRankAsc": "関連性 (昇順)",
   "saveCriterion": "検索条件を保存",
-  "useCriterion": "検索条件は次回の検索のために保存されます",
+  "useCriterion": "次回の検索条件を現在の検索条件で使用しない",
   "removeCriterion": "検索条件を削除",
   "group": "グループ ",
   "noGroupBy": "グループ化なし",

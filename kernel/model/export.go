@@ -2230,9 +2230,12 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			}
 
 			cell := &ast.Node{Type: ast.NodeTableCell}
-			name := string(lex.EscapeProtyleMarkers([]byte(col.Name)))
-			name = strings.ReplaceAll(name, "\\|", "|")
-			name = strings.ReplaceAll(name, "|", "\\|")
+			name := col.Name
+			if !wysiwyg {
+				name = string(lex.EscapeProtyleMarkers([]byte(col.Name)))
+				name = strings.ReplaceAll(name, "\\|", "|")
+				name = strings.ReplaceAll(name, "|", "\\|")
+			}
 			cell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(name)})
 			mdTableHeadRow.AppendChild(cell)
 		}
@@ -2255,9 +2258,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					if av.KeyTypeBlock == cell.Value.Type {
 						if nil != cell.Value.Block {
 							val = cell.Value.Block.Content
-							val = string(lex.EscapeProtyleMarkers([]byte(val)))
-							val = strings.ReplaceAll(val, "\\|", "|")
-							val = strings.ReplaceAll(val, "|", "\\|")
+							if !wysiwyg {
+								val = string(lex.EscapeProtyleMarkers([]byte(val)))
+								val = strings.ReplaceAll(val, "\\|", "|")
+								val = strings.ReplaceAll(val, "|", "\\|")
+							}
 							col := table.GetColumn(cell.Value.KeyID)
 							if nil != col && col.Wrap {
 								lines := strings.Split(val, "\n")
@@ -2274,9 +2279,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					} else if av.KeyTypeText == cell.Value.Type {
 						if nil != cell.Value.Text {
 							val = cell.Value.Text.Content
-							val = string(lex.EscapeProtyleMarkers([]byte(val)))
-							val = strings.ReplaceAll(val, "\\|", "|")
-							val = strings.ReplaceAll(val, "|", "\\|")
+							if !wysiwyg {
+								val = string(lex.EscapeProtyleMarkers([]byte(val)))
+								val = strings.ReplaceAll(val, "\\|", "|")
+								val = strings.ReplaceAll(val, "|", "\\|")
+							}
 							col := table.GetColumn(cell.Value.KeyID)
 							if nil != col && col.Wrap {
 								lines := strings.Split(val, "\n")

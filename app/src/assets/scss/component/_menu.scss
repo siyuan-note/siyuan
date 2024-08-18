@@ -140,7 +140,8 @@
 
   &--list {
     overflow: auto;
-    max-height: 70vh;
+    // https://github.com/siyuan-note/siyuan/issues/11919
+    max-height: calc(80vh + 18px);
 
     .b3-menu__label {
       @include text-clamp(1);

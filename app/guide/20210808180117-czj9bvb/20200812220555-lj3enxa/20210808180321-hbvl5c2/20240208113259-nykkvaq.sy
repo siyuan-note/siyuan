@@ -6,7 +6,8 @@
 		"icon": "1f5c3-fe0f",
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
-		"updated": "20240208165258"
+		"type": "doc",
+		"updated": "20240818174633"
 	},
 	"Children": [
 		{
@@ -628,11 +629,47 @@
 			"AttributeViewType": "table"
 		},
 		{
-			"ID": "20240208164400-bj6bcvj",
+			"ID": "20240818174119-3zag9wr",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240818174119-3zag9wr",
+				"updated": "20240818174633"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240818174124-ab1x2an",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20240208164400-bj6bcvj"
-			}
+				"id": "20240818174124-ab1x2an",
+				"updated": "20240818174633"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在数据库单元格中换行，请使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 。"
+				}
+			]
 		}
 	]
 }

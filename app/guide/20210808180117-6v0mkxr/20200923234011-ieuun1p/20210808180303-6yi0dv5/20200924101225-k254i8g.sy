@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20240513102037"
+		"updated": "20240818180008"
 	},
 	"Children": [
 		{
@@ -1356,7 +1356,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091538-38bsz5r"
+				"id": "20210104091538-38bsz5r",
+				"updated": "20240818180008"
 			},
 			"Children": [
 				{
@@ -1509,11 +1510,11 @@
 			]
 		},
 		{
-			"ID": "20210104091538-ok40ct8",
+			"ID": "20240818174819-qu6xbk1",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091538-ok40ct8",
-				"updated": "20210104091538"
+				"id": "20240818174819-qu6xbk1",
+				"updated": "20240818180003"
 			},
 			"Children": [
 				{
@@ -1527,7 +1528,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the form, please use "
+					"Data": "​ in a table block, please use "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1536,7 +1537,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to escape, that is, you need to enter "
+					"Data": "​ to escape it, that is, you need to enter "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1545,7 +1546,30 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​."
+				}
+			]
+		},
+		{
+			"ID": "20240818174819-rfu3puw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818174819-rfu3puw",
+				"updated": "20240818180008"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to wrap a line in a table block, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ."
 				}
 			]
 		},
@@ -1911,28 +1935,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "The unordered list block can only contain list item blocks, and neighboring unordered list blocks are widely spaced."
-				}
-			]
-		},
-		{
-			"ID": "20210104091538-lb00enw",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104091538-lb00enw"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "If you need to wrap a line in a list item, use "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "."
 				}
 			]
 		},
@@ -2314,7 +2316,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104091538-wqiaxdu"
+				"id": "20210104091538-wqiaxdu",
+				"updated": "20240818174739"
 			},
 			"Children": [
 				{
@@ -2406,6 +2409,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "List item blocks are contained within a list block, and neighboring list item blocks are less widely spaced."
+				}
+			]
+		},
+		{
+			"ID": "20210104091538-lb00enw",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104091538-lb00enw",
+				"updated": "20240818174739"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to wrap a line in a list item, use "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​."
 				}
 			]
 		},

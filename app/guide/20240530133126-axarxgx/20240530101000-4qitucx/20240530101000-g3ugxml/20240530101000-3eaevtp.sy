@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240818180154"
 	},
 	"Children": [
 		{
@@ -677,12 +677,47 @@
 			"AttributeViewType": "table"
 		},
 		{
-			"ID": "20240530101000-i4xhxb0",
+			"ID": "20240818180118-fq3wqdb",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240818180118-fq3wqdb",
+				"updated": "20240818180154"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意事項"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240818180153-gokxpbv",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-v41qw7k",
-				"id": "20240530101000-i4xhxb0"
-			}
+				"id": "20240818180153-gokxpbv",
+				"updated": "20240818180154"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "データベースのセルで改行する必要がある場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用してください。"
+				}
+			]
 		}
 	]
 }

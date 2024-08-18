@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20240513102051"
+		"updated": "20240818175946"
 	},
 	"Children": [
 		{
@@ -1340,7 +1340,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-erf17it"
+				"id": "20210104090624-erf17it",
+				"updated": "20240818175946"
 			},
 			"Children": [
 				{
@@ -1493,16 +1494,16 @@
 			]
 		},
 		{
-			"ID": "20210104090624-8z2zryf",
+			"ID": "20240818173939-7tkd498",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-8z2zryf",
-				"updated": "20210104090624"
+				"id": "20240818173939-7tkd498",
+				"updated": "20240818175944"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "表格中如需使用 "
+					"Data": "如果需要在表格块中使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1511,7 +1512,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 请使用 "
+					"Data": "​ ，请使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1520,7 +1521,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 转义，即需要输入 "
+					"Data": "​ 转义，即需要输入 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1529,7 +1530,30 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20240818173939-j0bcrw6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818173939-j0bcrw6",
+				"updated": "20240818175946"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在表格块中换行，请使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 。"
 				}
 			]
 		},
@@ -1894,29 +1918,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "无序列表块只能包含列表项块，相邻的无序列表块间距较大。"
-				}
-			]
-		},
-		{
-			"ID": "20210104090624-5p4i03b",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210104090624-5p4i03b",
-				"updated": "20210104090624"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要在列表项中进行换行，请使用 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​。"
 				}
 			]
 		},
@@ -2297,7 +2298,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-n9anlgh"
+				"id": "20210104090624-n9anlgh",
+				"updated": "20240818173849"
 			},
 			"Children": [
 				{
@@ -2389,6 +2391,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "列表项块被包含在列表块内，相邻的列表项块间距较小。"
+				}
+			]
+		},
+		{
+			"ID": "20210104090624-5p4i03b",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20210104090624-5p4i03b",
+				"updated": "20240818173849"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在列表项中换行，请使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
 				}
 			]
 		},

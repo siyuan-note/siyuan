@@ -6,7 +6,8 @@
 		"icon": "1f5c3-fe0f",
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
-		"updated": "20240208174001"
+		"type": "doc",
+		"updated": "20240818174636"
 	},
 	"Children": [
 		{
@@ -450,7 +451,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172038-fewwv8i",
-				"updated": "20240208172038"
+				"updated": "20240818174403"
 			},
 			"Children": [
 				{
@@ -628,6 +629,49 @@
 			},
 			"AttributeViewID": "20240208172113-d44j7tk",
 			"AttributeViewType": "table"
+		},
+		{
+			"ID": "20240818174403-xnbqd38",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20240818174403-xnbqd38",
+				"updated": "20240818174636"
+			},
+			"Children": [
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "tag",
+					"TextMarkTextContent": "注意"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20240818174421-v5il1as",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818174421-v5il1as",
+				"updated": "20240818174636"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在資料庫單元格中換行，請使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 。"
+				}
+			]
 		}
 	]
 }

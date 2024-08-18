@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20240513102142"
+		"updated": "20240818175953"
 	},
 	"Children": [
 		{
@@ -1309,7 +1309,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-fe8klj7",
-				"updated": "20211225225419"
+				"updated": "20240818175953"
 			},
 			"Children": [
 				{
@@ -1456,16 +1456,16 @@
 			]
 		},
 		{
-			"ID": "20211226120227-53chk0s",
+			"ID": "20240818174341-f6miv80",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226120227-53chk0s",
-				"updated": "20211226120227"
+				"id": "20240818174341-f6miv80",
+				"updated": "20240818175952"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "表格中如需使用 "
+					"Data": "如果需要在表格塊中使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1474,7 +1474,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 請使用 "
+					"Data": "​ ，請使用 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1483,7 +1483,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 轉義，即需要輸入 "
+					"Data": "​ 轉義，即需要輸入 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1492,7 +1492,30 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
+				}
+			]
+		},
+		{
+			"ID": "20240818174341-89p5u2n",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818174341-89p5u2n",
+				"updated": "20240818175953"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在表格塊中換行，請使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 。"
 				}
 			]
 		},
@@ -1842,29 +1865,6 @@
 			]
 		},
 		{
-			"ID": "20211226120227-wx6gvu6",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20211226120227-wx6gvu6",
-				"updated": "20211225225419"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "如果需要在列表項中進行換行，請使用 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "。"
-				}
-			]
-		},
-		{
 			"ID": "20211226120227-h6hyct1",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
@@ -2201,7 +2201,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226120227-ot6klof",
-				"updated": "20211225225419"
+				"updated": "20240818174225"
 			},
 			"Children": [
 				{
@@ -2285,6 +2285,29 @@
 				{
 					"Type": "NodeText",
 					"Data": "列表項塊被包含在列表塊內，相鄰的列表項塊間距較小。"
+				}
+			]
+		},
+		{
+			"ID": "20211226120227-wx6gvu6",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20211226120227-wx6gvu6",
+				"updated": "20240818174225"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要在列表項中換行，請使用 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​。"
 				}
 			]
 		},

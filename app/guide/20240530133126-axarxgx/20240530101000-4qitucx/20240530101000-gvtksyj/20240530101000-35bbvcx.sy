@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240818180047"
 	},
 	"Children": [
 		{
@@ -1623,7 +1623,7 @@
 			"Properties": {
 				"ID": "20240530101000-1iwbq48",
 				"id": "20240530101000-riwihza",
-				"updated": "20240530101000"
+				"updated": "20240818180047"
 			},
 			"Children": [
 				{
@@ -1823,17 +1823,16 @@
 			]
 		},
 		{
-			"ID": "20240530101000-fk6b5l8",
+			"ID": "20240818180047-zgu22l5",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-j80retc",
-				"id": "20240530101000-fk6b5l8",
-				"updated": "20240530101000"
+				"id": "20240818180047-zgu22l5",
+				"updated": "20240818180047"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "テーブルブロックの内で "
+					"Data": "テーブルブロックで "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1842,7 +1841,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ を使用するには "
+					"Data": "​ を使用する必要がある場合は、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1860,7 +1859,30 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ と入力する必要があります。"
+					"Data": "​ を入力する必要があります。"
+				}
+			]
+		},
+		{
+			"ID": "20240818180047-hluqmta",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20240818180047-hluqmta",
+				"updated": "20240818180047"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "テーブルブロックで改行する必要がある場合は、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用してください。"
 				}
 			]
 		},
@@ -2160,7 +2182,7 @@
 			"Properties": {
 				"ID": "20240530101000-opc0x0f",
 				"id": "20240530101000-qkndmzb",
-				"updated": "20240530101000"
+				"updated": "20240818175720"
 			},
 			"Children": [
 				{
@@ -2392,7 +2414,7 @@
 			"Properties": {
 				"ID": "20240530101000-1gm8h13",
 				"id": "20240530101000-knbkfqu",
-				"updated": "20240530101000"
+				"updated": "20240818175720"
 			},
 			"Children": [
 				{
@@ -2637,30 +2659,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "順序付きリストブロックにはリスト項目ブロックのみを含めることができ、隣接する順序付きリストブロック同士の間隔は広くなります。"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-68p4w33",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-cbgit73",
-				"id": "20240530101000-68p4w33",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "リスト項目内で改行するには、"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ を使用してください。"
 				}
 			]
 		},
@@ -2924,7 +2922,7 @@
 			"Properties": {
 				"ID": "20240530101000-xaefotq",
 				"id": "20240530101000-y5kx7kx",
-				"updated": "20240530101000"
+				"updated": "20240818175723"
 			},
 			"Children": [
 				{
@@ -3064,6 +3062,30 @@
 				{
 					"Type": "NodeText",
 					"Data": "リスト項目ブロックはリストブロックの中に含まれ、隣接するリスト項目ブロック同士の間隔は狭くなります。"
+				}
+			]
+		},
+		{
+			"ID": "20240530101000-68p4w33",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"ID": "20240530101000-cbgit73",
+				"id": "20240530101000-68p4w33",
+				"updated": "20240818175723"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リスト項目内で改行するには、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Shift+Enter"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ を使用してください。"
 				}
 			]
 		},

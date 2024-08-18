@@ -1591,16 +1591,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     });
                 }
-                const insertElement = document.createElement("span");
                 let language = nodeElement.querySelector(".protyle-action__language").textContent;
                 if (!window.hljs.getLanguage(language)) {
                     language = "plaintext";
                 }
-                insertElement.innerHTML = window.hljs.highlight(text.substr(0, text.length - 1), {
+                wbrElement.insertAdjacentHTML("afterend", window.hljs.highlight(text.substr(0, text.length - 1), {
                     language,
                     ignoreIllegals: true
-                }).value;
-                range.insertNode(insertElement);
+                }).value + "<br>");
+                range.setStart(wbrElement.nextSibling, 0);
+                const brElement = wbrElement.parentElement.querySelector("br")
+                range.setEnd(brElement.previousSibling, brElement.previousSibling.textContent.length);
+                brElement.remove();
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                 wbrElement.remove();
                 return;

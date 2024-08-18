@@ -561,7 +561,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         return true;
                     }
                 });
-                if (target.parentElement.classList.contains('b3-chip--current')) {
+                if (target.parentElement.classList.contains("b3-chip--current")) {
                     updateConfig(element, {
                         removed: true,
                         sort: 0,

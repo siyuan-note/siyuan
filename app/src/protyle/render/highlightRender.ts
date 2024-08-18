@@ -91,6 +91,9 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                     // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
                     block.firstElementChild.classList.add("protyle-linenumber__rows");
                     lineNumberRender(block);
+                } else {
+                    block.firstElementChild.classList.remove("protyle-linenumber__rows");
+                    block.firstElementChild.innerHTML = "";
                 }
 
                 (block.childElementCount === 2 ? block.lastElementChild : block).innerHTML = window.hljs.highlight(
@@ -119,10 +122,9 @@ export const lineNumberRender = (block: HTMLElement) => {
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
     const lineNumberTemp = document.createElement("div");
     lineNumberTemp.className = "hljs";
-    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: calc(100% - 3.6em);position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
+    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: ${block.lastElementChild.clientWidth}px;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
-
     let lineNumberHTML = "";
     const lineList = block.lastElementChild.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {

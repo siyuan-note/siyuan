@@ -300,7 +300,8 @@ export class Dock {
         });
 
         this.layout.element.addEventListener("mouseleave", (event: MouseEvent & { toElement: HTMLElement }) => {
-            if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu")) {
+            if (event.buttons !== 0 || this.pin || event.toElement?.classList.contains("b3-menu") ||
+                event.toElement?.classList.contains("tooltip")) {
                 return;
             }
             if (this.position === "Left" && event.clientX < 43) {

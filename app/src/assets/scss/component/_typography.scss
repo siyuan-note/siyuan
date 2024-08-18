@@ -272,6 +272,7 @@
     margin: 1em 0;
     display: flex;
     flex-direction: row-reverse;
+    box-sizing: border-box;
     background-color: var(--b3-protyle-code-background);
 
     .protyle-action {

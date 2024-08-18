@@ -521,7 +521,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .attribute}"
+									"TextMarkTextContent": ".action{ .attribute }"
 								},
 								{
 									"Type": "NodeText",

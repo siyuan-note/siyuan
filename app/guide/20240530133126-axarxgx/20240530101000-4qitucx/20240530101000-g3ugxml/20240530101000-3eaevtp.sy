@@ -602,7 +602,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ index . \u0026quot;カスタム属性名\u0026quot; }"
+									"TextMarkTextContent": ".action{ index . \u0026quot;custom-xxx\u0026quot; }"
 								},
 								{
 									"Type": "NodeText",

@@ -90,6 +90,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
                     // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
                     block.firstElementChild.classList.add("protyle-linenumber__rows");
+                    block.firstElementChild.setAttribute("contenteditable", "false");
                     lineNumberRender(block);
                 } else {
                     block.firstElementChild.classList.remove("protyle-linenumber__rows");

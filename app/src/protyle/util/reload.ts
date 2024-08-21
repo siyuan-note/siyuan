@@ -40,7 +40,8 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,
-                keyword: isMention ? inputsElement[1].value : inputsElement[0].value
+                keyword: isMention ? inputsElement[1].value : inputsElement[0].value,
+                containChildren: true
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);

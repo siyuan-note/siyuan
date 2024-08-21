@@ -51,7 +51,11 @@ func getBackmentionDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
-	backlinks := model.GetBackmentionDoc(defID, refTreeID, keyword)
+	containChildren := true
+	if val, ok := arg["containChildren"]; ok {
+		containChildren = val.(bool)
+	}
+	backlinks := model.GetBackmentionDoc(defID, refTreeID, keyword, containChildren)
 	ret.Data = map[string]interface{}{
 		"backmentions": backlinks,
 	}
@@ -69,7 +73,11 @@ func getBacklinkDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
-	backlinks := model.GetBacklinkDoc(defID, refTreeID, keyword)
+	containChildren := true
+	if val, ok := arg["containChildren"]; ok {
+		containChildren = val.(bool)
+	}
+	backlinks := model.GetBacklinkDoc(defID, refTreeID, keyword, containChildren)
 	ret.Data = map[string]interface{}{
 		"backlinks": backlinks,
 	}

@@ -436,7 +436,8 @@ export class Backlink extends Model {
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId,
-                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value
+                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value,
+                containChildren: true
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");

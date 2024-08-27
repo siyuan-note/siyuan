@@ -1600,7 +1600,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ignoreIllegals: true
                 }).value + "<br>");
                 range.setStart(wbrElement.nextSibling, 0);
-                const brElement = wbrElement.parentElement.querySelector("br")
+                const brElement = wbrElement.parentElement.querySelector("br");
                 range.setEnd(brElement.previousSibling, brElement.previousSibling.textContent.length);
                 brElement.remove();
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);

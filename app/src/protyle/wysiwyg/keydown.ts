@@ -808,7 +808,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const position = getSelectionOffset(editElement, protyle.wysiwyg.element, range);
                 if (event.key === "Delete" || matchHotKey("⌃D", event)) {
-                    // 需使用 innerText，否则表格内 br 无法传唤为 /n https://github.com/siyuan-note/siyuan/issues/12066
+                    // 需使用 innerText，否则 br 无法传唤为 /n https://github.com/siyuan-note/siyuan/issues/12066
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
                     if (position.end === editElement.innerText.length ||
                         // 软换行后删除 https://github.com/siyuan-note/siyuan/issues/11118

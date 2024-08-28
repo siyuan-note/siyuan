@@ -462,6 +462,27 @@
   }
   ```
 
+### 根据 ID 获取存储路径
+* `/api/filetree/getPathByID`
+* 参数
+
+  ```json
+  {
+    "id": "20210917220056-yxtyl7i"
+  }
+  ```
+
+  * `id`：块 ID
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/20210828150719-r8edxl2/20210917220056-yxtyl7i.sy"
+  }
+  ```
+
 ### 根据人类可读路径获取 IDs
 
 * `/api/filetree/getIDsByHPath`

@@ -462,6 +462,28 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": "/foo/bar"
   }
   ```
+  
+### Get storage path based on ID
+
+* `/api/filetree/getPathByID`
+* Parameters
+
+  ```json
+  {
+    "id": "20210917220056-yxtyl7i"
+  }
+  ```
+
+  * `id`: Block ID
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/20210828150719-r8edxl2/20210917220056-yxtyl7i.sy"
+  }
+  ```
 
 ### Get IDs based on human-readable path
 

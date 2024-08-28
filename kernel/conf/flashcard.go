@@ -19,7 +19,8 @@ package conf
 import (
 	"bytes"
 	"fmt"
-	"github.com/open-spaced-repetition/go-fsrs"
+
+	"github.com/open-spaced-repetition/go-fsrs/v2"
 )
 
 type Flashcard struct {

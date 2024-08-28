@@ -1164,6 +1164,7 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (r
 	if withMath {
 		luteEngine.SetInlineMath(true)
 	}
+	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	WaitForWritingFiles()

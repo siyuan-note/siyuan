@@ -1570,10 +1570,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const tabSpace = window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ");
             if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && selectText !== "") {
                 const wbrElement = document.createElement("wbr");
-                // https://github.com/siyuan-note/siyuan/issues/8911
-                if (range.startContainer.nodeType !== 3 && (range.startContainer as Element).classList.contains("protyle-action")) {
-                    range.setStart(nodeElement.querySelector(".hljs").firstChild, 0);
-                }
                 range.insertNode(wbrElement);
                 range.setStartAfter(wbrElement);
                 const oldHTML = nodeElement.outerHTML;
@@ -1601,7 +1597,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }).value + "<br>");
                 range.setStart(wbrElement.nextSibling, 0);
                 const brElement = wbrElement.parentElement.querySelector("br");
-                range.setEnd(brElement.previousSibling, brElement.previousSibling.textContent.length);
+                setLastNodeRange(brElement.previousSibling as Element, range, false);
                 brElement.remove();
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                 wbrElement.remove();

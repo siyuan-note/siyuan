@@ -364,6 +364,29 @@ func getHPathByID(c *gin.Context) {
 	ret.Data = hPath
 }
 
+func getPathByID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	_path, err := model.GetPathByID(id)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = _path
+}
+
 func getFullHPathByID(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

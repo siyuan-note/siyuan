@@ -1164,7 +1164,6 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (r
 	if withMath {
 		luteEngine.SetInlineMath(true)
 	}
-	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 	WaitForWritingFiles()
@@ -1324,6 +1323,15 @@ func GetHPathByID(id string) (hPath string, err error) {
 		return
 	}
 	hPath = tree.HPath
+	return
+}
+
+func GetPathByID(id string) (hPath string, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+	hPath = tree.Path
 	return
 }
 

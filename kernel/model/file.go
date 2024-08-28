@@ -1327,6 +1327,16 @@ func GetHPathByID(id string) (hPath string, err error) {
 	return
 }
 
+func GetPathByID(id string) (path string, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if nil != err {
+		return
+	}
+
+	path = tree.Path
+	return
+}
+
 func GetFullHPathByID(id string) (hPath string, err error) {
 	tree, err := LoadTreeByBlockID(id)
 	if nil != err {

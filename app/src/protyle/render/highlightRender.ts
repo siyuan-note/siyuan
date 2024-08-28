@@ -135,7 +135,8 @@ export const lineNumberRender = (block: HTMLElement) => {
     lineList.map((line) => {
         let lineHeight = "";
         if (isWrap) {
-            lineNumberTemp.textContent = line || "<br>";
+            // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
+            lineNumberTemp.textContent = line.trim() || "<br>";
             // 不能使用 lineNumberTemp.getBoundingClientRect().height.toFixed(1) 否则
             // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
             // https://github.com/siyuan-note/siyuan/issues/9029

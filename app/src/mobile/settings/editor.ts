@@ -195,7 +195,7 @@ export const initEditor = () => {
 <div class="b3-label">
     ${window.siyuan.languages.dynamicLoadBlocks}
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="dynamicLoadBlocks" type="number" min="48" max="1024" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
+    <input class="b3-text-field fn__block" id="dynamicLoadBlocks" type="number" min="48" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
     <div class="b3-label__text">${window.siyuan.languages.dynamicLoadBlocksTip}</div>
 </div>
 <div class="b3-label">

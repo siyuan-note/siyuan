@@ -247,9 +247,6 @@ func InitConf() {
 	if conf.MinDynamicLoadBlocks > Conf.Editor.DynamicLoadBlocks {
 		Conf.Editor.DynamicLoadBlocks = conf.MinDynamicLoadBlocks
 	}
-	if conf.MaxDynamicLoadBlocks < Conf.Editor.DynamicLoadBlocks {
-		Conf.Editor.DynamicLoadBlocks = conf.MaxDynamicLoadBlocks
-	}
 	if 0 > Conf.Editor.BacklinkExpandCount {
 		Conf.Editor.BacklinkExpandCount = 0
 	}

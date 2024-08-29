@@ -284,7 +284,7 @@ func Upload(c *gin.Context) {
 				os.RemoveAll(tmpDir2)
 			}
 
-			succMap[fName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
 		}
 	}
 

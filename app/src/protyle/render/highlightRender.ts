@@ -86,18 +86,17 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 } else {
                     block.style.fontVariantLigatures = "none";
                 }
-                const codeText = block.textContent;
+                const codeText = block.lastElementChild.textContent;
                 if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
                     // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
-                    block.firstElementChild.classList.add("protyle-linenumber__rows");
+                    block.firstElementChild.className = "protyle-linenumber__rows";
                     block.firstElementChild.setAttribute("contenteditable", "false");
                     lineNumberRender(block);
                 } else {
-                    block.firstElementChild.classList.remove("protyle-linenumber__rows");
+                    block.firstElementChild.className = "fn__none";
                     block.firstElementChild.innerHTML = "";
                 }
-
-                (block.childElementCount === 2 ? block.lastElementChild : block).innerHTML = window.hljs.highlight(
+                block.lastElementChild.innerHTML = window.hljs.highlight(
                     codeText + (codeText.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
                     {
                         language,

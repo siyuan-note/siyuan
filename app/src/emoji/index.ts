@@ -5,7 +5,7 @@ import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
-import {getAllModels} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 /// #endif
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
@@ -520,7 +520,6 @@ export const getEmojiDesc = (emoji: IEmojiItem) => {
     return emoji.description;
 };
 
-
 export const getEmojiTitle = (index: number) => {
     if (window.siyuan.config.lang === "zh_CN") {
         return window.siyuan.emojis[index].title_zh_cn;
@@ -530,3 +529,31 @@ export const getEmojiTitle = (index: number) => {
     }
     return window.siyuan.emojis[index].title;
 };
+
+const putEmojis = (protyle: IProtyle) => {
+    if (window.siyuan.emojis[0].items.length > 0) {
+        const emojis: IObject = {};
+        window.siyuan.emojis[0].items.forEach(emojiITem => {
+            emojis[emojiITem.keywords] = protyle.options.hint.emojiPath + "/" + emojiITem.unicode;
+        });
+        protyle.lute.PutEmojis(emojis);
+    }
+};
+
+export const reloadEmoji = () => {
+    fetchPost("/api/system/getEmojiConf", {}, response => {
+        window.siyuan.emojis = response.data as IEmoji[];
+        /// #if MOBILE
+        if (window.siyuan.mobile.editor) {
+            putEmojis(window.siyuan.mobile.editor.protyle);
+        }
+        if (window.siyuan.mobile.popEditor) {
+            putEmojis(window.siyuan.mobile.popEditor.protyle);
+        }
+        /// #else
+        getAllEditor().forEach(item => {
+            putEmojis(item.protyle);
+        });
+        /// #endif
+    });
+}

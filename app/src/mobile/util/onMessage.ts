@@ -1,9 +1,15 @@
 import {openMobileFileById} from "../editor";
-import {processSync, progressLoading, progressStatus, reloadSync, transactionError} from "../../dialog/processSystem";
+import {
+    processSync,
+    progressLoading,
+    progressStatus,
+    reloadSync,
+    transactionError
+} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
-import {fetchPost} from "../../util/fetch";
+import {reloadEmoji} from "../../emoji";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
@@ -12,9 +18,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 reloadPlugin(app, data.data);
                 break;
             case "reloadEmojiConf":
-                fetchPost("/api/system/getEmojiConf", {}, response => {
-                    window.siyuan.emojis = response.data as IEmoji[];
-                });
+                reloadEmoji();
                 break;
             case "syncMergeResult":
                 reloadSync(app, data.data);

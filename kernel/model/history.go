@@ -228,7 +228,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	WaitForWritingFiles()
 
 	srcPath := historyPath
-	var destPath string
+	var destPath, parentHPath string
 	baseName := filepath.Base(historyPath)
 	id := strings.TrimSuffix(baseName, ".sy")
 
@@ -239,7 +239,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 	}
 
-	destPath, err = getRollbackDockPath(boxID, historyPath)
+	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath)
 	if nil != err {
 		return
 	}
@@ -269,7 +269,19 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 	}
 
-	FullReindex()
+	tree.Box = boxID
+	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
+	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
+
+	// 仅重新索引该文档，不进行全量索引
+	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
+	treenode.RemoveBlockTree(id)
+	treenode.IndexBlockTree(tree)
+	sql.RemoveTreeQueue(id)
+	sql.IndexTreeQueue(tree)
+	util.PushReloadFiletree()
+	util.PushMsg(Conf.Language(102), 3000)
+
 	IncSync()
 	go func() {
 		sql.WaitForWritingDatabase()
@@ -297,7 +309,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	return nil
 }
 
-func getRollbackDockPath(boxID, historyPath string) (destPath string, err error) {
+func getRollbackDockPath(boxID, historyPath string) (destPath, parentHPath string, err error) {
 	baseName := filepath.Base(historyPath)
 	parentID := strings.TrimSuffix(filepath.Base(filepath.Dir(historyPath)), ".sy")
 	parentWorkingDoc := treenode.GetBlockTree(parentID)
@@ -309,6 +321,7 @@ func getRollbackDockPath(boxID, historyPath string) (destPath string, err error)
 			return
 		}
 		destPath = filepath.Join(parentDir, baseName)
+		parentHPath = parentWorkingDoc.HPath
 	} else {
 		// 父路径如果不是文档，则恢复到笔记本根路径下
 		destPath = filepath.Join(util.DataDir, boxID, baseName)

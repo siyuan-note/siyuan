@@ -244,7 +244,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         range.collapse(false);
         range.insertNode(document.createElement("wbr"));
         if (isNodeCodeBlock) {
-            getContenteditableElement(blockElement).removeAttribute("data-render");
+            blockElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
             highlightRender(blockElement);
         } else {
             focusByWbr(blockElement, range);

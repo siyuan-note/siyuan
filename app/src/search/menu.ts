@@ -317,7 +317,8 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
         saveDialog.destroy();
     });
     btnsElement[1].addEventListener("click", () => {
-        const value = saveDialog.element.querySelector("input").value.trim();
+        const inputElement = saveDialog.element.querySelector("input");
+        const value = inputElement.value.trim();
         if (!value) {
             showMessage(window.siyuan.languages["_kernel"]["142"]);
             return;
@@ -340,6 +341,7 @@ export const saveCriterion = (config: Config.IUILayoutTabSearchConfig,
                 hasSameConfig = item.name;
             }
         });
+        inputElement.blur();
         if (hasSameName && !hasSameConfig) {
             confirmDialog(window.siyuan.languages.confirm, window.siyuan.languages.searchOverwrite, () => {
                 Array.from(criteriaElement.children).forEach(item => {

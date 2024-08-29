@@ -165,7 +165,7 @@ func renderBlockContentByNodes(nodes []*ast.Node) string {
 	return buf.String()
 }
 
-func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resolved *[]string) {
+func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resolved *[]string, depth *int) {
 	var children []*ast.Node
 	if ast.NodeHeading == n.Type {
 		children = append(children, n)
@@ -176,6 +176,11 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 		}
 	} else {
 		children = append(children, n)
+	}
+
+	*depth++
+	if 7 < *depth {
+		return
 	}
 
 	for _, child := range children {
@@ -196,13 +201,15 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 				stmt = strings.ReplaceAll(stmt, editor.IALValEscNewLine, "\n")
 				sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, Conf.Search.Limit)
 				for _, sqlBlock := range sqlBlocks {
-					md := sqlBlock.Markdown
+					if "query_embed" == sqlBlock.Type {
+						continue
+					}
 
+					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+					var md string
 					if "d" == sqlBlock.Type {
-						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
 						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 					} else if "h" == sqlBlock.Type {
-						subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
 						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
 						var hChildren []*ast.Node
 						hChildren = append(hChildren, h)
@@ -214,6 +221,9 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 							mdBuf.WriteString("\n\n")
 						}
 						md = mdBuf.String()
+					} else {
+						node := treenode.GetNodeInTree(subTree, sqlBlock.ID)
+						md, _ = lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
 					}
 
 					buf := &bytes.Buffer{}
@@ -230,7 +240,7 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					}
 					buf.WriteString("\n\n")
 
-					subTree := parse.Parse("", buf.Bytes(), luteEngine.ParseOptions)
+					subTree = parse.Parse("", buf.Bytes(), luteEngine.ParseOptions)
 					var inserts []*ast.Node
 					for subNode := subTree.Root.FirstChild; nil != subNode; subNode = subNode.Next {
 						if ast.NodeKramdownBlockIAL != subNode.Type {
@@ -239,7 +249,12 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					}
 					for _, insert := range inserts {
 						n.InsertBefore(insert)
-						resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved)
+
+						if gulu.Str.Contains(sqlBlock.ID, *resolved) {
+							return ast.WalkContinue
+						}
+
+						resolveEmbedR(insert, blockEmbedMode, luteEngine, resolved, depth)
 					}
 				}
 				unlinks = append(unlinks, n)

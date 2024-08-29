@@ -73,8 +73,8 @@ export const initUI = (protyle: IProtyle) => {
         wheelTimeout = window.setTimeout(() => {
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
             if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
-                protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber").forEach((block: HTMLElement) => {
-                    lineNumberRender(block);
+                protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
+                    lineNumberRender(block.parentElement);
                 });
             }
         }, Constants.TIMEOUT_LOAD);

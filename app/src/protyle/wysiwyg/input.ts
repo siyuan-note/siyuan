@@ -249,7 +249,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
             }
         });
     } else if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
-        editElement.removeAttribute("data-render");
+        editElement.parentElement.removeAttribute("data-render");
         highlightRender(blockElement);
     } else {
         focusByWbr(protyle.wysiwyg.element, range);

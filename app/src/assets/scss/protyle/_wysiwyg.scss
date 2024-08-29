@@ -177,6 +177,7 @@
           flex: 1;
           box-sizing: border-box;
           margin-right: 24px;
+          min-width: 1px;
 
           &:nth-last-child(2),
           &:last-child {
@@ -446,8 +447,7 @@
     }
   }
 
-  &--select,
-  &--select .hljs {
+  &--select {
     background-color: var(--b3-theme-primary-lightest) !important;
   }
 
@@ -456,15 +456,9 @@
     display: none;
   }
 
-  &--hl,
-  &--hl .hljs {
+  &--hl {
     transition: var(--b3-background-transition);
     background-color: var(--b3-theme-primary-lightest) !important;
-  }
-
-  &--hl .protyle-linenumber__rows,
-  &--select .protyle-linenumber__rows {
-    background-color: var(--b3-protyle-code-linenumber-hl) !important;
   }
 
   .dragover {
@@ -638,7 +632,7 @@
 
   .render-node .img:hover .protyle-icons,
   .render-node .render-node:hover > .protyle-icons,
-  // https://github.com/siyuan-note/siyuan/issues/11879
+    // https://github.com/siyuan-note/siyuan/issues/11879
   .protyle-wysiwyg__embed .img:hover .protyle-action__drag,
   .protyle-wysiwyg__embed .iframe:hover .protyle-action__drag {
     display: none;

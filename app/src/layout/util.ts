@@ -313,6 +313,11 @@ export const JSONToCenter = (
 ) => {
     let child: Layout | Wnd | Tab | Model;
     if (json.instance === "Layout") {
+        // TabA 向右分屏后向下分屏，依次关闭右侧、上侧分屏无法移除 layout 嵌套，故在此解决 https://github.com/siyuan-note/siyuan/issues/12196
+        while (json.children.length === 1 && json.children[0].instance === "Layout" &&
+        json.children[0].type === "normal" && json.children[0].children.length === 1) {
+            json.children = json.children[0].children;
+        }
         if (!layout) {
             window.siyuan.layout.layout = new Layout({
                 element: document.getElementById("layouts"),

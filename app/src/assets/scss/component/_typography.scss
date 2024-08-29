@@ -268,10 +268,12 @@
 
   .code-block {
     position: relative;
-    padding: 0;
+    padding: 2em 1em 1.6em;
     margin: 1em 0;
     display: flex;
     flex-direction: row-reverse;
+    box-sizing: border-box;
+    background-color: var(--b3-protyle-code-background);
 
     .protyle-action {
       left: 4px;
@@ -299,15 +301,10 @@
     &:hover .protyle-action__language {
       opacity: .86;
     }
-
-    &[linenumber="true"] .protyle-action__language {
-      margin-left: 3.6em;
-    }
   }
 
   .hljs {
     border-radius: var(--b3-border-radius);
-    padding: 2em 4px 1.6em 4px;
     font-size: 85%;
     overflow: auto;
     font-family: var(--b3-font-family-code);
@@ -315,6 +312,8 @@
     overflow-x: overlay;
     tab-size: 4;
     flex: 1;
+    display: flex;
+    background-color: transparent;
   }
 
   [data-subtype="echarts"],
@@ -552,37 +551,31 @@
     }
   }
 
-  &-linenumber {
-    border-top-left-radius: 0 !important;
-    border-bottom-left-radius: 0 !important;
+  &-linenumber__rows {
+    pointer-events: none;
+    user-select: none;
+    counter-reset: linenumber;
+    font-size: 85%;
+    box-sizing: border-box;
+    font-family: var(--b3-font-family-code);
+    margin-right: 1em;
+    min-width: 1.2em;
+    text-align: right;
 
-    &__rows {
+    & > span {
       pointer-events: none;
-      user-select: none;
-      counter-reset: linenumber;
-      font-size: 85%;
-      background-color: var(--b3-theme-surface);
-      padding: 2em 4px 1.6em 4px;
-      box-sizing: border-box;
-      border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
-      width: 3.6em;
-      font-family: var(--b3-font-family-code);
+      display: block;
 
-      & > span {
-        pointer-events: none;
+      &::before {
+        counter-increment: linenumber;
+        content: counter(linenumber);
+        color: var(--b3-theme-on-surface);
         display: block;
-
-        &::before {
-          counter-increment: linenumber;
-          content: counter(linenumber);
-          color: var(--b3-theme-on-surface);
-          display: block;
-          text-align: right;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          direction: rtl;
-        }
+        text-align: right;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        direction: rtl;
       }
     }
   }

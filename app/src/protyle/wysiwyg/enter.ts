@@ -117,7 +117,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         range.insertNode(document.createTextNode("\n"));
         range.collapse(false);
         range.insertNode(wbrElement);
-        editableElement.removeAttribute("data-render");
+        editableElement.parentElement.removeAttribute("data-render");
         highlightRender(blockElement);
         updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
         return true;

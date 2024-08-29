@@ -1174,7 +1174,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestBlock(event.target);
+        let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") || hasClosestBlock(event.target);
         const point = {x: event.clientX, y: event.clientY, className: ""};
         if (!targetElement) {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
@@ -1279,6 +1279,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__right");
+            } else if (targetElement.classList.contains("av__row--header")) {
+                targetElement.classList.add("dragover__bottom");
+            } else if (targetElement.classList.contains("av__row--util")) {
+                targetElement.previousElementSibling.classList.add("dragover__bottom");
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
                     targetElement.classList.add("dragover__bottom");

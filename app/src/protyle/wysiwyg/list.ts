@@ -117,7 +117,7 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
                 previousElement.lastElementChild.previousElementSibling.lastElementChild.before(item);
             } else if (subtype === "t") {
                 item.setAttribute("data-marker", "*");
-                actionElement.innerHTML = '<svg><use xlink:href="#iconUncheck"></use></svg>';
+                actionElement.innerHTML = `<svg><use xlink:href="#icon${item.classList.contains("protyle-task--done") ? "Check" : "Uncheck"}"></use></svg>`;
                 actionElement.classList.remove("protyle-action--order");
                 actionElement.classList.add("protyle-action--task");
                 previousElement.lastElementChild.previousElementSibling.lastElementChild.before(item);

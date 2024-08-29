@@ -176,6 +176,9 @@ export class WYSIWYG {
         if (inputData === "<" || inputData === ">") {
             // 使用 inlineElement.innerHTML 会出现 https://ld246.com/article/1627185027423 中的第2个问题
             dataLength = 4;
+        } else if (inputData === "&") {
+            // https://github.com/siyuan-note/siyuan/issues/12239
+            dataLength = 5;
         }
         // https://github.com/siyuan-note/siyuan/issues/5924
         if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === inputData.length &&
@@ -1513,7 +1516,7 @@ export class WYSIWYG {
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
                     range.insertNode(document.createElement("wbr"));
-                    getContenteditableElement(nodeElement).removeAttribute("data-render");
+                    nodeElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
                     highlightRender(nodeElement);
                 }
                 if (nodeElement.parentElement.parentElement && !isFoldHeading && !nodeElement.classList.contains("av")) {

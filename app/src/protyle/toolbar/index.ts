@@ -1195,14 +1195,8 @@ export class Toolbar {
             nodeElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
             processRender(nodeElement);
         } else {
-            const lineNumber = nodeElement.getAttribute("linenumber");
-            if (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum)) {
-                editElement.classList.add("protyle-linenumber");
-            } else {
-                editElement.classList.remove("protyle-linenumber");
-            }
             (editElement as HTMLElement).textContent = editElement.textContent;
-            editElement.removeAttribute("data-render");
+            editElement.parentElement.removeAttribute("data-render");
             highlightRender(nodeElement);
         }
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

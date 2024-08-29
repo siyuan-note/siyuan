@@ -100,7 +100,7 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 				return
 			}
 			f.Close()
-			succMap[fName] = "assets/" + fName
+			succMap[baseName] = "assets/" + fName
 		}
 	}
 	IncSync()

@@ -95,6 +95,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 } else {
                     block.firstElementChild.className = "fn__none";
                     block.firstElementChild.innerHTML = "";
+                    block.lastElementChild.removeAttribute("style");
                 }
                 block.lastElementChild.innerHTML = window.hljs.highlight(
                     codeText + (codeText.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
@@ -147,4 +148,5 @@ export const lineNumberRender = (block: HTMLElement) => {
 
     lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
+    block.lastElementChild.setAttribute("style", `padding-left:${block.firstElementChild.clientWidth + 16}px`);
 };

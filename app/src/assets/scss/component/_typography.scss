@@ -313,6 +313,7 @@
     flex: 1;
     display: flex;
     background-color: transparent;
+    position: relative;
   }
 
   [data-subtype="echarts"],
@@ -555,11 +556,9 @@
     user-select: none;
     counter-reset: linenumber;
     font-size: 85%;
-    box-sizing: border-box;
     font-family: var(--b3-font-family-code);
-    margin-right: 1em;
-    min-width: 1.2em;
     text-align: right;
+    position: absolute;
 
     & > span {
       pointer-events: none;

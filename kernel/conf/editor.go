@@ -56,7 +56,6 @@ type Editor struct {
 
 const (
 	MinDynamicLoadBlocks = 48
-	MaxDynamicLoadBlocks = 1024
 )
 
 func NewEditor() *Editor {

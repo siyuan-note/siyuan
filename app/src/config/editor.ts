@@ -165,7 +165,7 @@ export const editor = {
         <div class="b3-label__text">${window.siyuan.languages.dynamicLoadBlocksTip}</div>
     </div>
     <span class="fn__space"></span>
-    <input class="b3-text-field fn__flex-center fn__size200" id="dynamicLoadBlocks" type="number" min="48" max="1024" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
+    <input class="b3-text-field fn__flex-center fn__size200" id="dynamicLoadBlocks" type="number" min="48" value="${window.siyuan.config.editor.dynamicLoadBlocks}"/>
 </div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
@@ -327,10 +327,6 @@ export const editor = {
             if (48 > dynamicLoadBlocks) {
                 dynamicLoadBlocks = 48;
                 (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "48";
-            }
-            if (1024 < dynamicLoadBlocks) {
-                dynamicLoadBlocks = 1024;
-                (editor.element.querySelector("#dynamicLoadBlocks") as HTMLInputElement).value = "1024";
             }
 
             fetchPost("/api/setting/setEditor", {

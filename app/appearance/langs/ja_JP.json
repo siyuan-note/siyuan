@@ -65,7 +65,6 @@
   "cardStatus": "カードの状態",
   "noSupportTip": "この機能はカードデッキの使用をサポートしていません",
   "insertRowTip": "新しく追加された行はフィルタリングされており、フィルタリング/検索/並べ替えを解除すると表示されます",
-  "insertRowTip2": "新しく追加された行は並べ替えの対象ではありません",
   "insertPhoto": "画像を挿入",
   "relativeToToday": "今日からの相対的な期間",
   "current": "現在",

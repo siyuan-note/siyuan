@@ -126,10 +126,11 @@ func extensionCopy(c *gin.Context) {
 	var md string
 	var withMath bool
 	if nil != form.Value["href"] {
-		if href := form.Value["href"][0]; strings.HasPrefix(href, "https://ld246.com/article/") {
+		if href := form.Value["href"][0]; strings.HasPrefix(href, "https://ld246.com/article/") || strings.HasPrefix(href, "https://liuyun.io/article/") {
 			// 剪藏链滴帖子时直接使用 Markdown 接口的返回
 			// https://ld246.com/article/raw/1724850322251
 			href = strings.ReplaceAll(href, "https://ld246.com/article/", "https://ld246.com/article/raw/")
+			href = strings.ReplaceAll(href, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
 			resp, err := httpclient.NewCloudRequest30s().Get(href)
 			if nil != err {
 				logging.LogWarnf("get [%s] failed: %s", href, err)

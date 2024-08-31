@@ -3037,7 +3037,9 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		if !val.IsDetached { // 现在绑定了块
 			// 将游离行绑定到新建的块上
 			bindBlockAv(tx, avID, rowID)
-			val.BlockID = val.Block.ID
+			if nil != val.Block {
+				val.BlockID = val.Block.ID
+			}
 		}
 	} else {
 		// 之前绑定了块

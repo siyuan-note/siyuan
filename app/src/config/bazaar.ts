@@ -542,6 +542,10 @@ export const bazaar = {
     <div${(data.outdated && (data.installed || dataObj.downloaded)) ? "" : ' class="fn__none"'}>
         <button class="b3-button" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
     </div>
+    <div class="fn__hr--b"></div>
+    <div>
+        <a href="${data.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" class="b3-button b3-button--success" style="width: 168px" data-type="feedback">${window.siyuan.languages.feedback}</a>
+    </div>
     <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
     <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
     <div class="fn__flex${dataObj.downloaded ? " fn__none" : ""}" style="justify-content: center;">
@@ -722,6 +726,11 @@ export const bazaar = {
                     confirmDialog("⬆️ " + window.siyuan.languages.updateAll, window.siyuan.languages.confirmUpdateAll, () => {
                         fetchPost("/api/bazaar/batchUpdatePackage", {frontend: getFrontend()});
                     });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "feedback") {
+
                     event.preventDefault();
                     event.stopPropagation();
                     break;

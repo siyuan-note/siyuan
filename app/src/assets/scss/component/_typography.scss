@@ -303,16 +303,20 @@
     }
   }
 
-  .hljs {
+  div.hljs,
+  code.hljs {
     font-size: 85%;
     overflow: auto;
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
     overflow-x: overlay;
     tab-size: 4;
+    background-color: transparent;
+  }
+
+  div.hljs {
     flex: 1;
     display: flex;
-    background-color: transparent;
     position: relative;
   }
 

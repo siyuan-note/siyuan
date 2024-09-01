@@ -8,7 +8,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     let isPreview = false;
     if (element.classList.contains("code-block")) {
         // 编辑器内代码块编辑渲染
-        codeElements = element.querySelectorAll("[spellcheck]");
+        codeElements = element.querySelectorAll(".hljs");
     } else {
         if (element.classList.contains("item__readme")) {
             // bazaar reademe
@@ -21,7 +21,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
             codeElements = element.querySelectorAll(".code-block code");
             isPreview = true;
         } else {
-            codeElements = element.querySelectorAll(".code-block [spellcheck]");
+            codeElements = element.querySelectorAll(".code-block .hljs");
         }
     }
     if (codeElements.length === 0) {
@@ -73,31 +73,34 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                 const autoEnter = block.parentElement.getAttribute("linewrap");
                 const ligatures = block.parentElement.getAttribute("ligatures");
                 const lineNumber = block.parentElement.getAttribute("linenumber");
+                const hljsElement = block.lastElementChild ? block.lastElementChild as HTMLElement : block;
                 if (autoEnter === "true" || (autoEnter !== "false" && window.siyuan.config.editor.codeLineWrap)) {
-                    block.style.setProperty("white-space", "pre-wrap");
-                    block.style.setProperty("word-break", "break-word");
+                    hljsElement.style.setProperty("white-space", "pre-wrap");
+                    hljsElement.style.setProperty("word-break", "break-word");
                 } else {
                     // https://ld246.com/article/1684031600711 该属性会导致有 tab 后光标跳至末尾，目前无解
-                    block.style.setProperty("white-space", "pre");
-                    block.style.setProperty("word-break", "initial");
+                    hljsElement.style.setProperty("white-space", "pre");
+                    hljsElement.style.setProperty("word-break", "initial");
                 }
                 if (ligatures === "true" || (ligatures !== "false" && window.siyuan.config.editor.codeLigatures)) {
-                    block.style.fontVariantLigatures = "normal";
+                    hljsElement.style.fontVariantLigatures = "normal";
                 } else {
-                    block.style.fontVariantLigatures = "none";
+                    hljsElement.style.fontVariantLigatures = "none";
                 }
-                const codeText = block.lastElementChild.textContent;
-                if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
-                    // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
-                    block.firstElementChild.className = "protyle-linenumber__rows";
-                    block.firstElementChild.setAttribute("contenteditable", "false");
-                    lineNumberRender(block);
-                } else {
-                    block.firstElementChild.className = "fn__none";
-                    block.firstElementChild.innerHTML = "";
-                    block.lastElementChild.removeAttribute("style");
+                const codeText = hljsElement.textContent;
+                if (block.firstElementChild) {
+                    if (!isPreview && (lineNumber === "true" || (lineNumber !== "false" && window.siyuan.config.editor.codeSyntaxHighlightLineNum))) {
+                        // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
+                        block.firstElementChild.className = "protyle-linenumber__rows";
+                        block.firstElementChild.setAttribute("contenteditable", "false");
+                        lineNumberRender(block);
+                    } else {
+                        block.firstElementChild.className = "fn__none";
+                        block.firstElementChild.innerHTML = "";
+                        hljsElement.style.paddingLeft = "";
+                    }
                 }
-                block.lastElementChild.innerHTML = window.hljs.highlight(
+                hljsElement.innerHTML = window.hljs.highlight(
                     codeText + (codeText.endsWith("\n") ? "" : "\n"), // https://github.com/siyuan-note/siyuan/issues/4609
                     {
                         language,
@@ -148,5 +151,5 @@ export const lineNumberRender = (block: HTMLElement) => {
 
     lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
-    block.lastElementChild.setAttribute("style", `padding-left:${block.firstElementChild.clientWidth + 16}px`);
+    (block.lastElementChild as HTMLElement).style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
 };

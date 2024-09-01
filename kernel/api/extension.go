@@ -33,6 +33,7 @@ import (
 	"github.com/gabriel-vasile/mimetype"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
+	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -121,9 +122,44 @@ func extensionCopy(c *gin.Context) {
 		uploaded[oName] = "assets/" + fName
 	}
 
-	md, withMath, _ := model.HTML2Markdown(dom)
-	md = strings.TrimSpace(md)
 	luteEngine := util.NewLute()
+	var md string
+	var withMath bool
+	if nil != form.Value["href"] {
+		if href := form.Value["href"][0]; strings.HasPrefix(href, "https://ld246.com/article/") || strings.HasPrefix(href, "https://liuyun.io/article/") {
+			// 剪藏链滴帖子时直接使用 Markdown 接口的返回
+			// https://ld246.com/article/raw/1724850322251
+			href = strings.ReplaceAll(href, "https://ld246.com/article/", "https://ld246.com/article/raw/")
+			href = strings.ReplaceAll(href, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
+			resp, err := httpclient.NewCloudRequest30s().Get(href)
+			if nil != err {
+				logging.LogWarnf("get [%s] failed: %s", href, err)
+			} else {
+				bodyData, readErr := io.ReadAll(resp.Body)
+				if nil != readErr {
+					ret.Code = -1
+					ret.Msg = "read response body failed: " + readErr.Error()
+					return
+				}
+
+				md = string(bodyData)
+				tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if ast.NodeInlineMath == n.Type {
+						withMath = true
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+			}
+		}
+	}
+
+	if "" == md {
+		md, withMath, _ = model.HTML2Markdown(dom)
+	}
+
+	md = strings.TrimSpace(md)
 	if withMath {
 		luteEngine.SetInlineMath(true)
 	}
@@ -142,6 +178,9 @@ func extensionCopy(c *gin.Context) {
 		} else if ast.NodeImage == n.Type {
 			if dest := n.ChildByType(ast.NodeLinkDest); nil != dest {
 				assetPath := uploaded[string(dest.Tokens)]
+				if "" == assetPath {
+					assetPath = uploaded[string(dest.Tokens)+"?imageView2/2/interlace/1/format/webp"]
+				}
 				if "" != assetPath {
 					dest.Tokens = []byte(assetPath)
 				}

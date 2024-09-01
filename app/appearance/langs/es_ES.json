@@ -65,7 +65,6 @@
   "cardStatus": "Estado de la tarjeta",
   "noSupportTip": "Esta función no admite el uso de paquetes de tarjetas",
   "insertRowTip": "Las filas recién agregadas se han filtrado y se pueden ver cancelando el filtrado/búsqueda/clasificación",
-  "insertRowTip2": "Las filas nuevas no participan en la clasificación",
   "insertPhoto": "Toma una foto e insértala",
   "relativeToToday": "Relativa a hoy",
   "current": "Esto",

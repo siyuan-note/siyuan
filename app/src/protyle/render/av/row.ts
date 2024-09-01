@@ -108,7 +108,6 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
     // 有排序需要加入最后一行
     if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
         previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
-        showMessage(window.siyuan.languages.insertRowTip2);
     }
     let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;

@@ -65,7 +65,6 @@
   "cardStatus": "卡片狀態",
   "noSupportTip": "此功能不支援卡包使用",
   "insertRowTip": "新增行已被過濾，可取消過濾/搜尋/排序進行查看",
-  "insertRowTip2": "新增行不參與排序",
   "insertPhoto": "拍照並插入",
   "relativeToToday": "相對於今天",
   "current": "當前",

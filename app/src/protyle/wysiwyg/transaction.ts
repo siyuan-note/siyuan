@@ -236,7 +236,9 @@ const promiseTransaction = () => {
         });
 
         // 删除仅有的折叠标题后展开内容为空
-        if (protyle.wysiwyg.element.childElementCount === 0) {
+        if (protyle.wysiwyg.element.childElementCount === 0 &&
+            // 聚焦时不需要新增块，否则会导致 https://github.com/siyuan-note/siyuan/issues/12326 第一点
+            !protyle.block.showAll) {
             const newID = Lute.NewNodeID();
             const emptyElement = genEmptyElement(false, true, newID);
             protyle.wysiwyg.element.insertAdjacentElement("afterbegin", emptyElement);
@@ -279,7 +281,11 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
         focusSideBlock(updateElements[0]);
     }
     updateElements.forEach(item => {
-        item.remove();
+        // 需移除顶层，否则删除唯一的列表项后列表无法清除干净 https://github.com/siyuan-note/siyuan/issues/12326 第一点
+        const topElement = getTopAloneElement(item);
+        if (topElement) {
+            topElement.remove();
+        }
     });
     // 更新 ws 嵌入块
     protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {

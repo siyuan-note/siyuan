@@ -556,4 +556,4 @@ export const reloadEmoji = () => {
         });
         /// #endif
     });
-}
+};

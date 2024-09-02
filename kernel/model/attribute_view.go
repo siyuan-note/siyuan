@@ -990,8 +990,20 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 		return
 	}
 
+	var changedAvIDs []string
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
+			if av.KeyTypeRelation == value.Type {
+				if nil != value.Relation {
+					for i, relBlockID := range value.Relation.BlockIDs {
+						if relBlockID == operation.ID {
+							value.Relation.BlockIDs[i] = operation.NextID
+							changedAvIDs = append(changedAvIDs, attrView.ID)
+						}
+					}
+				}
+			}
+
 			if value.BlockID != operation.ID {
 				continue
 			}
@@ -1005,7 +1017,8 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 				value.Block.ID = operation.NextID
 			}
 
-			replaceRelationAvValues(operation.AvID, operation.ID, operation.NextID)
+			avIDs := replaceRelationAvValues(operation.AvID, operation.ID, operation.NextID)
+			changedAvIDs = append(changedAvIDs, avIDs...)
 		}
 	}
 
@@ -1028,6 +1041,11 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 	}
 
 	err = av.SaveAttributeView(attrView)
+
+	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
+	for _, avID := range changedAvIDs {
+		util.PushReloadAttrView(avID)
+	}
 	return
 }
 
@@ -2855,8 +2873,20 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 		}
 	}
 
+	var changedAvIDs []string
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
+			if av.KeyTypeRelation == value.Type {
+				if nil != value.Relation {
+					for i, relBlockID := range value.Relation.BlockIDs {
+						if relBlockID == operation.PreviousID {
+							value.Relation.BlockIDs[i] = operation.NextID
+							changedAvIDs = append(changedAvIDs, attrView.ID)
+						}
+					}
+				}
+			}
+
 			if value.BlockID != operation.PreviousID {
 				continue
 			}
@@ -2878,7 +2908,8 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 			if av.KeyTypeBlock == value.Type && !operation.IsDetached {
 				bindBlockAv(tx, operation.AvID, operation.NextID)
 
-				replaceRelationAvValues(operation.AvID, operation.PreviousID, operation.NextID)
+				avIDs := replaceRelationAvValues(operation.AvID, operation.PreviousID, operation.NextID)
+				changedAvIDs = append(changedAvIDs, avIDs...)
 			}
 		}
 	}
@@ -2902,6 +2933,11 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	}
 
 	err = av.SaveAttributeView(attrView)
+
+	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
+	for _, avID := range changedAvIDs {
+		util.PushReloadAttrView(avID)
+	}
 	return
 }
 
@@ -3429,7 +3465,7 @@ func getAttrViewName(attrView *av.AttributeView) string {
 	return ret
 }
 
-func replaceRelationAvValues(avID, previousID, nextID string) {
+func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []string) {
 	// The database relation fields follow the change after the primary key field is changed https://github.com/siyuan-note/siyuan/issues/11117
 
 	srcAvIDs := av.GetSrcAvIDs(avID)
@@ -3464,9 +3500,10 @@ func replaceRelationAvValues(avID, previousID, nextID string) {
 
 		if changed {
 			av.SaveAttributeView(srcAv)
-			util.PushReloadAttrView(srcAvID)
+			changedSrcAvID = append(changedSrcAvID, srcAvID)
 		}
 	}
+	return
 }
 
 func updateBoundBlockAvsAttribute(avIDs []string) {

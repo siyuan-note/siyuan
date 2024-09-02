@@ -124,17 +124,18 @@ export const lineNumberRender = (block: HTMLElement) => {
     }
     // clientHeight 总是取的整数
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
+    const codeElement = block.lastElementChild as HTMLElement;
     const lineNumberTemp = document.createElement("div");
     lineNumberTemp.className = "hljs";
-    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: ${block.lastElementChild.clientWidth}px;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${block.style.whiteSpace};word-break:${block.style.wordBreak};font-variant-ligatures:${block.style.fontVariantLigatures};`);
+    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: ${codeElement.clientWidth}px;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${codeElement.style.whiteSpace};word-break:${codeElement.style.wordBreak};font-variant-ligatures:${codeElement.style.fontVariantLigatures};`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
     let lineNumberHTML = "";
-    const lineList = block.lastElementChild.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
+    const lineList = codeElement.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-    const isWrap = block.style.wordBreak === "break-word";
+    const isWrap = codeElement.style.wordBreak === "break-word";
     lineList.map((line) => {
         let lineHeight = "";
         if (isWrap) {
@@ -151,5 +152,5 @@ export const lineNumberRender = (block: HTMLElement) => {
 
     lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
-    (block.lastElementChild as HTMLElement).style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
+    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
 };

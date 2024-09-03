@@ -588,6 +588,7 @@
   "mergeCell": "セルの結合",
   "cancelMerged": "セルの結合を解除",
   "useDefaultWidth": "デフォルトの列幅を使用",
+  "useDefaultAlign": "デフォルトの配置を使用する",
   "type": "種類",
   "replaceType": "種類の置換",
   "searchType": "検索フィルタ",

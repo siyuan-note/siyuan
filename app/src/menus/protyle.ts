@@ -1880,6 +1880,13 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
             setTableAlign(protyle, [cellElement], nodeElement, "right", range);
         }
     });
+    otherMenus.push({
+        icon: "",
+        label: window.siyuan.languages.useDefaultAlign,
+        click: () => {
+            setTableAlign(protyle, [cellElement], nodeElement, "", range);
+        }
+    });
     const menus: IMenu[] = [];
     menus.push(...otherMenus);
     menus.push({

@@ -588,6 +588,7 @@
   "mergeCell": "合并单元格",
   "cancelMerged": "拆分单元格",
   "useDefaultWidth": "使用默认列宽",
+  "useDefaultAlign": "使用默认对齐",
   "type": "类型",
   "replaceType": "替换类型",
   "searchType": "搜索类型",

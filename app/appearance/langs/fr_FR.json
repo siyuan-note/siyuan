@@ -588,6 +588,7 @@
   "mergeCell": "Fusionner la cellule",
   "cancelMerged": "Annuler la fusion de cellules",
   "useDefaultWidth": "Utiliser la largeur de colonne par défaut",
+  "useDefaultAlign": "Utiliser l'alignement par défaut",
   "type": "Type",
   "replaceType": "Remplacer le type",
   "searchType": "Type de recherche",

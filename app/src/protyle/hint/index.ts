@@ -615,6 +615,7 @@ ${genHintItemHTML(item)}
                 range.insertNode(textNode);
                 range.setEnd(textNode, value.length);
                 range.collapse(false);
+                focusByRange(range);
                 return;
             } else if (value === Constants.ZWSP) {
                 range.deleteContents();
@@ -689,6 +690,7 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
+                focusByRange(range);
                 this.genEmojiHTML(protyle);
                 return;
             } else if (value.indexOf("style") > -1) {

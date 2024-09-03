@@ -146,7 +146,7 @@ func Convert2Float(s string) (float64, bool) {
 	}
 	s = buf.String()
 	ret, err := strconv.ParseFloat(strings.TrimSpace(s), 64)
-	if nil != err {
+	if err != nil {
 		return 0, false
 	}
 	return ret, true

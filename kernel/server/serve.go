@@ -96,7 +96,7 @@ func Serve(fastMode bool) {
 	}
 
 	ln, err := net.Listen("tcp", host+":"+util.ServerPort)
-	if nil != err {
+	if err != nil {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)
@@ -107,7 +107,7 @@ func Serve(fastMode bool) {
 	}
 
 	_, port, err := net.SplitHostPort(ln.Addr().String())
-	if nil != err {
+	if err != nil {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)
@@ -136,7 +136,7 @@ func Serve(fastMode bool) {
 		// 反代服务器启动失败不影响核心服务器启动
 	}()
 
-	if err = http.Serve(ln, ginServer.Handler()); nil != err {
+	if err = http.Serve(ln, ginServer.Handler()); err != nil {
 		if !fastMode {
 			logging.LogErrorf("boot kernel failed: %s", err)
 			os.Exit(logging.ExitCodeUnavailablePort)
@@ -152,20 +152,20 @@ func rewritePortJSON(pid, port string) {
 
 	if gulu.File.IsExist(portJSON) {
 		data, err = os.ReadFile(portJSON)
-		if nil != err {
+		if err != nil {
 			logging.LogWarnf("read port.json failed: %s", err)
 		} else {
-			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); err != nil {
 				logging.LogWarnf("unmarshal port.json failed: %s", err)
 			}
 		}
 	}
 
 	pidPorts[pid] = port
-	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); err != nil {
 		logging.LogWarnf("marshal port.json failed: %s", err)
 	} else {
-		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+		if err = os.WriteFile(portJSON, data, 0644); err != nil {
 			logging.LogWarnf("write port.json failed: %s", err)
 		}
 	}
@@ -204,7 +204,7 @@ func serveSnippets(ginServer *gin.Engine) {
 		ext := filepath.Ext(filePath)
 		name := strings.TrimSuffix(filePath, ext)
 		confSnippets, err := model.LoadSnippets()
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("load snippets failed: %s", err)
 			c.Status(http.StatusNotFound)
 			return
@@ -278,13 +278,13 @@ func serveAppearance(ginServer *gin.Engine) {
 
 				enUSFilePath := filepath.Join(appearancePath, "langs", "en_US.json")
 				enUSData, err := os.ReadFile(enUSFilePath)
-				if nil != err {
+				if err != nil {
 					logging.LogErrorf("read en_US.json [%s] failed: %s", enUSFilePath, err)
 					util.ReportFileSysFatalError(err)
 					return
 				}
 				enUSMap := map[string]interface{}{}
-				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); nil != err {
+				if err = gulu.JSON.UnmarshalJSON(enUSData, &enUSMap); err != nil {
 					logging.LogErrorf("unmarshal en_US.json [%s] failed: %s", enUSFilePath, err)
 					util.ReportFileSysFatalError(err)
 					return
@@ -292,13 +292,13 @@ func serveAppearance(ginServer *gin.Engine) {
 
 				for {
 					data, err := os.ReadFile(filePath)
-					if nil != err {
+					if err != nil {
 						c.JSON(200, enUSMap)
 						return
 					}
 
 					langMap := map[string]interface{}{}
-					if err = gulu.JSON.UnmarshalJSON(data, &langMap); nil != err {
+					if err = gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
 						logging.LogErrorf("unmarshal json [%s] failed: %s", filePath, err)
 						c.JSON(200, enUSMap)
 						return
@@ -327,14 +327,14 @@ func serveCheckAuth(ginServer *gin.Engine) {
 
 func serveAuthPage(c *gin.Context) {
 	data, err := os.ReadFile(filepath.Join(util.WorkingDir, "stage/auth.html"))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load auth page failed: %s", err)
 		c.Status(500)
 		return
 	}
 
 	tpl, err := template.New("auth").Parse(string(data))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse auth page failed: %s", err)
 		c.Status(500)
 		return
@@ -378,7 +378,7 @@ func serveAuthPage(c *gin.Context) {
 		"workspaceDir":           util.WorkspaceDir,
 	}
 	buf := &bytes.Buffer{}
-	if err = tpl.Execute(buf, model); nil != err {
+	if err = tpl.Execute(buf, model); err != nil {
 		logging.LogErrorf("execute auth page failed: %s", err)
 		c.Status(500)
 		return
@@ -394,7 +394,7 @@ func serveAssets(ginServer *gin.Engine) {
 		requestPath := context.Param("path")
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
-		if nil != err {
+		if err != nil {
 			if strings.Contains(strings.TrimPrefix(requestPath, "/"), "/") {
 				// 再使用编码过的路径解析一次 https://github.com/siyuan-note/siyuan/issues/11823
 				dest := url.PathEscape(strings.TrimPrefix(requestPath, "/"))
@@ -403,7 +403,7 @@ func serveAssets(ginServer *gin.Engine) {
 				p, err = model.GetAssetAbsPath(relativePath)
 			}
 
-			if nil != err {
+			if err != nil {
 				context.Status(http.StatusNotFound)
 				return
 			}
@@ -450,7 +450,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 	util.WebSocketServer.Config.MaxMessageSize = 1024 * 1024 * 8
 
 	ginServer.GET("/ws", func(c *gin.Context) {
-		if err := util.WebSocketServer.HandleRequest(c.Writer, c.Request); nil != err {
+		if err := util.WebSocketServer.HandleRequest(c.Writer, c.Request); err != nil {
 			logging.LogErrorf("handle command failed: %s", err)
 		}
 	})
@@ -465,7 +465,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 
 		if "" != model.Conf.AccessAuthCode {
 			session, err := cookieStore.Get(s.Request, "siyuan")
-			if nil != err {
+			if err != nil {
 				authOk = false
 				logging.LogErrorf("get cookie failed: %s", err)
 			} else {
@@ -475,7 +475,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 				} else {
 					sess := &util.SessionData{}
 					err = gulu.JSON.UnmarshalJSON([]byte(val.(string)), sess)
-					if nil != err {
+					if err != nil {
 						authOk = false
 						logging.LogErrorf("unmarshal cookie failed: %s", err)
 					} else {
@@ -534,7 +534,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 		start := time.Now()
 		logging.LogTracef("request [%s]", shortReqMsg(msg))
 		request := map[string]interface{}{}
-		if err := gulu.JSON.UnmarshalJSON(msg, &request); nil != err {
+		if err := gulu.JSON.UnmarshalJSON(msg, &request); err != nil {
 			result := util.NewResult()
 			result.Code = -1
 			result.Msg = "Bad Request"

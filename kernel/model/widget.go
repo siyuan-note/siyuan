@@ -30,7 +30,7 @@ func SearchWidget(keyword string) (ret []*Block) {
 	ret = []*Block{}
 	widgetsDir := filepath.Join(util.DataDir, "widgets")
 	entries, err := os.ReadDir(widgetsDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", widgetsDir, err)
 		return
 	}

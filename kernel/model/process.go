@@ -87,13 +87,13 @@ var uiProcNames = []string{"siyuan", "electron"}
 func getAttachedUIProcCount() (ret int) {
 	util.UIProcessIDs.Range(func(uiProcIDArg, _ interface{}) bool {
 		uiProcID, err := strconv.Atoi(uiProcIDArg.(string))
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("invalid UI proc ID [%s]: %s", uiProcIDArg, err)
 			return true
 		}
 
 		proc, err := goPS.FindProcess(uiProcID)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("find UI proc [%d] failed: %s", uiProcID, err)
 			return true
 		}

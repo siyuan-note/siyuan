@@ -56,7 +56,7 @@ var (
 func initEnvVars() {
 	RunInContainer = isRunningInDockerContainer()
 	var err error
-	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); nil != err {
+	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
 		SiyuanAccessAuthCodeBypass = false
 	}
 }
@@ -224,7 +224,7 @@ func initWorkspaceDir(workspaceArg string) {
 	logging.SetLogPath(filepath.Join(userHomeConfDir, "kernel.log"))
 
 	if !gulu.File.IsExist(workspaceConf) {
-		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
+		if err := os.MkdirAll(userHomeConfDir, 0755); err != nil && !os.IsExist(err) {
 			logging.LogErrorf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(logging.ExitCodeInitWorkspaceErr)
 		}
@@ -256,7 +256,7 @@ func initWorkspaceDir(workspaceArg string) {
 
 	if !gulu.File.IsDir(WorkspaceDir) {
 		logging.LogWarnf("use the default workspace [%s] since the specified workspace [%s] is not a dir", defaultWorkspaceDir, WorkspaceDir)
-		if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
+		if err := os.MkdirAll(defaultWorkspaceDir, 0755); err != nil && !os.IsExist(err) {
 			logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
 			os.Exit(logging.ExitCodeInitWorkspaceErr)
 		}
@@ -264,7 +264,7 @@ func initWorkspaceDir(workspaceArg string) {
 	}
 	workspacePaths = append(workspacePaths, WorkspaceDir)
 
-	if err := WriteWorkspacePaths(workspacePaths); nil != err {
+	if err := WriteWorkspacePaths(workspacePaths); err != nil {
 		logging.LogErrorf("write workspace conf [%s] failed: %s", workspaceConf, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
@@ -276,7 +276,7 @@ func initWorkspaceDir(workspaceArg string) {
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)
-	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
+	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
 		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
@@ -295,14 +295,14 @@ func ReadWorkspacePaths() (ret []string, err error) {
 	ret = []string{}
 	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
 	data, err := os.ReadFile(workspaceConf)
-	if nil != err {
+	if err != nil {
 		msg := fmt.Sprintf("read workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		msg := fmt.Sprintf("unmarshal workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
@@ -325,14 +325,14 @@ func WriteWorkspacePaths(workspacePaths []string) (err error) {
 	workspacePaths = gulu.Str.RemoveDuplicatedElem(workspacePaths)
 	workspaceConf := filepath.Join(HomeDir, ".config", "siyuan", "workspace.json")
 	data, err := gulu.JSON.MarshalJSON(workspacePaths)
-	if nil != err {
+	if err != nil {
 		msg := fmt.Sprintf("marshal workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
 		return
 	}
 
-	if err = filelock.WriteFile(workspaceConf, data); nil != err {
+	if err = filelock.WriteFile(workspaceConf, data); err != nil {
 		msg := fmt.Sprintf("write workspace conf [%s] failed: %s", workspaceConf, err)
 		logging.LogErrorf(msg)
 		err = errors.New(msg)
@@ -364,44 +364,44 @@ const (
 )
 
 func initPathDir() {
-	if err := os.MkdirAll(ConfDir, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(ConfDir, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create conf folder [%s] failed: %s", ConfDir, err)
 	}
-	if err := os.MkdirAll(DataDir, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(DataDir, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data folder [%s] failed: %s", DataDir, err)
 	}
-	if err := os.MkdirAll(TempDir, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(TempDir, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create temp folder [%s] failed: %s", TempDir, err)
 	}
 
 	assets := filepath.Join(DataDir, "assets")
-	if err := os.MkdirAll(assets, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(assets, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data assets folder [%s] failed: %s", assets, err)
 	}
 
 	templates := filepath.Join(DataDir, "templates")
-	if err := os.MkdirAll(templates, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(templates, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data templates folder [%s] failed: %s", templates, err)
 	}
 
 	widgets := filepath.Join(DataDir, "widgets")
-	if err := os.MkdirAll(widgets, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(widgets, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data widgets folder [%s] failed: %s", widgets, err)
 	}
 
 	plugins := filepath.Join(DataDir, "plugins")
-	if err := os.MkdirAll(plugins, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(plugins, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data plugins folder [%s] failed: %s", widgets, err)
 	}
 
 	emojis := filepath.Join(DataDir, "emojis")
-	if err := os.MkdirAll(emojis, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(emojis, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data emojis folder [%s] failed: %s", widgets, err)
 	}
 
 	// Support directly access `data/public/*` contents via URL link https://github.com/siyuan-note/siyuan/issues/8593
 	public := filepath.Join(DataDir, "public")
-	if err := os.MkdirAll(public, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(public, 0755); err != nil && !os.IsExist(err) {
 		logging.LogFatalf(logging.ExitCodeInitWorkspaceErr, "create data public folder [%s] failed: %s", widgets, err)
 	}
 }
@@ -438,7 +438,7 @@ func GetDataAssetsAbsPath() (ret string) {
 		// 跟随符号链接 https://github.com/siyuan-note/siyuan/issues/5480
 		var err error
 		ret, err = filepath.EvalSymlinks(ret)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read assets link failed: %s", err)
 		}
 	}
@@ -451,7 +451,7 @@ func tryLockWorkspace() {
 	if ok {
 		return
 	}
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("lock workspace [%s] failed: %s", WorkspaceDir, err)
 	} else {
 		logging.LogErrorf("lock workspace [%s] failed", WorkspaceDir)
@@ -483,12 +483,12 @@ func UnlockWorkspace() {
 		return
 	}
 
-	if err := WorkspaceLock.Unlock(); nil != err {
+	if err := WorkspaceLock.Unlock(); err != nil {
 		logging.LogErrorf("unlock workspace [%s] failed: %s", WorkspaceDir, err)
 		return
 	}
 
-	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); nil != err {
+	if err := os.Remove(filepath.Join(WorkspaceDir, ".lock")); err != nil {
 		logging.LogErrorf("remove workspace lock failed: %s", err)
 		return
 	}

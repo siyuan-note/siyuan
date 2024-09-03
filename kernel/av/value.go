@@ -181,7 +181,7 @@ func (value *Value) String(format bool) string {
 
 func (value *Value) ToJSONString() string {
 	data, err := gulu.JSON.MarshalJSON(value)
-	if nil != err {
+	if err != nil {
 		return ""
 	}
 	return string(data)
@@ -189,11 +189,11 @@ func (value *Value) ToJSONString() string {
 
 func (value *Value) Clone() (ret *Value) {
 	data, err := gulu.JSON.MarshalJSON(value)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	err = gulu.JSON.UnmarshalJSON(data, &ret)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	return

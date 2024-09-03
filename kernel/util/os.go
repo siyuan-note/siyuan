@@ -25,7 +25,7 @@ import (
 
 func GetOSPlatform() (plat string) {
 	plat, _, _, err := host.PlatformInformation()
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("get os platform failed: %s", err)
 		return "Unknown"
 	}

@@ -49,7 +49,7 @@ func watchAssets() {
 	}
 
 	var err error
-	if assetsWatcher, err = fsnotify.NewWatcher(); nil != err {
+	if assetsWatcher, err = fsnotify.NewWatcher(); err != nil {
 		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}

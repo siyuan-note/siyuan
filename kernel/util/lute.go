@@ -94,7 +94,7 @@ func NewStdLute() (ret *lute.Lute) {
 
 func LinkTarget(htmlStr, linkBase string) (ret string) {
 	doc, err := goquery.NewDocumentFromReader(strings.NewReader(htmlStr))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse HTML failed: %s", err)
 		return
 	}

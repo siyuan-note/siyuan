@@ -97,7 +97,7 @@ func transferBlockRef(c *gin.Context) {
 	}
 
 	err := model.TransferBlockRef(fromID, toID, refIDs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
@@ -122,7 +122,7 @@ func swapBlockRef(c *gin.Context) {
 	defID := arg["defID"].(string)
 	includeChildren := arg["includeChildren"].(bool)
 	err := model.SwapBlockRef(refID, defID, includeChildren)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
@@ -170,7 +170,7 @@ func getHeadingDeleteTransaction(c *gin.Context) {
 	id := arg["id"].(string)
 
 	transaction, err := model.GetHeadingDeleteTransaction(id)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
@@ -193,7 +193,7 @@ func getHeadingLevelTransaction(c *gin.Context) {
 	level := int(arg["level"].(float64))
 
 	transaction, err := model.GetHeadingLevelTransaction(id, level)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
@@ -215,7 +215,7 @@ func setBlockReminder(c *gin.Context) {
 	id := arg["id"].(string)
 	timed := arg["timed"].(string) // yyyyMMddHHmmss
 	err := model.SetBlockReminder(id, timed)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 7000}
@@ -449,7 +449,7 @@ func getBlockBreadcrumb(c *gin.Context) {
 	}
 
 	blockPath, err := model.BuildBlockBreadcrumb(id, excludeTypes)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

@@ -39,7 +39,7 @@ type History struct {
 func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 	ret = []map[string]interface{}{}
 	rows, err := queryHistory(stmt)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
 		return
 	}
@@ -57,7 +57,7 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 			columnPointers[i] = &columns[i]
 		}
 
-		if err = rows.Scan(columnPointers...); nil != err {
+		if err = rows.Scan(columnPointers...); err != nil {
 			return
 		}
 
@@ -73,7 +73,7 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 
 func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 	rows, err := historyDB.Query(stmt)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
 		return
 	}
@@ -88,7 +88,7 @@ func SelectHistoriesRawStmt(stmt string) (ret []*History) {
 
 func scanHistoryRows(rows *sql.Rows) (ret *History) {
 	var history History
-	if err := rows.Scan(&history.ID, &history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); nil != err {
+	if err := rows.Scan(&history.ID, &history.Type, &history.Op, &history.Title, &history.Content, &history.Path, &history.Created); err != nil {
 		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		return
 	}
@@ -106,7 +106,7 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 
 func deleteOutdatedHistories(tx *sql.Tx, before int64, context map[string]interface{}) (err error) {
 	stmt := "DELETE FROM histories_fts_case_insensitive WHERE CAST(created AS INTEGER) < ?"
-	if err = execStmtTx(tx, stmt, before); nil != err {
+	if err = execStmtTx(tx, stmt, before); err != nil {
 		return
 	}
 	return
@@ -129,13 +129,13 @@ func insertHistories(tx *sql.Tx, histories []*History, context map[string]interf
 			continue
 		}
 
-		if err = insertHistories0(tx, bulk, context); nil != err {
+		if err = insertHistories0(tx, bulk, context); err != nil {
 			return
 		}
 		bulk = []*History{}
 	}
 	if 0 < len(bulk) {
-		if err = insertHistories0(tx, bulk, context); nil != err {
+		if err = insertHistories0(tx, bulk, context); err != nil {
 			return
 		}
 	}
@@ -157,7 +157,7 @@ func insertHistories0(tx *sql.Tx, bulk []*History, context map[string]interface{
 	}
 
 	stmt := fmt.Sprintf(HistoriesFTSCaseInsensitiveInsert, strings.Join(valueStrings, ","))
-	if err = prepareExecInsertTx(tx, stmt, valueArgs); nil != err {
+	if err = prepareExecInsertTx(tx, stmt, valueArgs); err != nil {
 		return
 	}
 

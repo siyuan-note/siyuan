@@ -89,7 +89,7 @@ func StatJob() {
 func ListNotebooks() (ret []*Box, err error) {
 	ret = []*Box{}
 	dirs, err := os.ReadDir(util.DataDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
 		return ret, err
 	}
@@ -185,12 +185,12 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 	}
 
 	data, err := filelock.ReadFile(confPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		logging.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
 		return
 	}
@@ -200,13 +200,13 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 func (box *Box) SaveConf(conf *conf.BoxConf) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
 	newData, err := gulu.JSON.MarshalIndentJSON(conf, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal box conf [%s] failed: %s", confPath, err)
 		return
 	}
 
 	oldData, err := filelock.ReadFile(confPath)
-	if nil != err {
+	if err != nil {
 		box.saveConf0(newData)
 		return
 	}
@@ -220,10 +220,10 @@ func (box *Box) SaveConf(conf *conf.BoxConf) {
 
 func (box *Box) saveConf0(data []byte) {
 	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan/conf.json")
-	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); nil != err {
+	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, ".siyuan"), 0755); err != nil {
 		logging.LogErrorf("save box conf [%s] failed: %s", confPath, err)
 	}
-	if err := filelock.WriteFile(confPath, data); nil != err {
+	if err := filelock.WriteFile(confPath, data); err != nil {
 		logging.LogErrorf("write box conf [%s] failed: %s", confPath, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -243,7 +243,7 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 	}
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, box.ID, p))
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -287,7 +287,7 @@ func (box *Box) Ls(p string) (ret []*FileInfo, totals int, err error) {
 func (box *Box) Stat(p string) (ret *FileInfo) {
 	absPath := filepath.Join(util.DataDir, box.ID, p)
 	info, err := os.Stat(absPath)
-	if nil != err {
+	if err != nil {
 		if !os.IsNotExist(err) {
 			logging.LogErrorf("stat [%s] failed: %s", absPath, err)
 		}
@@ -307,7 +307,7 @@ func (box *Box) Exist(p string) bool {
 }
 
 func (box *Box) Mkdir(path string) error {
-	if err := os.Mkdir(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
+	if err := os.Mkdir(filepath.Join(util.DataDir, box.ID, path), 0755); err != nil {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
 		logging.LogErrorf("mkdir [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
@@ -317,7 +317,7 @@ func (box *Box) Mkdir(path string) error {
 }
 
 func (box *Box) MkdirAll(path string) error {
-	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, path), 0755); nil != err {
+	if err := os.MkdirAll(filepath.Join(util.DataDir, box.ID, path), 0755); err != nil {
 		msg := fmt.Sprintf(Conf.Language(6), box.Name, path, err)
 		logging.LogErrorf("mkdir all [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
@@ -331,7 +331,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 	fromPath := filepath.Join(boxLocalPath, oldPath)
 	toPath := filepath.Join(boxLocalPath, newPath)
 
-	if err := filelock.Rename(fromPath, toPath); nil != err {
+	if err := filelock.Rename(fromPath, toPath); err != nil {
 		msg := fmt.Sprintf(Conf.Language(5), box.Name, fromPath, err)
 		logging.LogErrorf("move [path=%s] in box [%s] failed: %s", fromPath, box.Name, err)
 		return errors.New(msg)
@@ -350,7 +350,7 @@ func (box *Box) Move(oldPath, newPath string) error {
 func (box *Box) Remove(path string) error {
 	boxLocalPath := filepath.Join(util.DataDir, box.ID)
 	filePath := filepath.Join(boxLocalPath, path)
-	if err := filelock.Remove(filePath); nil != err {
+	if err := filelock.Remove(filePath); err != nil {
 		msg := fmt.Sprintf(Conf.Language(7), box.Name, path, err)
 		logging.LogErrorf("remove [path=%s] in box [%s] failed: %s", path, box.ID, err)
 		return errors.New(msg)
@@ -361,7 +361,7 @@ func (box *Box) Remove(path string) error {
 
 func (box *Box) ListFiles(path string) (ret []*FileInfo) {
 	fis, _, err := box.Ls(path)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	box.listFiles(&fis, &ret)
@@ -372,7 +372,7 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 	for _, file := range *files {
 		if file.isdir {
 			fis, _, err := box.Ls(file.path)
-			if nil == err {
+			if err == nil {
 				box.listFiles(&fis, ret)
 			}
 			*ret = append(*ret, file)
@@ -412,7 +412,7 @@ func (box *Box) renameSubTrees(tree *parse.Tree) {
 		}
 
 		subTree, err := filesys.LoadTree(box.ID, subFile.path, luteEngine) // LoadTree 会重新构造 HPath
-		if nil != err {
+		if err != nil {
 			continue
 		}
 
@@ -521,7 +521,7 @@ func fullReindex() {
 
 	WaitForWritingFiles()
 
-	if err := sql.InitDatabase(true); nil != err {
+	if err := sql.InitDatabase(true); err != nil {
 		os.Exit(logging.ExitCodeReadOnlyDatabase)
 		return
 	}

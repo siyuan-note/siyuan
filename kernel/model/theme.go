@@ -109,7 +109,7 @@ func getThemeStyleVar(theme string) (ret map[string]string) {
 	ret = map[string]string{}
 
 	data, err := os.ReadFile(filepath.Join(util.ThemesPath, theme, "theme.css"))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read theme [%s] css file failed: %s", theme, err)
 		return
 	}

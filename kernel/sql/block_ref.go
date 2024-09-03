@@ -38,10 +38,10 @@ type Ref struct {
 }
 
 func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
-	if err = deleteRefsByPath(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
-	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
 	err = insertRefs(tx, tree)
@@ -49,10 +49,10 @@ func upsertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 }
 
 func deleteRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
-	if err = deleteRefsByPath(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
-	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); nil != err {
+	if err = deleteFileAnnotationRefsByPath(tx, tree.Box, tree.Path); err != nil {
 		return
 	}
 	return
@@ -60,10 +60,10 @@ func deleteRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 
 func insertRefs(tx *sql.Tx, tree *parse.Tree) (err error) {
 	refs, fileAnnotationRefs := refsFromTree(tree)
-	if err = insertBlockRefs(tx, refs); nil != err {
+	if err = insertBlockRefs(tx, refs); err != nil {
 		return
 	}
-	if err = insertFileAnnotationRefs(tx, fileAnnotationRefs); nil != err {
+	if err = insertFileAnnotationRefs(tx, fileAnnotationRefs); err != nil {
 		return
 	}
 	return err

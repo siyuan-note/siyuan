@@ -128,7 +128,7 @@ func installBazaarPlugin(c *gin.Context) {
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
 	err := model.InstallBazaarPlugin(repoURL, repoHash, packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
@@ -154,7 +154,7 @@ func uninstallBazaarPlugin(c *gin.Context) {
 	frontend := arg["frontend"].(string)
 	packageName := arg["packageName"].(string)
 	err := model.UninstallBazaarPlugin(packageName, frontend)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -216,7 +216,7 @@ func installBazaarWidget(c *gin.Context) {
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
 	err := model.InstallBazaarWidget(repoURL, repoHash, packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
@@ -239,7 +239,7 @@ func uninstallBazaarWidget(c *gin.Context) {
 
 	packageName := arg["packageName"].(string)
 	err := model.UninstallBazaarWidget(packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -301,7 +301,7 @@ func installBazaarIcon(c *gin.Context) {
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
 	err := model.InstallBazaarIcon(repoURL, repoHash, packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
@@ -325,7 +325,7 @@ func uninstallBazaarIcon(c *gin.Context) {
 
 	packageName := arg["packageName"].(string)
 	err := model.UninstallBazaarIcon(packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -388,7 +388,7 @@ func installBazaarTemplate(c *gin.Context) {
 	repoHash := arg["repoHash"].(string)
 	packageName := arg["packageName"].(string)
 	err := model.InstallBazaarTemplate(repoURL, repoHash, packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
@@ -412,7 +412,7 @@ func uninstallBazaarTemplate(c *gin.Context) {
 
 	packageName := arg["packageName"].(string)
 	err := model.UninstallBazaarTemplate(packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -479,7 +479,7 @@ func installBazaarTheme(c *gin.Context) {
 		update = arg["update"].(bool)
 	}
 	err := model.InstallBazaarTheme(repoURL, repoHash, packageName, int(mode), update)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return
@@ -507,7 +507,7 @@ func uninstallBazaarTheme(c *gin.Context) {
 
 	packageName := arg["packageName"].(string)
 	err := model.UninstallBazaarTheme(packageName)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

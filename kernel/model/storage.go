@@ -44,7 +44,7 @@ func RemoveRecentDoc(ids []string) {
 	defer recentDocLock.Unlock()
 
 	recentDocs, err := getRecentDocs()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -57,7 +57,7 @@ func RemoveRecentDoc(ids []string) {
 	}
 
 	err = setRecentDocs(recentDocs)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	return
@@ -74,7 +74,7 @@ func setRecentDocByTree(tree *parse.Tree) {
 	defer recentDocLock.Unlock()
 
 	recentDocs, err := getRecentDocs()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -102,20 +102,20 @@ func GetRecentDocs() (ret []*RecentDoc, err error) {
 
 func setRecentDocs(recentDocs []*RecentDoc) (err error) {
 	dirPath := filepath.Join(util.DataDir, "storage")
-	if err = os.MkdirAll(dirPath, 0755); nil != err {
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [recent-doc] dir failed: %s", err)
 		return
 	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(recentDocs, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal storage [recent-doc] failed: %s", err)
 		return
 	}
 
 	lsPath := filepath.Join(dirPath, "recent-doc.json")
 	err = filelock.WriteFile(lsPath, data)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("write storage [recent-doc] failed: %s", err)
 		return
 	}
@@ -130,12 +130,12 @@ func getRecentDocs() (ret []*RecentDoc, err error) {
 	}
 
 	data, err := filelock.ReadFile(dataPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read storage [recent-doc] failed: %s", err)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &tmp); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &tmp); err != nil {
 		logging.LogErrorf("unmarshal storage [recent-doc] failed: %s", err)
 		return
 	}
@@ -227,7 +227,7 @@ func RemoveCriterion(name string) (err error) {
 	defer criteriaLock.Unlock()
 
 	criteria, err := getCriteria()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -251,7 +251,7 @@ func SetCriterion(criterion *Criterion) (err error) {
 	defer criteriaLock.Unlock()
 
 	criteria, err := getCriteria()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -280,20 +280,20 @@ func GetCriteria() (ret []*Criterion) {
 
 func setCriteria(criteria []*Criterion) (err error) {
 	dirPath := filepath.Join(util.DataDir, "storage")
-	if err = os.MkdirAll(dirPath, 0755); nil != err {
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [criteria] dir failed: %s", err)
 		return
 	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(criteria, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal storage [criteria] failed: %s", err)
 		return
 	}
 
 	lsPath := filepath.Join(dirPath, "criteria.json")
 	err = filelock.WriteFile(lsPath, data)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("write storage [criteria] failed: %s", err)
 		return
 	}
@@ -308,12 +308,12 @@ func getCriteria() (ret []*Criterion, err error) {
 	}
 
 	data, err := filelock.ReadFile(dataPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read storage [criteria] failed: %s", err)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [criteria] failed: %s", err)
 		return
 	}
@@ -360,20 +360,20 @@ func setLocalStorage(val interface{}) (err error) {
 	}
 
 	dirPath := filepath.Join(util.DataDir, "storage")
-	if err = os.MkdirAll(dirPath, 0755); nil != err {
+	if err = os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create storage [local] dir failed: %s", err)
 		return
 	}
 
 	data, err := gulu.JSON.MarshalIndentJSON(val, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal storage [local] failed: %s", err)
 		return
 	}
 
 	lsPath := filepath.Join(dirPath, "local.json")
 	err = filelock.WriteFile(lsPath, data)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("write storage [local] failed: %s", err)
 		return
 	}
@@ -389,12 +389,12 @@ func getLocalStorage() (ret map[string]interface{}) {
 	}
 
 	data, err := filelock.ReadFile(lsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read storage [local] failed: %s", err)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal storage [local] failed: %s", err)
 		return
 	}

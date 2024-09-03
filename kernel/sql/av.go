@@ -408,7 +408,7 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 	SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Parse(tplContent)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("parse template [%s] failed: %s", tplContent, err)
 		return
 	}
@@ -489,7 +489,7 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		}
 	}
 
-	if err = tpl.Execute(buf, dataModel); nil != err {
+	if err = tpl.Execute(buf, dataModel); err != nil {
 		logging.LogWarnf("execute template [%s] failed: %s", tplContent, err)
 		return
 	}
@@ -575,7 +575,7 @@ func getAttributeViewContent(avID string,
 	}
 
 	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 		return
 	}

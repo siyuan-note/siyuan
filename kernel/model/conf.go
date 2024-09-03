@@ -116,7 +116,7 @@ func InitConf() {
 	Conf = &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
-		if data, err := os.ReadFile(confPath); nil != err {
+		if data, err := os.ReadFile(confPath); err != nil {
 			logging.LogErrorf("load conf [%s] failed: %s", confPath, err)
 		} else {
 			if err = gulu.JSON.UnmarshalJSON(data, Conf); err != nil {
@@ -146,10 +146,10 @@ func InitConf() {
 		if "" == Conf.Lang {
 			// 未指定外观语言时使用系统语言
 
-			if userLang, err := locale.Detect(); nil == err {
+			if userLang, err := locale.Detect(); err == nil {
 				var supportLangs []language.Tag
 				for lang := range util.Langs {
-					if tag, err := language.Parse(lang); nil == err {
+					if tag, err := language.Parse(lang); err == nil {
 						supportLangs = append(supportLangs, tag)
 					} else {
 						logging.LogErrorf("load language [%s] failed: %s", lang, err)
@@ -367,7 +367,7 @@ func InitConf() {
 	}
 	if timingEnv := os.Getenv("SIYUAN_SYNC_INDEX_TIMING"); "" != timingEnv {
 		val, err := strconv.Atoi(timingEnv)
-		if nil == err {
+		if err == nil {
 			Conf.Repo.SyncIndexTiming = int64(val)
 		}
 	}
@@ -504,7 +504,7 @@ func InitConf() {
 func initLang() {
 	p := filepath.Join(util.WorkingDir, "appearance", "langs")
 	dir, err := os.Open(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("open language configuration folder [%s] failed: %s", p, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -512,7 +512,7 @@ func initLang() {
 	defer dir.Close()
 
 	langNames, err := dir.Readdirnames(-1)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("list language configuration folder [%s] failed: %s", p, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -521,12 +521,12 @@ func initLang() {
 	for _, langName := range langNames {
 		jsonPath := filepath.Join(p, langName)
 		data, err := os.ReadFile(jsonPath)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read language configuration [%s] failed: %s", jsonPath, err)
 			continue
 		}
 		langMap := map[string]interface{}{}
-		if err := gulu.JSON.UnmarshalJSON(data, &langMap); nil != err {
+		if err := gulu.JSON.UnmarshalJSON(data, &langMap); err != nil {
 			logging.LogErrorf("parse language configuration failed [%s] failed: %s", jsonPath, err)
 			continue
 		}
@@ -639,7 +639,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 		// 将当前工作空间放到工作空间列表的最后一个
 		// Open the last workspace by default https://github.com/siyuan-note/siyuan/issues/10570
 		workspacePaths, err := util.ReadWorkspacePaths()
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read workspace paths failed: %s", err)
 		} else {
 			workspacePaths = gulu.Str.RemoveElem(workspacePaths, util.WorkspaceDir)
@@ -697,7 +697,7 @@ func (conf *AppConf) Save() {
 	newData, _ := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	oldData, err := filelock.ReadFile(confPath)
-	if nil != err {
+	if err != nil {
 		conf.save0(newData)
 		return
 	}
@@ -711,7 +711,7 @@ func (conf *AppConf) Save() {
 
 func (conf *AppConf) save0(data []byte) {
 	confPath := filepath.Join(util.ConfDir, "conf.json")
-	if err := filelock.WriteFile(confPath, data); nil != err {
+	if err := filelock.WriteFile(confPath, data); err != nil {
 		logging.LogErrorf("write conf [%s] failed: %s", confPath, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -758,7 +758,7 @@ func (conf *AppConf) BoxNames(boxIDs []string) (ret map[string]string) {
 func (conf *AppConf) GetBoxes() (ret []*Box) {
 	ret = []*Box{}
 	notebooks, err := ListNotebooks()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -775,7 +775,7 @@ func (conf *AppConf) GetBoxes() (ret []*Box) {
 func (conf *AppConf) GetOpenedBoxes() (ret []*Box) {
 	ret = []*Box{}
 	notebooks, err := ListNotebooks()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -790,7 +790,7 @@ func (conf *AppConf) GetOpenedBoxes() (ret []*Box) {
 func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 	ret = []*Box{}
 	notebooks, err := ListNotebooks()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -829,7 +829,7 @@ func InitBoxes() {
 	}
 
 	var dbSize string
-	if dbFile, err := os.Stat(util.DBPath); nil == err {
+	if dbFile, err := os.Stat(util.DBPath); err == nil {
 		dbSize = humanize.BytesCustomCeil(uint64(dbFile.Size()), 2)
 	}
 	logging.LogInfof("database size [%s], tree/block count [%d/%d]", dbSize, treenode.CountTrees(), treenode.CountBlocks())
@@ -862,12 +862,12 @@ const (
 func GetMaskedConf() (ret *AppConf, err error) {
 	// 脱敏处理
 	data, err := gulu.JSON.MarshalIndentJSON(Conf, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal conf failed: %s", err)
 		return
 	}
 	ret = &AppConf{}
-	if err = gulu.JSON.UnmarshalJSON(data, ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		logging.LogErrorf("unmarshal conf failed: %s", err)
 		return
 	}
@@ -906,20 +906,20 @@ func clearPortJSON() {
 
 	if gulu.File.IsExist(portJSON) {
 		data, err = os.ReadFile(portJSON)
-		if nil != err {
+		if err != nil {
 			logging.LogWarnf("read port.json failed: %s", err)
 		} else {
-			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); nil != err {
+			if err = gulu.JSON.UnmarshalJSON(data, &pidPorts); err != nil {
 				logging.LogWarnf("unmarshal port.json failed: %s", err)
 			}
 		}
 	}
 
 	delete(pidPorts, pid)
-	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); nil != err {
+	if data, err = gulu.JSON.MarshalIndentJSON(pidPorts, "", "  "); err != nil {
 		logging.LogWarnf("marshal port.json failed: %s", err)
 	} else {
-		if err = os.WriteFile(portJSON, data, 0644); nil != err {
+		if err = os.WriteFile(portJSON, data, 0644); err != nil {
 			logging.LogWarnf("write port.json failed: %s", err)
 		}
 	}
@@ -929,7 +929,7 @@ func clearCorruptedNotebooks() {
 	// 数据同步时展开文档树操作可能导致数据丢失 https://github.com/siyuan-note/siyuan/issues/7129
 
 	dirs, err := os.ReadDir(util.DataDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
 		return
 	}
@@ -970,13 +970,13 @@ func clearWorkspaceTemp() {
 	if gulu.File.IsDir(install) {
 		monthAgo := time.Now().Add(-time.Hour * 24 * 7)
 		entries, err := os.ReadDir(install)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read dir [%s] failed: %s", install, err)
 		} else {
 			for _, entry := range entries {
 				info, _ := entry.Info()
 				if nil != info && !info.IsDir() && info.ModTime().Before(monthAgo) {
-					if err = os.RemoveAll(filepath.Join(install, entry.Name())); nil != err {
+					if err = os.RemoveAll(filepath.Join(install, entry.Name())); err != nil {
 						logging.LogErrorf("remove old install pkg [%s] failed: %s", filepath.Join(install, entry.Name()), err)
 					}
 				}
@@ -985,11 +985,11 @@ func clearWorkspaceTemp() {
 	}
 
 	tmps, err := filepath.Glob(filepath.Join(util.TempDir, "*.tmp"))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
-		if err = os.RemoveAll(tmp); nil != err {
+		if err = os.RemoveAll(tmp); err != nil {
 			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
 			logging.LogInfof("removed temp file [%s]", tmp)
@@ -997,11 +997,11 @@ func clearWorkspaceTemp() {
 	}
 
 	tmps, err = filepath.Glob(filepath.Join(util.DataDir, ".siyuan", "*.tmp"))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("glob temp files failed: %s", err)
 	}
 	for _, tmp := range tmps {
-		if err = os.RemoveAll(tmp); nil != err {
+		if err = os.RemoveAll(tmp); err != nil {
 			logging.LogErrorf("remove temp file [%s] failed: %s", tmp, err)
 		} else {
 			logging.LogInfof("removed temp file [%s]", tmp)
@@ -1022,7 +1022,7 @@ func closeUserGuide() {
 	defer logging.Recover()
 
 	dirs, err := os.ReadDir(util.DataDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", util.DataDir, err)
 		return
 	}

@@ -57,16 +57,16 @@ type Block struct {
 
 func updateRootContent(tx *sql.Tx, content, updated, id string) (err error) {
 	stmt := "UPDATE blocks SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
 		return
 	}
 	stmt = "UPDATE blocks_fts SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
 		return
 	}
 	if !caseSensitive {
 		stmt = "UPDATE blocks_fts_case_insensitive SET content = ?, fcontent = ?, updated = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, content, updated, id); nil != err {
+		if err = execStmtTx(tx, stmt, content, content, updated, id); err != nil {
 			return
 		}
 	}
@@ -77,18 +77,18 @@ func updateRootContent(tx *sql.Tx, content, updated, id string) (err error) {
 
 func updateBlockContent(tx *sql.Tx, block *Block) (err error) {
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
 		tx.Rollback()
 		return
 	}
 	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+	if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
 		tx.Rollback()
 		return
 	}
 	if !caseSensitive {
 		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, block.Content, block.ID); nil != err {
+		if err = execStmtTx(tx, stmt, block.Content, block.ID); err != nil {
 			tx.Rollback()
 			return
 		}
@@ -117,18 +117,18 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 
 	content := NodeStaticContent(node, nil, true, indexAssetPath, true, nil)
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, id); err != nil {
 		tx.Rollback()
 		return
 	}
 	stmt = "UPDATE blocks_fts SET content = ? WHERE id = ?"
-	if err = execStmtTx(tx, stmt, content, id); nil != err {
+	if err = execStmtTx(tx, stmt, content, id); err != nil {
 		tx.Rollback()
 		return
 	}
 	if !caseSensitive {
 		stmt = "UPDATE blocks_fts_case_insensitive SET content = ? WHERE id = ?"
-		if err = execStmtTx(tx, stmt, content, id); nil != err {
+		if err = execStmtTx(tx, stmt, content, id); err != nil {
 			tx.Rollback()
 			return
 		}

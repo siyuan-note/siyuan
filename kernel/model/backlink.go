@@ -134,7 +134,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 
 	linkRefs, _, _ := buildLinkRefs(rootID, refs, keyword)
 	refTree, err := LoadTreeByBlockID(refTreeID)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
 		return
 	}

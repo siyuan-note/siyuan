@@ -249,11 +249,11 @@ func PluginJSON(pluginDirName string) (ret *Plugin, err error) {
 		return
 	}
 	data, err := filelock.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read plugin.json [%s] failed: %s", p, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse plugin.json [%s] failed: %s", p, err)
 		return
 	}
@@ -269,11 +269,11 @@ func WidgetJSON(widgetDirName string) (ret *Widget, err error) {
 		return
 	}
 	data, err := filelock.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read widget.json [%s] failed: %s", p, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse widget.json [%s] failed: %s", p, err)
 		return
 	}
@@ -289,11 +289,11 @@ func IconJSON(iconDirName string) (ret *Icon, err error) {
 		return
 	}
 	data, err := os.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read icon.json [%s] failed: %s", p, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse icon.json [%s] failed: %s", p, err)
 		return
 	}
@@ -309,11 +309,11 @@ func TemplateJSON(templateDirName string) (ret *Template, err error) {
 		return
 	}
 	data, err := filelock.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read template.json [%s] failed: %s", p, err)
 		return
 	}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse template.json [%s] failed: %s", p, err)
 		return
 	}
@@ -329,13 +329,13 @@ func ThemeJSON(themeDirName string) (ret *Theme, err error) {
 		return
 	}
 	data, err := os.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read theme.json [%s] failed: %s", p, err)
 		return
 	}
 
 	ret = &Theme{}
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("parse theme.json [%s] failed: %s", p, err)
 		return
 	}
@@ -350,7 +350,7 @@ var stageIndexLock = sync.Mutex{}
 
 func getStageIndex(pkgType string) (ret *StageIndex, err error) {
 	rhyRet, err := util.GetRhyResult(false)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -514,14 +514,14 @@ func GetPackageREADME(repoURL, repoHash, packageType string) (ret string) {
 	readme := getPreferredReadme(repo.Package.Readme)
 
 	data, err := downloadPackage(repoURLHash+"/"+readme, false, "")
-	if nil != err {
+	if err != nil {
 		ret = fmt.Sprintf("Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
 		if readme == repo.Package.Readme.Default || "" == strings.TrimSpace(repo.Package.Readme.Default) {
 			return
 		}
 		readme = repo.Package.Readme.Default
 		data, err = downloadPackage(repoURLHash+"/"+readme, false, "")
-		if nil != err {
+		if err != nil {
 			ret += fmt.Sprintf("<br>Load bazaar package's README.md(%s) failed: %s", readme, err.Error())
 			return
 		}
@@ -579,7 +579,7 @@ func downloadPackage(repoURLHash string, pushProgress bool, systemID string) (da
 			util.PushDownloadProgress(repoURL, progress)
 		}
 	}).Get(u)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get bazaar package [%s] failed: %s", u, err)
 		return nil, errors.New("get bazaar package failed, please check your network")
 	}
@@ -608,7 +608,7 @@ func incPackageDownloads(repoURLHash, systemID string) {
 }
 
 func uninstallPackage(installPath string) (err error) {
-	if err = os.RemoveAll(installPath); nil != err {
+	if err = os.RemoveAll(installPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", installPath, err)
 		return fmt.Errorf("remove community package [%s] failed", filepath.Base(installPath))
 	}
@@ -618,7 +618,7 @@ func uninstallPackage(installPath string) (err error) {
 
 func installPackage(data []byte, installPath, repoURLHash string) (err error) {
 	err = installPackage0(data, installPath)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -628,23 +628,23 @@ func installPackage(data []byte, installPath, repoURLHash string) (err error) {
 
 func installPackage0(data []byte, installPath string) (err error) {
 	tmpPackage := filepath.Join(util.TempDir, "bazaar", "package")
-	if err = os.MkdirAll(tmpPackage, 0755); nil != err {
+	if err = os.MkdirAll(tmpPackage, 0755); err != nil {
 		return
 	}
 	name := gulu.Rand.String(7)
 	tmp := filepath.Join(tmpPackage, name+".zip")
-	if err = os.WriteFile(tmp, data, 0644); nil != err {
+	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		return
 	}
 
 	unzipPath := filepath.Join(tmpPackage, name)
-	if err = gulu.Zip.Unzip(tmp, unzipPath); nil != err {
+	if err = gulu.Zip.Unzip(tmp, unzipPath); err != nil {
 		logging.LogErrorf("write file [%s] failed: %s", installPath, err)
 		return
 	}
 
 	dirs, err := os.ReadDir(unzipPath)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -653,7 +653,7 @@ func installPackage0(data []byte, installPath string) (err error) {
 		srcPath = filepath.Join(unzipPath, dirs[0].Name())
 	}
 
-	if err = filelock.Copy(srcPath, installPath); nil != err {
+	if err = filelock.Copy(srcPath, installPath); err != nil {
 		return
 	}
 	return

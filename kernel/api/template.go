@@ -36,7 +36,7 @@ func renderSprig(c *gin.Context) {
 
 	template := arg["template"].(string)
 	content, err := model.RenderGoTemplate(template)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return
@@ -57,7 +57,7 @@ func docSaveAsTemplate(c *gin.Context) {
 	name := arg["name"].(string)
 	overwrite := arg["overwrite"].(bool)
 	code, err := model.DocSaveAsTemplate(id, name, overwrite)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return
@@ -86,7 +86,7 @@ func renderTemplate(c *gin.Context) {
 	}
 
 	_, content, err := model.RenderTemplate(p, id, preview)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = util.EscapeHTML(err.Error())
 		return

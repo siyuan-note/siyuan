@@ -58,7 +58,7 @@ func html2BlockDOM(c *gin.Context) {
 
 	dom := arg["dom"].(string)
 	markdown, withMath, err := model.HTML2Markdown(dom)
-	if nil != err {
+	if err != nil {
 		ret.Data = "Failed to convert"
 		return
 	}
@@ -155,7 +155,7 @@ func html2BlockDOM(c *gin.Context) {
 			name = name[0 : len(name)-len(ext)]
 			name = name + "-" + ast.NewNodeID() + ext
 			targetPath := filepath.Join(util.DataDir, "assets", name)
-			if err = filelock.Copy(localPath, targetPath); nil != err {
+			if err = filelock.Copy(localPath, targetPath); err != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", localPath, targetPath, err)
 				return ast.WalkStop
 			}

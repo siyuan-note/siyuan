@@ -106,7 +106,7 @@ func SetFlashcardsDueTime(cardDues []*SetFlashcardDueTime) (err error) {
 		card.SetDue(due)
 	}
 
-	if err = deck.Save(); nil != err {
+	if err = deck.Save(); err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", builtinDeckID, err)
 	}
 	return
@@ -270,7 +270,7 @@ func GetNotebookFlashcards(boxID string, page, pageSize int) (blocks []*Block, t
 	blocks = []*Block{}
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir failed: %s", err)
 		return
 	}
@@ -467,12 +467,12 @@ func ReviewFlashcard(deckID, cardID string, rating riff.Rating, reviewedCardIDs 
 	}
 
 	log := deck.Review(cardID, rating)
-	if err = deck.Save(); nil != err {
+	if err = deck.Save(); err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
 
-	if err = deck.SaveLog(log); nil != err {
+	if err = deck.SaveLog(log); err != nil {
 		logging.LogErrorf("save review log [%s] failed: %s", deckID, err)
 		return
 	}
@@ -538,7 +538,7 @@ func GetNotebookDueFlashcards(boxID string, reviewedCardIDs []string) (ret []*Fl
 	waitForSyncingStorages()
 
 	entries, err := os.ReadDir(filepath.Join(util.DataDir, boxID))
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir failed: %s", err)
 		return
 	}
@@ -734,7 +734,7 @@ func (tx *Transaction) doRemoveFlashcards(operation *Operation) (ret *TxErr) {
 	deckID := operation.DeckID
 	blockIDs := operation.BlockIDs
 
-	if err := tx.removeBlocksDeckAttr(blockIDs, deckID); nil != err {
+	if err := tx.removeBlocksDeckAttr(blockIDs, deckID); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
 	}
 
@@ -803,7 +803,7 @@ func (tx *Transaction) removeBlocksDeckAttr(blockIDs []string, deckID string) (e
 			node.SetIALAttr("custom-riff-decks", val)
 		}
 
-		if err = tx.writeTree(tree); nil != err {
+		if err = tx.writeTree(tree); err != nil {
 			return
 		}
 
@@ -829,7 +829,7 @@ func removeFlashcardsByBlockIDs(blockIDs []string, deck *riff.Deck) {
 		deck.RemoveCard(card.ID())
 	}
 	err := deck.Save()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", deck.ID, err)
 	}
 }
@@ -899,7 +899,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		val = strings.TrimSuffix(val, ",")
 		node.SetIALAttr("custom-riff-decks", val)
 
-		if err := tx.writeTree(tree); nil != err {
+		if err := tx.writeTree(tree); err != nil {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: deckID}
 		}
 
@@ -924,7 +924,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 		deck.AddCard(cardID, blockID)
 	}
 
-	if err := deck.Save(); nil != err {
+	if err := deck.Save(); err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
@@ -933,7 +933,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 
 func LoadFlashcards() {
 	riffSavePath := getRiffDir()
-	if err := os.MkdirAll(riffSavePath, 0755); nil != err {
+	if err := os.MkdirAll(riffSavePath, 0755); err != nil {
 		logging.LogErrorf("create riff dir [%s] failed: %s", riffSavePath, err)
 		return
 	}
@@ -941,7 +941,7 @@ func LoadFlashcards() {
 	Decks = map[string]*riff.Deck{}
 
 	entries, err := os.ReadDir(riffSavePath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read riff dir failed: %s", err)
 		return
 	}
@@ -978,7 +978,7 @@ func RenameDeck(deckID, name string) (err error) {
 	deck := Decks[deckID]
 	deck.Name = name
 	err = deck.Save()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}
@@ -994,14 +994,14 @@ func RemoveDeck(deckID string) (err error) {
 	riffSavePath := getRiffDir()
 	deckPath := filepath.Join(riffSavePath, deckID+".deck")
 	if filelock.IsExist(deckPath) {
-		if err = filelock.Remove(deckPath); nil != err {
+		if err = filelock.Remove(deckPath); err != nil {
 			return
 		}
 	}
 
 	cardsPath := filepath.Join(riffSavePath, deckID+".cards")
 	if filelock.IsExist(cardsPath) {
-		if err = filelock.Remove(cardsPath); nil != err {
+		if err = filelock.Remove(cardsPath); err != nil {
 			return
 		}
 	}
@@ -1027,14 +1027,14 @@ func createDeck(name string) (deck *riff.Deck, err error) {
 func createDeck0(name string, deckID string) (deck *riff.Deck, err error) {
 	riffSavePath := getRiffDir()
 	deck, err = riff.LoadDeck(riffSavePath, deckID, Conf.Flashcard.RequestRetention, Conf.Flashcard.MaximumInterval, Conf.Flashcard.Weights)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load deck [%s] failed: %s", deckID, err)
 		return
 	}
 	deck.Name = name
 	Decks[deckID] = deck
 	err = deck.Save()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("save deck [%s] failed: %s", deckID, err)
 		return
 	}

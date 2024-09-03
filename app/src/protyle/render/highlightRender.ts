@@ -125,22 +125,32 @@ export const lineNumberRender = (block: HTMLElement) => {
     // clientHeight 总是取的整数
     block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
     const codeElement = block.lastElementChild as HTMLElement;
-    const lineNumberTemp = document.createElement("div");
-    lineNumberTemp.className = "hljs";
-    lineNumberTemp.setAttribute("style", `box-sizing: border-box;width: ${codeElement.clientWidth}px;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;white-space:${codeElement.style.whiteSpace};word-break:${codeElement.style.wordBreak};font-variant-ligatures:${codeElement.style.fontVariantLigatures};`);
-    lineNumberTemp.setAttribute("contenteditable", "true");
-    block.insertAdjacentElement("afterend", lineNumberTemp);
+
     let lineNumberHTML = "";
     const lineList = codeElement.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
+    block.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
+    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
+
+    const lineNumberTemp = document.createElement("div");
+    lineNumberTemp.className = "hljs";
+    lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
+width: ${codeElement.clientWidth}px;
+white-space:${codeElement.style.whiteSpace};
+word-break:${codeElement.style.wordBreak};
+font-variant-ligatures:${codeElement.style.fontVariantLigatures};
+box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
+    lineNumberTemp.setAttribute("contenteditable", "true");
+    block.insertAdjacentElement("afterend", lineNumberTemp);
+
     const isWrap = codeElement.style.wordBreak === "break-word";
     lineList.map((line) => {
         let lineHeight = "";
         if (isWrap) {
             // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
-            lineNumberTemp.textContent = line.trim() || "<br>";
+            lineNumberTemp.textContent = line.trim() ? line : "<br>";
             // 不能使用 lineNumberTemp.getBoundingClientRect().height.toFixed(1) 否则
             // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
             // https://github.com/siyuan-note/siyuan/issues/9029
@@ -152,5 +162,4 @@ export const lineNumberRender = (block: HTMLElement) => {
 
     lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
-    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
 };

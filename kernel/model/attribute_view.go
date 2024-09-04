@@ -651,7 +651,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 字段排序
-		refreshAttrViewKeyIDs(attrView)
+		refreshAttrViewKeyIDs(attrView, true)
 		sorts := map[string]int{}
 		for i, k := range attrView.KeyIDs {
 			sorts[k] = i
@@ -2533,7 +2533,7 @@ func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
 		return
 	}
 
-	refreshAttrViewKeyIDs(attrView)
+	refreshAttrViewKeyIDs(attrView, false)
 
 	var currentKeyID string
 	var idx, previousIndex int
@@ -2562,7 +2562,7 @@ func SortAttributeViewKey(avID, keyID, previousKeyID string) (err error) {
 	return
 }
 
-func refreshAttrViewKeyIDs(attrView *av.AttributeView) {
+func refreshAttrViewKeyIDs(attrView *av.AttributeView, needSave bool) {
 	// 订正 keyIDs 数据
 
 	existKeyIDs := map[string]bool{}
@@ -2583,6 +2583,10 @@ func refreshAttrViewKeyIDs(attrView *av.AttributeView) {
 		}
 	}
 	attrView.KeyIDs = tmp
+
+	if needSave {
+		av.SaveAttributeView(attrView)
+	}
 }
 
 func (tx *Transaction) doAddAttrViewColumn(operation *Operation) (ret *TxErr) {

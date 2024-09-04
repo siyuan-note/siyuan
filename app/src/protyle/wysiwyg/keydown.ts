@@ -1383,12 +1383,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list.custom, event);
         const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event);
         const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, event);
-        if (isMatchList || isMatchOList || isMatchCheck) {
+        const isMatchQuote = matchHotKey(window.siyuan.config.keymap.editor.insert.quote.custom, event);
+        if (isMatchList || isMatchOList || isMatchCheck || isMatchQuote) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length === 0) {
                 protyle.hint.splitChar = "/";
                 protyle.hint.lastIndex = -1;
-                protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
+                if (isMatchQuote) {
+                    protyle.hint.fill(">" + Lute.Caret, protyle);
+                } else {
+                    protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
+                }
             } else if (selectsElement.length === 1) {
                 const subType = selectsElement[0].dataset.subtype;
                 const type = selectsElement[0].dataset.type;
@@ -1396,7 +1401,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     turnsIntoOneTransaction({
                         protyle,
                         selectsElement,
-                        type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                        type: isMatchQuote ? "Blocks2Blockquote" : (isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs"))
                     });
                 } else if (type === "NodeList") {
                     const id = selectsElement[0].dataset.nodeId;
@@ -1443,7 +1448,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     turnsIntoOneTransaction({
                         protyle,
                         selectsElement,
-                        type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
+                        type: isMatchQuote ? "Blocks2Blockquote" : (isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs"))
                     });
                 }
             }

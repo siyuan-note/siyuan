@@ -571,6 +571,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconQuote",
                     label: window.siyuan.languages.quote,
+                    accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2Blockquote"
@@ -917,6 +918,7 @@ export class Gutter {
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconQuote",
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
                 label: window.siyuan.languages.quote,
                 protyle,
                 selectsElement: [nodeElement],

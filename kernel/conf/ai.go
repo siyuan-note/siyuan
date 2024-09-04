@@ -17,9 +17,10 @@
 package conf
 
 import (
-	"github.com/siyuan-note/siyuan/kernel/util"
 	"os"
 	"strconv"
+
+	"github.com/siyuan-note/siyuan/kernel/util"
 
 	"github.com/sashabaranov/go-openai"
 )
@@ -57,7 +58,7 @@ func NewAI() *AI {
 
 	if timeout := os.Getenv("SIYUAN_OPENAI_API_TIMEOUT"); "" != timeout {
 		timeoutInt, err := strconv.Atoi(timeout)
-		if nil == err {
+		if err == nil {
 			openAI.APITimeout = timeoutInt
 		}
 	}
@@ -68,21 +69,21 @@ func NewAI() *AI {
 
 	if maxTokens := os.Getenv("SIYUAN_OPENAI_API_MAX_TOKENS"); "" != maxTokens {
 		maxTokensInt, err := strconv.Atoi(maxTokens)
-		if nil == err {
+		if err == nil {
 			openAI.APIMaxTokens = maxTokensInt
 		}
 	}
 
 	if temperature := os.Getenv("SIYUAN_OPENAI_API_TEMPERATURE"); "" != temperature {
 		temperatureFloat, err := strconv.ParseFloat(temperature, 64)
-		if nil == err {
+		if err == nil {
 			openAI.APITemperature = temperatureFloat
 		}
 	}
 
 	if maxContexts := os.Getenv("SIYUAN_OPENAI_API_MAX_CONTEXTS"); "" != maxContexts {
 		maxContextsInt, err := strconv.Atoi(maxContexts)
-		if nil == err {
+		if err == nil {
 			openAI.APIMaxContexts = maxContextsInt
 		}
 	}

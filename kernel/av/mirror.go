@@ -29,12 +29,12 @@ func GetBlockRels() (ret map[string][]string) {
 	}
 
 	data, err := filelock.ReadFile(blocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 
-	if err = msgpack.Unmarshal(data, &ret); nil != err {
+	if err = msgpack.Unmarshal(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
 	}
@@ -51,13 +51,13 @@ func IsMirror(avID string) bool {
 	}
 
 	data, err := filelock.ReadFile(blocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return false
 	}
 
 	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+	if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return false
 	}
@@ -76,13 +76,13 @@ func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret
 	}
 
 	data, err := filelock.ReadFile(blocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 
 	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+	if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
 	}
@@ -104,11 +104,11 @@ func RemoveBlockRel(avID, blockID string, existBlockTree func(string) bool) (ret
 	ret = len(newBlockIDs) != len(blockIDs)
 
 	data, err = msgpack.Marshal(avBlocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal attribute view blocks failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(blocks, data); nil != err {
+	if err = filelock.WriteFile(blocks, data); err != nil {
 		logging.LogErrorf("write attribute view blocks failed: %s", err)
 		return
 	}
@@ -122,18 +122,18 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 	avBlocks := map[string][]string{}
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
 	if !filelock.IsExist(blocks) {
-		if err := os.MkdirAll(filepath.Dir(blocks), 0755); nil != err {
+		if err := os.MkdirAll(filepath.Dir(blocks), 0755); err != nil {
 			logging.LogErrorf("create attribute view dir failed: %s", err)
 			return
 		}
 	} else {
 		data, err := filelock.ReadFile(blocks)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read attribute view blocks failed: %s", err)
 			return
 		}
 
-		if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+		if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 			logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 			return
 		}
@@ -155,11 +155,11 @@ func BatchUpsertBlockRel(nodes []*ast.Node) {
 	}
 
 	data, err := msgpack.Marshal(avBlocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal attribute view blocks failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(blocks, data); nil != err {
+	if err = filelock.WriteFile(blocks, data); err != nil {
 		logging.LogErrorf("write attribute view blocks failed: %s", err)
 		return
 	}
@@ -172,18 +172,18 @@ func UpsertBlockRel(avID, blockID string) (ret bool) {
 	avBlocks := map[string][]string{}
 	blocks := filepath.Join(util.DataDir, "storage", "av", "blocks.msgpack")
 	if !filelock.IsExist(blocks) {
-		if err := os.MkdirAll(filepath.Dir(blocks), 0755); nil != err {
+		if err := os.MkdirAll(filepath.Dir(blocks), 0755); err != nil {
 			logging.LogErrorf("create attribute view dir failed: %s", err)
 			return
 		}
 	} else {
 		data, err := filelock.ReadFile(blocks)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read attribute view blocks failed: %s", err)
 			return
 		}
 
-		if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+		if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 			logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 			return
 		}
@@ -197,11 +197,11 @@ func UpsertBlockRel(avID, blockID string) (ret bool) {
 	ret = oldLen != len(blockIDs) && 0 != oldLen
 
 	data, err := msgpack.Marshal(avBlocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal attribute view blocks failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(blocks, data); nil != err {
+	if err = filelock.WriteFile(blocks, data); err != nil {
 		logging.LogErrorf("write attribute view blocks failed: %s", err)
 		return
 	}

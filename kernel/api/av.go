@@ -38,7 +38,7 @@ func duplicateAttributeViewBlock(c *gin.Context) {
 	avID := arg["avID"].(string)
 
 	newAvID, newBlockID, err := model.DuplicateDatabaseBlock(avID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -88,7 +88,7 @@ func setDatabaseBlockView(c *gin.Context) {
 	viewID := arg["viewID"].(string)
 
 	err := model.SetDatabaseBlockView(blockID, viewID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -122,7 +122,7 @@ func getAttributeViewPrimaryKeyValues(c *gin.Context) {
 		keyword = keywordArg.(string)
 	}
 	attributeViewName, databaseBlockIDs, rows, err := model.GetAttributeViewPrimaryKeyValues(id, keyword, page, pageSize)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -170,7 +170,7 @@ func appendAttributeViewDetachedBlocksWithValues(c *gin.Context) {
 	}
 
 	err := model.AppendAttributeViewDetachedBlocksWithValues(avID, values)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -206,7 +206,7 @@ func addAttributeViewBlocks(c *gin.Context) {
 		srcs = append(srcs, src)
 	}
 	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, previousID, ignoreFillFilter)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -231,7 +231,7 @@ func removeAttributeViewBlocks(c *gin.Context) {
 	}
 
 	err := model.RemoveAttributeViewBlock(srcIDs, avID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -257,7 +257,7 @@ func addAttributeViewKey(c *gin.Context) {
 	previousKeyID := arg["previousKeyID"].(string)
 
 	err := model.AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -279,7 +279,7 @@ func removeAttributeViewKey(c *gin.Context) {
 	keyID := arg["keyID"].(string)
 
 	err := model.RemoveAttributeViewKey(avID, keyID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -306,7 +306,7 @@ func sortAttributeViewViewKey(c *gin.Context) {
 	previousKeyID := arg["previousKeyID"].(string)
 
 	err := model.SortAttributeViewViewKey(avID, viewID, keyID, previousKeyID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -329,7 +329,7 @@ func sortAttributeViewKey(c *gin.Context) {
 	previousKeyID := arg["previousKeyID"].(string)
 
 	err := model.SortAttributeViewKey(avID, keyID, previousKeyID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -442,7 +442,7 @@ func renderSnapshotAttributeView(c *gin.Context) {
 	index := arg["snapshot"].(string)
 	id := arg["id"].(string)
 	view, attrView, err := model.RenderRepoSnapshotAttributeView(index, id)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -484,7 +484,7 @@ func renderHistoryAttributeView(c *gin.Context) {
 	id := arg["id"].(string)
 	created := arg["created"].(string)
 	view, attrView, err := model.RenderHistoryAttributeView(id, created)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -548,7 +548,7 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	view, attrView, err := model.RenderAttributeView(id, viewID, query, page, pageSize)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

@@ -30,7 +30,7 @@ func getRecentDocs(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	data, err := model.GetRecentDocs()
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -49,7 +49,7 @@ func removeCriterion(c *gin.Context) {
 
 	name := arg["name"].(string)
 	err := model.RemoveCriterion(name)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -66,21 +66,21 @@ func setCriterion(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["criterion"])
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	criterion := &model.Criterion{}
-	if err = gulu.JSON.UnmarshalJSON(param, criterion); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, criterion); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	err = model.SetCriterion(criterion)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -111,7 +111,7 @@ func removeLocalStorageVals(c *gin.Context) {
 	}
 
 	err := model.RemoveLocalStorageVals(keys)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -136,7 +136,7 @@ func setLocalStorageVal(c *gin.Context) {
 	key := arg["key"].(string)
 	val := arg["val"].(interface{})
 	err := model.SetLocalStorageVal(key, val)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -160,7 +160,7 @@ func setLocalStorage(c *gin.Context) {
 
 	val := arg["val"].(interface{})
 	err := model.SetLocalStorage(val)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

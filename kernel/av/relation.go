@@ -26,13 +26,13 @@ func GetSrcAvIDs(destAvID string) []string {
 	}
 
 	data, err := filelock.ReadFile(relations)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view relations failed: %s", err)
 		return nil
 	}
 
 	avRels := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avRels); nil != err {
+	if err = msgpack.Unmarshal(data, &avRels); err != nil {
 		logging.LogErrorf("unmarshal attribute view relations failed: %s", err)
 		return nil
 	}
@@ -57,13 +57,13 @@ func RemoveAvRel(srcAvID, destAvID string) {
 	}
 
 	data, err := filelock.ReadFile(relations)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view relations failed: %s", err)
 		return
 	}
 
 	avRels := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avRels); nil != err {
+	if err = msgpack.Unmarshal(data, &avRels); err != nil {
 		logging.LogErrorf("unmarshal attribute view relations failed: %s", err)
 		return
 	}
@@ -82,11 +82,11 @@ func RemoveAvRel(srcAvID, destAvID string) {
 	avRels[destAvID] = newAvIDs
 
 	data, err = msgpack.Marshal(avRels)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal attribute view relations failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(relations, data); nil != err {
+	if err = filelock.WriteFile(relations, data); err != nil {
 		logging.LogErrorf("write attribute view relations failed: %s", err)
 		return
 	}
@@ -99,18 +99,18 @@ func UpsertAvBackRel(srcAvID, destAvID string) {
 	avRelations := map[string][]string{}
 	relations := filepath.Join(util.DataDir, "storage", "av", "relations.msgpack")
 	if !filelock.IsExist(relations) {
-		if err := os.MkdirAll(filepath.Dir(relations), 0755); nil != err {
+		if err := os.MkdirAll(filepath.Dir(relations), 0755); err != nil {
 			logging.LogErrorf("create attribute view dir failed: %s", err)
 			return
 		}
 	} else {
 		data, err := filelock.ReadFile(relations)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read attribute view relations failed: %s", err)
 			return
 		}
 
-		if err = msgpack.Unmarshal(data, &avRelations); nil != err {
+		if err = msgpack.Unmarshal(data, &avRelations); err != nil {
 			logging.LogErrorf("unmarshal attribute view relations failed: %s", err)
 			return
 		}
@@ -122,11 +122,11 @@ func UpsertAvBackRel(srcAvID, destAvID string) {
 	avRelations[destAvID] = srcAvIDs
 
 	data, err := msgpack.Marshal(avRelations)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal attribute view relations failed: %s", err)
 		return
 	}
-	if err = filelock.WriteFile(relations, data); nil != err {
+	if err = filelock.WriteFile(relations, data); err != nil {
 		logging.LogErrorf("write attribute view relations failed: %s", err)
 		return
 	}

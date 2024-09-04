@@ -39,7 +39,7 @@ func getNetwork(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	maskedConf, err := model.GetMaskedConf()
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "get conf failed: " + err.Error()
 		return
@@ -76,7 +76,7 @@ func getChangelog(c *gin.Context) {
 	}
 
 	contentData, err := os.ReadFile(changelogPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read changelog failed: %s", err)
 		return
 	}
@@ -97,7 +97,7 @@ func getEmojiConf(c *gin.Context) {
 
 	builtConfPath := filepath.Join(util.AppearancePath, "emojis", "conf.json")
 	data, err := os.ReadFile(builtConfPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -105,7 +105,7 @@ func getEmojiConf(c *gin.Context) {
 	}
 
 	var conf []map[string]interface{}
-	if err = gulu.JSON.UnmarshalJSON(data, &conf); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &conf); err != nil {
 		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -124,7 +124,7 @@ func getEmojiConf(c *gin.Context) {
 	if gulu.File.IsDir(customConfDir) {
 		model.CustomEmojis = sync.Map{}
 		customEmojis, err := os.ReadDir(customConfDir)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read custom emojis failed: %s", err)
 		} else {
 			for _, customEmoji := range customEmojis {
@@ -136,7 +136,7 @@ func getEmojiConf(c *gin.Context) {
 				if customEmoji.IsDir() {
 					// 子级
 					subCustomEmojis, err := os.ReadDir(filepath.Join(customConfDir, name))
-					if nil != err {
+					if err != nil {
 						logging.LogErrorf("read custom emojis failed: %s", err)
 						continue
 					}
@@ -211,7 +211,7 @@ func getConf(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	maskedConf, err := model.GetMaskedConf()
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "get conf failed: " + err.Error()
 		return
@@ -252,14 +252,14 @@ func setUILayout(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["layout"])
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	uiLayout := &conf.UILayout{}
-	if err = gulu.JSON.UnmarshalJSON(param, uiLayout); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, uiLayout); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

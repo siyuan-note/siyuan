@@ -37,7 +37,7 @@ import (
 
 func GetFilePathsByExts(dirPath string, exts []string) (ret []string) {
 	filelock.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("get file paths by ext failed: %s", err)
 			return err
 		}
@@ -79,7 +79,7 @@ func GetMimeTypeByExt(filePath string) (ret string) {
 	ret = mime.TypeByExtension(filepath.Ext(filePath))
 	if "" == ret {
 		m, err := mimetype.DetectFile(filePath)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("detect mime type of [%s] failed: %s", filePath, err)
 			return
 		}
@@ -92,7 +92,7 @@ func GetMimeTypeByExt(filePath string) (ret string) {
 
 func IsSymlinkPath(absPath string) bool {
 	fi, err := os.Lstat(absPath)
-	if nil != err {
+	if err != nil {
 		return false
 	}
 	return 0 != fi.Mode()&os.ModeSymlink
@@ -104,7 +104,7 @@ func IsEmptyDir(p string) bool {
 	}
 
 	files, err := os.ReadDir(p)
-	if nil != err {
+	if err != nil {
 		return false
 	}
 	return 1 > len(files)
@@ -124,7 +124,7 @@ func IsPathRegularDirOrSymlinkDir(path string) bool {
 		return false
 	}
 
-	if nil != err {
+	if err != nil {
 		return false
 	}
 
@@ -276,7 +276,7 @@ func IsSubPath(absPath, toCheckPath string) bool {
 
 func SizeOfDirectory(path string) (size int64, err error) {
 	err = filelock.Walk(path, func(_ string, info os.FileInfo, err error) error {
-		if nil != err {
+		if err != nil {
 			return err
 		}
 		if !info.IsDir() {
@@ -287,7 +287,7 @@ func SizeOfDirectory(path string) (size int64, err error) {
 		}
 		return nil
 	})
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("size of dir [%s] failed: %s", path, err)
 	}
 	return
@@ -295,7 +295,7 @@ func SizeOfDirectory(path string) (size int64, err error) {
 
 func DataSize() (dataSize, assetsSize int64) {
 	filelock.Walk(DataDir, func(path string, info os.FileInfo, err error) error {
-		if nil != err {
+		if err != nil {
 			if os.IsNotExist(err) {
 				return nil
 			}

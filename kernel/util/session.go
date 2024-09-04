@@ -42,7 +42,7 @@ type WorkspaceSession struct {
 func (sd *SessionData) Save(c *gin.Context) error {
 	session := ginSessions.Default(c)
 	sessionDataBytes, err := gulu.JSON.MarshalJSON(sd)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	session.Set("data", string(sessionDataBytes))
@@ -60,7 +60,7 @@ func GetSession(c *gin.Context) *SessionData {
 	}
 
 	err := gulu.JSON.UnmarshalJSON([]byte(sessionDataStr.(string)), ret)
-	if nil != err {
+	if err != nil {
 		return ret
 	}
 

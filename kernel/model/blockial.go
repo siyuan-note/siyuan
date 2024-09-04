@@ -55,7 +55,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 
 	attrs := GetBlockAttrs(id) // 获取属性是会等待树写入
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -70,7 +70,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	content := sql.NodeStaticContent(node, nil, false, false, false, GetBlockAttrsWithoutWaitWriting)
 	content = gulu.Str.SubStr(content, 128)
 	err = SetCloudBlockReminder(id, content, timedMills)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -88,7 +88,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 		node.SetIALAttr(attrName, timed)
 		util.PushMsg(fmt.Sprintf(Conf.Language(101), time.UnixMilli(timedMills).Format("2006-01-02 15:04")), 5000)
 	}
-	if err = indexWriteTreeUpsertQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}
 	IncSync()
@@ -144,7 +144,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 	}
 
 	for _, tree := range trees {
-		if err = indexWriteTreeUpsertQueue(tree); nil != err {
+		if err = indexWriteTreeUpsertQueue(tree); err != nil {
 			return
 		}
 	}
@@ -162,7 +162,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	WaitForWritingFiles()
 
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 
@@ -177,11 +177,11 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 
 func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
 	oldAttrs, err := setNodeAttrs0(node, nameValues)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = indexWriteTreeUpsertQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}
 
@@ -201,11 +201,11 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 
 func setNodeAttrsWithTx(tx *Transaction, node *ast.Node, tree *parse.Tree, nameValues map[string]string) (err error) {
 	oldAttrs, err := setNodeAttrs0(node, nameValues)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return
 	}
 
@@ -250,7 +250,7 @@ func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
 
 func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 
@@ -280,7 +280,7 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		updateRefTextRenameDoc(tree)
 	}
 
-	if err = indexWriteTreeUpsertQueue(tree); nil != err {
+	if err = indexWriteTreeUpsertQueue(tree); err != nil {
 		return
 	}
 	IncSync()
@@ -335,7 +335,7 @@ func getBlockAttrs(id string) (ret map[string]string) {
 	ret = map[string]string{}
 
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		return
 	}
 

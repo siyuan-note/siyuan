@@ -45,7 +45,7 @@ func Plugins(frontend string) (plugins []*Plugin) {
 	}
 
 	stageIndex, err := getStageIndex("plugins")
-	if nil != err {
+	if err != nil {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
@@ -131,7 +131,7 @@ func ParseInstalledPlugin(name, frontend string) (found bool, displayName string
 	}
 
 	pluginDirs, err := os.ReadDir(pluginsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("read plugins folder failed: %s", err)
 		return
 	}
@@ -166,7 +166,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 	}
 
 	pluginDirs, err := os.ReadDir(pluginsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("read plugins folder failed: %s", err)
 		return
 	}
@@ -228,7 +228,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 func InstallPlugin(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash, true, systemID)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	return installPackage(data, installPath, repoURLHash)

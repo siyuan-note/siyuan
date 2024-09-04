@@ -46,7 +46,7 @@ func pandoc(c *gin.Context) {
 	}
 
 	path, err := util.ConvertPandoc(dir, args...)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

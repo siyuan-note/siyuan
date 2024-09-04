@@ -132,7 +132,7 @@ func findReplace(c *gin.Context) {
 	}
 
 	err := model.FindReplace(k, r, replaceTypes, ids, paths, boxes, types, method, orderBy, groupBy)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -211,7 +211,7 @@ func removeTemplate(c *gin.Context) {
 
 	path := arg["path"].(string)
 	err := model.RemoveTemplate(path)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -281,7 +281,7 @@ func updateEmbedBlock(c *gin.Context) {
 	content := arg["content"].(string)
 
 	err := model.UpdateEmbedBlock(id, content)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

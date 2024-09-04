@@ -53,7 +53,7 @@ func extensionCopy(c *gin.Context) {
 		}
 	}
 
-	if err := os.MkdirAll(assets, 0755); nil != err {
+	if err := os.MkdirAll(assets, 0755); err != nil {
 		logging.LogErrorf("create assets folder [%s] failed: %s", assets, err)
 		ret.Msg = err.Error()
 		return
@@ -62,15 +62,15 @@ func extensionCopy(c *gin.Context) {
 	uploaded := map[string]string{}
 	for originalName, file := range form.File {
 		oName, err := url.PathUnescape(originalName)
-		if nil != err {
+		if err != nil {
 			if strings.Contains(originalName, "%u") {
 				originalName = strings.ReplaceAll(originalName, "%u", "\\u")
 				originalName, err = strconv.Unquote("\"" + originalName + "\"")
-				if nil != err {
+				if err != nil {
 					continue
 				}
 				oName, err = url.PathUnescape(originalName)
-				if nil != err {
+				if err != nil {
 					continue
 				}
 			} else {
@@ -84,14 +84,14 @@ func extensionCopy(c *gin.Context) {
 		fName := path.Base(u.Path)
 
 		f, err := file[0].Open()
-		if nil != err {
+		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break
 		}
 
 		data, err := io.ReadAll(f)
-		if nil != err {
+		if err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break
@@ -113,7 +113,7 @@ func extensionCopy(c *gin.Context) {
 		fName = util.FilterUploadFileName(fName)
 		fName = fName + "-" + ast.NewNodeID() + ext
 		writePath := filepath.Join(assets, fName)
-		if err = filelock.WriteFile(writePath, data); nil != err {
+		if err = filelock.WriteFile(writePath, data); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			break
@@ -132,7 +132,7 @@ func extensionCopy(c *gin.Context) {
 			href = strings.ReplaceAll(href, "https://ld246.com/article/", "https://ld246.com/article/raw/")
 			href = strings.ReplaceAll(href, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
 			resp, err := httpclient.NewCloudRequest30s().Get(href)
-			if nil != err {
+			if err != nil {
 				logging.LogWarnf("get [%s] failed: %s", href, err)
 			} else {
 				bodyData, readErr := io.ReadAll(resp.Body)

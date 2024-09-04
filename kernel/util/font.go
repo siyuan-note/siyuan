@@ -63,19 +63,19 @@ func loadFonts(currentLanguage string) (ret []*Font) {
 	for _, fontPath := range findfont.List() {
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
 			data, err := os.ReadFile(fontPath)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("read font file [%s] failed: %s", fontPath, err)
 				continue
 			}
 			collection, err := ttc.ParseCollection(data)
-			if nil != err {
+			if err != nil {
 				//LogErrorf("parse font collection [%s] failed: %s", fontPath, err)
 				continue
 			}
 
 			for i := 0; i < collection.NumFonts(); i++ {
 				font, err := collection.Font(i)
-				if nil != err {
+				if err != nil {
 					//LogErrorf("get font [%s] failed: %s", fontPath, err)
 					continue
 				}
@@ -86,18 +86,18 @@ func loadFonts(currentLanguage string) (ret []*Font) {
 			}
 		} else if strings.HasSuffix(strings.ToLower(fontPath), ".otf") || strings.HasSuffix(strings.ToLower(fontPath), ".ttf") {
 			fontFile, err := os.Open(fontPath)
-			if nil != err {
+			if err != nil {
 				//LogErrorf("open font file [%s] failed: %s", fontPath, err)
 				continue
 			}
 			font, err := sfnt.Parse(fontFile)
-			if nil != err {
+			if err != nil {
 				//LogErrorf("parse font [%s] failed: %s", fontPath, err)
 				continue
 			}
 
 			t, err := font.NameTable()
-			if nil != err {
+			if err != nil {
 				//LogErrorf("parse font name table [%s] failed: %s", fontPath, err)
 				return
 			}
@@ -110,7 +110,7 @@ func loadFonts(currentLanguage string) (ret []*Font) {
 
 				if sfnt.PlatformLanguageID(1033) == e.LanguageID {
 					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-					if nil != err {
+					if err != nil {
 						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
 						continue
 					}
@@ -127,7 +127,7 @@ func loadFonts(currentLanguage string) (ret []*Font) {
 					}
 
 					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-					if nil != err {
+					if err != nil {
 						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
 						continue
 					}

@@ -80,7 +80,7 @@ func globalCopyFiles(c *gin.Context) {
 	destDir = filepath.Join(util.WorkspaceDir, destDir)
 	for _, src := range srcs {
 		dest := filepath.Join(destDir, filepath.Base(src))
-		if err := filelock.Copy(src, dest); nil != err {
+		if err := filelock.Copy(src, dest); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 			ret.Code = -1
 			ret.Msg = err.Error()
@@ -100,7 +100,7 @@ func copyFile(c *gin.Context) {
 
 	src := arg["src"].(string)
 	src, err := model.GetAssetAbsPath(src)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -109,7 +109,7 @@ func copyFile(c *gin.Context) {
 	}
 
 	info, err := os.Stat(src)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", src, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -125,7 +125,7 @@ func copyFile(c *gin.Context) {
 	}
 
 	dest := arg["dest"].(string)
-	if err = filelock.Copy(src, dest); nil != err {
+	if err = filelock.Copy(src, dest); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", src, dest, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -145,7 +145,7 @@ func getFile(c *gin.Context) {
 
 	filePath := arg["path"].(string)
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		c.JSON(http.StatusAccepted, ret)
@@ -158,7 +158,7 @@ func getFile(c *gin.Context) {
 		c.JSON(http.StatusAccepted, ret)
 		return
 	}
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -192,7 +192,7 @@ func getFile(c *gin.Context) {
 	}
 
 	data, err := filelock.ReadFile(fileAbsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -224,7 +224,7 @@ func readDir(c *gin.Context) {
 
 	dirPath := arg["path"].(string)
 	dirAbsPath, err := util.GetAbsPathInWorkspace(dirPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		return
@@ -235,7 +235,7 @@ func readDir(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -249,7 +249,7 @@ func readDir(c *gin.Context) {
 	}
 
 	entries, err := os.ReadDir(dirAbsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", dirAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -260,7 +260,7 @@ func readDir(c *gin.Context) {
 	for _, entry := range entries {
 		path := filepath.Join(dirAbsPath, entry.Name())
 		info, err = os.Stat(path)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("stat [%s] failed: %s", path, err)
 			ret.Code = http.StatusInternalServerError
 			ret.Msg = err.Error()
@@ -289,7 +289,7 @@ func renameFile(c *gin.Context) {
 
 	srcPath := arg["path"].(string)
 	srcAbsPath, err := util.GetAbsPathInWorkspace(srcPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		return
@@ -302,7 +302,7 @@ func renameFile(c *gin.Context) {
 
 	destPath := arg["newPath"].(string)
 	destAbsPath, err := util.GetAbsPathInWorkspace(destPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		c.JSON(http.StatusAccepted, ret)
@@ -314,7 +314,7 @@ func renameFile(c *gin.Context) {
 		return
 	}
 
-	if err := filelock.Rename(srcAbsPath, destAbsPath); nil != err {
+	if err := filelock.Rename(srcAbsPath, destAbsPath); err != nil {
 		logging.LogErrorf("rename file [%s] to [%s] failed: %s", srcAbsPath, destAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -334,7 +334,7 @@ func removeFile(c *gin.Context) {
 
 	filePath := arg["path"].(string)
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		return
@@ -344,14 +344,14 @@ func removeFile(c *gin.Context) {
 		ret.Code = http.StatusNotFound
 		return
 	}
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("stat [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
 		return
 	}
 
-	if err = filelock.Remove(fileAbsPath); nil != err {
+	if err = filelock.Remove(fileAbsPath); err != nil {
 		logging.LogErrorf("remove [%s] failed: %s", fileAbsPath, err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()
@@ -366,7 +366,7 @@ func putFile(c *gin.Context) {
 	var err error
 	filePath := c.PostForm("path")
 	fileAbsPath, err := util.GetAbsPathInWorkspace(filePath)
-	if nil != err {
+	if err != nil {
 		ret.Code = http.StatusForbidden
 		ret.Msg = err.Error()
 		return
@@ -377,7 +377,7 @@ func putFile(c *gin.Context) {
 
 	if isDir {
 		err = os.MkdirAll(fileAbsPath, 0755)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("make dir [%s] failed: %s", fileAbsPath, err)
 		}
 	} else {
@@ -391,34 +391,34 @@ func putFile(c *gin.Context) {
 
 		for {
 			dir := filepath.Dir(fileAbsPath)
-			if err = os.MkdirAll(dir, 0755); nil != err {
+			if err = os.MkdirAll(dir, 0755); err != nil {
 				logging.LogErrorf("put file [%s] make dir [%s] failed: %s", fileAbsPath, dir, err)
 				break
 			}
 
 			var f multipart.File
 			f, err = fileHeader.Open()
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("open file failed: %s", err)
 				break
 			}
 
 			var data []byte
 			data, err = io.ReadAll(f)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("read file failed: %s", err)
 				break
 			}
 
 			err = filelock.WriteFile(fileAbsPath, data)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("write file [%s] failed: %s", fileAbsPath, err)
 				break
 			}
 			break
 		}
 	}
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -436,7 +436,7 @@ func putFile(c *gin.Context) {
 		}
 		modTime = millisecond2Time(modTimeInt)
 	}
-	if err = os.Chtimes(fileAbsPath, modTime, modTime); nil != err {
+	if err = os.Chtimes(fileAbsPath, modTime, modTime); err != nil {
 		logging.LogErrorf("change time failed: %s", err)
 		ret.Code = http.StatusInternalServerError
 		ret.Msg = err.Error()

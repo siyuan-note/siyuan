@@ -46,7 +46,7 @@ func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
 
 	stmt := scriptNode.TokensStr()
 	parsedStmt, err := sqlparser.Parse(stmt)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -116,7 +116,7 @@ func IsEmbedBlockRef(n *ast.Node) bool {
 
 func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 	markdown, err := lute.FormatNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	if nil != err {
+	if err != nil {
 		root := TreeRoot(node)
 		logging.LogFatalf(logging.ExitCodeFatal, "format node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}
@@ -125,7 +125,7 @@ func FormatNode(node *ast.Node, luteEngine *lute.Lute) string {
 
 func ExportNodeStdMd(node *ast.Node, luteEngine *lute.Lute) string {
 	markdown, err := lute.ProtyleExportMdNodeSync(node, luteEngine.ParseOptions, luteEngine.RenderOptions)
-	if nil != err {
+	if err != nil {
 		root := TreeRoot(node)
 		logging.LogFatalf(logging.ExitCodeFatal, "export markdown for node [%s] in tree [%s] failed: %s", node.ID, root.ID, err)
 	}

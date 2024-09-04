@@ -75,7 +75,7 @@ func renameNotebook(c *gin.Context) {
 
 	name := arg["name"].(string)
 	err := model.RenameBox(notebook, name)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -112,7 +112,7 @@ func removeNotebook(c *gin.Context) {
 	}
 
 	err := model.RemoveBox(notebook)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -137,14 +137,14 @@ func createNotebook(c *gin.Context) {
 
 	name := arg["name"].(string)
 	id, err := model.CreateBox(name)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	existed, err := model.Mount(id)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -204,7 +204,7 @@ func openNotebook(c *gin.Context) {
 	msgId := util.PushMsg(model.Conf.Language(45), 1000*60*15)
 	defer util.PushClearMsg(msgId)
 	existed, err := model.Mount(notebook)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -321,14 +321,14 @@ func setNotebookConf(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["conf"])
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	boxConf := box.GetConf()
-	if err = gulu.JSON.UnmarshalJSON(param, boxConf); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, boxConf); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -377,7 +377,7 @@ func lsNotebooks(c *gin.Context) {
 
 	// 兼容旧版接口，不能直接使用 util.JsonArg()
 	arg := map[string]interface{}{}
-	if err := c.ShouldBindJSON(&arg); nil == err {
+	if err := c.ShouldBindJSON(&arg); err == nil {
 		if arg["flashcard"] != nil {
 			flashcard = arg["flashcard"].(bool)
 		}
@@ -389,7 +389,7 @@ func lsNotebooks(c *gin.Context) {
 	} else {
 		var err error
 		notebooks, err = model.ListNotebooks()
-		if nil != err {
+		if err != nil {
 			return
 		}
 	}

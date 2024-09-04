@@ -53,7 +53,7 @@ func putBlockCache(block *Block) {
 	}
 
 	cloned := &Block{}
-	if err := copier.Copy(cloned, block); nil != err {
+	if err := copier.Copy(cloned, block); err != nil {
 		logging.LogErrorf("clone block failed: %v", err)
 		return
 	}

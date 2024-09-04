@@ -799,14 +799,26 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	if needSyncDel2AvBlock {
-		syncDelete2AttributeView(node)
-		syncDelete2Block(node)
+		syncDelete2AvBlock(node)
 	}
 	return
 }
 
-func syncDelete2Block(node *ast.Node) {
-	var changedAvIDs []string
+func syncDelete2AvBlock(node *ast.Node) {
+	changedAvIDs := syncDelete2AttributeView(node)
+	avIDs := syncDelete2Block(node)
+	changedAvIDs = append(changedAvIDs, avIDs...)
+	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
+
+	go func() {
+		time.Sleep(256 * time.Millisecond)
+		for _, avID := range changedAvIDs {
+			util.PushReloadAttrView(avID)
+		}
+	}()
+}
+
+func syncDelete2Block(node *ast.Node) (changedAvIDs []string) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
@@ -850,14 +862,12 @@ func syncDelete2Block(node *ast.Node) {
 		}
 		return ast.WalkContinue
 	})
+
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
-	for _, avID := range changedAvIDs {
-		util.PushReloadAttrView(avID)
-	}
+	return
 }
 
-func syncDelete2AttributeView(node *ast.Node) {
-	changedAvIDs := hashset.New()
+func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || !n.IsBlock() {
 			return ast.WalkContinue
@@ -891,15 +901,14 @@ func syncDelete2AttributeView(node *ast.Node) {
 
 			if changedAv {
 				av.SaveAttributeView(attrView)
-				changedAvIDs.Add(avID)
+				changedAvIDs = append(changedAvIDs, avID)
 			}
 		}
 		return ast.WalkContinue
 	})
 
-	for _, avID := range changedAvIDs.Values() {
-		util.PushReloadAttrView(avID.(string))
-	}
+	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
+	return
 }
 
 func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {

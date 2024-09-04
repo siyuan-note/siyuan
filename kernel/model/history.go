@@ -248,6 +248,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return
 	}
 
+	var avIDs []string
 	tree, _ := loadTree(srcPath, util.NewLute())
 	if nil != tree {
 		historyDir := strings.TrimPrefix(historyPath, util.HistoryDir+string(os.PathSeparator))
@@ -266,8 +267,11 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 					logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
 				}
 			}
+
+			avIDs = append(avIDs, avNode.AttributeViewID)
 		}
 	}
+	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 
 	tree.Box = boxID
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
@@ -305,6 +309,11 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			"refText": refText,
 		}
 		util.PushEvent(evt)
+
+		// 刷新属性视图
+		for _, avID := range avIDs {
+			util.PushReloadAttrView(avID)
+		}
 	}()
 	return nil
 }

@@ -72,7 +72,7 @@ func FlushAssetContentQueue() {
 		}
 
 		tx, err := beginAssetContentTx()
-		if nil != err {
+		if err != nil {
 			return
 		}
 
@@ -80,14 +80,14 @@ func FlushAssetContentQueue() {
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
 
-		if err = execAssetContentOp(op, tx, context); nil != err {
+		if err = execAssetContentOp(op, tx, context); err != nil {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 			eventbus.Publish(util.EvtSQLAssetContentRebuild)
 			return
 		}
 
-		if err = commitAssetContentTx(tx); nil != err {
+		if err = commitAssetContentTx(tx); err != nil {
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
 		}

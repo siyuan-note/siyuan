@@ -53,7 +53,7 @@ func logf(a, b interface{}) float64 { return math.Log(cast.ToFloat64(a)) / math.
 func parseTime(dateStr string) time.Time {
 	now := time.Now()
 	retTime, err := dateparse.ParseIn(dateStr, now.Location())
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("parse date [%s] failed [%s], return current time instead", dateStr, err)
 		return now
 	}

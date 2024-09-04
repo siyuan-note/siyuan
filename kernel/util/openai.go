@@ -50,7 +50,7 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
 	defer cancel()
 	resp, err := c.CreateChatCompletion(ctx, req)
-	if nil != err {
+	if err != nil {
 		PushErrMsg("Requesting failed, please check kernel log for more details", 3000)
 		logging.LogErrorf("create chat completion failed: %s", err)
 		stop = true
@@ -86,7 +86,7 @@ func NewOpenAIClient(apiKey, apiProxy, apiBaseURL, apiUserAgent, apiVersion, api
 	transport := &http.Transport{}
 	if "" != apiProxy {
 		proxyUrl, err := url.Parse(apiProxy)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("OpenAI API proxy failed: %v", err)
 		} else {
 			transport.Proxy = http.ProxyURL(proxyUrl)

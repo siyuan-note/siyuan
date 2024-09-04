@@ -32,7 +32,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 	parentID := operation.ParentID
 
 	tree, err := tx.loadTree(headingID)
-	if nil != err {
+	if err != nil {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 	operation.RetData = tree.Root.ID
@@ -201,7 +201,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return
 	}
 	return

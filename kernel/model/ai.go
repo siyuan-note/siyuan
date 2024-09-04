@@ -61,7 +61,7 @@ func chatGPT(msg string, cloud bool) (ret string) {
 	}
 
 	ret, retCtxMsgs, err := chatGPTContinueWrite(msg, cachedContextMsg, cloud)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	cachedContextMsg = append(cachedContextMsg, retCtxMsgs...)
@@ -74,7 +74,7 @@ func chatGPTWithAction(msg string, action string, cloud bool) (ret string) {
 		msg = action + ":\n\n" + msg
 	}
 	ret, _, err := chatGPTContinueWrite(msg, nil, cloud)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	return

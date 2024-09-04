@@ -66,7 +66,7 @@ func batchSetRiffCardsDueTime(c *gin.Context) {
 	}
 
 	err := model.SetFlashcardsDueTime(cardDues)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 	}
@@ -178,7 +178,7 @@ func reviewRiffCard(c *gin.Context) {
 	rating := int(arg["rating"].(float64))
 	reviewedCardIDs := getReviewedCards(arg)
 	err := model.ReviewFlashcard(deckID, cardID, riff.Rating(rating), reviewedCardIDs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -197,7 +197,7 @@ func skipReviewRiffCard(c *gin.Context) {
 	deckID := arg["deckID"].(string)
 	cardID := arg["cardID"].(string)
 	err := model.SkipReviewFlashcard(deckID, cardID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -216,7 +216,7 @@ func getNotebookRiffDueCards(c *gin.Context) {
 	notebookID := arg["notebook"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetNotebookDueFlashcards(notebookID, reviewedCardIDs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -242,7 +242,7 @@ func getTreeRiffDueCards(c *gin.Context) {
 	rootID := arg["rootID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetTreeDueFlashcards(rootID, reviewedCardIDs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -268,7 +268,7 @@ func getRiffDueCards(c *gin.Context) {
 	deckID := arg["deckID"].(string)
 	reviewedCardIDs := getReviewedCards(arg)
 	cards, unreviewedCount, unreviewedNewCardCount, unreviewedOldCardCount, err := model.GetDueFlashcards(deckID, reviewedCardIDs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -381,7 +381,7 @@ func renameRiffDeck(c *gin.Context) {
 	deckID := arg["deckID"].(string)
 	name := arg["name"].(string)
 	err := model.RenameDeck(deckID, name)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -399,7 +399,7 @@ func removeRiffDeck(c *gin.Context) {
 
 	deckID := arg["deckID"].(string)
 	err := model.RemoveDeck(deckID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -417,7 +417,7 @@ func createRiffDeck(c *gin.Context) {
 
 	name := arg["name"].(string)
 	deck, err := model.CreateDeck(name)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

@@ -26,7 +26,7 @@ import (
 
 func NeedWarnDiskUsage(dataSize int64) bool {
 	usage, err := disk.Usage(WorkspaceDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get disk usage failed: %s", err)
 		return false
 	}

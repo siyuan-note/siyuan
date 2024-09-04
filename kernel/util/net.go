@@ -58,7 +58,7 @@ func IsLocalHostname(hostname string) bool {
 }
 
 func IsLocalHost(host string) bool {
-	if hostname, _, err := net.SplitHostPort(strings.TrimSpace(host)); nil != err {
+	if hostname, _, err := net.SplitHostPort(strings.TrimSpace(host)); err != nil {
 		return false
 	} else {
 		return IsLocalHostname(hostname)
@@ -66,7 +66,7 @@ func IsLocalHost(host string) bool {
 }
 
 func IsLocalOrigin(origin string) bool {
-	if url, err := url.Parse(origin); nil == err {
+	if url, err := url.Parse(origin); err == nil {
 		return IsLocalHostname(url.Hostname())
 	}
 	return false
@@ -74,7 +74,7 @@ func IsLocalOrigin(origin string) bool {
 
 func IsOnline(checkURL string, skipTlsVerify bool) bool {
 	_, err := url.Parse(checkURL)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("invalid check URL [%s]", checkURL)
 		return false
 	}
@@ -94,7 +94,7 @@ func IsOnline(checkURL string, skipTlsVerify bool) bool {
 func IsPortOpen(port string) bool {
 	timeout := time.Second
 	conn, err := net.DialTimeout("tcp", net.JoinHostPort("127.0.0.1", port), timeout)
-	if nil != err {
+	if err != nil {
 		return false
 	}
 	if nil != conn {
@@ -127,7 +127,7 @@ func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
 			}
 		}
 
-		ret = nil == err
+		ret = err == nil
 		if ret {
 			break
 		}
@@ -153,7 +153,7 @@ func GetRemoteAddr(req *http.Request) string {
 
 func JsonArg(c *gin.Context, result *gulu.Result) (arg map[string]interface{}, ok bool) {
 	arg = map[string]interface{}{}
-	if err := c.BindJSON(&arg); nil != err {
+	if err := c.BindJSON(&arg); err != nil {
 		result.Code = -1
 		result.Msg = "parses request failed"
 		return
@@ -175,7 +175,7 @@ func InvalidIDPattern(idArg string, result *gulu.Result) bool {
 
 func IsValidURL(str string) bool {
 	_, err := url.Parse(str)
-	return nil == err
+	return err == nil
 }
 
 func initHttpClient() {

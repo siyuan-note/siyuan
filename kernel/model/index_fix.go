@@ -269,7 +269,7 @@ func recreateTree(tree *parse.Tree, absPath string) {
 	treenode.RemoveBlockTreesByRootID(tree.ID)
 
 	resetTree(tree, "", true)
-	if err := filesys.WriteTree(tree); nil != err {
+	if err := filesys.WriteTree(tree); err != nil {
 		logging.LogWarnf("write tree [%s] failed: %s", tree.Path, err)
 		return
 	}
@@ -284,7 +284,7 @@ func recreateTree(tree *parse.Tree, absPath string) {
 		}
 	}
 
-	if err := filelock.Remove(absPath); nil != err {
+	if err := filelock.Remove(absPath); err != nil {
 		logging.LogWarnf("remove [%s] failed: %s", absPath, err)
 		return
 	}
@@ -369,7 +369,7 @@ func fixDatabaseIndexByBlockTree() {
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 4, 5))
 	rootUpdatedMap := treenode.GetRootUpdated()
 	dbRootUpdatedMap, err := sql.GetRootUpdated()
-	if nil == err {
+	if err == nil {
 		reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap)
 	}
 }
@@ -445,7 +445,7 @@ func reindexTreeByUpdated(rootUpdatedMap, dbRootUpdatedMap map[string]string) {
 
 func reindexTreeByPath(box, p string, i, size int, luteEngine *lute.Lute) {
 	tree, err := filesys.LoadTree(box, p, luteEngine)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -460,7 +460,7 @@ func reindexTree(rootID string, i, size int, luteEngine *lute.Lute) {
 	}
 
 	tree, err := filesys.LoadTree(root.BoxID, root.Path, luteEngine)
-	if nil != err {
+	if err != nil {
 		if os.IsNotExist(err) {
 			// 文件系统上没有找到该 .sy 文件，则订正块树
 			treenode.RemoveBlockTreesByRootID(rootID)

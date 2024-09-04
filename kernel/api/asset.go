@@ -46,7 +46,7 @@ func statAsset(c *gin.Context) {
 	if strings.HasPrefix(path, "assets/") {
 		var err error
 		p, err = model.GetAssetAbsPath(path)
-		if nil != err {
+		if err != nil {
 			ret.Code = 1
 			return
 		}
@@ -62,13 +62,13 @@ func statAsset(c *gin.Context) {
 	}
 
 	info, err := os.Stat(p)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		return
 	}
 
 	t, err := times.Stat(p)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		return
 	}
@@ -160,7 +160,7 @@ func renameAsset(c *gin.Context) {
 	oldPath := arg["oldPath"].(string)
 	newName := arg["newName"].(string)
 	newPath, err := model.RenameAsset(oldPath, newName)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -182,7 +182,7 @@ func getDocImageAssets(c *gin.Context) {
 
 	id := arg["id"].(string)
 	assets, err := model.DocImageAssets(id)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -203,12 +203,12 @@ func setFileAnnotation(c *gin.Context) {
 	p = strings.ReplaceAll(p, "%23", "#")
 	data := arg["data"].(string)
 	writePath, err := resolveFileAnnotationAbsPath(p)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	if err := filelock.WriteFile(writePath, []byte(data)); nil != err {
+	if err := filelock.WriteFile(writePath, []byte(data)); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -228,7 +228,7 @@ func getFileAnnotation(c *gin.Context) {
 	p := arg["path"].(string)
 	p = strings.ReplaceAll(p, "%23", "#")
 	readPath, err := resolveFileAnnotationAbsPath(p)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -240,7 +240,7 @@ func getFileAnnotation(c *gin.Context) {
 	}
 
 	data, err := filelock.ReadFile(readPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -253,7 +253,7 @@ func getFileAnnotation(c *gin.Context) {
 func resolveFileAnnotationAbsPath(assetRelPath string) (ret string, err error) {
 	filePath := strings.TrimSuffix(assetRelPath, ".sya")
 	absPath, err := model.GetAssetAbsPath(filePath)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	dir := filepath.Dir(absPath)
@@ -319,7 +319,7 @@ func resolveAssetPath(c *gin.Context) {
 
 	path := arg["path"].(string)
 	p, err := model.GetAssetAbsPath(path)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 3000}
@@ -340,7 +340,7 @@ func uploadCloud(c *gin.Context) {
 
 	rootID := arg["id"].(string)
 	count, err := model.UploadAssets2Cloud(rootID)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 3000}
@@ -371,7 +371,7 @@ func insertLocalAssets(c *gin.Context) {
 	}
 	id := arg["id"].(string)
 	succMap, err := model.InsertLocalAssets(id, assetPaths, isUpload)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

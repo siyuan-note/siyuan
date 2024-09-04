@@ -64,7 +64,7 @@ func NewCmdResult(cmdName string, cmdId float64, pushMode PushMode) *Result {
 
 func (r *Result) Bytes() []byte {
 	ret, err := gulu.JSON.MarshalJSON(r)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal result [%+v] failed [%s]", r, err)
 	}
 	return ret

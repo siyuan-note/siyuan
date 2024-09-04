@@ -62,13 +62,13 @@ func watchEmojis() {
 		}
 	}()
 
-	if err := emojisWatcher.Add(emojisDir); nil != err {
+	if err := emojisWatcher.Add(emojisDir); err != nil {
 		logging.LogErrorf("add emojis watcher for folder [%s] failed: %s", emojisDir, err)
 		return
 	}
 
 	//logging.LogInfof("added file watcher [%s]", emojisDir)
-	if err := emojisWatcher.Start(10 * time.Second); nil != err {
+	if err := emojisWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start emojis watcher for folder [%s] failed: %s", emojisDir, err)
 		return
 	}

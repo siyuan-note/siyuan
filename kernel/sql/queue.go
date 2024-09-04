@@ -136,20 +136,20 @@ func FlushQueue() {
 		}
 
 		tx, err := beginTx()
-		if nil != err {
+		if err != nil {
 			return
 		}
 
 		groupOpsCurrent[op.action]++
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
-		if err = execOp(op, tx, context); nil != err {
+		if err = execOp(op, tx, context); err != nil {
 			tx.Rollback()
 			logging.LogErrorf("queue operation [%s] failed: %s", op.action, err)
 			continue
 		}
 
-		if err = commitTx(tx); nil != err {
+		if err = commitTx(tx); err != nil {
 			logging.LogErrorf("commit tx failed: %s", err)
 			continue
 		}
@@ -188,7 +188,7 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 	case "rename":
 		err = batchUpdateHPath(tx, op.renameTree.ID, op.renameTree.HPath, context)
-		if nil != err {
+		if err != nil {
 			break
 		}
 		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)

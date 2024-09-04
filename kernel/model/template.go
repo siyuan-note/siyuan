@@ -46,14 +46,14 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
-	if nil != err {
+	if err != nil {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 	}
 
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
 	err = tpl.Execute(buf, nil)
-	if nil != err {
+	if err != nil {
 		return "", errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 	}
 	ret = buf.String()
@@ -62,7 +62,7 @@ func RenderGoTemplate(templateContent string) (ret string, err error) {
 
 func RemoveTemplate(p string) (err error) {
 	err = filelock.Remove(p)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("remove template failed: %s", err)
 	}
 	return
@@ -77,7 +77,7 @@ func SearchTemplate(keyword string) (ret []*Block) {
 	}
 
 	groups, err := os.ReadDir(templates)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read templates failed: %s", err)
 		return
 	}
@@ -195,7 +195,7 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 
 func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, err error) {
 	tree, err = LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -206,7 +206,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 	block := sql.BuildBlockFromNode(node, tree)
 	md, err := os.ReadFile(p)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -228,14 +228,14 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))
-	if nil != err {
+	if err != nil {
 		err = errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 		return
 	}
 
 	buf := &bytes.Buffer{}
 	buf.Grow(4096)
-	if err = tpl.Execute(buf, dataModel); nil != err {
+	if err = tpl.Execute(buf, dataModel); err != nil {
 		err = errors.New(fmt.Sprintf(Conf.Language(44), err.Error()))
 		return
 	}

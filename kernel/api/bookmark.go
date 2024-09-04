@@ -42,7 +42,7 @@ func removeBookmark(c *gin.Context) {
 	}
 
 	bookmark := arg["bookmark"].(string)
-	if err := model.RemoveBookmark(bookmark); nil != err {
+	if err := model.RemoveBookmark(bookmark); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -61,7 +61,7 @@ func renameBookmark(c *gin.Context) {
 
 	oldBookmark := arg["oldBookmark"].(string)
 	newBookmark := arg["newBookmark"].(string)
-	if err := model.RenameBookmark(oldBookmark, newBookmark); nil != err {
+	if err := model.RenameBookmark(oldBookmark, newBookmark); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}

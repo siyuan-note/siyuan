@@ -34,7 +34,7 @@ import (
 
 func InitAppearance() {
 	util.SetBootDetails("Initializing appearance...")
-	if err := os.Mkdir(util.AppearancePath, 0755); nil != err && !os.IsExist(err) {
+	if err := os.Mkdir(util.AppearancePath, 0755); err != nil && !os.IsExist(err) {
 		logging.LogErrorf("create appearance folder [%s] failed: %s", util.AppearancePath, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -42,7 +42,7 @@ func InitAppearance() {
 
 	unloadThemes()
 	from := filepath.Join(util.WorkingDir, "appearance")
-	if err := filelock.Copy(from, util.AppearancePath); nil != err {
+	if err := filelock.Copy(from, util.AppearancePath); err != nil {
 		logging.LogErrorf("copy appearance resources from [%s] to [%s] failed: %s", from, util.AppearancePath, err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -70,7 +70,7 @@ var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher{}
 
 func closeThemeWatchers() {
 	themeWatchers.Range(func(key, value interface{}) bool {
-		if err := value.(*fsnotify.Watcher).Close(); nil != err {
+		if err := value.(*fsnotify.Watcher).Close(); err != nil {
 			logging.LogErrorf("close file watcher failed: %s", err)
 		}
 		return true
@@ -83,7 +83,7 @@ func unloadThemes() {
 	}
 
 	themeDirs, err := os.ReadDir(util.ThemesPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)
 		return
 	}
@@ -98,7 +98,7 @@ func unloadThemes() {
 
 func loadThemes() {
 	themeDirs, err := os.ReadDir(util.ThemesPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read appearance themes folder failed: %s", err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -143,7 +143,7 @@ func loadThemes() {
 
 func loadIcons() {
 	iconDirs, err := os.ReadDir(util.IconsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read appearance icons folder failed: %s", err)
 		util.ReportFileSysFatalError(err)
 		return
@@ -156,7 +156,7 @@ func loadIcons() {
 		}
 		name := iconDir.Name()
 		iconConf, err := bazaar.IconJSON(name)
-		if nil != err || nil == iconConf {
+		if err != nil || nil == iconConf {
 			continue
 		}
 		Conf.Appearance.Icons = append(Conf.Appearance.Icons, name)
@@ -183,7 +183,7 @@ func watchTheme(folder string) {
 	}
 
 	var err error
-	if themeWatcher, err = fsnotify.NewWatcher(); nil != err {
+	if themeWatcher, err = fsnotify.NewWatcher(); err != nil {
 		logging.LogErrorf("add theme file watcher for folder [%s] failed: %s", folder, err)
 		return
 	}

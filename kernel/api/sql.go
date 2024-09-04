@@ -45,7 +45,7 @@ func SQL(c *gin.Context) {
 
 	stmt := arg["stmt"].(string)
 	result, err := sql.Query(stmt, model.Conf.Search.Limit)
-	if nil != err {
+	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()
 		return

@@ -38,7 +38,7 @@ func killRunningKernel() {
 	defer logging.LogInfof("check running kernel elapsed [%dms]", time.Since(now).Milliseconds())
 
 	processes, err := goPS.Processes()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get processes failed: %s", err)
 		killByPort(util.FixedPort)
 		return
@@ -102,7 +102,7 @@ func pidByPort(port string) (ret string) {
 		cmd := exec.Command("cmd", "/c", "netstat -ano | findstr "+port)
 		gulu.CmdAttr(cmd)
 		data, err := cmd.CombinedOutput()
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("netstat failed: %s", err)
 			return
 		}
@@ -122,7 +122,7 @@ func pidByPort(port string) (ret string) {
 	cmd := exec.Command("lsof", "-Fp", "-i", ":"+port)
 	gulu.CmdAttr(cmd)
 	data, err := cmd.CombinedOutput()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("lsof failed: %s", err)
 		return
 	}

@@ -33,7 +33,7 @@ func QueryAssetContentNoLimit(stmt string) (ret []map[string]interface{}, err er
 
 func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	rows, err := queryAssetContent(stmt)
-	if nil != err {
+	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}
@@ -42,7 +42,7 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 	defer rows.Close()
 
 	cols, err := rows.Columns()
-	if nil != err || nil == cols {
+	if err != nil || nil == cols {
 		return
 	}
 
@@ -55,7 +55,7 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 			columnPointers[i] = &columns[i]
 		}
 
-		if err = rows.Scan(columnPointers...); nil != err {
+		if err = rows.Scan(columnPointers...); err != nil {
 			return
 		}
 
@@ -76,7 +76,7 @@ func queryAssetContentRawStmt(stmt string, limit int) (ret []map[string]interfac
 
 func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetContent) {
 	parsedStmt, err := sqlparser.Parse(stmt)
-	if nil != err {
+	if err != nil {
 		return selectAssetContentsRawStmt(stmt, limit)
 	}
 
@@ -122,7 +122,7 @@ func SelectAssetContentsRawStmt(stmt string, page, limit int) (ret []*AssetConte
 	stmt = strings.ReplaceAll(stmt, "\\\\*", "\\*")
 	stmt = strings.ReplaceAll(stmt, "from dual", "")
 	rows, err := queryAssetContent(stmt)
-	if nil != err {
+	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}
@@ -144,7 +144,7 @@ func SelectAssetContentsRawStmtNoParse(stmt string, limit int) (ret []*AssetCont
 
 func selectAssetContentsRawStmt(stmt string, limit int) (ret []*AssetContent) {
 	rows, err := queryAssetContent(stmt)
-	if nil != err {
+	if err != nil {
 		if strings.Contains(err.Error(), "syntax error") {
 			return
 		}
@@ -172,7 +172,7 @@ func selectAssetContentsRawStmt(stmt string, limit int) (ret []*AssetContent) {
 
 func scanAssetContentRows(rows *sql.Rows) (ret *AssetContent) {
 	var ac AssetContent
-	if err := rows.Scan(&ac.ID, &ac.Name, &ac.Ext, &ac.Path, &ac.Size, &ac.Updated, &ac.Content); nil != err {
+	if err := rows.Scan(&ac.ID, &ac.Name, &ac.Ext, &ac.Path, &ac.Size, &ac.Updated, &ac.Content); err != nil {
 		logging.LogErrorf("query scan field failed: %s\n%s", err, logging.ShortStack())
 		return
 	}

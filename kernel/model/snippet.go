@@ -36,7 +36,7 @@ func RemoveSnippet(id string) (ret *conf.Snippet, err error) {
 	defer snippetsLock.Unlock()
 
 	snippets, err := loadSnippets()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -73,12 +73,12 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 	}
 
 	data, err := filelock.ReadFile(confPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load js snippets failed: %s", err)
 		return
 	}
 
-	if err = gulu.JSON.UnmarshalJSON(data, &ret); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal js snippets failed: %s", err)
 		return
 	}
@@ -98,12 +98,12 @@ func loadSnippets() (ret []*conf.Snippet, err error) {
 
 func writeSnippetsConf(snippets []*conf.Snippet) (err error) {
 	data, err := gulu.JSON.MarshalIndentJSON(snippets, "", "  ")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("marshal snippets failed: %s", err)
 		return
 	}
 
-	if err = os.MkdirAll(util.SnippetsPath, 0755); nil != err {
+	if err = os.MkdirAll(util.SnippetsPath, 0755); err != nil {
 		return
 	}
 

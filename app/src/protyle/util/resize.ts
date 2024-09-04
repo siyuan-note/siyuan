@@ -29,11 +29,8 @@ export const resize = (protyle: IProtyle) => {
                 });
             }
             protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((item: HTMLElement) => {
-                const block = item.parentElement;
-                if ((window.siyuan.config.editor.codeSyntaxHighlightLineNum && block.parentElement.getAttribute("lineNumber") !== "false" &&
-                        window.siyuan.config.editor.codeLineWrap && block.parentElement.getAttribute("linewrap") !== "false") ||
-                    (block.parentElement.getAttribute("lineNumber") === "true" && block.parentElement.getAttribute("linewrap") === "true")) {
-                    lineNumberRender(block);
+                if ((item.nextElementSibling as HTMLElement).style.wordBreak === "break-word") {
+                    lineNumberRender(item.parentElement);
                 }
             });
             // 保持光标位置不变 https://ld246.com/article/1673704873983/comment/1673765814595#comments

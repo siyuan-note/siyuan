@@ -44,7 +44,7 @@ func Templates() (templates []*Template) {
 	}
 
 	stageIndex, err := getStageIndex("templates")
-	if nil != err {
+	if err != nil {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
@@ -131,7 +131,7 @@ func InstalledTemplates() (ret []*Template) {
 	}
 
 	templateDirs, err := os.ReadDir(templatesPath)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("read templates folder failed: %s", err)
 		return
 	}
@@ -190,7 +190,7 @@ func InstalledTemplates() (ret []*Template) {
 func InstallTemplate(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash, true, systemID)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	return installPackage(data, installPath, repoURLHash)
@@ -206,7 +206,7 @@ func filterLegacyTemplates(templates []*Template) (ret []*Template) {
 		if "" != theme.Updated {
 			updated := theme.Updated[:len("2006-01-02T15:04:05")]
 			t, err := time.Parse("2006-01-02T15:04:05", updated)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("convert update time [%s] failed: %s", updated, err)
 				continue
 			}

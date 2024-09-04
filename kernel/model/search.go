@@ -56,7 +56,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	blockMap := map[string]bool{}
 	var invalidBlockIDs []string
 	notebooks, err := ListNotebooks()
-	if nil != err {
+	if err != nil {
 		return
 	}
 	luteEngine := util.NewLute()
@@ -469,7 +469,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	cachedTrees := map[string]*parse.Tree{}
 
 	historyDir, err := getHistoryDir(HistoryOpReplace, time.Now())
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
@@ -499,7 +499,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		}
 
 		historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
-		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
@@ -773,7 +773,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 				unlink.Unlink()
 			}
 
-			if err = writeTreeUpsertQueue(tree); nil != err {
+			if err = writeTreeUpsertQueue(tree); err != nil {
 				return
 			}
 		}
@@ -1069,7 +1069,7 @@ func buildOrderBy(query string, method, orderBy int) string {
 
 func buildTypeFilter(types map[string]bool) string {
 	s := conf.NewSearch()
-	if err := copier.Copy(s, Conf.Search); nil != err {
+	if err := copier.Copy(s, Conf.Search); err != nil {
 		logging.LogErrorf("copy search conf failed: %s", err)
 	}
 	if nil != types {
@@ -1141,7 +1141,7 @@ func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matc
 
 func removeLimitClause(stmt string) string {
 	parsedStmt, err := sqlparser.Parse(stmt)
-	if nil != err {
+	if err != nil {
 		return stmt
 	}
 
@@ -1728,17 +1728,17 @@ func getSearchIgnoreLines() (ret []string) {
 
 	searchIgnorePath := filepath.Join(util.DataDir, ".siyuan", "searchignore")
 	err := os.MkdirAll(filepath.Dir(searchIgnorePath), 0755)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	if !gulu.File.IsExist(searchIgnorePath) {
-		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); nil != err {
+		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); err != nil {
 			logging.LogErrorf("create searchignore [%s] failed: %s", searchIgnorePath, err)
 			return
 		}
 	}
 	data, err := os.ReadFile(searchIgnorePath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read searchignore [%s] failed: %s", searchIgnorePath, err)
 		return
 	}
@@ -1778,17 +1778,17 @@ func getRefSearchIgnoreLines() (ret []string) {
 
 	searchIgnorePath := filepath.Join(util.DataDir, ".siyuan", "refsearchignore")
 	err := os.MkdirAll(filepath.Dir(searchIgnorePath), 0755)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	if !gulu.File.IsExist(searchIgnorePath) {
-		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); nil != err {
+		if err = gulu.File.WriteFileSafer(searchIgnorePath, nil, 0644); err != nil {
 			logging.LogErrorf("create refsearchignore [%s] failed: %s", searchIgnorePath, err)
 			return
 		}
 	}
 	data, err := os.ReadFile(searchIgnorePath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read refsearchignore [%s] failed: %s", searchIgnorePath, err)
 		return
 	}

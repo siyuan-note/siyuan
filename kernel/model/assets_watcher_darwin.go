@@ -76,13 +76,13 @@ func watchAssets() {
 		}
 	}()
 
-	if err := assetsWatcher.Add(assetsDir); nil != err {
+	if err := assetsWatcher.Add(assetsDir); err != nil {
 		logging.LogErrorf("add assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}
 
 	//logging.LogInfof("added file watcher [%s]", assetsDir)
-	if err := assetsWatcher.Start(10 * time.Second); nil != err {
+	if err := assetsWatcher.Start(10 * time.Second); err != nil {
 		logging.LogErrorf("start assets watcher for folder [%s] failed: %s", assetsDir, err)
 		return
 	}

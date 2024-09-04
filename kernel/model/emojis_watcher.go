@@ -48,7 +48,7 @@ func watchEmojis() {
 	}
 
 	var err error
-	if emojisWatcher, err = fsnotify.NewWatcher(); nil != err {
+	if emojisWatcher, err = fsnotify.NewWatcher(); err != nil {
 		logging.LogErrorf("add emojis watcher for folder [%s] failed: %s", emojisDir, err)
 		return
 	}

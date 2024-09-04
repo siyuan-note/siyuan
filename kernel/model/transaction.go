@@ -155,7 +155,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 	//defer pprof.StopCPUProfile()
 
 	var err error
-	if err = tx.begin(); nil != err {
+	if err = tx.begin(); err != nil {
 		if strings.Contains(err.Error(), "database is closed") {
 			return
 		}
@@ -302,7 +302,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -335,7 +335,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 		var targetTree *parse.Tree
 		targetTree, err = tx.loadTree(targetPreviousID)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("load tree [%s] failed: %s", targetPreviousID, err)
 			return &TxErr{code: TxErrCodeBlockNotFound, id: targetPreviousID}
 		}
@@ -374,11 +374,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 		refreshUpdated(srcNode)
 		refreshUpdated(srcTree.Root)
-		if err = tx.writeTree(srcTree); nil != err {
+		if err = tx.writeTree(srcTree); err != nil {
 			return
 		}
 		if !isSameTree {
-			if err = tx.writeTree(targetTree); nil != err {
+			if err = tx.writeTree(targetTree); err != nil {
 				return
 			}
 		}
@@ -390,7 +390,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	targetTree, err := tx.loadTree(targetParentID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", targetParentID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetParentID}
 	}
@@ -452,11 +452,11 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 
 	refreshUpdated(srcNode)
 	refreshUpdated(srcTree.Root)
-	if err = tx.writeTree(srcTree); nil != err {
+	if err = tx.writeTree(srcTree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 	if !isSameTree {
-		if err = tx.writeTree(targetTree); nil != err {
+		if err = tx.writeTree(targetTree); err != nil {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 		}
 	}
@@ -482,7 +482,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 		return
 	}
 	tree, err := tx.loadTree(block.ID)
-	if nil != err {
+	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
@@ -542,7 +542,7 @@ func (tx *Transaction) doPrependInsert(operation *Operation) (ret *TxErr) {
 	}
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
@@ -566,7 +566,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 		return
 	}
 	tree, err := tx.loadTree(block.ID)
-	if nil != err {
+	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
@@ -631,7 +631,7 @@ func (tx *Transaction) doAppendInsert(operation *Operation) (ret *TxErr) {
 
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
@@ -650,7 +650,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	srcTree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -688,7 +688,7 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 	}
 
 	targetTree, err := tx.loadTree(targetRootID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", targetRootID, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: targetRootID}
 	}
@@ -719,12 +719,12 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 		srcEmptyList.Unlink()
 	}
 
-	if err = tx.writeTree(srcTree); nil != err {
+	if err = tx.writeTree(srcTree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 
 	if !isSameTree {
-		if err = tx.writeTree(targetTree); nil != err {
+		if err = tx.writeTree(targetTree); err != nil {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 		}
 	}
@@ -737,7 +737,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			// move 以后这里会空，算作正常情况
 			return
@@ -768,7 +768,7 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	treenode.RemoveBlockTree(node.ID)
 
 	delete(tx.nodes, node.ID)
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return
 	}
 
@@ -824,7 +824,7 @@ func syncDelete2Block(node *ast.Node) {
 		}
 
 		attrView, err := av.ParseAttributeView(avID)
-		if nil != err {
+		if err != nil {
 			return ast.WalkContinue
 		}
 
@@ -919,7 +919,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	}
 
 	tree, err := tx.loadTree(block.ID)
-	if nil != err {
+	if err != nil {
 		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
 		logging.LogErrorf(msg)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
@@ -953,7 +953,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 				// 只有全局 assets 才移动到相对 assets
 				targetP := filepath.Join(assets, filepath.Base(assetPath))
-				if e = filelock.Rename(assetPath, targetP); nil != err {
+				if e = filelock.Rename(assetPath, targetP); err != nil {
 					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
 				}
@@ -1048,7 +1048,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
@@ -1078,7 +1078,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -1151,7 +1151,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	createdUpdated(updatedNode)
 
 	tx.nodes[updatedNode.ID] = updatedNode
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 
@@ -1185,7 +1185,7 @@ func upsertAvBlockRel(node *ast.Node) {
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		if errors.Is(err, ErrBlockNotFound) {
 			logging.LogWarnf("not found block [%s]", id)
 			return
@@ -1204,7 +1204,7 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 	node.SetIALAttr("updated", operation.Data.(string))
 	createdUpdated(node)
 	tx.nodes[node.ID] = node
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 	}
 	return
@@ -1221,7 +1221,7 @@ func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	id := operation.ID
 	tree, err := tx.loadTree(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", id, err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -1233,7 +1233,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 	}
 
 	attrs := map[string]string{}
-	if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &attrs); nil != err {
+	if err = gulu.JSON.UnmarshalJSON([]byte(operation.Data.(string)), &attrs); err != nil {
 		logging.LogErrorf("unmarshal attrs failed: %s", err)
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
@@ -1259,7 +1259,7 @@ func (tx *Transaction) doSetAttrs(operation *Operation) (ret *TxErr) {
 		}
 	}
 
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return
 	}
 	cache.PutBlockIAL(id, parse.IAL2Map(node.KramdownIAL))
@@ -1366,7 +1366,7 @@ func (tx *Transaction) begin() (err error) {
 
 func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
-		if err = writeTreeUpsertQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
 
@@ -1404,7 +1404,7 @@ func (tx *Transaction) loadTree(id string) (ret *parse.Tree, err error) {
 	}
 
 	ret, err = filesys.LoadTree(box, p, tx.luteEngine)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	tx.trees[rootID] = ret
@@ -1466,7 +1466,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		if !ok {
 			var err error
 			refTree, err = LoadTreeByBlockID(refTreeID)
-			if nil != err {
+			if err != nil {
 				continue
 			}
 		}

@@ -91,7 +91,7 @@ func GetCurrentWorkspacePath() string {
 
 func GetAssetAbsPath(asset string) (ret string) {
 	ret, err := model.GetAssetAbsPath(asset)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get asset [%s] abs path failed: %s", asset, err)
 		ret = asset
 	}

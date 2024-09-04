@@ -83,7 +83,7 @@ func RemoveIndexes(paths []string) {
 func listSyFiles(dir string) (ret []string) {
 	dirPath := filepath.Join(util.DataDir, dir)
 	err := filelock.Walk(dirPath, func(path string, d fs.FileInfo, err error) error {
-		if nil != err {
+		if err != nil {
 			logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
 			return err
 		}
@@ -98,7 +98,7 @@ func listSyFiles(dir string) (ret []string) {
 		}
 		return nil
 	})
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
 	}
 	return
@@ -169,7 +169,7 @@ func index(boxID string) {
 		i := treeCount
 		lock.Unlock()
 		tree, err := filesys.LoadTree(box.ID, file.path, luteEngine)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read box [%s] tree [%s] failed: %s", box.ID, file.path, err)
 			return
 		}

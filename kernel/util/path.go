@@ -57,7 +57,7 @@ func GetLocalIPs() (ret []string) {
 
 	ret = []string{}
 	addrs, err := net.InterfaceAddrs()
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("get interface addresses failed: %s", err)
 		return
 	}

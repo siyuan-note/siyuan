@@ -37,14 +37,14 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 	btPathsMap := map[string]bool{}
 	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
 	rows, err := db.Query(sqlStmt, boxID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("query block tree failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var path string
-		if err = rows.Scan(&path); nil != err {
+		if err = rows.Scan(&path); err != nil {
 			logging.LogErrorf("scan block tree failed: %s", err)
 			return
 		}
@@ -63,7 +63,7 @@ func getRedundantPaths(boxID string, paths []string) (ret []string) {
 func removeBlockTreesByPath(boxID, path string) {
 	sqlStmt := "DELETE FROM blocktrees WHERE box_id = ? AND path = ?"
 	_, err := db.Exec(sqlStmt, boxID, path)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("delete block tree failed: %s", err)
 	}
 }
@@ -77,14 +77,14 @@ func GetNotExistPaths(boxID string, paths []string) (ret []string) {
 	btPathsMap := map[string]bool{}
 	sqlStmt := "SELECT path FROM blocktrees WHERE box_id = ?"
 	rows, err := db.Query(sqlStmt, boxID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("query block tree failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var path string
-		if err = rows.Scan(&path); nil != err {
+		if err = rows.Scan(&path); err != nil {
 			logging.LogErrorf("scan block tree failed: %s", err)
 			return
 		}
@@ -104,14 +104,14 @@ func GetRootUpdated() (ret map[string]string) {
 	ret = map[string]string{}
 	sqlStmt := "SELECT root_id, updated FROM blocktrees WHERE root_id = id AND type = 'd'"
 	rows, err := db.Query(sqlStmt)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("query block tree failed: %s", err)
 		return
 	}
 	defer rows.Close()
 	for rows.Next() {
 		var rootID, updated string
-		if err = rows.Scan(&rootID, &updated); nil != err {
+		if err = rows.Scan(&rootID, &updated); err != nil {
 			logging.LogErrorf("scan block tree failed: %s", err)
 			return
 		}

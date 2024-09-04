@@ -97,7 +97,7 @@ func ChangeHistoryTick(minutes int) {
 func ClearWorkspaceHistory() (err error) {
 	historyDir := util.HistoryDir
 	if gulu.File.IsDir(historyDir) {
-		if err = os.RemoveAll(historyDir); nil != err {
+		if err = os.RemoveAll(historyDir); err != nil {
 			logging.LogErrorf("remove workspace history dir [%s] failed: %s", historyDir, err)
 			return
 		}
@@ -109,7 +109,7 @@ func ClearWorkspaceHistory() (err error) {
 	// 以下部分是老版本的清理逻辑，暂时保留
 
 	notebooks, err := ListNotebooks()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -120,7 +120,7 @@ func ClearWorkspaceHistory() (err error) {
 			continue
 		}
 
-		if err = os.RemoveAll(historyDir); nil != err {
+		if err = os.RemoveAll(historyDir); err != nil {
 			logging.LogErrorf("remove notebook history dir [%s] failed: %s", historyDir, err)
 			return
 		}
@@ -129,7 +129,7 @@ func ClearWorkspaceHistory() (err error) {
 
 	historyDir = filepath.Join(util.DataDir, ".siyuan", "history")
 	if gulu.File.IsDir(historyDir) {
-		if err = os.RemoveAll(historyDir); nil != err {
+		if err = os.RemoveAll(historyDir); err != nil {
 			logging.LogErrorf("remove data history dir [%s] failed: %s", historyDir, err)
 			return
 		}
@@ -137,7 +137,7 @@ func ClearWorkspaceHistory() (err error) {
 	}
 	historyDir = filepath.Join(util.DataDir, "assets", ".siyuan", "history")
 	if gulu.File.IsDir(historyDir) {
-		if err = os.RemoveAll(historyDir); nil != err {
+		if err = os.RemoveAll(historyDir); err != nil {
 			logging.LogErrorf("remove assets history dir [%s] failed: %s", historyDir, err)
 			return
 		}
@@ -153,7 +153,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 	}
 
 	data, err := filelock.ReadFile(historyPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", historyPath, err)
 		return
 	}
@@ -161,7 +161,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 
 	luteEngine := NewLute()
 	historyTree, err := filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
 		os.RemoveAll(historyPath)
 		return
@@ -234,17 +234,17 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
-		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); nil != err {
+		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
 			return
 		}
 	}
 
 	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = filelock.CopyNewtimes(srcPath, destPath); nil != err {
+	if err = filelock.CopyNewtimes(srcPath, destPath); err != nil {
 		return
 	}
 
@@ -317,7 +317,7 @@ func getRollbackDockPath(boxID, historyPath string) (destPath, parentHPath strin
 		// 父路径如果是文档，则恢复到父路径下
 		parentDir := strings.TrimSuffix(parentWorkingDoc.Path, ".sy")
 		parentDir = filepath.Join(util.DataDir, boxID, parentDir)
-		if err = os.MkdirAll(parentDir, 0755); nil != err {
+		if err = os.MkdirAll(parentDir, 0755); err != nil {
 			return
 		}
 		destPath = filepath.Join(parentDir, baseName)
@@ -339,7 +339,7 @@ func RollbackAssetsHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, "assets", filepath.Base(historyPath))
 
-	if err = filelock.CopyNewtimes(from, to); nil != err {
+	if err = filelock.CopyNewtimes(from, to); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
@@ -357,7 +357,7 @@ func RollbackNotebookHistory(historyPath string) (err error) {
 	from := historyPath
 	to := filepath.Join(util.DataDir, filepath.Base(historyPath))
 
-	if err = filelock.CopyNewtimes(from, to); nil != err {
+	if err = filelock.CopyNewtimes(from, to); err != nil {
 		logging.LogErrorf("copy file [%s] to [%s] failed: %s", from, to, err)
 		return
 	}
@@ -395,14 +395,14 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 	countStmt := strings.ReplaceAll(stmt, "SELECT DISTINCT created", "SELECT COUNT(DISTINCT created) AS total")
 	stmt += " ORDER BY created DESC LIMIT " + strconv.Itoa(fileHistoryPageSize) + " OFFSET " + strconv.Itoa(offset)
 	result, err := sql.QueryHistory(stmt)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	for _, row := range result {
 		ret = append(ret, row["created"].(string))
 	}
 	result, err = sql.QueryHistory(countStmt)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	if 1 > len(ret) {
@@ -472,7 +472,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 	}
 
 	historyNotebookConfs, err := filepath.Glob(historyDir + "/*-delete/*/.siyuan/conf.json")
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", historyDir, err)
 		return
 	}
@@ -495,7 +495,7 @@ func GetNotebookHistory() (ret []*History, err error) {
 			logging.LogErrorf("read notebook conf [%s] failed: %s", historyNotebookConf, readErr)
 			continue
 		}
-		if err = json.Unmarshal(data, &c); nil != err {
+		if err = json.Unmarshal(data, &c); err != nil {
 			logging.LogErrorf("parse notebook conf [%s] failed: %s", historyNotebookConf, err)
 			continue
 		}
@@ -523,19 +523,19 @@ func generateAssetsHistory() {
 	}
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
 	for _, file := range assets {
 		historyPath := filepath.Join(historyDir, "assets", strings.TrimPrefix(file, filepath.Join(util.DataDir, "assets")))
-		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
 
-		if err = filelock.Copy(file, historyPath); nil != err {
+		if err = filelock.Copy(file, historyPath); err != nil {
 			logging.LogErrorf("copy file [%s] to [%s] failed: %s", file, historyPath, err)
 			return
 		}
@@ -552,7 +552,7 @@ func (box *Box) generateDocHistory0() {
 	}
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
@@ -560,7 +560,7 @@ func (box *Box) generateDocHistory0() {
 	luteEngine := util.NewLute()
 	for _, file := range files {
 		historyPath := filepath.Join(historyDir, box.ID, strings.TrimPrefix(file, filepath.Join(util.DataDir, box.ID)))
-		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+		if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 			logging.LogErrorf("generate history failed: %s", err)
 			return
 		}
@@ -605,7 +605,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	}
 
 	dirs, err := os.ReadDir(historyDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("clear history [%s] failed: %s", historyDir, err)
 		return
 	}
@@ -615,7 +615,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 	var removes []string
 	for _, dir := range dirs {
 		dirInfo, err := dir.Info()
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read history dir [%s] failed: %s", dir.Name(), err)
 			continue
 		}
@@ -624,7 +624,7 @@ func clearOutdatedHistoryDir(historyDir string) {
 		}
 	}
 	for _, dir := range removes {
-		if err = os.RemoveAll(dir); nil != err {
+		if err = os.RemoveAll(dir); err != nil {
 			logging.LogWarnf("remove history dir [%s] failed: %s", dir, err)
 			continue
 		}
@@ -692,13 +692,13 @@ const (
 
 func generateOpTypeHistory(tree *parse.Tree, opType string) {
 	historyDir, err := GetHistoryDir(opType)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get history dir failed: %s", err)
 		return
 	}
 
 	historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
-	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); nil != err {
+	if err = os.MkdirAll(filepath.Dir(historyPath), 0755); err != nil {
 		logging.LogErrorf("generate history failed: %s", err)
 		return
 	}
@@ -723,7 +723,7 @@ func GetHistoryDir(suffix string) (ret string, err error) {
 
 func getHistoryDir(suffix string, t time.Time) (ret string, err error) {
 	ret = filepath.Join(util.HistoryDir, t.Format("2006-01-02-150405")+"-"+suffix)
-	if err = os.MkdirAll(ret, 0755); nil != err {
+	if err = os.MkdirAll(ret, 0755); err != nil {
 		logging.LogErrorf("make history dir failed: %s", err)
 		return
 	}
@@ -737,7 +737,7 @@ func ReindexHistory() {
 
 func fullReindexHistory() {
 	historyDirs, err := os.ReadDir(util.HistoryDir)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read history dir [%s] failed: %s", util.HistoryDir, err)
 		return
 	}

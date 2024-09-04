@@ -295,13 +295,17 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
         element.querySelectorAll(".b3-text-field--text").forEach((item: HTMLInputElement) => {
             item.addEventListener("change", () => {
                 let value;
-                if (["url", "text", "email", "phone"].includes(item.parentElement.dataset.type)) {
+                const type = item.parentElement.dataset.type;
+                if (["url", "text", "email", "phone"].includes(type)) {
                     value = {
-                        [item.parentElement.dataset.type]: {
+                        [type]: {
                             content: item.value
                         }
                     };
-                } else if (item.parentElement.dataset.type === "number") {
+                    if (type !== "text") {
+                        item.parentElement.querySelector("a").setAttribute("href", (type === "url" ? "" : (type === "email" ? "mailto:" : "tel:")) + item.value);
+                    }
+                } else if (type === "number") {
                     if ("undefined" === item.value || !item.value) {
                         value = {
                             number: {
@@ -333,7 +337,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
     });
 };
 
-const openEdit = (protyle: IProtyle, element:HTMLElement, event: MouseEvent) => {
+const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) => {
     let target = event.target as HTMLElement;
     const blockElement = hasClosestBlock(target);
     if (!blockElement) {

@@ -503,7 +503,7 @@ func PurgeCloud() (err error) {
 	deletedObjects := stat.Objects
 	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(232), deletedIndexes, deletedObjects, deletedSize)
-	util.PushMsg(msg, 5000)
+	util.PushMsg(msg, 7000)
 	return
 }
 
@@ -526,7 +526,7 @@ func PurgeRepo() (err error) {
 	deletedObjects := stat.Objects
 	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
-	util.PushMsg(msg, 5000)
+	util.PushMsg(msg, 7000)
 	return
 }
 

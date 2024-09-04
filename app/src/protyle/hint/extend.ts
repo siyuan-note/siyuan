@@ -43,9 +43,9 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "{{",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSQL"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.blockEmbed}</span><span class="b3-list-item__meta">{{</span></div>`,
     }, {
-        filter: ["ai chat"],
+        filter: ["人工智能", "ai", "rgzn"],
         value: Constants.ZWSP + 5,
-        html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">AI Chat</span></div>',
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconSparkles"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.aiWriting}</span></div>`,
     }, {
         filter: ["数据库", "视图", "shujuku", "shitu", "sjk", "st", "database", "view", "db"],
         value: '<div data-type="NodeAttributeView" data-av-type="table"></div>',

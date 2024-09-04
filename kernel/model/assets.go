@@ -486,13 +486,15 @@ func uploadAssets2Cloud(assetPaths []string, bizType string) (count int, err err
 }
 
 func RemoveUnusedAssets() (ret []string) {
+	ret = []string{}
+	var size int64
+
 	msgId := util.PushMsg(Conf.Language(100), 30*1000)
 	defer func() {
-		util.PushClearMsg(msgId)
-		util.PushMsg(Conf.Language(99), 3000)
+		msg := fmt.Sprintf(Conf.Language(91), len(ret), humanize.BytesCustomCeil(uint64(size), 2))
+		util.PushUpdateMsg(msgId, msg, 5000)
 	}()
 
-	ret = []string{}
 	unusedAssets := UnusedAssets()
 
 	historyDir, err := GetHistoryDir(HistoryOpClean)
@@ -522,6 +524,11 @@ func RemoveUnusedAssets() (ret []string) {
 
 	for _, unusedAsset := range unusedAssets {
 		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
+			info, statErr := os.Stat(unusedAsset)
+			if statErr == nil {
+				size += info.Size()
+			}
+
 			if err := filelock.Remove(unusedAsset); err != nil {
 				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
 			}

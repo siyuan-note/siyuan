@@ -270,8 +270,8 @@
       display: none;
       position: absolute;
       right: 5px;
-      font-size: 85%;
-      top: 5.5px;
+      font-size: 85% !important;
+      top: 7.5px;
     }
 
     .popover__block {

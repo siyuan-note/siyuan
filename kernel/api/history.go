@@ -127,9 +127,7 @@ func clearWorkspaceHistory(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
-	util.PushClearMsg(msgId)
-	time.Sleep(500 * time.Millisecond)
-	util.PushMsg(model.Conf.Language(99), 1000*5)
+	util.PushUpdateMsg(msgId, model.Conf.Language(99), 1000*5)
 }
 
 func getDocHistoryContent(c *gin.Context) {

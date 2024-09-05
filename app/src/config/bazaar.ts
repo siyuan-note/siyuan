@@ -673,6 +673,7 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarPlugin";
                         }
                         fetchPost(url, {
+                            keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                             repoURL: dataObj.repoURL,
                             packageName: dataObj.name,
                             repoHash: dataObj.repoHash,
@@ -752,6 +753,7 @@ export const bazaar = {
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
                             fetchPost(url, {
+                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                                 repoURL: dataObj.repoURL,
                                 packageName: dataObj.name,
                                 repoHash: dataObj.repoHash,
@@ -819,6 +821,7 @@ export const bazaar = {
                         confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
                             fetchPost(url, {
                                 packageName,
+                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(bazaarType, app);

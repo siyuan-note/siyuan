@@ -813,7 +813,7 @@ func syncDelete2AvBlock(node *ast.Node) {
 	go func() {
 		time.Sleep(256 * time.Millisecond)
 		for _, avID := range changedAvIDs {
-			util.PushReloadAttrView(avID)
+			ReloadAttrView(avID)
 		}
 	}()
 }
@@ -1074,7 +1074,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			"id":         insertedNode.ID,
 			"isDetached": false,
 		}}, avID, "", previousID, false)
-		util.PushReloadAttrView(avID)
+		ReloadAttrView(avID)
 	}
 
 	operation.ID = insertedNode.ID
@@ -1187,7 +1187,7 @@ func upsertAvBlockRel(node *ast.Node) {
 	})
 	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
 	for _, avID := range avIDs {
-		util.PushReloadAttrView(avID)
+		ReloadAttrView(avID)
 	}
 }
 
@@ -1533,7 +1533,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 			if changedAv {
 				av.SaveAttributeView(attrView)
-				util.PushReloadAttrView(avID)
+				ReloadAttrView(avID)
 			}
 		}
 	}

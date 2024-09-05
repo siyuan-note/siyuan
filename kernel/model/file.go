@@ -1113,7 +1113,7 @@ func DuplicateDoc(tree *parse.Tree) {
 				"id":         n.ID,
 				"isDetached": false,
 			}}, avID, "", "", false)
-			util.PushReloadAttrView(avID)
+			ReloadAttrView(avID)
 		}
 		return ast.WalkContinue
 	})

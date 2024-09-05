@@ -239,7 +239,7 @@ func refreshSubscriptionExpirationRemind() {
 		now := time.Now().UnixMilli()
 		if now >= expired { // 已经过期
 			if now-expired <= 1000*60*60*24*2 { // 2 天内提醒 https://github.com/siyuan-note/siyuan/issues/7816
-				task.AppendTaskWithDelay(task.PushMsg, 30*time.Second, util.PushErrMsg, Conf.Language(128), 0)
+				task.AppendAsyncTaskWithDelay(task.PushMsg, 30*time.Second, util.PushErrMsg, Conf.Language(128), 0)
 			}
 			return
 		}
@@ -250,8 +250,7 @@ func refreshSubscriptionExpirationRemind() {
 		}
 
 		if 0 < remains && expireDay > remains {
-			util.WaitForUILoaded()
-			task.AppendTaskWithDelay(task.PushMsg, 7*time.Second, util.PushErrMsg, fmt.Sprintf(Conf.Language(127), remains), 0)
+			task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushErrMsg, fmt.Sprintf(Conf.Language(127), remains), 0)
 			return
 		}
 	}

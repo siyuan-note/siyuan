@@ -470,9 +470,9 @@ func InitConf() {
 		go func() {
 			util.WaitForUILoaded()
 			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
-				task.AppendTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
+				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
 			} else {
-				task.AppendTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)
+				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)
 			}
 		}()
 	}

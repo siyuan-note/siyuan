@@ -105,10 +105,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 	}
 
 	util.ReloadUI()
-	go func() {
-		util.WaitForUILoaded()
-		task.AppendTaskWithDelay(task.PushMsg, 1*time.Second, util.PushMsg, fmt.Sprintf(Conf.language(237), total), 5000)
-	}()
+	task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, fmt.Sprintf(Conf.language(237), total), 5000)
 	return
 }
 

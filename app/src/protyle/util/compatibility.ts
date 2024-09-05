@@ -11,7 +11,7 @@ export const openByMobile = (uri: string) => {
             new URL(uri);
             window.location.href = uri;
         } catch (e) {
-            window.location.href = 'http://' + uri;
+            window.location.href = "http://" + uri;
         }
     } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);

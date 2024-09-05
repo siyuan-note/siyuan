@@ -178,6 +178,10 @@ func StatusJob() {
 			}
 		}
 
+		if "" == action {
+			continue
+		}
+
 		item := map[string]interface{}{"action": action}
 		items = append(items, item)
 	}

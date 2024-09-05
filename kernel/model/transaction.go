@@ -810,12 +810,9 @@ func syncDelete2AvBlock(node *ast.Node) {
 	changedAvIDs = append(changedAvIDs, avIDs...)
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 
-	go func() {
-		time.Sleep(256 * time.Millisecond)
-		for _, avID := range changedAvIDs {
-			ReloadAttrView(avID)
-		}
-	}()
+	for _, avID := range changedAvIDs {
+		ReloadAttrView(avID)
+	}
 }
 
 func syncDelete2Block(node *ast.Node) (changedAvIDs []string) {

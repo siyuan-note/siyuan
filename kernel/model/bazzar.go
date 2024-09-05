@@ -19,6 +19,7 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"path"
 	"path/filepath"
 	"strings"
@@ -104,13 +105,10 @@ func BatchUpdateBazaarPackages(frontend string) {
 	}
 
 	util.ReloadUI()
-
 	go func() {
 		util.WaitForUILoaded()
-		time.Sleep(500)
-		util.PushMsg(fmt.Sprintf(Conf.language(237), total), 5000)
+		task.AppendTaskWithDelay(task.PushMsg, 1*time.Second, util.PushMsg, fmt.Sprintf(Conf.language(237), total), 5000)
 	}()
-
 	return
 }
 

@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -468,11 +469,10 @@ func InitConf() {
 		// 上次未正常完成数据索引
 		go func() {
 			util.WaitForUILoaded()
-			time.Sleep(2 * time.Second)
 			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
-				util.PushMsg(Conf.language(245), 15000)
+				task.AppendTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
 			} else {
-				util.PushMsg(Conf.language(244), 15000)
+				task.AppendTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)
 			}
 		}()
 	}

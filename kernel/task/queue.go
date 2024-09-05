@@ -131,6 +131,7 @@ const (
 	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
 	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
 	ReloadAttributeView             = "task.reload.attributeView"          // 重新加载属性视图
+	PushMsg                         = "task.push.msg"                      // 推送消息
 )
 
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。
@@ -144,6 +145,7 @@ var uniqueActions = []string{
 	HistoryDatabaseIndexCommit,
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
+	ReloadAttributeView,
 }
 
 func ContainIndexTask() bool {

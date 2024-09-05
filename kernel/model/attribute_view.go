@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"slices"
@@ -92,7 +93,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	ReloadAttrView(avID)
 	return
 }
 
@@ -1044,7 +1045,7 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 	for _, avID := range changedAvIDs {
-		util.PushReloadAttrView(avID)
+		ReloadAttrView(avID)
 	}
 	return
 }
@@ -1313,7 +1314,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 	}
 	if !isSameAv {
 		err = av.SaveAttributeView(destAv)
-		util.PushReloadAttrView(destAv.ID)
+		ReloadAttrView(destAv.ID)
 	}
 
 	av.UpsertAvBackRel(srcAv.ID, destAv.ID)
@@ -2147,7 +2148,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
-		util.PushReloadAttrView(relatedAvID)
+		ReloadAttrView(relatedAvID)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2804,7 +2805,7 @@ func RemoveAttributeViewKey(avID, keyID string) (err error) {
 
 				if destAv != attrView {
 					av.SaveAttributeView(destAv)
-					util.PushReloadAttrView(destAv.ID)
+					ReloadAttrView(destAv.ID)
 				}
 
 				if !destAvRelSrcAv {
@@ -2940,7 +2941,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 	for _, avID := range changedAvIDs {
-		util.PushReloadAttrView(avID)
+		ReloadAttrView(avID)
 	}
 	return
 }
@@ -3182,7 +3183,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
-		util.PushReloadAttrView(relatedAvID)
+		ReloadAttrView(relatedAvID)
 	}
 
 	if err = av.SaveAttributeView(attrView); err != nil {
@@ -3578,4 +3579,13 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
 		av.BatchUpsertBlockRel(avNodes)
 	}
+}
+
+func ReloadAttrView(avID string) {
+	task.AppendTaskWithDelay(task.ReloadAttributeView, 200*time.Millisecond, pushReloadAttrView, avID)
+
+}
+
+func pushReloadAttrView(avID string) {
+	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 }

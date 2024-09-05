@@ -212,7 +212,7 @@ func addAttributeViewBlocks(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func removeAttributeViewBlocks(c *gin.Context) {
@@ -237,7 +237,7 @@ func removeAttributeViewBlocks(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func addAttributeViewKey(c *gin.Context) {
@@ -263,7 +263,7 @@ func addAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func removeAttributeViewKey(c *gin.Context) {
@@ -285,7 +285,7 @@ func removeAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func sortAttributeViewViewKey(c *gin.Context) {
@@ -312,7 +312,7 @@ func sortAttributeViewViewKey(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func sortAttributeViewKey(c *gin.Context) {
@@ -335,7 +335,7 @@ func sortAttributeViewKey(c *gin.Context) {
 		return
 	}
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }
 
 func getAttributeViewFilterSort(c *gin.Context) {
@@ -609,5 +609,5 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	blockAttributeViewKeys := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, cellID, value)
 	ret.Data = blockAttributeViewKeys
 
-	util.PushReloadAttrView(avID)
+	model.ReloadAttrView(avID)
 }

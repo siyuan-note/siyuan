@@ -312,7 +312,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 		// 刷新属性视图
 		for _, avID := range avIDs {
-			util.PushReloadAttrView(avID)
+			ReloadAttrView(avID)
 		}
 	}()
 	return nil

@@ -40,6 +40,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -1488,7 +1489,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 				}
 
 				// 推送动态锚文本节点刷新
-				util.PushReloadBlock(refTreeID, n.ID)
+				task.AppendAsyncTaskWithDelay(task.ReloadProtyleBlock, 200*time.Millisecond, util.PushReloadBlock, refTreeID, n.ID)
 				return ast.WalkContinue
 			}
 			return ast.WalkContinue

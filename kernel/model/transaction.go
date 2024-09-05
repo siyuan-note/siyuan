@@ -1434,24 +1434,22 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 // refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
-	// 1. 更新引用的动态锚文本
+	// 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	for _, updateNode := range updatedDefNodes {
 		refs := sql.GetRefsCacheByDefID(updateNode.ID)
 		if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
-			updateNode.Parent.IsContainerBlock() && (updateNode == treenode.FirstLeafBlock(updateNode.Parent)) { // 容器块下第一个子块
-			var parentRefs []*sql.Ref
-			if ast.NodeListItem == updateNode.Parent.Type { // 引用列表块时动态锚文本未跟随定义块内容变动 https://github.com/siyuan-note/siyuan/issues/4393
-				parentRefs = sql.GetRefsCacheByDefID(updateNode.Parent.Parent.ID)
-				updatedDefNodes[updateNode.Parent.ID] = updateNode.Parent
-				updatedDefNodes[updateNode.Parent.Parent.ID] = updateNode.Parent.Parent
-			} else {
-				parentRefs = sql.GetRefsCacheByDefID(updateNode.Parent.ID)
-				updatedDefNodes[updateNode.Parent.ID] = updateNode.Parent
-			}
+			updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) { // 容器块下第一个叶子块
+			// 如果是容器块下第一个叶子块，则需要向上查找引用
+			for parent := updateNode.Parent; nil != parent; parent = parent.Parent {
+				if ast.NodeDocument == parent.Type {
+					break
+				}
 
-			if 0 < len(parentRefs) {
-				refs = append(refs, parentRefs...)
+				parentRefs := sql.GetRefsCacheByDefID(parent.ID)
+				if 0 < len(parentRefs) {
+					refs = append(refs, parentRefs...)
+				}
 			}
 		}
 		for _, ref := range refs {
@@ -1488,6 +1486,9 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 				if !refTreeChanged && changed {
 					refTreeChanged = true
 				}
+
+				// 推送动态锚文本节点刷新
+				util.PushReloadBlock(refTreeID, n.ID)
 				return ast.WalkContinue
 			}
 			return ast.WalkContinue
@@ -1498,7 +1499,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		}
 	}
 
-	// 2. 更新属性视图主键内容
+	// 更新属性视图主键内容
 	for _, updatedDefNode := range updatedDefNodes {
 		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
 		if "" == avs {
@@ -1535,7 +1536,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		}
 	}
 
-	// 3. 保存变更
+	// 保存变更
 	for _, tree := range changedRefTree {
 		indexWriteTreeUpsertQueue(tree)
 	}

@@ -284,6 +284,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	sql.RemoveTreeQueue(id)
 	sql.IndexTreeQueue(tree)
 	util.PushReloadFiletree()
+	util.PushProtyleReload(id)
 	util.PushMsg(Conf.Language(102), 3000)
 
 	IncSync()

@@ -374,6 +374,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		}
 
 		refreshUpdated(srcNode)
+		tx.nodes[srcNode.ID] = srcNode
 		refreshUpdated(srcTree.Root)
 		if err = tx.writeTree(srcTree); err != nil {
 			return
@@ -452,6 +453,7 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	refreshUpdated(srcNode)
+	tx.nodes[srcNode.ID] = srcNode
 	refreshUpdated(srcTree.Root)
 	if err = tx.writeTree(srcTree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
@@ -1435,24 +1437,10 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 // refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
-	// 更新引用的动态锚文本
+	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	for _, updateNode := range updatedDefNodes {
-		refs := sql.GetRefsCacheByDefID(updateNode.ID)
-		if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
-			updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) { // 容器块下第一个叶子块
-			// 如果是容器块下第一个叶子块，则需要向上查找引用
-			for parent := updateNode.Parent; nil != parent; parent = parent.Parent {
-				if ast.NodeDocument == parent.Type {
-					break
-				}
-
-				parentRefs := sql.GetRefsCacheByDefID(parent.ID)
-				if 0 < len(parentRefs) {
-					refs = append(refs, parentRefs...)
-				}
-			}
-		}
+		refs := getRefsCacheByDefNode(updateNode)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -1497,10 +1485,11 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 		if refTreeChanged {
 			changedRefTree[refTreeID] = refTree
+			sql.UpdateRefsTreeQueue(refTree)
 		}
 	}
 
-	// 更新属性视图主键内容
+	// 2. 更新属性视图主键内容
 	for _, updatedDefNode := range updatedDefNodes {
 		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
 		if "" == avs {
@@ -1537,10 +1526,29 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 		}
 	}
 
-	// 保存变更
+	// 3. 保存变更
 	for _, tree := range changedRefTree {
 		indexWriteTreeUpsertQueue(tree)
 	}
+}
+
+func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref) {
+	ret = sql.GetRefsCacheByDefID(updateNode.ID)
+	if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
+		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) { // 容器块下第一个叶子块
+		// 如果是容器块下第一个叶子块，则需要向上查找引用
+		for parent := updateNode.Parent; nil != parent; parent = parent.Parent {
+			if ast.NodeDocument == parent.Type {
+				break
+			}
+
+			parentRefs := sql.GetRefsCacheByDefID(parent.ID)
+			if 0 < len(parentRefs) {
+				ret = append(ret, parentRefs...)
+			}
+		}
+	}
+	return
 }
 
 var updateRefTextRenameDocs = map[string]*parse.Tree{}

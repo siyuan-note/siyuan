@@ -256,10 +256,7 @@ func resetDuplicateBlocksOnFileSys() {
 
 	if needRefreshUI {
 		util.ReloadUI()
-		go func() {
-			util.WaitForUILoaded()
-			task.AppendTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, Conf.Language(190), 5000)
-		}()
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, Conf.Language(190), 5000)
 	}
 }
 

@@ -477,7 +477,7 @@ func ResetRepo() (err error) {
 	Conf.Save()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
-	task.AppendTaskWithDelay(task.ReloadUI, 2*time.Second, util.ReloadUI)
+	task.AppendAsyncTaskWithDelay(task.ReloadUI, 2*time.Second, util.ReloadUI)
 	return
 }
 
@@ -656,10 +656,7 @@ func checkoutRepo(id string) {
 	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
 
 	if syncEnabled {
-		func() {
-			time.Sleep(5 * time.Second)
-			util.PushMsg(Conf.Language(134), 0)
-		}()
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
 	}
 	return
 }

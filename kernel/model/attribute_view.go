@@ -3582,7 +3582,7 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 }
 
 func ReloadAttrView(avID string) {
-	task.AppendTaskWithDelay(task.ReloadAttributeView, 200*time.Millisecond, pushReloadAttrView, avID)
+	task.AppendAsyncTaskWithDelay(task.ReloadAttributeView, 200*time.Millisecond, pushReloadAttrView, avID)
 
 }
 

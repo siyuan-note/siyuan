@@ -45,8 +45,13 @@ var UseSingleLineSave = true
 var IsUILoaded = false
 
 func WaitForUILoaded() {
+	start := time.Now()
 	for !IsUILoaded {
 		time.Sleep(200 * time.Millisecond)
+		if time.Since(start) > 30*time.Second {
+			logging.LogErrorf("wait for ui loaded timeout")
+			break
+		}
 	}
 }
 

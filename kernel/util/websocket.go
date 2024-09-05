@@ -153,23 +153,27 @@ func PushTxErr(msg string, code int, data interface{}) {
 }
 
 func PushUpdateMsg(msgId string, msg string, timeout int) {
+	WaitForUILoaded()
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushMsg(msg string, timeout int) (msgId string) {
+	WaitForUILoaded()
 	msgId = gulu.Rand.String(7)
 	BroadcastByType("main", "msg", 0, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushErrMsg(msg string, timeout int) (msgId string) {
+	WaitForUILoaded()
 	msgId = gulu.Rand.String(7)
 	BroadcastByType("main", "msg", -1, msg, map[string]interface{}{"id": msgId, "closeTimeout": timeout})
 	return
 }
 
 func PushStatusBar(msg string) {
+	WaitForUILoaded()
 	msg += " (" + time.Now().Format("2006-01-02 15:04:05") + ")"
 	BroadcastByType("main", "statusbar", 0, msg, nil)
 }

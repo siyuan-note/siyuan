@@ -790,10 +790,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	WaitForWritingFiles()
 	if 0 < len(ids) {
-		go func() {
-			time.Sleep(time.Millisecond * 500)
-			util.ReloadUI()
-		}()
+		task.AppendAsyncTaskWithDelay(task.ReloadUI, 500*time.Millisecond, util.ReloadUI)
 	}
 	return
 }

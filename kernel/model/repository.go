@@ -656,7 +656,7 @@ func checkoutRepo(id string) {
 	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
 
 	if syncEnabled {
-		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushMsg, Conf.Language(134), 0)
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
 	}
 	return
 }

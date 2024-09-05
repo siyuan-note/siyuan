@@ -205,8 +205,8 @@ func StatusJob() {
 }
 
 func ExecTaskJob() {
-	syncTask, asyncTasks := popTasks()
-	if nil == syncTask && 1 > len(asyncTasks) {
+	task := popTask()
+	if nil == task {
 		return
 	}
 
@@ -214,39 +214,69 @@ func ExecTaskJob() {
 		return
 	}
 
-	for _, asyncTask := range asyncTasks {
-		go func() {
-			execTask(asyncTask)
-		}()
-	}
-
-	if nil != syncTask {
-		execTask(syncTask)
-	}
+	execTask(task)
 }
 
-func popTasks() (syncTask *Task, asyncTasks []*Task) {
+func popTask() (ret *Task) {
 	queueLock.Lock()
 	defer queueLock.Unlock()
 
-	if 0 == len(taskQueue) {
+	if 1 > len(taskQueue) {
 		return
 	}
 
-	var popedIndexes []int
 	for i, task := range taskQueue {
 		if time.Since(task.Created) <= task.Delay {
 			continue
 		}
 
+		if !task.Async {
+			ret = task
+			taskQueue = append(taskQueue[:i], taskQueue[i+1:]...)
+			return
+		}
+	}
+	return
+}
+
+func ExecAsyncTaskJob() {
+	tasks := popAsyncTasks()
+	if 1 > len(tasks) {
+		return
+	}
+
+	if util.IsExiting.Load() {
+		return
+	}
+
+	for _, task := range tasks {
+		go func() {
+			execTask(task)
+		}()
+	}
+}
+
+func popAsyncTasks() (ret []*Task) {
+	queueLock.Lock()
+	defer queueLock.Unlock()
+
+	if 1 > len(taskQueue) {
+		return
+	}
+
+	var popedIndexes []int
+	for i, task := range taskQueue {
+		if !task.Async {
+			continue
+		}
+
+		if time.Since(task.Created) <= task.Delay {
+			continue
+		}
+
 		if task.Async {
-			asyncTasks = append(asyncTasks, task)
+			ret = append(ret, task)
 			popedIndexes = append(popedIndexes, i)
-		} else {
-			if nil == syncTask {
-				syncTask = task
-				popedIndexes = append(popedIndexes, i)
-			}
 		}
 	}
 
@@ -301,7 +331,7 @@ func execTask(task *Task) {
 	case <-ctx.Done():
 		logging.LogWarnf("task [%s] timeout", task.Action)
 	case <-ch:
-		logging.LogInfof("task [%s] done", task.Action)
+		//logging.LogInfof("task [%s] done", task.Action)
 	}
 
 	if !task.Async {

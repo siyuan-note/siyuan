@@ -288,6 +288,12 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	util.PushMsg(Conf.Language(102), 3000)
 
 	IncSync()
+
+	// 刷新属性视图
+	for _, avID := range avIDs {
+		ReloadAttrView(avID)
+	}
+
 	go func() {
 		sql.WaitForWritingDatabase()
 
@@ -310,11 +316,6 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			"refText": refText,
 		}
 		util.PushEvent(evt)
-
-		// 刷新属性视图
-		for _, avID := range avIDs {
-			ReloadAttrView(avID)
-		}
 	}()
 	return nil
 }

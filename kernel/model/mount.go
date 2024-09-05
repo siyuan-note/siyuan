@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -218,10 +219,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			Conf.Save()
 		}
 
+		task.AppendTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(52), 7000)
 		go func() {
-			time.Sleep(time.Second * 3)
-			util.PushErrMsg(Conf.Language(52), 7000)
-
 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
 			time.Sleep(time.Second * 10)
 			CheckUpdate(true)

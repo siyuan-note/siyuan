@@ -33,6 +33,7 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -238,8 +239,7 @@ func refreshSubscriptionExpirationRemind() {
 		now := time.Now().UnixMilli()
 		if now >= expired { // 已经过期
 			if now-expired <= 1000*60*60*24*2 { // 2 天内提醒 https://github.com/siyuan-note/siyuan/issues/7816
-				time.Sleep(time.Second * 30)
-				util.PushErrMsg(Conf.Language(128), 0)
+				task.AppendTaskWithDelay(task.PushMsg, 30*time.Second, util.PushErrMsg, Conf.Language(128), 0)
 			}
 			return
 		}
@@ -251,8 +251,7 @@ func refreshSubscriptionExpirationRemind() {
 
 		if 0 < remains && expireDay > remains {
 			util.WaitForUILoaded()
-			time.Sleep(time.Second * 7)
-			util.PushErrMsg(fmt.Sprintf(Conf.Language(127), remains), 0)
+			task.AppendTaskWithDelay(task.PushMsg, 7*time.Second, util.PushErrMsg, fmt.Sprintf(Conf.Language(127), remains), 0)
 			return
 		}
 	}

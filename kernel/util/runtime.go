@@ -49,7 +49,7 @@ func WaitForUILoaded() {
 	for !IsUILoaded {
 		time.Sleep(200 * time.Millisecond)
 		if time.Since(start) > 30*time.Second {
-			logging.LogErrorf("wait for ui loaded timeout")
+			logging.LogErrorf("wait for ui loaded timeout: %s", logging.ShortStack())
 			break
 		}
 	}

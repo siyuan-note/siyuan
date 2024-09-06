@@ -151,11 +151,10 @@ export const setRefDynamicText = (data: {
     "rootID": string
 }) => {
     getAllEditor().forEach(item => {
-        if (item.protyle.block.rootID === data.rootID) {
-           const refElement = item.protyle.wysiwyg.element.querySelector(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`);
-           if (refElement) {
-               refElement.innerHTML = data.refText;
-           }
+        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        const refElement = item.protyle.wysiwyg.element.querySelector(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`);
+        if (refElement) {
+            refElement.innerHTML = data.refText;
         }
     })
 }

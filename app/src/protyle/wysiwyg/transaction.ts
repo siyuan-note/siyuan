@@ -109,8 +109,6 @@ const promiseTransaction = () => {
                 }
                 // 当前编辑器中更新嵌入块
                 updateEmbed(protyle, operation);
-                // 更新块引用
-                updateRef(protyle, operation.id);
                 return;
             }
             if (operation.action === "delete" || operation.action === "append") {
@@ -230,8 +228,6 @@ const promiseTransaction = () => {
                 //         blockRender(protyle, item);
                 //     }
                 // });
-                // 更新块引用
-                updateRef(protyle, operation.id);
             }
         });
 
@@ -328,8 +324,6 @@ const updateBlock = (updateElements: Element[], protyle: IProtyle, operation: IO
     blockRender(protyle, updateElements.length === 1 ? updateElements[0] : protyle.wysiwyg.element);
     // 更新 ws 嵌入块
     updateEmbed(protyle, operation);
-    // 更新 ws 块引用
-    updateRef(protyle, operation.id);
 };
 
 // 用于推送和撤销
@@ -433,8 +427,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         } else { // updateElements 没有包含嵌入块，在悬浮层编辑嵌入块时，嵌入块也需要更新
             // 更新 ws 嵌入块
             updateEmbed(protyle, operation);
-            // 更新 ws 块引用
-            updateRef(protyle, operation.id);
         }
         return;
     }
@@ -691,8 +683,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 wbrElement.remove();
             }
         });
-        // 更新 ws 块引用
-        updateRef(protyle, operation.id);
         return;
     }
     if (operation.action === "append") {

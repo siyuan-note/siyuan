@@ -5,8 +5,9 @@ import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
-import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getAllModels} from "../layout/getAll";
 /// #endif
+import {getAllEditor} from "../layout/getAll";
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
@@ -543,17 +544,8 @@ const putEmojis = (protyle: IProtyle) => {
 export const reloadEmoji = () => {
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];
-        /// #if MOBILE
-        if (window.siyuan.mobile.editor) {
-            putEmojis(window.siyuan.mobile.editor.protyle);
-        }
-        if (window.siyuan.mobile.popEditor) {
-            putEmojis(window.siyuan.mobile.popEditor.protyle);
-        }
-        /// #else
         getAllEditor().forEach(item => {
             putEmojis(item.protyle);
         });
-        /// #endif
     });
 };

@@ -1,8 +1,4 @@
-/// #if MOBILE
-import {getCurrentEditor} from "../../mobile/editor";
-/// #else
 import {getAllEditor} from "../../layout/getAll";
-/// #endif
 
 // "gutter", "toolbar", "select", "hint", "util", "dialog", "gutterOnly"
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
@@ -64,16 +60,6 @@ export const hideAllElements = (types: string[]) => {
         });
     }
     if (types.includes("util")) {
-        /// #if MOBILE
-        const editor = getCurrentEditor();
-        if (editor) {
-            editor.protyle.toolbar.subElement.classList.add("fn__none");
-            if (editor.protyle.toolbar.subElementCloseCB) {
-                editor.protyle.toolbar.subElementCloseCB();
-                editor.protyle.toolbar.subElementCloseCB = undefined;
-            }
-        }
-        /// #else
         getAllEditor().forEach(item => {
             if (item.protyle.toolbar) {
                 item.protyle.toolbar.subElement.classList.add("fn__none");
@@ -83,7 +69,6 @@ export const hideAllElements = (types: string[]) => {
                 }
             }
         });
-        /// #endif
     }
     if (types.includes("pdfutil")) {
         document.querySelectorAll(".pdf__util").forEach(item => {

@@ -2,7 +2,9 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
+import {getAllModels} from "../layout/getAll";
 /// #endif
+import {getAllEditor} from "../layout/getAll";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -14,7 +16,6 @@ import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
 import {redirectToCheckAuth, setNoteBook} from "../util/pathName";
-import {getAllEditor, getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -145,6 +146,21 @@ export const reloadSync = (
 };
 
 export const setRefDynamicText = (data: {
+    "blockID": string,
+    "defBlockID": string,
+    "refText": string,
+    "rootID": string
+}) => {
+    getAllEditor().forEach(item => {
+        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        const refElement = item.protyle.wysiwyg.element.querySelector(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`);
+        if (refElement) {
+            refElement.innerHTML = data.refText;
+        }
+    })
+}
+
+export const setDefRefCount = (data: {
     "blockID": string,
     "defBlockID": string,
     "refText": string,

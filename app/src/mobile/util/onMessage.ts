@@ -3,7 +3,7 @@ import {
     processSync,
     progressLoading,
     progressStatus,
-    reloadSync,
+    reloadSync, setDefRefCount, setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
 import {Constants} from "../../constants";
@@ -14,6 +14,12 @@ import {reloadEmoji} from "../../emoji";
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "setDefRefCount":
+                setDefRefCount(data.data);
+                break;
+            case "setRefDynamicText":
+                setRefDynamicText(data.data);
+                break;
             case "reloadPlugin":
                 reloadPlugin(app, data.data);
                 break;

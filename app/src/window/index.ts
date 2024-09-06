@@ -11,7 +11,7 @@ import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
-    progressStatus, reloadSync,
+    progressStatus, reloadSync, setDefRefCount, setRefDynamicText,
     setTitle,
     transactionError
 } from "../dialog/processSystem";
@@ -50,6 +50,12 @@ class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "setDefRefCount":
+                                setDefRefCount(data.data);
+                                break;
+                            case "setRefDynamicText":
+                                setRefDynamicText(data.data);
+                                break;
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);
                                 break;

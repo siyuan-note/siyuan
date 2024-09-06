@@ -3,6 +3,8 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 import {getAllModels} from "../layout/getAll";
+import {getDockByType} from "../layout/tabUtil";
+import {Files} from "../layout/dock/Files";
 /// #endif
 import {getAllEditor} from "../layout/getAll";
 /// #if !BROWSER
@@ -164,8 +166,26 @@ export const setDefRefCount = (data: {
     "refCount": number,
     "rootRefCount": number,
     "rootID": string
+    refIds: string[]
 }) => {
     getAllEditor().forEach(item => {
+        if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
+            const attrElement = item.protyle.title.element.querySelector(".protyle-attr")
+            const countElement = attrElement.querySelector('.popover__block')
+            if (countElement) {
+                if (data.refCount === 0) {
+                    countElement.remove()
+                } else {
+                    countElement.textContent = data.refCount.toString();
+                    // TODO
+                    countElement.setAttribute("data-id", data.refIds.toString())
+                }
+            } else if (data.refCount > 0) {
+                // TODO
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIds.toString()}" style="">${data.refCount}</div>`)
+            }
+            return;
+        }
         // 不能对比 rootId，否则潜入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
             const countElement = item.querySelector('.protyle-attr--refcount')
@@ -185,6 +205,23 @@ export const setDefRefCount = (data: {
             }
         });
     })
+
+    /// #if MOBILE
+    /// #else
+    const liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`)
+    if (liElement) {
+        const counterElement = liElement.querySelector(".counter")
+        if (counterElement) {
+            if (data.rootRefCount === 0) {
+                counterElement.remove()
+            } else {
+                counterElement.textContent = data.rootRefCount.toString()
+            }
+        } else if (data.rootRefCount > 0) {
+            liElement.insertAdjacentHTML("beforeend", `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${data.rootRefCount}</span>`)
+        }
+    }
+    /// #endif
 }
 
 export const lockScreen = (app: App) => {

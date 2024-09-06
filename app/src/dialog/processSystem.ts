@@ -153,25 +153,37 @@ export const setRefDynamicText = (data: {
 }) => {
     getAllEditor().forEach(item => {
         // 不能对比 rootId，否则潜入块中的锚文本无法更新
-        const refElement = item.protyle.wysiwyg.element.querySelector(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`);
-        if (refElement) {
-            refElement.innerHTML = data.refText;
-        }
+        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
+            item.innerHTML = data.refText;
+        });
     })
 }
 
 export const setDefRefCount = (data: {
     "blockID": string,
-    "defBlockID": string,
-    "refText": string,
+    "refCount": number,
+    "rootRefCount": number,
     "rootID": string
 }) => {
     getAllEditor().forEach(item => {
         // 不能对比 rootId，否则潜入块中的锚文本无法更新
-        const refElement = item.protyle.wysiwyg.element.querySelector(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`);
-        if (refElement) {
-            refElement.innerHTML = data.refText;
-        }
+        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
+            const countElement = item.querySelector('.protyle-attr--refcount')
+            if (countElement) {
+                if (data.refCount === 0) {
+                    countElement.remove()
+                } else {
+                    countElement.textContent = data.refCount.toString();
+                }
+            } else if (data.refCount > 0) {
+                const attrElement = item.querySelector('.protyle-attr')
+                if (attrElement.childElementCount > 0) {
+                    attrElement.lastElementChild.insertAdjacentHTML("afterend", `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>`)
+                } else {
+                    attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`
+                }
+            }
+        });
     })
 }
 

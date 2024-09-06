@@ -1231,9 +1231,18 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 func pushSetDefRefCount(rootID, blockID string) {
 	sql.WaitForWritingDatabase()
 
-	refCounts := sql.QueryRefCount([]string{blockID})
+	bt := treenode.GetBlockTree(blockID)
+	if nil == bt {
+		return
+	}
+
+	refCounts := sql.QueryRootChildrenRefCount(bt.RootID)
 	refCount := refCounts[blockID]
-	util.PushSetDefRefCount(rootID, blockID, refCount)
+	var rootRefCount int
+	for _, count := range refCounts {
+		rootRefCount += count
+	}
+	util.PushSetDefRefCount(rootID, blockID, refCount, rootRefCount)
 }
 
 func upsertAvBlockRel(node *ast.Node) {

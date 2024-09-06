@@ -1439,8 +1439,9 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
 	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
+	var changedParentNodes []*ast.Node
 	for _, updateNode := range updatedDefNodes {
-		refs := getRefsCacheByDefNode(updateNode)
+		refs, parentNodes := getRefsCacheByDefNode(updateNode)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -1449,6 +1450,14 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			} else {
 				refIDs.Add(ref.BlockID)
 			}
+		}
+		if 0 < len(parentNodes) {
+			changedParentNodes = append(changedParentNodes, parentNodes...)
+		}
+	}
+	if 0 < len(changedParentNodes) {
+		for _, parent := range changedParentNodes {
+			updatedDefNodes[parent.ID] = parent
 		}
 	}
 
@@ -1471,13 +1480,15 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 			}
 
 			if n.IsBlock() && refNodeIDs.Contains(n.ID) {
-				changed := updateRefText(n, updatedDefNodes)
+				changed, changedDefNodes := updateRefText(n, updatedDefNodes)
 				if !refTreeChanged && changed {
 					refTreeChanged = true
 				}
 
 				// 推送动态锚文本节点刷新
-				task.AppendAsyncTaskWithDelay(task.ReloadProtyleBlock, 200*time.Millisecond, util.PushReloadBlock, refTreeID, n.ID)
+				for _, defNode := range changedDefNodes {
+					task.AppendAsyncTaskWithDelay(task.ReloadProtyleBlock, 200*time.Millisecond, util.PushReloadBlock, refTreeID, n.ID, defNode.id, defNode.refText)
+				}
 				return ast.WalkContinue
 			}
 			return ast.WalkContinue
@@ -1532,7 +1543,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 	}
 }
 
-func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref) {
+func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentNodes []*ast.Node) {
 	ret = sql.GetRefsCacheByDefID(updateNode.ID)
 	if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
 		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) { // 容器块下第一个叶子块
@@ -1545,6 +1556,7 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref) {
 			parentRefs := sql.GetRefsCacheByDefID(parent.ID)
 			if 0 < len(parentRefs) {
 				ret = append(ret, parentRefs...)
+				changedParentNodes = append(changedParentNodes, parent)
 			}
 		}
 	}
@@ -1575,7 +1587,12 @@ func flushUpdateRefTextRenameDoc() {
 	updateRefTextRenameDocs = map[string]*parse.Tree{}
 }
 
-func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool) {
+type changedDefNode struct {
+	id      string
+	refText string
+}
+
+func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
 	ast.Walk(refNode, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1597,6 +1614,7 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		refText := getNodeRefText(defNode)
 		treenode.SetDynamicBlockRefText(n, refText)
 		changed = true
+		defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText})
 		return ast.WalkContinue
 	})
 	return

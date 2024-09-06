@@ -258,8 +258,8 @@ func PushProtyleReload(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }
 
-func PushReloadBlock(rootID, blockID string) {
-	BroadcastByType("main", "reloadBlock", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID})
+func PushReloadBlock(rootID, blockID, defBlockID, refText string) {
+	BroadcastByType("protyle", "reloadBlock", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "defBlockID": defBlockID, "refText": refText})
 }
 
 func PushProtyleLoading(rootID, msg string) {

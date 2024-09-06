@@ -172,6 +172,8 @@ export const setDefRefCount = (data: {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
             const attrElement = item.protyle.title.element.querySelector(".protyle-attr")
             const countElement = attrElement.querySelector('.popover__block')
+            // TODO
+            data.refIds = ["1", "2"]
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove()
@@ -206,9 +208,12 @@ export const setDefRefCount = (data: {
         });
     })
 
+    let liElement;
     /// #if MOBILE
+    liElement = window.siyuan.mobile.files.element.querySelector(`li[data-node-id="${data.rootID}"]`)
     /// #else
-    const liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`)
+    liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`)
+    /// #endif
     if (liElement) {
         const counterElement = liElement.querySelector(".counter")
         if (counterElement) {
@@ -221,7 +226,6 @@ export const setDefRefCount = (data: {
             liElement.insertAdjacentHTML("beforeend", `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${data.rootRefCount}</span>`)
         }
     }
-    /// #endif
 }
 
 export const lockScreen = (app: App) => {

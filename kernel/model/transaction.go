@@ -756,6 +756,20 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 		return nil // move 以后的情况，列表项移动导致的状态异常 https://github.com/siyuan-note/insider/issues/961
 	}
 
+	// 收集引用的定义块 ID
+	refDefIDs := getRefDefIDs(node)
+	// 推送定义节点引用计数
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+	for _, defID := range refDefIDs {
+		defTree, _ := LoadTreeByBlockID(defID)
+		if nil != defTree {
+			defNode := treenode.GetNodeInTree(defTree, defID)
+			if nil != defNode {
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+			}
+		}
+	}
+
 	parent := node.Parent
 	if nil != node.Next && ast.NodeKramdownBlockIAL == node.Next.Type && bytes.Contains(node.Next.Tokens, []byte(node.ID)) {
 		// 列表块撤销状态异常 https://github.com/siyuan-note/siyuan/issues/3985
@@ -1061,6 +1075,20 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
 	}
 
+	// 收集引用的定义块 ID
+	refDefIDs := getRefDefIDs(insertedNode)
+	// 推送定义节点引用计数
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+	for _, defID := range refDefIDs {
+		defTree, _ := LoadTreeByBlockID(defID)
+		if nil != defTree {
+			defNode := treenode.GetNodeInTree(defTree, defID)
+			if nil != defNode {
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+			}
+		}
+	}
+
 	upsertAvBlockRel(insertedNode)
 
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
@@ -1106,6 +1134,9 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		return &TxErr{msg: ErrBlockNotFound.Error(), id: id}
 	}
 
+	// 收集引用的定义块 ID
+	refDefIDs := getRefDefIDs(oldNode)
+
 	var unlinks []*ast.Node
 	ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -1128,13 +1159,26 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 						n.TextMarkTextContent = dRefText.(string)
 					}
 				}
+
+				refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
 			}
 		}
 		return ast.WalkContinue
 	})
-
 	for _, n := range unlinks {
 		n.Unlink()
+	}
+
+	// 推送定义节点引用计数
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+	for _, defID := range refDefIDs {
+		defTree, _ := LoadTreeByBlockID(defID)
+		if nil != defTree {
+			defNode := treenode.GetNodeInTree(defTree, defID)
+			if nil != defNode {
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+			}
+		}
 	}
 
 	updatedNode := subTree.Root.FirstChild
@@ -1168,6 +1212,28 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	checkUpsertInUserGuide(tree)
 	return
+}
+
+func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+			refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
+func pushSetDefRefCount(rootID, blockID string) {
+	sql.WaitForWritingDatabase()
+
+	refCounts := sql.QueryRefCount([]string{blockID})
+	refCount := refCounts[blockID]
+	util.PushSetDefRefCount(rootID, blockID, refCount)
 }
 
 func upsertAvBlockRel(node *ast.Node) {

@@ -16,6 +16,7 @@ export class Setting {
         confirmCallback?: () => void
     }) {
         this.confirmCallback = options.confirmCallback;
+        this.destroyCallback = options.destroyCallback;
         this.width = options.width || (isMobile() ? "92vw" : "768px");
         this.height = options.height || "80vh";
     }

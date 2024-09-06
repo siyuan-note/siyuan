@@ -134,7 +134,8 @@ const (
 	AssetContentDatabaseIndexCommit = "task.asset.database.index.commit"   // 资源文件数据库索引提交
 	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
 	ReloadAttributeView             = "task.reload.attributeView"          // 重新加载属性视图
-	ReloadProtyleBlock              = "task.reload.protyleBlock"           // 重载编辑器内容块
+	SetRefDynamicText               = "task.ref.setDynamicText"            // 设置引用的动态锚文本
+	SetDefRefCount                  = "task.def.setRefCount"               // 设置定义的引用计数
 	PushMsg                         = "task.push.msg"                      // 推送消息
 )
 
@@ -150,7 +151,8 @@ var uniqueActions = []string{
 	AssetContentDatabaseIndexFull,
 	AssetContentDatabaseIndexCommit,
 	ReloadAttributeView,
-	ReloadProtyleBlock,
+	SetRefDynamicText,
+	SetDefRefCount,
 }
 
 func ContainIndexTask() bool {

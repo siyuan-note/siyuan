@@ -1487,7 +1487,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 				// 推送动态锚文本节点刷新
 				for _, defNode := range changedDefNodes {
-					task.AppendAsyncTaskWithDelay(task.ReloadProtyleBlock, 200*time.Millisecond, util.PushReloadBlock, refTreeID, n.ID, defNode.id, defNode.refText)
+					task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
 				}
 				return ast.WalkContinue
 			}

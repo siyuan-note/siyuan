@@ -259,11 +259,11 @@ func PushProtyleReload(rootID string) {
 }
 
 func PushSetRefDynamicText(rootID, blockID, defBlockID, refText string) {
-	BroadcastByType("protyle", "setRefDynamicText", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "defBlockID": defBlockID, "refText": refText})
+	BroadcastByType("main", "setRefDynamicText", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "defBlockID": defBlockID, "refText": refText})
 }
 
 func PushSetDefRefCount(rootID, blockID string, refCount int) {
-	BroadcastByType("protyle", "setDefRefCount", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "refCount": refCount})
+	BroadcastByType("main", "setDefRefCount", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "refCount": refCount})
 }
 
 func PushProtyleLoading(rootID, msg string) {

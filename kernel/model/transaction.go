@@ -22,6 +22,7 @@ import (
 	"fmt"
 	"path/filepath"
 	"runtime/debug"
+	"slices"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -1135,7 +1136,8 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	}
 
 	// 收集引用的定义块 ID
-	refDefIDs := getRefDefIDs(oldNode)
+	oldDefIDs := getRefDefIDs(oldNode)
+	var newDefIDs []string
 
 	var unlinks []*ast.Node
 	ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1160,7 +1162,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 					}
 				}
 
-				refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
+				newDefIDs = append(newDefIDs, n.TextMarkBlockRefID)
 			}
 		}
 		return ast.WalkContinue
@@ -1169,14 +1171,20 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		n.Unlink()
 	}
 
-	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
-	for _, defID := range refDefIDs {
-		defTree, _ := LoadTreeByBlockID(defID)
-		if nil != defTree {
-			defNode := treenode.GetNodeInTree(defTree, defID)
-			if nil != defNode {
-				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+	oldDefIDs = gulu.Str.RemoveDuplicatedElem(oldDefIDs)
+	newDefIDs = gulu.Str.RemoveDuplicatedElem(newDefIDs)
+	refDefIDs := oldDefIDs
+
+	if !slices.Equal(oldDefIDs, newDefIDs) { // 如果引用发生了变化，则推送定义节点引用计数
+		refDefIDs = append(refDefIDs, newDefIDs...)
+		refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+		for _, defID := range refDefIDs {
+			defTree, _ := LoadTreeByBlockID(defID)
+			if nil != defTree {
+				defNode := treenode.GetNodeInTree(defTree, defID)
+				if nil != defNode {
+					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+				}
 			}
 		}
 	}

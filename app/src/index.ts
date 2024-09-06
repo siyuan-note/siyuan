@@ -17,7 +17,7 @@ import {
     progressBackgroundTask,
     progressLoading,
     progressStatus,
-    reloadSync,
+    reloadSync, setRefDynamicText,
     setTitle,
     transactionError
 } from "./dialog/processSystem";
@@ -61,6 +61,9 @@ export class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "setRefDynamicText":
+                                setRefDynamicText(data.data);
+                                break;
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);
                                 break;

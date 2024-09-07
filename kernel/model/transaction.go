@@ -1250,7 +1250,8 @@ func pushSetDefRefCount(rootID, blockID string) {
 	for _, count := range refCounts {
 		rootRefCount += count
 	}
-	util.PushSetDefRefCount(rootID, blockID, refCount, rootRefCount)
+	refIDs, _, _ := GetBlockRefIDs(blockID)
+	util.PushSetDefRefCount(rootID, blockID, refIDs, refCount, rootRefCount)
 }
 
 func upsertAvBlockRel(node *ast.Node) {

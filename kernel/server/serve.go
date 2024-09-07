@@ -619,7 +619,7 @@ func serveWebDAV(ginServer *gin.Engine) {
 	ginGroup.Match(WebDavMethod, "/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {
-			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "PROPPATCH":
+			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
 				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
 				return
 			}

@@ -2,11 +2,10 @@ import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
-import {getAllModels} from "../layout/getAll";
+/// #endif
+import {getAllEditor, getAllModels} from "../layout/getAll";
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
-/// #endif
-import {getAllEditor} from "../layout/getAll";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -166,25 +165,21 @@ export const setDefRefCount = (data: {
     "refCount": number,
     "rootRefCount": number,
     "rootID": string
-    refIds: string[]
+    refIDs: string[]
 }) => {
     getAllEditor().forEach(item => {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
             const attrElement = item.protyle.title.element.querySelector(".protyle-attr")
             const countElement = attrElement.querySelector('.popover__block')
-            // TODO
-            data.refIds = ["1", "2"]
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove()
                 } else {
                     countElement.textContent = data.refCount.toString();
-                    // TODO
-                    countElement.setAttribute("data-id", data.refIds.toString())
+                    countElement.setAttribute("data-id", data.refIDs.toString())
                 }
             } else if (data.refCount > 0) {
-                // TODO
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIds.toString()}" style="">${data.refCount}</div>`)
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`)
             }
             return;
         }

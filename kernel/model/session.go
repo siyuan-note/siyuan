@@ -250,6 +250,16 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
+	// 通过 BasicAuth (header: Authorization)
+	if username, password, ok := c.Request.BasicAuth(); ok {
+		// 使用访问授权码作为密码
+		if util.WorkspaceName == username && Conf.AccessAuthCode == password {
+			c.Set(RoleContextKey, RoleAdministrator)
+			c.Next()
+			return
+		}
+	}
+
 	// 通过 API token (header: Authorization)
 	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
 		var token string
@@ -289,7 +299,15 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	if "/check-auth" == c.Request.URL.Path { // 跳过访问授权页
+	// WebDAV BasicAuth Authenticate
+	if strings.HasPrefix(c.Request.RequestURI, "/webdav") {
+		c.Header("WWW-Authenticate", "Basic realm=Authorization Required")
+		c.AbortWithStatus(http.StatusUnauthorized)
+		return
+	}
+
+	// 跳过访问授权页
+	if "/check-auth" == c.Request.URL.Path {
 		c.Next()
 		return
 	}

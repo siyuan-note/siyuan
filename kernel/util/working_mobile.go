@@ -141,6 +141,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 
+	WorkspaceName = filepath.Base(WorkspaceDir)
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
 	RepoDir = filepath.Join(WorkspaceDir, "repo")

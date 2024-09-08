@@ -66,7 +66,7 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	}
 
 	var children []*ast.Node
-	for c := listItemNode.FirstChild.Next; nil != c; c = c.Next {
+	for c := listItemNode.FirstChild; nil != c; c = c.Next {
 		children = append(children, c)
 	}
 	if 1 > len(children) {

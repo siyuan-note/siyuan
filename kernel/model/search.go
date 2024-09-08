@@ -519,6 +519,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	}
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
+	luteEngine := util.NewLute()
+	var reloadTreeIDs []string
 	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -534,6 +536,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		if nil == node {
 			continue
 		}
+
+		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
 
 		if ast.NodeDocument == node.Type {
 			if !replaceTypes["docTitle"] {
@@ -555,7 +559,6 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 				}
 			}
 		} else {
-			luteEngine := util.NewLute()
 			var unlinks []*ast.Node
 			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering {
@@ -789,9 +792,13 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	}
 
 	WaitForWritingFiles()
-	if 0 < len(ids) {
-		task.AppendAsyncTaskWithDelay(task.ReloadUI, 500*time.Millisecond, util.ReloadUI)
+
+	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
+	for _, id := range reloadTreeIDs {
+		util.PushProtyleReload(id)
 	}
+
+	util.PushClearProgress()
 	return
 }
 

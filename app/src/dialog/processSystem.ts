@@ -157,8 +157,8 @@ export const setRefDynamicText = (data: {
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
             item.innerHTML = data.refText;
         });
-    })
-}
+    });
+};
 
 export const setDefRefCount = (data: {
     "blockID": string,
@@ -169,59 +169,59 @@ export const setDefRefCount = (data: {
 }) => {
     getAllEditor().forEach(item => {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
-            const attrElement = item.protyle.title.element.querySelector(".protyle-attr")
-            const countElement = attrElement.querySelector('.popover__block')
+            const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
+            const countElement = attrElement.querySelector(".popover__block");
             if (countElement) {
                 if (data.refCount === 0) {
-                    countElement.remove()
+                    countElement.remove();
                 } else {
                     countElement.textContent = data.refCount.toString();
-                    countElement.setAttribute("data-id", data.refIDs.toString())
+                    countElement.setAttribute("data-id", data.refIDs.toString());
                 }
             } else if (data.refCount > 0) {
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`)
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`);
             }
             return;
         }
         // 不能对比 rootId，否则潜入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
-            const countElement = item.querySelector('.protyle-attr--refcount')
+            const countElement = item.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
-                    countElement.remove()
+                    countElement.remove();
                 } else {
                     countElement.textContent = data.refCount.toString();
                 }
             } else if (data.refCount > 0) {
-                const attrElement = item.querySelector('.protyle-attr')
+                const attrElement = item.querySelector(".protyle-attr");
                 if (attrElement.childElementCount > 0) {
-                    attrElement.lastElementChild.insertAdjacentHTML("afterend", `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>`)
+                    attrElement.lastElementChild.insertAdjacentHTML("afterend", `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>`);
                 } else {
-                    attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`
+                    attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`;
                 }
             }
         });
-    })
+    });
 
     let liElement;
     /// #if MOBILE
-    liElement = window.siyuan.mobile.files.element.querySelector(`li[data-node-id="${data.rootID}"]`)
+    liElement = window.siyuan.mobile.files.element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #else
-    liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`)
+    liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #endif
     if (liElement) {
-        const counterElement = liElement.querySelector(".counter")
+        const counterElement = liElement.querySelector(".counter");
         if (counterElement) {
             if (data.rootRefCount === 0) {
-                counterElement.remove()
+                counterElement.remove();
             } else {
-                counterElement.textContent = data.rootRefCount.toString()
+                counterElement.textContent = data.rootRefCount.toString();
             }
         } else if (data.rootRefCount > 0) {
-            liElement.insertAdjacentHTML("beforeend", `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${data.rootRefCount}</span>`)
+            liElement.insertAdjacentHTML("beforeend", `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${data.rootRefCount}</span>`);
         }
     }
-}
+};
 
 export const lockScreen = (app: App) => {
     if (window.siyuan.config.readonly) {

@@ -1050,23 +1050,6 @@ export const turnsOneInto = async (options: {
     avRender(options.protyle.wysiwyg.element, options.protyle);
 };
 
-const updateRef = (protyle: IProtyle, id: string, index = 0) => {
-    if (index > 6) {
-        return;
-    }
-    protyle.wysiwyg.element.querySelectorAll(`[data-type~="block-ref"][data-id="${id}"]`).forEach(item => {
-        if (item.getAttribute("data-subtype") === "d") {
-            fetchPost("/api/block/getRefText", {id: id}, (response) => {
-                item.innerHTML = response.data;
-                const blockElement = hasClosestBlock(item);
-                if (blockElement) {
-                    updateRef(protyle, blockElement.getAttribute("data-node-id"), index + 1);
-                }
-            });
-        }
-    });
-};
-
 let transactionsTimeout: number;
 export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoOperations?: IOperation[]) => {
     if (doOperations.length === 0) {

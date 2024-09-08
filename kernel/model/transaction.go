@@ -1228,7 +1228,7 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref") {
+		if treenode.IsBlockRef(n) {
 			refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
 		}
 		return ast.WalkContinue
@@ -1571,7 +1571,9 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 				// 推送动态锚文本节点刷新
 				for _, defNode := range changedDefNodes {
-					task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
+					if "ref-d" == defNode.refType {
+						task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
+					}
 				}
 				return ast.WalkContinue
 			}
@@ -1674,6 +1676,7 @@ func flushUpdateRefTextRenameDoc() {
 type changedDefNode struct {
 	id      string
 	refText string
+	refType string // ref-d/ref-s/embed
 }
 
 func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (changed bool, defNodes []*changedDefNode) {
@@ -1681,24 +1684,30 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 		if !entering {
 			return ast.WalkContinue
 		}
-		if !treenode.IsBlockRef(n) {
+		if treenode.IsBlockRef(n) {
+			defID, refText, subtype := treenode.GetBlockRef(n)
+			if "" == defID {
+				return ast.WalkContinue
+			}
+
+			defNode := changedDefNodes[defID]
+			if nil == defNode {
+				return ast.WalkSkipChildren
+			}
+
+			changed = true
+			if "d" == subtype {
+				refText = getNodeRefText(defNode)
+				treenode.SetDynamicBlockRefText(n, refText)
+			}
+			defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText, refType: "ref-" + subtype})
+			return ast.WalkContinue
+		} else if treenode.IsEmbedBlockRef(n) {
+			defID := treenode.GetEmbedBlockRef(n)
+			changed = true
+			defNodes = append(defNodes, &changedDefNode{id: defID, refType: "embed"})
 			return ast.WalkContinue
 		}
-
-		defID, _, subtype := treenode.GetBlockRef(n)
-		if "s" == subtype || "" == defID {
-			return ast.WalkContinue
-		}
-
-		defNode := changedDefNodes[defID]
-		if nil == defNode {
-			return ast.WalkSkipChildren
-		}
-
-		refText := getNodeRefText(defNode)
-		treenode.SetDynamicBlockRefText(n, refText)
-		changed = true
-		defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText})
 		return ast.WalkContinue
 	})
 	return

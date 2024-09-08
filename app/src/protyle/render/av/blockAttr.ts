@@ -2,8 +2,8 @@ import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
 import {escapeAttr} from "../../../util/escape";
 import * as dayjs from "dayjs";
-import {popTextCell} from "./cell";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {popTextCell, updateCellsValue} from "./cell";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
@@ -74,7 +74,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
                 if (item.type === "image") {
                     html += `<img class="av__cellassetimg" src="${item.content}">`;
                 } else {
-                    html += `<span class="b3-chip b3-chip--middle av__celltext--url" data-url="${item.content}" data-name="${item.name}">${item.name}</span>`;
+                    html += `<span class="b3-chip b3-chip--middle av__celltext--url" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
                 }
             });
             break;
@@ -282,8 +282,19 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             });
             element.addEventListener("paste", (event) => {
                 const files = event.clipboardData.files;
-                if (document.querySelector(".av__panel .b3-form__upload") && files && files.length > 0) {
-                    uploadFiles(protyle, files);
+                if (document.querySelector(".av__panel .b3-form__upload")) {
+                    if (files && files.length > 0) {
+                        uploadFiles(protyle, files);
+                    } else {
+                        const textPlain = event.clipboardData.getData("text/plain");
+                        const target = event.target as HTMLElement;
+                        const blockElement = hasClosestBlock(target)
+                        const cellsElement = hasClosestByAttribute(target, "data-type","mAsset")
+                        if (blockElement && cellsElement && textPlain) {
+                            updateCellsValue(protyle, blockElement as HTMLElement,  textPlain, [cellsElement], undefined, protyle.lute.Md2BlockDOM(textPlain));
+                            document.querySelector(".av__panel")?.remove();
+                        }
+                    }
                 }
             });
             element.addEventListener("click", (event) => {

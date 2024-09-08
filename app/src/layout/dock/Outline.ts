@@ -160,10 +160,10 @@ export class Outline extends Model {
             } else {
                 iconElement.classList.add("block__icon--active");
                 window.siyuan.storage[Constants.LOCAL_OUTLINE].keepExpand = true;
+                this.tree.expandAll();
             }
 
             setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
-            this.tree.expandAll();
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (this.type === "local") {

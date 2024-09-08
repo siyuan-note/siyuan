@@ -44,10 +44,21 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/net/webdav"
 )
 
 var (
-	cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	cookieStore  = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	WebDavMethod = []string{
+		"OPTIONS",
+		"GET", "HEAD",
+		"POST", "PUT",
+		"DELETE",
+		"MKCOL",
+		"COPY", "MOVE",
+		"LOCK", "UNLOCK",
+		"PROPFIND", "PROPPATCH",
+	}
 )
 
 func Serve(fastMode bool) {
@@ -76,6 +87,7 @@ func Serve(fastMode bool) {
 	serveAssets(ginServer)
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
+	serveWebDAV(ginServer)
 	serveExport(ginServer)
 	serveWidgets(ginServer)
 	servePlugins(ginServer)
@@ -371,7 +383,7 @@ func serveAuthPage(c *gin.Context) {
 		"l8":                     model.Conf.Language(95),
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
-		"workspace":              filepath.Base(util.WorkspaceDir),
+		"workspace":              util.WorkspaceName,
 		"workspacePath":          util.WorkspaceDir,
 		"keymapGeneralToggleWin": keymapHideWindow,
 		"trayMenuLangs":          util.TrayMenuLangs[util.Lang],
@@ -586,6 +598,33 @@ func serveWebSocket(ginServer *gin.Engine) {
 		logging.LogTracef("parse cmd [%s] consumed [%d]ms", command.Name(), end.Sub(start).Milliseconds())
 
 		cmd.Exec(command)
+	})
+}
+
+func serveWebDAV(ginServer *gin.Engine) {
+	// REF: https://github.com/fungaren/gin-webdav
+	handler := webdav.Handler{
+		Prefix:     "/webdav/",
+		FileSystem: webdav.Dir(util.WorkspaceDir),
+		LockSystem: webdav.NewMemLS(),
+		Logger: func(r *http.Request, err error) {
+			if nil != err {
+				logging.LogErrorf("WebDAV [%s %s]: %s", r.Method, r.URL.String(), err.Error())
+			}
+			// logging.LogDebugf("WebDAV [%s %s]", r.Method, r.URL.String())
+		},
+	}
+
+	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
+	ginGroup.Match(WebDavMethod, "/*path", func(c *gin.Context) {
+		if util.ReadOnly {
+			switch c.Request.Method {
+			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
+				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
+				return
+			}
+		}
+		handler.ServeHTTP(c.Writer, c.Request)
 	})
 }
 

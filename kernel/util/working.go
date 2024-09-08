@@ -198,6 +198,7 @@ var (
 	WorkingDir, _ = os.Getwd()
 
 	WorkspaceDir       string        // 工作空间目录路径
+	WorkspaceName      string        // 工作空间名称
 	WorkspaceLock      *flock.Flock  // 工作空间锁
 	ConfDir            string        // 配置目录路径
 	DataDir            string        // 数据目录路径
@@ -269,6 +270,7 @@ func initWorkspaceDir(workspaceArg string) {
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 
+	WorkspaceName = filepath.Base(WorkspaceDir)
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
 	RepoDir = filepath.Join(WorkspaceDir, "repo")

@@ -10,6 +10,9 @@ export const escapeGreat = (html: string) => {
 };
 
 export const escapeAttr = (html: string) => {
+    if (!html) {
+        return html;
+    }
     return html.replace(/"/g, "&quot;").replace(/'/g, "&apos;");
 };
 

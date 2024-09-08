@@ -8,6 +8,8 @@ import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
+import {openLink} from "../../../editor/openLink";
+import {editAssetItem} from "./asset";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -72,7 +74,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
                 if (item.type === "image") {
                     html += `<img class="av__cellassetimg" src="${item.content}">`;
                 } else {
-                    html += `<span class="b3-chip b3-chip--middle av__celltext--url" data-url="${item.content}">${item.name}</span>`;
+                    html += `<span class="b3-chip b3-chip--middle av__celltext--url" data-url="${item.content}" data-name="${item.name}">${item.name}</span>`;
                 }
             });
             break;
@@ -345,7 +347,32 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     }
     while (target && !element.isSameNode(target)) {
         const type = target.getAttribute("data-type");
-        if (type === "date") {
+        if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
+            if (event.type === "contextmenu") {
+                let index = 0;
+                Array.from(target.parentElement.children).find((item, i) => {
+                    if (item.isSameNode(target)) {
+                        index = i;
+                        return true;
+                    }
+                });
+                editAssetItem({
+                    protyle,
+                    cellElements: [target.parentElement],
+                    blockElement: hasClosestBlock(target) as HTMLElement,
+                    content: target.tagName === "IMG" ? target.getAttribute("src") : target.getAttribute("data-url"),
+                    type: target.tagName === "IMG" ? "image" : "file",
+                    name: target.tagName === "IMG" ? "" : target.getAttribute("data-name"),
+                    index,
+                    rect: target.getBoundingClientRect()
+                });
+            } else {
+                openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
+            }
+            event.stopPropagation();
+            event.preventDefault();
+            break;
+        } else if (type === "date") {
             popTextCell(protyle, [target], "date");
             event.stopPropagation();
             event.preventDefault();

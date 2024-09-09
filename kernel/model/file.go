@@ -252,12 +252,6 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	//pprof.StartCPUProfile(cpuProfile)
 	//defer pprof.StopCPUProfile()
 
-	start1 := time.Now()
-	defer func() {
-		elapsed := time.Now().Sub(start1).Milliseconds()
-		logging.LogInfof("list doc tree elapsed [%dms]", elapsed)
-	}()
-
 	ret = []*File{}
 
 	var deck *riff.Deck

@@ -382,6 +382,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     item.remove();
                 });
             });
+            if (protyle.wysiwyg.element.childElementCount === 0) {
+                zoomOut({
+                    protyle,
+                    id: protyle.block.rootID,
+                    isPushBack: false,
+                    focusId: operation.id,
+                });
+            }
         }
         return;
     }

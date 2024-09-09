@@ -1866,6 +1866,11 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 				if util.IsAssetLinkDest([]byte(href)) {
 					n.TextMarkAHref = strings.ReplaceAll(href, " ", "_")
 				}
+			} else if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+				dest := treenode.GetNodeSrcTokens(n)
+				if util.IsAssetLinkDest([]byte(dest)) {
+					setAssetsLinkDest(n, dest, strings.ReplaceAll(dest, " ", "_"))
+				}
 			}
 			return ast.WalkContinue
 		})

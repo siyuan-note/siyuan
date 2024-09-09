@@ -80,7 +80,7 @@ export const initUI = (protyle: IProtyle) => {
             protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
                 lineNumberRender(block.parentElement);
             });
-            document.querySelector(`#message [data-id="${wheelId}"] button`).addEventListener("click", () => {
+            document.querySelector(`#message [data-id="${wheelId}"] button`)?.addEventListener("click", () => {
                 window.siyuan.config.editor.fontSize = 16;
                 setInlineStyle();
                 fetchPost("/api/setting/setEditor", window.siyuan.config.editor);

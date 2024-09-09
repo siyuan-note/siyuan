@@ -10,6 +10,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
 import {editAssetItem} from "./asset";
+import {previewImage} from "../../preview/image";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -289,9 +290,9 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         const textPlain = event.clipboardData.getData("text/plain");
                         const target = event.target as HTMLElement;
                         const blockElement = hasClosestBlock(target)
-                        const cellsElement = hasClosestByAttribute(target, "data-type","mAsset")
+                        const cellsElement = hasClosestByAttribute(target, "data-type", "mAsset")
                         if (blockElement && cellsElement && textPlain) {
-                            updateCellsValue(protyle, blockElement as HTMLElement,  textPlain, [cellsElement], undefined, protyle.lute.Md2BlockDOM(textPlain));
+                            updateCellsValue(protyle, blockElement as HTMLElement, textPlain, [cellsElement], undefined, protyle.lute.Md2BlockDOM(textPlain));
                             document.querySelector(".av__panel")?.remove();
                         }
                     }
@@ -359,7 +360,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     while (target && !element.isSameNode(target)) {
         const type = target.getAttribute("data-type");
         if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
-            if (event.type === "contextmenu") {
+            if (event.type === "contextmenu" || (!target.dataset.url && target.tagName !== "IMG")) {
                 let index = 0;
                 Array.from(target.parentElement.children).find((item, i) => {
                     if (item.isSameNode(target)) {
@@ -378,7 +379,11 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                     rect: target.getBoundingClientRect()
                 });
             } else {
-                openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
+                if (target.tagName === "IMG") {
+                    previewImage(target.getAttribute("src"));
+                } else {
+                    openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
+                }
             }
             event.stopPropagation();
             event.preventDefault();

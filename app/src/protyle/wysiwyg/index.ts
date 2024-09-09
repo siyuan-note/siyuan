@@ -1659,7 +1659,8 @@ export class WYSIWYG {
             }
 
             protyle.toolbar.range = getEditorRange(protyle.element);
-            if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
+
+            if (target.tagName === "SPAN" && !isNotEditBlock(nodeElement)) { // https://ld246.com/article/1665141518103
                 let types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
                 if (types.length === 0) {
                     // https://github.com/siyuan-note/siyuan/issues/8960

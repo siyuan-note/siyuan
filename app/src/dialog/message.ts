@@ -101,7 +101,8 @@ export const hideMessage = (id?: string) => {
             setTimeout(() => {
                 messageElement.remove();
                 if (messagesElement.childElementCount === 0) {
-                    hideMessage();
+                    messagesElement.parentElement.classList.remove("b3-snackbars--show");
+                    messagesElement.innerHTML = "";
                 }
             }, Constants.TIMEOUT_INPUT);
         }

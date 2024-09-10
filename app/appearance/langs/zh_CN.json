@@ -1,5 +1,6 @@
 {
   "clearContextSucc": "上下文已清空",
+  "emptyMobilePlaceholder": "写点什么",
   "emptyPlaceholder": "写点什么，或按下 ' / ' 查看命令",
   "publish": "发布",
   "publishService": "发布服务",

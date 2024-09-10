@@ -289,8 +289,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     } else {
                         const textPlain = event.clipboardData.getData("text/plain");
                         const target = event.target as HTMLElement;
-                        const blockElement = hasClosestBlock(target)
-                        const cellsElement = hasClosestByAttribute(target, "data-type", "mAsset")
+                        const blockElement = hasClosestBlock(target);
+                        const cellsElement = hasClosestByAttribute(target, "data-type", "mAsset");
                         if (blockElement && cellsElement && textPlain) {
                             updateCellsValue(protyle, blockElement as HTMLElement, textPlain, [cellsElement], undefined, protyle.lute.Md2BlockDOM(textPlain));
                             document.querySelector(".av__panel")?.remove();

@@ -38,6 +38,7 @@ import (
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
 	"github.com/facette/natsort"
+	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -117,18 +118,28 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 
-	data, err := filelock.ReadFile(filePath)
-	if util.IsCorruptedSYData(data) {
-		box.moveCorruptedData(filePath)
-		return nil
-	}
+	filelock.Lock(filePath)
+	defer filelock.Unlock(filePath)
+
+	file, err := os.Open(filePath)
 	if err != nil {
-		logging.LogErrorf("read file [%s] failed: %s", p, err)
+		logging.LogErrorf("open file [%s] failed: %s", p, err)
 		return nil
 	}
-	ret = filesys.ReadDocIAL(data)
+	defer file.Close()
+
+	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
+	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
+		if field == "Properties" {
+			iter.ReadVal(&ret)
+			break
+		} else {
+			iter.Skip()
+		}
+	}
+
 	if 1 > len(ret) {
-		logging.LogWarnf("tree [%s] is corrupted", filePath)
+		logging.LogWarnf("properties not found in file [%s]", p)
 		box.moveCorruptedData(filePath)
 		return nil
 	}

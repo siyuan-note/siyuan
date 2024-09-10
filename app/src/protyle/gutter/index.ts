@@ -442,7 +442,8 @@ export class Gutter {
 
     private isMatchNode(item: Element) {
         const itemRect = item.getBoundingClientRect();
-        let gutterTop = this.element.getBoundingClientRect().top + 4;
+        // 原本为4，由于 https://github.com/siyuan-note/siyuan/issues/12166 改为 6
+        let gutterTop = this.element.getBoundingClientRect().top + 6;
         if (itemRect.height < Math.floor(window.siyuan.config.editor.fontSize * 1.625) + 8) {
             gutterTop = gutterTop - (itemRect.height - this.element.clientHeight) / 2;
         }
@@ -571,6 +572,7 @@ export class Gutter {
                 turnIntoSubmenu.push(this.turnsIntoOne({
                     icon: "iconQuote",
                     label: window.siyuan.languages.quote,
+                    accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
                     protyle,
                     selectsElement,
                     type: "Blocks2Blockquote"
@@ -917,6 +919,7 @@ export class Gutter {
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
                 icon: "iconQuote",
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
                 label: window.siyuan.languages.quote,
                 protyle,
                 selectsElement: [nodeElement],

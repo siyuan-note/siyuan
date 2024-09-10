@@ -37,13 +37,13 @@ func GetMirrorAttrViewBlockIDs(avID string) (ret []string) {
 	}
 
 	data, err := filelock.ReadFile(blocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 
 	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+	if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
 	}
@@ -73,13 +73,13 @@ func BatchGetMirrorAttrViewBlocks(avIDs []string) (ret []*AvBlock) {
 	}
 
 	data, err := filelock.ReadFile(blocks)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read attribute view blocks failed: %s", err)
 		return
 	}
 
 	avBlocks := map[string][]string{}
-	if err = msgpack.Unmarshal(data, &avBlocks); nil != err {
+	if err = msgpack.Unmarshal(data, &avBlocks); err != nil {
 		logging.LogErrorf("unmarshal attribute view blocks failed: %s", err)
 		return
 	}

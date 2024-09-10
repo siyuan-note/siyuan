@@ -114,7 +114,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     let html = blockElement.outerHTML;
     let focusHR = false;
-    if (editElement.textContent === "---" && type !== "NodeCodeBlock") {
+    if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
         const nextBlockElement = getNextBlock(editElement);
         if (nextBlockElement) {

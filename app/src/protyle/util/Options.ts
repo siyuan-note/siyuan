@@ -126,7 +126,7 @@ export class Options {
             url: Constants.UPLOAD_ADDRESS,
             extraData: {},
             fieldName: "file[]",
-            filename: (name: string) => name.replace(/[\\/:*?"'<>|]/g, ""),
+            filename: (name: string) => name.replace(/[\\/:*?"'<>|\[\]\(\)~!`&{}=#%$]/g, ""),
             linkToImgUrl: "",
             withCredentials: false,
         }

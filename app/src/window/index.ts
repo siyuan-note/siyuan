@@ -11,7 +11,7 @@ import {openFileById} from "../editor/util";
 import {
     processSync, progressBackgroundTask,
     progressLoading,
-    progressStatus, reloadSync,
+    progressStatus, reloadSync, setDefRefCount, setRefDynamicText,
     setTitle,
     transactionError
 } from "../dialog/processSystem";
@@ -21,6 +21,7 @@ import {getLocalStorage} from "../protyle/util/compatibility";
 import {init} from "../window/init";
 import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
+import {reloadEmoji} from "../emoji";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -49,13 +50,17 @@ class App {
                     });
                     if (data) {
                         switch (data.cmd) {
+                            case "setDefRefCount":
+                                setDefRefCount(data.data);
+                                break;
+                            case "setRefDynamicText":
+                                setRefDynamicText(data.data);
+                                break;
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);
                                 break;
                             case "reloadEmojiConf":
-                                fetchPost("/api/system/getEmojiConf", {}, response => {
-                                    window.siyuan.emojis = response.data as IEmoji[];
-                                });
+                                reloadEmoji();
                                 break;
                             case "reloaddoc":
                                 reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false);

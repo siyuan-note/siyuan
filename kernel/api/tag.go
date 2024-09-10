@@ -57,7 +57,7 @@ func renameTag(c *gin.Context) {
 
 	oldLabel := arg["oldLabel"].(string)
 	newLabel := arg["newLabel"].(string)
-	if err := model.RenameTag(oldLabel, newLabel); nil != err {
+	if err := model.RenameTag(oldLabel, newLabel); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -75,7 +75,7 @@ func removeTag(c *gin.Context) {
 	}
 
 	label := arg["label"].(string)
-	if err := model.RemoveTag(label); nil != err {
+	if err := model.RemoveTag(label); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}

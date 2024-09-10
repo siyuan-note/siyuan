@@ -27,7 +27,7 @@ import (
 func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 	ret = rootTree
 	rootBlock := &Block{Box: rootTree.Box, ID: rootTree.ID, Path: rootTree.Path, HPath: rootTree.HPath}
-	if err = buildBlockChildren(rootBlock); nil != err {
+	if err = buildBlockChildren(rootBlock); err != nil {
 		return
 	}
 
@@ -53,7 +53,7 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 
 	for {
 		i := 0
-		if err = walkBlock(insertPoint, rootBlock, i); nil != err {
+		if err = walkBlock(insertPoint, rootBlock, i); err != nil {
 			return
 		}
 		if nil == rootBlock.Children {
@@ -67,7 +67,7 @@ func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 	level++
 	for i := len(block.Children) - 1; i >= 0; i-- {
 		c := block.Children[i]
-		if err = walkBlock(insertPoint, c, level); nil != err {
+		if err = walkBlock(insertPoint, c, level); err != nil {
 			return
 		}
 
@@ -87,7 +87,7 @@ func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error) {
 	luteEngine := NewLute()
 	tree, err := filesys.LoadTree(box, p, luteEngine)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -112,7 +112,7 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 
 func buildBlockChildren(block *Block) (err error) {
 	files, _, err := ListDocTree(block.Box, block.Path, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -122,7 +122,7 @@ func buildBlockChildren(block *Block) (err error) {
 	}
 
 	for _, c := range block.Children {
-		if err = buildBlockChildren(c); nil != err {
+		if err = buildBlockChildren(c); err != nil {
 			return
 		}
 	}

@@ -442,6 +442,7 @@ export class Dock {
         }
         this.layout.element.style.transform = "";
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
+        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         if (this.position === "Left") {
             this.layout.element.style.left = `${this.element.clientWidth}px`;
         } else if (this.position === "Right") {

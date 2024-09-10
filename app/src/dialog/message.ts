@@ -97,10 +97,12 @@ export const hideMessage = (id?: string) => {
         const messageElement = messagesElement.querySelector(`[data-id="${id}"]`);
         if (messageElement) {
             messageElement.classList.add("b3-snackbar--hide");
+            window.clearTimeout(parseInt(messageElement.getAttribute("data-timeoutid")));
             setTimeout(() => {
                 messageElement.remove();
                 if (messagesElement.childElementCount === 0) {
-                    hideMessage();
+                    messagesElement.parentElement.classList.remove("b3-snackbars--show");
+                    messagesElement.innerHTML = "";
                 }
             }, Constants.TIMEOUT_INPUT);
         }

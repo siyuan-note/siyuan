@@ -72,7 +72,7 @@ func FlushHistoryQueue() {
 		}
 
 		tx, err := beginHistoryTx()
-		if nil != err {
+		if err != nil {
 			return
 		}
 
@@ -80,14 +80,14 @@ func FlushHistoryQueue() {
 		context["current"] = groupOpsCurrent[op.action]
 		context["total"] = groupOpsTotal[op.action]
 
-		if err = execHistoryOp(op, tx, context); nil != err {
+		if err = execHistoryOp(op, tx, context); err != nil {
 			tx.Rollback()
 			logging.LogErrorf("queue operation failed: %s", err)
 			eventbus.Publish(util.EvtSQLHistoryRebuild)
 			return
 		}
 
-		if err = commitHistoryTx(tx); nil != err {
+		if err = commitHistoryTx(tx); err != nil {
 			logging.LogErrorf("commit tx failed: %s", err)
 			return
 		}

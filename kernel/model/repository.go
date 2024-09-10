@@ -65,12 +65,12 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	file, err := repo.GetFile(fileID)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -86,17 +86,17 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	file, err := repo.GetFile(fileID)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	data, err := repo.OpenFile(file)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -106,7 +106,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
 		isProtyleDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
@@ -204,12 +204,12 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	diff, err := repo.DiffIndex(left, right)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -300,7 +300,7 @@ func DiffRepoSnapshots(left, right string) (ret *LeftRightDiff, err error) {
 
 func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lute) (title string, err error) {
 	file, err := repo.GetFile(fileID)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get file [%s] failed: %s", fileID, err)
 		return
 	}
@@ -309,14 +309,14 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	if strings.HasSuffix(file.Path, ".sy") {
 		var data []byte
 		data, err = repo.OpenFile(file)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("open file [%s] failed: %s", fileID, err)
 			return
 		}
 
 		var tree *parse.Tree
 		tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 			return
 		}
@@ -329,7 +329,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isProtyleDoc bool, tree *parse.Tree, err error) {
 	isProtyleDoc = 1024*1024*1 <= len(data)
 	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	return
@@ -353,12 +353,12 @@ func GetRepoSnapshots(page int) (ret []*Snapshot, pageCount, totalCount int, err
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	logs, pageCount, totalCount, err := repo.GetIndexLogs(page, 32)
-	if nil != err {
+	if err != nil {
 		if dejavu.ErrNotFoundIndex == err {
 			logs = []*dejavu.Log{}
 			err = nil
@@ -435,7 +435,7 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 	}
 
 	key, err := base64.StdEncoding.DecodeString(retKey)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("import data repo key failed: %s", err)
 		return "", errors.New(Conf.Language(157))
 	}
@@ -446,10 +446,10 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 	Conf.Repo.Key = key
 	Conf.Save()
 
-	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
 	}
-	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); err != nil {
 		return
 	}
 
@@ -462,11 +462,11 @@ func ResetRepo() (err error) {
 	msgId := util.PushMsg(Conf.Language(144), 1000*60)
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = repo.Reset(); nil != err {
+	if err = repo.Reset(); err != nil {
 		logging.LogErrorf("reset data repo failed: %s", err)
 		return
 	}
@@ -477,10 +477,7 @@ func ResetRepo() (err error) {
 	Conf.Save()
 
 	util.PushUpdateMsg(msgId, Conf.Language(145), 3000)
-	go func() {
-		time.Sleep(2 * time.Second)
-		util.ReloadUI()
-	}()
+	task.AppendAsyncTaskWithDelay(task.ReloadUI, 2*time.Second, util.ReloadUI)
 	return
 }
 
@@ -490,12 +487,12 @@ func PurgeCloud() (err error) {
 	defer util.PushClearProgress()
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	stat, err := repo.PurgeCloud()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -503,7 +500,7 @@ func PurgeCloud() (err error) {
 	deletedObjects := stat.Objects
 	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(232), deletedIndexes, deletedObjects, deletedSize)
-	util.PushMsg(msg, 5000)
+	util.PushMsg(msg, 7000)
 	return
 }
 
@@ -513,12 +510,12 @@ func PurgeRepo() (err error) {
 	defer util.PushClearProgress()
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	stat, err := repo.Purge()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -526,7 +523,7 @@ func PurgeRepo() (err error) {
 	deletedObjects := stat.Objects
 	deletedSize := humanize.BytesCustomCeil(uint64(stat.Size), 2)
 	msg = fmt.Sprintf(Conf.Language(203), deletedIndexes, deletedObjects, deletedSize)
-	util.PushMsg(msg, 5000)
+	util.PushMsg(msg, 7000)
 	return
 }
 
@@ -538,10 +535,10 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	}
 
 	util.PushMsg(Conf.Language(136), 3000)
-	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
 	}
-	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); err != nil {
 		return
 	}
 
@@ -554,7 +551,7 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 	} else {
 		salt := fmt.Sprintf("%x", sha256.Sum256([]byte(passphrase)))[:16]
 		key, err = encryption.KDF(passphrase, salt)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("init data repo key failed: %s", err)
 			return
 		}
@@ -570,29 +567,29 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 func InitRepoKey() (err error) {
 	util.PushMsg(Conf.Language(136), 3000)
 
-	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); nil != err {
+	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
 	}
-	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); nil != err {
+	if err = os.MkdirAll(Conf.Repo.GetSaveDir(), 0755); err != nil {
 		return
 	}
 
 	randomBytes := make([]byte, 16)
 	_, err = rand.Read(randomBytes)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	password := string(randomBytes)
 	randomBytes = make([]byte, 16)
 	_, err = rand.Read(randomBytes)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("init data repo key failed: %s", err)
 		return
 	}
 	salt := string(randomBytes)
 
 	key, err := encryption.KDF(password, salt)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("init data repo key failed: %s", err)
 		return
 	}
@@ -624,7 +621,7 @@ func checkoutRepo(id string) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("new repository failed: %s", err)
 		util.PushErrMsg(Conf.Language(141), 7000)
 		return
@@ -643,7 +640,7 @@ func checkoutRepo(id string) {
 	Conf.Save()
 
 	_, _, err = repo.Checkout(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("checkout repository failed: %s", err)
 		util.PushClearProgress()
 		util.PushErrMsg(Conf.Language(141), 7000)
@@ -659,10 +656,7 @@ func checkoutRepo(id string) {
 	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
 
 	if syncEnabled {
-		func() {
-			time.Sleep(5 * time.Second)
-			util.PushMsg(Conf.Language(134), 0)
-		}()
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)
 	}
 	return
 }
@@ -674,7 +668,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -700,7 +694,7 @@ func DownloadCloudSnapshot(tag, id string) (err error) {
 	} else {
 		downloadFileCount, downloadChunkCount, downloadBytes, err = repo.DownloadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	}
-	if nil != err {
+	if err != nil {
 		return
 	}
 	msg := fmt.Sprintf(Conf.Language(153), downloadFileCount, downloadChunkCount, humanize.BytesCustomCeil(uint64(downloadBytes), 2))
@@ -716,7 +710,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -736,7 +730,7 @@ func UploadCloudSnapshot(tag, id string) (err error) {
 	util.PushEndlessProgress(Conf.Language(116))
 	defer util.PushClearProgress()
 	uploadFileCount, uploadChunkCount, uploadBytes, err := repo.UploadTagIndex(tag, id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
-	if nil != err {
+	if err != nil {
 		if errors.Is(err, dejavu.ErrCloudBackupCountExceeded) {
 			err = fmt.Errorf(Conf.Language(84), Conf.Language(154))
 			return
@@ -762,7 +756,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -780,7 +774,7 @@ func RemoveCloudRepoTag(tag string) (err error) {
 	}
 
 	err = repo.RemoveCloudRepoTag(tag)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	return
@@ -794,7 +788,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -812,7 +806,7 @@ func GetCloudRepoTagSnapshots() (ret []*dejavu.Log, err error) {
 	}
 
 	logs, err := repo.GetCloudRepoTagLogs(map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
-	if nil != err {
+	if err != nil {
 		return
 	}
 	ret = logs
@@ -830,7 +824,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -852,7 +846,7 @@ func GetCloudRepoSnapshots(page int) (ret []*dejavu.Log, pageCount, totalCount i
 	}
 
 	logs, pageCount, totalCount, err := repo.GetCloudRepoLogs(page)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	ret = logs
@@ -870,12 +864,12 @@ func GetTagSnapshots() (ret []*Snapshot, err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	logs, err := repo.GetTagLogs()
-	if nil != err {
+	if err != nil {
 		return
 	}
 	ret = buildSnapshots(logs)
@@ -892,7 +886,7 @@ func RemoveTagSnapshot(tag string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -919,16 +913,16 @@ func TagSnapshot(id, name string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	index, err := repo.GetIndex(id)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = repo.AddTag(index.ID, name); nil != err {
+	if err = repo.AddTag(index.ID, name); err != nil {
 		msg := fmt.Sprintf("Add tag to data snapshot [%s] failed: %s", index.ID, err)
 		util.PushStatusBar(msg)
 		return
@@ -950,7 +944,7 @@ func IndexRepo(memo string) (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -962,7 +956,7 @@ func IndexRepo(memo string) (err error) {
 	index, err := repo.Index(memo, map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
 	})
-	if nil != err {
+	if err != nil {
 		util.PushStatusBar("Index data repo failed: " + html.EscapeString(err.Error()))
 		return
 	}
@@ -1011,7 +1005,7 @@ func syncRepoDownload() (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
@@ -1024,7 +1018,7 @@ func syncRepoDownload() (err error) {
 	logging.LogInfof("downloading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "d", true)
 	start := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo download failed: %s", err)
@@ -1039,7 +1033,7 @@ func syncRepoDownload() (err error) {
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.SyncDownload(syncContext)
 	elapsed := time.Since(start)
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo download failed: %s", err)
@@ -1082,7 +1076,7 @@ func syncRepoUpload() (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		msg := fmt.Sprintf("sync repo failed: %s", err)
@@ -1095,7 +1089,7 @@ func syncRepoUpload() (err error) {
 	logging.LogInfof("uploading data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "u", true)
 	start := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo upload failed: %s", err)
@@ -1110,7 +1104,7 @@ func syncRepoUpload() (err error) {
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	trafficStat, err := repo.SyncUpload(syncContext)
 	elapsed := time.Since(start)
-	if nil != err {
+	if err != nil {
 		planSyncAfter(fixSyncInterval)
 
 		logging.LogErrorf("sync data repo upload failed: %s", err)
@@ -1156,7 +1150,7 @@ func bootSyncRepo() (err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1171,7 +1165,7 @@ func bootSyncRepo() (err error) {
 
 	start := time.Now()
 	_, _, err = indexRepoBeforeCloudSync(repo)
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1217,7 +1211,7 @@ func bootSyncRepo() (err error) {
 
 	elapsed := time.Since(start)
 	logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", elapsed.Seconds())
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1243,7 +1237,7 @@ func bootSyncRepo() (err error) {
 		go func() {
 			_, syncErr := syncRepo(false, false)
 			isBootSyncing.Store(false)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("boot background sync repo failed: %s", syncErr)
 				return
 			}
@@ -1267,7 +1261,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	}
 
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1281,7 +1275,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	logging.LogInfof("syncing data repo [device=%s, kernel=%s, provider=%d, mode=%s/%t]", Conf.System.ID, KernelID, Conf.Sync.Provider, "a", byHand)
 	start := time.Now()
 	beforeIndex, afterIndex, err := indexRepoBeforeCloudSync(repo)
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1302,7 +1296,7 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 	mergeResult, trafficStat, err := repo.Sync(syncContext)
 	elapsed := time.Since(start)
-	if nil != err {
+	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
 
@@ -1610,7 +1604,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
 	})
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return
 	}
@@ -1619,7 +1613,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 	if nil == beforeIndex || beforeIndex.ID != afterIndex.ID {
 		// 对新创建的快照需要更新备注，加入耗时统计
 		afterIndex.Memo = fmt.Sprintf("[Sync] Cloud sync, completed in %.2fs", elapsed.Seconds())
-		if err = repo.PutIndex(afterIndex); nil != err {
+		if err = repo.PutIndex(afterIndex); err != nil {
 			util.PushStatusBar("Save data snapshot for cloud sync failed")
 			logging.LogErrorf("put index into data repo before cloud sync failed: %s", err)
 			return
@@ -1651,7 +1645,7 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 
 func newRepository() (ret *dejavu.Repo, err error) {
 	cloudConf, err := buildCloudConf()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -1680,7 +1674,7 @@ func newRepository() (ret *dejavu.Repo, err error) {
 	ignoreLines := getSyncIgnoreLines()
 	ignoreLines = append(ignoreLines, "/.siyuan/conf.json") // 忽略旧版同步配置
 	ret, err = dejavu.NewRepo(util.DataDir, util.RepoDir, util.HistoryDir, util.TempDir, Conf.System.ID, Conf.System.Name, Conf.System.OS, Conf.Repo.Key, ignoreLines, cloudRepo)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("init data repo failed: %s", err)
 		return
 	}
@@ -1978,7 +1972,7 @@ type Sync struct {
 
 func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchangeSize, hTrafficUploadSize, hTrafficDownloadSize, hTrafficAPIGet, hTrafficAPIPut string, err error) {
 	stat, err := getCloudSpace()
-	if nil != err {
+	if err != nil {
 		err = errors.New(Conf.Language(30) + " " + err.Error())
 		return
 	}
@@ -2027,12 +2021,12 @@ func GetCloudSpace() (s *Sync, b *Backup, hSize, hAssetSize, hTotalSize, hExchan
 
 func getCloudSpace() (stat *cloud.Stat, err error) {
 	repo, err := newRepository()
-	if nil != err {
+	if err != nil {
 		return
 	}
 
 	stat, err = repo.GetCloudRepoStat()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("get cloud repo stat failed: %s", err)
 		return
 	}

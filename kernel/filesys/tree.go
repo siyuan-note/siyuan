@@ -58,7 +58,7 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
 	filePath := filepath.Join(util.DataDir, boxID, p)
 	data, err := filelock.ReadFile(filePath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree [%s] failed: %s", p, err)
 		return
 	}
@@ -135,11 +135,11 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 
 func WriteTree(tree *parse.Tree) (err error) {
 	data, filePath, err := prepareWriteTree(tree)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
-	if err = filelock.WriteFile(filePath, data); nil != err {
+	if err = filelock.WriteFile(filePath, data); err != nil {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)
 		return errors.New(msg)
@@ -172,13 +172,13 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	if !util.UseSingleLineSave {
 		buf := bytes.Buffer{}
 		buf.Grow(1024 * 1024 * 2)
-		if err = json.Indent(&buf, data, "", "\t"); nil != err {
+		if err = json.Indent(&buf, data, "", "\t"); err != nil {
 			return
 		}
 		data = buf.Bytes()
 	}
 
-	if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
+	if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 		return
 	}
 	return
@@ -193,7 +193,7 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 	var err error
 	var needFix bool
 	ret, needFix, err = ParseJSON(jsonData, luteEngine.ParseOptions)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse json [%s] to tree failed: %s", boxID+p, err)
 		return
 	}
@@ -215,16 +215,16 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		if !util.UseSingleLineSave {
 			buf := bytes.Buffer{}
 			buf.Grow(1024 * 1024 * 2)
-			if err = json.Indent(&buf, data, "", "\t"); nil != err {
+			if err = json.Indent(&buf, data, "", "\t"); err != nil {
 				return
 			}
 			data = buf.Bytes()
 		}
 
-		if err = os.MkdirAll(filepath.Dir(filePath), 0755); nil != err {
+		if err = os.MkdirAll(filepath.Dir(filePath), 0755); err != nil {
 			return
 		}
-		if err = filelock.WriteFile(filePath, data); nil != err {
+		if err = filelock.WriteFile(filePath, data); err != nil {
 			msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 			logging.LogErrorf(msg)
 		}

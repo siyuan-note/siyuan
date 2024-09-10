@@ -24,13 +24,13 @@ import (
 )
 
 var docIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 102400,
-	MaxCost:     10240,
+	NumCounters: 1024 * 100,
+	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })
 
 func PutDocIAL(p string, ial map[string]string) {
-	docIALCache.Set(p, ial, 1)
+	docIALCache.Set(p, ial, 128)
 }
 
 func GetDocIAL(p string) (ret map[string]string) {
@@ -55,13 +55,13 @@ func ClearDocsIAL() {
 }
 
 var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
-	NumCounters: 102400,
-	MaxCost:     10240,
+	NumCounters: 1024 * 1000,
+	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
 })
 
 func PutBlockIAL(id string, ial map[string]string) {
-	blockIALCache.Set(id, ial, 1)
+	blockIALCache.Set(id, ial, 128)
 }
 
 func GetBlockIAL(id string) (ret map[string]string) {

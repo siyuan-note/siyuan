@@ -36,7 +36,7 @@ import (
 func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 	headingID := operation.ID
 	tree, err := tx.loadTree(headingID)
-	if nil != err {
+	if err != nil {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
@@ -54,12 +54,13 @@ func (tx *Transaction) doFoldHeading(operation *Operation) (ret *TxErr) {
 				return ast.WalkContinue
 			}
 
+			n.SetIALAttr("fold", "1")
 			n.SetIALAttr("heading-fold", "1")
 			return ast.WalkContinue
 		})
 	}
 	heading.SetIALAttr("fold", "1")
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
 	IncSync()
@@ -77,7 +78,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	headingID := operation.ID
 
 	tree, err := tx.loadTree(headingID)
-	if nil != err {
+	if err != nil {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: headingID}
 	}
 
@@ -100,7 +101,7 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	}
 	heading.RemoveIALAttr("fold")
 	heading.RemoveIALAttr("heading-fold")
-	if err = tx.writeTree(tree); nil != err {
+	if err = tx.writeTree(tree); err != nil {
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: headingID}
 	}
 	IncSync()
@@ -272,7 +273,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	srcRootBlockID = srcTree.Root.ID
 
 	headingBlock, err := getBlock(srcHeadingID, srcTree)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	if nil == headingBlock {
@@ -308,7 +309,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 
 	newTargetPath = path.Join(toFolder, srcHeadingID+".sy")
 	if !box.Exist(toFolder) {
-		if err = box.MkdirAll(toFolder); nil != err {
+		if err = box.MkdirAll(toFolder); err != nil {
 			return
 		}
 	}
@@ -358,7 +359,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 		srcTree.Root.AppendChild(treenode.NewParagraph())
 	}
 	treenode.RemoveBlockTreesByRootID(srcTree.ID)
-	if err = indexWriteTreeUpsertQueue(srcTree); nil != err {
+	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {
 		return "", "", err
 	}
 
@@ -366,7 +367,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = "1"
 	box.addMinSort(path.Dir(newTargetPath), newTree.ID)
-	if err = indexWriteTreeUpsertQueue(newTree); nil != err {
+	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err
 	}
 	IncSync()

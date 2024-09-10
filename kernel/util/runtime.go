@@ -45,8 +45,13 @@ var UseSingleLineSave = true
 var IsUILoaded = false
 
 func WaitForUILoaded() {
+	start := time.Now()
 	for !IsUILoaded {
 		time.Sleep(200 * time.Millisecond)
+		if time.Since(start) > 30*time.Second {
+			logging.LogErrorf("wait for ui loaded timeout: %s", logging.ShortStack())
+			break
+		}
 	}
 }
 
@@ -93,7 +98,7 @@ func RandomSleep(minMills, maxMills int) {
 func GetDeviceID() string {
 	if ContainerStd == Container {
 		machineID, err := machineid.ID()
-		if nil != err {
+		if err != nil {
 			return gulu.Rand.String(12)
 		}
 		return machineID
@@ -103,17 +108,17 @@ func GetDeviceID() string {
 
 func GetDeviceName() string {
 	ret, err := os.Hostname()
-	if nil != err {
+	if err != nil {
 		return "unknown"
 	}
 	return ret
 }
 
 func SetNetworkProxy(proxyURL string) {
-	if err := os.Setenv("HTTPS_PROXY", proxyURL); nil != err {
+	if err := os.Setenv("HTTPS_PROXY", proxyURL); err != nil {
 		logging.LogErrorf("set env [HTTPS_PROXY] failed: %s", err)
 	}
-	if err := os.Setenv("HTTP_PROXY", proxyURL); nil != err {
+	if err := os.Setenv("HTTP_PROXY", proxyURL); err != nil {
 		logging.LogErrorf("set env [HTTP_PROXY] failed: %s", err)
 	}
 
@@ -186,12 +191,12 @@ func checkFileSysStatus() {
 	}
 
 	dir := filepath.Join(DataDir, fileSysStatusCheckFile)
-	if err := os.RemoveAll(dir); nil != err {
+	if err := os.RemoveAll(dir); err != nil {
 		ReportFileSysFatalError(err)
 		return
 	}
 
-	if err := os.MkdirAll(dir, 0755); nil != err {
+	if err := os.MkdirAll(dir, 0755); err != nil {
 		ReportFileSysFatalError(err)
 		return
 	}
@@ -200,12 +205,12 @@ func checkFileSysStatus() {
 		tmp := filepath.Join(dir, "check_consistency")
 		data := make([]byte, 1024*4)
 		_, err := rand.Read(data)
-		if nil != err {
+		if err != nil {
 			ReportFileSysFatalError(err)
 			return
 		}
 
-		if err = os.WriteFile(tmp, data, 0644); nil != err {
+		if err = os.WriteFile(tmp, data, 0644); err != nil {
 			ReportFileSysFatalError(err)
 			return
 		}
@@ -214,7 +219,7 @@ func checkFileSysStatus() {
 
 		for j := 0; j < 32; j++ {
 			renamed := tmp + "_renamed"
-			if err = os.Rename(tmp, renamed); nil != err {
+			if err = os.Rename(tmp, renamed); err != nil {
 				ReportFileSysFatalError(err)
 				break
 			}
@@ -222,23 +227,23 @@ func checkFileSysStatus() {
 			RandomSleep(500, 1000)
 
 			f, err := os.Open(renamed)
-			if nil != err {
+			if err != nil {
 				ReportFileSysFatalError(err)
 				return
 			}
 
-			if err = f.Close(); nil != err {
+			if err = f.Close(); err != nil {
 				ReportFileSysFatalError(err)
 				return
 			}
 
-			if err = os.Rename(renamed, tmp); nil != err {
+			if err = os.Rename(renamed, tmp); err != nil {
 				ReportFileSysFatalError(err)
 				return
 			}
 
 			entries, err := os.ReadDir(dir)
-			if nil != err {
+			if err != nil {
 				ReportFileSysFatalError(err)
 				return
 			}
@@ -264,7 +269,7 @@ func checkFileSysStatus() {
 			}
 		}
 
-		if err = os.RemoveAll(tmp); nil != err {
+		if err = os.RemoveAll(tmp); err != nil {
 			ReportFileSysFatalError(err)
 			return
 		}
@@ -343,33 +348,33 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 
 	runtime.LockOSThread()
 	defer runtime.LockOSThread()
-	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); nil != err {
+	if err := ole.CoInitializeEx(0, ole.COINIT_MULTITHREADED); err != nil {
 		logging.LogWarnf("initialize ole failed: %s", err)
 		return false
 	}
 	defer ole.CoUninitialize()
 	dir, file := filepath.Split(checkAbsPath)
 	unknown, err := oleutil.CreateObject("Shell.Application")
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("create shell application failed: %s", err)
 		return false
 	}
 	shell, err := unknown.QueryInterface(ole.IID_IDispatch)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("query shell interface failed: %s", err)
 		return false
 	}
 	defer shell.Release()
 
 	result, err := oleutil.CallMethod(shell, "NameSpace", dir)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("call shell [NameSpace] failed: %s", err)
 		return false
 	}
 	folderObj := result.ToIDispatch()
 
 	result, err = oleutil.CallMethod(folderObj, "ParseName", file)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("call shell [ParseName] failed: %s", err)
 		return false
 	}
@@ -380,7 +385,7 @@ func existAvailabilityStatus(workspaceAbsPath string) bool {
 	}
 
 	result, err = oleutil.CallMethod(folderObj, "GetDetailsOf", fileObj, 303)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("call shell [GetDetailsOf] failed: %s", err)
 		return false
 	}

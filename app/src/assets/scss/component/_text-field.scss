@@ -10,6 +10,7 @@
   background-color: var(--b3-theme-background);
   -webkit-appearance: none;
   font-variant-ligatures: none;
+  font-size: 14px;
 
   &:not(.b3-text-field--text):hover {
     box-shadow: inset 0 0 0 .6px var(--b3-theme-on-background);

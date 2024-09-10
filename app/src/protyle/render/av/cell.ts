@@ -593,6 +593,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                         }
                     }
                 }
+                // https://github.com/siyuan-note/siyuan/issues/12308
+                if (!link) {
+                    name = value;
+                }
                 if (!link && !name && !imgSrc) {
                     return;
                 }

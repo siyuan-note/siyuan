@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -52,7 +53,7 @@ func CreateBox(name string) (id string, err error) {
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -121,13 +122,13 @@ func RemoveBox(boxID string) (err error) {
 	if !isUserGuide {
 		var historyDir string
 		historyDir, err = GetHistoryDir(HistoryOpDelete)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("get history dir failed: %s", err)
 			return
 		}
 		p := strings.TrimPrefix(localPath, util.DataDir)
 		historyPath := filepath.Join(historyDir, p)
-		if err = filelock.Copy(localPath, historyPath); nil != err {
+		if err = filelock.Copy(localPath, historyPath); err != nil {
 			logging.LogErrorf("gen sync history failed: %s", err)
 			return
 		}
@@ -136,7 +137,7 @@ func RemoveBox(boxID string) (err error) {
 	}
 
 	unmount0(boxID)
-	if err = filelock.Remove(localPath); nil != err {
+	if err = filelock.Remove(localPath); err != nil {
 		return
 	}
 	IncSync()
@@ -191,18 +192,18 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			reMountGuide = true
 		}
 
-		if err = filelock.Remove(localPath); nil != err {
+		if err = filelock.Remove(localPath); err != nil {
 			return
 		}
 
 		p := filepath.Join(util.WorkingDir, "guide", boxID)
-		if err = filelock.Copy(p, localPath); nil != err {
+		if err = filelock.Copy(p, localPath); err != nil {
 			return
 		}
 
 		avDirPath := filepath.Join(util.WorkingDir, "guide", boxID, "storage", "av")
 		if filelock.IsExist(avDirPath) {
-			if err = filelock.Copy(avDirPath, filepath.Join(util.DataDir, "storage", "av")); nil != err {
+			if err = filelock.Copy(avDirPath, filepath.Join(util.DataDir, "storage", "av")); err != nil {
 				return
 			}
 		}
@@ -218,10 +219,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 			Conf.Save()
 		}
 
+		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(52), 7000)
 		go func() {
-			time.Sleep(time.Second * 3)
-			util.PushErrMsg(Conf.Language(52), 7000)
-
 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
 			time.Sleep(time.Second * 10)
 			CheckUpdate(true)

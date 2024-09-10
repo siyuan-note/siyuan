@@ -382,8 +382,9 @@ export class WYSIWYG {
                         html = tempElement.innerHTML;
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
-                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
-                        hasClosestByMatchTag(range.startContainer, "CODE")) {
+                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
+                        textPlain = tempElement.textContent.replace(Constants.ZWSP, "").replace(/\n$/, "");
+                    } else if (hasClosestByMatchTag(range.startContainer, "CODE")) {
                         textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
                     }
                 }
@@ -1201,6 +1202,26 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "",
+                            label: window.siyuan.languages.useDefaultAlign,
+                            click: () => {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    tableSelectElement.removeAttribute("style");
+                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "", getEditorRange(tableBlockElement));
+                                }
+                            }
+                        }).element);
                         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             label: window.siyuan.languages.clear,
@@ -1638,7 +1659,8 @@ export class WYSIWYG {
             }
 
             protyle.toolbar.range = getEditorRange(protyle.element);
-            if (target.tagName === "SPAN") { // https://ld246.com/article/1665141518103
+
+            if (target.tagName === "SPAN" && !isNotEditBlock(nodeElement)) { // https://ld246.com/article/1665141518103
                 let types = protyle.toolbar.getCurrentType(protyle.toolbar.range);
                 if (types.length === 0) {
                     // https://github.com/siyuan-note/siyuan/issues/8960
@@ -2080,6 +2102,12 @@ export class WYSIWYG {
                 protyle.breadcrumb.render(protyle, false, hasClosestBlock(event.target));
             }
             const range = getEditorRange(this.element);
+            // https://github.com/siyuan-note/siyuan/issues/12317
+            if (range.startContainer.nodeType !== 3 &&
+                (range.startContainer as Element).classList.contains("protyle-action") &&
+                range.startContainer.parentElement.classList.contains("code-block")) {
+                setFirstNodeRange(range.startContainer.parentElement.querySelector(".hljs").lastElementChild, range);
+            }
             // 需放在嵌入块之前，否则嵌入块内的引用、链接、pdf 双链无法点击打开 https://ld246.com/article/1630479789513
             const aElement = hasClosestByAttribute(event.target, "data-type", "a") ||
                 hasClosestByClassName(event.target, "av__celltext--url");   // 数据库中资源文件、链接、电话、邮箱单元格
@@ -2204,6 +2232,27 @@ export class WYSIWYG {
                 event.stopPropagation();
                 event.preventDefault();
                 openLink(protyle, aLink, event, ctrlIsPressed);
+                return;
+            }
+
+            if (aElement && aElement.classList.contains("av__celltext--url") && !aLink) {
+                let index = 0;
+                Array.from(aElement.parentElement.children).find((item, i) => {
+                    if (item === aElement) {
+                        index = i;
+                        return true;
+                    }
+                });
+                editAssetItem({
+                    protyle,
+                    cellElements: [aElement.parentElement],
+                    blockElement: hasClosestBlock(aElement) as HTMLElement,
+                    content: aElement.getAttribute("data-url"),
+                    type: "file",
+                    name: aElement.getAttribute("data-name"),
+                    index,
+                    rect: aElement.getBoundingClientRect()
+                });
                 return;
             }
 

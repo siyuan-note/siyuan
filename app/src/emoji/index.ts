@@ -7,6 +7,7 @@ import {Files} from "../layout/dock/Files";
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels} from "../layout/getAll";
 /// #endif
+import {getAllEditor} from "../layout/getAll";
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
@@ -520,7 +521,6 @@ export const getEmojiDesc = (emoji: IEmojiItem) => {
     return emoji.description;
 };
 
-
 export const getEmojiTitle = (index: number) => {
     if (window.siyuan.config.lang === "zh_CN") {
         return window.siyuan.emojis[index].title_zh_cn;
@@ -529,4 +529,23 @@ export const getEmojiTitle = (index: number) => {
         return window.siyuan.emojis[index].title_ja_jp;
     }
     return window.siyuan.emojis[index].title;
+};
+
+const putEmojis = (protyle: IProtyle) => {
+    if (window.siyuan.emojis[0].items.length > 0) {
+        const emojis: IObject = {};
+        window.siyuan.emojis[0].items.forEach(emojiITem => {
+            emojis[emojiITem.keywords] = protyle.options.hint.emojiPath + "/" + emojiITem.unicode;
+        });
+        protyle.lute.PutEmojis(emojis);
+    }
+};
+
+export const reloadEmoji = () => {
+    fetchPost("/api/system/getEmojiConf", {}, response => {
+        window.siyuan.emojis = response.data as IEmoji[];
+        getAllEditor().forEach(item => {
+            putEmojis(item.protyle);
+        });
+    });
 };

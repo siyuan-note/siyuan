@@ -190,6 +190,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns, html);
         } else if (cellsElement.length > 0) {
             updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns, html);
+            document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {
             range.insertNode(document.createTextNode(text));
             range.collapse(false);

@@ -61,7 +61,7 @@ func echo(c *gin.Context) {
 
 	password, passwordSet = c.Request.URL.User.Password()
 
-	if form, err := c.MultipartForm(); nil != err || nil == form {
+	if form, err := c.MultipartForm(); err != nil || nil == form {
 		multipartForm = nil
 	} else {
 		multipartForm = &MultipartForm{
@@ -75,11 +75,11 @@ func echo(c *gin.Context) {
 				files[i].Filename = handler.Filename
 				files[i].Header = handler.Header
 				files[i].Size = handler.Size
-				if file, err := handler.Open(); nil != err {
+				if file, err := handler.Open(); err != nil {
 					logging.LogWarnf("echo open form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
 				} else {
 					content := make([]byte, handler.Size)
-					if _, err := file.Read(content); nil != err {
+					if _, err := file.Read(content); err != nil {
 						logging.LogWarnf("echo read form [%s] file [%s] error: %s", k, handler.Filename, err.Error())
 					} else {
 						files[i].Content = base64.StdEncoding.EncodeToString(content)
@@ -89,7 +89,7 @@ func echo(c *gin.Context) {
 		}
 	}
 
-	if data, err := c.GetRawData(); nil == err {
+	if data, err := c.GetRawData(); err == nil {
 		rawData = base64.StdEncoding.EncodeToString(data)
 	} else {
 		logging.LogWarnf("echo get raw data error: %s", err.Error())
@@ -203,7 +203,7 @@ func forwardProxy(c *gin.Context) {
 	case "base64":
 		fallthrough
 	case "base64-std":
-		if payload, err := base64.StdEncoding.DecodeString(arg["payload"].(string)); nil != err {
+		if payload, err := base64.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
 			ret.Code = -2
 			ret.Msg = "decode base64-std payload failed: " + err.Error()
 			return
@@ -211,7 +211,7 @@ func forwardProxy(c *gin.Context) {
 			request.SetBody(payload)
 		}
 	case "base64-url":
-		if payload, err := base64.URLEncoding.DecodeString(arg["payload"].(string)); nil != err {
+		if payload, err := base64.URLEncoding.DecodeString(arg["payload"].(string)); err != nil {
 			ret.Code = -2
 			ret.Msg = "decode base64-url payload failed: " + err.Error()
 			return
@@ -221,7 +221,7 @@ func forwardProxy(c *gin.Context) {
 	case "base32":
 		fallthrough
 	case "base32-std":
-		if payload, err := base32.StdEncoding.DecodeString(arg["payload"].(string)); nil != err {
+		if payload, err := base32.StdEncoding.DecodeString(arg["payload"].(string)); err != nil {
 			ret.Code = -2
 			ret.Msg = "decode base32-std payload failed: " + err.Error()
 			return
@@ -229,7 +229,7 @@ func forwardProxy(c *gin.Context) {
 			request.SetBody(payload)
 		}
 	case "base32-hex":
-		if payload, err := base32.HexEncoding.DecodeString(arg["payload"].(string)); nil != err {
+		if payload, err := base32.HexEncoding.DecodeString(arg["payload"].(string)); err != nil {
 			ret.Code = -2
 			ret.Msg = "decode base32-hex payload failed: " + err.Error()
 			return
@@ -237,7 +237,7 @@ func forwardProxy(c *gin.Context) {
 			request.SetBody(payload)
 		}
 	case "hex":
-		if payload, err := hex.DecodeString(arg["payload"].(string)); nil != err {
+		if payload, err := hex.DecodeString(arg["payload"].(string)); err != nil {
 			ret.Code = -2
 			ret.Msg = "decode hex payload failed: " + err.Error()
 			return
@@ -251,14 +251,14 @@ func forwardProxy(c *gin.Context) {
 
 	started := time.Now()
 	resp, err := request.Send(method, destURL)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "forward request failed: " + err.Error()
 		return
 	}
 
 	bodyData, err := io.ReadAll(resp.Body)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "read response body failed: " + err.Error()
 		return

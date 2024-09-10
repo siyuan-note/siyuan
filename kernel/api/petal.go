@@ -53,7 +53,7 @@ func setPetalEnabled(c *gin.Context) {
 	enabled := arg["enabled"].(bool)
 	frontend := arg["frontend"].(string)
 	data, err := model.SetPetalEnabled(packageName, enabled, frontend)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

@@ -213,7 +213,7 @@ const renderSlashMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${getSlashItem(Constants.ZWSP + 2, "iconImage", window.siyuan.languages.assets)}
     ${getSlashItem("((", "iconRef", window.siyuan.languages.ref, "true")}
     ${getSlashItem("{{", "iconSQL", window.siyuan.languages.blockEmbed, "true")}
-    ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", "AI Chat")}
+    ${getSlashItem(Constants.ZWSP + 5, "iconSparkles", window.siyuan.languages.aiWriting)}
     ${getSlashItem('<div data-type="NodeAttributeView" data-av-type="table"></div>', "iconDatabase", window.siyuan.languages.database, "true")}
     ${getSlashItem(Constants.ZWSP + 4, "iconFile", window.siyuan.languages.newSubDocRef)}
 </div>

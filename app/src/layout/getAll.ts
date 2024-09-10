@@ -1,3 +1,4 @@
+/// #if !MOBILE
 import {Layout} from "./index";
 import {Tab} from "./Tab";
 import {Editor} from "../editor";
@@ -12,10 +13,19 @@ import {Tag} from "./dock/Tag";
 import {Custom} from "./dock/Custom";
 import {Protyle} from "../protyle";
 import {Wnd} from "./Wnd";
+/// #endif
 
 export const getAllEditor = () => {
-    const models = getAllModels();
     const editors: Protyle[] = [];
+    /// #if MOBILE
+    if (window.siyuan.mobile.editor) {
+        editors.push(window.siyuan.mobile.editor);
+    }
+    if (window.siyuan.mobile.popEditor) {
+        editors.push(window.siyuan.mobile.popEditor);
+    }
+    /// #else
+    const models = getAllModels();
     models.editor.forEach(item => {
         editors.push(item.editor);
     });
@@ -45,6 +55,7 @@ export const getAllEditor = () => {
             editors.push(editorItem);
         });
     });
+    /// #endif
     return editors;
 };
 

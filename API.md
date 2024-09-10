@@ -19,6 +19,8 @@
     * [Move documents](#Move-documents)
     * [Get human-readable path based on path](#Get-human-readable-path-based-on-path)
     * [Get human-readable path based on ID](#Get-human-readable-path-based-on-ID)
+    * [Get storage path based on ID](#Get-storage-path-based-on-ID)
+    * [Get IDs based on human-readable path](#Get-IDs-based-on-human-readable-path)
 * [Assets](#Assets)
     * [Upload assets](#Upload-assets)
 * [Blocks](#Blocks)
@@ -70,8 +72,7 @@
 
 * Endpoint: `http://127.0.0.1:6806`
 * Both are POST methods
-* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header
-  Content-Type is `application/json`
+* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header Content-Type is `application/json`
 * Return value
 
    ````json
@@ -326,8 +327,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
 
     * `notebook`: Notebook ID
-    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the
-      database hpath field)
+    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the database hpath field)
     * `markdown`: GFM Markdown content
 * Return value
 
@@ -462,6 +462,28 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "data": "/foo/bar"
   }
   ```
+  
+### Get storage path based on ID
+
+* `/api/filetree/getPathByID`
+* Parameters
+
+  ```json
+  {
+    "id": "20210917220056-yxtyl7i"
+  }
+  ```
+
+  * `id`: Block ID
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": "/20210828150719-r8edxl2/20210917220056-yxtyl7i.sy"
+  }
+  ```
 
 ### Get IDs based on human-readable path
 
@@ -500,9 +522,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
         * `"/assets/"`: workspace/data/assets/ folder
         * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
-      Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder
-      of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user
-      guide.
+      Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
     * `file[]`: Uploaded file list
 * Return value
 
@@ -520,9 +540,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
-    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is
-      assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the
-      uploaded address
+    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the uploaded address
 
 ## Blocks
 
@@ -547,8 +565,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     * `previousID`: The ID of the previous block, used to anchor the insertion position
     * `parentID`: The ID of the parent block, used to anchor the insertion position
 
-  `nextID`, `previousID`, and `parentID` must have at least one value, using
-  priority: `nextID` > `previousID` > `parentID`
+  `nextID`, `previousID`, and `parentID` must have at least one value, using priority: `nextID` > `previousID` > `parentID`
 * Return value
 
   ```json
@@ -755,8 +772,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
 
     * `id`: Block ID to move
     * `previousID`: The ID of the previous block, used to anchor the insertion position
-    * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot
-      be empty at the same time, if they exist at the same time, `previousID` will be used first
+    * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot be empty at the same time, if they exist at the same time, `previousID` will be used first
 * Return value
 
   ```json
@@ -1302,8 +1318,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "timeout": 7000
   }
   ```
-    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
-      milliseconds
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000 milliseconds
 * Return value
 
   ```json
@@ -1328,8 +1343,7 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
     "timeout": 7000
   }
   ```
-    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
-      milliseconds
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000 milliseconds
 * Return value
 
   ```json

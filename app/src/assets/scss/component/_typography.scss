@@ -266,14 +266,14 @@
     color: var(--b3-theme-background);
   }
 
-  .code-block {
-    position: relative;
+  pre.code-block {
+    border-radius: var(--b3-border-radius);
+  }
+
+  .code-block:not(pre) {
     padding: 2em 1em 1.6em;
     margin: 1em 0;
-    display: flex;
-    flex-direction: row-reverse;
     box-sizing: border-box;
-    background-color: var(--b3-protyle-code-background);
 
     .protyle-action {
       left: 4px;
@@ -304,16 +304,19 @@
   }
 
   .hljs {
-    border-radius: var(--b3-border-radius);
     font-size: 85%;
     overflow: auto;
     font-family: var(--b3-font-family-code);
     min-height: 22px !important;
     overflow-x: overlay;
     tab-size: 4;
+    background-color: transparent;
+  }
+
+  div.hljs {
     flex: 1;
     display: flex;
-    background-color: transparent;
+    position: relative;
   }
 
   [data-subtype="echarts"],
@@ -556,11 +559,9 @@
     user-select: none;
     counter-reset: linenumber;
     font-size: 85%;
-    box-sizing: border-box;
     font-family: var(--b3-font-family-code);
-    margin-right: 1em;
-    min-width: 1.2em;
     text-align: right;
+    position: absolute;
 
     & > span {
       pointer-events: none;

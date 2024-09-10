@@ -30,7 +30,7 @@ import (
 func ParseJSONWithoutFix(jsonData []byte, options *parse.Options) (ret *parse.Tree, err error) {
 	root := &ast.Node{}
 	err = unmarshalJSON(jsonData, root)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -52,7 +52,7 @@ func ParseJSONWithoutFix(jsonData []byte, options *parse.Options) (ret *parse.Tr
 func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFix bool, err error) {
 	root := &ast.Node{}
 	err = unmarshalJSON(jsonData, root)
-	if nil != err {
+	if err != nil {
 		return
 	}
 

@@ -169,6 +169,9 @@ export const exportImage = (id: string) => {
         if (response.data.attrs.alias) {
             previewElement.setAttribute("alias", response.data.attrs.alias);
         }
+        previewElement.querySelectorAll(".code-block").forEach(item => {
+            item.setAttribute("linewrap", "true");
+        });
         processRender(previewElement);
         highlightRender(previewElement);
         previewElement.querySelectorAll("table").forEach((item: HTMLElement) => {

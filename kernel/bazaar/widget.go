@@ -43,7 +43,7 @@ func Widgets() (widgets []*Widget) {
 	}
 
 	stageIndex, err := getStageIndex("widgets")
-	if nil != err {
+	if err != nil {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
@@ -129,7 +129,7 @@ func InstalledWidgets() (ret []*Widget) {
 	}
 
 	widgetDirs, err := os.ReadDir(widgetsPath)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("read widgets folder failed: %s", err)
 		return
 	}
@@ -188,7 +188,7 @@ func InstalledWidgets() (ret []*Widget) {
 func InstallWidget(repoURL, repoHash, installPath string, systemID string) error {
 	repoURLHash := repoURL + "@" + repoHash
 	data, err := downloadPackage(repoURLHash, true, systemID)
-	if nil != err {
+	if err != nil {
 		return err
 	}
 	return installPackage(data, installPath, repoURLHash)

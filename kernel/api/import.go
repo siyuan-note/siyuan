@@ -37,7 +37,7 @@ func importSY(c *gin.Context) {
 	defer util.ClearPushProgress(100)
 
 	form, err := c.MultipartForm()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse import .sy.zip failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -53,7 +53,7 @@ func importSY(c *gin.Context) {
 	}
 	file := files[0]
 	reader, err := file.Open()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read import .sy.zip failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -61,7 +61,7 @@ func importSY(c *gin.Context) {
 	}
 
 	importDir := filepath.Join(util.TempDir, "import")
-	if err = os.MkdirAll(importDir, 0755); nil != err {
+	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -70,13 +70,13 @@ func importSY(c *gin.Context) {
 	writePath := filepath.Join(util.TempDir, "import", file.Filename)
 	defer os.RemoveAll(writePath)
 	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("open import .sy.zip [%s] failed: %s", writePath, err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	if _, err = io.Copy(writer, reader); nil != err {
+	if _, err = io.Copy(writer, reader); err != nil {
 		logging.LogErrorf("write import .sy.zip failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -89,7 +89,7 @@ func importSY(c *gin.Context) {
 	toPath := form.Value["toPath"][0]
 
 	err = model.ImportSY(writePath, notebook, toPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -104,7 +104,7 @@ func importData(c *gin.Context) {
 	defer util.ClearPushProgress(100)
 
 	form, err := c.MultipartForm()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("import data failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -120,7 +120,7 @@ func importData(c *gin.Context) {
 
 	tmpImport := filepath.Join(util.TempDir, "import")
 	err = os.MkdirAll(tmpImport, 0755)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "create temp import dir failed"
 		return
@@ -128,7 +128,7 @@ func importData(c *gin.Context) {
 	dataZipPath := filepath.Join(tmpImport, util.CurrentTimeSecondsStr()+".zip")
 	defer os.RemoveAll(dataZipPath)
 	dataZipFile, err := os.Create(dataZipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create temp file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = "create temp file failed"
@@ -136,20 +136,20 @@ func importData(c *gin.Context) {
 	}
 	file := form.File["file"][0]
 	fileReader, err := file.Open()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("open upload file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = "open file failed"
 		return
 	}
 	_, err = io.Copy(dataZipFile, fileReader)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read upload file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = "read file failed"
 		return
 	}
-	if err = dataZipFile.Close(); nil != err {
+	if err = dataZipFile.Close(); err != nil {
 		logging.LogErrorf("close file failed: %s", err)
 		ret.Code = -1
 		ret.Msg = "close file failed"
@@ -158,7 +158,7 @@ func importData(c *gin.Context) {
 	fileReader.Close()
 
 	err = model.ImportData(dataZipPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -178,7 +178,7 @@ func importStdMd(c *gin.Context) {
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
 	err := model.ImportFromLocalPath(notebook, localPath, toPath)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

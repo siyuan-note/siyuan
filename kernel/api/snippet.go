@@ -49,7 +49,7 @@ func getSnippet(c *gin.Context) {
 	}
 
 	confSnippets, err := model.LoadSnippets()
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "load snippets failed: " + err.Error()
 		return
@@ -108,7 +108,7 @@ func setSnippet(c *gin.Context) {
 	}
 
 	err := model.SetSnippet(snippets)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "set snippet failed: " + err.Error()
 		return
@@ -126,7 +126,7 @@ func removeSnippet(c *gin.Context) {
 
 	id := arg["id"].(string)
 	snippet, err := model.RemoveSnippet(id)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = "remove snippet failed: " + err.Error()
 		return

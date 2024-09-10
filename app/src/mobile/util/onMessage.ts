@@ -1,20 +1,30 @@
 import {openMobileFileById} from "../editor";
-import {processSync, progressLoading, progressStatus, reloadSync, transactionError} from "../../dialog/processSystem";
+import {
+    processSync,
+    progressLoading,
+    progressStatus,
+    reloadSync, setDefRefCount, setRefDynamicText,
+    transactionError
+} from "../../dialog/processSystem";
 import {Constants} from "../../constants";
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
-import {fetchPost} from "../../util/fetch";
+import {reloadEmoji} from "../../emoji";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
+            case "setDefRefCount":
+                setDefRefCount(data.data);
+                break;
+            case "setRefDynamicText":
+                setRefDynamicText(data.data);
+                break;
             case "reloadPlugin":
                 reloadPlugin(app, data.data);
                 break;
             case "reloadEmojiConf":
-                fetchPost("/api/system/getEmojiConf", {}, response => {
-                    window.siyuan.emojis = response.data as IEmoji[];
-                });
+                reloadEmoji();
                 break;
             case "syncMergeResult":
                 reloadSync(app, data.data);

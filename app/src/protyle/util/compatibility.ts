@@ -7,7 +7,12 @@ export const openByMobile = (uri: string) => {
         return;
     }
     if (window.siyuan.config.system.container === "ios") {
-        window.location.href = uri;
+        try {
+            new URL(uri);
+            window.location.href = uri;
+        } catch (e) {
+            window.location.href = "https://" + uri;
+        }
     } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
     } else {

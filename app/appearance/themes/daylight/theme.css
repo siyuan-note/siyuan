@@ -185,3 +185,7 @@
 .protyle-action--order:after {
     mix-blend-mode: multiply;
 }
+
+.b3-typography .code-block, .protyle-wysiwyg .code-block {
+    background-color: rgba(27, 31, 35, .05);
+}

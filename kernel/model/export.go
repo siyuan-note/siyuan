@@ -61,7 +61,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	// Database block supports export as CSV https://github.com/siyuan-note/siyuan/issues/10072
 
 	attrView, err := av.ParseAttributeView(avID)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -71,7 +71,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	}
 	viewID := node.IALAttr(av.NodeAttrView)
 	view, err := attrView.GetCurrentView(viewID)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -83,19 +83,19 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	table.SortRows(attrView)
 
 	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
-	if err = os.MkdirAll(exportFolder, 0755); nil != err {
+	if err = os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("mkdir [%s] failed: %s", exportFolder, err)
 		return
 	}
 	csvPath := filepath.Join(exportFolder, name+".csv")
 
 	f, err := os.OpenFile(csvPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0644)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("open [%s] failed: %s", csvPath, err)
 		return
 	}
 
-	if _, err = f.WriteString("\xEF\xBB\xBF"); nil != err { // 写入 UTF-8 BOM，避免使用 Microsoft Excel 打开乱码
+	if _, err = f.WriteString("\xEF\xBB\xBF"); err != nil { // 写入 UTF-8 BOM，避免使用 Microsoft Excel 打开乱码
 		logging.LogErrorf("write UTF-8 BOM to [%s] failed: %s", csvPath, err)
 		f.Close()
 		return
@@ -106,7 +106,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	for _, col := range table.Columns {
 		header = append(header, col.Name)
 	}
-	if err = writer.Write(header); nil != err {
+	if err = writer.Write(header); err != nil {
 		logging.LogErrorf("write csv header [%s] failed: %s", header, err)
 		f.Close()
 		return
@@ -164,7 +164,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 
 			rowVal = append(rowVal, val)
 		}
-		if err = writer.Write(rowVal); nil != err {
+		if err = writer.Write(rowVal); err != nil {
 			logging.LogErrorf("write csv row [%s] failed: %s", rowVal, err)
 			f.Close()
 			return
@@ -175,19 +175,19 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 
 	zipPath = exportFolder + ".db.zip"
 	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
 		f.Close()
 		return
 	}
 
-	if err = zip.AddDirectory("", exportFolder); nil != err {
+	if err = zip.AddDirectory("", exportFolder); err != nil {
 		logging.LogErrorf("create export .db.zip [%s] failed: %s", exportFolder, err)
 		f.Close()
 		return
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export .db.zip failed: %s", err)
 		f.Close()
 		return
@@ -204,7 +204,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 
 func Export2Liandi(id string) (err error) {
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
 	}
@@ -221,7 +221,7 @@ func Export2Liandi(id string) (err error) {
 	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -309,7 +309,7 @@ func Export2Liandi(id string) (err error) {
 		articleId = result.Data.(string)
 		tree, _ = LoadTreeByBlockID(id) // 这里必须重新加载，因为前面导出时已经修改了树结构
 		tree.Root.SetIALAttr(liandiArticleIdAttrName, articleId)
-		if err = writeTreeUpsertQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
 	}
@@ -322,7 +322,7 @@ func Export2Liandi(id string) (err error) {
 func ExportSystemLog() (zipPath string) {
 	exportFolder := filepath.Join(util.TempDir, "export", "system-log")
 	os.RemoveAll(exportFolder)
-	if err := os.MkdirAll(exportFolder, 0755); nil != err {
+	if err := os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
@@ -330,7 +330,7 @@ func ExportSystemLog() (zipPath string) {
 	appLog := filepath.Join(util.HomeDir, ".config", "siyuan", "app.log")
 	if gulu.File.IsExist(appLog) {
 		to := filepath.Join(exportFolder, "app.log")
-		if err := filelock.Copy(appLog, to); nil != err {
+		if err := filelock.Copy(appLog, to); err != nil {
 			logging.LogErrorf("copy app log from [%s] to [%s] failed: %s", err, appLog, to)
 		}
 	}
@@ -338,7 +338,7 @@ func ExportSystemLog() (zipPath string) {
 	kernelLog := filepath.Join(util.HomeDir, ".config", "siyuan", "kernel.log")
 	if gulu.File.IsExist(kernelLog) {
 		to := filepath.Join(exportFolder, "kernel.log")
-		if err := filelock.Copy(kernelLog, to); nil != err {
+		if err := filelock.Copy(kernelLog, to); err != nil {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, kernelLog, to)
 		}
 	}
@@ -346,7 +346,7 @@ func ExportSystemLog() (zipPath string) {
 	siyuanLog := filepath.Join(util.TempDir, "siyuan.log")
 	if gulu.File.IsExist(siyuanLog) {
 		to := filepath.Join(exportFolder, "siyuan.log")
-		if err := filelock.Copy(siyuanLog, to); nil != err {
+		if err := filelock.Copy(siyuanLog, to); err != nil {
 			logging.LogErrorf("copy kernel log from [%s] to [%s] failed: %s", err, siyuanLog, to)
 		}
 	}
@@ -354,24 +354,24 @@ func ExportSystemLog() (zipPath string) {
 	mobileLog := filepath.Join(util.TempDir, "mobile.log")
 	if gulu.File.IsExist(mobileLog) {
 		to := filepath.Join(exportFolder, "mobile.log")
-		if err := filelock.Copy(mobileLog, to); nil != err {
+		if err := filelock.Copy(mobileLog, to); err != nil {
 			logging.LogErrorf("copy mobile log from [%s] to [%s] failed: %s", err, mobileLog, to)
 		}
 	}
 
 	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export log zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
-	if err = zip.AddDirectory("log", exportFolder); nil != err {
+	if err = zip.AddDirectory("log", exportFolder); err != nil {
 		logging.LogErrorf("create export log zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export log zip failed: %s", err)
 	}
 
@@ -414,12 +414,12 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	defer util.ClearPushProgress(100)
 
 	zipPath, err := ExportData()
-	if nil != err {
+	if err != nil {
 		return
 	}
 	name = filepath.Base(zipPath)
 	name, err = url.PathUnescape(name)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("url unescape [%s] failed: %s", name, err)
 		return
 	}
@@ -427,7 +427,7 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)
 	err = filelock.Copy(zipAbsPath, targetZipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("copy export zip from [%s] to [%s] failed: %s", zipAbsPath, targetZipPath, err)
 		return
 	}
@@ -441,10 +441,10 @@ func ExportData() (zipPath string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
-	name := util.FilterFileName(filepath.Base(util.WorkspaceDir)) + "-" + util.CurrentTimeSecondsStr()
+	name := util.FilterFileName(util.WorkspaceName) + "-" + util.CurrentTimeSecondsStr()
 	exportFolder := filepath.Join(util.TempDir, "export", name)
 	zipPath, err = exportData(exportFolder)
-	if nil != err {
+	if err != nil {
 		return
 	}
 	zipPath = "/export/" + url.PathEscape(filepath.Base(zipPath))
@@ -455,13 +455,13 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	WaitForWritingFiles()
 
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
-	if err = os.MkdirAll(exportFolder, 0755); nil != err {
+	if err = os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
 
 	data := filepath.Join(util.WorkspaceDir, "data")
-	if err = filelock.Copy(data, exportFolder); nil != err {
+	if err = filelock.Copy(data, exportFolder); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", data, baseFolderName, err)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), err.Error()))
 		return
@@ -469,7 +469,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 
 	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export data zip [%s] failed: %s", exportFolder, err)
 		return
 	}
@@ -479,12 +479,12 @@ func exportData(exportFolder string) (zipPath string, err error) {
 		util.PushEndlessProgress(msg)
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); nil != err {
+	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
 		logging.LogErrorf("create export data zip [%s] failed: %s", exportFolder, err)
 		return
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export data zip failed: %s", err)
 	}
 
@@ -497,7 +497,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 	// 用于导出的临时文件夹完整路径
 	exportFolderPath := filepath.Join(util.TempDir, "export", mainName)
-	if err = os.MkdirAll(exportFolderPath, 0755); nil != err {
+	if err = os.MkdirAll(exportFolderPath, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
@@ -507,7 +507,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 		resourceFullPath := filepath.Join(util.WorkspaceDir, resourcePath)    // 资源完整路径
 		resourceBaseName := filepath.Base(resourceFullPath)                   // 资源名称
 		resourceCopyPath := filepath.Join(exportFolderPath, resourceBaseName) // 资源副本完整路径
-		if err = filelock.Copy(resourceFullPath, resourceCopyPath); nil != err {
+		if err = filelock.Copy(resourceFullPath, resourceCopyPath); err != nil {
 			logging.LogErrorf("copy resource will be exported from [%s] to [%s] failed: %s", resourcePath, resourceCopyPath, err)
 			err = fmt.Errorf(Conf.Language(14), err.Error())
 			return
@@ -516,17 +516,17 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 	zipFilePath := exportFolderPath + ".zip" // 导出的 *.zip 文件完整路径
 	zip, err := gulu.Zip.Create(zipFilePath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", zipFilePath, err)
 		return
 	}
 
-	if err = zip.AddDirectory(mainName, exportFolderPath); nil != err {
+	if err = zip.AddDirectory(mainName, exportFolderPath); err != nil {
 		logging.LogErrorf("create export zip [%s] failed: %s", exportFolderPath, err)
 		return
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export zip failed: %s", err)
 	}
 
@@ -570,7 +570,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	}
 
 	tmpDir := filepath.Join(util.TempDir, "export", gulu.Rand.String(7))
-	if err = os.MkdirAll(tmpDir, 0755); nil != err {
+	if err = os.MkdirAll(tmpDir, 0755); err != nil {
 		return
 	}
 	defer os.Remove(tmpDir)
@@ -601,7 +601,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	gulu.CmdAttr(pandoc)
 	pandoc.Stdin = bytes.NewBufferString(content)
 	output, err := pandoc.CombinedOutput()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
 		msg := fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output))
 		err = errors.New(msg)
@@ -610,14 +610,14 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 
 	fullPath = filepath.Join(savePath, name+".docx")
 	fullPath = util.GetUniqueFilename(fullPath)
-	if err = filelock.Copy(tmpDocxPath, fullPath); nil != err {
+	if err = filelock.Copy(tmpDocxPath, fullPath); err != nil {
 		logging.LogErrorf("export docx failed: %s", err)
 		err = errors.New(fmt.Sprintf(Conf.Language(14), err))
 		return
 	}
 
 	if tmpAssets := filepath.Join(tmpDir, "assets"); !removeAssets && gulu.File.IsDir(tmpAssets) {
-		if err = filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); nil != err {
+		if err = filelock.Copy(tmpAssets, filepath.Join(savePath, "assets")); err != nil {
 			logging.LogErrorf("export docx failed: %s", err)
 			err = errors.New(fmt.Sprintf(Conf.Language(14), err))
 			return
@@ -652,7 +652,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 	savePath = strings.TrimSpace(savePath)
 
-	if err := os.MkdirAll(savePath, 0755); nil != err {
+	if err := os.MkdirAll(savePath, 0755); err != nil {
 		logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
 		return
 	}
@@ -665,12 +665,12 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 			}
 
 			srcAbsPath, err := GetAssetAbsPath(asset)
-			if nil != err {
+			if err != nil {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
 				continue
 			}
 			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); nil != err {
+			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
 		}
@@ -680,7 +680,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, src := range srcs {
 		from := filepath.Join(util.WorkingDir, src)
 		to := filepath.Join(savePath, src)
-		if err := filelock.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); err != nil {
 			logging.LogWarnf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -705,7 +705,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, src := range srcs {
 		from := filepath.Join(appearancePath, src)
 		to := filepath.Join(savePath, "appearance", src)
-		if err := filelock.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); err != nil {
 			logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -716,7 +716,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	for _, emoji := range emojis {
 		from := filepath.Join(util.DataDir, emoji)
 		to := filepath.Join(savePath, emoji)
-		if err := filelock.Copy(from, to); nil != err {
+		if err := filelock.Copy(from, to); err != nil {
 			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
 			return
 		}
@@ -802,7 +802,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
 	if "" != savePath {
-		if err := os.MkdirAll(savePath, 0755); nil != err {
+		if err := os.MkdirAll(savePath, 0755); err != nil {
 			logging.LogErrorf("mkdir [%s] failed: %s", savePath, err)
 			return
 		}
@@ -814,12 +814,12 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			}
 
 			srcAbsPath, err := GetAssetAbsPath(asset)
-			if nil != err {
+			if err != nil {
 				logging.LogWarnf("resolve path of asset [%s] failed: %s", asset, err)
 				continue
 			}
 			targetAbsPath := filepath.Join(savePath, asset)
-			if err = filelock.Copy(srcAbsPath, targetAbsPath); nil != err {
+			if err = filelock.Copy(srcAbsPath, targetAbsPath); err != nil {
 				logging.LogWarnf("copy asset from [%s] to [%s] failed: %s", srcAbsPath, targetAbsPath, err)
 			}
 		}
@@ -831,7 +831,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, src := range srcs {
 			from := filepath.Join(util.WorkingDir, src)
 			to := filepath.Join(savePath, src)
-			if err := filelock.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -855,7 +855,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, src := range srcs {
 			from := filepath.Join(appearancePath, src)
 			to := filepath.Join(savePath, "appearance", src)
-			if err := filelock.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -866,7 +866,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		for _, emoji := range emojis {
 			from := filepath.Join(util.DataDir, emoji)
 			to := filepath.Join(savePath, emoji)
-			if err := filelock.Copy(from, to); nil != err {
+			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
 				return
 			}
@@ -1055,7 +1055,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 
 		fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
 		err := api.InstallFonts([]string{fontPath})
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("install font [%s] failed: %s", fontPath, err)
 		}
 	}
@@ -1073,14 +1073,14 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 		wm, err = pdfcpu.ParsePDFWatermarkDetails(str, desc, false, pdfcpu.POINTS)
 	}
 
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("parse watermark failed: %s", err)
 		return
 	}
 
 	wm.OnTop = true // Export PDF and add watermarks no longer covered by images https://github.com/siyuan-note/siyuan/issues/10818
 	err = pdfCtx.AddWatermarks(nil, wm)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("add watermark failed: %s", err)
 		return
 	}
@@ -1088,7 +1088,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 
 func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 	links, err := api.ListToCLinks(pdfCtx)
-	if nil != err {
+	if err != nil {
 		return
 	}
 
@@ -1148,7 +1148,7 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 	}
 
 	err = pdfCtx.AddBookmarks(topBms)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("add bookmark failed: %s", err)
 		return
 	}
@@ -1342,7 +1342,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 
 func ExportStdMarkdown(id string) string {
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return ""
 	}
@@ -1503,7 +1503,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName)
-	if err := os.MkdirAll(exportFolder, 0755); nil != err {
+	if err := os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
@@ -1518,7 +1518,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 		id := docIAL["id"]
 		tree, err := LoadTreeByBlockID(id)
-		if nil != err {
+		if err != nil {
 			continue
 		}
 		trees[tree.ID] = tree
@@ -1649,7 +1649,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			attrView, err := av.ParseAttributeView(avID)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 				return ast.WalkContinue
 			}
@@ -1749,7 +1749,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	zipPath = exportFolder + ".sy.zip"
 	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
@@ -1759,12 +1759,12 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		util.PushEndlessProgress(msg)
 	}
 
-	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); nil != err {
+	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
 		logging.LogErrorf("create export .sy.zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export .sy.zip failed: %s", err)
 	}
 
@@ -1819,7 +1819,7 @@ func ExportMarkdownContent(id string) (hPath, exportedMd string) {
 
 func exportMarkdownContent(id string, exportRefMode int, defBlockIDs []string) (hPath, exportedMd string) {
 	tree, err := LoadTreeByBlockID(id)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
 	}
@@ -1865,6 +1865,11 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 				href := n.TextMarkAHref
 				if util.IsAssetLinkDest([]byte(href)) {
 					n.TextMarkAHref = strings.ReplaceAll(href, " ", "_")
+				}
+			} else if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+				dest := treenode.GetNodeSrcTokens(n)
+				if util.IsAssetLinkDest([]byte(dest)) {
+					setAssetsLinkDest(n, dest, strings.ReplaceAll(dest, " ", "_"))
 				}
 			}
 			return ast.WalkContinue
@@ -2196,14 +2201,14 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		attrView, err := av.ParseAttributeView(avID)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue
 		}
 
 		viewID := n.IALAttr(av.NodeAttrView)
 		view, err := attrView.GetCurrentView(viewID)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("get attribute view [%s] failed: %s", avID, err)
 			return ast.WalkContinue
 		}
@@ -2389,7 +2394,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 	var rendered []string
 	for _, foot := range *refFootnotes {
 		t, err := LoadTreeByBlockID(foot.defID)
-		if nil != err {
+		if err != nil {
 			continue
 		}
 		defNode := treenode.GetNodeInTree(t, foot.defID)
@@ -2515,7 +2520,7 @@ func collectFootnotesDefs(id string, refFootnotes *[]*refAsFootnotes, treeCache 
 	t := (*treeCache)[b.RootID]
 	if nil == t {
 		var err error
-		if t, err = LoadTreeByBlockID(b.ID); nil != err {
+		if t, err = LoadTreeByBlockID(b.ID); err != nil {
 			return
 		}
 		(*treeCache)[t.ID] = t
@@ -2602,7 +2607,7 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 				return ast.WalkSkipChildren
 			}
 			defTree, err := LoadTreeByBlockID(defBlock.RootID)
-			if nil != err {
+			if err != nil {
 				return ast.WalkSkipChildren
 			}
 
@@ -2647,18 +2652,18 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode int) ast.WalkStatus {
 	p := refID[:strings.LastIndex(refID, "/")]
 	absPath, err := GetAssetAbsPath(p)
-	if nil != err {
+	if err != nil {
 		logging.LogWarnf("get assets abs path by rel path [%s] failed: %s", p, err)
 		return ast.WalkSkipChildren
 	}
 	sya := absPath + ".sya"
 	syaData, err := os.ReadFile(sya)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read file [%s] failed: %s", sya, err)
 		return ast.WalkSkipChildren
 	}
 	syaJSON := map[string]interface{}{}
-	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(syaData, &syaJSON); err != nil {
 		logging.LogErrorf("unmarshal file [%s] failed: %s", sya, err)
 		return ast.WalkSkipChildren
 	}
@@ -2705,7 +2710,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
 	os.RemoveAll(exportFolder)
-	if err := os.MkdirAll(exportFolder, 0755); nil != err {
+	if err := os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
 		return
 	}
@@ -2726,7 +2731,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 			}
 			id := docIAL["id"]
 			tree, err := LoadTreeByBlockID(id)
-			if nil != err {
+			if err != nil {
 				continue
 			}
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2772,7 +2777,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 			writePath = filepath.Join(exportFolder, p)
 		}
 		writeFolder := filepath.Dir(writePath)
-		if err := os.MkdirAll(writeFolder, 0755); nil != err {
+		if err := os.MkdirAll(writeFolder, 0755); err != nil {
 			logging.LogErrorf("create export temp folder [%s] failed: %s", writeFolder, err)
 			continue
 		}
@@ -2792,14 +2797,14 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 			}
 
 			srcPath, err := GetAssetAbsPath(asset)
-			if nil != err {
+			if err != nil {
 				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
 				continue
 			}
 
 			destPath := filepath.Join(writeFolder, asset)
 			err = filelock.Copy(srcPath, destPath)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
 				continue
 			}
@@ -2807,7 +2812,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 		// 调用 Pandoc 进行格式转换
 		err := util.Pandoc(pandocFrom, pandocTo, writePath, md)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("pandoc failed: %s", err)
 			continue
 		}
@@ -2815,14 +2820,14 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 	zipPath = exportFolder + ".zip"
 	zip, err := gulu.Zip.Create(zipPath)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("create export markdown zip [%s] failed: %s", exportFolder, err)
 		return ""
 	}
 
 	// 导出 Markdown zip 包内不带文件夹 https://github.com/siyuan-note/siyuan/issues/6869
 	entries, err := os.ReadDir(exportFolder)
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("read export markdown folder [%s] failed: %s", exportFolder, err)
 		return ""
 	}
@@ -2833,13 +2838,13 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 		} else {
 			err = zip.AddEntry(entry.Name(), entryPath)
 		}
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("add entry [%s] to zip failed: %s", entry.Name(), err)
 			return ""
 		}
 	}
 
-	if err = zip.Close(); nil != err {
+	if err = zip.Close(); err != nil {
 		logging.LogErrorf("close export markdown zip failed: %s", err)
 	}
 

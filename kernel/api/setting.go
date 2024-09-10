@@ -61,14 +61,14 @@ func setConfSnippet(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	snippet := &conf.Snpt{}
-	if err = gulu.JSON.UnmarshalJSON(param, snippet); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, snippet); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -142,14 +142,14 @@ func setBazaar(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	bazaar := &conf.Bazaar{}
-	if err = gulu.JSON.UnmarshalJSON(param, bazaar); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, bazaar); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -171,14 +171,14 @@ func setAI(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	ai := &conf.AI{}
-	if err = gulu.JSON.UnmarshalJSON(param, ai); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, ai); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -219,14 +219,14 @@ func setFlashcard(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	flashcard := &conf.Flashcard{}
-	if err = gulu.JSON.UnmarshalJSON(param, flashcard); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, flashcard); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -256,14 +256,14 @@ func setAccount(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	account := &conf.Account{}
-	if err = gulu.JSON.UnmarshalJSON(param, account); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, account); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -285,7 +285,7 @@ func setEditor(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -294,7 +294,7 @@ func setEditor(c *gin.Context) {
 	oldGenerateHistoryInterval := model.Conf.Editor.GenerateHistoryInterval
 
 	editor := conf.NewEditor()
-	if err = gulu.JSON.UnmarshalJSON(param, editor); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, editor); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -346,14 +346,14 @@ func setExport(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	export := &conf.Export{}
-	if err = gulu.JSON.UnmarshalJSON(param, export); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, export); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
@@ -385,14 +385,14 @@ func setFiletree(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	fileTree := conf.NewFileTree()
-	if err = gulu.JSON.UnmarshalJSON(param, fileTree); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, fileTree); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -431,14 +431,14 @@ func setSearch(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	s := &conf.Search{}
-	if err = gulu.JSON.UnmarshalJSON(param, s); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, s); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -485,14 +485,14 @@ func setKeymap(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg["data"])
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	keymap := &conf.Keymap{}
-	if err = gulu.JSON.UnmarshalJSON(param, keymap); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, keymap); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -512,14 +512,14 @@ func setAppearance(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	appearance := &conf.Appearance{}
-	if err = gulu.JSON.UnmarshalJSON(param, appearance); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, appearance); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -544,14 +544,14 @@ func setPublish(c *gin.Context) {
 	}
 
 	param, err := gulu.JSON.MarshalJSON(arg)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
 	publish := &conf.Publish{}
-	if err = gulu.JSON.UnmarshalJSON(param, publish); nil != err {
+	if err = gulu.JSON.UnmarshalJSON(param, publish); err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -627,7 +627,7 @@ func login2faCloudUser(c *gin.Context) {
 	token := arg["token"].(string)
 	code := arg["code"].(string)
 	data, err := model.Login2fa(token, code)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

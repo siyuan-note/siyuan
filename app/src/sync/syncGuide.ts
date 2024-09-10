@@ -246,11 +246,11 @@ const setSync = (key?: string, dialog?: Dialog) => {
     <button class="b3-button" disabled="disabled">${window.siyuan.languages.openSyncTip1}</button>
 </div>`;
         if (dialog) {
-            dialog.element.querySelector(".b3-dialog__header").innerHTML = window.siyuan.languages.cloudSyncDir;
+            dialog.element.querySelector(".b3-dialog__header").innerHTML = "🗂️ " + window.siyuan.languages.cloudSyncDir;
             dialog.element.querySelector(".b3-dialog__body").innerHTML = listHTML;
         } else {
             dialog = new Dialog({
-                title: window.siyuan.languages.cloudSyncDir,
+                title: "🗂️ " + window.siyuan.languages.cloudSyncDir,
                 content: listHTML,
                 width: isMobile() ? "92vw" : "520px",
             });
@@ -277,7 +277,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
             fetchPost("/api/sync/setSyncEnable", {enabled: true}, () => {
                 window.siyuan.config.sync.enabled = true;
                 processSync();
-                confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
+                confirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
                     syncNow();
                 });
             });
@@ -286,7 +286,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
         if (dialog) {
             dialog.destroy();
         }
-        confirmDialog(window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
+        confirmDialog("🔄 " + window.siyuan.languages.syncConfGuide4, window.siyuan.languages.syncConfGuide5, () => {
             syncNow();
         });
     }
@@ -294,7 +294,7 @@ const setSync = (key?: string, dialog?: Dialog) => {
 
 export const setKey = (isSync: boolean, cb?: () => void) => {
     const dialog = new Dialog({
-        title: window.siyuan.languages.syncConfGuide1,
+        title: "🔑 " + window.siyuan.languages.syncConfGuide1,
         content: `<div class="b3-dialog__content ft__center">
     <img style="width: 260px" src="/stage/images/sync-guide.svg"/>
     <div class="fn__hr--b"></div>

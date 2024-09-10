@@ -99,7 +99,7 @@ func setBlockAttrs(c *gin.Context) {
 		}
 	}
 	err := model.SetBlockAttrs(id, nameValues)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -141,7 +141,7 @@ func batchSetBlockAttrs(c *gin.Context) {
 	}
 
 	err := model.BatchSetBlockAttrs(blockAttrs)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
@@ -164,7 +164,7 @@ func resetBlockAttrs(c *gin.Context) {
 		nameValues[name] = value.(string)
 	}
 	err := model.ResetBlockAttrs(id, nameValues)
-	if nil != err {
+	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return

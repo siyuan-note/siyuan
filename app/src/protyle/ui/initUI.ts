@@ -6,6 +6,8 @@ import {isMac} from "../util/compatibility";
 import {setInlineStyle} from "../../util/assets";
 import {fetchPost} from "../../util/fetch";
 import {lineNumberRender} from "../render/highlightRender";
+import {hideMessage, showMessage} from "../../dialog/message";
+import {genUUID} from "../../util/genID";
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -48,6 +50,7 @@ export const initUI = (protyle: IProtyle) => {
     document.execCommand("DefaultParagraphSeparator", false, "p");
 
     let wheelTimeout: number;
+    const wheelId = genUUID();
     const isMacOS = isMac();
     protyle.contentElement.addEventListener("mousewheel", (event: WheelEvent) => {
         if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
@@ -70,13 +73,22 @@ export const initUI = (protyle: IProtyle) => {
         }
         setInlineStyle();
         clearTimeout(wheelTimeout);
+        showMessage(`${window.siyuan.languages.fontSize} ${window.siyuan.config.editor.fontSize}px<span class="fn__space"></span>
+<button class="b3-button b3-button--small b3-button--white">${window.siyuan.languages.reset} 16px</button>`, undefined, undefined, wheelId);
         wheelTimeout = window.setTimeout(() => {
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
-            if (window.siyuan.config.editor.codeSyntaxHighlightLineNum) {
+            protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
+                lineNumberRender(block.parentElement);
+            });
+            document.querySelector(`#message [data-id="${wheelId}"] button`)?.addEventListener("click", () => {
+                window.siyuan.config.editor.fontSize = 16;
+                setInlineStyle();
+                fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
+                hideMessage(wheelId);
                 protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {
                     lineNumberRender(block.parentElement);
                 });
-            }
+            });
         }, Constants.TIMEOUT_LOAD);
     }, {passive: false});
 };

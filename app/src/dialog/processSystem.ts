@@ -3,6 +3,9 @@ import {fetchPost} from "../util/fetch";
 /// #if !MOBILE
 import {exportLayout} from "../layout/util";
 /// #endif
+import {getAllEditor, getAllModels} from "../layout/getAll";
+import {getDockByType} from "../layout/tabUtil";
+import {Files} from "../layout/dock/Files";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
 /// #endif
@@ -14,7 +17,6 @@ import {escapeHtml} from "../util/escape";
 import {getWorkspaceName} from "../util/noRelyPCFunction";
 import {needSubscribe} from "../util/needSubscribe";
 import {redirectToCheckAuth, setNoteBook} from "../util/pathName";
-import {getAllModels} from "../layout/getAll";
 import {reloadProtyle} from "../protyle/util/reload";
 import {Tab} from "../layout/Tab";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -142,6 +144,83 @@ export const reloadSync = (
         }
     });
     /// #endif
+};
+
+export const setRefDynamicText = (data: {
+    "blockID": string,
+    "defBlockID": string,
+    "refText": string,
+    "rootID": string
+}) => {
+    getAllEditor().forEach(item => {
+        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
+            item.innerHTML = data.refText;
+        });
+    });
+};
+
+export const setDefRefCount = (data: {
+    "blockID": string,
+    "refCount": number,
+    "rootRefCount": number,
+    "rootID": string
+    refIDs: string[]
+}) => {
+    getAllEditor().forEach(item => {
+        if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
+            const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
+            const countElement = attrElement.querySelector(".popover__block");
+            if (countElement) {
+                if (data.refCount === 0) {
+                    countElement.remove();
+                } else {
+                    countElement.textContent = data.refCount.toString();
+                    countElement.setAttribute("data-id", data.refIDs.toString());
+                }
+            } else if (data.refCount > 0) {
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`);
+            }
+            return;
+        }
+        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
+            const countElement = item.querySelector(".protyle-attr--refcount");
+            if (countElement) {
+                if (data.refCount === 0) {
+                    countElement.remove();
+                } else {
+                    countElement.textContent = data.refCount.toString();
+                }
+            } else if (data.refCount > 0) {
+                const attrElement = item.querySelector(".protyle-attr");
+                if (attrElement.childElementCount > 0) {
+                    attrElement.lastElementChild.insertAdjacentHTML("afterend", `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>`);
+                } else {
+                    attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`;
+                }
+            }
+        });
+    });
+
+    let liElement;
+    /// #if MOBILE
+    liElement = window.siyuan.mobile.files.element.querySelector(`li[data-node-id="${data.rootID}"]`);
+    /// #else
+    liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`);
+    /// #endif
+    if (liElement) {
+        const counterElement = liElement.querySelector(".counter");
+        if (counterElement) {
+            if (data.rootRefCount === 0) {
+                counterElement.remove();
+            } else {
+                counterElement.textContent = data.rootRefCount.toString();
+            }
+        } else if (data.rootRefCount > 0) {
+            liElement.insertAdjacentHTML("beforeend", `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${data.rootRefCount}</span>`);
+        }
+    }
 };
 
 export const lockScreen = (app: App) => {

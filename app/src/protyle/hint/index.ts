@@ -339,7 +339,13 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
 <span class="b3-list-item__text">${window.siyuan.languages.newFile} <mark>${response.data.k}</mark></span></div></button>`;
             }
             response.data.blocks.forEach((item: IBlock, index: number) => {
-                const blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+                let blockRefHTML;
+                if (source === "av") {
+                    // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
+                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
+                } else {
+                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
+                }
                 searchHTML += `<button style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-value="${encodeURIComponent(blockRefHTML)}">
 ${genHintItemHTML(item)}
 </button>`;
@@ -481,7 +487,10 @@ ${genHintItemHTML(item)}
                 updateAttrViewCellAnimation(cellElement, {
                     type: "block",
                     isDetached: false,
-                    block: {content: tempElement.textContent, id: sourceId}
+                    block: {
+                        content: tempElement.textContent,
+                        id: sourceId
+                    }
                 });
             }
             return;
@@ -615,6 +624,7 @@ ${genHintItemHTML(item)}
                 range.insertNode(textNode);
                 range.setEnd(textNode, value.length);
                 range.collapse(false);
+                focusByRange(range);
                 return;
             } else if (value === Constants.ZWSP) {
                 range.deleteContents();
@@ -689,6 +699,7 @@ ${genHintItemHTML(item)}
                 range.deleteContents();
                 range.insertNode(document.createTextNode(":"));
                 range.collapse(false);
+                focusByRange(range);
                 this.genEmojiHTML(protyle);
                 return;
             } else if (value.indexOf("style") > -1) {

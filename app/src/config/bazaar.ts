@@ -542,6 +542,10 @@ export const bazaar = {
     <div${(data.outdated && (data.installed || dataObj.downloaded)) ? "" : ' class="fn__none"'}>
         <button class="b3-button" style="width: 168px" data-type="install-t">${window.siyuan.languages.update}</button>
     </div>
+    <div class="fn__hr--b"></div>
+    <div>
+        <a href="${data.repoURL}/issues" target="_blank" title="Feedback via GitHub Issues" class="b3-button b3-button--success" style="width: 168px" data-type="feedback">${window.siyuan.languages.feedback}</a>
+    </div>
     <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
     <div class="fn__hr--b${dataObj.downloaded ? " fn__none" : ""}"></div>
     <div class="fn__flex${dataObj.downloaded ? " fn__none" : ""}" style="justify-content: center;">
@@ -669,6 +673,7 @@ export const bazaar = {
                             url = "/api/bazaar/installBazaarPlugin";
                         }
                         fetchPost(url, {
+                            keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                             repoURL: dataObj.repoURL,
                             packageName: dataObj.name,
                             repoHash: dataObj.repoHash,
@@ -725,6 +730,11 @@ export const bazaar = {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "feedback") {
+
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "install-t") {
                     if (!target.classList.contains("b3-button--progress")) {
                         confirmDialog("⬆️ " + window.siyuan.languages.update, window.siyuan.languages.confirmUpdate, () => {
@@ -743,6 +753,7 @@ export const bazaar = {
                                 target.parentElement.insertAdjacentHTML("afterend", '<img data-type="img-loading" style="position: absolute;top: 0;left: 0;height: 100%;width: 100%;padding: 16px;box-sizing: border-box;" src="/stage/loading-pure.svg">');
                             }
                             fetchPost(url, {
+                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                                 repoURL: dataObj.repoURL,
                                 packageName: dataObj.name,
                                 repoHash: dataObj.repoHash,
@@ -810,6 +821,7 @@ export const bazaar = {
                         confirmDialog("⚠️ " + window.siyuan.languages.uninstall, window.siyuan.languages.confirmUninstall.replace("${name}", packageName), () => {
                             fetchPost(url, {
                                 packageName,
+                                keyword: (bazaar.element.querySelector(".config-bazaar__panel:not(.fn__none) .b3-form__icon-input") as HTMLInputElement).value,
                                 frontend: getFrontend()
                             }, response => {
                                 this._genMyHTML(bazaarType, app);

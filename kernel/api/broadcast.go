@@ -130,7 +130,7 @@ func subscribe(c *gin.Context, broadcastChannel *melody.Melody, channel string) 
 		map[string]interface{}{
 			"channel": channel,
 		},
-	); nil != err {
+	); err != nil {
 		logging.LogErrorf("create broadcast channel failed: %s", err)
 		return
 	}
@@ -175,7 +175,7 @@ func postMessage(c *gin.Context) {
 		channel.Count = 0
 	} else {
 		var broadcastChannel = _broadcastChannel.(*melody.Melody)
-		if err := broadcastChannel.Broadcast([]byte(message)); nil != err {
+		if err := broadcastChannel.Broadcast([]byte(message)); err != nil {
 			logging.LogErrorf("broadcast message failed: %s", err)
 
 			ret.Code = -2

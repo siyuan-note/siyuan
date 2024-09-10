@@ -46,7 +46,7 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 	docDirLocalPath := filepath.Join(util.DataDir, bt.BoxID, path.Dir(bt.Path))
 	assetsDirPath := getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), docDirLocalPath)
 	if !gulu.File.IsExist(assetsDirPath) {
-		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
+		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
 			return
 		}
 	}
@@ -91,16 +91,16 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 			fName = fName[0 : len(fName)-len(ext)]
 			fName = fName + "-" + ast.NewNodeID() + ext
 			writePath := filepath.Join(assetsDirPath, fName)
-			if _, err = f.Seek(0, io.SeekStart); nil != err {
+			if _, err = f.Seek(0, io.SeekStart); err != nil {
 				f.Close()
 				return
 			}
-			if err = filelock.WriteFileByReader(writePath, f); nil != err {
+			if err = filelock.WriteFileByReader(writePath, f); err != nil {
 				f.Close()
 				return
 			}
 			f.Close()
-			succMap[fName] = "assets/" + fName
+			succMap[baseName] = "assets/" + fName
 		}
 	}
 	IncSync()
@@ -112,7 +112,7 @@ func Upload(c *gin.Context) {
 	defer c.JSON(200, ret)
 
 	form, err := c.MultipartForm()
-	if nil != err {
+	if err != nil {
 		logging.LogErrorf("insert asset failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -137,7 +137,7 @@ func Upload(c *gin.Context) {
 		assetsDirPath = filepath.Join(util.DataDir, relAssetsDirPath)
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
-		if err = os.MkdirAll(assetsDirPath, 0755); nil != err {
+		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {
 			ret.Code = -1
 			ret.Msg = err.Error()
 			return
@@ -206,7 +206,7 @@ func Upload(c *gin.Context) {
 			writePath := filepath.Join(assetsDirPath, fName)
 			tmpDir := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
 			if needUnzip2Dir {
-				if err = os.MkdirAll(tmpDir, 0755); nil != err {
+				if err = os.MkdirAll(tmpDir, 0755); err != nil {
 					errFiles = append(errFiles, fName)
 					ret.Msg = err.Error()
 					f.Close()
@@ -215,14 +215,14 @@ func Upload(c *gin.Context) {
 				writePath = filepath.Join(tmpDir, fName)
 			}
 
-			if _, err = f.Seek(0, io.SeekStart); nil != err {
+			if _, err = f.Seek(0, io.SeekStart); err != nil {
 				logging.LogErrorf("seek failed: %s", err)
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
 				f.Close()
 				break
 			}
-			if err = filelock.WriteFileByReader(writePath, f); nil != err {
+			if err = filelock.WriteFileByReader(writePath, f); err != nil {
 				logging.LogErrorf("write file failed: %s", err)
 				errFiles = append(errFiles, fName)
 				ret.Msg = err.Error()
@@ -241,7 +241,7 @@ func Upload(c *gin.Context) {
 				fName += ext
 				fName = util.AssetName(fName)
 				tmpDir2 := filepath.Join(util.TempDir, "convert", "zip", gulu.Rand.String(7))
-				if err = gulu.Zip.Unzip(writePath, tmpDir2); nil != err {
+				if err = gulu.Zip.Unzip(writePath, tmpDir2); err != nil {
 					errFiles = append(errFiles, fName)
 					ret.Msg = err.Error()
 					break
@@ -284,7 +284,7 @@ func Upload(c *gin.Context) {
 				os.RemoveAll(tmpDir2)
 			}
 
-			succMap[fName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
+			succMap[baseName] = strings.TrimPrefix(path.Join(relAssetsDirPath, fName), "/")
 		}
 	}
 

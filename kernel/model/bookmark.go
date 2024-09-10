@@ -66,7 +66,7 @@ func RemoveBookmark(bookmark string) (err error) {
 		}
 
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -124,7 +124,7 @@ func RenameBookmark(oldBookmark, newBookmark string) (err error) {
 		}
 
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); nil != err {
+		if err = writeTreeUpsertQueue(tree); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -180,7 +180,7 @@ func BuildBookmark() (ret *Bookmarks) {
 		} else {
 			// Improve bookmark panel rendering https://github.com/siyuan-note/siyuan/issues/9361
 			tree, err := LoadTreeByBlockID(block.ID)
-			if nil != err {
+			if err != nil {
 				logging.LogErrorf("parse block [%s] failed: %s", block.ID, err)
 			} else {
 				n := treenode.GetNodeInTree(tree, block.ID)

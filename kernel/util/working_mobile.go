@@ -46,14 +46,14 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 	logging.SetLogPath(filepath.Join(userHomeConfDir, "kernel.log"))
 
 	if !gulu.File.IsExist(userHomeConfDir) {
-		if err := os.MkdirAll(userHomeConfDir, 0755); nil != err && !os.IsExist(err) {
+		if err := os.MkdirAll(userHomeConfDir, 0755); err != nil && !os.IsExist(err) {
 			logging.LogErrorf("create user home conf folder [%s] failed: %s", userHomeConfDir, err)
 			os.Exit(logging.ExitCodeInitWorkspaceErr)
 		}
 	}
 
 	defaultWorkspaceDir := filepath.Join(workspaceBaseDir, "siyuan")
-	if err := os.MkdirAll(defaultWorkspaceDir, 0755); nil != err && !os.IsExist(err) {
+	if err := os.MkdirAll(defaultWorkspaceDir, 0755); err != nil && !os.IsExist(err) {
 		logging.LogErrorf("create default workspace folder [%s] failed: %s", defaultWorkspaceDir, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
@@ -69,7 +69,7 @@ func BootMobile(container, appDir, workspaceBaseDir, lang string) {
 func initWorkspaceDirMobile(workspaceBaseDir string) {
 	if gulu.File.IsDir(workspaceBaseDir) {
 		entries, err := os.ReadDir(workspaceBaseDir)
-		if nil != err {
+		if err != nil {
 			logging.LogErrorf("read workspace dir [%s] failed: %s", workspaceBaseDir, err)
 		} else {
 			// 旧版 iOS 端会在 workspaceBaseDir 下直接创建工作空间，这里需要将数据迁移到 workspaceBaseDir/siyuan/ 文件夹下
@@ -96,7 +96,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 
 					from := filepath.Join(workspaceBaseDir, entry.Name())
 					to := filepath.Join(workspaceBaseDir, "siyuan", entry.Name())
-					if err = os.Rename(from, to); nil != err {
+					if err = os.Rename(from, to); err != nil {
 						logging.LogErrorf("move workspace dir [%s] failed: %s", workspaceBaseDir, err)
 					} else {
 						logging.LogInfof("moved workspace dir [fomr=%s, to=%s]", from, to)
@@ -136,11 +136,12 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 		}
 	}
 
-	if err := WriteWorkspacePaths(workspacePaths); nil != err {
+	if err := WriteWorkspacePaths(workspacePaths); err != nil {
 		logging.LogErrorf("write workspace conf [%s] failed: %s", workspaceConf, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}
 
+	WorkspaceName = filepath.Base(WorkspaceDir)
 	ConfDir = filepath.Join(WorkspaceDir, "conf")
 	DataDir = filepath.Join(WorkspaceDir, "data")
 	RepoDir = filepath.Join(WorkspaceDir, "repo")
@@ -148,7 +149,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 	TempDir = filepath.Join(WorkspaceDir, "temp")
 	osTmpDir := filepath.Join(TempDir, "os")
 	os.RemoveAll(osTmpDir)
-	if err := os.MkdirAll(osTmpDir, 0755); nil != err {
+	if err := os.MkdirAll(osTmpDir, 0755); err != nil {
 		logging.LogErrorf("create os tmp dir [%s] failed: %s", osTmpDir, err)
 		os.Exit(logging.ExitCodeInitWorkspaceErr)
 	}

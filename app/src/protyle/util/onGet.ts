@@ -187,7 +187,7 @@ const setHTML = (options: {
         if (editElement && editElement.textContent === "") {
             editElement.classList.add("protyle-wysiwyg--empty");
             /// #if MOBILE
-            editElement.setAttribute("placeholder", window.siyuan.languages.emptyPlaceholder);
+            editElement.setAttribute("placeholder", window.siyuan.languages.emptyMobilePlaceholder);
             /// #else
             editElement.setAttribute("placeholder", window.siyuan.languages.emptyPlaceholder);
             /// #endif

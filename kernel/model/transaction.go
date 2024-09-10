@@ -384,6 +384,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			if err = tx.writeTree(targetTree); err != nil {
 				return
 			}
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, srcTree.ID, srcTree.ID)
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, targetTree.ID, srcNode.ID)
 		}
 		return
 	}
@@ -463,6 +465,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if err = tx.writeTree(targetTree); err != nil {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 		}
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, srcTree.ID, srcTree.ID)
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, targetTree.ID, srcNode.ID)
 	}
 	return
 }

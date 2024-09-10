@@ -1,5 +1,6 @@
 {
   "clearContextSucc": "上下文已清空",
+  "emptyMobilePlaceholder": "記錄點什麼",
   "emptyPlaceholder": "寫點什麼，或按下 ' / ' 查看指令",
   "publish": "發布",
   "publishService": "發布服務",

@@ -1,5 +1,6 @@
 {
   "clearContextSucc": "Se ha borrado el contexto",
+  "emptyMobilePlaceholder": "Grabar algo",
   "emptyPlaceholder": "Escribe algo, ' / ' para los comandos",
   "publish": "Publicar",
   "publishService": "Publicar servicio",

@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"slices"
@@ -3579,13 +3578,4 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
 		av.BatchUpsertBlockRel(avNodes)
 	}
-}
-
-func ReloadAttrView(avID string) {
-	task.AppendAsyncTaskWithDelay(task.ReloadAttributeView, 200*time.Millisecond, pushReloadAttrView, avID)
-
-}
-
-func pushReloadAttrView(avID string) {
-	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 }

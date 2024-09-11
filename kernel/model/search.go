@@ -795,7 +795,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
 	for _, id := range reloadTreeIDs {
-		util.PushProtyleReload(id)
+		refreshProtyle(id)
 	}
 
 	util.PushClearProgress()

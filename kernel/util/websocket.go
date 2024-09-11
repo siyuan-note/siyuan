@@ -254,7 +254,7 @@ func PushSaveDoc(rootID, typ string, sources interface{}) {
 	PushEvent(evt)
 }
 
-func PushProtyleReload(rootID string) {
+func PushReloadProtyle(rootID string) {
 	BroadcastByType("protyle", "reload", 0, "", rootID)
 }
 

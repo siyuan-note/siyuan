@@ -979,6 +979,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 func parseStdMd(markdown []byte) (ret *parse.Tree) {
 	luteEngine := util.NewStdLute()
+	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return

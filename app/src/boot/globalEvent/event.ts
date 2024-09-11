@@ -27,6 +27,10 @@ export const initWindowEvent = (app: App) => {
             window.siyuan.layout.rightDock.hideDock();
             window.siyuan.layout.bottomDock.hideDock();
         }
+        document.querySelectorAll(".protyle-gutters").forEach(item => {
+            item.classList.add("fn__none");
+            item.innerHTML = "";
+        });
         hideTooltip();
     });
     let mouseIsEnter = false;

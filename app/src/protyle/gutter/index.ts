@@ -1858,7 +1858,7 @@ export class Gutter {
 
     private genWidths(nodeElements: Element[], protyle: IProtyle) {
         const styles: IMenu[] = [];
-        ["25%", "33%", "50%", "67%", "75%"].forEach((item) => {
+        ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
             styles.push({
                 label: item,
                 click: () => {

@@ -284,7 +284,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	sql.RemoveTreeQueue(id)
 	sql.IndexTreeQueue(tree)
 	util.PushReloadFiletree()
-	util.PushProtyleReload(id)
+	util.PushReloadProtyle(id)
 	util.PushMsg(Conf.Language(102), 3000)
 
 	IncSync()
@@ -302,8 +302,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			return
 		}
 
-		// 刷新关联的动态锚文本 https://github.com/siyuan-note/siyuan/issues/11575
-		refreshDynamicRefText(tree.Root, tree)
+		refreshProtyle(id)
 
 		// 刷新页签名
 		refText := getNodeRefText(tree.Root)

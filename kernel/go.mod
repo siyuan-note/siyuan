@@ -46,7 +46,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.2.1
-	github.com/open-spaced-repetition/go-fsrs/v2 v2.0.1
+	github.com/open-spaced-repetition/go-fsrs/v3 v3.1.0
 	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/radovskyb/watcher v1.0.7
@@ -60,7 +60,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20240724034355-d1ed7bf21d04
 	github.com/siyuan-note/httpclient v0.0.0-20240910021232-ab6f84db3b8b
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
-	github.com/siyuan-note/riff v0.0.0-20240828101024-443a09504726
+	github.com/siyuan-note/riff v0.0.0-20240911034015-5fb2819a3ad3
 	github.com/spf13/cast v1.7.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0

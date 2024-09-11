@@ -2365,6 +2365,65 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					} else if av.KeyTypeLineNumber == cell.Value.Type {
 						val = strconv.Itoa(rowNum)
 						rowNum++
+					} else if av.KeyTypeRelation == cell.Value.Type {
+						for i, v := range cell.Value.Relation.Contents {
+							if nil == v {
+								continue
+							}
+
+							if av.KeyTypeBlock == v.Type && nil != v.Block {
+								val = v.Block.Content
+								if !wysiwyg {
+									val = string(lex.EscapeProtyleMarkers([]byte(val)))
+									val = strings.ReplaceAll(val, "\\|", "|")
+									val = strings.ReplaceAll(val, "|", "\\|")
+								}
+
+								val = strings.ReplaceAll(val, "\n", " ")
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+							}
+							if i < len(cell.Value.Relation.Contents)-1 {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+							}
+						}
+						continue
+					} else if av.KeyTypeRollup == cell.Value.Type {
+						for i, v := range cell.Value.Rollup.Contents {
+							if nil == v {
+								continue
+							}
+
+							if av.KeyTypeBlock == v.Type {
+								if nil != v.Block {
+									val = v.Block.Content
+									if !wysiwyg {
+										val = string(lex.EscapeProtyleMarkers([]byte(val)))
+										val = strings.ReplaceAll(val, "\\|", "|")
+										val = strings.ReplaceAll(val, "|", "\\|")
+									}
+
+									val = strings.ReplaceAll(val, "\n", " ")
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								}
+							} else if av.KeyTypeText == v.Type {
+								val = v.Text.Content
+								if !wysiwyg {
+									val = string(lex.EscapeProtyleMarkers([]byte(val)))
+									val = strings.ReplaceAll(val, "\\|", "|")
+									val = strings.ReplaceAll(val, "|", "\\|")
+								}
+
+								val = strings.ReplaceAll(val, "\n", " ")
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+							} else {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(v.String(true))})
+							}
+
+							if i < len(cell.Value.Rollup.Contents)-1 {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+							}
+						}
+						continue
 					}
 
 					if "" == val {

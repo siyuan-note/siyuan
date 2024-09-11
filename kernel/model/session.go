@@ -217,7 +217,7 @@ func CheckAuth(c *gin.Context) {
 
 	// 放过来自本机的某些请求
 	if localhost {
-		if strings.HasPrefix(c.Request.RequestURI, "/assets/") {
+		if strings.HasPrefix(c.Request.RequestURI, "/assets/") || strings.HasPrefix(c.Request.RequestURI, "/export/") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return

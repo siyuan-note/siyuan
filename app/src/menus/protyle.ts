@@ -1153,7 +1153,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         imgElement.style.width = inputElement.value + "px";
                         imgElement.style.height = "";
                     });
-                    inputElement.addEventListener("change", () => {
+                    inputElement.addEventListener("blur", () => {
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();
@@ -1215,7 +1215,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         assetElement.style.width = "";
                         imgElement.style.width = "";
                     });
-                    inputElement.addEventListener("change", () => {
+                    inputElement.addEventListener("blur", () => {
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();

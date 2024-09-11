@@ -803,6 +803,7 @@ export class Gutter {
         }
         this.genAlign(selectsElement, protyle);
         this.genWidths(selectsElement, protyle);
+        // this.genHeights(selectsElement, protyle);
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
@@ -1674,6 +1675,7 @@ export class Gutter {
             }
             this.genAlign([nodeElement], protyle);
             this.genWidths([nodeElement], protyle);
+            // this.genHeights([nodeElement], protyle);
         }
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
         if (!["NodeThematicBreak", "NodeBlockQueryEmbed", "NodeIFrame", "NodeHTMLBlock", "NodeWidget", "NodeVideo", "NodeAudio"].includes(type) &&
@@ -1856,10 +1858,55 @@ export class Gutter {
         }).element);
     }
 
+    private updateNodeElements(nodeElements: Element[], protyle: IProtyle, inputElement: HTMLInputElement) {
+        const undoOperations: IOperation[] = [];
+        const operations: IOperation[] = [];
+        nodeElements.forEach((e) => {
+            undoOperations.push({
+                action: "update",
+                id: e.getAttribute("data-node-id"),
+                data: e.outerHTML
+            });
+        });
+        inputElement.addEventListener(inputElement.type === "number" ? "blur" : "change", () => {
+            nodeElements.forEach((e: HTMLElement) => {
+                operations.push({
+                    action: "update",
+                    id: e.getAttribute("data-node-id"),
+                    data: e.outerHTML
+                });
+            });
+            transaction(protyle, operations, undoOperations);
+            window.siyuan.menus.menu.remove();
+            focusBlock(nodeElements[0]);
+        });
+    }
+
     private genWidths(nodeElements: Element[], protyle: IProtyle) {
-        const styles: IMenu[] = [];
+        let rangeElement: HTMLInputElement;
+        const firstElement = nodeElements[0] as HTMLElement
+        const styles: IMenu[] = [{
+            iconHTML: "",
+            type: "readonly",
+            label: `<div class="fn__flex-center">
+<input class="b3-text-field" value="${firstElement.style.width.endsWith("px") ? parseInt(firstElement.style.width) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.width}"> px
+</div>`,
+            bind: (element) => {
+                const inputElement = element.querySelector("input");
+                inputElement.addEventListener("input", () => {
+                    nodeElements.forEach((item: HTMLElement) => {
+                        item.style.width = inputElement.value + "px";
+                        item.style.flex = "none";
+                    })
+                    rangeElement.value = "0";
+                    rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                });
+                this.updateNodeElements(nodeElements, protyle, inputElement);
+            }
+        }];
         ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
             styles.push({
+                iconHTML: "",
                 label: item,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
@@ -1872,60 +1919,118 @@ export class Gutter {
         styles.push({
             type: "separator"
         });
-        let width = 100;
-        if (nodeElements.length === 1) {
-            const widthStyle = (nodeElements[0] as HTMLElement).style.width;
-            if (widthStyle.endsWith("%")) {
-                width = parseInt(widthStyle);
-            }
-        }
+        const width = firstElement.style.width.endsWith("%") ? parseInt(firstElement.style.width) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
             submenu: styles.concat([{
-                label: `<div aria-label="${width}%" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+                iconHTML: "",
+                type: "readonly",
+                label: `<div style="margin: 4px 0;"  aria-label="${firstElement.style.width.endsWith("px") ? firstElement.style.width : (firstElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
-                bind(element) {
-                    const rangeElement = element.querySelector("input");
+                bind: (element) => {
+                    rangeElement = element.querySelector("input");
                     rangeElement.addEventListener("input", () => {
-                        nodeElements.forEach((e) => {
-                            (e as HTMLElement).style.width = rangeElement.value + "%";
-                            (e as HTMLElement).style.flex = "none";
+                        nodeElements.forEach((e: HTMLElement) => {
+                            e.style.width = rangeElement.value + "%";
+                            e.style.flex = "none";
                         });
                         rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                     });
-                    const undoOperations: IOperation[] = [];
-                    const operations: IOperation[] = [];
-                    nodeElements.forEach((e) => {
-                        undoOperations.push({
-                            action: "update",
-                            id: e.getAttribute("data-node-id"),
-                            data: e.outerHTML
-                        });
-                    });
-                    rangeElement.addEventListener("change", () => {
-                        nodeElements.forEach((e: HTMLElement) => {
-                            operations.push({
-                                action: "update",
-                                id: e.getAttribute("data-node-id"),
-                                data: e.outerHTML
-                            });
-                        });
-                        transaction(protyle, operations, undoOperations);
-                        window.siyuan.menus.menu.remove();
-                        focusBlock(nodeElements[0]);
-                    });
+                    this.updateNodeElements(nodeElements, protyle, rangeElement);
                 }
             }, {
                 type: "separator"
             }, {
-                label: window.siyuan.languages.clearFontStyle,
-                icon: "iconTrashcan",
+                iconHTML: "",
+                label: window.siyuan.languages.default,
                 click: () => {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.style.width) {
                             e.style.width = "";
                             e.style.flex = "";
+                        }
+                    });
+                }
+            }]),
+        }).element);
+    }
+
+    // TODO https://github.com/siyuan-note/siyuan/issues/11055
+    private genHeights(nodeElements: Element[], protyle: IProtyle) {
+        const matchHeight = nodeElements.find(item => {
+            if (!item.classList.contains("p") && !item.classList.contains("code-block") && !item.classList.contains("render-node")) {
+                return true
+            }
+        })
+        if (matchHeight) {
+            return;
+        }
+        let rangeElement: HTMLInputElement;
+        const firstElement = nodeElements[0] as HTMLElement
+        const styles: IMenu[] = [{
+            iconHTML: "",
+            type: "readonly",
+            label: `<div class="fn__flex-center">
+<input class="b3-text-field" value="${firstElement.style.height.endsWith("px") ? parseInt(firstElement.style.height) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.height}"> px
+</div>`,
+            bind: (element) => {
+                const inputElement = element.querySelector("input");
+                inputElement.addEventListener("input", () => {
+                    nodeElements.forEach((item: HTMLElement) => {
+                        item.style.height = inputElement.value + "px";
+                        item.style.flex = "none";
+                    })
+                    rangeElement.value = "0";
+                    rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                });
+                this.updateNodeElements(nodeElements, protyle, inputElement);
+            }
+        }];
+        ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
+            styles.push({
+                iconHTML: "",
+                label: item,
+                click: () => {
+                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        e.style.height = item;
+                        e.style.flex = "none";
+                    });
+                }
+            });
+        });
+        styles.push({
+            type: "separator"
+        });
+        const height = firstElement.style.height.endsWith("%") ? parseInt(firstElement.style.height) : 0;
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.height,
+            submenu: styles.concat([{
+                iconHTML: "",
+                label: `<div style="margin: 4px 0;"  aria-label="${firstElement.style.height.endsWith("px") ? firstElement.style.height : (firstElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+    <input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
+</div>`,
+                bind: (element) => {
+                    rangeElement = element.querySelector("input");
+                    rangeElement.addEventListener("input", () => {
+                        nodeElements.forEach((e: HTMLElement) => {
+                            e.style.height = rangeElement.value + "%";
+                            e.style.flex = "none";
+                        });
+                        rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
+                    });
+                    this.updateNodeElements(nodeElements, protyle, rangeElement);
+                }
+            }, {
+                type: "separator"
+            }, {
+                iconHTML: "",
+                label: window.siyuan.languages.default,
+                click: () => {
+                    this.genClick(nodeElements, protyle, (e: HTMLElement) => {
+                        if (e.style.height) {
+                            e.style.height = "";
+                            e.style.overflow = ""
                         }
                     });
                 }

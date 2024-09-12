@@ -989,6 +989,14 @@ export class Gutter {
                 selectsElement: [nodeElement],
                 type: "Blocks2Ps",
             }));
+            turnIntoSubmenu.push(this.turnsIntoOne({
+                icon: "iconQuote",
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
+                label: window.siyuan.languages.quote,
+                protyle,
+                selectsElement: [nodeElement],
+                type: "Blocks2Blockquote"
+            }));
             if (subType !== "h1") {
                 turnIntoSubmenu.push(this.turnsInto({
                     icon: "iconH1",
@@ -1064,6 +1072,14 @@ export class Gutter {
                 nodeElement,
                 id,
                 type: "CancelList"
+            }));
+            turnIntoSubmenu.push(this.turnsIntoOne({
+                icon: "iconQuote",
+                accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
+                label: window.siyuan.languages.quote,
+                protyle,
+                selectsElement: [nodeElement],
+                type: "Blocks2Blockquote"
             }));
             if (nodeElement.getAttribute("data-subtype") === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({

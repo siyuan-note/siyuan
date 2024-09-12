@@ -1387,45 +1387,58 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isMatchList || isMatchOList || isMatchCheck || isMatchQuote) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length === 0) {
-                protyle.hint.splitChar = "/";
-                protyle.hint.lastIndex = -1;
-                if (isMatchQuote) {
-                    protyle.hint.fill(">" + Lute.Caret, protyle);
-                } else {
-                    protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
-                }
-            } else if (selectsElement.length === 1) {
+                selectsElement.push(nodeElement);
+            }
+            if (selectsElement.length === 1) {
                 const subType = selectsElement[0].dataset.subtype;
                 const type = selectsElement[0].dataset.type;
-                if (type === "NodeParagraph") {
-                    turnsIntoOneTransaction({
-                        protyle,
-                        selectsElement,
-                        type: isMatchQuote ? "Blocks2Blockquote" : (isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs"))
-                    });
-                } else if (type === "NodeList") {
-                    const id = selectsElement[0].dataset.nodeId;
-                    if (subType === "o" && (isMatchList || isMatchCheck)) {
-                        turnsOneInto({
+                if (isMatchQuote) {
+                    if (["NodeHeading", "NodeParagraph", "NodeList"].includes(type)) {
+                        turnsIntoOneTransaction({
                             protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchCheck ? "UL2TL" : "OL2UL",
+                            selectsElement,
+                            type: "Blocks2Blockquote"
                         });
-                    } else if (subType === "t" && (isMatchList || isMatchOList)) {
-                        turnsOneInto({
+                    } else {
+                        protyle.hint.splitChar = "/";
+                        protyle.hint.lastIndex = -1;
+                        protyle.hint.fill(">" + Lute.Caret, protyle);
+                    }
+                } else {
+                    if (type === "NodeParagraph") {
+                        turnsIntoOneTransaction({
                             protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchList ? "TL2UL" : "TL2OL",
+                            selectsElement,
+                            type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
                         });
-                    } else if (isMatchCheck || isMatchOList) {
-                        turnsOneInto({
-                            protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchCheck ? "OL2TL" : "UL2OL",
-                        });
+                    } else if (type === "NodeList") {
+                        const id = selectsElement[0].dataset.nodeId;
+                        if (subType === "o" && (isMatchList || isMatchCheck)) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchCheck ? "UL2TL" : "OL2UL",
+                            });
+                        } else if (subType === "t" && (isMatchList || isMatchOList)) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchList ? "TL2UL" : "TL2OL",
+                            });
+                        } else if (isMatchCheck || isMatchOList) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchCheck ? "OL2TL" : "UL2OL",
+                            });
+                        }
+                    } else {
+                        protyle.hint.splitChar = "/";
+                        protyle.hint.lastIndex = -1;
+                        protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
                     }
                 }
             } else {

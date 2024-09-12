@@ -1185,8 +1185,10 @@ export class Toolbar {
 
     private updateLanguage(languageElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, oldHtml: string, selectedLang: string) {
         languageElement.textContent = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
-        window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
-        setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
+        if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
+            window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+            setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
+        }
         const editElement = getContenteditableElement(nodeElement);
         if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
             nodeElement.dataset.content = editElement.textContent.trim();

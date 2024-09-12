@@ -128,6 +128,8 @@ func setImageOCRText(c *gin.Context) {
 	path := arg["path"].(string)
 	text := arg["text"].(string)
 	util.SetAssetText(path, text)
+
+	model.ReindexAssetContent()
 }
 
 func ocr(c *gin.Context) {

@@ -185,6 +185,15 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 
 	for _, child := range children {
 		var unlinks []*ast.Node
+
+		parentHeadingLevel := 0
+		for prev := child; nil != prev; prev = prev.Previous {
+			if ast.NodeHeading == prev.Type {
+				parentHeadingLevel = prev.HeadingLevel
+				break
+			}
+		}
+
 		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering || !n.IsBlock() {
 				return ast.WalkContinue
@@ -214,6 +223,29 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						var hChildren []*ast.Node
 						hChildren = append(hChildren, h)
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
+
+						if 0 == blockEmbedMode {
+							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
+							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233
+							embedTopLevel := 0
+							for _, hChild := range hChildren {
+								if ast.NodeHeading == hChild.Type {
+									embedTopLevel = hChild.HeadingLevel
+									break
+								}
+							}
+							if parentHeadingLevel >= embedTopLevel {
+								for _, hChild := range hChildren {
+									if ast.NodeHeading == hChild.Type {
+										hChild.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+										if 6 < hChild.HeadingLevel {
+											hChild.HeadingLevel = 6
+										}
+									}
+								}
+							}
+						}
+
 						mdBuf := &bytes.Buffer{}
 						for _, hChild := range hChildren {
 							md, _ = lute.FormatNodeSync(hChild, luteEngine.ParseOptions, luteEngine.RenderOptions)

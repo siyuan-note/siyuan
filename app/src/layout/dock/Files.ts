@@ -45,6 +45,9 @@ export class Files extends Model {
                             break;
                         case "mount":
                             this.onMount(data);
+                            options.app.plugins.forEach((item) => {
+                                item.eventBus.emit("opened-notebook", data);
+                            });
                             break;
                         case "createnotebook":
                             setNoteBook((notebooks) => {
@@ -65,6 +68,11 @@ export class Files extends Model {
                             });
                             break;
                         case "unmount":
+                            this.onRemove(data);
+                            options.app.plugins.forEach((item) => {
+                                item.eventBus.emit("closed-notebook", data);
+                            });
+                            break;
                         case "removeDoc":
                             this.onRemove(data);
                             break;
@@ -763,7 +771,7 @@ export class Files extends Model {
                     removeElement.remove();
                     const counterElement = this.closeElement.querySelector(".counter");
                     counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0")  {
+                    if (counterElement.textContent === "0") {
                         counterElement.classList.add("fn__none");
                     }
                 }

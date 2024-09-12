@@ -60,7 +60,8 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "open-noneditableblock" |
     "open-menu-blockref" | "open-menu-fileannotationref" | "open-menu-tag" | "open-menu-link" | "open-menu-image" |
     "open-menu-av" | "open-menu-content" | "open-menu-breadcrumbmore" | "open-menu-doctree" | "open-menu-inbox" |
-    "open-siyuan-url-plugin" | "open-siyuan-url-block" |
+    "open-siyuan-url-plugin" | "open-siyuan-url-block" | "opened-notebook" |
+    "closed-notebook" |
     "paste" |
     "input-search" |
     "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |

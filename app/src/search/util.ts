@@ -1261,6 +1261,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
             return;
         }
         if (isAll) {
+            inputEvent(element, config, edit, true);
             return;
         }
         const rootId = currentList.getAttribute("data-root-id");

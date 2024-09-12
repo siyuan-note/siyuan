@@ -170,17 +170,34 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 }
             };
         } else if (colType === "date") {
-            cellValue = {
-                type: colType,
-                date: {
-                    content: null,
-                    isNotEmpty: false,
-                    content2: null,
-                    isNotEmpty2: false,
-                    hasEndDate: false,
-                    isNotTime: true,
-                }
-            };
+            const dateObj = dayjs(value)
+            if (isNaN(dateObj.valueOf())) {
+                cellValue = {
+                    type: colType,
+                    date: {
+                        content: null,
+                        isNotEmpty: false,
+                        content2: null,
+                        isNotEmpty2: false,
+                        formattedContent: "",
+                        hasEndDate: false,
+                        isNotTime: true,
+                    }
+                };
+            } else {
+                cellValue = {
+                    type: colType,
+                    date: {
+                        content: dateObj.valueOf(),
+                        isNotEmpty: true,
+                        content2: 0,
+                        formattedContent: "",
+                        isNotEmpty2: false,
+                        hasEndDate: false,
+                        isNotTime: dateObj.hour() === 0,
+                    }
+                };
+            }
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,

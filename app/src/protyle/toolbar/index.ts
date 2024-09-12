@@ -600,9 +600,12 @@ export class Toolbar {
         for (let i = 0; i < newNodes.length; i++) {
             const currentNewNode = newNodes[i] as HTMLElement;
             const nextNewNode = newNodes[i + 1] as HTMLElement;
+            const currentType = currentNewNode.getAttribute("data-type") || "";
             if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
                 nextNewNode.tagName === currentNewNode.tagName &&
-                isArrayEqual((nextNewNode.getAttribute("data-type") || "").split(" "), (currentNewNode.getAttribute("data-type") || "").split(" ")) &&
+                // 表格内多个换行 https://github.com/siyuan-note/siyuan/issues/12300
+                currentNewNode.tagName !== "BR" &&
+                isArrayEqual((nextNewNode.getAttribute("data-type") || "").split(" "), currentType.split(" ")) &&
                 currentNewNode.getAttribute("data-id") === nextNewNode.getAttribute("data-id") &&
                 currentNewNode.getAttribute("data-subtype") === nextNewNode.getAttribute("data-subtype") &&
                 currentNewNode.style.color === nextNewNode.style.color &&
@@ -612,7 +615,6 @@ export class Toolbar {
                 currentNewNode.style.fontSize === nextNewNode.style.fontSize &&
                 currentNewNode.style.backgroundColor === nextNewNode.style.backgroundColor) {
                 // 合并相同的 node
-                const currentType = currentNewNode.getAttribute("data-type");
                 if (currentType.indexOf("inline-math") > -1) {
                     // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
                     nextNewNode.setAttribute("data-content", currentNewNode.getAttribute("data-content") + nextNewNode.getAttribute("data-content"));

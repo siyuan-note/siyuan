@@ -654,8 +654,6 @@ export class WYSIWYG {
                         if (moveEvent.clientY > y - dragHeight + 8 && moveEvent.clientY < mostBottom) {
                             dragElement.style.height = (dragHeight + (moveEvent.clientY - y)) + "px";
                         }
-                    } else {
-                        dragElement.parentElement.parentElement.style.width = (parseInt(dragElement.style.width) + 10) + "px";
                     }
                 };
 

@@ -1133,7 +1133,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 alignImgLeft(protyle, nodeElement, [assetElement], id, html);
             }
         }).element);
-        const width = assetElement.style.width.endsWith("%") ? parseInt(assetElement.style.width) : 0;
+        const width = imgElement.style.width.endsWith("%") ? parseInt(imgElement.style.width) : 0;
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
@@ -1141,7 +1141,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 iconHTML: "",
                 type: "readonly",
                 label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${assetElement.style.width.endsWith("px") ? parseInt(imgElement.style.width) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.width}"> px
+<input class="b3-text-field" value="${imgElement.style.width.endsWith("px") ? parseInt(imgElement.style.width) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.width}"> px
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -1149,7 +1149,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeElement.value = "0";
                         rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
 
-                        assetElement.style.width = (parseInt(inputElement.value) + 10) + "px";
                         imgElement.style.width = inputElement.value + "px";
                         imgElement.style.height = "";
                     });
@@ -1161,25 +1160,24 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     });
                 }
             },
-                genImageWidthMenu("25%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageWidthMenu("33%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageWidthMenu("50%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageWidthMenu("67%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageWidthMenu("75%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageWidthMenu("100%", assetElement, imgElement, protyle, id, nodeElement, html), {
+                genImageWidthMenu("25%", imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu("33%", imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu("50%", imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu("67%", imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu("75%", imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu("100%", imgElement, protyle, id, nodeElement, html), {
                     type: "separator",
                 }, {
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${assetElement.style.width.endsWith("px") ? imgElement.style.width : (assetElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
-                            assetElement.style.width = rangeElement.value + "%";
-                            imgElement.style.width = "10000px";
-                            imgElement.style.height = "";
+                            imgElement.style.width = rangeElement.value + "%";
+
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                         });
                         rangeElement.addEventListener("change", () => {
@@ -1192,7 +1190,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     type: "separator",
                 },
-                genImageWidthMenu(window.siyuan.languages.default, assetElement, imgElement, protyle, id, nodeElement, html),
+                genImageWidthMenu(window.siyuan.languages.default, imgElement, protyle, id, nodeElement, html),
             ]
         }).element);
         let rangeHeightElement: HTMLInputElement;
@@ -1223,12 +1221,12 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     });
                 }
             },
-                genImageHeightMenu("25%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageHeightMenu("33%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageHeightMenu("50%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageHeightMenu("67%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageHeightMenu("75%", assetElement, imgElement, protyle, id, nodeElement, html),
-                genImageHeightMenu("100%", assetElement, imgElement, protyle, id, nodeElement, html), {
+                genImageHeightMenu("25%", imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu("33%", imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu("50%", imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu("67%", imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu("75%", imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu("100%", imgElement, protyle, id, nodeElement, html), {
                     type: "separator",
                 }, {
                     iconHTML: "",
@@ -1239,9 +1237,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     bind(element) {
                         rangeHeightElement = element.querySelector("input");
                         rangeHeightElement.addEventListener("input", () => {
-                            assetElement.style.width ="";
+                            assetElement.style.width = "";
                             imgElement.style.width = "";
-                            imgElement.style.height =  rangeHeightElement.value + "vh";
+                            imgElement.style.height = rangeHeightElement.value + "vh";
                             rangeHeightElement.parentElement.setAttribute("aria-label", `${rangeHeightElement.value}%`);
                         });
                         rangeHeightElement.addEventListener("change", () => {
@@ -1254,7 +1252,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     type: "separator",
                 },
-                genImageHeightMenu(window.siyuan.languages.default, assetElement, imgElement, protyle, id, nodeElement, html),
+                genImageHeightMenu(window.siyuan.languages.default, imgElement, protyle, id, nodeElement, html),
             ]
         }).element);
     }
@@ -1729,22 +1727,16 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
     });
 };
 
-const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, html: string) => {
+const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, html: string) => {
     return {
         iconHTML: "",
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             if (label === window.siyuan.languages.default) {
-                const isCenter = assetElement.style.display === "block" || assetElement.style.minWidth;
-                assetElement.removeAttribute("style");
-                imgElement.removeAttribute("style");
-                if (isCenter) {
-                    assetElement.style.minWidth = "calc(100% - 0.1em)";
-                }
+                imgElement.style.width = "";
             } else {
-                assetElement.style.width = label;
-                imgElement.style.width = "10000px";
+                imgElement.style.width = label;
             }
             imgElement.style.height = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
@@ -1753,25 +1745,18 @@ const genImageWidthMenu = (label: string, assetElement: HTMLElement, imgElement:
     };
 };
 
-const genImageHeightMenu = (label: string, assetElement: HTMLElement, imgElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, html: string) => {
+const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, html: string) => {
     return {
         iconHTML: "",
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             if (label === window.siyuan.languages.default) {
-                const isCenter = assetElement.style.display === "block" || assetElement.style.minWidth;
-                assetElement.removeAttribute("style");
-                imgElement.removeAttribute("style");
-                if (isCenter) {
-                    assetElement.style.minWidth = "calc(100% - 0.1em)";
-                }
                 imgElement.style.height = "";
             } else {
-                assetElement.style.width = "";
-                imgElement.style.width = "";
                 imgElement.style.height = parseInt(label) + "vh";
             }
+            imgElement.style.width = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);
         }

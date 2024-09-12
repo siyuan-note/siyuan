@@ -376,8 +376,11 @@ export class Outline extends Model {
         let needReload = false;
         const ops = data.data.sources[0];
         ops.doOperations.find((item: IOperation) => {
-            if ((item.action === "update" || item.action === "insert") &&
-                (item.data.indexOf('data-type="NodeHeading"') > -1 || item.data.indexOf(`<div contenteditable="true" spellcheck="${window.siyuan.config.editor.spellcheck}"><wbr></div>`) > -1)) {
+            if (item.action === "update" &&
+                (this.element.querySelector(`.b3-list-item[data-node-id="${item.id}"]`) || item.data.indexOf('data-type="NodeHeading"') > -1)) {
+                needReload = true;
+                return true;
+            } else if (item.action === "insert" && item.data.indexOf('data-type="NodeHeading"') > -1) {
                 needReload = true;
                 return true;
             } else if (item.action === "delete" || item.action === "move") {

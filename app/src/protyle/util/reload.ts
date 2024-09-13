@@ -26,6 +26,8 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     }
     protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     protyle.lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
+    protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
+    protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
     protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
     protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
     protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);

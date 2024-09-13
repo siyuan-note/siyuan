@@ -289,6 +289,14 @@ declare namespace Config {
      */
     interface IMarkdown {
         /**
+         * Whether to enable the inline asterisk
+         */
+        inlineAsterisk: boolean;
+        /**
+         * Whether to enable the inline underscore
+         */
+        inlineUnderscore: boolean;
+        /**
          * Whether to enable the inline superscript
          */
         inlineSup: boolean;

@@ -170,7 +170,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 }
             };
         } else if (colType === "date") {
-            const dateObj = dayjs(value)
+            const dateObj = dayjs(value);
             if (isNaN(dateObj.valueOf())) {
                 cellValue = {
                     type: colType,

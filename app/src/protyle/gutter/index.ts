@@ -1900,7 +1900,7 @@ export class Gutter {
 
     private genWidths(nodeElements: Element[], protyle: IProtyle) {
         let rangeElement: HTMLInputElement;
-        const firstElement = nodeElements[0] as HTMLElement
+        const firstElement = nodeElements[0] as HTMLElement;
         const styles: IMenu[] = [{
             iconHTML: "",
             type: "readonly",
@@ -1913,7 +1913,7 @@ export class Gutter {
                     nodeElements.forEach((item: HTMLElement) => {
                         item.style.width = inputElement.value + "px";
                         item.style.flex = "none";
-                    })
+                    });
                     rangeElement.value = "0";
                     rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
                 });
@@ -1976,14 +1976,14 @@ export class Gutter {
     private genHeights(nodeElements: Element[], protyle: IProtyle) {
         const matchHeight = nodeElements.find(item => {
             if (!item.classList.contains("p") && !item.classList.contains("code-block") && !item.classList.contains("render-node")) {
-                return true
+                return true;
             }
-        })
+        });
         if (matchHeight) {
             return;
         }
         let rangeElement: HTMLInputElement;
-        const firstElement = nodeElements[0] as HTMLElement
+        const firstElement = nodeElements[0] as HTMLElement;
         const styles: IMenu[] = [{
             iconHTML: "",
             type: "readonly",
@@ -1996,7 +1996,7 @@ export class Gutter {
                     nodeElements.forEach((item: HTMLElement) => {
                         item.style.height = inputElement.value + "px";
                         item.style.flex = "none";
-                    })
+                    });
                     rangeElement.value = "0";
                     rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
                 });
@@ -2046,7 +2046,7 @@ export class Gutter {
                     this.genClick(nodeElements, protyle, (e: HTMLElement) => {
                         if (e.style.height) {
                             e.style.height = "";
-                            e.style.overflow = ""
+                            e.style.overflow = "";
                         }
                     });
                 }

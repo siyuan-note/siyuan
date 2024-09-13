@@ -740,8 +740,8 @@ export class Files extends Model {
         window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: filesPath) => {
             item.openPaths.forEach((openPath) => {
                 this.selectItem(item.notebookId, openPath, undefined, false);
-            })
-        })
+            });
+        });
         if (!init) {
             return;
         }
@@ -1065,17 +1065,17 @@ export class Files extends Model {
 
     private getOpenPaths() {
         const filesPaths: filesPath[] = [];
-        this.element.querySelectorAll('.b3-list[data-url]').forEach((item: HTMLElement) => {
+        this.element.querySelectorAll(".b3-list[data-url]").forEach((item: HTMLElement) => {
             const notebookPaths: filesPath = {
                 notebookId: item.getAttribute("data-url"),
                 openPaths: []
-            }
+            };
             item.querySelectorAll(".b3-list-item__arrow--open").forEach((openItem) => {
                 const liElement = hasClosestByTag(openItem, "LI");
                 if (liElement) {
                     notebookPaths.openPaths.push(liElement.getAttribute("data-path"));
                 }
-            })
+            });
             if (notebookPaths.openPaths.length > 0) {
                 for (let i = 0; i < notebookPaths.openPaths.length; i++) {
                     for (let j = i + 1; j < notebookPaths.openPaths.length; j++) {

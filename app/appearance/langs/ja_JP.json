@@ -42,7 +42,7 @@
   "editorMarkdownInlineMath": "Markdown インライン数式構文",
   "editorMarkdownInlineMathTip": "<code class='fn__code'>$foo$</code> 形式のインライン数式構文を有効にします",
   "editorMarkdownInlineAsterisk": "マークダウン インライン アスタリスク構文",
-  "editorMarkdownInlineAsteriskTip": "有効にすると、<code class='fn__code'>*foo*</code> 斜体構文と <code class='fn__code'>**foo**</code> 太字構文の入力がサポートされます。",
+  "editorMarkdownInlineAsteriskTip": "有効にすると、<code class='fn__code'>*foo*</code> 斜体構文と <code class='fn__code'>**foo**</code> 太字構文の入力がサポートされます",
   "editorMarkdownInlineUnderscore": "マークダウンのインライン下線構文",
   "editorMarkdownInlineUnderscoreTip": "有効にすると、<code class='fn__code'>_foo_</code> 斜体構文と <code class='fn__code'>__foo__</code> 太字構文の入力がサポートされます",
   "currentNotebook": "現在のノートブック",

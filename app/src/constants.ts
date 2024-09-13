@@ -117,6 +117,7 @@ export abstract class Constants {
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
     public static readonly LOCAL_FLASHCARD = "local-flashcard";
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";
+    public static readonly LOCAL_FILESPATHS = "local-filespaths";
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
     public static readonly LOCAL_OUTLINE = "local-outline";

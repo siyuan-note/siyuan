@@ -214,6 +214,10 @@ declare class Lute {
 
     public SetSup(enable: boolean): void;
 
+    public SetInlineAsterisk(enable: boolean): void;
+
+    public SetInlineUnderscore(enable: boolean): void;
+
     public SetBlockRef(enable: boolean): void;
 
     public SetSanitize(enable: boolean): void;

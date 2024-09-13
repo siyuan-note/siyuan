@@ -274,6 +274,22 @@ export const editor = {
 </label>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.editorMarkdownInlineAsterisk}
+        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineAsteriskTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineAsterisk" type="checkbox"${window.siyuan.config.editor.markdown.inlineAsterisk ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+        ${window.siyuan.languages.editorMarkdownInlineUnderscore}
+        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineUnderscoreTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineUnderscore" type="checkbox"${window.siyuan.config.editor.markdown.inlineUnderscore ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.editorMarkdownInlineSup}
         <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineSupTip}</div>
     </div>
@@ -332,6 +348,8 @@ export const editor = {
             fetchPost("/api/setting/setEditor", {
                 fullWidth: (editor.element.querySelector("#fullWidth") as HTMLInputElement).checked,
                 markdown: {
+                    inlineAsterisk: (editor.element.querySelector("#editorMarkdownInlineAsterisk") as HTMLInputElement).checked,
+                    inlineUnderscore: (editor.element.querySelector("#editorMarkdownInlineUnderscore") as HTMLInputElement).checked,
                     inlineSup: (editor.element.querySelector("#editorMarkdownInlineSup") as HTMLInputElement).checked,
                     inlineSub: (editor.element.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
                     inlineTag: (editor.element.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,

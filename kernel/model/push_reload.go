@@ -65,6 +65,8 @@ func refreshProtyle(rootID string) {
 	for _, id := range rootIDs {
 		task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 200*time.Millisecond, util.PushReloadProtyle, id)
 	}
+
+	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 200*time.Millisecond, util.PushReloadProtyle, rootID)
 }
 
 // refreshRefCount 用于刷新定义块处的引用计数。

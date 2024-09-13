@@ -2379,8 +2379,17 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									val = strings.ReplaceAll(val, "|", "\\|")
 								}
 
-								val = strings.ReplaceAll(val, "\n", " ")
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								col := table.GetColumn(cell.Value.KeyID)
+								if nil != col && col.Wrap {
+									lines := strings.Split(val, "\n")
+									for _, line := range lines {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+									}
+								} else {
+									val = strings.ReplaceAll(val, "\n", " ")
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								}
 							}
 							if i < len(cell.Value.Relation.Contents)-1 {
 								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
@@ -2402,8 +2411,17 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 										val = strings.ReplaceAll(val, "|", "\\|")
 									}
 
-									val = strings.ReplaceAll(val, "\n", " ")
-									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+									col := table.GetColumn(cell.Value.KeyID)
+									if nil != col && col.Wrap {
+										lines := strings.Split(val, "\n")
+										for _, line := range lines {
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+										}
+									} else {
+										val = strings.ReplaceAll(val, "\n", " ")
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+									}
 								}
 							} else if av.KeyTypeText == v.Type {
 								val = v.Text.Content
@@ -2413,8 +2431,17 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									val = strings.ReplaceAll(val, "|", "\\|")
 								}
 
-								val = strings.ReplaceAll(val, "\n", " ")
-								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								col := table.GetColumn(cell.Value.KeyID)
+								if nil != col && col.Wrap {
+									lines := strings.Split(val, "\n")
+									for _, line := range lines {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+									}
+								} else {
+									val = strings.ReplaceAll(val, "\n", " ")
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								}
 							} else {
 								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(v.String(true))})
 							}
@@ -2923,4 +2950,43 @@ func getExportBlockRefLinkText(blockRef *ast.Node, blockRefTextLeft, blockRefTex
 	}
 	linkText = blockRefTextLeft + linkText + blockRefTextRight
 	return
+}
+
+func getDestViewVal(attrView *av.AttributeView, keyID, blockID string) *av.TableColumn {
+	rollupKey, _ := attrView.GetKey(keyID)
+	if nil == rollupKey || nil == rollupKey.Rollup {
+		return nil
+	}
+
+	relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+	if nil == relKey || nil == relKey.Relation {
+		return nil
+	}
+
+	relVal := attrView.GetValue(relKey.ID, blockID)
+	if nil == relVal || nil == relVal.Relation {
+		return nil
+	}
+
+	destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+	if nil == destAv {
+		return nil
+	}
+
+	destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+	if nil == destKey {
+		return nil
+	}
+
+	destView, _ := destAv.GetCurrentView(destAv.ViewID)
+	if nil == destView {
+		return nil
+	}
+
+	destTable := sql.RenderAttributeViewTable(destAv, destView, "", GetBlockAttrsWithoutWaitWriting)
+	if nil == destTable {
+		return nil
+	}
+
+	return destTable.GetColumn(rollupKey.Rollup.KeyID)
 }

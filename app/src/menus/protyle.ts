@@ -1133,7 +1133,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 alignImgLeft(protyle, nodeElement, [assetElement], id, html);
             }
         }).element);
-        const width = imgElement.style.width.endsWith("%") ? parseInt(imgElement.style.width) : 0;
+        const width = imgElement.style.width.endsWith("vw") ? parseInt(imgElement.style.width) : 0;
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
@@ -1170,14 +1170,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width?.replace("vw", "%") || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
-                            imgElement.style.width = rangeElement.value + "%";
-
+                            imgElement.style.width = rangeElement.value + "vw";
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                         });
                         rangeElement.addEventListener("change", () => {
@@ -1736,7 +1735,7 @@ const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IPro
             if (label === window.siyuan.languages.default) {
                 imgElement.style.width = "";
             } else {
-                imgElement.style.width = label;
+                imgElement.style.width = label.replace("%", "vw");
             }
             imgElement.style.height = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);

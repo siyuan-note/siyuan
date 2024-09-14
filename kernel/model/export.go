@@ -454,6 +454,8 @@ func ExportData() (zipPath string, err error) {
 func exportData(exportFolder string) (zipPath string, err error) {
 	WaitForWritingFiles()
 
+	logging.LogInfof("exporting data...")
+
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	if err = os.MkdirAll(exportFolder, 0755); err != nil {
 		logging.LogErrorf("create export temp folder failed: %s", err)
@@ -489,6 +491,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	os.RemoveAll(exportFolder)
+	logging.LogInfof("export data done [%s]", zipPath)
 	return
 }
 

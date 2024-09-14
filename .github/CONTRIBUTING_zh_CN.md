@@ -16,11 +16,11 @@
 
 * macOS/Linux: 
  ```
- ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v30.4.0 -D
+ ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v30.5.1 -D
  ```
 * Windows:
     * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@v30.4.0 -D`
+    * `pnpm install electron@v30.5.1 -D`
 
 NPM 镜像：
 
@@ -30,7 +30,7 @@ NPM 镜像：
 
 桌面端进入 app 文件夹运行：
 
-* `pnpm install electron@v30.4.0 -D`
+* `pnpm install electron@v30.5.1 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

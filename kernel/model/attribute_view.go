@@ -75,6 +75,23 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			v.UpdatedAt = now
 
 			keyValues.Values = append(keyValues.Values, v)
+
+			if av.KeyTypeSelect == v.Type || av.KeyTypeMSelect == v.Type {
+				// 保存选项 https://github.com/siyuan-note/siyuan/issues/12475
+				key, _ := attrView.GetKey(v.KeyID)
+				if nil != key && 0 < len(v.MSelect) {
+					for _, valOpt := range v.MSelect {
+						if opt := key.GetOption(valOpt.Content); nil == opt {
+							// 不存在的选项新建保存
+							opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+							key.Options = append(key.Options, opt)
+						} else {
+							// 已经存在的选项颜色需要保持不变
+							valOpt.Color = opt.Color
+						}
+					}
+				}
+			}
 		}
 	}
 

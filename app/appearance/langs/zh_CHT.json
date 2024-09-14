@@ -1,4 +1,5 @@
 {
+  "visitCommunityShare": "訪問社區分享",
   "clearContextSucc": "上下文已清空",
   "emptyMobilePlaceholder": "記錄點什麼",
   "emptyPlaceholder": "寫點什麼，或按下 ' / ' 查看指令",
@@ -466,6 +467,7 @@
   "floatWindowMode1": "按住 <code class='fn__code'>${hotkey}</code>+懸停",
   "floatWindowMode2": "不觸發浮窗",
   "codeSnippet": "代碼片段",
+  "codeSnippetTip": "透過程式碼片段對介面或功能進行微調",
   "expandDown": "向下擴選",
   "expandUp": "向上擴選",
   "goForward": "前進",

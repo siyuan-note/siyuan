@@ -34,6 +34,7 @@ import {App} from "../index";
 import {newCardModel} from "../card/newCardTab";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {clearOBG} from "../layout/dock/util";
+import {Model} from "../layout/Model";
 
 export const openFileById = async (options: {
     app: App,
@@ -44,7 +45,7 @@ export const openFileById = async (options: {
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean
-    afterOpen?: () => void
+    afterOpen?: (model:Model) => void
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
     if (response.code === -1) {
@@ -112,7 +113,7 @@ export const openFile = async (options: IOpenFileOptions) => {
         });
         if (asset) {
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(asset);
             }
             return asset.parent;
         }
@@ -129,14 +130,14 @@ export const openFile = async (options: IOpenFileOptions) => {
         });
         if (custom) {
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(custom);
             }
             return custom.parent;
         }
         const hasModel = getUnInitTab(options);
         if (hasModel) {
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(hasModel.model);
             }
             return hasModel;
         }
@@ -176,7 +177,7 @@ export const openFile = async (options: IOpenFileOptions) => {
                 switchEditor(editor, options, allModels);
             }
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(editor);
             }
             return editor.parent;
         }
@@ -184,7 +185,7 @@ export const openFile = async (options: IOpenFileOptions) => {
         const hasEditor = getUnInitTab(options);
         if (hasEditor) {
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(hasEditor.model);
             }
             return hasEditor;
         }
@@ -268,7 +269,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             }
             wnd.showHeading();
             if (options.afterOpen) {
-                options.afterOpen();
+                options.afterOpen(createdTab.model);
             }
             return createdTab;
         }
@@ -305,7 +306,7 @@ export const openFile = async (options: IOpenFileOptions) => {
         }
         wnd.showHeading();
         if (options.afterOpen) {
-            options.afterOpen();
+            options.afterOpen(createdTab.model);
         }
         return createdTab;
     }

@@ -552,7 +552,7 @@ interface IOpenFileOptions {
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
-    afterOpen?: () => void // 打开后回调
+    afterOpen?: (model?: import("../layout/Model").Model) => void // 打开后回调
 }
 
 interface ILayoutOptions {

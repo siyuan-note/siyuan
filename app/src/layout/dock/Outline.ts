@@ -11,11 +11,12 @@ import {openFileById} from "../../editor/util";
 import {Constants} from "../../constants";
 import {escapeHtml} from "../../util/escape";
 import {unicode2Emoji} from "../../emoji";
-import {onGet} from "../../protyle/util/onGet";
 import {getPreviousBlock} from "../../protyle/wysiwyg/getBlock";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {transaction} from "../../protyle/wysiwyg/transaction";
+import {goHome} from "../../protyle/wysiwyg/commonHotkey";
+import {Editor} from "../../editor";
 
 export class Outline extends Model {
     public tree: Tree;
@@ -166,12 +167,8 @@ export class Outline extends Model {
             setStorageVal(Constants.LOCAL_OUTLINE, window.siyuan.storage[Constants.LOCAL_OUTLINE]);
         });
         options.tab.panelElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
-            if (this.type === "local") {
-                setPanelFocus(options.tab.panelElement.parentElement.parentElement);
-            } else {
-                setPanelFocus(options.tab.panelElement);
-            }
             let target = event.target as HTMLElement;
+            let isFocus = true;
             while (target && !target.isEqualNode(options.tab.panelElement)) {
                 if (target.classList.contains("block__icon")) {
                     const type = target.getAttribute("data-type");
@@ -182,29 +179,26 @@ export class Outline extends Model {
                     }
                     break;
                 } else if (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons")) {
-                    getAllModels().editor.find(item => {
-                        if (this.blockId === item.editor.protyle.block.rootID) {
-                            if (item.editor.protyle.scroll.element.classList.contains("fn__none")) {
-                                item.editor.protyle.contentElement.scrollTop = 0;
-                            } else {
-                                fetchPost("/api/filetree/getDoc", {
-                                    id: item.editor.protyle.block.rootID,
-                                    mode: 0,
-                                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                                }, getResponse => {
-                                    onGet({
-                                        data: getResponse,
-                                        protyle: item.editor.protyle,
-                                        action: [Constants.CB_GET_FOCUS],
-                                    });
-                                });
+                    openFileById({
+                        app: options.app,
+                        id: this.blockId,
+                        afterOpen(model: Editor) {
+                            if (model) {
+                                goHome(model.editor.protyle);
                             }
-                            return true;
                         }
                     });
+                    isFocus = false;
                     break;
                 }
                 target = target.parentElement;
+            }
+            if (isFocus) {
+                if (this.type === "local") {
+                    setPanelFocus(options.tab.panelElement.parentElement.parentElement);
+                } else {
+                    setPanelFocus(options.tab.panelElement);
+                }
             }
         });
         this.bindSort();

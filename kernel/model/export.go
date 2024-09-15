@@ -2341,7 +2341,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 						}
 					} else if av.KeyTypeMAsset == cell.Value.Type {
 						if nil != cell.Value.MAsset {
-							for _, a := range cell.Value.MAsset {
+							for i, a := range cell.Value.MAsset {
 								if av.AssetTypeImage == a.Type {
 									img := &ast.Node{Type: ast.NodeImage}
 									img.AppendChild(&ast.Node{Type: ast.NodeBang})
@@ -2355,12 +2355,19 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 								} else if av.AssetTypeFile == a.Type {
 									file := &ast.Node{Type: ast.NodeLink}
 									file.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-									file.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(a.Name)})
+									linkText := strings.TrimSpace(a.Name)
+									if "" == linkText {
+										linkText = a.Content
+									}
+									file.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(linkText)})
 									file.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 									file.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
 									file.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
 									file.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 									mdTableCell.AppendChild(file)
+								}
+								if i < len(cell.Value.MAsset)-1 {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
 								}
 							}
 							continue

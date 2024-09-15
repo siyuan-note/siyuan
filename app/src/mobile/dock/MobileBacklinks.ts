@@ -44,14 +44,14 @@ export class MobileBacklinks {
             element: this.element.querySelector(".backlinkList") as HTMLElement,
             data: null,
             click(element: HTMLElement) {
-                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_CONTEXT]);
             }
         });
         this.mTree = new Tree({
             element: this.element.querySelector(".backlinkMList") as HTMLElement,
             data: null,
             click: (element) => {
-                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT]);
+                openMobileFileById(app, element.getAttribute("data-node-id"), [Constants.CB_GET_CONTEXT]);
             },
         });
         this.element.addEventListener("click", (event) => {

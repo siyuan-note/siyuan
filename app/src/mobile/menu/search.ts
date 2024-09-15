@@ -591,7 +591,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                             preventScroll(window.siyuan.mobile.editor.protyle);
                         }
                         checkFold(id, (zoomIn) => {
-                            openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                            openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                         closePanel();
                     } else {

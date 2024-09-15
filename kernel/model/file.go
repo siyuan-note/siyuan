@@ -37,7 +37,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
-	"github.com/facette/natsort"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -388,11 +387,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	switch sortMode {
 	case util.SortModeNameASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
+			return util.PinYinCompare(docs[i].Name, docs[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
+			return util.PinYinCompare(docs[j].Name, docs[i].Name)
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
@@ -400,11 +399,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
 	case util.SortModeAlphanumASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
+			return util.NaturalCompare(docs[i].Name, docs[j].Name)
 		})
 	case util.SortModeAlphanumDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
+			return util.NaturalCompare(docs[j].Name, docs[i].Name)
 		})
 	case util.SortModeCustom:
 		fileTreeFiles := docs

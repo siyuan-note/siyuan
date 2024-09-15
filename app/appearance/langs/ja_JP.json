@@ -1,4 +1,5 @@
 {
+  "visitCommunityShare": "コミュニティシェアを訪問",
   "clearContextSucc": "コンテキストがクリアされました",
   "emptyMobilePlaceholder": "何かを記録する",
   "emptyPlaceholder": "何か書いてください。コマンドの場合は「/」",
@@ -466,6 +467,7 @@
   "floatWindowMode1": "<code class='fn__code'>${hotkey}</code> を押しながらホバー",
   "floatWindowMode2": "表示しない",
   "codeSnippet": "コードスニペット",
+  "codeSnippetTip": "コード スニペットを通じてインターフェイスまたは機能を微調整します",
   "expandDown": "選択範囲を下に拡張",
   "expandUp": "選択範囲を上に拡張",
   "goForward": "進む",

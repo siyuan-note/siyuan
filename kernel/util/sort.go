@@ -21,11 +21,21 @@ import (
 	"io"
 	"strings"
 
+	"github.com/facette/natsort"
 	"golang.org/x/text/encoding/simplifiedchinese"
 	"golang.org/x/text/transform"
 )
 
+func NaturalCompare(str1, str2 string) bool {
+	str1 = RemoveEmojiInvisible(str1)
+	str2 = RemoveEmojiInvisible(str2)
+	return natsort.Compare(str1, str2)
+}
+
 func PinYinCompare(str1, str2 string) bool {
+	str1 = RemoveEmojiInvisible(str1)
+	str2 = RemoveEmojiInvisible(str2)
+
 	// Doc tree, backlinks, tags and templates ignores case when sorting alphabetically by name https://github.com/siyuan-note/siyuan/issues/8360
 	str1 = strings.ToLower(str1)
 	str2 = strings.ToLower(str2)

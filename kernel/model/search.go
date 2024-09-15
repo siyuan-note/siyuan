@@ -798,6 +798,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		refreshProtyle(id)
 	}
 
+	sql.WaitForWritingDatabase()
 	util.PushClearProgress()
 	return
 }

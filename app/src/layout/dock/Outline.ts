@@ -182,9 +182,13 @@ export class Outline extends Model {
                     openFileById({
                         app: options.app,
                         id: this.blockId,
-                        afterOpen(model: Editor) {
+                        afterOpen: (model: Editor) =>{
                             if (model) {
-                                goHome(model.editor.protyle);
+                                if (this.isPreview) {
+                                    model.editor.protyle.preview.element.querySelector(".b3-typography").scrollTop = 0;
+                                } else {
+                                    goHome(model.editor.protyle);
+                                }
                             }
                         }
                     });

@@ -45,7 +45,7 @@ export const openFileById = async (options: {
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean
-    afterOpen?: (model:Model) => void
+    afterOpen?: (model: Model) => void
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
     if (response.code === -1) {
@@ -575,6 +575,9 @@ export const isCurrentEditor = (blockId: string) => {
 
 export const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {
+        if (protyle && item.blockId === protyle.block.rootID && item.type === "pin") {
+            item.isPreview = !protyle.preview.element.classList.contains("fn__none");
+        }
         if (reload || (item.type === "pin" && (!protyle || item.blockId !== protyle.block?.rootID))) {
             let blockId = "";
             if (protyle && protyle.block) {
@@ -583,17 +586,12 @@ export const updateOutline = (models: IModels, protyle: IProtyle, reload = false
             if (blockId === item.blockId && !reload) {
                 return;
             }
-            if (protyle && !protyle.preview.element.classList.contains("fn__none")) {
-                protyle.preview.render(protyle);
-                return;
-            }
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
             }, response => {
                 if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId)) {
                     return;
                 }
-                item.isPreview = false;
                 item.update(response, blockId);
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial);

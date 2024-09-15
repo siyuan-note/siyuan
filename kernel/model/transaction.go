@@ -763,7 +763,6 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(node)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
@@ -1082,7 +1081,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(insertedNode)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
@@ -1233,9 +1231,13 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 
 		if treenode.IsBlockRef(n) {
 			refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
+		} else if treenode.IsEmbedBlockRef(n) {
+			defID := treenode.GetEmbedBlockRef(n)
+			refDefIDs = append(refDefIDs, defID)
 		}
 		return ast.WalkContinue
 	})
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	return
 }
 

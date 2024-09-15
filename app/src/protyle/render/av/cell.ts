@@ -293,9 +293,11 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
                 if (rowElement) {
                     const stickyElement = rowElement.querySelector(".av__colsticky");
                     if (stickyElement) {
-                        const stickyRight = stickyElement.getBoundingClientRect().right;
-                        if (stickyRight > cellRect.left) {
-                            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                        if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
+                            const stickyRight = stickyElement.getBoundingClientRect().right;
+                            if (stickyRight > cellRect.left) {
+                                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                            }
                         }
                     } else if (avScrollRect.left > cellRect.left) {
                         avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;

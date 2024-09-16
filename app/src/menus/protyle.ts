@@ -1147,12 +1147,15 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
                         rangeElement.value = "0";
-                        rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                        rangeElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        imgElement.style.width = inputElement.value + "px";
+                        imgElement.style.width = inputElement.value ? (inputElement.value + "px") : "";
                         imgElement.style.height = "";
                     });
                     inputElement.addEventListener("blur", () => {
+                        if (inputElement.value === imgElement.style.width.replace("px", "")) {
+                            return
+                        }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();
@@ -1206,13 +1209,16 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
                         rangeHeightElement.value = "0";
-                        rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                        rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        imgElement.style.height = inputElement.value + "px";
+                        imgElement.style.height = inputElement.value ? (inputElement.value + "px") : "";
                         assetElement.style.width = "";
                         imgElement.style.width = "";
                     });
                     inputElement.addEventListener("blur", () => {
+                        if (inputElement.value === imgElement.style.height.replace("px", "")) {
+                            return
+                        }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();

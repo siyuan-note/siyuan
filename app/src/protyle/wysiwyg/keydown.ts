@@ -15,7 +15,8 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByMatchTag,
-    hasTopClosestByAttribute, isInEmbedBlock
+    hasTopClosestByAttribute,
+    isInEmbedBlock
 } from "../util/hasClosest";
 import {removeBlock, removeImage} from "./remove";
 import {
@@ -24,7 +25,8 @@ import {
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement, hasNextSibling,
+    getTopAloneElement,
+    hasNextSibling,
     hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
@@ -46,14 +48,7 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-import {
-    alignImgCenter,
-    alignImgLeft,
-    commonHotkey,
-    downSelect,
-    getStartEndElement,
-    upSelect
-} from "./commonHotkey";
+import {alignImgCenter, alignImgLeft, commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -648,7 +643,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || position.start === 0 || nodeElement.classList.contains("av")) {
+                    if (getSelectionPosition(nodeElement, range).top - parseInt(getComputedStyle(nodeElement).paddingTop) - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -670,7 +665,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (previousElement) {
                                 const foldElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
                                 // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
-                                if (getContenteditableElement(previousElement)?.textContent.endsWith("\n") && !foldElement) {
+                                if (!foldElement) {
                                     focusBlock(previousElement, undefined, false);
                                     scrollCenter(protyle, previousElement);
                                     event.stopPropagation();

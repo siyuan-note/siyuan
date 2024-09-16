@@ -2978,11 +2978,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -3002,7 +3002,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	now := time.Now().UnixMilli()
-	var val *av.Value
 	oldIsDetached := true
 	if nil != blockVal {
 		oldIsDetached = blockVal.IsDetached

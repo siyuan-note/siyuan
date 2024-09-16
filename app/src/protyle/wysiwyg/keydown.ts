@@ -648,7 +648,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
+                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || position.start === 0 || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -736,11 +736,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
                     // 下一个块是折叠块
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
-                    if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
+                    if (nextFoldElement) {
                         focusBlock(nextFoldElement);
                         scrollCenter(protyle, nextFoldElement);
                         event.stopPropagation();
                         event.preventDefault();
+                    } else {
+                        range.collapse(false);
                     }
                 }
             }

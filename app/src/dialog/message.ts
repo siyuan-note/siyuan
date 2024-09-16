@@ -32,7 +32,7 @@ export const initMessage = () => {
             target = target.parentElement;
         }
     });
-    const tempMessageElement = document.getElementById("tempMessage")
+    const tempMessageElement = document.getElementById("tempMessage");
     if (tempMessageElement) {
         showMessage(tempMessageElement.innerHTML);
         tempMessageElement.remove();

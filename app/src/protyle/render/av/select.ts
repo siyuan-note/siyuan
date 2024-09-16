@@ -179,7 +179,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             }
         });
         const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-        const selectedElement = menuElement.querySelector(".b3-chips")
+        const selectedElement = menuElement.querySelector(".b3-chips");
         const oldChipsHeight = selectedElement ? selectedElement.clientHeight : 0;
         if (!cellElements) {
             menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
@@ -259,7 +259,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     }
                 });
                 const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-                const selectedElement = menuElement.querySelector(".b3-chips")
+                const selectedElement = menuElement.querySelector(".b3-chips");
                 const oldChipsHeight = selectedElement?selectedElement.clientHeight:0;
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});

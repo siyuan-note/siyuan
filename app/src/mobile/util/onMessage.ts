@@ -6,7 +6,6 @@ import {
     reloadSync, setDefRefCount, setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
-import {Constants} from "../../constants";
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";

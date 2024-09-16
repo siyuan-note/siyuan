@@ -3047,11 +3047,14 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	key, _ := attrView.GetKey(keyID)
 
 	if av.KeyTypeNumber == val.Type {
-		if nil != val.Number && !val.Number.IsNotEmpty {
-			val.Number.Content = 0
-			val.Number.FormattedContent = ""
+		if nil != val.Number {
+			if !val.Number.IsNotEmpty {
+				val.Number.Content = 0
+				val.Number.FormattedContent = ""
+			} else {
+				val.Number.FormatNumber()
+			}
 		}
-		val.Number.FormatNumber()
 	} else if av.KeyTypeDate == val.Type {
 		if nil != val.Date && !val.Date.IsNotEmpty {
 			val.Date.Content = 0

@@ -194,7 +194,7 @@ export const getLocalStorage = (cb: () => void) => {
             dark: "dark",
             annoColor: "var(--b3-pdf-background1)"
         };
-        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number}
+        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number, filespaths: filesPath[]}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
         defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
@@ -231,7 +231,7 @@ export const getLocalStorage = (cb: () => void) => {
             id: "",
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
-        defaultStorage[Constants.LOCAL_FILESPATHS] = [];
+        defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // filesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
             page: 1,
             sort: 0,
@@ -292,7 +292,7 @@ export const getLocalStorage = (cb: () => void) => {
     });
 };
 
-export const setStorageVal = (key: string, val: any) => {
+export const setStorageVal = (key: string, val: any, cb?:()=>void) => {
     if (window.siyuan.config.readonly) {
         return;
     }
@@ -301,5 +301,9 @@ export const setStorageVal = (key: string, val: any) => {
         app: Constants.SIYUAN_APPID,
         key,
         val,
+    }, () => {
+        if (cb) {
+            cb();
+        }
     });
 };

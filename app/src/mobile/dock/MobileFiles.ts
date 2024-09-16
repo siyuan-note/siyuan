@@ -17,11 +17,6 @@ import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
 
-type filesPath = {
-    notebookId: string,
-    openPaths: string[]
-}
-
 export class MobileFiles extends Model {
     public element: HTMLElement;
     private actionsElement: HTMLElement;

@@ -21,11 +21,6 @@ import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 
-type filesPath = {
-    notebookId: string,
-    openPaths: string[]
-}
-
 export class Files extends Model {
     public element: HTMLElement;
     public parent: Tab;

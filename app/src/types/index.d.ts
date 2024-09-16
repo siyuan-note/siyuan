@@ -192,6 +192,11 @@ interface Window {
     destroyTheme(): Promise<void>
 }
 
+interface filesPath {
+    notebookId: string,
+    openPaths: string[]
+}
+
 interface IPosition {
     x: number,
     y: number,
@@ -204,6 +209,7 @@ interface ISaveLayout {
     name: string,
     layout: IObject
     time: number
+    filesPaths: filesPath[]
 }
 
 interface IWorkspace {

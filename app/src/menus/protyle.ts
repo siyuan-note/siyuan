@@ -1154,7 +1154,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     });
                     inputElement.addEventListener("blur", () => {
                         if (inputElement.value === imgElement.style.width.replace("px", "")) {
-                            return
+                            return;
                         }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
@@ -1217,7 +1217,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     });
                     inputElement.addEventListener("blur", () => {
                         if (inputElement.value === imgElement.style.height.replace("px", "")) {
-                            return
+                            return;
                         }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);

@@ -33,6 +33,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
@@ -413,6 +414,30 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
+	data := filepath.Join(util.WorkspaceDir, "data")
+	if util.ContainerStd == util.Container {
+		// 桌面端检查磁盘可用空间
+
+		dataSize, sizeErr := util.SizeOfDirectory(data)
+		if sizeErr != nil {
+			logging.LogErrorf("get size of data dir [%s] failed: %s", data, sizeErr)
+			err = sizeErr
+			return
+		}
+
+		_, _, tempExportFree := util.GetDiskUsage(util.TempDir)
+		if int64(tempExportFree) < dataSize*2 { // 压缩 zip 文件时需要 data 的两倍空间
+			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(tempExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize)*2, 2)))
+			return
+		}
+
+		_, _, targetExportFree := util.GetDiskUsage(exportFolder)
+		if int64(targetExportFree) < dataSize { // 复制 zip 最多需要 data 一样的空间
+			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(targetExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize), 2)))
+			return
+		}
+	}
+
 	zipPath, err := ExportData()
 	if err != nil {
 		return
@@ -423,6 +448,9 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 		logging.LogErrorf("url unescape [%s] failed: %s", name, err)
 		return
 	}
+
+	util.PushEndlessProgress(Conf.Language(65))
+	defer util.ClearPushProgress(100)
 
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)

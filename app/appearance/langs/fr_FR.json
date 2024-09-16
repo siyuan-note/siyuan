@@ -1540,7 +1540,7 @@
     "239": "Les opérations associées sont en cours de traitement, veuillez réessayer plus tard",
     "240": "L'en-tête du glisser-déposer actuel se trouve dans le bloc conteneur et l'opération de glisser-déposer ne peut pas être effectuée",
     "241": "Le glisser vers son sous-titre n'est pas pris en charge",
-    "242": "TODO",
+    "242": "Espace actuellement disponible [%s], au moins [%s] est requis pour effectuer cette opération",
     "243": "Répertorier uniquement les [%d] premières balises (y compris les sous-balises). veuillez modifier [Paramètres - Arbre des documents - Nombre maximum de documents à lister].",
     "244": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Arborescence des documents - Reconstruire l'index] une fois. À l'avenir, veuillez quitter complètement le programme avant d'éteindre l'ordinateur.",
     "245": "L'indexation des données n'a pas été terminée depuis la dernière utilisation. Veuillez exécuter [Arborescence des documents - Reconstruire l'index] une fois. Veuillez utiliser [Quitter l'application] dans le panneau de la colonne de droite pour quitter normalement",

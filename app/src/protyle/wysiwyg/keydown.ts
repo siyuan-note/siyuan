@@ -663,7 +663,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1) {
+                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1 || (!isMac() && position.start === 0)) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;

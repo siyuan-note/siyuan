@@ -62,7 +62,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
-            html = `<input data-format="${value.number.format}" value="${value.number.isNotEmpty ? typeof value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">
 <span class="fn__space"></span><span class="fn__flex-center ft__on-surface b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.format}">${value.number.formattedContent}</span><span class="fn__space"></span>`;
             break;
         case "mSelect":
@@ -343,9 +343,9 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     rowID: item.parentElement.dataset.blockId,
                     cellID: item.parentElement.dataset.id,
                     value
-                }, (response) => {
+                }, (setResponse) => {
                     if (type === "number") {
-                        item.parentElement.querySelector(".fn__flex-center").textContent = response.data.formattedContent;
+                        item.parentElement.querySelector(".fn__flex-center").textContent = setResponse.data.value.number.formattedContent;
                     }
                 });
             });

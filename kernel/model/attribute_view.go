@@ -545,6 +545,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeCreated})
 			case av.KeyTypeUpdated:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeUpdated})
+			case av.KeyTypeNumber:
+				for _, v := range kValues.Values {
+					if nil != v.Number {
+						v.Number.Format = kValues.Key.NumberFormat
+						v.Number.FormatNumber()
+					}
+				}
 			}
 
 			if 0 < len(kValues.Values) {

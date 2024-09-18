@@ -567,7 +567,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string) (retStdHTML string, retOutline []*Path) {
+func Preview(id string) (retStdHTML string) {
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -586,7 +586,6 @@ func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {
 		footnotesDefBlock.Unlink()
 	}
-	retOutline = outline(tree)
 	return
 }
 

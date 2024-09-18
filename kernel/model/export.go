@@ -2102,7 +2102,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	if addTitle {
 		if root, _ := getBlock(id, tree); nil != root {
 			root.IAL["type"] = "doc"
-			title := &ast.Node{Type: ast.NodeHeading, HeadingLevel: 1}
+			title := &ast.Node{ID: root.ID, Type: ast.NodeHeading, HeadingLevel: 1}
 			for k, v := range root.IAL {
 				if "type" == k {
 					continue

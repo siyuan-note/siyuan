@@ -1238,8 +1238,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
-            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "protyle-wysiwyg--select");
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
             });
@@ -1247,14 +1247,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (point.className) {
-                targetElement.classList.add(point.className);
+                targetElement.classList.add(point.className, "dragover");
                 return;
             }
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom");
+                    targetElement.classList.add("dragover__bottom", "dragover");
                 } else if (!targetElement.classList.contains("av__row--header")) {
-                    targetElement.classList.add("dragover__top");
+                    targetElement.classList.add("dragover__top", "dragover");
                 }
                 return;
             }
@@ -1275,19 +1275,19 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__left");
+                targetElement.classList.add("dragover__left", "dragover");
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__right");
+                targetElement.classList.add("dragover__right", "dragover");
             } else if (targetElement.classList.contains("av__row--header")) {
-                targetElement.classList.add("dragover__bottom");
+                targetElement.classList.add("dragover__bottom", "dragover");
             } else if (targetElement.classList.contains("av__row--util")) {
-                targetElement.previousElementSibling.classList.add("dragover__bottom");
+                targetElement.previousElementSibling.classList.add("dragover__bottom", "dragover");
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
-                    targetElement.classList.add("dragover__bottom");
+                    targetElement.classList.add("dragover__bottom", "dragover");
                 } else if (disabledPosition !== "top") {
-                    targetElement.classList.add("dragover__top");
+                    targetElement.classList.add("dragover__top", "dragover");
                 }
             }
             return;
@@ -1357,8 +1357,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
-        editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right");
+        editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+            item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
         });
     });
 };

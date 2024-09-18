@@ -105,6 +105,7 @@ export const reloadSync = (
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
+                preview: item.isPreview
             }, response => {
                 item.update(response);
             });

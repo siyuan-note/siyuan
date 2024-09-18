@@ -71,6 +71,7 @@ export class MobileOutline {
         }
         fetchPost("/api/outline/getDocOutline", {
             id: window.siyuan.mobile.editor.protyle.block.rootID,
+            preview: !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
         }, response => {
             let currentId;
             let currentElement = this.element.querySelector(".b3-list-item--focus");

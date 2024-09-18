@@ -578,23 +578,29 @@ export const isCurrentEditor = (blockId: string) => {
 
 export const updateOutline = (models: IModels, protyle: IProtyle, reload = false) => {
     models.outline.find(item => {
-        if (protyle && item.blockId === protyle.block.rootID && item.type === "pin") {
-            item.isPreview = !protyle.preview.element.classList.contains("fn__none");
-        }
-        if (reload || (item.type === "pin" && (!protyle || item.blockId !== protyle.block?.rootID))) {
+        if (reload ||
+            (item.type === "pin" &&
+                (!protyle || item.blockId !== protyle.block?.rootID ||
+                    item.isPreview === protyle.preview.element.classList.contains("fn__none"))
+            )
+        ) {
             let blockId = "";
             if (protyle && protyle.block) {
                 blockId = protyle.block.rootID;
             }
-            if (blockId === item.blockId && !reload) {
+            if (blockId === item.blockId && !reload && item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                 return;
             }
+
             fetchPost("/api/outline/getDocOutline", {
                 id: blockId,
+                preview: !protyle.preview.element.classList.contains("fn__none")
             }, response => {
-                if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId)) {
+                if (!reload && (!isCurrentEditor(blockId) || item.blockId === blockId) &&
+                    item.isPreview !== protyle.preview.element.classList.contains("fn__none")) {
                     return;
                 }
+                item.isPreview = !protyle.preview.element.classList.contains("fn__none");
                 item.update(response, blockId);
                 if (protyle) {
                     item.updateDocTitle(protyle.background.ial);

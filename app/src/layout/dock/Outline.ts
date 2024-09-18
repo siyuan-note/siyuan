@@ -182,7 +182,7 @@ export class Outline extends Model {
                     openFileById({
                         app: options.app,
                         id: this.blockId,
-                        afterOpen: (model: Editor) =>{
+                        afterOpen: (model: Editor) => {
                             if (model) {
                                 if (this.isPreview) {
                                     model.editor.protyle.preview.element.querySelector(".b3-typography").scrollTop = 0;
@@ -206,22 +206,13 @@ export class Outline extends Model {
             }
         });
         this.bindSort();
-        if (this.isPreview) {
-            if (this.blockId) {
-                fetchPost("/api/export/preview", {
-                    id: this.blockId,
-                }, response => {
-                    response.data = response.data.outline;
-                    this.update(response);
-                });
-            }
-        } else {
-            fetchPost("/api/outline/getDocOutline", {
-                id: this.blockId,
-            }, response => {
-                this.update(response);
-            });
-        }
+
+        fetchPost("/api/outline/getDocOutline", {
+            id: this.blockId,
+            preview: this.isPreview
+        }, response => {
+            this.update(response);
+        });
     }
 
     private bindSort() {
@@ -368,7 +359,7 @@ export class Outline extends Model {
     }
 
     private onTransaction(data: IWebSocketData) {
-        if (this.isPreview || data.data.rootID !== this.blockId) {
+        if (data.data.rootID !== this.blockId) {
             return;
         }
         let needReload = false;
@@ -397,6 +388,7 @@ export class Outline extends Model {
         if (needReload) {
             fetchPost("/api/outline/getDocOutline", {
                 id: this.blockId,
+                preview: this.isPreview
             }, response => {
                 this.update(response);
                 // https://github.com/siyuan-note/siyuan/issues/8372

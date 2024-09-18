@@ -231,7 +231,7 @@ func Outline(rootID string, preview bool) (ret []*Path, err error) {
 			title.InsertAfter(&ast.Node{Type: ast.NodeKramdownBlockIAL, Tokens: parse.IAL2Tokens(title.KramdownIAL)})
 
 			content := html.UnescapeString(root.Content)
-			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
+			title.AppendChild(&ast.Node{ID: root.ID, Type: ast.NodeText, Tokens: []byte(content)})
 			tree.Root.PrependChild(title)
 		}
 	}

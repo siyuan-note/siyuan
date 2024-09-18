@@ -191,9 +191,6 @@ export class Preview {
                 avRender(protyle.preview.previewElement, protyle);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
-                /// #if !MOBILE
-                updateOutline(getAllModels(), protyle);
-                /// #endif
                 loadingElement.remove();
             });
         }, protyle.options.preview.delay);

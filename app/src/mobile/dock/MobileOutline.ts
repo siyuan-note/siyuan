@@ -58,17 +58,6 @@ export class MobileOutline {
     }
 
     public update() {
-        if (!window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")) {
-            const blockId = window.siyuan.mobile.editor.protyle.preview.element.querySelector(".selected")?.id;
-            window.siyuan.mobile.editor.protyle.preview.render(window.siyuan.mobile.editor.protyle, (outlineData) => {
-                this.tree.updateData(outlineData);
-                if (blockId) {
-                    this.setCurrentByPreview(this.element.querySelector("#" + blockId));
-                    return;
-                }
-            });
-            return;
-        }
         fetchPost("/api/outline/getDocOutline", {
             id: window.siyuan.mobile.editor.protyle.block.rootID,
             preview: !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")

@@ -235,7 +235,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                         // 有 gutter 菜单时不隐藏
                     } else if (item.targetElement && item.targetElement.classList.contains("protyle-wysiwyg__embed") &&
                         item.targetElement.contains(targetElement)) {
-                        // 点击潜入块后浮窗消失后再快速点击潜入块无法弹出浮窗 https://github.com/siyuan-note/siyuan/issues/12511
+                        // 点击嵌入块后浮窗消失后再快速点击嵌入块无法弹出浮窗 https://github.com/siyuan-note/siyuan/issues/12511
                     } else {
                         item.destroy();
                     }

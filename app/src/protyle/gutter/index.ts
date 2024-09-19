@@ -1461,7 +1461,7 @@ export class Gutter {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator11", type: "separator"}).element);
             const breadcrumb = nodeElement.getAttribute("breadcrumb");
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "assetSubMenu",
+                id: "blockEmbed",
                 type: "submenu",
                 icon: "iconSQL",
                 label: window.siyuan.languages.blockEmbed,

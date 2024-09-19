@@ -202,9 +202,9 @@ export const setDefRefCount = (data: {
                 }
             }
             if (data.refCount === 0) {
-                item.removeAttribute("refcount")
+                item.removeAttribute("refcount");
             } else {
-                item.setAttribute("refcount", data.refCount.toString())
+                item.setAttribute("refcount", data.refCount.toString());
             }
         });
     });

@@ -461,7 +461,7 @@ export class Gutter {
         level?: number
     }) {
         return {
-            'data-id': options.id,
+            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -482,7 +482,7 @@ export class Gutter {
         level?: TTurnIntoOneSub
     }) {
         return {
-            'data-id': options.id,
+            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -504,7 +504,7 @@ export class Gutter {
         accelerator?: string
     }) {
         return {
-            'data-id': options.id,
+            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,

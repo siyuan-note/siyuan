@@ -651,16 +651,16 @@ export class Gutter {
                 isContinue
             }));
             window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconRefresh",
                 id: "turnInto",
+                icon: "iconRefresh",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
                 submenu: turnIntoSubmenu
             }).element);
             if (isContinue) {
                 window.siyuan.menus.menu.append(new MenuItem({
-                    icon: "iconSuper",
                     id: "superBlock",
+                    icon: "iconSuper",
                     label: window.siyuan.languages.merge + " " + window.siyuan.languages.superBlock,
                     type: "submenu",
                     submenu: [this.turnsIntoOne({
@@ -685,8 +685,8 @@ export class Gutter {
         }
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconSparkles",
                 id: "ai",
+                icon: "iconSparkles",
                 label: window.siyuan.languages.ai,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
@@ -732,9 +732,9 @@ export class Gutter {
             copyMenu.splice(2, 0, copyTextRefMenu);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
-            id: "copy",
             type: "submenu",
             submenu: copyMenu,
         }).element);

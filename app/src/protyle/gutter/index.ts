@@ -1182,6 +1182,7 @@ export class Gutter {
         }
 
         const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
+            id: "copyPlainText",
             iconHTML: "",
             label: window.siyuan.languages.copyPlainText,
             accelerator: window.siyuan.config.keymap.editor.general.copyPlainText.custom,
@@ -1190,6 +1191,7 @@ export class Gutter {
                 focusBlock(nodeElement);
             }
         }, {
+            id: "copyMirror",
             iconHTML: "",
             label: type === "NodeAttributeView" ? window.siyuan.languages.copyMirror : window.siyuan.languages.copy,
             accelerator: "⌘C",
@@ -1202,6 +1204,7 @@ export class Gutter {
                 document.execCommand("copy");
             }
         }, {
+            id: "duplicateMirror",
             iconHTML: "",
             label: type === "NodeAttributeView" ? window.siyuan.languages.duplicateMirror : window.siyuan.languages.duplicate,
             accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
@@ -1212,6 +1215,7 @@ export class Gutter {
         }]);
         if (type === "NodeAttributeView") {
             copyMenu.push({
+                id: "duplicateCompletely",
                 iconHTML: "",
                 label: window.siyuan.languages.duplicateCompletely,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicateCompletely.custom,

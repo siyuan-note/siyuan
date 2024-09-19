@@ -233,6 +233,9 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                 if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false") {
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
+                    } else if (item.targetElement && item.targetElement.classList.contains("protyle-wysiwyg__embed") &&
+                        item.targetElement.contains(targetElement)) {
+                        // 点击潜入块后浮窗消失后再快速点击潜入块无法弹出浮窗 https://github.com/siyuan-note/siyuan/issues/12511
                     } else {
                         item.destroy();
                     }

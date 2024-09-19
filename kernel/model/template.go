@@ -42,7 +42,7 @@ import (
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
-	tplFuncMap := util.BuiltInTemplateFuncs()
+	tplFuncMap := treenode.BuiltInTemplateFuncs()
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
@@ -224,7 +224,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := util.BuiltInTemplateFuncs()
+	tplFuncMap := treenode.BuiltInTemplateFuncs()
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))

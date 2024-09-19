@@ -201,6 +201,11 @@ export const setDefRefCount = (data: {
                     attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`;
                 }
             }
+            if (data.refCount === 0) {
+                item.removeAttribute("refcount")
+            } else {
+                item.setAttribute("refcount", data.refCount.toString())
+            }
         });
     });
 

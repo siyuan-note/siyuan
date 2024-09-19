@@ -1206,7 +1206,7 @@
   "list": "無序列表",
   "more": "更多",
   "nameEmpty": "檔案名不能為空",
-  "ordered-list": "有序列表",
+  "orderedList": "有序列表",
   "outdent": "列表反向縮進",
   "outlineOutdent": "列表大綱反向縮進",
   "outlineOutdentTip": "啟用後將使用列表大綱式邏輯反向縮進，即將列表項移動到父級下方",

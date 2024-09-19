@@ -1206,7 +1206,7 @@
   "list": "リスト",
   "more": "詳細",
   "nameEmpty": "名前が空です",
-  "ordered-list": "番号付きリスト",
+  "orderedList": "番号付きリスト",
   "outdent": "アウトデント",
   "outlineOutdent": "リストのアウトラインアウトデント",
   "outlineOutdentTip": "リスト項目にアウトラインロジックを使用してアウトデントします",

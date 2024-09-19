@@ -429,7 +429,7 @@ export abstract class Constants {
                 "inline-code": {default: "⌘G", custom: "⌘G"},
                 link: {default: "⌘K", custom: "⌘K"},
                 check: {default: "⌘L", custom: "⌘L"},
-                "ordered-list": {default: "", custom: ""},
+                "orderedList": {default: "", custom: ""},
                 list: {default: "", custom: ""},
                 table: {default: "⌘O", custom: "⌘O"},
                 code: {default: "⇧⌘K", custom: "⇧⌘K"},

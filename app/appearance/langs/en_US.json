@@ -1206,7 +1206,7 @@
   "list": "List",
   "more": "More",
   "nameEmpty": "Name is empty",
-  "ordered-list": "Order List",
+  "orderedList": "Order List",
   "outdent": "Outdent",
   "outlineOutdent": "List outline outdent",
   "outlineOutdentTip": "After enabling, the outdent will be using the list outline logic, i.e. moving the list items below the parent",

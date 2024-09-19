@@ -92,7 +92,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
     }, {
         filter: ["有序列表", "youxuliebiao", "yxlb", "ordered list"],
         value: "1. " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["ordered-list"]}</span><span class="b3-list-item__meta">1.&nbsp;</span></div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.orderedList}</span><span class="b3-list-item__meta">1.&nbsp;</span></div>`,
     }, {
         filter: ["任务列表", "renwuliebiao", "rwlb", "task list", "todo list"],
         value: "* [ ] " + Lute.Caret,

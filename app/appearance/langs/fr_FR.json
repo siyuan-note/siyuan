@@ -1206,7 +1206,7 @@
   "list": "Liste",
   "more": "Plus",
   "nameEmpty": "Nom est vide",
-  "ordered-list": "Liste d'ordres",
+  "orderedList": "Liste d'ordres",
   "outdent": "Outdent",
   "outlineOutdent": "Liste des retraits excessifs du contour",
   "outlineOutdentTip": "Après l'activation, le retrait négatif utilisera la logique de contour de la liste, c'est-à-dire en déplaçant les éléments de la liste sous le parent",

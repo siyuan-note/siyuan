@@ -1705,6 +1705,7 @@ export class Gutter {
         }
         if (!protyle.disabled) {
             const appearanceElement = new MenuItem({
+                id: "appearance",
                 label: window.siyuan.languages.appearance,
                 icon: "iconFont",
                 accelerator: window.siyuan.config.keymap.editor.insert.appearance.custom,

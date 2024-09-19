@@ -2139,6 +2139,7 @@ export class Gutter {
             label: window.siyuan.languages.height,
             submenu: styles.concat([{
                 iconHTML: "",
+                type: "readonly",
                 label: `<div style="margin: 4px 0;"  aria-label="${firstElement.style.height.endsWith("px") ? firstElement.style.height : (firstElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,

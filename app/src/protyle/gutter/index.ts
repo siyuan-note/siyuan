@@ -2106,6 +2106,7 @@ export class Gutter {
             return false;
         }
         return {
+            id: "copyText",
             iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.copyText.custom,
             label: window.siyuan.languages.copyText,

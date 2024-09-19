@@ -1379,7 +1379,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const isMatchList = matchHotKey(window.siyuan.config.keymap.editor.insert.list.custom, event);
         const isMatchCheck = matchHotKey(window.siyuan.config.keymap.editor.insert.check.custom, event);
-        const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert.orderedList.custom, event);
+        const isMatchOList = matchHotKey(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, event);
         const isMatchQuote = matchHotKey(window.siyuan.config.keymap.editor.insert.quote.custom, event);
         if (isMatchList || isMatchOList || isMatchCheck || isMatchQuote) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));

@@ -1206,7 +1206,7 @@
   "list": "Lista",
   "more": "Más",
   "nameEmpty": "El nombre está vacío",
-  "orderedList": "Lista ordenada",
+  "ordered-list": "Lista ordenada",
   "outdent": "anular la sangría",
   "outlineOutdent": "Lista de contorno sin sangría",
   "outlineOutdentTip": "Después de habilitar, el outdent utilizará la lógica de esquema de la lista, es decir, moviendo los elementos de la lista debajo del padre",

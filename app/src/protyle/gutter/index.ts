@@ -652,6 +652,7 @@ export class Gutter {
             }));
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconRefresh",
+                id: "turnInto",
                 label: window.siyuan.languages.turnInto,
                 type: "submenu",
                 submenu: turnIntoSubmenu
@@ -659,6 +660,7 @@ export class Gutter {
             if (isContinue) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     icon: "iconSuper",
+                    id: "superBlock",
                     label: window.siyuan.languages.merge + " " + window.siyuan.languages.superBlock,
                     type: "submenu",
                     submenu: [this.turnsIntoOne({
@@ -684,6 +686,7 @@ export class Gutter {
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
                 icon: "iconSparkles",
+                id: "ai",
                 label: window.siyuan.languages.ai,
                 accelerator: window.siyuan.config.keymap.editor.general.ai.custom,
                 click() {
@@ -731,6 +734,7 @@ export class Gutter {
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
+            id: "copy",
             type: "submenu",
             submenu: copyMenu,
         }).element);

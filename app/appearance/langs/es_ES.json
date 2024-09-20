@@ -1063,7 +1063,7 @@
   "export20": "La exportación de archivos Word .docx requiere la conversión del formato mediante <a href=\"https://pandoc.org\" target=\"_blank\">Pandoc</a>",
   "export21": "Exportar plantilla de pie de página PDF",
   "export22": "<code class='fn__code'>%page</code> es el número de página actual, <code class='fn__code'>%pages</code> es el número de página total y es compatible con las funciones de plantilla de Sprig ",
-  "export23": "Exportar descuento con YAML front-matter",
+  "export23": "Exportar Markdown con YAML front-matter",
   "export24": "Después de habilitar, agregue información general de metadatos al comienzo del archivo Markdown exportado",
   "export25": "Exportar ruta de plantilla .docx de Word",
   "export26": "La ruta absoluta de la plantilla utilizada al exportar archivos .docx de Word, es decir, Pandoc <a href=\"https://pandoc.org/MANUAL.html#option--reference-doc\" target =\"_blank\">--reference-doc</a> valor del parámetro",

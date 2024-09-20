@@ -2155,6 +2155,7 @@ export class WYSIWYG {
                             action,
                             zoomIn
                         });
+                        window.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape"}));
                     } else if (event.altKey) {
                         openFileById({
                             app: protyle.app,

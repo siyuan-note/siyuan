@@ -20,6 +20,7 @@ import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
+import {hideTooltip} from "../../dialog/tooltip";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -382,6 +383,7 @@ export class Files extends Model {
                 return;
             }
             window.getSelection().removeAllRanges();
+            hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
                 let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));

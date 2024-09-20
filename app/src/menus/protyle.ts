@@ -25,7 +25,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, readText, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, readText, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -382,7 +382,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.refTab,
         icon: "iconEyeoff",
-        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘") + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn) => {
                 openFileById({
@@ -398,7 +398,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconLayoutRight",
-        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/" + updateHotkeyTip("⌥") + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
@@ -417,7 +417,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
         icon: "iconLayoutBottom",
-        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧") + window.siyuan.languages.click,
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
@@ -1086,7 +1086,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }).element);
         }
-        /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             label: "OCR",
             submenu: [{
@@ -1116,7 +1115,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }],
         }).element);
-        /// #endif
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignCenter",
             label: window.siyuan.languages.alignCenter,

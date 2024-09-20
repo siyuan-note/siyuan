@@ -797,7 +797,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
         if (targetElement) {
-            targetElement.classList.remove("protyle-wysiwyg--select");
+            targetElement.classList.remove("protyle-wysiwyg--select", "dragover");
             targetElement.removeAttribute("select-start");
             targetElement.removeAttribute("select-end");
         }
@@ -1227,7 +1227,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeViewRowMenu${Constants.ZWSP}`.toLowerCase())) {
             // 行只能拖拽当前 av 中
-            if (!targetElement.classList.contains("av__row") || !window.siyuan.dragElement.contains(targetElement)) {
+            if ((!targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__row--util")) ||
+                !window.siyuan.dragElement.contains(targetElement)) {
                 targetElement = false;
             }
         }
@@ -1280,14 +1281,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__right", "dragover");
             } else if (targetElement.classList.contains("av__row--header")) {
-                targetElement.classList.add("dragover__bottom", "dragover");
+                targetElement.classList.add("dragover__bottom");
             } else if (targetElement.classList.contains("av__row--util")) {
-                targetElement.previousElementSibling.classList.add("dragover__bottom", "dragover");
+                targetElement.previousElementSibling.classList.add("dragover__bottom");
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
-                    targetElement.classList.add("dragover__bottom", "dragover");
+                    targetElement.classList.add("dragover__bottom");
+                    if (!targetElement.classList.contains("av__row")) {
+                        targetElement.classList.add("dragover");
+                    }
                 } else if (disabledPosition !== "top") {
-                    targetElement.classList.add("dragover__top", "dragover");
+                    targetElement.classList.add("dragover__top");
+                    if (!targetElement.classList.contains("av__row")) {
+                        targetElement.classList.add("dragover");
+                    }
                 }
             }
             return;

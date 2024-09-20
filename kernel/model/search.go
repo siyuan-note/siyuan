@@ -824,8 +824,30 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, rep
 // Supports replacing text elements with other elements https://github.com/siyuan-note/siyuan/issues/11058
 func replaceTextNode(text *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, luteEngine *lute.Lute) bool {
 	if 0 == method {
-		if bytes.Contains(text.Tokens, []byte(keyword)) {
-			newContent := bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
+		newContent := text.Tokens
+		if Conf.Search.CaseSensitive {
+			if bytes.Contains(text.Tokens, []byte(keyword)) {
+				newContent = bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
+			}
+		} else {
+			// 当搜索结果中的文本元素包含大小写混合时替换失败
+			// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
+			keywords := strings.Split(keyword, " ")
+			// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
+			if 1 < len(keywords) {
+				var lowerKeywords []string
+				for _, k := range keywords {
+					lowerKeywords = append(lowerKeywords, strings.ToLower(k))
+				}
+				lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
+				keyword = strings.Join(lowerKeywords, " ")
+			}
+
+			if bytes.Contains(bytes.ToLower(text.Tokens), []byte(keyword)) {
+				newContent = replaceCaseInsensitive(text.Tokens, []byte(keyword), []byte(replacement))
+			}
+		}
+		if !bytes.Equal(newContent, text.Tokens) {
 			tree := parse.Inline("", newContent, luteEngine.ParseOptions)
 			if nil == tree.Root.FirstChild {
 				return false
@@ -1817,4 +1839,9 @@ func filterQueryInvisibleChars(query string) string {
 	query = gulu.Str.RemoveInvisible(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
 	return query
+}
+
+func replaceCaseInsensitive(input, old, new []byte) []byte {
+	re := regexp.MustCompile("(?i)" + regexp.QuoteMeta(string(old)))
+	return []byte(re.ReplaceAllString(string(input), string(new)))
 }

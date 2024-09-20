@@ -1086,7 +1086,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }).element);
         }
-        /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             label: "OCR",
             submenu: [{
@@ -1116,7 +1115,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }],
         }).element);
-        /// #endif
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignCenter",
             label: window.siyuan.languages.alignCenter,

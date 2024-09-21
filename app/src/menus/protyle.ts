@@ -382,7 +382,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.refTab,
         icon: "iconEyeoff",
-        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘") + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn) => {
                 openFileById({
@@ -398,7 +398,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconLayoutRight",
-        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/" + updateHotkeyTip("⌥") + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/" + updateHotkeyTip("⌥" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
@@ -417,7 +417,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
         icon: "iconLayoutBottom",
-        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧") + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {

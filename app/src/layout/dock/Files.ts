@@ -20,7 +20,7 @@ import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
-import {hideTooltip} from "../../dialog/tooltip";
+import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -422,8 +422,13 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragend", () => {
-            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
+            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
+                // https://github.com/siyuan-note/siyuan/issues/11587
+                if (index === 0) {
+                    const airaLabelElement = item.querySelector(".ariaLabel")
+                    showTooltip(airaLabelElement.getAttribute("aria-label"), airaLabelElement);
+                }
             });
             window.siyuan.dragElement = undefined;
         });

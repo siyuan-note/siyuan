@@ -1176,6 +1176,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         event.preventDefault();
         let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") || hasClosestBlock(event.target);
         const point = {x: event.clientX, y: event.clientY, className: ""};
+
+        // 超级块中有a，b两个段落块，移动到 ab 之间的间隙 targetElement 会变为超级块，需修正为 a
+        if (targetElement && (targetElement.classList.contains("bq") || targetElement.classList.contains("sb") || targetElement.classList.contains("list") || targetElement.classList.contains("li"))) {
+            let prevElement = hasClosestBlock(document.elementFromPoint(point.x, point.y - 6))
+            while (prevElement && targetElement.contains(prevElement)) {
+                if (prevElement.nextElementSibling?.getAttribute("data-node-id")) {
+                    targetElement = prevElement;
+                }
+                prevElement = prevElement.parentElement;
+            }
+        }
+
         if (!targetElement) {
             if (event.clientY > editorElement.lastElementChild.getBoundingClientRect().bottom) {
                 // 命中底部
@@ -1248,14 +1260,17 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (point.className) {
-                targetElement.classList.add(point.className, "dragover");
+                targetElement.classList.add(point.className);
+                addDragover(targetElement);
                 return;
             }
             if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
-                    targetElement.classList.add("dragover__bottom", "dragover");
+                    targetElement.classList.add("dragover__bottom");
+                    addDragover(targetElement);
                 } else if (!targetElement.classList.contains("av__row--header")) {
-                    targetElement.classList.add("dragover__top", "dragover");
+                    targetElement.classList.add("dragover__top");
+                    addDragover(targetElement);
                 }
                 return;
             }
@@ -1276,10 +1291,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__left", "dragover");
+                targetElement.classList.add("dragover__left");
+                addDragover(targetElement);
             } else if (event.clientX > nodeRect.right - 32 && event.clientX < nodeRect.right &&
                 !targetElement.classList.contains("av__row")) {
-                targetElement.classList.add("dragover__right", "dragover");
+                targetElement.classList.add("dragover__right");
+                addDragover(targetElement);
             } else if (targetElement.classList.contains("av__row--header")) {
                 targetElement.classList.add("dragover__bottom");
             } else if (targetElement.classList.contains("av__row--util")) {
@@ -1287,14 +1304,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2 && disabledPosition !== "bottom") {
                     targetElement.classList.add("dragover__bottom");
-                    if (!targetElement.classList.contains("av__row")) {
-                        targetElement.classList.add("dragover");
-                    }
+                    addDragover(targetElement);
                 } else if (disabledPosition !== "top") {
                     targetElement.classList.add("dragover__top");
-                    if (!targetElement.classList.contains("av__row")) {
-                        targetElement.classList.add("dragover");
-                    }
+                    addDragover(targetElement);
                 }
             }
             return;
@@ -1369,3 +1382,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         });
     });
 };
+
+const addDragover = (element: HTMLElement) => {
+    if (element.classList.contains("sb") ||
+        element.classList.contains("li") ||
+        element.classList.contains("list") ||
+        element.classList.contains("bq")) {
+        element.classList.add("dragover")
+    }
+}

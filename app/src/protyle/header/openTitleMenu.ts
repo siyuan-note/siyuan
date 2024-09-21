@@ -200,13 +200,13 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         /// #if !MOBILE
         if (!protyle.model) {
             window.siyuan.menus.menu.append(new MenuItem({
-                label: window.siyuan.languages.openInNewTab,
-                icon: "iconLayoutRight",
+                label: window.siyuan.languages.openBy,
+                icon: "iconOpen",
                 click() {
                     openFileById({
                         app: protyle.app,
                         id: protyle.block.id,
-                        action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT],
+                        action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT],
                     });
                 }
             }).element);

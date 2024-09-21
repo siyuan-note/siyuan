@@ -2227,8 +2227,11 @@ export class WYSIWYG {
                 return;
             }
 
-            // 如果aLink 为空时，当 data-type="a inline-math" 可继续后续操作
-            if (aElement && range.toString() === "" && aLink) {
+            if (aElement &&
+                // https://github.com/siyuan-note/siyuan/issues/11980
+                (event.shiftKey || range.toString() === "") &&
+                // 如果aLink 为空时，当 data-type="a inline-math" 可继续后续操作
+                aLink) {
                 event.stopPropagation();
                 event.preventDefault();
                 openLink(protyle, aLink, event, ctrlIsPressed);

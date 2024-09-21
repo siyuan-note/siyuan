@@ -490,7 +490,6 @@ export class Gutter {
     }
 
     private turnsInto(options: {
-        id?: string,
         icon?: string,
         label: string,
         protyle: IProtyle,
@@ -501,7 +500,6 @@ export class Gutter {
         accelerator?: string
     }) {
         return {
-            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -583,7 +581,6 @@ export class Gutter {
             // 多选引用转换为块的时候 id 不一致
             if (!hasEmbedBlock) {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "paragraph",
                     icon: "iconParagraph",
                     label: window.siyuan.languages.paragraph,
                     accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
@@ -594,7 +591,6 @@ export class Gutter {
                 }));
             }
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading1",
                 icon: "iconH1",
                 label: window.siyuan.languages.heading1,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading1.custom,
@@ -605,7 +601,6 @@ export class Gutter {
                 isContinue
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading2",
                 icon: "iconH2",
                 label: window.siyuan.languages.heading2,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading2.custom,
@@ -616,7 +611,6 @@ export class Gutter {
                 isContinue
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading3",
                 icon: "iconH3",
                 label: window.siyuan.languages.heading3,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading3.custom,
@@ -627,7 +621,6 @@ export class Gutter {
                 isContinue
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading4",
                 icon: "iconH4",
                 label: window.siyuan.languages.heading4,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading4.custom,
@@ -638,7 +631,6 @@ export class Gutter {
                 isContinue
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading5",
                 icon: "iconH5",
                 label: window.siyuan.languages.heading5,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading5.custom,
@@ -649,7 +641,6 @@ export class Gutter {
                 isContinue
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading6",
                 icon: "iconH6",
                 label: window.siyuan.languages.heading6,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading6.custom,
@@ -950,7 +941,6 @@ export class Gutter {
                 type: "Blocks2Blockquote"
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading1",
                 icon: "iconH1",
                 label: window.siyuan.languages.heading1,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading1.custom,
@@ -960,7 +950,6 @@ export class Gutter {
                 type: "Blocks2Hs",
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading2",
                 icon: "iconH2",
                 label: window.siyuan.languages.heading2,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading2.custom,
@@ -970,7 +959,6 @@ export class Gutter {
                 type: "Blocks2Hs",
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading3",
                 icon: "iconH3",
                 label: window.siyuan.languages.heading3,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading3.custom,
@@ -980,7 +968,6 @@ export class Gutter {
                 type: "Blocks2Hs",
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading4",
                 icon: "iconH4",
                 label: window.siyuan.languages.heading4,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading4.custom,
@@ -990,7 +977,6 @@ export class Gutter {
                 type: "Blocks2Hs",
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading5",
                 icon: "iconH5",
                 label: window.siyuan.languages.heading5,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading5.custom,
@@ -1000,7 +986,6 @@ export class Gutter {
                 type: "Blocks2Hs",
             }));
             turnIntoSubmenu.push(this.turnsInto({
-                id: "heading6",
                 icon: "iconH6",
                 label: window.siyuan.languages.heading6,
                 accelerator: window.siyuan.config.keymap.editor.heading.heading6.custom,
@@ -1011,7 +996,6 @@ export class Gutter {
             }));
         } else if (type === "NodeHeading" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsInto({
-                id: "paragraph",
                 icon: "iconParagraph",
                 label: window.siyuan.languages.paragraph,
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
@@ -1029,7 +1013,6 @@ export class Gutter {
             }));
             if (subType !== "h1") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading1",
                     icon: "iconH1",
                     label: window.siyuan.languages.heading1,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading1.custom,
@@ -1041,7 +1024,6 @@ export class Gutter {
             }
             if (subType !== "h2") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading2",
                     icon: "iconH2",
                     label: window.siyuan.languages.heading2,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading2.custom,
@@ -1053,7 +1035,6 @@ export class Gutter {
             }
             if (subType !== "h3") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading3",
                     icon: "iconH3",
                     label: window.siyuan.languages.heading3,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading3.custom,
@@ -1065,7 +1046,6 @@ export class Gutter {
             }
             if (subType !== "h4") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading4",
                     icon: "iconH4",
                     label: window.siyuan.languages.heading4,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading4.custom,
@@ -1077,7 +1057,6 @@ export class Gutter {
             }
             if (subType !== "h5") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading5",
                     icon: "iconH5",
                     label: window.siyuan.languages.heading5,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading5.custom,
@@ -1089,7 +1068,6 @@ export class Gutter {
             }
             if (subType !== "h6") {
                 turnIntoSubmenu.push(this.turnsInto({
-                    id: "heading6",
                     icon: "iconH6",
                     label: window.siyuan.languages.heading6,
                     accelerator: window.siyuan.config.keymap.editor.heading.heading6.custom,

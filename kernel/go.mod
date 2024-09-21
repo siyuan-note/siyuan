@@ -152,7 +152,7 @@ require (
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
-	github.com/tetratelabs/wazero v1.8.0 // indirect
+	github.com/tetratelabs/wazero v1.7.3 // indirect
 	github.com/tklauser/go-sysconf v0.3.14 // indirect
 	github.com/tklauser/numcpus v0.8.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

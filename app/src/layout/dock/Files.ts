@@ -571,6 +571,10 @@ export class Files extends Model {
                         }
                     });
                     if (!isChild) {
+                        // 禁止父节点移动到子节点 https://github.com/siyuan-note/siyuan/issues/12539
+                        if (newElement.getAttribute("data-path").startsWith(item.dataset.path.replace(".sy", ""))) {
+                            return;
+                        }
                         selectFileElements.push(item);
                         fromPaths.push(dataPath);
                     }

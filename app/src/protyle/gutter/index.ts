@@ -472,7 +472,6 @@ export class Gutter {
 
     private turnsIntoOne(options: {
         accelerator?: string,
-        id?: string,
         icon?: string,
         label: string,
         protyle: IProtyle,
@@ -481,7 +480,6 @@ export class Gutter {
         level?: TTurnIntoOneSub
     }) {
         return {
-            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -550,7 +548,6 @@ export class Gutter {
             const turnIntoSubmenu: IMenu[] = [];
             if (isContinue) {
                 turnIntoSubmenu.push(this.turnsIntoOne({
-                    id: "list",
                     icon: "iconList",
                     label: window.siyuan.languages.list,
                     protyle,
@@ -559,7 +556,6 @@ export class Gutter {
                     type: "Blocks2ULs"
                 }));
                 turnIntoSubmenu.push(this.turnsIntoOne({
-                    id: "orderedList",
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
@@ -568,7 +564,6 @@ export class Gutter {
                     type: "Blocks2OLs"
                 }));
                 turnIntoSubmenu.push(this.turnsIntoOne({
-                    id: "check",
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
@@ -577,7 +572,6 @@ export class Gutter {
                     type: "Blocks2TLs"
                 }));
                 turnIntoSubmenu.push(this.turnsIntoOne({
-                    id: "quote",
                     icon: "iconQuote",
                     label: window.siyuan.languages.quote,
                     accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
@@ -679,7 +673,6 @@ export class Gutter {
                     label: window.siyuan.languages.merge + " " + window.siyuan.languages.superBlock,
                     type: "submenu",
                     submenu: [this.turnsIntoOne({
-                        id: "hLayout",
                         label: window.siyuan.languages.hLayout,
                         accelerator: window.siyuan.config.keymap.editor.general.hLayout.custom,
                         icon: "iconSplitLR",
@@ -688,7 +681,6 @@ export class Gutter {
                         type: "BlocksMergeSuperBlock",
                         level: "col"
                     }), this.turnsIntoOne({
-                        id: "vLayout",
                         label: window.siyuan.languages.vLayout,
                         accelerator: window.siyuan.config.keymap.editor.general.vLayout.custom,
                         icon: "iconSplitTB",
@@ -926,7 +918,6 @@ export class Gutter {
         // "heading1-6", "list", "ordered-list", "check", "quote", "code", "table", "line", "math", "paragraph"
         if (type === "NodeParagraph" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "list",
                 icon: "iconList",
                 label: window.siyuan.languages.list,
                 accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
@@ -935,7 +926,6 @@ export class Gutter {
                 type: "Blocks2ULs"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "orderedList",
                 icon: "iconOrderedList",
                 label: window.siyuan.languages["ordered-list"],
                 accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
@@ -944,7 +934,6 @@ export class Gutter {
                 type: "Blocks2OLs"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "check",
                 icon: "iconCheck",
                 label: window.siyuan.languages.check,
                 accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
@@ -953,7 +942,6 @@ export class Gutter {
                 type: "Blocks2TLs"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "quote",
                 icon: "iconQuote",
                 label: window.siyuan.languages.quote,
                 accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
@@ -1032,7 +1020,6 @@ export class Gutter {
                 type: "Blocks2Ps",
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "quote",
                 icon: "iconQuote",
                 label: window.siyuan.languages.quote,
                 accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,
@@ -1123,7 +1110,6 @@ export class Gutter {
                 type: "CancelList"
             }));
             turnIntoSubmenu.push(this.turnsIntoOne({
-                id: "quote",
                 icon: "iconQuote",
                 label: window.siyuan.languages.quote,
                 accelerator: window.siyuan.config.keymap.editor.insert.quote.custom,

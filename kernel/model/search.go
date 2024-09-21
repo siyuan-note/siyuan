@@ -1290,8 +1290,8 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy stri
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
-	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	regex := regexp.MustCompile(exp)
+	blocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -1354,7 +1354,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 	return
 }
 
-func highlightByQuery(query, typeFilter, id string) (ret []string) {
+func highlightByFTS(query, typeFilter, id string) (ret []string) {
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {
@@ -1373,6 +1373,22 @@ func highlightByQuery(query, typeFilter, id string) (ret []string) {
 	stmt += " AND root_id = '" + id + "'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, limit)
+	for _, block := range sqlBlocks {
+		keyword := gulu.Str.SubstringsBetween(block.Content, search.SearchMarkLeft, search.SearchMarkRight)
+		if 0 < len(keyword) {
+			ret = append(ret, keyword...)
+		}
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func highlightByRegexp(query, typeFilter, id string) (ret []string) {
+	fieldFilter := fieldRegexp(query)
+	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt += " AND root_id = '" + id + "'"
+	regex := regexp.MustCompile(query)
+	sqlBlocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.Content, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {

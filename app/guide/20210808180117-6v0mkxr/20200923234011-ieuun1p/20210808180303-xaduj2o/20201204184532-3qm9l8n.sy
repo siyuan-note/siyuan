@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20240403151002"
+		"updated": "20240921122726"
 	},
 	"Children": [
 		{
@@ -56,7 +56,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091444-jy56z0p"
+				"id": "20210104091444-jy56z0p",
+				"updated": "20240921122726"
 			},
 			"Children": [
 				{
@@ -214,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20240403151002"
+				"updated": "20240921122726"
 			},
 			"Children": [
 				{
@@ -225,7 +226,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091444-d5hpwdd"
+						"id": "20210104091444-d5hpwdd",
+						"updated": "20210104091444"
 					},
 					"Children": [
 						{
@@ -270,7 +272,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210221131637-9xmclwp"
+						"id": "20210221131637-9xmclwp",
+						"updated": "20210221131637"
 					},
 					"Children": [
 						{
@@ -306,7 +309,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211213121001-86hu9ws"
+						"id": "20211213121001-86hu9ws",
+						"updated": "20211213121001"
 					},
 					"Children": [
 						{
@@ -342,7 +346,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211213121022-33ngo64"
+						"id": "20211213121022-33ngo64",
+						"updated": "20211213121022"
 					},
 					"Children": [
 						{
@@ -365,6 +370,43 @@
 								{
 									"Type": "NodeText",
 									"Data": "​：Use this variable to insert the current document alias"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240921122521-l3lmolm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240921122521-l3lmolm",
+						"updated": "20240921122726"
+					},
+					"Children": [
+						{
+							"ID": "20240921122521-4qqycah",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240921122521-4qqycah",
+								"updated": "20240921122726"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the readable path of the block corresponding to the block ID"
 								}
 							]
 						}
@@ -475,23 +517,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to parse "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " string in time format into "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "a"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
+									"Data": "​: This function is used to parse a string in time format into a "
 								},
 								{
 									"Type": "NodeTextMark",

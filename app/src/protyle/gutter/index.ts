@@ -461,7 +461,6 @@ export class Gutter {
         level?: number
     }) {
         return {
-            id: options.id,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -1115,7 +1114,7 @@ export class Gutter {
             }
         } else if (type === "NodeList" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsOneInto({
-                id: "paragraph",
+                id,
                 icon: "iconParagraph",
                 label: window.siyuan.languages.paragraph,
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
@@ -1134,7 +1133,7 @@ export class Gutter {
             }));
             if (nodeElement.getAttribute("data-subtype") === "o") {
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "list",
+                    id,
                     icon: "iconList",
                     label: window.siyuan.languages.list,
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
@@ -1143,7 +1142,7 @@ export class Gutter {
                     type: "OL2UL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "check",
+                    id,
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
@@ -1153,7 +1152,7 @@ export class Gutter {
                 }));
             } else if (nodeElement.getAttribute("data-subtype") === "t") {
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "list",
+                    id,
                     icon: "iconList",
                     label: window.siyuan.languages.list,
                     accelerator: window.siyuan.config.keymap.editor.insert.list.custom,
@@ -1162,7 +1161,7 @@ export class Gutter {
                     type: "TL2UL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "orderedList",
+                    id,
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
@@ -1172,7 +1171,7 @@ export class Gutter {
                 }));
             } else {
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "orderedList",
+                    id,
                     icon: "iconOrderedList",
                     label: window.siyuan.languages["ordered-list"],
                     accelerator: window.siyuan.config.keymap.editor.insert["ordered-list"].custom,
@@ -1181,7 +1180,7 @@ export class Gutter {
                     type: "UL2OL"
                 }));
                 turnIntoSubmenu.push(this.turnsOneInto({
-                    id: "check",
+                    id,
                     icon: "iconCheck",
                     label: window.siyuan.languages.check,
                     accelerator: window.siyuan.config.keymap.editor.insert.check.custom,
@@ -1192,7 +1191,7 @@ export class Gutter {
             }
         } else if (type === "NodeBlockquote" && !protyle.disabled) {
             turnIntoSubmenu.push(this.turnsOneInto({
-                id: "paragraph",
+                id,
                 icon: "iconParagraph",
                 label: window.siyuan.languages.paragraph,
                 accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,

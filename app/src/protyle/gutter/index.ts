@@ -1441,7 +1441,7 @@ export class Gutter {
         } else if ((type === "NodeVideo" || type === "NodeAudio") && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_VideoOrAudio", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "assetSubMenu",
+                id: type === "NodeVideo" ? "assetVideo" : "assetAudio",
                 type: "submenu",
                 icon: type === "NodeVideo" ? "iconVideo" : "iconRecord",
                 label: window.siyuan.languages.assets,
@@ -1450,7 +1450,7 @@ export class Gutter {
         } else if (type === "NodeIFrame" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_IFrame", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "assetSubMenu",
+                id: "assetIFrame",
                 type: "submenu",
                 icon: "iconLanguage",
                 label: window.siyuan.languages.assets,

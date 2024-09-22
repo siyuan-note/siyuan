@@ -264,17 +264,27 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 }
                 event.preventDefault();
                 const nodeRect = targetElement.getBoundingClientRect();
-                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                 } else {
                     targetElement.classList.add("dragover__top");
                 }
             });
+            let counter = 0
             element.addEventListener("dragleave", () => {
-                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__bottom", "dragover__top");
-                });
+                counter--;
+                if (counter === 0) {
+                    element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                        item.classList.remove("dragover__bottom", "dragover__top");
+                    });
+                }
+            });
+            element.addEventListener("dragenter", (event) => {
+                event.preventDefault();
+                counter++;
             });
             element.addEventListener("dragend", () => {
                 if (window.siyuan.dragElement) {

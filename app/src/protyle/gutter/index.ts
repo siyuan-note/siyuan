@@ -1454,7 +1454,7 @@ export class Gutter {
                 submenu: iframeMenu(protyle, nodeElement)
             }).element);
         } else if (type === "NodeHTMLBlock" && !protyle.disabled) {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_HTML", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_html", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "html",
                 icon: "iconHTML5",

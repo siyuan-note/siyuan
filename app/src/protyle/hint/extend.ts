@@ -143,7 +143,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMath"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.math}</span><span class="b3-list-item__meta">$$</span></div>`,
     }, {
         filter: ["html"],
-        id: "HTML",
+        id: "html",
         value: "<div>",
         html: '<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconHTML5"></use></svg><span class="b3-list-item__text">HTML</span></div>',
     }, {

@@ -1459,7 +1459,7 @@ export class Gutter {
         } else if (type === "NodeHTMLBlock" && !protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_HTML", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "HTML",
+                id: "html",
                 icon: "iconHTML5",
                 label: "HTML",
                 click() {

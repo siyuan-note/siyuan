@@ -169,8 +169,14 @@
       }
 
       & > .list {
+        margin-left: 18px !important;
+        padding-left: 16px;
         padding-top: 0;
         padding-bottom: 0;
+
+        &.protyle-wysiwyg--select {
+          margin-left: 34px !important;
+          padding-left: 0;
       }
     }
 

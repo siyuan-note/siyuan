@@ -808,7 +808,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 const totalPage = parseInt(repoElement.getAttribute("total-page") || "1");
 
                 confirmDialog(
-                    window.siyuan.languages.dataHistoryJumpPage.replace("${x}", totalPage),
+                    window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
                     // eslint-disable-next-line quotes
                     `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
                     (dialog: Dialog) => {

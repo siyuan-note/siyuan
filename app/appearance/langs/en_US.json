@@ -1,5 +1,5 @@
 {
-  "dataHistoryJumpPage": "Jump to the specified page: 1 ~ ${x}",
+  "jumpToPage": "Jump to the specified page: 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total ${x} pages, ${y} snapshots",
   "visitCommunityShare": "Visit community share",
   "clearContextSucc": "The context has been cleared",

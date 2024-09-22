@@ -1,5 +1,5 @@
 {
-  "dataHistoryJumpPage": "指定されたページにジャンプ：1 ~ ${x}",
+  "jumpToPage": "指定されたページにジャンプ：1 ~ ${x}",
   "pageCountAndSnapshotCount": "合計 ${x} ページ、${y} スナップショット",
   "visitCommunityShare": "コミュニティシェアを訪問",
   "clearContextSucc": "コンテキストがクリアされました",

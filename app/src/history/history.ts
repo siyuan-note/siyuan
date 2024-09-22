@@ -241,9 +241,14 @@ ${actionHTML}
 const renderRepo = (element: Element, currentPage: number) => {
     const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value;
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
+    const pageCount = element.querySelector(".history-repo__title span.count-page");
+    const snapCount = element.querySelector(".history-repo__title span.count-snap");
+    const pageBtn = element.querySelector('button[data-type="jumpPage"]');
+    pageBtn.textContent = `${currentPage}`;
+
     const previousElement = element.querySelector('[data-type="previous"]');
     const nextElement = element.querySelector('[data-type="next"]');
-    const pageElement = nextElement.nextElementSibling.nextElementSibling;
+    // const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-init", "true");
     if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
         fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
@@ -251,11 +256,15 @@ const renderRepo = (element: Element, currentPage: number) => {
         });
         previousElement.classList.add("fn__none");
         nextElement.classList.add("fn__none");
-        pageElement.classList.add("fn__none");
+        // pageElement.classList.add("fn__none");
+        pageBtn.classList.add("fn__none");
+        pageCount.parentElement?.classList.add("fn__none");
     } else {
         previousElement.classList.remove("fn__none");
         nextElement.classList.remove("fn__none");
-        pageElement.classList.remove("fn__none");
+        // pageElement.classList.remove("fn__none");
+        pageBtn.classList.remove("fn__none");
+        pageCount.parentElement?.classList.remove("fn__none");
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {
             previousElement.removeAttribute("disabled");
@@ -269,7 +278,9 @@ const renderRepo = (element: Element, currentPage: number) => {
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            pageElement.textContent = `${currentPage}/${response.data.pageCount || 1}`;
+            // pageElement.textContent = `${currentPage}/${response.data.pageCount || 1}`;
+            pageCount.textContent = `${response.data.pageCount}`;
+            snapCount.textContent = `${response.data.totalCount}`;
             renderRepoItem(response, element, selectValue);
         });
     }
@@ -392,11 +403,13 @@ export const openHistory = (app: App) => {
         <div data-type="repo" class="fn__none history__repo">
             <div style="overflow: auto"">
                 <div class="block__icons">
+                    <div style="margin-left: 3px;" class="history-repo__title">
+                        ${window.siyuan.languages.historyRepoTitle}
+                    </div>
+                    <span class="fn__space"></span>
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-                    <span class="fn__space"></span>
+                    <button class="b3-button b3-button--text" data-type="jumpPage">1</button>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
-                    <span class="fn__space"></span>
-                    <span>1/1</span>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <select class="b3-select ${isMobile() ? "fn__size96" : "fn__size200"}">
@@ -797,6 +810,25 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
+            } else if (type === "jumpPage") {
+                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                const count = repoElement.querySelector("span.count-page");
+                const totalPage = parseInt(count?.textContent || "1");
+
+                confirmDialog(
+                    window.siyuan.languages.historyRepoJumpPage.replace("${x}", totalPage),
+                    // eslint-disable-next-line quotes
+                    `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
+                    (dialog: Dialog) => {
+                        const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                        if (inputElement.value === "") {
+                            return;
+                        }
+                        let page = parseInt(inputElement.value);
+                        page = Math.max(1, Math.min(page, totalPage));
+                        renderRepo(repoElement, page);
+                    }
+                );
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);

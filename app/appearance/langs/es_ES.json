@@ -1,4 +1,6 @@
 {
+  "historyRepoJumpPage": "Saltar a la página especificada: 1 ~ ${x}",
+  "historyRepoTitle": "Total <span class=\"count-page\">1</span> páginas, <span class=\"count-snap\">1</span> instantáneas",
   "visitCommunityShare": "Visitar la comunidad compartida",
   "clearContextSucc": "Se ha borrado el contexto",
   "emptyMobilePlaceholder": "Grabar algo",

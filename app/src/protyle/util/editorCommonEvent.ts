@@ -4,7 +4,8 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByTag,
-    hasTopClosestByAttribute, isInEmbedBlock
+    hasTopClosestByAttribute,
+    isInEmbedBlock
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
@@ -1371,15 +1372,23 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverElement = targetElement;
         }
     });
-    editorElement.addEventListener("dragleave", (event) => {
+    let counter = 0
+    editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled) {
             event.preventDefault();
             event.stopPropagation();
             return;
         }
-        editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-            item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
-        });
+        counter--;
+        if (counter === 0) {
+            editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+            });
+        }
+    });
+    editorElement.addEventListener("dragenter", (event) => {
+        event.preventDefault();
+        counter++;
     });
 };
 

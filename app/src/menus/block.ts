@@ -6,6 +6,7 @@ import {Constants} from "../constants";
 
 export const transferBlockRef = (id: string) => {
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "transferBlockRef",
         label: window.siyuan.languages.transferBlockRef,
         icon: "iconScrollHoriz",
         click() {

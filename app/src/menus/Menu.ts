@@ -181,6 +181,9 @@ export class MenuItem {
         if (options.disabled) {
             this.element.setAttribute("disabled", "disabled");
         }
+        if (options.id) {
+            this.element.setAttribute("data-id", options.id);
+        }
         if (options.type === "separator") {
             this.element.classList.add("b3-menu__separator");
             return;
@@ -206,9 +209,6 @@ export class MenuItem {
                     window.siyuan.menus.menu.remove();
                 }
             });
-        }
-        if (options.id) {
-            this.element.setAttribute("data-id", options.id);
         }
         if (options.type === "readonly") {
             this.element.classList.add("b3-menu__item--readonly");

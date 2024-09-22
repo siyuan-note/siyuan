@@ -1771,6 +1771,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
+        id: "asset",
         iconHTML: "",
         type: "readonly",
         label: `<textarea spellcheck="false" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
@@ -1841,6 +1842,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
+        id: "asset",
         iconHTML: "",
         type: "readonly",
         label: `<textarea spellcheck="false" rows="1" style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
@@ -1860,6 +1862,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             type: "separator"
         });
         subMenus.push({
+            id: "rename",
             label: window.siyuan.languages.rename,
             icon: "iconEdit",
             click() {
@@ -1870,6 +1873,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const VideoSrc = videoElement.getAttribute("src");
     if (VideoSrc) {
         subMenus.push({
+            id: "openBy",
             label: window.siyuan.languages.openBy,
             icon: "iconOpen",
             submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]

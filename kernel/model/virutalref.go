@@ -37,7 +37,7 @@ import (
 
 // virtualBlockRefCache 用于保存块关联的虚拟引用关键字。
 // 改进打开虚拟引用后加载文档的性能 https://github.com/siyuan-note/siyuan/issues/7378
-var virtualBlockRefCache, _ = ristretto.NewCache(&ristretto.Config{
+var virtualBlockRefCache, _ = ristretto.NewCache[string, []string](&ristretto.Config[string, []string]{
 	NumCounters: 102400,
 	MaxCost:     10240,
 	BufferItems: 64,
@@ -60,7 +60,7 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 		ret = putBlockVirtualRefKeywords(content, root)
 		return
 	}
-	ret = val.([]string)
+	ret = val
 	return
 }
 
@@ -216,7 +216,7 @@ func getVirtualRefKeywords(root *ast.Node) (ret []string) {
 	}
 
 	if val, ok := virtualBlockRefCache.Get("virtual_ref"); ok {
-		ret = val.([]string)
+		ret = val
 	}
 
 	if "" != strings.TrimSpace(Conf.Editor.VirtualBlockRefInclude) {

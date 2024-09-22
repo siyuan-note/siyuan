@@ -274,7 +274,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            element.setAttribute("total-page", response.data.totalCount.toString());
+            element.setAttribute("total-page", response.data.pageCount.toString());
             pageElement.textContent = `${window.siyuan.languages.pageCountAndSnapshotCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
             renderRepoItem(response, element, selectValue);
         });

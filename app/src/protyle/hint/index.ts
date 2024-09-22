@@ -825,7 +825,7 @@ ${genHintItemHTML(item)}
                         y: rect.top,
                         isLeft: true
                     });
-                    const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"], [data-id="blockEmbed"]');
+                    const itemElement = window.siyuan.menus.menu.element.querySelector('[data-id="assetVideo"], [data-id="assetAudio"], [data-id="assetIFrame"]');
                     itemElement.classList.add("b3-menu__item--show");
                     window.siyuan.menus.menu.showSubMenu(itemElement.querySelector(".b3-menu__submenu"));
                     window.siyuan.menus.menu.element.querySelector("textarea").focus();

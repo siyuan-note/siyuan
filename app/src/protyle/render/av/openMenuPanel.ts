@@ -181,6 +181,7 @@ export const openMenuPanel = (options: {
             return;
         });
         avPanelElement.addEventListener("drop", (event) => {
+            counter = 0;
             if (!window.siyuan.dragElement) {
                 event.preventDefault();
                 event.stopPropagation();

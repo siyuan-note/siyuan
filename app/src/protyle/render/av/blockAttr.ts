@@ -221,6 +221,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 });
             });
             element.addEventListener("drop", () => {
+                counter = 0;
                 window.siyuan.dragElement.style.opacity = "";
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {

@@ -203,6 +203,7 @@ input::-moz-focus-inner {
   border: 0;
 }
 
+textarea::placeholder,
 button::placeholder,
 input::placeholder {
   color: var(--b3-empty-color);

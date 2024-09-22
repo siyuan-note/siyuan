@@ -1,5 +1,5 @@
 {
-  "historyRepoJumpPage": "指定されたページにジャンプ: 1 ~ ${x}",
+  "historyRepoJumpPage": "指定されたページにジャンプ：1 ~ ${x}",
   "historyRepoTitle": "合計<span class=\"count-page\">1</span>ページ、<span class=\"count-snap\">1</span>スナップショット",
   "visitCommunityShare": "コミュニティシェアを訪問",
   "clearContextSucc": "コンテキストがクリアされました",

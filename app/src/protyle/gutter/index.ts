@@ -866,10 +866,7 @@ export class Gutter {
             return;
         }
         hideElements(["util", "toolbar", "hint"], protyle);
-        const menu = new Menu("gutter");
-        if (menu.isOpen) {
-            return;
-        }
+        window.siyuan.menus.menu.remove();
         if (isMobile()) {
             activeBlur();
         }

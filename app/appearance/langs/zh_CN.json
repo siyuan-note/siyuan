@@ -1,4 +1,6 @@
 {
+  "historyRepoJumpPage": "跳转到指定页: 1 ~ ${x}",
+  "historyRepoTitle": "共<span class=\"count-page\">1</span>页, <span class=\"count-snap\">1</span>个快照",
   "visitCommunityShare": "访问社区分享",
   "clearContextSucc": "上下文已清空",
   "emptyMobilePlaceholder": "记录点什么",

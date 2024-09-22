@@ -115,7 +115,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: ["任务列表", "renwuliebiao", "rwlb", "task list", "todo list"],
         id: "check",
         value: "* [ ] " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCheck"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.check}</span>${window.siyuan.config.keymap.editor.insert.check.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.check.custom))}</span>` : '<span class="b3-list-item__meta">&lsqb;&rsqb;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCheck"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.check}</span>${window.siyuan.config.keymap.editor.insert.check.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.check.custom))}</span>` : '<span class="b3-list-item__meta">&lsqb;&nbsp;&rsqb;</span>'}</div>`,
     }, {
         filter: ["引述", "yinshu", "ys", "bq", "blockquote"],
         id: "quote",

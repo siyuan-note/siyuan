@@ -313,9 +313,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return false
 			}
 
-			if nil != relativeDate {
-				// 使用相对时间比较
-
+			if nil != relativeDate { // 使用相对时间比较
 				count := relativeDate.Count
 				unit := relativeDate.Unit
 				direction := relativeDate.Direction
@@ -331,14 +329,13 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeCreated:
 		if nil != value.Created {
-			if nil != relativeDate {
-				// 使用相对时间比较
-
+			if nil != relativeDate { // 使用相对时间比较
 				count := relativeDate.Count
 				unit := relativeDate.Unit
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterRelativeTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+				_, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+				return filterRelativeTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Created {
 					return true
@@ -348,14 +345,13 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeUpdated:
 		if nil != value.Updated {
-			if nil != relativeDate {
-				// 使用相对时间比较
-
+			if nil != relativeDate { // 使用相对时间比较
 				count := relativeDate.Count
 				unit := relativeDate.Unit
 				direction := relativeDate.Direction
 				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterRelativeTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+				_, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+				return filterRelativeTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Updated {
 					return true
@@ -598,7 +594,7 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, otherValueStart,
 	case FilterOperatorIsLessOrEqual:
 		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
-		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2))
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd2)
 	case FilterOperatorIsEmpty:
 		return !valueIsNotEmpty
 	case FilterOperatorIsNotEmpty:

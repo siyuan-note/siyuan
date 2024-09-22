@@ -223,6 +223,7 @@ export class Wnd {
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
         }) {
+            headerDragCounter = 0;
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽

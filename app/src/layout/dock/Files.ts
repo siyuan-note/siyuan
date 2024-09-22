@@ -526,6 +526,7 @@ export class Files extends Model {
             counter++;
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
+            counter = 0;
             const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
             if (!newElement) {
                 return;

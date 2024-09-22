@@ -451,7 +451,9 @@ export class Files extends Model {
                 event.preventDefault();
                 return;
             }
-            liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
+            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+            });
             let gutterType = "";
             for (const item of event.dataTransfer.items) {
                 if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
@@ -510,10 +512,18 @@ export class Files extends Model {
             liElement.classList.add("dragover");
             event.preventDefault();
         });
+        let counter = 0;
         this.element.addEventListener("dragleave", () => {
-            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
-            });
+            counter--;
+            if (counter === 0) {
+                this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                });
+            }
+        });
+        this.element.addEventListener("dragenter", (event) => {
+            event.preventDefault();
+            counter++;
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
             const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");

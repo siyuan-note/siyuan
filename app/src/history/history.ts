@@ -20,6 +20,7 @@ let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
+    const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-page", currentPage.toString());
     if (currentPage > 1) {
         previousElement.removeAttribute("disabled");
@@ -85,7 +86,6 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         }
         pageBtn.setAttribute("data-totalPage", (response.data.pageCount || 1).toString());
         // nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
-        const pageElement = nextElement.nextElementSibling.nextElementSibling;
         pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
         pageElement.classList.remove("fn__none");
         if (response.data.histories.length === 0) {

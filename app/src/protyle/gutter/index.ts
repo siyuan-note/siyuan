@@ -1454,9 +1454,9 @@ export class Gutter {
                 submenu: iframeMenu(protyle, nodeElement)
             }).element);
         } else if (type === "NodeHTMLBlock" && !protyle.disabled) {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_HTML", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_html", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
-                id: "HTML",
+                id: "html",
                 icon: "iconHTML5",
                 label: "HTML",
                 click() {
@@ -1989,7 +1989,7 @@ export class Gutter {
         }];
         ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
             styles.push({
-                id: "width" + item,
+                id: "width_" + item,
                 iconHTML: "",
                 label: item,
                 click: () => {
@@ -2079,7 +2079,7 @@ export class Gutter {
         }];
         ["25%", "33%", "50%", "67%", "75%", "100%"].forEach((item) => {
             styles.push({
-                id: "height" + item,
+                id: "height_" + item,
                 iconHTML: "",
                 label: item,
                 click: () => {

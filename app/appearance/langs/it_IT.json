@@ -1,4 +1,5 @@
 {
+    "visitCommunityShare": "Visita la condivisione della comunità",
     "clearContextSucc": "Il contesto è stato cancellato",
     "emptyMobilePlaceholder": "Registra qualcosa",
     "emptyPlaceholder": "Scrivi qualcosa, ' / ' per i comandi",
@@ -466,6 +467,7 @@
     "floatWindowMode1": "Tieni premuto <code class='fn__code'>${hotkey}</code>+Passa il mouse",
     "floatWindowMode2": "Non attivare",
     "codeSnippet": "Snippet di codice",
+    "codeSnippetTip": "Affina l'interfaccia o la funzionalità tramite frammenti di codice",
     "expandDown": "Espandi verso il basso",
     "expandUp": "Espandi verso l'alto",
     "goForward": "Vai avanti",

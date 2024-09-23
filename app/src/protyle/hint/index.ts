@@ -248,9 +248,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 focusClass = " b3-list-item--focus";
             }
             if (hintData.html === "separator") {
-                hintsHTML += `<button data-id="${hintData.id}" class="b3-menu__separator"></button>`;
+                hintsHTML += `<button data-id="${hintData.id || ""}" class="b3-menu__separator"></button>`;
             } else {
-                hintsHTML += `<button data-id="${hintData.id}" style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
+                hintsHTML += `<button data-id="${hintData.id || ""}" style="width: calc(100% - 16px)" class="b3-list-item b3-list-item--two${focusClass}" data-value="${encodeURIComponent(hintData.value)}">${hintData.html}</button>`;
             }
         });
         return `${hintsHTML}</div>`;

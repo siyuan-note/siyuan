@@ -21,6 +21,14 @@ import {genAssetHTML} from "../../asset/renderAssets";
 import {unicode2Emoji} from "../../emoji";
 import {avRender} from "../render/av/render";
 
+const getHotkeyOrMarker = (hotkey: string, marker: string) => {
+    if (hotkey) {
+        return `<span class="b3-menu__accelerator">${updateHotkeyTip(hotkey)}</span>`;
+    } else {
+        return `<span class="b3-list-item__meta">${marker}</span>`;
+    }
+}
+
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
         filter: ["模版", "moban", "muban", "mb", "template"],
@@ -75,57 +83,57 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: ["yijibiaoti", "一级标题", "yjbt", "h1", "heading"],
         id: "heading1",
         value: "# " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH1"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading1}</span>${window.siyuan.config.keymap.editor.heading.heading1.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading1.custom))}</span>` : '<span class="b3-list-item__meta">&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH1"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading1}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading1.custom, "# ")}</div>`,
     }, {
         filter: ["erjibiaoti", "二级标题", "ejbt", "h2", "heading"],
         id: "heading2",
         value: "## " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH2"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading2}</span>${window.siyuan.config.keymap.editor.heading.heading2.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading2.custom))}</span>` : '<span class="b3-list-item__meta">&num;&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH2"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading2}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading2.custom, "## ")}</div>`,
     }, {
         filter: ["sanjibiaoti", "三级标题", "sjbt", "h3", "heading"],
         id: "heading3",
         value: "### " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH3"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading3}</span>${window.siyuan.config.keymap.editor.heading.heading3.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading3.custom))}</span>` : '<span class="b3-list-item__meta">&num;&num;&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH3"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading3}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading3.custom, "### ")}</div>`,
     }, {
         filter: ["sijibiaoti", "四级标题", "sjbt", "h4", "heading"],
         id: "heading4",
         value: "#### " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH4"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading4}</span>${window.siyuan.config.keymap.editor.heading.heading4.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading4.custom))}</span>` : '<span class="b3-list-item__meta">&num;&num;&num;&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH4"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading4}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading4.custom, "#### ")}</div>`,
     }, {
         filter: ["wujibiaoti", "五级标题", "wjbt", "h5", "heading"],
         id: "heading5",
         value: "##### " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH5"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading5}</span>${window.siyuan.config.keymap.editor.heading.heading5.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading5.custom))}</span>` : '<span class="b3-list-item__meta">&num;&num;&num;&num;&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH5"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading5}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading5.custom, "##### ")}</div>`,
     }, {
         filter: ["liujibiaoti", "六级标题", "ljbt", "h6", "heading"],
         id: "heading6",
         value: "###### " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH6"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading6}</span>${window.siyuan.config.keymap.editor.heading.heading6.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.heading.heading6.custom))}</span>` : '<span class="b3-list-item__meta">&num;&num;&num;&num;&num;&num;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH6"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading6}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading6.custom, "###### ")}</div>`,
     }, {
         filter: ["无序列表", "wuxuliebiao", "wxlb", "unordered list"],
         id: "list",
         value: "* " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.list}</span>${window.siyuan.config.keymap.editor.insert.list.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.list.custom))}</span>` : '<span class="b3-list-item__meta">&ast;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.list}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.list.custom, "* ")}</div>`,
     }, {
         filter: ["有序列表", "youxuliebiao", "yxlb", "ordered list"],
         id: "orderedList",
         value: "1. " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["ordered-list"]}</span>${window.siyuan.config.keymap.editor.insert["ordered-list"].custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["ordered-list"].custom))}</span>` : '<span class="b3-list-item__meta">1&period;&nbsp;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconOrderedList"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["ordered-list"]}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert["ordered-list"].custom, "1. ")}</div>`,
     }, {
         filter: ["任务列表", "renwuliebiao", "rwlb", "task list", "todo list"],
         id: "check",
         value: "* [ ] " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCheck"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.check}</span>${window.siyuan.config.keymap.editor.insert.check.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.check.custom))}</span>` : '<span class="b3-list-item__meta">&lsqb;&nbsp;&rsqb;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCheck"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.check}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.check.custom, "[]")}</div>`,
     }, {
         filter: ["引述", "yinshu", "ys", "bq", "blockquote"],
         id: "quote",
         value: "> " + Lute.Caret,
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${window.siyuan.config.keymap.editor.insert.quote.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.quote.custom))}</span>` : '<span class="b3-list-item__meta">&gt;</span>'}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconQuote"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.quote}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.quote.custom, ">")}</div>`,
     }, {
         filter: ["代码块", "daimakuai", "dmk", "code block"],
         id: "code",
         value: "```",
-        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span>${window.siyuan.config.keymap.editor.insert.code.custom ? `<span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert.code.custom))}</span>` : `<span class="b3-list-item__meta">&grave;&grave;&grave;${window.siyuan.languages.enterKey}</span>`}</div>`,
+        html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.code}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.insert.code.custom, "```" + window.siyuan.languages.enterKey)}</div>`,
     }, {
         filter: ["表格", "biaoge", "bg", "table"],
         id: "table",

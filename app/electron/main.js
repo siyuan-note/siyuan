@@ -92,13 +92,16 @@ const hotKey2Electron = (key) => {
     if (key.indexOf("⌘") > -1) {
         electronKey += "CommandOrControl+";
     }
+    if (key.indexOf("⌃") > -1) {
+        electronKey += "Control+";
+    }
     if (key.indexOf("⇧") > -1) {
         electronKey += "Shift+";
     }
     if (key.indexOf("⌥") > -1) {
         electronKey += "Alt+";
     }
-    return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "");
+    return electronKey + key.replace("⌘", "").replace("⇧", "").replace("⌥", "").replace("⌃", "");
 };
 
 const exitApp = (port, errorWindowId) => {

@@ -1057,10 +1057,19 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
 	if ast.NodeLinkDest == node.Type {
+		if bytes.HasPrefix(node.Tokens, []byte("//")) {
+			node.Tokens = append([]byte("https:"), node.Tokens...)
+		}
 		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
 	} else if node.IsTextMarkType("a") {
+		if strings.HasPrefix(node.TextMarkAHref, "//") {
+			node.TextMarkAHref = "https:" + node.TextMarkAHref
+		}
 		node.TextMarkAHref = strings.ReplaceAll(node.TextMarkAHref, oldDest, dest)
 	} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
+		if strings.HasPrefix(node.TextMarkAHref, "//") {
+			node.TextMarkAHref = "https:" + node.TextMarkAHref
+		}
 		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
 	} else if ast.NodeAttributeView == node.Type {
 		needWrite := false

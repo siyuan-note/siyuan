@@ -1,6 +1,7 @@
 {
   "jumpToPage": "跳转到指定页：1 ~ ${x}",
   "pageCountAndSnapshotCount": "共 ${x} 页，${y} 个快照",
+  "pageCountAndHistoryCount": "共 ${x} 页，${y} 个历史版本",
   "visitCommunityShare": "访问社区分享",
   "clearContextSucc": "上下文已清空",
   "emptyMobilePlaceholder": "记录点什么",

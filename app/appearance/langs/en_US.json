@@ -1,6 +1,7 @@
 {
   "jumpToPage": "Jump to the specified page: 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total ${x} pages, ${y} snapshots",
+  "pageCountAndHistoryCount": "Total ${x} pages, ${y} histories",
   "visitCommunityShare": "Visit community share",
   "clearContextSucc": "The context has been cleared",
   "emptyMobilePlaceholder": "Record something",

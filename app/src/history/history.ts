@@ -1,19 +1,19 @@
-import {Dialog} from "../dialog";
-import {confirmDialog} from "../dialog/confirmDialog";
-import {Constants} from "../constants";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {renderAssetsPreview} from "../asset/renderAssets";
-import {Protyle} from "../protyle";
-import {disabledProtyle, onGet} from "../protyle/util/onGet";
+import { Dialog } from "../dialog";
+import { confirmDialog } from "../dialog/confirmDialog";
+import { Constants } from "../constants";
+import { hasClosestByClassName } from "../protyle/util/hasClosest";
+import { renderAssetsPreview } from "../asset/renderAssets";
+import { Protyle } from "../protyle";
+import { disabledProtyle, onGet } from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
-import {fetchPost} from "../util/fetch";
-import {escapeAttr, escapeHtml} from "../util/escape";
-import {isMobile} from "../util/functions";
-import {showDiff} from "./diff";
-import {setStorageVal} from "../protyle/util/compatibility";
-import {openModel} from "../mobile/menu/model";
-import {closeModel} from "../mobile/util/closePanel";
-import {App} from "../index";
+import { fetchPost } from "../util/fetch";
+import { escapeAttr, escapeHtml } from "../util/escape";
+import { isMobile } from "../util/functions";
+import { showDiff } from "./diff";
+import { setStorageVal } from "../protyle/util/compatibility";
+import { openModel } from "../mobile/menu/model";
+import { closeModel } from "../mobile/util/closePanel";
+import { App } from "../index";
 
 let historyEditor: Protyle;
 
@@ -26,6 +26,9 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     } else {
         previousElement.setAttribute("disabled", "disabled");
     }
+    const pageBtn = element.querySelector('button[data-type="jumpHistoryPage"]');
+    pageBtn.textContent = `${currentPage}`;
+
     const inputElement = element.querySelector(".b3-text-field") as HTMLInputElement;
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
     const typeElement = element.querySelector('.b3-select[data-type="typeselect"]') as HTMLSelectElement;
@@ -80,7 +83,10 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-        nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
+        pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
+        // nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
+        const titleElement = nextElement.nextElementSibling.nextElementSibling;
+        titleElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
         if (response.data.histories.length === 0) {
             listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
             return;
@@ -241,7 +247,7 @@ ${actionHTML}
 const renderRepo = (element: Element, currentPage: number) => {
     const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value;
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
-    const pageBtn = element.querySelector('button[data-type="jumpPage"]');
+    const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
     pageBtn.textContent = `${currentPage}`;
 
     const previousElement = element.querySelector('[data-type="previous"]');
@@ -268,7 +274,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             previousElement.setAttribute("disabled", "disabled");
         }
         nextElement.setAttribute("disabled", "disabled");
-        fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
+        fetchPost(`/api/repo/${selectValue}`, { page: currentPage }, (response) => {
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
             } else {
@@ -348,10 +354,10 @@ export const openHistory = (app: App) => {
             <div style="overflow:auto;">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-                    <span class="fn__space"></span>
+                    <button class="b3-button b3-button--text" data-type="jumpHistoryPage" data-totalpage="1">1</button>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
-                    <span>1/1</span>
+                    <span class="ft__on-surface fn__flex-shrink ft__selectnone">${window.siyuan.languages.pageCountAndHistoryCount}</span>
                     <span class="fn__space"></span>
                     <div class="fn__flex-1"></div>
                     <div style="position: relative">
@@ -399,7 +405,7 @@ export const openHistory = (app: App) => {
             <div style="overflow: auto"">
                 <div class="block__icons">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-                    <button class="b3-button b3-button--text" data-type="jumpPage">1</button>
+                    <button class="b3-button b3-button--text" data-type="jumpRepoPage">1</button>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
@@ -645,7 +651,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             target.parentElement.querySelector(`.b3-list-item[data-id="${idJSON.splice(0, 1)[0].id}"]`)?.classList.remove("b3-list-item--focus");
                         }
                     }
-                    idJSON.push({id, time: target.querySelector('[data-type="hCreated"]').textContent});
+                    idJSON.push({ id, time: target.querySelector('[data-type="hCreated"]').textContent });
                 }
 
                 if (idJSON.length === 2) {
@@ -717,7 +723,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     genRepoDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/createSnapshot", {memo: textareaElement.value}, () => {
+                    fetchPost("/api/repo/createSnapshot", { memo: textareaElement.value }, () => {
                         renderRepo(repoElement, 1);
                     });
                     genRepoDialog.destroy();
@@ -728,7 +734,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
                 confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
-                    fetchPost("/api/repo/" + type, {tag}, () => {
+                    fetchPost("/api/repo/" + type, { tag }, () => {
                         renderRepo(repoElement, 1);
                     });
                 });
@@ -803,24 +809,48 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.stopPropagation();
                 event.preventDefault();
                 break;
-            } else if (type === "jumpPage") {
+            } else if (type === "jumpRepoPage") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
                 const totalPage = parseInt(repoElement.getAttribute("total-page") || "1");
 
-                confirmDialog(
-                    window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                    // eslint-disable-next-line quotes
-                    `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                    (dialog: Dialog) => {
-                        const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
-                        if (inputElement.value === "") {
-                            return;
+                if (totalPage > 1) {
+                    confirmDialog(
+                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        // eslint-disable-next-line quotes
+                        `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
+                        (dialog: Dialog) => {
+                            const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                            if (inputElement.value === "") {
+                                return;
+                            }
+                            let page = parseInt(inputElement.value);
+                            page = Math.max(1, Math.min(page, totalPage));
+                            renderRepo(repoElement, page);
                         }
-                        let page = parseInt(inputElement.value);
-                        page = Math.max(1, Math.min(page, totalPage));
-                        renderRepo(repoElement, page);
-                    }
-                );
+                    );
+                }
+            } else if (type === "jumpHistoryPage") {
+                const currentPage = parseInt(target.textContent.trim());
+                const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
+
+                if (totalPage > 1) {
+                    confirmDialog(
+                        window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
+                        // eslint-disable-next-line quotes
+                        `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
+                        (dialog: Dialog) => {
+                            const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                            if (inputElement.value === "") {
+                                return;
+                            }
+                            let page = parseInt(inputElement.value);
+                            page = Math.max(1, Math.min(page, totalPage));
+                            renderDoc(firstPanelElement, page);
+                        }
+                    );
+                }
+
+
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);

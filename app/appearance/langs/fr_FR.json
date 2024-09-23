@@ -1,7 +1,7 @@
 {
   "jumpToPage": "Aller à la page spécifiée : 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total de ${x} pages, ${y} instantanés",
-  "pageCountAndHistoryCount": "Total de ${x} pages,${y} histoires",
+  "pageCountAndHistoryCount": "Total de ${x} pages, ${y} histoires",
   "visitCommunityShare": "Visiter le partage communautaire",
   "clearContextSucc": "Le contexte a été effacé",
   "emptyMobilePlaceholder": "Enregistrer quelque chose",

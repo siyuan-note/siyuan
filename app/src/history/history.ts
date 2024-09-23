@@ -266,7 +266,6 @@ const renderRepo = (element: Element, currentPage: number) => {
     } else {
         previousElement.classList.remove("fn__none");
         nextElement.classList.remove("fn__none");
-        pageElement.classList.remove("fn__none");
         pageBtn.classList.remove("fn__none");
         element.setAttribute("data-page", currentPage.toString());
         if (currentPage > 1) {

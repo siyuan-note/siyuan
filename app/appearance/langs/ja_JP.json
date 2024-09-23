@@ -1,6 +1,7 @@
 {
   "jumpToPage": "指定されたページにジャンプ：1 ~ ${x}",
   "pageCountAndSnapshotCount": "合計 ${x} ページ、${y} スナップショット",
+  "pageCountAndHistoryCount": "合計 ${x} ページ、${y} 履歴",
   "visitCommunityShare": "コミュニティシェアを訪問",
   "clearContextSucc": "コンテキストがクリアされました",
   "emptyMobilePlaceholder": "何かを記録する",

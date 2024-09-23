@@ -451,6 +451,7 @@ export class Gutter {
     }
 
     private turnsOneInto(options: {
+        menuId?: string,
         id: string,
         icon: string,
         label: string,
@@ -461,6 +462,7 @@ export class Gutter {
         level?: number
     }) {
         return {
+            id: options.menuId,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -477,9 +479,11 @@ export class Gutter {
         protyle: IProtyle,
         selectsElement: Element[],
         type: TTurnIntoOne,
-        level?: TTurnIntoOneSub
+        level?: TTurnIntoOneSub,
+        menuId?: string,
     }) {
         return {
+            id: options.menuId,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -496,10 +500,12 @@ export class Gutter {
         selectsElement: Element[],
         type: TTurnInto,
         level?: number,
-        isContinue?: boolean
-        accelerator?: string
+        isContinue?: boolean,
+        accelerator?: string,
+        menuId?: string,
     }) {
         return {
+            id: options.menuId,
             icon: options.icon,
             label: options.label,
             accelerator: options.accelerator,
@@ -1281,7 +1287,10 @@ export class Gutter {
             }).element);
         }
         if (type === "NodeSuperBlock" && !protyle.disabled) {
-            window.siyuan.menus.menu.append(new MenuItem({id: "separator_cancelSuperBlock", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "separator_cancelSuperBlock",
+                type: "separator"
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "cancelSuperBlock",
                 label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,

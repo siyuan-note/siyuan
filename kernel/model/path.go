@@ -45,8 +45,8 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string) (retID string
 		// 在指定了父文档 ID 的情况下优先查找父文档
 		parentHPath, name := path.Split(hPath)
 		parentHPath = strings.TrimSuffix(parentHPath, "/")
-		preferredParent := treenode.GetBlockTreeRootByHPathPreferredParentID(boxID, parentHPath, parentID)
-		if nil != preferredParent && preferredParent.ID == parentID {
+		preferredParent := treenode.GetBlockTreeByHPathPreferredParentID(boxID, parentHPath, parentID)
+		if nil != preferredParent && preferredParent.RootID == parentID {
 			// 如果父文档存在且 ID 一致，则直接在父文档下创建
 			p := strings.TrimSuffix(preferredParent.Path, ".sy") + "/" + id + ".sy"
 			if _, err = createDoc(boxID, p, name, content); err != nil {

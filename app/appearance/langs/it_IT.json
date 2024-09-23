@@ -1540,7 +1540,7 @@
       "239": "Operazioni correlate sono in fase di elaborazione, si prega di riprovare più tardi",
       "240": "L'intestazione di trascinamento attuale si trova nel blocco contenitore e l'operazione di trascinamento non può essere eseguita",
       "241": "Trascinare nel suo sottotitolo non è supportato",
-      "242": "DA FARE",
+      "242": "Lo spazio attualmente disponibile è [%s], è necessario almeno [%s] per eseguire questa operazione",
       "243": "Elencare solo i primi [%d] tag (inclusi i sottotag); se è necessario regolare, si prega di modificare [Impostazioni - Albero Documenti - Numero massimo da elencare]",
       "244": "L'indicizzazione dei dati non è stata completata dopo l'ultimo utilizzo. Si prega di eseguire [Albero Documenti - Ricostruisci Indice]. Si prega di uscire completamente dal programma prima di spegnere il computer",
       "245": "L'indicizzazione dei dati non è stata completata dopo l'ultimo utilizzo. Si prega di eseguire [Albero Documenti - Ricostruisci Indice]. Si prega di utilizzare [Esci dall'applicazione] nel pannello della colonna destra per uscire normalmente",

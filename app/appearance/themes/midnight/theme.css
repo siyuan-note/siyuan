@@ -17,6 +17,7 @@
     --b3-theme-on-primary: #fff;
     --b3-theme-on-secondary: #fff;
     --b3-theme-on-background: #dadada;
+    --b3-theme-on-background-rgb: rgb(218, 218, 218);
     --b3-theme-on-surface: #9aa0a6;
     --b3-theme-on-surface-light: #bababa;
     --b3-theme-on-error: #fff;
@@ -71,12 +72,16 @@
     /* 卡片背景 */
     --b3-card-error-color: rgb(243, 153, 147);
     --b3-card-error-background: #442724;
+    --b3-card-error-background-rgb: rgb(68, 39, 36);
     --b3-card-warning-color: rgb(255, 213, 153);
     --b3-card-warning-background: #554636;
+    --b3-card-warning-background-rgb: rgb(85, 70, 54);
     --b3-card-info-color: rgb(166, 213, 250);
     --b3-card-info-background: #28405c;
+    --b3-card-info-background-rgb: rgb(40, 64, 92);
     --b3-card-success-color: rgb(183, 223, 185);
     --b3-card-success-background: #425347;
+    --b3-card-success-background-rgb: rgb(66, 83, 71);
 
     /* 自定义文字 */
     --b3-font-color1: var(--b3-card-error-color);
@@ -105,6 +110,19 @@
     --b3-font-background11: #376629;
     --b3-font-background12: #803a06;
     --b3-font-background13: var(--b3-theme-on-background);
+    --b3-font-background1-rgb: var(--b3-card-error-background-rgb);
+    --b3-font-background2-rgb: var(--b3-card-warning-background-rgb);
+    --b3-font-background3-rgb: var(--b3-card-info-background-rgb);
+    --b3-font-background4-rgb: var(--b3-card-success-background-rgb);
+    --b3-font-background5-rgb: rgb(76, 82, 87);
+    --b3-font-background6-rgb: rgb(12, 61, 136);
+    --b3-font-background7-rgb: rgb(89, 57, 5);
+    --b3-font-background8-rgb: rgb(84, 24, 18);
+    --b3-font-background9-rgb: rgb(106, 6, 52);
+    --b3-font-background10-rgb: rgb(107, 47, 107);
+    --b3-font-background11-rgb: rgb(55, 102, 41);
+    --b3-font-background12-rgb: rgb(128, 58, 6);
+    --b3-font-background13-rgb: var(--b3-theme-on-background-rgb);
 
     /* 动画效果 */
     --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;

@@ -462,8 +462,56 @@
   &--select {
     background-color: var(--b3-theme-primary-lightest) !important;
 
-    [data-node-id][style*="background-color"] {
-      opacity: .86;
+    [data-node-id][style*="background-color: var(--b3-font-background1)"] {
+      background-color: rgba(var(--b3-font-background1-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background2)"] {
+      background-color: rgba(var(--b3-font-background2-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background3)"] {
+      background-color: rgba(var(--b3-font-background3-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background4)"] {
+      background-color: rgba(var(--b3-font-background4-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background5)"] {
+      background-color: rgba(var(--b3-font-background5-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background6)"] {
+      background-color: rgba(var(--b3-font-background6-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background7)"] {
+      background-color: rgba(var(--b3-font-background7-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background8)"] {
+      background-color: rgba(var(--b3-font-background8-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background9)"] {
+      background-color: rgba(var(--b3-font-background9-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background10)"] {
+      background-color: rgba(var(--b3-font-background10-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background11)"] {
+      background-color: rgba(var(--b3-font-background11-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background12)"] {
+      background-color: rgba(var(--b3-font-background12-rgb), .86) !important;
+    }
+
+    [data-node-id][style*="background-color: var(--b3-font-background13)"] {
+      background-color: rgba(var(--b3-font-background13-rgb), .86) !important;
     }
   }
 

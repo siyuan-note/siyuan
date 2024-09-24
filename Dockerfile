@@ -1,4 +1,5 @@
-FROM node:21 as NODE_BUILD
+FROM node:21 AS NODE_BUILD
+
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 ADD . /go/src/github.com/siyuan-note/siyuan/
 RUN apt-get update && \
@@ -17,7 +18,7 @@ RUN apt-get purge -y jq
 RUN apt-get autoremove -y
 RUN rm -rf /var/lib/apt/lists/*
 
-FROM golang:alpine as GO_BUILD
+FROM golang:alpine AS GO_BUILD
 WORKDIR /go/src/github.com/siyuan-note/siyuan/
 COPY --from=NODE_BUILD /go/src/github.com/siyuan-note/siyuan/ /go/src/github.com/siyuan-note/siyuan/
 ENV GO111MODULE=on
@@ -35,13 +36,34 @@ RUN apk add --no-cache gcc musl-dev && \
 FROM alpine:latest
 LABEL maintainer="Liang Ding<845765@qq.com>"
 
+# Set default values in case PUID/PGID are not provided
+ARG USER_ID=1000
+ARG GROUP_ID=1000
+
+ENV PUID $USER_ID
+ENV PGID $GROUP_ID
+
 WORKDIR /opt/siyuan/
 COPY --from=GO_BUILD /opt/siyuan/ /opt/siyuan/
-RUN addgroup --gid 1000 siyuan && adduser --uid 1000 --ingroup siyuan --disabled-password siyuan && apk add --no-cache ca-certificates tzdata && chown -R siyuan:siyuan /opt/siyuan/
+
+# Create User and Group
+RUN if ! getent group ${PGID}; then \
+      addgroup --gid ${PGID} siyuan; \
+    else \
+      groupname=$(getent group ${PGID} | cut -d: -f1); \
+      echo "Group with GID ${PGID} already exists, using group: $groupname"; \
+    fi && \
+    adduser --uid ${PUID} --ingroup ${groupname:-siyuan} --disabled-password siyuan && \
+    chown -R siyuan:${groupname:-siyuan} /opt/siyuan/
+
+RUN apk add --no-cache ca-certificates tzdata
 
 ENV TZ=Asia/Shanghai
+ENV HOME=/home/siyuan
 ENV RUN_IN_CONTAINER=true
 EXPOSE 6806
+VOLUME /home/siyuan/workspace
 
 USER siyuan
+
 ENTRYPOINT ["/opt/siyuan/kernel"]

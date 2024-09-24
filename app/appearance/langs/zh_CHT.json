@@ -757,7 +757,7 @@
   "insertImgURL": "插入圖片連結",
   "insertIframeURL": "插入 IFrame 連結",
   "context": "上下文",
-  "dockTip": "\n按一下 展開/最小化\n右鍵 調整位置",
+  "dockTip": "\n點選 <span class='ft__on-surface ft__nowrap'>展開/最小化</span>\n右鍵/拖拽 <span class='ft__on-surface ft__nowrap'>調整位置</span>",
   "shadow": "投影",
   "hollow": "鏤空",
   "attrValue1": "屬性值留空則會自動刪除該屬性",

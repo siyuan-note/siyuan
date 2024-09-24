@@ -757,7 +757,7 @@
   "insertImgURL": "画像リンクを挿入",
   "insertIframeURL": "IFrameリンクを挿入",
   "context": "コンテキスト",
-  "dockTip": "\nクリックして開く/最小化\n右クリックで位置を調整",
+  "dockTip": "\nをクリック<span class='ft__on-surface ft__nowrap'>開く/最小化</span>\nを右クリック/ドラッグ<span class='ft__on-surface ft__nowrap'>位置を調整</span>",
   "shadow": "影",
   "hollow": "アウトライン",
   "attrValue1": "属性値を空にすると属性が自動的に削除されます",

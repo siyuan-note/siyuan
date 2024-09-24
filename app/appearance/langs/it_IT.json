@@ -757,7 +757,7 @@
     "insertImgURL": "Inserisci collegamento immagine",
     "insertIframeURL": "Inserisci collegamento iframe",
     "context": "Contesto",
-    "dockTip": "Clicca per Aprire/Ridurre\nTasto destro per Regolare la posizione",
+    "dockTip": "\nClicca per <span class='ft__on-surface ft__nowrap'>Aprire/Ridurre</span>\nTasto destro per/trascinare <span class='ft__on-surface ft__nowrap'>Regolare la posizione</span>",
     "shadow": "Ombra",
     "hollow": "Vuoto",
     "attrValue1": "Lasciare vuoto il valore dell'attributo eliminerà automaticamente l'attributo",

@@ -757,7 +757,7 @@
   "insertImgURL": "Insert image link",
   "insertIframeURL": "Insert IFrame link",
   "context": "Context",
-  "dockTip": "\nClick Open/Minimize\nRight Click Adjust position",
+  "dockTip": "\nClick <span class='ft__on-surface ft__nowrap'>Open/Minimize</span>\nRight Click/Drag <span class='ft__on-surface ft__nowrap'>Adjust position</span>",
   "shadow": "Shadow",
   "hollow": "Hollow",
   "attrValue1": "Leave the attribute value blank will automatically delete the attribute",

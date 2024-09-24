@@ -757,7 +757,7 @@
   "insertImgURL": "Insérer lien Image",
   "insertIframeURL": "Insérer lien IFrame",
   "context": "Context",
-  "dockTip": "\nCliquer pour ouvrir/Minimiser\nClic droit Ajuster la position",
+  "dockTip": "\nCliquer pour <span class='ft__on-surface ft__nowrap'>Ouvrir/Minimiser</span>\nClic droit/Glisser <span class='ft__on-surface ft__nowrap'>Ajuster la position</span>",
   "shadow": "Ombre",
   "hollow": "Hollow",
   "attrValue1": "Si vous laissez la valeur de l'attribut vide, l'attribut sera automatiquement supprimé",

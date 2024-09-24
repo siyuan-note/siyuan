@@ -20,7 +20,6 @@ let historyEditor: Protyle;
 const renderDoc = (element: HTMLElement, currentPage: number) => {
     const previousElement = element.querySelector('[data-type="docprevious"]');
     const nextElement = element.querySelector('[data-type="docnext"]');
-    const pageElement = nextElement.nextElementSibling.nextElementSibling;
     element.setAttribute("data-page", currentPage.toString());
     if (currentPage > 1) {
         previousElement.removeAttribute("disabled");
@@ -84,8 +83,8 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-        pageBtn.setAttribute("data-totalPage", (response.data.pageCount || 1).toString());
-        // nextElement.nextElementSibling.nextElementSibling.textContent = `${currentPage}/${response.data.pageCount || 1}`;
+        pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
+        const pageElement = nextElement.nextElementSibling.nextElementSibling;
         pageElement.textContent = `${window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
         pageElement.classList.remove("fn__none");
         if (response.data.histories.length === 0) {
@@ -280,7 +279,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             } else {
                 nextElement.setAttribute("disabled", "disabled");
             }
-            pageBtn.setAttribute("data-totalPage", (response.data.pageCount || 1).toString());
+            pageBtn.setAttribute("data-totalpage", (response.data.pageCount || 1).toString());
             pageElement.textContent = `${window.siyuan.languages.pageCountAndSnapshotCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount || 1)}`;
             pageElement.classList.remove("fn__none");
             renderRepoItem(response, element, selectValue);
@@ -355,7 +354,7 @@ export const openHistory = (app: App) => {
             <div style="overflow:auto;">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-                    <button class="b3-button b3-button--text" data-type="jumpHistoryPage" data-totalPage="1">1</button>
+                    <button class="b3-button b3-button--text ft__selectnone" data-type="jumpHistoryPage" data-totalpage="1">1</button>
                     <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndHistoryCount}</span>
@@ -406,7 +405,7 @@ export const openHistory = (app: App) => {
             <div style="overflow: auto"">
                 <div class="block__icons">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
-                    <button class="b3-button b3-button--text" data-type="jumpRepoPage" data-totalPage="1">1</button>
+                    <button class="b3-button b3-button--text ft__selectnone" data-type="jumpRepoPage" data-totalpage="1">1</button>
                     <span data-type="next" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
                     <span class="fn__space"></span>
                     <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndSnapshotCount}</span>
@@ -812,7 +811,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 break;
             } else if (type === "jumpRepoPage") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
-                const totalPage = parseInt(target.getAttribute("data-totalPage") || "1");
+                const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
                     confirmDialog(
@@ -832,7 +831,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 }
             } else if (type === "jumpHistoryPage") {
                 const currentPage = parseInt(repoElement.getAttribute("data-page"));
-                const totalPage = parseInt(target.getAttribute("data-totalPage") || "1");
+                const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
                     confirmDialog(

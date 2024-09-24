@@ -180,10 +180,11 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		boxes[box.ID] = box
 	}
 
+	keywords := strings.Fields(keyword)
 	var rootBlocks []*sql.Block
-	if "" != keyword {
+	if 0 < len(keywords) {
 		for _, box := range boxes {
-			if strings.Contains(box.Name, keyword) {
+			if util.ContainsSubStr(box.Name, keywords) {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
@@ -195,13 +196,18 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			}
 		}
 
-		condition := "hpath LIKE '%" + keyword + "%'"
-		if "" != keyword {
-			namCondition := Conf.Search.NAMFilter(keyword)
-			if "" != namCondition {
-				condition += " " + namCondition
+		var condition string
+		for i, k := range keywords {
+			condition += "(hpath LIKE '%" + k + "%'"
+			namCondition := Conf.Search.NAMFilter(k)
+			condition += " " + namCondition
+			condition += ")"
+
+			if i < len(keywords)-1 {
+				condition += " AND "
 			}
 		}
+
 		rootBlocks = sql.QueryRootBlockByCondition(condition)
 	} else {
 		for _, box := range boxes {

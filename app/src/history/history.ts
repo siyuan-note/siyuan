@@ -816,7 +816,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 if (totalPage > 1) {
                     confirmDialog(
                         window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        // eslint-disable-next-line quotes
                         `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
                         (dialog: Dialog) => {
                             const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
@@ -836,7 +835,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 if (totalPage > 1) {
                     confirmDialog(
                         window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        // eslint-disable-next-line quotes
                         `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
                         (dialog: Dialog) => {
                             const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;

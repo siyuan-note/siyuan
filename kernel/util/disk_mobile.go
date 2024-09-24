@@ -21,3 +21,7 @@ package util
 func NeedWarnDiskUsage(dataSize int64) bool {
 	return false
 }
+
+func GetDiskUsage(p string) (total, used, free uint64) {
+	return
+}

@@ -1021,7 +1021,7 @@
   "md27": "Code block line number",
   "md28": "After enabling, the code block will display the line number (Please note that enabling may reduce editor performance)",
   "md29": "Number of Tab Spaces",
-  "md30": "Replaces with spaces only when tab is pressed, does not replace tabs in clipboard with spaces",
+  "md30": "Replaces with spaces only when Tab is pressed, does not replace tabs (Tab) in clipboard with spaces",
   "md31": "Code block wraps",
   "md32": "After enabling, the content in the code block will wrap automatically",
   "md33": "Virtual Reference",

@@ -469,7 +469,7 @@ export const openMenuPanel = (options: {
             }
             dragoverElement = targetElement;
         });
-        let counter = 0
+        let counter = 0;
         avPanelElement.addEventListener("dragleave", () => {
             counter--;
             if (counter === 0) {

@@ -58,7 +58,6 @@ import {emitOpenMenu} from "../../plugin/EventBus";
 import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
-import {Menu} from "../../plugin/Menu";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {processClonePHElement} from "../render/util";
 

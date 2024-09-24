@@ -274,7 +274,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     targetElement.classList.add("dragover__top");
                 }
             });
-            let counter = 0
+            let counter = 0;
             element.addEventListener("dragleave", () => {
                 counter--;
                 if (counter === 0) {

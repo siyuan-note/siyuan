@@ -35,7 +35,6 @@ import {dropEvent} from "../util/editorCommonEvent";
 import {input} from "./input";
 import {
     getContenteditableElement,
-    getLastBlock,
     getNextBlock,
     getTopAloneElement,
     hasNextSibling,

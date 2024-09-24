@@ -99,7 +99,7 @@ export const initUI = (protyle: IProtyle) => {
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
             (!event.target.classList.contains("protyle-content") && !event.target.classList.contains("protyle-wysiwyg"))) {
-            return
+            return;
         }
         const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
         const range = document.createRange();

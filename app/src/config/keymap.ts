@@ -230,7 +230,7 @@ export const keymap = {
         });
     },
     search(value: string, keymapString: string) {
-        const keymapListElement = keymap.element.querySelector("#keymapList")
+        const keymapListElement = keymap.element.querySelector("#keymapList");
         keymapListElement.querySelectorAll(".b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             const liElement = item.parentElement;
             let matchedKeymap = false;

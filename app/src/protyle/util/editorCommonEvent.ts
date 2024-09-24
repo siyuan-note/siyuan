@@ -1181,7 +1181,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // 超级块中有a，b两个段落块，移动到 ab 之间的间隙 targetElement 会变为超级块，需修正为 a
         if (targetElement && (targetElement.classList.contains("bq") || targetElement.classList.contains("sb") || targetElement.classList.contains("list") || targetElement.classList.contains("li"))) {
-            let prevElement = hasClosestBlock(document.elementFromPoint(point.x, point.y - 6))
+            let prevElement = hasClosestBlock(document.elementFromPoint(point.x, point.y - 6));
             while (prevElement && targetElement.contains(prevElement)) {
                 if (prevElement.nextElementSibling?.getAttribute("data-node-id")) {
                     targetElement = prevElement;
@@ -1373,7 +1373,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             dragoverElement = targetElement;
         }
     });
-    let counter = 0
+    let counter = 0;
     editorElement.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
         if (protyle.disabled) {
             event.preventDefault();
@@ -1398,6 +1398,6 @@ const addDragover = (element: HTMLElement) => {
         element.classList.contains("li") ||
         element.classList.contains("list") ||
         element.classList.contains("bq")) {
-        element.classList.add("dragover")
+        element.classList.add("dragover");
     }
-}
+};

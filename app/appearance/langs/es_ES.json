@@ -1032,7 +1032,7 @@
   "md38": "La longitud máxima del texto de anclaje que se renderiza automáticamente cuando el texto de anclaje del bloque ref no está personalizado, el valor por defecto es <code class='fn__code'>96</code> caracteres",
   "md39": "Dirección de PlantUML Serve",
   "md40": "Dejar en blanco para restablecer el valor por defecto <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
-  "md41": "Se admite el uso de / para ajustar expresiones regulares, por ejemplo <code class='fn__code'>foo,/[0-9]+/</code> significa excluir foo y números",
+  "md41": "Se admite el uso de <code class='fn__code'>/</code> para ajustar expresiones regulares, por ejemplo <code class='fn__code'>foo,/[0-9]+/</code> significa excluir foo y números",
   "fileTree2": "El árbol de documentos seleccionará automáticamente el documento actual cuando se cambie la pestaña del editor",
   "fileTree3": "No se requiere confirmación al borrar documentos",
   "fileTree4": "Si no se activa, aparecerá un cuadro de confirmación cada vez que se elimine un documento",

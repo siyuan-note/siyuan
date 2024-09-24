@@ -1032,7 +1032,7 @@
   "md38": "The maximum length of the anchor text that is automatically rendered when the block ref anchor text is not customized, the default is <code class='fn__code'>96</code> characters",
   "md39": "PlantUML Serve Address",
   "md40": "Leave blank to restore default <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
-  "md41": "Support using / to wrap regular expressions, for example <code class='fn__code'>foo,/[0-9]+/</code> means to exclude foo and numbers",
+  "md41": "Support using <code class='fn__code'>/</code> to wrap regular expressions, for example <code class='fn__code'>foo,/[0-9]+/</code> means to exclude foo and numbers",
   "fileTree2": "The doc tree will automatically select the current document when the editor tab is switched",
   "fileTree3": "No confirmation required when deleting documents",
   "fileTree4": "If not enabled, a confirmation box will pop up every time you delete a document",

@@ -1032,7 +1032,7 @@
     "md38": "La lunghezza massima del testo di ancoraggio che viene automaticamente reso quando il testo di ancoraggio del riferimento al blocco non è personalizzato, il valore predefinito è <code class='fn__code'>96</code> caratteri",
     "md39": "Indirizzo del server PlantUML",
     "md40": "Lascia vuoto per ripristinare il valore predefinito <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
-    "md41": "Supporta l'uso di / per avvolgere le espressioni regolari, ad esempio <code class='fn__code'>foo,/[0-9]+/</code> significa escludere foo e numeri",
+    "md41": "Supporta l'uso di <code class='fn__code'>/</code> per avvolgere le espressioni regolari, ad esempio <code class='fn__code'>foo,/[0-9]+/</code> significa escludere foo e numeri",
     "fileTree2": "L'albero dei documenti selezionerà automaticamente il documento corrente quando la scheda dell'editor viene cambiata",
     "fileTree3": "Nessuna conferma richiesta durante l'eliminazione dei documenti",
     "fileTree4": "Se non abilitato, ogni volta che elimini un documento verrà visualizzata una finestra di conferma",

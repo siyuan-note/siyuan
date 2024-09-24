@@ -1032,7 +1032,7 @@
   "md38": "La longueur maximale du texte d'ancrage qui est automatiquement rendu lorsque le texte d'ancrage de la référence de bloc n'est pas personnalisé, la valeur par défaut est de <code class='fn__code'>96</code> caractères",
   "md39": "Adresse Servo PlantUML",
   "md40": "Laissez vide pour restaurer <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1/</code> par défaut",
-  "md41": "Prend en charge l'utilisation de / pour envelopper les expressions régulières, par exemple <code class='fn__code'>foo,/[0-9]+/</code> signifie exclure foo et les nombres",
+  "md41": "Prend en charge l'utilisation de <code class='fn__code'>/</code> pour envelopper les expressions régulières, par exemple <code class='fn__code'>foo,/[0-9]+/</code> signifie exclure foo et les nombres",
   "fileTree2": "L'arbre des Docs sélectionne automatiquement le document en cours lorsque l'on change d'onglet d'édition",
   "fileTree3": "Aucune confirmation requise lors de la suppression de documents",
   "fileTree4": "Si non activé, une boîte de confirmation apparaîtra à chaque fois que vous supprimerez un document",

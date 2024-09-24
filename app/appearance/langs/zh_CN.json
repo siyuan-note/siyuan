@@ -1032,7 +1032,7 @@
   "md38": "不自定义块引锚文本时自动渲染锚文本的最大长度，默认为 <code class='fn__code'>96</code> 个字符",
   "md39": "PlantUML 伺服地址",
   "md40": "留空将恢复默认值 <code class='fn__code'>https://www.plantuml.com/plantuml/svg/~1</code>",
-  "md41": "支持使用 / 包裹正则表达式，例如 <code class='fn__code'>foo,/[0-9]+/</code> 表示排除 foo 和数字",
+  "md41": "支持使用 <code class='fn__code'>/</code> 包裹正则表达式，例如 <code class='fn__code'>foo,/[0-9]+/</code> 表示排除 foo 和数字",
   "fileTree2": "在编辑器页签切换时文档树会自动选中当前的文档",
   "fileTree3": "删除文档时不需要确认",
   "fileTree4": "不启用时每次删除文档都会弹出确认框",

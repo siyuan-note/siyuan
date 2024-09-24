@@ -268,7 +268,7 @@ declare namespace Config {
      * User interface language
      * Same as {@link IAppearance.lang}
      */
-    export type TLang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN" | "ja_JP";
+    export type TLang = "en_US" | "es_ES" | "fr_FR" | "zh_CHT" | "zh_CN" | "ja_JP" | "it_IT";
 
     /**
      * SiYuan bazaar related configuration
@@ -288,6 +288,14 @@ declare namespace Config {
      * SiYuan editor markdown related configuration
      */
     interface IMarkdown {
+        /**
+         * Whether to enable the inline asterisk
+         */
+        inlineAsterisk: boolean;
+        /**
+         * Whether to enable the inline underscore
+         */
+        inlineUnderscore: boolean;
         /**
          * Whether to enable the inline superscript
          */

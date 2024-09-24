@@ -14,12 +14,13 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {isNotCtrl, isOnlyMeta, updateHotkeyTip} from "../../protyle/util/compatibility";
+import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
+import {hideTooltip, showTooltip} from "../../dialog/tooltip";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -45,6 +46,9 @@ export class Files extends Model {
                             break;
                         case "mount":
                             this.onMount(data);
+                            options.app.plugins.forEach((item) => {
+                                item.eventBus.emit("opened-notebook", data);
+                            });
                             break;
                         case "createnotebook":
                             setNoteBook((notebooks) => {
@@ -65,6 +69,11 @@ export class Files extends Model {
                             });
                             break;
                         case "unmount":
+                            this.onRemove(data);
+                            options.app.plugins.forEach((item) => {
+                                item.eventBus.emit("closed-notebook", data);
+                            });
+                            break;
                         case "removeDoc":
                             this.onRemove(data);
                             break;
@@ -374,6 +383,7 @@ export class Files extends Model {
                 return;
             }
             window.getSelection().removeAllRanges();
+            hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
                 let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));
@@ -412,8 +422,13 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragend", () => {
-            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement) => {
+            this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
+                // https://github.com/siyuan-note/siyuan/issues/11587
+                if (index === 0) {
+                    const airaLabelElement = item.querySelector(".ariaLabel");
+                    showTooltip(airaLabelElement.getAttribute("aria-label"), airaLabelElement);
+                }
             });
             window.siyuan.dragElement = undefined;
         });
@@ -436,7 +451,9 @@ export class Files extends Model {
                 event.preventDefault();
                 return;
             }
-            liElement.classList.remove("dragover__top", "dragover__bottom", "dragover");
+            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+            });
             let gutterType = "";
             for (const item of event.dataTransfer.items) {
                 if (item.type.startsWith(Constants.SIYUAN_DROP_GUTTER)) {
@@ -495,12 +512,21 @@ export class Files extends Model {
             liElement.classList.add("dragover");
             event.preventDefault();
         });
+        let counter = 0;
         this.element.addEventListener("dragleave", () => {
-            this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover", "dragover__bottom", "dragover__top");
-            });
+            counter--;
+            if (counter === 0) {
+                this.element.querySelectorAll(".dragover, .dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover", "dragover__bottom", "dragover__top");
+                });
+            }
+        });
+        this.element.addEventListener("dragenter", (event) => {
+            event.preventDefault();
+            counter++;
         });
         this.element.addEventListener("drop", async (event: DragEvent & { target: HTMLElement }) => {
+            counter = 0;
             const newElement = this.element.querySelector(".dragover, .dragover__bottom, .dragover__top");
             if (!newElement) {
                 return;
@@ -561,6 +587,10 @@ export class Files extends Model {
                         }
                     });
                     if (!isChild) {
+                        // 禁止父节点移动到子节点 https://github.com/siyuan-note/siyuan/issues/12539
+                        if (newElement.getAttribute("data-path").startsWith(item.dataset.path.replace(".sy", ""))) {
+                            return;
+                        }
                         selectFileElements.push(item);
                         fromPaths.push(dataPath);
                     }
@@ -724,6 +754,11 @@ export class Files extends Model {
         } else {
             counterElement.classList.add("fn__none");
         }
+        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: filesPath) => {
+            item.openPaths.forEach((openPath) => {
+                this.selectItem(item.notebookId, openPath, undefined, false);
+            });
+        });
         if (!init) {
             return;
         }
@@ -763,7 +798,7 @@ export class Files extends Model {
                     removeElement.remove();
                     const counterElement = this.closeElement.querySelector(".counter");
                     counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0")  {
+                    if (counterElement.textContent === "0") {
                         counterElement.classList.add("fn__none");
                     }
                 }
@@ -924,18 +959,18 @@ export class Files extends Model {
         }, 2);
     }
 
-    private onLsSelect(data: { files: IFile[], box: string, path: string }, filePath: string) {
+    private onLsSelect(data: { files: IFile[], box: string, path: string }, filePath: string, setStorage: boolean) {
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
             if (filePath === item.path) {
-                this.selectItem(data.box, filePath);
+                this.selectItem(data.box, filePath, undefined, setStorage);
             } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
                 fetchPost("/api/filetree/listDocsByPath", {
                     notebook: data.box,
                     path: item.path
                 }, response => {
-                    this.selectItem(response.data.box, filePath, response.data);
+                    this.selectItem(response.data.box, filePath, response.data, setStorage);
                 });
             }
         });
@@ -955,7 +990,9 @@ export class Files extends Model {
             emojiElement.textContent = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
-        this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
+        if (setStorage) {
+            this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
+        }
     }
 
     private setCurrent(target: HTMLElement, isScroll = true) {
@@ -981,6 +1018,7 @@ export class Files extends Model {
         if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
             liElement.nextElementSibling?.remove();
+            this.getOpenPaths();
             return;
         }
         fetchPost("/api/filetree/listDocsByPath", {
@@ -992,10 +1030,15 @@ export class Files extends Model {
                 return;
             }
             this.onLsHTML(response.data);
+            this.getOpenPaths();
         });
     }
 
-    public selectItem(notebookId: string, filePath: string, data?: { files: IFile[], box: string, path: string }) {
+    public selectItem(notebookId: string, filePath: string, data?: {
+        files: IFile[],
+        box: string,
+        path: string
+    }, setStorage = true) {
         const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
         if (!treeElement) {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
@@ -1016,20 +1059,60 @@ export class Files extends Model {
         }
 
         if (liElement.getAttribute("data-path") === filePath) {
-            this.setCurrent(liElement);
+            if (setStorage) {
+                this.setCurrent(liElement);
+                this.getOpenPaths();
+            } else {
+                this.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+            }
             return;
         }
 
         if (data && data.path === currentPath) {
-            this.onLsSelect(data, filePath);
+            this.onLsSelect(data, filePath, setStorage);
         } else {
             fetchPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
                 path: currentPath
             }, response => {
-                this.onLsSelect(response.data, filePath);
+                this.onLsSelect(response.data, filePath, setStorage);
             });
         }
+    }
+
+    private getOpenPaths() {
+        const filesPaths: filesPath[] = [];
+        this.element.querySelectorAll(".b3-list[data-url]").forEach((item: HTMLElement) => {
+            const notebookPaths: filesPath = {
+                notebookId: item.getAttribute("data-url"),
+                openPaths: []
+            };
+            item.querySelectorAll(".b3-list-item__arrow--open").forEach((openItem) => {
+                const liElement = hasClosestByTag(openItem, "LI");
+                if (liElement) {
+                    notebookPaths.openPaths.push(liElement.getAttribute("data-path"));
+                }
+            });
+            if (notebookPaths.openPaths.length > 0) {
+                for (let i = 0; i < notebookPaths.openPaths.length; i++) {
+                    for (let j = i + 1; j < notebookPaths.openPaths.length; j++) {
+                        if (notebookPaths.openPaths[j].startsWith(notebookPaths.openPaths[i].replace(".sy", ""))) {
+                            notebookPaths.openPaths.splice(i, 1);
+                            j--;
+                        }
+                    }
+                }
+                notebookPaths.openPaths.forEach((openPath, index) => {
+                    const nextPath = this.element.querySelector(`[data-url="${notebookPaths.notebookId}"] li[data-path="${openPath}"]`)?.nextElementSibling?.firstElementChild?.getAttribute("data-path");
+                    if (nextPath) {
+                        notebookPaths.openPaths[index] = nextPath;
+                    }
+                });
+                filesPaths.push(notebookPaths);
+            }
+        });
+        window.siyuan.storage[Constants.LOCAL_FILESPATHS] = filesPaths;
+        setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
     }
 
     private genFileHTML = (item: IFile) => {

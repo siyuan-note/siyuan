@@ -27,7 +27,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
-	"github.com/facette/natsort"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -252,10 +251,10 @@ func getWorkspaces(c *gin.Context) {
 		}
 	}
 	sort.Slice(openedWorkspaces, func(i, j int) bool {
-		return natsort.Compare(util.RemoveEmojiInvisible(filepath.Base(openedWorkspaces[i].Path)), util.RemoveEmojiInvisible(filepath.Base(openedWorkspaces[j].Path)))
+		return util.NaturalCompare(filepath.Base(openedWorkspaces[i].Path), filepath.Base(openedWorkspaces[j].Path))
 	})
 	sort.Slice(closedWorkspaces, func(i, j int) bool {
-		return natsort.Compare(util.RemoveEmojiInvisible(filepath.Base(closedWorkspaces[i].Path)), util.RemoveEmojiInvisible(filepath.Base(closedWorkspaces[j].Path)))
+		return util.NaturalCompare(filepath.Base(closedWorkspaces[i].Path), filepath.Base(closedWorkspaces[j].Path))
 	})
 	workspaces = append(workspaces, openedWorkspaces...)
 	workspaces = append(workspaces, closedWorkspaces...)

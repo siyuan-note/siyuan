@@ -55,6 +55,18 @@
       }
     }
 
+    .bq {
+      .dragover {
+        &__top:not(.av__row) {
+          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+
+        &__bottom:not(.av__row) {
+          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0 -1px 0 var(--b3-theme-primary-lighter) !important;
+        }
+      }
+    }
+
     &.list {
       padding-left: 0;
 
@@ -449,6 +461,10 @@
 
   &--select {
     background-color: var(--b3-theme-primary-lightest) !important;
+
+    [data-node-id][style*="background-color"] {
+      opacity: .86;
+    }
   }
 
   // https://github.com/siyuan-note/siyuan/issues/11589

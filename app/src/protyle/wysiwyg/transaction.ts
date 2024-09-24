@@ -646,6 +646,18 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     cursorElements.push(item.nextElementSibling);
                 }
             });
+        } else if (operation.nextID) {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`)).forEach(item => {
+                const embedElement = isInEmbedBlock(item);
+                if (embedElement) {
+                    // https://github.com/siyuan-note/siyuan/issues/5524
+                    embedElement.removeAttribute("data-render");
+                    blockRender(protyle, embedElement);
+                } else {
+                    item.insertAdjacentHTML("beforebegin", operation.data);
+                    cursorElements.push(item.previousElementSibling);
+                }
+            });
         } else {
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);

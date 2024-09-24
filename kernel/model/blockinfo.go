@@ -215,21 +215,21 @@ func getNodeRefText0(node *ast.Node) string {
 	return ret
 }
 
-func GetBlockRefIDs(id string) (refIDs, refTexts, defIDs []string) {
+func GetBlockRefs(defID string) (refIDs, refTexts, defIDs []string) {
 	refIDs = []string{}
 	refTexts = []string{}
 	defIDs = []string{}
-	bt := treenode.GetBlockTree(id)
+	bt := treenode.GetBlockTree(defID)
 	if nil == bt {
 		return
 	}
 
 	isDoc := bt.ID == bt.RootID
-	refIDs, refTexts = sql.QueryRefIDsByDefID(id, isDoc)
+	refIDs, refTexts = sql.QueryRefIDsByDefID(defID, isDoc)
 	if isDoc {
-		defIDs = sql.QueryChildDefIDsByRootDefID(id)
+		defIDs = sql.QueryChildDefIDsByRootDefID(defID)
 	} else {
-		defIDs = append(defIDs, id)
+		defIDs = append(defIDs, defID)
 	}
 	return
 }

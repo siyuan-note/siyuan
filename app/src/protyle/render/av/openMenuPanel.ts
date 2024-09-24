@@ -1,10 +1,9 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol} from "./col";
-import {bindEditEvent, duplicateCol, getColIconByType, getEditHTML} from "./col";
+import {addCol, bindEditEvent, duplicateCol, getColIconByType, getEditHTML} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {bindSelectEvent, getSelectHTML, addColOptionOrCell, setColOption, removeCellOption} from "./select";
+import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
 import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML} from "./date";
@@ -182,6 +181,7 @@ export const openMenuPanel = (options: {
             return;
         });
         avPanelElement.addEventListener("drop", (event) => {
+            counter = 0;
             if (!window.siyuan.dragElement) {
                 event.preventDefault();
                 event.stopPropagation();
@@ -457,7 +457,9 @@ export const openMenuPanel = (options: {
             event.preventDefault();
             if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
                 const nodeRect = targetElement.getBoundingClientRect();
-                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                 } else {
@@ -467,10 +469,18 @@ export const openMenuPanel = (options: {
             }
             dragoverElement = targetElement;
         });
+        let counter = 0;
         avPanelElement.addEventListener("dragleave", () => {
-            avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__bottom", "dragover__top");
-            });
+            counter--;
+            if (counter === 0) {
+                avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
+            }
+        });
+        avPanelElement.addEventListener("dragenter", (event) => {
+            event.preventDefault();
+            counter++;
         });
         avPanelElement.addEventListener("dragend", () => {
             if (window.siyuan.dragElement) {

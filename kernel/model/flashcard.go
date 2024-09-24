@@ -96,7 +96,7 @@ func SetFlashcardsDueTime(cardDues []*SetFlashcardDueTime) (err error) {
 			continue
 		}
 
-		due, parseErr := time.Parse("20060102150405", cardDue.Due)
+		due, parseErr := time.ParseInLocation("20060102150405", cardDue.Due, time.Local)
 		if nil != parseErr {
 			logging.LogErrorf("parse due time [%s] failed: %s", cardDue.Due, err)
 			err = parseErr

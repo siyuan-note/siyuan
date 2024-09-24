@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"slices"
@@ -76,6 +75,23 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			v.UpdatedAt = now
 
 			keyValues.Values = append(keyValues.Values, v)
+
+			if av.KeyTypeSelect == v.Type || av.KeyTypeMSelect == v.Type {
+				// 保存选项 https://github.com/siyuan-note/siyuan/issues/12475
+				key, _ := attrView.GetKey(v.KeyID)
+				if nil != key && 0 < len(v.MSelect) {
+					for _, valOpt := range v.MSelect {
+						if opt := key.GetOption(valOpt.Content); nil == opt {
+							// 不存在的选项新建保存
+							opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+							key.Options = append(key.Options, opt)
+						} else {
+							// 已经存在的选项颜色需要保持不变
+							valOpt.Color = opt.Color
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -529,6 +545,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeCreated})
 			case av.KeyTypeUpdated:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeUpdated})
+			case av.KeyTypeNumber:
+				for _, v := range kValues.Values {
+					if nil != v.Number {
+						v.Number.Format = kValues.Key.NumberFormat
+						v.Number.FormatNumber()
+					}
+				}
 			}
 
 			if 0 < len(kValues.Values) {
@@ -2955,11 +2978,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -2979,7 +3002,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	now := time.Now().UnixMilli()
-	var val *av.Value
 	oldIsDetached := true
 	if nil != blockVal {
 		oldIsDetached = blockVal.IsDetached
@@ -3025,9 +3047,13 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	key, _ := attrView.GetKey(keyID)
 
 	if av.KeyTypeNumber == val.Type {
-		if nil != val.Number && !val.Number.IsNotEmpty {
-			val.Number.Content = 0
-			val.Number.FormattedContent = ""
+		if nil != val.Number {
+			if !val.Number.IsNotEmpty {
+				val.Number.Content = 0
+				val.Number.FormattedContent = ""
+			} else {
+				val.Number.FormatNumber()
+			}
 		}
 	} else if av.KeyTypeDate == val.Type {
 		if nil != val.Date && !val.Date.IsNotEmpty {
@@ -3579,13 +3605,4 @@ func updateBoundBlockAvsAttribute(avIDs []string) {
 		avNodes := saveTree.Root.ChildrenByType(ast.NodeAttributeView)
 		av.BatchUpsertBlockRel(avNodes)
 	}
-}
-
-func ReloadAttrView(avID string) {
-	task.AppendAsyncTaskWithDelay(task.ReloadAttributeView, 200*time.Millisecond, pushReloadAttrView, avID)
-
-}
-
-func pushReloadAttrView(avID string) {
-	util.BroadcastByType("protyle", "refreshAttributeView", 0, "", map[string]interface{}{"id": avID})
 }

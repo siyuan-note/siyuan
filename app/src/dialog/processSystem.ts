@@ -105,6 +105,7 @@ export const reloadSync = (
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
+                preview: item.isPreview
             }, response => {
                 item.update(response);
             });
@@ -153,7 +154,7 @@ export const setRefDynamicText = (data: {
     "rootID": string
 }) => {
     getAllEditor().forEach(item => {
-        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        // 不能对比 rootId，否则嵌入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
             item.innerHTML = data.refText;
         });
@@ -183,7 +184,7 @@ export const setDefRefCount = (data: {
             }
             return;
         }
-        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        // 不能对比 rootId，否则嵌入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
             const countElement = item.querySelector(".protyle-attr--refcount");
             if (countElement) {
@@ -199,6 +200,11 @@ export const setDefRefCount = (data: {
                 } else {
                     attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`;
                 }
+            }
+            if (data.refCount === 0) {
+                item.removeAttribute("refcount");
+            } else {
+                item.setAttribute("refcount", data.refCount.toString());
             }
         });
     });

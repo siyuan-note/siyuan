@@ -170,17 +170,42 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 }
             };
         } else if (colType === "date") {
-            cellValue = {
-                type: colType,
-                date: {
-                    content: null,
-                    isNotEmpty: false,
-                    content2: null,
-                    isNotEmpty2: false,
-                    hasEndDate: false,
-                    isNotTime: true,
+            let values = value.split("→");
+            if (values.length !== 2) {
+                values = value.split("-");
+                if (values.length !== 2) {
+                    values = value.split("~");
                 }
-            };
+            }
+            const dateObj1 = dayjs(values[0]);
+            const dateObj2 = dayjs(values[1] || "");
+            if (isNaN(dateObj1.valueOf())) {
+                cellValue = {
+                    type: colType,
+                    date: {
+                        content: null,
+                        isNotEmpty: false,
+                        content2: null,
+                        isNotEmpty2: false,
+                        formattedContent: "",
+                        hasEndDate: false,
+                        isNotTime: true,
+                    }
+                };
+            } else {
+                cellValue = {
+                    type: colType,
+                    date: {
+                        content: dateObj1.valueOf(),
+                        isNotEmpty: true,
+                        content2: dateObj2.valueOf() || 0,
+                        isNotEmpty2: !isNaN(dateObj2.valueOf()),
+                        hasEndDate: !isNaN(dateObj2.valueOf()),
+                        isNotTime: dateObj1.hour() === 0,
+                        formattedContent: "",
+                    }
+                };
+            }
         } else if (colType === "relation") {
             cellValue = {
                 type: colType,
@@ -268,9 +293,11 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
                 if (rowElement) {
                     const stickyElement = rowElement.querySelector(".av__colsticky");
                     if (stickyElement) {
-                        const stickyRight = stickyElement.getBoundingClientRect().right;
-                        if (stickyRight > cellRect.left) {
-                            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                        if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
+                            const stickyRight = stickyElement.getBoundingClientRect().right;
+                            if (stickyRight > cellRect.left) {
+                                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                            }
                         }
                     } else if (avScrollRect.left > cellRect.left) {
                         avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
@@ -470,6 +497,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     });
     avMaskElement.addEventListener("contextmenu", (event) => {
         removeAvMask(event);
+    });
+    avMaskElement.addEventListener("mousedown", (event:MouseEvent) => {
+        if (event.button === 1) {
+            removeAvMask(event);
+        }
     });
 };
 

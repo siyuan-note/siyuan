@@ -38,8 +38,13 @@ func getDocOutline(c *gin.Context) {
 		return
 	}
 
+	preview := false
+	if previewArg := arg["preview"]; nil != previewArg {
+		preview = previewArg.(bool)
+	}
+
 	rootID := arg["id"].(string)
-	headings, err := model.Outline(rootID)
+	headings, err := model.Outline(rootID, preview)
 	if err != nil {
 		ret.Code = 1
 		ret.Msg = err.Error()

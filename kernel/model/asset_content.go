@@ -880,7 +880,7 @@ func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
 		res := <-results
 		pageText[res.pageNo] = res.text
 		if nil != res.err {
-			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, err)
+			logging.LogErrorf("convert [%s] of page %d failed: [%s]", tmp, res.pageNo, res.err)
 		}
 	}
 	close(results)

@@ -442,7 +442,6 @@ export class Dock {
         }
         this.layout.element.style.transform = "";
         this.layout.element.style.zIndex = (++window.siyuan.zIndex).toString();
-        this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         if (this.position === "Left") {
             this.layout.element.style.left = `${this.element.clientWidth}px`;
         } else if (this.position === "Right") {
@@ -595,7 +594,7 @@ export class Dock {
                                     type: "pin",
                                     tab,
                                     blockId: editor?.protyle?.block?.rootID,
-                                    isPreview: !editor?.protyle?.preview?.element.classList.contains("fn__none")
+                                    isPreview: editor?.protyle?.preview ? editor.protyle.preview.element.classList.contains("fn__none") : false
                                 });
                                 if (editor?.protyle?.title?.editElement) {
                                     outline.updateDocTitle(editor.protyle?.background?.ial);

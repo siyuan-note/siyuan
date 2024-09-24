@@ -62,7 +62,8 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
             break;
         case "number":
-            html = `<input value="${value.number.content || ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">`;
+            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">
+<span class="fn__space"></span><span class="fn__flex-center ft__on-surface b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.format}">${value.number.formattedContent}</span><span class="fn__space"></span>`;
             break;
         case "mSelect":
         case "select":
@@ -220,6 +221,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 });
             });
             element.addEventListener("drop", () => {
+                counter = 0;
                 window.siyuan.dragElement.style.opacity = "";
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {
@@ -263,17 +265,27 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 }
                 event.preventDefault();
                 const nodeRect = targetElement.getBoundingClientRect();
-                targetElement.classList.remove("dragover__bottom", "dragover__top");
+                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__bottom", "dragover__top");
+                });
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                 } else {
                     targetElement.classList.add("dragover__top");
                 }
             });
+            let counter = 0;
             element.addEventListener("dragleave", () => {
-                element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__bottom", "dragover__top");
-                });
+                counter--;
+                if (counter === 0) {
+                    element.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
+                        item.classList.remove("dragover__bottom", "dragover__top");
+                    });
+                }
+            });
+            element.addEventListener("dragenter", (event) => {
+                event.preventDefault();
+                counter++;
             });
             element.addEventListener("dragend", () => {
                 if (window.siyuan.dragElement) {
@@ -342,6 +354,10 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     rowID: item.parentElement.dataset.blockId,
                     cellID: item.parentElement.dataset.id,
                     value
+                }, (setResponse) => {
+                    if (type === "number") {
+                        item.parentElement.querySelector(".fn__flex-center").textContent = setResponse.data.value.number.formattedContent;
+                    }
                 });
             });
         });

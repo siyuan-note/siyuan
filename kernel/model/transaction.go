@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
-	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -384,6 +383,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			if err = tx.writeTree(targetTree); err != nil {
 				return
 			}
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, srcTree.ID, srcTree.ID)
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, targetTree.ID, srcNode.ID)
 		}
 		return
 	}
@@ -463,6 +464,8 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		if err = tx.writeTree(targetTree); err != nil {
 			return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: id}
 		}
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, srcTree.ID, srcTree.ID)
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, targetTree.ID, srcNode.ID)
 	}
 	return
 }
@@ -760,13 +763,12 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(node)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
 			defNode := treenode.GetNodeInTree(defTree, defID)
 			if nil != defNode {
-				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, defTree.ID, defNode.ID)
 			}
 		}
 	}
@@ -1079,13 +1081,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(insertedNode)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
 			defNode := treenode.GetNodeInTree(defTree, defID)
 			if nil != defNode {
-				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, defTree.ID, defNode.ID)
 			}
 		}
 	}
@@ -1183,7 +1184,7 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 			if nil != defTree {
 				defNode := treenode.GetNodeInTree(defTree, defID)
 				if nil != defNode {
-					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, pushSetDefRefCount, defTree.ID, defNode.ID)
+					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, defTree.ID, defNode.ID)
 				}
 			}
 		}
@@ -1230,28 +1231,14 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 
 		if treenode.IsBlockRef(n) {
 			refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
+		} else if treenode.IsEmbedBlockRef(n) {
+			defID := treenode.GetEmbedBlockRef(n)
+			refDefIDs = append(refDefIDs, defID)
 		}
 		return ast.WalkContinue
 	})
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	return
-}
-
-func pushSetDefRefCount(rootID, blockID string) {
-	sql.WaitForWritingDatabase()
-
-	bt := treenode.GetBlockTree(blockID)
-	if nil == bt {
-		return
-	}
-
-	refCounts := sql.QueryRootChildrenRefCount(bt.RootID)
-	refCount := refCounts[blockID]
-	var rootRefCount int
-	for _, count := range refCounts {
-		rootRefCount += count
-	}
-	refIDs, _, _ := GetBlockRefIDs(blockID)
-	util.PushSetDefRefCount(rootID, blockID, refIDs, refCount, rootRefCount)
 }
 
 func upsertAvBlockRel(node *ast.Node) {
@@ -1508,125 +1495,6 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	tx.trees[tree.ID] = tree
 	treenode.UpsertBlockTree(tree)
 	return
-}
-
-// refreshDynamicRefText 用于刷新块引用的动态锚文本。
-// 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
-func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
-	changedDefs := map[string]*ast.Node{updatedDefNode.ID: updatedDefNode}
-	changedTrees := map[string]*parse.Tree{updatedTree.ID: updatedTree}
-	refreshDynamicRefTexts(changedDefs, changedTrees)
-}
-
-// refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
-// 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
-func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
-	// 1. 更新引用的动态锚文本
-	treeRefNodeIDs := map[string]*hashset.Set{}
-	var changedParentNodes []*ast.Node
-	for _, updateNode := range updatedDefNodes {
-		refs, parentNodes := getRefsCacheByDefNode(updateNode)
-		for _, ref := range refs {
-			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
-				refIDs = hashset.New()
-				refIDs.Add(ref.BlockID)
-				treeRefNodeIDs[ref.RootID] = refIDs
-			} else {
-				refIDs.Add(ref.BlockID)
-			}
-		}
-		if 0 < len(parentNodes) {
-			changedParentNodes = append(changedParentNodes, parentNodes...)
-		}
-	}
-	if 0 < len(changedParentNodes) {
-		for _, parent := range changedParentNodes {
-			updatedDefNodes[parent.ID] = parent
-		}
-	}
-
-	changedRefTree := map[string]*parse.Tree{}
-
-	for refTreeID, refNodeIDs := range treeRefNodeIDs {
-		refTree, ok := updatedTrees[refTreeID]
-		if !ok {
-			var err error
-			refTree, err = LoadTreeByBlockID(refTreeID)
-			if err != nil {
-				continue
-			}
-		}
-
-		var refTreeChanged bool
-		ast.Walk(refTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			if n.IsBlock() && refNodeIDs.Contains(n.ID) {
-				changed, changedDefNodes := updateRefText(n, updatedDefNodes)
-				if !refTreeChanged && changed {
-					refTreeChanged = true
-				}
-
-				// 推送动态锚文本节点刷新
-				for _, defNode := range changedDefNodes {
-					if "ref-d" == defNode.refType {
-						task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
-					}
-				}
-				return ast.WalkContinue
-			}
-			return ast.WalkContinue
-		})
-
-		if refTreeChanged {
-			changedRefTree[refTreeID] = refTree
-			sql.UpdateRefsTreeQueue(refTree)
-		}
-	}
-
-	// 2. 更新属性视图主键内容
-	for _, updatedDefNode := range updatedDefNodes {
-		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
-		if "" == avs {
-			continue
-		}
-
-		avIDs := strings.Split(avs, ",")
-		for _, avID := range avIDs {
-			attrView, parseErr := av.ParseAttributeView(avID)
-			if nil != parseErr {
-				continue
-			}
-
-			changedAv := false
-			blockValues := attrView.GetBlockKeyValues()
-			if nil == blockValues {
-				continue
-			}
-
-			for _, blockValue := range blockValues.Values {
-				if blockValue.Block.ID == updatedDefNode.ID {
-					newContent := getNodeRefText(updatedDefNode)
-					if newContent != blockValue.Block.Content {
-						blockValue.Block.Content = newContent
-						changedAv = true
-					}
-					break
-				}
-			}
-			if changedAv {
-				av.SaveAttributeView(attrView)
-				ReloadAttrView(avID)
-			}
-		}
-	}
-
-	// 3. 保存变更
-	for _, tree := range changedRefTree {
-		indexWriteTreeUpsertQueue(tree)
-	}
 }
 
 func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentNodes []*ast.Node) {

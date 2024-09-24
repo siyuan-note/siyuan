@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package util
+package treenode
 
 import (
 	"math"
@@ -25,21 +25,23 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/spf13/cast"
 )
 
 func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret = sprig.TxtFuncMap()
-	ret["Weekday"] = Weekday
-	ret["WeekdayCN"] = WeekdayCN
-	ret["WeekdayCN2"] = WeekdayCN2
-	ret["ISOWeek"] = ISOWeek
+	ret["Weekday"] = util.Weekday
+	ret["WeekdayCN"] = util.WeekdayCN
+	ret["WeekdayCN2"] = util.WeekdayCN2
+	ret["ISOWeek"] = util.ISOWeek
 	ret["pow"] = pow
 	ret["powf"] = powf
 	ret["log"] = log
 	ret["logf"] = logf
 	ret["parseTime"] = parseTime
 	ret["FormatFloat"] = FormatFloat
+	ret["getHPathByID"] = getHPathByID
 	return
 }
 
@@ -62,4 +64,13 @@ func parseTime(dateStr string) time.Time {
 
 func FormatFloat(format string, n float64) string {
 	return humanize.FormatFloat(format, n)
+}
+
+func getHPathByID(id string) (ret string) {
+	bt := GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+	ret = bt.HPath
+	return
 }

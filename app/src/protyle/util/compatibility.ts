@@ -194,7 +194,7 @@ export const getLocalStorage = (cb: () => void) => {
             dark: "dark",
             annoColor: "var(--b3-pdf-background1)"
         };
-        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number}
+        defaultStorage[Constants.LOCAL_LAYOUTS] = [];   // {name: "", layout:{}, time: number, filespaths: filesPath[]}
         defaultStorage[Constants.LOCAL_AI] = [];   // {name: "", memo: ""}
         defaultStorage[Constants.LOCAL_PLUGINTOPUNPIN] = [];
         defaultStorage[Constants.LOCAL_OUTLINE] = {keepExpand: true};
@@ -231,6 +231,7 @@ export const getLocalStorage = (cb: () => void) => {
             id: "",
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
+        defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // filesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
             page: 1,
             sort: 0,
@@ -265,7 +266,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
-            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION].forEach((key) => {
+            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);
@@ -291,7 +292,7 @@ export const getLocalStorage = (cb: () => void) => {
     });
 };
 
-export const setStorageVal = (key: string, val: any) => {
+export const setStorageVal = (key: string, val: any, cb?:()=>void) => {
     if (window.siyuan.config.readonly) {
         return;
     }
@@ -300,5 +301,9 @@ export const setStorageVal = (key: string, val: any) => {
         app: Constants.SIYUAN_APPID,
         key,
         val,
+    }, () => {
+        if (cb) {
+            cb();
+        }
     });
 };

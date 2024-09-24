@@ -23,7 +23,7 @@ import (
 	"github.com/dgraph-io/ristretto"
 )
 
-var docIALCache, _ = ristretto.NewCache(&ristretto.Config{
+var docIALCache, _ = ristretto.NewCache[string, map[string]string](&ristretto.Config[string, map[string]string]{
 	NumCounters: 1024 * 100,
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
@@ -40,7 +40,7 @@ func GetDocIAL(p string) (ret map[string]string) {
 	}
 
 	ret = map[string]string{}
-	for k, v := range ial.(map[string]string) {
+	for k, v := range ial {
 		ret[k] = strings.ReplaceAll(v, editor.IALValEscNewLine, "\n")
 	}
 	return
@@ -54,7 +54,7 @@ func ClearDocsIAL() {
 	docIALCache.Clear()
 }
 
-var blockIALCache, _ = ristretto.NewCache(&ristretto.Config{
+var blockIALCache, _ = ristretto.NewCache[string, map[string]string](&ristretto.Config[string, map[string]string]{
 	NumCounters: 1024 * 1000,
 	MaxCost:     1024 * 1024 * 200,
 	BufferItems: 64,
@@ -69,7 +69,7 @@ func GetBlockIAL(id string) (ret map[string]string) {
 	if nil == ial {
 		return
 	}
-	return ial.(map[string]string)
+	return ial
 }
 
 func RemoveBlockIAL(id string) {

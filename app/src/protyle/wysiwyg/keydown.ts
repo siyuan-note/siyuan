@@ -15,7 +15,8 @@ import {
     hasClosestBlock,
     hasClosestByAttribute,
     hasClosestByMatchTag,
-    hasTopClosestByAttribute, isInEmbedBlock
+    hasTopClosestByAttribute,
+    isInEmbedBlock
 } from "../util/hasClosest";
 import {removeBlock, removeImage} from "./remove";
 import {
@@ -24,7 +25,8 @@ import {
     getLastBlock,
     getNextBlock,
     getPreviousBlock,
-    getTopAloneElement, hasNextSibling,
+    getTopAloneElement,
+    hasNextSibling,
     hasPreviousSibling,
     isNotEditBlock,
 } from "./getBlock";
@@ -46,14 +48,7 @@ import {isLocalPath} from "../../util/pathName";
 /// #if !MOBILE
 import {openBy, openFileById} from "../../editor/util";
 /// #endif
-import {
-    alignImgCenter,
-    alignImgLeft,
-    commonHotkey,
-    downSelect,
-    getStartEndElement,
-    upSelect
-} from "./commonHotkey";
+import {alignImgCenter, alignImgLeft, commonHotkey, downSelect, getStartEndElement, upSelect} from "./commonHotkey";
 import {fileAnnotationRefMenu, inlineMathMenu, linkMenu, refMenu, setFold, tagMenu} from "../../menus/protyle";
 import {openAttr} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
@@ -648,7 +643,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeElement, range).top - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
+                    if (getSelectionPosition(nodeElement, range).top - parseInt(getComputedStyle(nodeElement).paddingTop) - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -663,14 +658,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1) {
+                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1 || (!isMac() && position.start === 0)) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;
                             if (previousElement) {
                                 const foldElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
                                 // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
-                                if (getContenteditableElement(previousElement)?.textContent.endsWith("\n") && !foldElement) {
+                                if (!foldElement) {
                                     focusBlock(previousElement, undefined, false);
                                     scrollCenter(protyle, previousElement);
                                     event.stopPropagation();
@@ -736,11 +731,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
                     // 下一个块是折叠块
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
-                    if (nextFoldElement && nextFoldElement.getAttribute("fold") === "1") {
+                    if (nextFoldElement) {
                         focusBlock(nextFoldElement);
                         scrollCenter(protyle, nextFoldElement);
                         event.stopPropagation();
                         event.preventDefault();
+                    } else {
+                        range.collapse(false);
                     }
                 }
             }
@@ -1387,45 +1384,58 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isMatchList || isMatchOList || isMatchCheck || isMatchQuote) {
             const selectsElement: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectsElement.length === 0) {
-                protyle.hint.splitChar = "/";
-                protyle.hint.lastIndex = -1;
-                if (isMatchQuote) {
-                    protyle.hint.fill(">" + Lute.Caret, protyle);
-                } else {
-                    protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
-                }
-            } else if (selectsElement.length === 1) {
+                selectsElement.push(nodeElement);
+            }
+            if (selectsElement.length === 1) {
                 const subType = selectsElement[0].dataset.subtype;
                 const type = selectsElement[0].dataset.type;
-                if (type === "NodeParagraph") {
-                    turnsIntoOneTransaction({
-                        protyle,
-                        selectsElement,
-                        type: isMatchQuote ? "Blocks2Blockquote" : (isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs"))
-                    });
-                } else if (type === "NodeList") {
-                    const id = selectsElement[0].dataset.nodeId;
-                    if (subType === "o" && (isMatchList || isMatchCheck)) {
-                        turnsOneInto({
+                if (isMatchQuote) {
+                    if (["NodeHeading", "NodeParagraph", "NodeList"].includes(type)) {
+                        turnsIntoOneTransaction({
                             protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchCheck ? "UL2TL" : "OL2UL",
+                            selectsElement,
+                            type: "Blocks2Blockquote"
                         });
-                    } else if (subType === "t" && (isMatchList || isMatchOList)) {
-                        turnsOneInto({
+                    } else {
+                        protyle.hint.splitChar = "/";
+                        protyle.hint.lastIndex = -1;
+                        protyle.hint.fill(">" + Lute.Caret, protyle);
+                    }
+                } else {
+                    if (type === "NodeParagraph") {
+                        turnsIntoOneTransaction({
                             protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchList ? "TL2UL" : "TL2OL",
+                            selectsElement,
+                            type: isMatchCheck ? "Blocks2TLs" : (isMatchList ? "Blocks2ULs" : "Blocks2OLs")
                         });
-                    } else if (isMatchCheck || isMatchOList) {
-                        turnsOneInto({
-                            protyle,
-                            nodeElement: selectsElement[0],
-                            id,
-                            type: isMatchCheck ? "OL2TL" : "UL2OL",
-                        });
+                    } else if (type === "NodeList") {
+                        const id = selectsElement[0].dataset.nodeId;
+                        if (subType === "o" && (isMatchList || isMatchCheck)) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchCheck ? "UL2TL" : "OL2UL",
+                            });
+                        } else if (subType === "t" && (isMatchList || isMatchOList)) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchList ? "TL2UL" : "TL2OL",
+                            });
+                        } else if (isMatchCheck || isMatchOList) {
+                            turnsOneInto({
+                                protyle,
+                                nodeElement: selectsElement[0],
+                                id,
+                                type: isMatchCheck ? "OL2TL" : "UL2OL",
+                            });
+                        }
+                    } else {
+                        protyle.hint.splitChar = "/";
+                        protyle.hint.lastIndex = -1;
+                        protyle.hint.fill((isMatchCheck ? "* [ ] " : (isMatchList ? "* " : "1. ")) + Lute.Caret, protyle);
                     }
                 }
             } else {

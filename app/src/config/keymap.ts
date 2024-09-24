@@ -230,7 +230,8 @@ export const keymap = {
         });
     },
     search(value: string, keymapString: string) {
-        keymap.element.querySelectorAll("#keymapList .b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
+        const keymapListElement = keymap.element.querySelector("#keymapList");
+        keymapListElement.querySelectorAll(".b3-list-item--hide-action > .b3-list-item__text").forEach(item => {
             const liElement = item.parentElement;
             let matchedKeymap = false;
             if (keymapString === "" || liElement.querySelector(".b3-text-field").getAttribute("data-value").indexOf(keymapString) > -1) {
@@ -245,10 +246,9 @@ export const keymap = {
             }
             if (!liElement.nextElementSibling) {
                 const toggleElement = liElement.parentElement.previousElementSibling;
-                const toggleIconElement = toggleElement.querySelector(".b3-list-item__arrow");
                 if (value === "" && keymapString === "") {
                     // 复原折叠状态
-                    if (toggleIconElement.classList.contains("b3-list-item__arrow--open")) {
+                    if (toggleElement.querySelector(".b3-list-item__arrow").classList.contains("b3-list-item__arrow--open")) {
                         liElement.parentElement.classList.remove("fn__none");
                     } else {
                         liElement.parentElement.classList.add("fn__none");
@@ -262,8 +262,14 @@ export const keymap = {
                 }
             }
         });
-        // 编辑器中三级菜单单独处理
-        const editorKeymapElement = keymap.element.querySelector("#keymapList").lastElementChild;
+        // 编辑器单独处理
+        this._toggleSearchItem(keymapListElement.lastElementChild, value, keymapString);
+        // 插件单独处理
+        if (keymapListElement.childElementCount === 5) {
+            this._toggleSearchItem(keymapListElement.lastElementChild.previousElementSibling, value, keymapString);
+        }
+    },
+    _toggleSearchItem(editorKeymapElement: HTMLElement, value: string, keymapString: string) {
         if (value === "" && keymapString === "") {
             // 复原折叠状态
             if (editorKeymapElement.querySelector(".b3-list-item__arrow").classList.contains("b3-list-item__arrow--open")) {

@@ -258,10 +258,10 @@ func GetBlockTreeRootsByHPath(boxID, hPath string) (ret []*BlockTree) {
 	return
 }
 
-func GetBlockTreeRootByHPathPreferredParentID(boxID, hPath, preferredParentID string) (ret *BlockTree) {
+func GetBlockTreeByHPathPreferredParentID(boxID, hPath, preferredParentID string) (ret *BlockTree) {
 	hPath = gulu.Str.RemoveInvisible(hPath)
 	var roots []*BlockTree
-	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND parent_id = ? AND type = 'd'"
+	sqlStmt := "SELECT * FROM blocktrees WHERE box_id = ? AND hpath = ? AND parent_id = ? LIMIT 1"
 	rows, err := db.Query(sqlStmt, boxID, hPath, preferredParentID)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)

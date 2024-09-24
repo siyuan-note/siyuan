@@ -33,6 +33,7 @@ import (
 	"time"
 	"unicode/utf8"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
@@ -413,6 +414,30 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 	util.PushEndlessProgress(Conf.Language(65))
 	defer util.ClearPushProgress(100)
 
+	data := filepath.Join(util.WorkspaceDir, "data")
+	if util.ContainerStd == util.Container {
+		// 桌面端检查磁盘可用空间
+
+		dataSize, sizeErr := util.SizeOfDirectory(data)
+		if sizeErr != nil {
+			logging.LogErrorf("get size of data dir [%s] failed: %s", data, sizeErr)
+			err = sizeErr
+			return
+		}
+
+		_, _, tempExportFree := util.GetDiskUsage(util.TempDir)
+		if int64(tempExportFree) < dataSize*2 { // 压缩 zip 文件时需要 data 的两倍空间
+			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(tempExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize)*2, 2)))
+			return
+		}
+
+		_, _, targetExportFree := util.GetDiskUsage(exportFolder)
+		if int64(targetExportFree) < dataSize { // 复制 zip 最多需要 data 一样的空间
+			err = errors.New(fmt.Sprintf(Conf.Language(242), humanize.BytesCustomCeil(targetExportFree, 2), humanize.BytesCustomCeil(uint64(dataSize), 2)))
+			return
+		}
+	}
+
 	zipPath, err := ExportData()
 	if err != nil {
 		return
@@ -423,6 +448,9 @@ func ExportDataInFolder(exportFolder string) (name string, err error) {
 		logging.LogErrorf("url unescape [%s] failed: %s", name, err)
 		return
 	}
+
+	util.PushEndlessProgress(Conf.Language(65))
+	defer util.ClearPushProgress(100)
 
 	targetZipPath := filepath.Join(exportFolder, name)
 	zipAbsPath := filepath.Join(util.TempDir, "export", name)
@@ -453,6 +481,8 @@ func ExportData() (zipPath string, err error) {
 
 func exportData(exportFolder string) (zipPath string, err error) {
 	WaitForWritingFiles()
+
+	logging.LogInfof("exporting data...")
 
 	baseFolderName := "data-" + util.CurrentTimeSecondsStr()
 	if err = os.MkdirAll(exportFolder, 0755); err != nil {
@@ -489,6 +519,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	os.RemoveAll(exportFolder)
+	logging.LogInfof("export data done [%s]", zipPath)
 	return
 }
 
@@ -536,7 +567,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string) (retStdHTML string, retOutline []*Path) {
+func Preview(id string) (retStdHTML string) {
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -555,7 +586,6 @@ func Preview(id string) (retStdHTML string, retOutline []*Path) {
 	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {
 		footnotesDefBlock.Unlink()
 	}
-	retOutline = outline(tree)
 	return
 }
 
@@ -2336,9 +2366,23 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 						if nil != cell.Value.Updated {
 							cell.Value.Updated = av.NewFormattedValueUpdated(cell.Value.Updated.Content, 0, av.UpdatedFormatNone)
 						}
+					} else if av.KeyTypeURL == cell.Value.Type {
+						if nil != cell.Value.URL {
+							if "" != strings.TrimSpace(cell.Value.URL.Content) {
+								link := &ast.Node{Type: ast.NodeLink}
+								link.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+								link.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(cell.Value.URL.Content)})
+								link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+								link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+								link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(cell.Value.URL.Content)})
+								link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+								mdTableCell.AppendChild(link)
+							}
+							continue
+						}
 					} else if av.KeyTypeMAsset == cell.Value.Type {
 						if nil != cell.Value.MAsset {
-							for _, a := range cell.Value.MAsset {
+							for i, a := range cell.Value.MAsset {
 								if av.AssetTypeImage == a.Type {
 									img := &ast.Node{Type: ast.NodeImage}
 									img.AppendChild(&ast.Node{Type: ast.NodeBang})
@@ -2350,14 +2394,26 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 									img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 									mdTableCell.AppendChild(img)
 								} else if av.AssetTypeFile == a.Type {
-									file := &ast.Node{Type: ast.NodeLink}
-									file.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
-									file.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(a.Name)})
-									file.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
-									file.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-									file.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
-									file.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
-									mdTableCell.AppendChild(file)
+									linkText := strings.TrimSpace(a.Name)
+									if "" == linkText {
+										linkText = a.Content
+									}
+
+									if "" != strings.TrimSpace(a.Content) {
+										file := &ast.Node{Type: ast.NodeLink}
+										file.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+										file.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(linkText)})
+										file.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+										file.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+										file.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(a.Content)})
+										file.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+										mdTableCell.AppendChild(file)
+									} else {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
+									}
+								}
+								if i < len(cell.Value.MAsset)-1 {
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
 								}
 							}
 							continue
@@ -2365,6 +2421,92 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					} else if av.KeyTypeLineNumber == cell.Value.Type {
 						val = strconv.Itoa(rowNum)
 						rowNum++
+					} else if av.KeyTypeRelation == cell.Value.Type {
+						for i, v := range cell.Value.Relation.Contents {
+							if nil == v {
+								continue
+							}
+
+							if av.KeyTypeBlock == v.Type && nil != v.Block {
+								val = v.Block.Content
+								if !wysiwyg {
+									val = string(lex.EscapeProtyleMarkers([]byte(val)))
+									val = strings.ReplaceAll(val, "\\|", "|")
+									val = strings.ReplaceAll(val, "|", "\\|")
+								}
+
+								col := table.GetColumn(cell.Value.KeyID)
+								if nil != col && col.Wrap {
+									lines := strings.Split(val, "\n")
+									for _, line := range lines {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+									}
+								} else {
+									val = strings.ReplaceAll(val, "\n", " ")
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								}
+							}
+							if i < len(cell.Value.Relation.Contents)-1 {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+							}
+						}
+						continue
+					} else if av.KeyTypeRollup == cell.Value.Type {
+						for i, v := range cell.Value.Rollup.Contents {
+							if nil == v {
+								continue
+							}
+
+							if av.KeyTypeBlock == v.Type {
+								if nil != v.Block {
+									val = v.Block.Content
+									if !wysiwyg {
+										val = string(lex.EscapeProtyleMarkers([]byte(val)))
+										val = strings.ReplaceAll(val, "\\|", "|")
+										val = strings.ReplaceAll(val, "|", "\\|")
+									}
+
+									col := table.GetColumn(cell.Value.KeyID)
+									if nil != col && col.Wrap {
+										lines := strings.Split(val, "\n")
+										for _, line := range lines {
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+											mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+										}
+									} else {
+										val = strings.ReplaceAll(val, "\n", " ")
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+									}
+								}
+							} else if av.KeyTypeText == v.Type {
+								val = v.Text.Content
+								if !wysiwyg {
+									val = string(lex.EscapeProtyleMarkers([]byte(val)))
+									val = strings.ReplaceAll(val, "\\|", "|")
+									val = strings.ReplaceAll(val, "|", "\\|")
+								}
+
+								col := table.GetColumn(cell.Value.KeyID)
+								if nil != col && col.Wrap {
+									lines := strings.Split(val, "\n")
+									for _, line := range lines {
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(line)})
+										mdTableCell.AppendChild(&ast.Node{Type: ast.NodeHardBreak})
+									}
+								} else {
+									val = strings.ReplaceAll(val, "\n", " ")
+									mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(val)})
+								}
+							} else {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(v.String(true))})
+							}
+
+							if i < len(cell.Value.Rollup.Contents)-1 {
+								mdTableCell.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(", ")})
+							}
+						}
+						continue
 					}
 
 					if "" == val {
@@ -2864,4 +3006,43 @@ func getExportBlockRefLinkText(blockRef *ast.Node, blockRefTextLeft, blockRefTex
 	}
 	linkText = blockRefTextLeft + linkText + blockRefTextRight
 	return
+}
+
+func getDestViewVal(attrView *av.AttributeView, keyID, blockID string) *av.TableColumn {
+	rollupKey, _ := attrView.GetKey(keyID)
+	if nil == rollupKey || nil == rollupKey.Rollup {
+		return nil
+	}
+
+	relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
+	if nil == relKey || nil == relKey.Relation {
+		return nil
+	}
+
+	relVal := attrView.GetValue(relKey.ID, blockID)
+	if nil == relVal || nil == relVal.Relation {
+		return nil
+	}
+
+	destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+	if nil == destAv {
+		return nil
+	}
+
+	destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
+	if nil == destKey {
+		return nil
+	}
+
+	destView, _ := destAv.GetCurrentView(destAv.ViewID)
+	if nil == destView {
+		return nil
+	}
+
+	destTable := sql.RenderAttributeViewTable(destAv, destView, "", GetBlockAttrsWithoutWaitWriting)
+	if nil == destTable {
+		return nil
+	}
+
+	return destTable.GetColumn(rollupKey.Rollup.KeyID)
 }

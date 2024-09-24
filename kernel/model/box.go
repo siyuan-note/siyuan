@@ -32,8 +32,8 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
-	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -43,6 +43,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"gopkg.in/yaml.v3"
 )
 
 // Box 笔记本。
@@ -148,30 +149,30 @@ func ListNotebooks() (ret []*Box, err error) {
 	switch Conf.FileTree.Sort {
 	case util.SortModeNameASC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(ret[i].Name), util.RemoveEmojiInvisible(ret[j].Name))
+			return util.PinYinCompare(ret[i].Name, ret[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(ret[j].Name), util.RemoveEmojiInvisible(ret[i].Name))
+			return util.PinYinCompare(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeUpdatedASC:
 	case util.SortModeUpdatedDESC:
 	case util.SortModeAlphanumASC:
 		sort.Slice(ret, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(ret[i].Name), util.RemoveEmojiInvisible(ret[j].Name))
+			return util.NaturalCompare(ret[i].Name, ret[j].Name)
 		})
 	case util.SortModeAlphanumDESC:
 		sort.Slice(ret, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(ret[j].Name), util.RemoveEmojiInvisible(ret[i].Name))
+			return util.NaturalCompare(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeCustom:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].Sort < ret[j].Sort })
 	case util.SortModeRefCountASC:
 	case util.SortModeRefCountDESC:
 	case util.SortModeCreatedASC:
-		sort.Slice(ret, func(i, j int) bool { return natsort.Compare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
 	case util.SortModeCreatedDESC:
-		sort.Slice(ret, func(i, j int) bool { return natsort.Compare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
 	}
 	return
 }
@@ -435,6 +436,7 @@ func normalizeTree(tree *parse.Tree) {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
 
+	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -496,9 +498,45 @@ func normalizeTree(tree *parse.Tree) {
 			n.Tokens = html.UnescapeBytes(n.Tokens)
 		}
 
+		if ast.NodeYamlFrontMatterContent == n.Type {
+			// Parsing YAML Front Matter as document custom attributes when importing Markdown files https://github.com/siyuan-note/siyuan/issues/10878
+			attrs := map[string]interface{}{}
+			parseErr := yaml.Unmarshal(n.Tokens, &attrs)
+			if parseErr != nil {
+				logging.LogWarnf("parse YAML front matter [%s] failed: %s", n.Tokens, parseErr)
+			} else {
+				for attrK, attrV := range attrs {
+					validKeyName := true
+					for i := 0; i < len(attrK); i++ {
+						if !lex.IsASCIILetterNumHyphen(attrK[i]) {
+							validKeyName = false
+							break
+						}
+					}
+					if !validKeyName {
+						logging.LogWarnf("invalid YAML key [%s] in [%s]", attrK, n.ID)
+						continue
+					}
+
+					tree.Root.SetIALAttr("custom-"+attrK, fmt.Sprint(attrV))
+				}
+			}
+		}
+
+		if ast.NodeYamlFrontMatter == n.Type {
+			unlinks = append(unlinks, n)
+		}
+
 		return ast.WalkContinue
 	})
-	tree.Root.KramdownIAL = parse.Tokens2IAL(tree.Root.LastChild.Tokens)
+	for _, n := range unlinks {
+		n.Unlink()
+	}
+
+	rootIAL := parse.Tokens2IAL(tree.Root.LastChild.Tokens)
+	for _, kv := range rootIAL {
+		tree.Root.SetIALAttr(kv[0], kv[1])
+	}
 	return
 }
 

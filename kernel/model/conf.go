@@ -408,7 +408,7 @@ func InitConf() {
 	if 0 >= Conf.Flashcard.MaximumInterval || 36500 <= Conf.Flashcard.MaximumInterval {
 		Conf.Flashcard.MaximumInterval = conf.NewFlashcard().MaximumInterval
 	}
-	if "" == Conf.Flashcard.Weights || 17 != len(strings.Split(Conf.Flashcard.Weights, ",")) {
+	if "" == Conf.Flashcard.Weights {
 		Conf.Flashcard.Weights = conf.NewFlashcard().Weights
 	}
 

@@ -6,7 +6,6 @@ import {
     reloadSync, setDefRefCount, setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
-import {Constants} from "../../constants";
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
@@ -45,7 +44,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 }
                 break;
             case "openFileById":
-                openMobileFileById(app, data.data.id, [Constants.CB_GET_HL]);
+                openMobileFileById(app, data.data.id);
                 break;
             case"txerr":
                 transactionError();

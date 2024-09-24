@@ -31,7 +31,7 @@ func AutoSpace(rootID string) (err error) {
 
 	logging.LogInfof("formatting tree [%s]...", rootID)
 	util.PushProtyleLoading(rootID, Conf.Language(116))
-	defer util.PushProtyleReload(rootID)
+	defer util.PushReloadProtyle(rootID)
 
 	WaitForWritingFiles()
 

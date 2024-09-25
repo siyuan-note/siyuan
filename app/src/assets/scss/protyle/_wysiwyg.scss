@@ -210,6 +210,8 @@
     }
 
     span[data-type~="tag"] {
+      padding-left: 1px;
+      padding-right: 1px;
       border-bottom: 1px solid;
       color: var(--b3-protyle-inline-tag-color);
       transition: var(--b3-transition);

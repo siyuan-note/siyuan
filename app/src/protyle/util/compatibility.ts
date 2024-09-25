@@ -7,7 +7,16 @@ export const openByMobile = (uri: string) => {
         return;
     }
     if (isInIOS()) {
-        window.webkit.messageHandlers.openLink.postMessage(uri);
+        if (uri.startsWith("assets/")) {
+            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/" + uri);
+        } else {
+            try {
+                new URL(uri);
+                window.webkit.messageHandlers.openLink.postMessage(uri);
+            } catch (e) {
+                window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
+            }
+        }
     } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
     } else {

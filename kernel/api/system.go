@@ -17,6 +17,7 @@
 package api
 
 import (
+	"github.com/jinzhu/copier"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -203,6 +204,97 @@ func exportLog(c *gin.Context) {
 	zipPath := model.ExportSystemLog()
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
+	}
+}
+
+func exportConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	name := "siyuan-conf-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		logging.LogErrorf("export WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	clonedConf := &model.AppConf{}
+	if err := copier.Copy(clonedConf, model.Conf); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if nil != clonedConf.Editor {
+		clonedConf.Editor.Emoji = []string{}
+	}
+	if nil != clonedConf.Export {
+		clonedConf.Export.PandocBin = ""
+	}
+	clonedConf.UserData = ""
+	clonedConf.Account = nil
+	clonedConf.AccessAuthCode = ""
+	if nil != clonedConf.System {
+		clonedConf.System.ID = ""
+		clonedConf.System.Name = ""
+		clonedConf.System.OSPlatform = ""
+		clonedConf.System.Container = ""
+		clonedConf.System.IsMicrosoftStore = false
+		clonedConf.System.IsInsider = false
+	}
+	clonedConf.Sync = nil
+	clonedConf.Stat = nil
+	clonedConf.Api = nil
+	clonedConf.Repo = nil
+	clonedConf.Publish = nil
+	clonedConf.CloudRegion = 0
+	clonedConf.DataIndexState = 0
+
+	data, err := gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
+	if err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, data, 0644); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipPath := "/export/" + name + ".zip"
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
 	}
 }
 

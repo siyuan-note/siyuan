@@ -62,7 +62,6 @@ ENV TZ=Asia/Shanghai
 ENV HOME=/home/siyuan
 ENV RUN_IN_CONTAINER=true
 EXPOSE 6806
-VOLUME /home/siyuan/workspace
 
 USER siyuan
 

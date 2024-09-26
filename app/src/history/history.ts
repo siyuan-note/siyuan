@@ -245,7 +245,9 @@ ${actionHTML}
 };
 
 const renderRepo = (element: Element, currentPage: number) => {
-    const selectValue = (element.querySelector(".b3-select") as HTMLSelectElement).value;
+    const selectElement = element.querySelector(".b3-select") as HTMLSelectElement;
+    selectElement.disabled = true;
+    const selectValue = selectElement.value;
     element.lastElementChild.innerHTML = '<li style="position: relative;height: 100%;"><div class="fn__loading"><img width="64px" src="/stage/loading-pure.svg"></div></li>';
     const pageBtn = element.querySelector('button[data-type="jumpRepoPage"]');
     pageBtn.textContent = `${currentPage}`;
@@ -257,6 +259,7 @@ const renderRepo = (element: Element, currentPage: number) => {
     if (selectValue === "getRepoTagSnapshots" || selectValue === "getCloudRepoTagSnapshots") {
         fetchPost(`/api/repo/${selectValue}`, {}, (response) => {
             renderRepoItem(response, element, selectValue);
+            selectElement.disabled = false;
         });
         previousElement.classList.add("fn__none");
         nextElement.classList.add("fn__none");
@@ -274,6 +277,7 @@ const renderRepo = (element: Element, currentPage: number) => {
         }
         nextElement.setAttribute("disabled", "disabled");
         fetchPost(`/api/repo/${selectValue}`, { page: currentPage }, (response) => {
+            selectElement.disabled = false;
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
             } else {

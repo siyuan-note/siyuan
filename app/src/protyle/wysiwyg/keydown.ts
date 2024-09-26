@@ -882,7 +882,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN");
                     if (position.start === 2 && inlineElement &&
                         getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
-                        inlineElement.innerText.startsWith(Constants.ZWSP)) {
+                        inlineElement.innerText.startsWith(Constants.ZWSP) &&
+                        // 需排除行内代码前有一个字符的情况
+                        editElement.innerText.startsWith(Constants.ZWSP)) {
                         focusBlock(nodeElement);
                         event.stopPropagation();
                         event.preventDefault();

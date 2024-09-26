@@ -1704,7 +1704,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 			continue
 		}
 
-		syncDelete2AvBlock(removeTree.Root)
+		syncDelete2AvBlock(removeTree.Root, removeTree, nil)
 	}
 
 	if existChildren {

@@ -503,6 +503,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         }).element);
         if (!window.siyuan.config.readonly) {
             const riffCardMenu = [{
+                id: "spaceRepetition",
                 iconHTML: "",
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
@@ -515,6 +516,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     /// #endif
                 }
             }, {
+                id: "manage",
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
@@ -528,6 +530,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     /// #endif
                 }
             }, {
+                id: "quickMakeCard",
                 iconHTML: "",
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
                 label: window.siyuan.languages.quickMakeCard,
@@ -543,6 +546,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     }]);
                 }
             }, {
+                id: "removeCard",
                 iconHTML: "",
                 label: window.siyuan.languages.removeCard,
                 click: () => {
@@ -559,6 +563,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }];
             if (window.siyuan.config.flashcard.deck) {
                 riffCardMenu.push({
+                    id: "addToDeck",
                     iconHTML: "",
                     label: window.siyuan.languages.addToDeck,
                     click: () => {

@@ -300,7 +300,6 @@ export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-
     fetchPost("/api/storage/setLocalStorageVal", {
         app: Constants.SIYUAN_APPID,
         key,

@@ -43,7 +43,8 @@ export const reloadSync = (
     hideMsg = true,
     // 同步的时候需要更新只读状态 https://github.com/siyuan-note/siyuan/issues/11517
     // 调整大纲的时候需要使用现有状态 https://github.com/siyuan-note/siyuan/issues/11808
-    updateReadonly = true
+    updateReadonly = true,
+    onlyUpdateDoc = false
 ) => {
     if (hideMsg) {
         hideMessage();
@@ -124,11 +125,13 @@ export const reloadSync = (
             }
         }
     });
-    allModels.files.forEach(item => {
-        setNoteBook(() => {
-            item.init(false);
+    if (onlyUpdateDoc) {
+        allModels.files.forEach(item => {
+            setNoteBook(() => {
+                item.init(false);
+            });
         });
-    });
+    }
     allModels.bookmark.forEach(item => {
         item.update();
     });

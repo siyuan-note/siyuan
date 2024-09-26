@@ -427,7 +427,9 @@ export class Files extends Model {
                 // https://github.com/siyuan-note/siyuan/issues/11587
                 if (index === 0) {
                     const airaLabelElement = item.querySelector(".ariaLabel");
-                    showTooltip(airaLabelElement.getAttribute("aria-label"), airaLabelElement);
+                    if (airaLabelElement) {
+                        showTooltip(airaLabelElement.getAttribute("aria-label"), airaLabelElement);
+                    }
                 }
             });
             window.siyuan.dragElement = undefined;

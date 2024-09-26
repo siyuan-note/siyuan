@@ -52,6 +52,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     });
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
@@ -61,6 +62,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "delete",
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         accelerator: "⌦",
@@ -72,9 +74,10 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     if (blockIDs.length === 0) {
         return window.siyuan.menus.menu;
     }
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
     if (!window.siyuan.config.readonly) {
         const riffCardMenu = [{
+            id: "quickMakeCard",
             iconHTML: "",
             accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
             label: window.siyuan.languages.quickMakeCard,
@@ -90,6 +93,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
                 }]);
             }
         }, {
+            id: "removeCard",
             iconHTML: "",
             label: window.siyuan.languages.removeCard,
             click: () => {
@@ -106,6 +110,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         }];
         if (window.siyuan.config.flashcard.deck) {
             riffCardMenu.push({
+                id: "addToDeck",
                 iconHTML: "",
                 label: window.siyuan.languages.addToDeck,
                 click: () => {
@@ -114,11 +119,12 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             });
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "riffCard",
             label: window.siyuan.languages.riffCard,
             icon: "iconRiffCard",
             submenu: riffCardMenu,
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
     }
     openEditorTab(app, blockIDs);
     if (app.plugins) {
@@ -163,6 +169,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             type: "notebook"
         }));
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "config",
             label: window.siyuan.languages.config,
             icon: "iconSettings",
             click: () => {
@@ -197,6 +204,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             return true;
         });
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "sort",
             icon: "iconSort",
             label: window.siyuan.languages.sort,
             type: "submenu",
@@ -205,10 +213,12 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "riffCard",
             label: window.siyuan.languages.riffCard,
             type: "submenu",
             icon: "iconRiffCard",
             submenu: [{
+                id: "spaceRepetition",
                 iconHTML: "",
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
@@ -221,6 +231,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                     /// #endif
                 }
             }, {
+                id: "manage",
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
@@ -233,6 +244,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         }).element);
     }
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "search",
         label: window.siyuan.languages.search,
         accelerator: window.siyuan.config.keymap.general.search.custom,
         icon: "iconSearch",
@@ -255,6 +267,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     }).element);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "replace",
             label: window.siyuan.languages.replace,
             accelerator: window.siyuan.config.keymap.general.replace.custom,
             icon: "iconReplace",
@@ -277,8 +290,9 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         }).element);
     }
     if (!window.siyuan.config.readonly) {
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "close",
             label: window.siyuan.languages.close,
             icon: "iconClose",
             click: () => {
@@ -288,6 +302,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
@@ -296,9 +311,10 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             }
         }).element);
     }
-    window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+    window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
     /// #if !BROWSER
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "showInFolder",
         icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click: () => {
@@ -309,10 +325,12 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
     genImportMenu(notebookId, "/");
 
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "export",
         label: window.siyuan.languages.export,
         type: "submenu",
         icon: "iconUpload",
         submenu: [{
+            id: "exportMarkdown",
             label: "Markdown",
             icon: "iconMarkdown",
             click: () => {
@@ -326,6 +344,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 });
             }
         }, {
+            id: "exportSiYuanZip",
             label: "SiYuan .sy.zip",
             icon: "iconSiYuan",
             click: () => {
@@ -378,6 +397,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
         const topElement = hasTopClosestByTag(liElement, "UL");
         if (window.siyuan.config.fileTree.sort === 6 || (topElement && topElement.dataset.sortmode === "6")) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "newDocAbove",
                 icon: "iconBefore",
                 label: window.siyuan.languages.newDocAbove,
                 click: () => {
@@ -400,6 +420,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "newDocBelow",
                 icon: "iconAfter",
                 label: window.siyuan.languages.newDocBelow,
                 click: () => {
@@ -421,13 +442,15 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     });
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
             submenu: (copySubMenu(id, false) as IMenu[]).concat([{
+                id: "duplicate",
                 iconHTML: "",
                 label: window.siyuan.languages.duplicate,
                 accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
@@ -442,6 +465,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             Array.from(fileElement.querySelectorAll(".b3-list-item--focus"))
         )));
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
             accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
             icon: "iconDatabase",
@@ -450,6 +474,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             accelerator: "⌦",
@@ -457,7 +482,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 deleteFiles(Array.from(fileElement.querySelectorAll(".b3-list-item--focus")));
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         window.siyuan.menus.menu.append(renameMenu({
             path: pathString,
             notebookId,
@@ -465,6 +490,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             type: "file"
         }));
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "attr",
             label: window.siyuan.languages.attr,
             icon: "iconAttr",
             click() {
@@ -541,6 +567,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 });
             }
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "riffCard",
                 label: window.siyuan.languages.riffCard,
                 type: "submenu",
                 icon: "iconRiffCard",
@@ -548,6 +575,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "search",
             label: window.siyuan.languages.search,
             icon: "iconSearch",
             accelerator: window.siyuan.config.keymap.general.search.custom,
@@ -575,6 +603,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "replace",
             label: window.siyuan.languages.replace,
             accelerator: window.siyuan.config.keymap.general.replace.custom,
             icon: "iconReplace",
@@ -601,11 +630,12 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                 /// #endif
             }
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
     }
     openEditorTab(app, [id], notebookId, pathString);
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "fileHistory",
             label: window.siyuan.languages.fileHistory,
             icon: "iconHistory",
             click() {

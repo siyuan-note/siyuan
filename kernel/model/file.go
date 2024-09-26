@@ -184,7 +184,7 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 	var rootBlocks []*sql.Block
 	if 0 < len(keywords) {
 		for _, box := range boxes {
-			if util.ContainsSubStr(box.Name, keywords) {
+			if gulu.Str.Contains(box.Name, keywords) {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {

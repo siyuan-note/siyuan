@@ -452,7 +452,7 @@ export const exportMd = (id: string) => {
         type: "submenu",
         icon: "iconUpload",
         submenu: [{
-            id: "template",
+            id: "exportTemplate",
             label: window.siyuan.languages.template,
             iconClass: "ft__error",
             icon: "iconMarkdown",

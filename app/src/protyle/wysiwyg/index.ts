@@ -2278,7 +2278,7 @@ export class WYSIWYG {
             }
 
             const embedItemElement = hasClosestByClassName(event.target, "protyle-wysiwyg__embed");
-            if (embedItemElement && !ctrlIsPressed) {
+            if (embedItemElement) {
                 const embedId = embedItemElement.getAttribute("data-id");
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
@@ -2320,8 +2320,11 @@ export class WYSIWYG {
                     }
                     /// #endif
                 });
-                event.stopPropagation();
-                return;
+                // https://github.com/siyuan-note/siyuan/issues/12585
+                if (!ctrlIsPressed) {
+                    event.stopPropagation();
+                    return;
+                }
             }
 
             if (commonClick(event, protyle)) {

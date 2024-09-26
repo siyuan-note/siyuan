@@ -70,15 +70,15 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
-	tmpDir := filepath.Join(util.TempDir, "import")
-	if err = os.MkdirAll(tmpDir, 0755); err != nil {
+	importDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(importDir, 0755); err != nil {
 		logging.LogErrorf("import WebDAV provider failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
 
-	tmp := filepath.Join(tmpDir, f.Filename)
+	tmp := filepath.Join(importDir, f.Filename)
 	if err = os.WriteFile(tmp, data, 0644); err != nil {
 		logging.LogErrorf("import WebDAV provider failed: %s", err)
 		ret.Code = -1
@@ -86,6 +86,7 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
+	tmpDir := filepath.Join(importDir, "webdav")
 	if err = gulu.Zip.Unzip(tmp, tmpDir); err != nil {
 		logging.LogErrorf("import WebDAV provider failed: %s", err)
 		ret.Code = -1
@@ -93,7 +94,22 @@ func importSyncProviderWebDAV(c *gin.Context) {
 		return
 	}
 
-	tmp = filepath.Join(tmpDir, f.Filename[:len(f.Filename)-4])
+	entries, err := os.ReadDir(tmpDir)
+	if err != nil {
+		logging.LogErrorf("import WebDAV provider failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if 1 != len(entries) {
+		logging.LogErrorf("invalid WebDAV provider package")
+		ret.Code = -1
+		ret.Msg = "invalid WebDAV provider package"
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, entries[0].Name())
 	data, err = os.ReadFile(tmp)
 	if err != nil {
 		logging.LogErrorf("import WebDAV provider failed: %s", err)

@@ -126,6 +126,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 }
             }).element);
             const riffCardMenu: IMenu[] = [{
+                id: "spaceRepetition",
                 iconHTML: "",
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
@@ -135,6 +136,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
+                id: "manage",
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
@@ -145,6 +147,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
+                id: "quickMakeCard",
                 iconHTML: "",
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
@@ -160,6 +163,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }];
             if (window.siyuan.config.flashcard.deck) {
                 riffCardMenu.push({
+                    id: "addToDeck",
                     iconHTML: "",
                     label: window.siyuan.languages.addToDeck,
                     click: () => {

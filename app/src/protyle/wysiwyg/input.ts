@@ -123,8 +123,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
-        const nextBlockElement = getNextBlock(editElement);
-        if (nextBlockElement) {
+        // https://github.com/siyuan-note/siyuan/issues/12593
+        const nextBlockElement = blockElement.nextElementSibling;
+        if (nextBlockElement && nextBlockElement.getAttribute("data-node-id")) {
             if (!isNotEditBlock(nextBlockElement)) {
                 focusBlock(nextBlockElement);
             } else {

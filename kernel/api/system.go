@@ -230,6 +230,11 @@ func exportConf(c *gin.Context) {
 		return
 	}
 
+	if nil != clonedConf.Appearance {
+		clonedConf.Appearance.DarkThemes = nil
+		clonedConf.Appearance.LightThemes = nil
+		clonedConf.Appearance.Icons = nil
+	}
 	if nil != clonedConf.Editor {
 		clonedConf.Editor.Emoji = []string{}
 	}

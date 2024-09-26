@@ -844,6 +844,7 @@ export const renameMenu = (options: {
 
 export const movePathToMenu = (paths: string[]) => {
     return new MenuItem({
+        id: "move",
         label: window.siyuan.languages.move,
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,

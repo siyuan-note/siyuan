@@ -742,90 +742,105 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
 
 export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, clickEvent: (sort: number) => void) => {
     const sortMenu: IMenu[] = [{
+        id: "fileNameASC",
         icon: sortMode === 0 ? "iconSelect" : undefined,
         label: window.siyuan.languages.fileNameASC,
         click: () => {
             clickEvent(0);
         }
     }, {
+        id: "fileNameDESC",
         icon: sortMode === 1 ? "iconSelect" : undefined,
         label: window.siyuan.languages.fileNameDESC,
         click: () => {
             clickEvent(1);
         }
     }, {
+        id: "fileNameNatASC",
         icon: sortMode === 4 ? "iconSelect" : undefined,
         label: window.siyuan.languages.fileNameNatASC,
         click: () => {
             clickEvent(4);
         }
     }, {
+        id: "fileNameNatDESC",
         icon: sortMode === 5 ? "iconSelect" : undefined,
         label: window.siyuan.languages.fileNameNatDESC,
         click: () => {
             clickEvent(5);
         }
-    }, {type: "separator"}, {
+    }, {id: "separator_1", type: "separator"}, {
+        id: "createdASC",
         icon: sortMode === 9 ? "iconSelect" : undefined,
         label: window.siyuan.languages.createdASC,
         click: () => {
             clickEvent(9);
         }
     }, {
+        id: "createdDESC",
         icon: sortMode === 10 ? "iconSelect" : undefined,
         label: window.siyuan.languages.createdDESC,
         click: () => {
             clickEvent(10);
         }
     }, {
+        id: "modifiedASC",
         icon: sortMode === 2 ? "iconSelect" : undefined,
         label: window.siyuan.languages.modifiedASC,
         click: () => {
             clickEvent(2);
         }
     }, {
+        id: "modifiedDESC",
         icon: sortMode === 3 ? "iconSelect" : undefined,
         label: window.siyuan.languages.modifiedDESC,
         click: () => {
             clickEvent(3);
         }
-    }, {type: "separator"}, {
+    }, {id: "separator_2", type: "separator"}, {
+        id: "refCountASC",
         icon: sortMode === 7 ? "iconSelect" : undefined,
         label: window.siyuan.languages.refCountASC,
         click: () => {
             clickEvent(7);
         }
     }, {
+        id: "refCountDESC",
         icon: sortMode === 8 ? "iconSelect" : undefined,
         label: window.siyuan.languages.refCountDESC,
         click: () => {
             clickEvent(8);
         }
-    }, {type: "separator"}, {
+    }, {id: "separator_3", type: "separator"}, {
+        id: "docSizeASC",
         icon: sortMode === 11 ? "iconSelect" : undefined,
         label: window.siyuan.languages.docSizeASC,
         click: () => {
             clickEvent(11);
         }
     }, {
+        id: "docSizeDESC",
         icon: sortMode === 12 ? "iconSelect" : undefined,
         label: window.siyuan.languages.docSizeDESC,
         click: () => {
             clickEvent(12);
         }
-    }, {type: "separator"}, {
+    }, {id: "separator_4", type: "separator"}, {
+        id: "subDocCountASC",
         icon: sortMode === 13 ? "iconSelect" : undefined,
         label: window.siyuan.languages.subDocCountASC,
         click: () => {
             clickEvent(13);
         }
     }, {
+        id: "subDocCountDESC",
         icon: sortMode === 14 ? "iconSelect" : undefined,
         label: window.siyuan.languages.subDocCountDESC,
         click: () => {
             clickEvent(14);
         }
-    }, {type: "separator"}, {
+    }, {id: "separator_5", type: "separator"}, {
+        id: "customSort",
         icon: sortMode === 6 ? "iconSelect" : undefined,
         label: window.siyuan.languages.customSort,
         click: () => {
@@ -834,6 +849,7 @@ export const sortMenu = (type: "notebooks" | "notebook", sortMode: number, click
     }];
     if (type === "notebook") {
         sortMenu.push({
+            id: "sortByFiletree",
             icon: sortMode === 15 ? "iconSelect" : undefined,
             label: window.siyuan.languages.sortByFiletree,
             click: () => {

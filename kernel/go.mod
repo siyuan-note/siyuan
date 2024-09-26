@@ -54,11 +54,11 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20240922023411-ba02dd7afac9
+	github.com/siyuan-note/dejavu v0.0.0-20240926141351-5fa8ee59bacc
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20240724034355-d1ed7bf21d04
-	github.com/siyuan-note/httpclient v0.0.0-20240921165925-d7d8fb56fa4e
+	github.com/siyuan-note/httpclient v0.0.0-20240926140630-aa8e1b4df549
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240912073907-1e89a5f8e7dc
 	github.com/spf13/cast v1.7.0
@@ -80,11 +80,13 @@ require (
 require (
 	dario.cat/mergo v1.0.1 // indirect
 	dmitri.shuralyov.com/font/woff2 v0.0.0-20180220214647-957792cbbdab // indirect
+	github.com/BurntSushi/toml v1.4.0 // indirect
 	github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052 // indirect
 	github.com/Masterminds/goutils v1.1.1 // indirect
 	github.com/Masterminds/semver/v3 v3.3.0 // indirect
 	github.com/advancedlogic/GoOse v0.0.0-20231203033844-ae6b36caf275 // indirect
 	github.com/alecthomas/chroma v0.10.0 // indirect
+	github.com/alex-ant/gomath v0.0.0-20160516115720-89013a210a82 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
@@ -98,7 +100,10 @@ require (
 	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
+	github.com/elastic/go-sysinfo v1.14.2 // indirect
+	github.com/elastic/go-windows v1.0.2 // indirect
 	github.com/fatih/set v0.2.1 // indirect
+	github.com/gammazero/toposort v0.1.1 // indirect
 	github.com/gigawattio/window v0.0.0-20180317192513-0f5467e35573 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
@@ -107,7 +112,7 @@ require (
 	github.com/go-resty/resty/v2 v2.14.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/pprof v0.0.0-20240910150728-a0b0bb1d4134 // indirect
+	github.com/google/pprof v0.0.0-20240925223930-fa3061bff0bc // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -122,7 +127,7 @@ require (
 	github.com/jmespath/go-jmespath v0.4.0 // indirect
 	github.com/jolestar/go-commons-pool/v2 v2.1.2 // indirect
 	github.com/juju/errors v1.0.0 // indirect
-	github.com/klauspost/compress v1.17.9 // indirect
+	github.com/klauspost/compress v1.17.10 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.8 // indirect
 	github.com/leodido/go-urn v1.4.0 // indirect
 	github.com/levigross/exp-html v0.0.0-20120902181939-8df60c69a8f5 // indirect
@@ -140,7 +145,8 @@ require (
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
-	github.com/qiniu/go-sdk/v7 v7.20.2 // indirect
+	github.com/prometheus/procfs v0.15.1 // indirect
+	github.com/qiniu/go-sdk/v7 v7.23.0 // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.47.0 // indirect
 	github.com/refraction-networking/utls v1.6.7 // indirect
@@ -170,6 +176,8 @@ require (
 	golang.org/x/tools v0.25.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
+	howett.net/plist v1.0.1 // indirect
+	modernc.org/fileutil v1.3.0 // indirect
 )
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950

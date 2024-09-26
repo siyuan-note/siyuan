@@ -1,4 +1,8 @@
 {
+  "exportConf": "Export settings",
+  "exportConfTip": "Account, access authorization code, synchronization, API token and data repo key will not be exported",
+  "importConf": "Import settings",
+  "importConfTip": "After importing, the current settings will be overwritten and the application will be automatically closed, please restart manually",
   "jumpToPage": "Jump to the specified page: 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total ${x} pages, ${y} snapshots",
   "pageCountAndHistoryCount": "Total ${x} pages, ${y} histories",

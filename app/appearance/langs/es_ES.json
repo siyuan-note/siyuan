@@ -1,4 +1,8 @@
 {
+  "exportConf": "Configuración de exportación",
+  "exportConfTip": "Las cuentas, los códigos de acceso, la sincronización, los tokens API y las claves del almacén de datos no se exportarán",
+  "importConf": "Importar configuración",
+  "importConfTip": "Después de importar, la configuración actual se sobrescribirá y la aplicación se cerrará automáticamente. Reiníciela manualmente",
   "jumpToPage": "Saltar a la página especificada: 1 ~ ${x}",
   "pageCountAndSnapshotCount": "Total ${x} páginas, ${y} instantáneas",
   "pageCountAndHistoryCount": "Total ${x} páginas, ${y} historias",

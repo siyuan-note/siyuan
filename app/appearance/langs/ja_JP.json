@@ -1,4 +1,8 @@
 {
+  "exportConf": "設定のエクスポート",
+  "exportConfTip": "アカウント、アクセス コード、同期、API トークン、データ ウェアハウス キーはエクスポートされません",
+  "importConf": "設定のインポート",
+  "importConfTip": "インポート後、現在の設定は上書きされ、アプリケーションは自動的に終了します。手動で再起動してください。",
   "jumpToPage": "指定されたページにジャンプ：1 ~ ${x}",
   "pageCountAndSnapshotCount": "合計 ${x} ページ、${y} スナップショット",
   "pageCountAndHistoryCount": "合計 ${x} ページ、${y} 履歴",

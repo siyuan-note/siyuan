@@ -9,6 +9,8 @@ import {showMessage} from "../dialog/message";
 import {showFileInFolder} from "../util/pathName";
 import {Constants} from "../constants";
 import {openByMobile} from "../protyle/util/compatibility";
+import {exportLayout} from "../layout/util";
+import {exitSiYuan} from "../dialog/processSystem";
 
 export const exportConfig = {
     element: undefined as Element,
@@ -234,7 +236,18 @@ export const exportConfig = {
                 item.addEventListener("change", (event: InputEvent & { target: HTMLInputElement }) => {
                     const formData = new FormData();
                     formData.append("file", event.target.files[0]);
-                    fetchPost("/api/system/importConf", formData);
+                    fetchPost("/api/system/importConf", formData, response => {
+                        if (response.code !== 0) {
+                            showMessage(response.msg);
+                            return
+                        }
+
+                        showMessage(window.siyuan.languages.imported);
+                        exportLayout({
+                            errorExit: true,
+                            cb: exitSiYuan
+                        });
+                    });
                 });
             } else {
                 item.addEventListener("change", () => {

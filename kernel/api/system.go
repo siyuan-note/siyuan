@@ -410,7 +410,6 @@ func importConf(c *gin.Context) {
 	}
 
 	logging.LogInfof("imported conf")
-	model.Close(false, true, 1)
 }
 
 func getConf(c *gin.Context) {

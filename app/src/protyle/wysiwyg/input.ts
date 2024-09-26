@@ -54,13 +54,20 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     const wbrElement: HTMLElement = document.createElement("wbr");
     range.insertNode(wbrElement);
-    if (event && event.inputType === "deleteContentForward") {
+    if (event) {
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
-        if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
-            const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
-            if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
-                wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
+        if (event.inputType === "deleteContentForward") {
+            if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+                const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
+                if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
+                    wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
+                }
             }
+        }
+        // https://github.com/siyuan-note/siyuan/issues/12468
+        if ((event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") &&
+            wbrNextElement && wbrNextElement.nodeType === 1 && wbrNextElement.tagName === "BR") {
+            wbrNextElement.remove();
         }
     }
     const id = blockElement.getAttribute("data-node-id");

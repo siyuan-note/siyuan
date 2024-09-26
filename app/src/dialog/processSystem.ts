@@ -174,7 +174,7 @@ export const setDefRefCount = (data: {
     getAllEditor().forEach(item => {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
             const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
-            const countElement = attrElement.querySelector(".popover__block");
+            const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove();

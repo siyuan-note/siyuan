@@ -280,11 +280,11 @@ export const kernelError = () => {
     }
 };
 
-export const exitSiYuan = () => {
+export const exitSiYuan = async () => {
     hideAllElements(["util"]);
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
-        saveScroll(window.siyuan.mobile.editor.protyle);
+        await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {

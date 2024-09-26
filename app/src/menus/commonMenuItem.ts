@@ -833,6 +833,7 @@ export const renameMenu = (options: {
     type: "notebook" | "file"
 }) => {
     return new MenuItem({
+        id: "rename",
         accelerator: window.siyuan.config.keymap.editor.general.rename.custom,
         icon: "iconEdit",
         label: window.siyuan.languages.rename,

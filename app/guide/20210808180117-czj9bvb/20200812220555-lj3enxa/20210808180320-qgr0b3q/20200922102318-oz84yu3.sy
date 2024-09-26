@@ -332,6 +332,34 @@
 							]
 						}
 					]
+				},
+				{
+					"ID":"20240926083126-pug1y9l",
+					"Type":"NodeParagraph",
+					"Properties":{
+						"id":"20240926083126-pug1y9l",
+						"updated":"20240926083250"
+					},
+					"Children":[
+						{
+							"Type":"NodeTextMark",
+							"TextMarkType":"strong",
+							"TextMarkTextContent":"注："
+						},
+						{
+							"Type":"NodeText",
+							"Data":"现在访问"
+						},
+						{
+							"Type":"NodeTextMark",
+							"TextMarkType":"a",
+							"TextMarkAHref":"https://ld246.com/tag/code-snippet","TextMarkTextContent":"代码片段 - 链滴社区"
+						},
+						{
+							"Type":"NodeText",
+							"Data":"，浏览获取所需代码片段。"
+						}
+					]
 				}
 			]
 		},

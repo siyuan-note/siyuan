@@ -652,6 +652,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     /// #if !BROWSER
     const importstdmd = (label: string, isDoc?: boolean) => {
         return {
+            id: isDoc ? "importMarkdownDoc" : "importMarkdownFolder",
             icon: isDoc ? "iconMarkdown" : "iconFolder",
             label,
             click: async () => {
@@ -680,9 +681,11 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     };
     /// #endif
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "import",
         icon: "iconDownload",
         label: window.siyuan.languages.import,
         submenu: [{
+            id: "importSiYuanZip",
             icon: "iconSiYuan",
             label: 'SiYuan .sy.zip<input class="b3-form__upload" type="file" accept="application/zip">',
             bind: (element) => {

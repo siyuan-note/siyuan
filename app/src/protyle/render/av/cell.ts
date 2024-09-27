@@ -498,8 +498,11 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     avMaskElement.addEventListener("contextmenu", (event) => {
         removeAvMask(event);
     });
-    avMaskElement.addEventListener("mousedown", (event:MouseEvent) => {
+    avMaskElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
         if (event.button === 1) {
+            if (event.target.classList.contains("av__mask") && document.activeElement && document.activeElement.nodeType === 1) {
+                (document.activeElement as HTMLElement).blur();
+            }
             removeAvMask(event);
         }
     });

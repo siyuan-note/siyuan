@@ -1426,7 +1426,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 id,
                                 type: isMatchList ? "TL2UL" : "TL2OL",
                             });
-                        } else if (isMatchCheck || isMatchOList) {
+                        } else if (subType === "u" && (isMatchCheck || isMatchOList)) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],

@@ -814,7 +814,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (type === "jumpRepoPage") {
-                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                // const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                let currentPage = parseInt(target.innerText);
+                currentPage = isNaN(currentPage) ? 1 : currentPage;
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {
@@ -833,7 +835,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     );
                 }
             } else if (type === "jumpHistoryPage") {
-                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                // const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                let currentPage = parseInt(target.innerText);
+                currentPage = isNaN(currentPage) ? 1 : currentPage;
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {

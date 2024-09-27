@@ -31,38 +31,22 @@ RUN apk add --no-cache gcc musl-dev && \
     mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/app/changelogs/ /opt/siyuan/ && \
     mv /go/src/github.com/siyuan-note/siyuan/kernel/kernel /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/kernel/entrypoint.sh /opt/siyuan/entrypoint.sh && \
     find /opt/siyuan/ -name .git | xargs rm -rf
 
 FROM alpine:latest
 LABEL maintainer="Liang Ding<845765@qq.com>"
 
-# Set default values in case PUID/PGID are not provided
-ARG USER_ID=1000
-ARG GROUP_ID=1000
-
-ENV PUID $USER_ID
-ENV PGID $GROUP_ID
-
 WORKDIR /opt/siyuan/
 COPY --from=GO_BUILD /opt/siyuan/ /opt/siyuan/
 
-# Create User and Group
-RUN if ! getent group ${PGID}; then \
-      addgroup --gid ${PGID} siyuan; \
-    else \
-      groupname=$(getent group ${PGID} | cut -d: -f1); \
-      echo "Group with GID ${PGID} already exists, using group: $groupname"; \
-    fi && \
-    adduser --uid ${PUID} --ingroup ${groupname:-siyuan} --disabled-password siyuan && \
-    chown -R siyuan:${groupname:-siyuan} /opt/siyuan/
-
-RUN apk add --no-cache ca-certificates tzdata
+RUN apk add --no-cache ca-certificates tzdata su-exec && \
+    chmod +x /opt/siyuan/entrypoint.sh
 
 ENV TZ=Asia/Shanghai
 ENV HOME=/home/siyuan
 ENV RUN_IN_CONTAINER=true
 EXPOSE 6806
 
-USER siyuan
-
-ENTRYPOINT ["/opt/siyuan/kernel"]
+ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
+CMD ["/opt/siyuan/kernel"]

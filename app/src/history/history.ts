@@ -495,6 +495,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     });
     disabledProtyle(historyEditor.protyle);
     const repoElement = element.querySelector('#historyContainer [data-type="repo"]');
+    const historyElement = element.querySelector('#historyContainer [data-type="doc"]');
     const repoSelectElement = repoElement.querySelector(".b3-select") as HTMLSelectElement;
     repoSelectElement.addEventListener("change", () => {
         renderRepo(repoElement, 1);
@@ -833,7 +834,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     );
                 }
             } else if (type === "jumpHistoryPage") {
-                const currentPage = parseInt(repoElement.getAttribute("data-page"));
+                const currentPage = parseInt(historyElement.getAttribute("data-page"));
                 const totalPage = parseInt(target.getAttribute("data-totalpage") || "1");
 
                 if (totalPage > 1) {

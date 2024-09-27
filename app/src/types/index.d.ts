@@ -668,6 +668,7 @@ interface IBlock {
     name?: string;
     memo?: string;
     alias?: string;
+    tag?: string;
     refs?: IBlock[];
     children?: IBlock[]
     length?: number

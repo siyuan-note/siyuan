@@ -179,7 +179,7 @@ func index(boxID string) {
 			updated := util.TimeFromID(tree.Root.ID)
 			tree.Root.SetIALAttr("updated", updated)
 			docIAL["updated"] = updated
-			if writeErr := filesys.WriteTree(tree); nil != writeErr {
+			if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
 				logging.LogErrorf("write tree [%s] failed: %s", tree.Path, writeErr)
 			}
 		}

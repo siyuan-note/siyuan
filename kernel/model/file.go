@@ -1075,18 +1075,22 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
 func writeTreeIndexQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
@@ -1101,11 +1105,13 @@ func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.RenameTreeQueue(tree)
 	treenode.UpsertBlockTree(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 

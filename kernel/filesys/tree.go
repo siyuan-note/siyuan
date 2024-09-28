@@ -103,7 +103,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 			if os.IsNotExist(readErr) {
 				// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
 				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
-				if writeErr := WriteTree(parentTree); nil != writeErr {
+				if _, writeErr := WriteTree(parentTree); nil != writeErr {
 					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
 				} else {
 					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
@@ -133,16 +133,18 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 	return
 }
 
-func WriteTree(tree *parse.Tree) (err error) {
+func WriteTree(tree *parse.Tree) (size uint64, err error) {
 	data, filePath, err := prepareWriteTree(tree)
 	if err != nil {
 		return
 	}
 
+	size = uint64(len(data))
 	if err = filelock.WriteFile(filePath, data); err != nil {
 		msg := fmt.Sprintf("write data [%s] failed: %s", filePath, err)
 		logging.LogErrorf(msg)
-		return errors.New(msg)
+		err = errors.New(msg)
+		return
 	}
 
 	afterWriteTree(tree)

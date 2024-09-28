@@ -17,6 +17,9 @@
 package model
 
 import (
+	"github.com/88250/go-humanize"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -30,6 +33,45 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func refreshDocInfo(tree *parse.Tree, size uint64) {
+	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
+	mTime := cTime
+	if updated := tree.Root.IALAttr("updated"); "" != updated {
+		if updatedTime, err := time.ParseInLocation("20060102150405", updated, time.Local); err == nil {
+			mTime = updatedTime
+		}
+	}
+
+	subFileCount := 0
+	subFiles, err := os.ReadDir(filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy")))
+	if err == nil {
+		for _, subFile := range subFiles {
+			if "true" == tree.Root.IALAttr("custom-hidden") {
+				continue
+			}
+
+			if strings.HasSuffix(subFile.Name(), ".sy") {
+				subFileCount++
+			}
+		}
+	}
+
+	docInfo := map[string]interface{}{
+		"rootID":       tree.ID,
+		"size":         size,
+		"hSize":        humanize.BytesCustomCeil(size, 2),
+		"mtime":        mTime.Unix(),
+		"ctime":        cTime.Unix(),
+		"hmtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hctime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+		"subFileCount": subFileCount,
+	}
+
+	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, util.PushReloadDocInfo, docInfo)
+
+	// TODO 子文档修改后也需要递归刷新父文档
+}
 
 func refreshProtyle(rootID string) {
 	// 刷新关联的引用

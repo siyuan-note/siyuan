@@ -255,7 +255,7 @@ func PushSaveDoc(rootID, typ string, sources interface{}) {
 }
 
 func PushReloadDocInfo(docInfo map[string]any) {
-	BroadcastByType("main", "reloadDocInfo", 0, "", docInfo)
+	BroadcastByType("filetree", "reloadDocInfo", 0, "", docInfo)
 }
 
 func PushReloadProtyle(rootID string) {

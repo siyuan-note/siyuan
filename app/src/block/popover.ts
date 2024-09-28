@@ -87,11 +87,19 @@ export const initBlockPopover = (app: App) => {
                 hideTooltip();
             }
         } else if (!aElement) {
-            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
-            if (!tipElement || (
-                tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
-            )) {
-                hideTooltip();
+            const notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
+                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
+                    const boxData = response.data.boxInfo;
+                    showTooltip(`${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`,notebookItemElement)
+                })
+            } else {
+                const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
+                if (!tipElement || (
+                    tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
+                )) {
+                    hideTooltip();
+                }
             }
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {

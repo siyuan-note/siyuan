@@ -516,6 +516,12 @@
     [data-node-id][style*="background-color: var(--b3-font-background13)"] {
       background-color: var(--b3-font-background13-rgba) !important;
     }
+
+    &[data-node-id]{
+      [style*="background-color: var(--b3-font-background1)"] {
+        background-color: var(--b3-font-background1-rgba) !important;
+      }
+    }
   }
 
   // https://github.com/siyuan-note/siyuan/issues/11589

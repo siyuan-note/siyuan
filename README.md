@@ -179,8 +179,8 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
-- `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
-- `--accessAuthCode`: Specifies the access authorization code
+* `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
+* `--accessAuthCode`: Specifies the access authorization code
 
 More parameters can be found using `--help`. Here’s an example of a startup command with the new environment variables:
 
@@ -194,11 +194,11 @@ docker run -d \
   --accessAuthCode=xxx
 ```
 
-- `PUID`: Custom user ID (optional, defaults to `1000` if not provided)
-- `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
-- `workspace_dir_host`: The workspace folder path on the host
-- `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
-- `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
+* `PUID`: Custom user ID (optional, defaults to `1000` if not provided)
+* `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
+* `workspace_dir_host`: The workspace folder path on the host
+* `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
+* `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
 
@@ -235,8 +235,9 @@ services:
 ```
 
 In this setup:
-- `PUID` and `PGID` are set dynamically and passed to the container.
-- If these variables are not provided, the default `1000` will be used.
+
+* `PUID` and `PGID` are set dynamically and passed to the container
+* If these variables are not provided, the default `1000` will be used
 
 By specifying `PUID` and `PGID` in the environment, you avoid the need to explicitly set the `user` directive (`user: '1000:1000'`) in the compose file. The container will dynamically adjust the user and group based on these environment variables at startup.
 

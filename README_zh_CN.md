@@ -178,9 +178,9 @@
 
 #### 启动入口
 
-入口点在构建 Docker 镜像时设置： `ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]`。该脚本允许更改将在容器内运行的用户的 `PUID` 和 `PGID`。这对于解决从主机挂载目录时的权限问题尤为重要。`PUID` 和 `PGID` 可以作为环境变量传递，这样在访问主机挂载的目录时就能更容易地确保正确的权限。
+入口点在构建 Docker 镜像时设置：`ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]`。该脚本允许更改将在容器内运行的用户的 `PUID` 和 `PGID`。这对于解决从主机挂载目录时的权限问题尤为重要。`PUID` 和 `PGID` 可以作为环境变量传递，这样在访问主机挂载的目录时就能更容易地确保正确的权限。
 
-使用 `docker run b3log/siyuan` 运行容器时，请使用以下参数：
+使用 `docker run b3log/siyuan` 运行容器时，请带入以下参数：
 
 * `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
 * `--accessAuthCode`：指定访问授权码
@@ -197,8 +197,8 @@ docker run -d \
   --accessAuthCode=xxx
 ```
 
-* `PUID`: 自定义用户 ID（可选，如果未提供，默认为 `1000）
-* `PGID`: 自定义组 ID（可选，如果未提供，默认为 `1000）
+* `PUID`: 自定义用户 ID（可选，如果未提供，默认为 `1000`）
+* `PGID`: 自定义组 ID（可选，如果未提供，默认为 `1000`）
 * `workspace_dir_host`：宿主机上的工作空间文件夹路径
 * `workspace_dir_container`：容器内工作空间文件夹路径，和后面 `--workspace` 指定成一样的
 * `accessAuthCode`：访问授权码，请**务必修改**，否则任何人都可以读写你的数据
@@ -215,7 +215,7 @@ docker run -d \
   --accessAuthCode=xxx
 ```
 
-使用 Docker Compose 部署请参考下面的示例：
+#### Docker Compose
 
 对于使用 Docker Compose 运行思源的用户，可以通过环境变量 `PUID` 和 `PGID` 来自定义用户和组的 ID。下面是一个 Docker Compose 配置示例：
 
@@ -238,8 +238,9 @@ services:
 ```
 
 在此设置中：
-- PUID “和 ”PGID "是动态设置并传递给容器的。
-- 如果没有提供这些变量，将使用默认的 `1000`。
+
+* PUID “和 ”PGID "是动态设置并传递给容器的
+* 如果没有提供这些变量，将使用默认的 `1000`
 
 在环境中指定 `PUID` 和 `PGID` 后，就无需在组成文件中明确设置 `user` 指令（`user: '1000:1000'`）。容器将在启动时根据这些环境变量动态调整用户和组。
 

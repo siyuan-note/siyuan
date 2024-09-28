@@ -47,12 +47,11 @@ func refreshParentDocInfo(tree *parse.Tree) {
 	luteEngine := lute.New()
 	boxDir := filepath.Join(util.DataDir, tree.Box)
 	parentDir := path.Dir(tree.Path)
-	parentPath := parentDir + ".sy"
-
 	if parentDir == boxDir || parentDir == "/" {
 		return
 	}
 
+	parentPath := parentDir + ".sy"
 	parentTree, err := filesys.LoadTree(tree.Box, parentPath, luteEngine)
 	if err != nil {
 		return

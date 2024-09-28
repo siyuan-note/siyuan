@@ -1741,6 +1741,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	}
 	util.PushEvent(evt)
 
+	refreshParentDocInfo(tree)
 	task.AppendTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
 }
 

@@ -17,7 +17,11 @@
 package model
 
 import (
+	"github.com/88250/lute"
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"os"
+	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -35,6 +39,31 @@ import (
 )
 
 func refreshDocInfo(tree *parse.Tree, size uint64) {
+	refreshDocInfo0(tree, size)
+	refreshParentDocInfo(tree)
+}
+
+func refreshParentDocInfo(tree *parse.Tree) {
+	luteEngine := lute.New()
+	boxDir := filepath.Join(util.DataDir, tree.Box)
+	parentDir := path.Dir(tree.Path)
+	parentPath := parentDir + ".sy"
+
+	if parentDir == boxDir || parentDir == "/" {
+		return
+	}
+
+	parentTree, err := filesys.LoadTree(tree.Box, parentPath, luteEngine)
+	if err != nil {
+		return
+	}
+
+	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions)
+	data := renderer.Render()
+	refreshDocInfo0(parentTree, uint64(len(data)))
+}
+
+func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
 	mTime := cTime
 	if updated := tree.Root.IALAttr("updated"); "" != updated {
@@ -59,18 +88,17 @@ func refreshDocInfo(tree *parse.Tree, size uint64) {
 
 	docInfo := map[string]interface{}{
 		"rootID":       tree.ID,
+		"name":         tree.Root.IALAttr("title"),
 		"size":         size,
 		"hSize":        humanize.BytesCustomCeil(size, 2),
 		"mtime":        mTime.Unix(),
 		"ctime":        cTime.Unix(),
-		"hmtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
-		"hctime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+		"hMtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hCtime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
 		"subFileCount": subFileCount,
 	}
 
 	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, util.PushReloadDocInfo, docInfo)
-
-	// TODO 子文档修改后也需要递归刷新父文档
 }
 
 func refreshProtyle(rootID string) {

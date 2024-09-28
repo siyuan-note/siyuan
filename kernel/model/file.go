@@ -1770,7 +1770,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 	if "" == title {
-		title = Conf.language(105)
+		title = Conf.language(16)
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
@@ -1808,7 +1808,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = strings.ReplaceAll(title, "/", "")
 	title = strings.TrimSpace(title)
 	if "" == title {
-		title = Conf.Language(105)
+		title = Conf.Language(16)
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))

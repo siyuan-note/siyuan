@@ -1437,6 +1437,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
+			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
+				if pluginName := parts[3]; "petals.json" != pluginName {
+					upsertPluginSet.Add(pluginName)
+				}
+			}
 		}
 
 		if strings.HasPrefix(file.Path, "/plugins/") {
@@ -1470,6 +1475,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
+			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
+				if pluginName := parts[3]; "petals.json" != pluginName {
+					removePluginSet.Add(pluginName)
+				}
+			}
 		}
 
 		if strings.HasPrefix(file.Path, "/plugins/") {

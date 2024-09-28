@@ -37,7 +37,7 @@ export class Files extends Model {
                 if (data) {
                     switch (data.cmd) {
                         case "reloadDocInfo":
-                            this.element.querySelector(`li[data-node-id="${data.data.id}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data));
+                            this.element.querySelector(`li[data-node-id="${data.data.rootID}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data));
                             break;
                         case "moveDoc":
                             this.onMove(data);

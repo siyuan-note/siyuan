@@ -217,11 +217,11 @@ export class Background {
                     const imgSrc = target.getAttribute("src");
                     if (event.detail > 1 && !imgSrc.startsWith("data:image/png;base64")) {
                         previewImage(imgSrc);
+                        event.preventDefault();
+                        event.stopPropagation();
                     }
                     // 点击题头图菜单无法消失
                     window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
                     break;
                 } else if (type === "position") {
                     const iconElements = this.element.firstElementChild.querySelectorAll(".protyle-icons");
@@ -416,6 +416,12 @@ export class Background {
                 target = target.parentElement;
             }
         });
+
+        /// #if MOBILE
+        if (!protyle.disabled) {
+          this.element.classList.add("protyle-background--mobileshow");
+        }
+        /// #endif
     }
 
     private removeTag(protyle: IProtyle) {

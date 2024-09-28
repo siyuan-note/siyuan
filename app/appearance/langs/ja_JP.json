@@ -362,7 +362,7 @@
   "apiTimeout": "タイムアウト",
   "apiTimeoutTip": "リクエストのタイムアウト時間 (単位: 秒)",
   "apiProxy": "ネットワークプロキシ",
-  "apiProxyTip": "リクエストを開始するネットワークプロキシ (例: <code class='fn__code'>socks://127.0.0.1:1080</code>)",
+  "apiProxyTip": "リクエストを開始するネットワークプロキシ (例: <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>)",
   "apiModel": "モデル",
   "apiModelTip": "API をリクエストするときに渡される <code class='fn__code'>model</code> パラメータ。生成されるテキストのスタイルを制御するために使用されます (Azure OpenAI サービスを使用する場合はデプロイメント ID を入力する必要があります)",
   "apiMaxTokens": "トークンの最大数",

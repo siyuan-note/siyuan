@@ -466,60 +466,108 @@
     background-color: var(--b3-theme-primary-lightest) !important;
 
     [data-node-id][style*="background-color: var(--b3-font-background1)"] {
-      background-color: var(--b3-font-background1-rgba) !important;
+      background-color: var(--b3-font-background1-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background2)"] {
-      background-color: var(--b3-font-background2-rgba) !important;
+      background-color: var(--b3-font-background2-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background3)"] {
-      background-color: var(--b3-font-background3-rgba) !important;
+      background-color: var(--b3-font-background3-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background4)"] {
-      background-color: var(--b3-font-background4-rgba) !important;
+      background-color: var(--b3-font-background4-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background5)"] {
-      background-color: var(--b3-font-background5-rgba) !important;
+      background-color: var(--b3-font-background5-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background6)"] {
-      background-color: var(--b3-font-background6-rgba) !important;
+      background-color: var(--b3-font-background6-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background7)"] {
-      background-color: var(--b3-font-background7-rgba) !important;
+      background-color: var(--b3-font-background7-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background8)"] {
-      background-color: var(--b3-font-background8-rgba) !important;
+      background-color: var(--b3-font-background8-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background9)"] {
-      background-color: var(--b3-font-background9-rgba) !important;
+      background-color: var(--b3-font-background9-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background10)"] {
-      background-color: var(--b3-font-background10-rgba) !important;
+      background-color: var(--b3-font-background10-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background11)"] {
-      background-color: var(--b3-font-background11-rgba) !important;
+      background-color: var(--b3-font-background11-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background12)"] {
-      background-color: var(--b3-font-background12-rgba) !important;
+      background-color: var(--b3-font-background12-select) !important;
     }
 
     [data-node-id][style*="background-color: var(--b3-font-background13)"] {
-      background-color: var(--b3-font-background13-rgba) !important;
+      background-color: var(--b3-font-background13-select) !important;
     }
 
-    &[data-node-id]{
+    &[data-node-id] {
       [style*="background-color: var(--b3-font-background1)"] {
-        background-color: var(--b3-font-background1-rgba) !important;
+        background-color: var(--b3-font-background1-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background2)"] {
+        background-color: var(--b3-font-background2-select) !important;
+      }
+      
+      [style*="background-color: var(--b3-font-background3)"] {
+        background-color: var(--b3-font-background3-select) !important;
+      }
+      
+      [style*="background-color: var(--b3-font-background4)"] {
+        background-color: var(--b3-font-background4-select) !important;
+      }
+      
+      [style*="background-color: var(--b3-font-background5)"] {
+        background-color: var(--b3-font-background5-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background6)"] {
+        background-color: var(--b3-font-background6-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background7)"] {
+        background-color: var(--b3-font-background7-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background8)"] {
+        background-color: var(--b3-font-background8-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background9)"] {
+        background-color: var(--b3-font-background9-select) !important;
+      }
+      
+      [style*="background-color: var(--b3-font-background10)"] {
+        background-color: var(--b3-font-background10-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background11)"] {
+        background-color: var(--b3-font-background11-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background12)"] {
+        background-color: var(--b3-font-background12-select) !important;
+      }
+
+      [style*="background-color: var(--b3-font-background13)"] {
+        background-color: var(--b3-font-background13-select) !important;
       }
     }
   }

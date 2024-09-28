@@ -28,6 +28,33 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getNotebookInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	boxID := arg["notebook"].(string)
+	if util.InvalidIDPattern(boxID, ret) {
+		return
+	}
+
+	box := model.Conf.Box(boxID)
+	if nil == box {
+		ret.Code = -1
+		ret.Msg = "notebook [" + boxID + "] not found"
+		return
+	}
+
+	boxInfo := box.GetInfo()
+	ret.Data = map[string]interface{}{
+		"boxInfo": boxInfo,
+	}
+}
+
 func setNotebookIcon(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

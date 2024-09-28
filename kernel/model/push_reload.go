@@ -17,12 +17,12 @@
 package model
 
 import (
-	"github.com/88250/go-humanize"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"

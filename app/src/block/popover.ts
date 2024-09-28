@@ -95,14 +95,14 @@ export const initBlockPopover = (app: App) => {
                     const boxData = response.data.boxInfo;
                     const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`
 
-                    const newNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-                    if (notebookItemElement && newNotebookItemElement && notebookItemElement.isSameNode(newNotebookItemElement)) {
+                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+                    if (notebookItemElement && scopeNotebookItemElement && notebookItemElement.isSameNode(scopeNotebookItemElement)) {
                         showTooltip(tip, notebookItemElement);
                     }
-                    if (newNotebookItemElement &&
-                        newNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
-                        newNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
-                        newNotebookItemElement.setAttribute("aria-label", tip);
+                    if (scopeNotebookItemElement &&
+                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
+                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
+                        scopeNotebookItemElement.setAttribute("aria-label", tip);
                     }
                 })
             } else {

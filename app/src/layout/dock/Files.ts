@@ -36,6 +36,9 @@ export class Files extends Model {
             msgCallback(data) {
                 if (data) {
                     switch (data.cmd) {
+                        case "reloadDocInfo":
+                            this.element.querySelector(`li[data-node-id="${data.data.id}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data));
+                            break;
                         case "moveDoc":
                             this.onMove(data);
                             break;
@@ -1117,12 +1120,16 @@ export class Files extends Model {
         setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
     }
 
-    private genFileHTML = (item: IFile) => {
+    private genDocAriaLabel(item: IFile) {
+        return `${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
+    }
+
+    private genFileHTML(item: IFile) {
         let countHTML = "";
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = `${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
+        const ariaLabel = this.genDocAriaLabel(item)
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${(item.path.split("/").length - 2) * 18 + 40}px" 

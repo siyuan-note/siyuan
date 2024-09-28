@@ -9,6 +9,7 @@ import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
 
 let popoverTargetElement: HTMLElement;
+let notebookItemElement: HTMLElement | false;
 export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
@@ -87,11 +88,22 @@ export const initBlockPopover = (app: App) => {
                 hideTooltip();
             }
         } else if (!aElement) {
-            const notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
             if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
+                showTooltip(notebookItemElement.getAttribute("aria-label") || "", notebookItemElement);
                 fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
                     const boxData = response.data.boxInfo;
-                    showTooltip(`${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`,notebookItemElement)
+                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`
+
+                    const newNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+                    if (notebookItemElement && newNotebookItemElement && notebookItemElement.isSameNode(newNotebookItemElement)) {
+                        showTooltip(tip, notebookItemElement);
+                    }
+                    if (newNotebookItemElement &&
+                        newNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
+                        newNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
+                        newNotebookItemElement.setAttribute("aria-label", tip);
+                    }
                 })
             } else {
                 const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);

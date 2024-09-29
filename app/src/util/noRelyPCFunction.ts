@@ -2,6 +2,7 @@ import {Dialog} from "../dialog";
 import {fetchPost} from "./fetch";
 import {isMobile} from "./functions";
 import {Constants} from "../constants";
+import {pathPosix} from "./pathName";
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
 export const renameTag = (labelName: string) => {
@@ -31,7 +32,7 @@ export const renameTag = (labelName: string) => {
 };
 
 export const getWorkspaceName = () => {
-    return window.siyuan.config.system.workspaceDir.replace(/^.*[\\\/]/, "");
+    return pathPosix().basename(window.siyuan.config.system.workspaceDir.replace(/\\/g, "/"));
 };
 
 export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[], isRoot: boolean) => void) => {

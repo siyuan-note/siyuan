@@ -17,6 +17,7 @@ import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
 import {lockScreen} from "../dialog/processSystem";
+import {Model} from "../layout/Model";
 
 let openTab;
 let openWindow;
@@ -77,7 +78,7 @@ openTab = (options: {
     position?: "right" | "bottom",
     keepCursor?: boolean // 是否跳转到新 tab 上
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
-    afterOpen?: () => void // 打开后回调
+    afterOpen?: (model?: Model) => void // 打开后回调
 }) => {
     if (options.doc) {
         if (options.doc.zoomIn) {

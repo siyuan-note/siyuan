@@ -117,6 +117,7 @@ export abstract class Constants {
     public static readonly LOCAL_PLUGINTOPUNPIN = "local-plugintopunpin";
     public static readonly LOCAL_FLASHCARD = "local-flashcard";
     public static readonly LOCAL_FILEPOSITION = "local-fileposition";
+    public static readonly LOCAL_FILESPATHS = "local-filespaths";
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
     public static readonly LOCAL_OUTLINE = "local-outline";
@@ -193,6 +194,7 @@ export abstract class Constants {
         fr_FR: "20210808180117-6v0mkxr",
         es_ES: "20210808180117-6v0mkxr",
         ja_JP: "20240530133126-axarxgx",
+        it_IT: "20210808180117-6v0mkxr",
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 

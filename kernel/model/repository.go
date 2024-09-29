@@ -639,6 +639,16 @@ func checkoutRepo(id string) {
 	Conf.Sync.Enabled = false
 	Conf.Save()
 
+	// 回滚快照时默认为当前数据创建一个快照
+	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
+	_, err = repo.Index("Backup before checkout", map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	if err != nil {
+		logging.LogErrorf("index repository failed: %s", err)
+		util.PushClearProgress()
+		util.PushErrMsg(fmt.Sprintf(Conf.Language(140), err), 0)
+		return
+	}
+
 	_, _, err = repo.Checkout(id, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("checkout repository failed: %s", err)
@@ -1427,6 +1437,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
+			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
+				if pluginName := parts[3]; "petals.json" != pluginName {
+					upsertPluginSet.Add(pluginName)
+				}
+			}
 		}
 
 		if strings.HasPrefix(file.Path, "/plugins/") {
@@ -1460,6 +1475,11 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 
 		if strings.HasPrefix(file.Path, "/storage/petal/") {
 			needReloadPlugin = true
+			if parts := strings.Split(file.Path, "/"); 3 < len(parts) {
+				if pluginName := parts[3]; "petals.json" != pluginName {
+					removePluginSet.Add(pluginName)
+				}
+			}
 		}
 
 		if strings.HasPrefix(file.Path, "/plugins/") {

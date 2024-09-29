@@ -37,7 +37,7 @@ export class MobileOutline {
                     document.getElementById(id)?.scrollIntoView();
                 } else {
                     checkFold(id, (zoomIn) => {
-                        openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
+                        openMobileFileById(app, id, zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_SETID, Constants.CB_GET_CONTEXT, Constants.CB_GET_HTML]);
                     });
                 }
             }
@@ -58,19 +58,9 @@ export class MobileOutline {
     }
 
     public update() {
-        if (!window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")) {
-            const blockId = window.siyuan.mobile.editor.protyle.preview.element.querySelector(".selected")?.id;
-            window.siyuan.mobile.editor.protyle.preview.render(window.siyuan.mobile.editor.protyle, (outlineData) => {
-                this.tree.updateData(outlineData);
-                if (blockId) {
-                    this.setCurrentByPreview(this.element.querySelector("#" + blockId));
-                    return;
-                }
-            });
-            return;
-        }
         fetchPost("/api/outline/getDocOutline", {
             id: window.siyuan.mobile.editor.protyle.block.rootID,
+            preview: !window.siyuan.mobile.editor.protyle.preview.element.classList.contains("fn__none")
         }, response => {
             let currentId;
             let currentElement = this.element.querySelector(".b3-list-item--focus");

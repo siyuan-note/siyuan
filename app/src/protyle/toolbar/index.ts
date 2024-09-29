@@ -600,7 +600,7 @@ export class Toolbar {
         for (let i = 0; i < newNodes.length; i++) {
             const currentNewNode = newNodes[i] as HTMLElement;
             const nextNewNode = newNodes[i + 1] as HTMLElement;
-            const currentType = currentNewNode.getAttribute("data-type") || "";
+            const currentType = currentNewNode.nodeType !== 3 ? (currentNewNode.getAttribute("data-type") || "") : "";
             if (currentNewNode.nodeType !== 3 && nextNewNode && nextNewNode.nodeType !== 3 &&
                 nextNewNode.tagName === currentNewNode.tagName &&
                 // 表格内多个换行 https://github.com/siyuan-note/siyuan/issues/12300

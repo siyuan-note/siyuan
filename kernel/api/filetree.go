@@ -673,6 +673,12 @@ func createDocWithMd(c *gin.Context) {
 		return
 	}
 
+	tagsArg := arg["tags"]
+	var tags string
+	if nil != tagsArg {
+		tags = tagsArg.(string)
+	}
+
 	var parentID string
 	parentIDArg := arg["parentID"]
 	if nil != parentIDArg {
@@ -706,7 +712,7 @@ func createDocWithMd(c *gin.Context) {
 		withMath = withMathArg.(bool)
 	}
 
-	id, err := model.CreateWithMarkdown(notebook, hPath, markdown, parentID, id, withMath)
+	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

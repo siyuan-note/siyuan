@@ -63,7 +63,7 @@ class App {
                                 reloadEmoji();
                                 break;
                             case "reloaddoc":
-                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false);
+                                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false, true);
                                 break;
                             case "syncMergeResult":
                                 reloadSync(this, data.data);

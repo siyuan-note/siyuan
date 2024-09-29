@@ -164,7 +164,7 @@ export class Preview {
         this.previewElement = previewElement;
     }
 
-    public render(protyle: IProtyle, cb?: (outlineData: IBlockTree[]) => void) {
+    public render(protyle: IProtyle) {
         if (this.element.style.display === "none") {
             return;
         }
@@ -191,22 +191,6 @@ export class Preview {
                 avRender(protyle.preview.previewElement, protyle);
                 speechRender(protyle.preview.previewElement, protyle.options.lang);
                 protyle.preview.previewElement.scrollTop = oldScrollTop;
-                /// #if MOBILE
-                if (cb) {
-                    cb(response.data.outline);
-                }
-                /// #else
-                response.data = response.data.outline;
-                getAllModels().outline.forEach(item => {
-                    if (item.type === "pin" || (item.type === "local" && item.blockId === protyle.block.rootID)) {
-                        item.isPreview = true;
-                        item.update(response, protyle.block.rootID);
-                        if (item.type === "pin") {
-                            item.updateDocTitle(protyle.background.ial);
-                        }
-                    }
-                });
-                /// #endif
                 loadingElement.remove();
             });
         }, protyle.options.preview.delay);

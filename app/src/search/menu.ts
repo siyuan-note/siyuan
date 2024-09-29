@@ -634,16 +634,11 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
             html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         });
         /// #if MOBILE
-        element.innerHTML = `<div class="b3-chips">
+        element.innerHTML = `<div class="b3-chips${html?"":" fn__none"}">
     ${html}
 </div>`;
-        if (html === "") {
-            element.classList.add("fn__none");
-        } else {
-            element.classList.remove("fn__none");
-        }
         /// #else
-        element.innerHTML = `<div class="b3-chips">
+        element.innerHTML = `<div class="b3-chips${html ? "" : " fn__none"}">
     ${html}
 </div>
 <span class="fn__flex-1"></span>

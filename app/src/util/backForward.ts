@@ -48,7 +48,7 @@ const focusStack = async (app: App, stack: IBackStack) => {
                 title: info.data.rootTitle,
                 docIcon: info.data.rootIcon,
                 callback(tab) {
-                    const scrollAttr = saveScroll(stack.protyle, true);
+                    const scrollAttr = saveScroll(stack.protyle, true) as IScrollAttr;
                     scrollAttr.rootId = stack.protyle.block.rootID;
                     scrollAttr.focusId = stack.id;
                     scrollAttr.focusStart = stack.position.start;

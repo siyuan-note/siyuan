@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
-	"github.com/facette/natsort"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -59,8 +58,6 @@ type Box struct {
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
 	FlashcardCount    int `json:"flashcardCount"`
-
-	historyGenerated int64 // 最近一次历史生成时间
 }
 
 func StatJob() {
@@ -150,30 +147,30 @@ func ListNotebooks() (ret []*Box, err error) {
 	switch Conf.FileTree.Sort {
 	case util.SortModeNameASC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(ret[i].Name), util.RemoveEmojiInvisible(ret[j].Name))
+			return util.PinYinCompare(ret[i].Name, ret[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(ret[j].Name), util.RemoveEmojiInvisible(ret[i].Name))
+			return util.PinYinCompare(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeUpdatedASC:
 	case util.SortModeUpdatedDESC:
 	case util.SortModeAlphanumASC:
 		sort.Slice(ret, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(ret[i].Name), util.RemoveEmojiInvisible(ret[j].Name))
+			return util.NaturalCompare(ret[i].Name, ret[j].Name)
 		})
 	case util.SortModeAlphanumDESC:
 		sort.Slice(ret, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(ret[j].Name), util.RemoveEmojiInvisible(ret[i].Name))
+			return util.NaturalCompare(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeCustom:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].Sort < ret[j].Sort })
 	case util.SortModeRefCountASC:
 	case util.SortModeRefCountDESC:
 	case util.SortModeCreatedASC:
-		sort.Slice(ret, func(i, j int) bool { return natsort.Compare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
 	case util.SortModeCreatedDESC:
-		sort.Slice(ret, func(i, j int) bool { return natsort.Compare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
 	}
 	return
 }
@@ -382,6 +379,70 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 			*ret = append(*ret, file)
 		}
 	}
+	return
+}
+
+type BoxInfo struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	DocCount int    `json:"docCount"`
+	Size     uint64 `json:"size"`
+	HSize    string `json:"hSize"`
+	Mtime    int64  `json:"mtime"`
+	CTime    int64  `json:"ctime"`
+	HMtime   string `json:"hMtime"`
+	HCtime   string `json:"hCtime"`
+}
+
+func (box *Box) GetInfo() (ret *BoxInfo) {
+	ret = &BoxInfo{
+		ID:   box.ID,
+		Name: box.Name,
+	}
+
+	fileInfos := box.ListFiles("/")
+
+	t, _ := time.ParseInLocation("20060102150405", box.ID[:14], time.Local)
+	ret.CTime = t.Unix()
+	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
+
+	docLatestModTime := t
+	for _, fileInfo := range fileInfos {
+		if fileInfo.isdir {
+			continue
+		}
+
+		if strings.HasPrefix(fileInfo.name, ".") {
+			continue
+		}
+
+		if !strings.HasSuffix(fileInfo.path, ".sy") {
+			continue
+		}
+
+		id := strings.TrimSuffix(fileInfo.name, ".sy")
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+
+		absPath := filepath.Join(util.DataDir, box.ID, fileInfo.path)
+		info, err := os.Stat(absPath)
+		if err != nil {
+			logging.LogErrorf("stat [%s] failed: %s", absPath, err)
+			continue
+		}
+
+		ret.DocCount++
+		ret.Size += uint64(info.Size())
+		docModT := info.ModTime()
+		if docModT.After(docLatestModTime) {
+			docLatestModTime = docModT
+		}
+	}
+
+	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
+	ret.Mtime = docLatestModTime.Unix()
+	ret.HMtime = docLatestModTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(docLatestModTime, Conf.Lang)
 	return
 }
 

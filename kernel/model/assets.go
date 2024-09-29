@@ -992,6 +992,21 @@ func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
 func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if n.IsBlock() {
+			// 以 custom-data-assets 开头的块属性值可能是多个资源文件链接，需要计入
+			// Ignore assets associated with the `custom-data-assets` block attribute when cleaning unreferenced assets https://github.com/siyuan-note/siyuan/issues/12574
+			for _, kv := range n.KramdownIAL {
+				k := kv[0]
+				if strings.HasPrefix(k, "custom-data-assets") {
+					dest := kv[1]
+					if "" == dest || !treenode.IsRelativePath([]byte(dest)) {
+						continue
+					}
+					ret = append(ret, dest)
+				}
+			}
+		}
+
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
@@ -1057,10 +1072,19 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 
 func setAssetsLinkDest(node *ast.Node, oldDest, dest string) {
 	if ast.NodeLinkDest == node.Type {
+		if bytes.HasPrefix(node.Tokens, []byte("//")) {
+			node.Tokens = append([]byte("https:"), node.Tokens...)
+		}
 		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
 	} else if node.IsTextMarkType("a") {
+		if strings.HasPrefix(node.TextMarkAHref, "//") {
+			node.TextMarkAHref = "https:" + node.TextMarkAHref
+		}
 		node.TextMarkAHref = strings.ReplaceAll(node.TextMarkAHref, oldDest, dest)
 	} else if ast.NodeAudio == node.Type || ast.NodeVideo == node.Type {
+		if strings.HasPrefix(node.TextMarkAHref, "//") {
+			node.TextMarkAHref = "https:" + node.TextMarkAHref
+		}
 		node.Tokens = bytes.ReplaceAll(node.Tokens, []byte(oldDest), []byte(dest))
 	} else if ast.NodeAttributeView == node.Type {
 		needWrite := false

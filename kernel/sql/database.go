@@ -752,7 +752,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		var src []byte
 		for _, attr := range nodes[0].Attr {
-			if "src" == attr.Key || "data-assets" == attr.Key || "custom-data-assets" == attr.Key {
+			if "src" == attr.Key || strings.HasPrefix(attr.Key, "data-assets") || strings.HasPrefix(attr.Key, "custom-data-assets") {
 				src = gulu.Str.ToBytes(attr.Val)
 				break
 			}
@@ -1251,23 +1251,44 @@ func batchDeleteByPathPrefix(tx *sql.Tx, boxID, pathPrefix string) (err error) {
 	return
 }
 
-func batchUpdateHPath(tx *sql.Tx, rootID, newHPath string, context map[string]interface{}) (err error) {
-	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, rootID); err != nil {
+func batchUpdatePath(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
+	stmt := "UPDATE blocks SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
-	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
-	if err = execStmtTx(tx, stmt, newHPath, rootID); err != nil {
+	stmt = "UPDATE blocks_fts SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 		return
 	}
 	if !caseSensitive {
-		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
-		if err = execStmtTx(tx, stmt, newHPath, rootID); err != nil {
+		stmt = "UPDATE blocks_fts_case_insensitive SET box = ?, path = ?, hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.Box, tree.Path, tree.HPath, tree.ID); err != nil {
 			return
 		}
 	}
 	ClearCache()
-	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(rootID)))[:7]
+	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tree.ID)))[:7]
+	eventbus.Publish(eventbus.EvtSQLUpdateBlocksHPaths, context, 1, evtHash)
+	return
+}
+
+func batchUpdateHPath(tx *sql.Tx, tree *parse.Tree, context map[string]interface{}) (err error) {
+	stmt := "UPDATE blocks SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
+		return
+	}
+	stmt = "UPDATE blocks_fts SET hpath = ? WHERE root_id = ?"
+	if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
+		return
+	}
+	if !caseSensitive {
+		stmt = "UPDATE blocks_fts_case_insensitive SET hpath = ? WHERE root_id = ?"
+		if err = execStmtTx(tx, stmt, tree.HPath, tree.ID); err != nil {
+			return
+		}
+	}
+	ClearCache()
+	evtHash := fmt.Sprintf("%x", sha256.Sum256([]byte(tree.ID)))[:7]
 	eventbus.Publish(eventbus.EvtSQLUpdateBlocksHPaths, context, 1, evtHash)
 	return
 }

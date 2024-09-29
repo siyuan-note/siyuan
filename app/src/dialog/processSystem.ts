@@ -43,7 +43,8 @@ export const reloadSync = (
     hideMsg = true,
     // 同步的时候需要更新只读状态 https://github.com/siyuan-note/siyuan/issues/11517
     // 调整大纲的时候需要使用现有状态 https://github.com/siyuan-note/siyuan/issues/11808
-    updateReadonly = true
+    updateReadonly = true,
+    onlyUpdateDoc = false
 ) => {
     if (hideMsg) {
         hideMessage();
@@ -105,6 +106,7 @@ export const reloadSync = (
         } else if (item.type !== "local" || data.upsertRootIDs.includes(item.blockId)) {
             fetchPost("/api/outline/getDocOutline", {
                 id: item.blockId,
+                preview: item.isPreview
             }, response => {
                 item.update(response);
             });
@@ -123,11 +125,13 @@ export const reloadSync = (
             }
         }
     });
-    allModels.files.forEach(item => {
-        setNoteBook(() => {
-            item.init(false);
+    if (onlyUpdateDoc) {
+        allModels.files.forEach(item => {
+            setNoteBook(() => {
+                item.init(false);
+            });
         });
-    });
+    }
     allModels.bookmark.forEach(item => {
         item.update();
     });
@@ -153,7 +157,7 @@ export const setRefDynamicText = (data: {
     "rootID": string
 }) => {
     getAllEditor().forEach(item => {
-        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        // 不能对比 rootId，否则嵌入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
             item.innerHTML = data.refText;
         });
@@ -170,7 +174,7 @@ export const setDefRefCount = (data: {
     getAllEditor().forEach(item => {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
             const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
-            const countElement = attrElement.querySelector(".popover__block");
+            const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove();
@@ -183,7 +187,7 @@ export const setDefRefCount = (data: {
             }
             return;
         }
-        // 不能对比 rootId，否则潜入块中的锚文本无法更新
+        // 不能对比 rootId，否则嵌入块中的锚文本无法更新
         item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
             const countElement = item.querySelector(".protyle-attr--refcount");
             if (countElement) {
@@ -199,6 +203,11 @@ export const setDefRefCount = (data: {
                 } else {
                     attrElement.innerHTML = `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>${Constants.ZWSP}`;
                 }
+            }
+            if (data.refCount === 0) {
+                item.removeAttribute("refcount");
+            } else {
+                item.setAttribute("refcount", data.refCount.toString());
             }
         });
     });
@@ -271,11 +280,11 @@ export const kernelError = () => {
     }
 };
 
-export const exitSiYuan = () => {
+export const exitSiYuan = async () => {
     hideAllElements(["util"]);
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
-        saveScroll(window.siyuan.mobile.editor.protyle);
+        await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {

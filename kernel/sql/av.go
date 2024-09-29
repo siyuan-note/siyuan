@@ -404,7 +404,7 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := util.BuiltInTemplateFuncs()
+	tplFuncMap := treenode.BuiltInTemplateFuncs()
 	SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Parse(tplContent)

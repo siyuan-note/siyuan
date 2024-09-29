@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20240921123108"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20240530101000"
+				"updated": "20240921123108"
 			},
 			"Children": [
 				{
@@ -225,9 +225,8 @@
 			"Type": "NodeList",
 			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-pbi857j",
 				"id": "20240530101000-by5hqnb",
-				"updated": "20240530101000"
+				"updated": "20240921123108"
 			},
 			"Children": [
 				{
@@ -238,7 +237,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-7szjdq0",
 						"id": "20240530101000-bua0yt4",
 						"updated": "20240530101000"
 					},
@@ -247,7 +245,6 @@
 							"ID": "20240530101000-ktp2f1l",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-n2filyd",
 								"id": "20240530101000-ktp2f1l",
 								"updated": "20240530101000"
 							},
@@ -286,7 +283,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-k9jf36d",
 						"id": "20240530101000-wx2hcib",
 						"updated": "20240530101000"
 					},
@@ -295,7 +291,6 @@
 							"ID": "20240530101000-ilxclyp",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-1otmc3i",
 								"id": "20240530101000-ilxclyp",
 								"updated": "20240530101000"
 							},
@@ -325,7 +320,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-18jxuyf",
 						"id": "20240530101000-k46zytu",
 						"updated": "20240530101000"
 					},
@@ -334,7 +328,6 @@
 							"ID": "20240530101000-v63d69b",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-ayy7vo8",
 								"id": "20240530101000-v63d69b",
 								"updated": "20240530101000"
 							},
@@ -364,7 +357,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-3cpwez9",
 						"id": "20240530101000-2xrfh9j",
 						"updated": "20240530101000"
 					},
@@ -373,7 +365,6 @@
 							"ID": "20240530101000-ag584e3",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-fal2ki7",
 								"id": "20240530101000-ag584e3",
 								"updated": "20240530101000"
 							},
@@ -396,6 +387,43 @@
 					]
 				},
 				{
+					"ID": "20240921122700-o8mea2f",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240921122700-o8mea2f",
+						"updated": "20240921123108"
+					},
+					"Children": [
+						{
+							"ID": "20240921122700-gol6drn",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240921122700-gol6drn",
+								"updated": "20240921123108"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は、ブロック ID に対応するブロックの可読パスを返すために使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
 					"ID": "20240530101000-0y2zlji",
 					"Type": "NodeListItem",
 					"ListData": {
@@ -403,7 +431,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-0u2osa4",
 						"id": "20240530101000-0y2zlji",
 						"updated": "20240530101000"
 					},
@@ -412,7 +439,6 @@
 							"ID": "20240530101000-obb5zo9",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-sst30kp",
 								"id": "20240530101000-obb5zo9",
 								"updated": "20240530101000"
 							},
@@ -442,7 +468,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-lk0kh1g",
 						"id": "20240530101000-238ctfi",
 						"updated": "20240530101000"
 					},
@@ -451,7 +476,6 @@
 							"ID": "20240530101000-4wi25sk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-zh2wjz8",
 								"id": "20240530101000-4wi25sk",
 								"updated": "20240530101000"
 							},
@@ -481,7 +505,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-ni4zyd6",
 						"id": "20240530101000-xhrxvp5",
 						"updated": "20240530101000"
 					},
@@ -490,7 +513,6 @@
 							"ID": "20240530101000-wuj9ay8",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-v8ufsw4",
 								"id": "20240530101000-wuj9ay8",
 								"updated": "20240530101000"
 							},
@@ -529,7 +551,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-ujpc1ih",
 						"id": "20240530101000-kh0a938",
 						"updated": "20240530101000"
 					},
@@ -538,7 +559,6 @@
 							"ID": "20240530101000-mvxsseo",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-u0uemri",
 								"id": "20240530101000-mvxsseo",
 								"updated": "20240530101000"
 							},
@@ -577,7 +597,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-9bz5ngu",
 						"id": "20240530101000-tri1ybg",
 						"updated": "20240530101000"
 					},
@@ -586,7 +605,6 @@
 							"ID": "20240530101000-trzydfr",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-fn9kv8j",
 								"id": "20240530101000-trzydfr",
 								"updated": "20240530101000"
 							},
@@ -625,7 +643,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-f17uw81",
 						"id": "20240530101000-5mr7f95",
 						"updated": "20240530101000"
 					},
@@ -634,7 +651,6 @@
 							"ID": "20240530101000-5zpnush",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-45l6xix",
 								"id": "20240530101000-5zpnush",
 								"updated": "20240530101000"
 							},
@@ -673,7 +689,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-f1u2elm",
 						"id": "20240530101000-28r34vb",
 						"updated": "20240530101000"
 					},
@@ -682,7 +697,6 @@
 							"ID": "20240530101000-ktm1kij",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-mkp0v1z",
 								"id": "20240530101000-ktm1kij",
 								"updated": "20240530101000"
 							},
@@ -712,7 +726,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-01lhhyb",
 						"id": "20240530101000-q2rf0ys",
 						"updated": "20240530101000"
 					},
@@ -721,7 +734,6 @@
 							"ID": "20240530101000-iom0qak",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-369vzsi",
 								"id": "20240530101000-iom0qak",
 								"updated": "20240530101000"
 							},
@@ -751,7 +763,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-udul0o2",
 						"id": "20240530101000-w5jc0fz",
 						"updated": "20240530101000"
 					},
@@ -760,7 +771,6 @@
 							"ID": "20240530101000-eymmw85",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-nlrkgky",
 								"id": "20240530101000-eymmw85",
 								"updated": "20240530101000"
 							},
@@ -790,7 +800,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-a06au9l",
 						"id": "20240530101000-1ff3zeb",
 						"updated": "20240530101000"
 					},
@@ -799,7 +808,6 @@
 							"ID": "20240530101000-6jhy040",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-42cxwgl",
 								"id": "20240530101000-6jhy040",
 								"updated": "20240530101000"
 							},
@@ -829,7 +837,6 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-mt5hchv",
 						"id": "20240530101000-fkeji33",
 						"updated": "20240530101000"
 					},
@@ -838,7 +845,6 @@
 							"ID": "20240530101000-4lrarz6",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-wtbf2te",
 								"id": "20240530101000-4lrarz6",
 								"updated": "20240530101000"
 							},

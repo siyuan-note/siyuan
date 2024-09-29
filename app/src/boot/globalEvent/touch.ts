@@ -49,6 +49,13 @@ export const globalTouchStart = (event: TouchEvent) => {
         event.stopImmediatePropagation();
         return true;
     }
+    if (backgroundElement) {
+        if (backgroundElement.classList.contains("protyle-background--enable")) {
+            backgroundElement.classList.add("protyle-background--mobileshow");
+        }
+    } else {
+        document.querySelector(".protyle-background--mobileshow")?.classList.remove("protyle-background--mobileshow");
+    }
     return false;
 };
 

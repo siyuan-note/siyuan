@@ -370,6 +370,7 @@ interface IPreviewActionCustom {
 }
 
 interface IHintData {
+    id?: string;
     html: string;
     value: string;
     filter?: string[]

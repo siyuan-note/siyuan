@@ -25,7 +25,7 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, readText, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {copyPlainText, readText, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
@@ -382,7 +382,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.refTab,
         icon: "iconEyeoff",
-        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/⌘" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.refTab.custom + "/" + updateHotkeyTip("⌘" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn) => {
                 openFileById({
@@ -398,7 +398,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertRight,
         icon: "iconLayoutRight",
-        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/⌥" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertRight.custom + "/" + updateHotkeyTip("⌥" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
@@ -417,7 +417,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.insertBottom,
         icon: "iconLayoutBottom",
-        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + "⇧" + window.siyuan.languages.click,
+        accelerator: window.siyuan.config.keymap.editor.general.insertBottom.custom + (window.siyuan.config.keymap.editor.general.insertBottom.custom ? "/" : "") + updateHotkeyTip("⇧" + window.siyuan.languages.click),
         click() {
             checkFold(refBlockId, (zoomIn, action, isRoot) => {
                 if (!isRoot) {
@@ -1086,7 +1086,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }).element);
         }
-        /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
             label: "OCR",
             submenu: [{
@@ -1116,7 +1115,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }
             }],
         }).element);
-        /// #endif
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconAlignCenter",
             label: window.siyuan.languages.alignCenter,
@@ -1133,7 +1131,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 alignImgLeft(protyle, nodeElement, [assetElement], id, html);
             }
         }).element);
-        const width = imgElement.style.width.endsWith("%") ? parseInt(imgElement.style.width) : 0;
+        const width = imgElement.style.width.endsWith("vw") ? parseInt(imgElement.style.width) : 0;
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
@@ -1147,12 +1145,15 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
                         rangeElement.value = "0";
-                        rangeElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                        rangeElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        imgElement.style.width = inputElement.value + "px";
+                        imgElement.style.width = inputElement.value ? (inputElement.value + "px") : "";
                         imgElement.style.height = "";
                     });
                     inputElement.addEventListener("blur", () => {
+                        if (inputElement.value === imgElement.style.width.replace("px", "")) {
+                            return;
+                        }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();
@@ -1170,14 +1171,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width?.replace("vw", "%") || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
     <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
-                            imgElement.style.width = rangeElement.value + "%";
-
+                            imgElement.style.width = rangeElement.value + "vw";
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                         });
                         rangeElement.addEventListener("change", () => {
@@ -1207,13 +1207,16 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
                         rangeHeightElement.value = "0";
-                        rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value + "px");
+                        rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        imgElement.style.height = inputElement.value + "px";
+                        imgElement.style.height = inputElement.value ? (inputElement.value + "px") : "";
                         assetElement.style.width = "";
                         imgElement.style.width = "";
                     });
                     inputElement.addEventListener("blur", () => {
+                        if (inputElement.value === imgElement.style.height.replace("px", "")) {
+                            return;
+                        }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                         updateTransaction(protyle, id, nodeElement.outerHTML, html);
                         window.siyuan.menus.menu.remove();
@@ -1736,7 +1739,7 @@ const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IPro
             if (label === window.siyuan.languages.default) {
                 imgElement.style.width = "";
             } else {
-                imgElement.style.width = label;
+                imgElement.style.width = label.replace("%", "vw");
             }
             imgElement.style.height = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
@@ -1768,6 +1771,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
     const iframeElement = nodeElement.querySelector("iframe");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
+        id: "asset",
         iconHTML: "",
         type: "readonly",
         label: `<textarea spellcheck="false" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
@@ -1838,6 +1842,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const videoElement = nodeElement.querySelector(type === "NodeVideo" ? "video" : "audio");
     let html = nodeElement.outerHTML;
     const subMenus: IMenu[] = [{
+        id: "asset",
         iconHTML: "",
         type: "readonly",
         label: `<textarea spellcheck="false" rows="1" style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
@@ -1857,6 +1862,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
             type: "separator"
         });
         subMenus.push({
+            id: "rename",
             label: window.siyuan.languages.rename,
             icon: "iconEdit",
             click() {
@@ -1867,6 +1873,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
     const VideoSrc = videoElement.getAttribute("src");
     if (VideoSrc) {
         subMenus.push({
+            id: "openBy",
             label: window.siyuan.languages.openBy,
             icon: "iconOpen",
             submenu: openMenu(protyle.app, VideoSrc, true, false) as IMenu[]

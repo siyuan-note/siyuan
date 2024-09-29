@@ -29,7 +29,6 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
-	"github.com/facette/natsort"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -275,13 +274,13 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		case util.SortModeCreatedASC:
 			return backlinks[i].Created < backlinks[j].Created
 		case util.SortModeNameDESC:
-			return util.PinYinCompare(util.RemoveEmojiInvisible(backlinks[j].Name), util.RemoveEmojiInvisible(backlinks[i].Name))
+			return util.PinYinCompare(backlinks[j].Name, backlinks[i].Name)
 		case util.SortModeNameASC:
-			return util.PinYinCompare(util.RemoveEmojiInvisible(backlinks[i].Name), util.RemoveEmojiInvisible(backlinks[j].Name))
+			return util.PinYinCompare(backlinks[i].Name, backlinks[j].Name)
 		case util.SortModeAlphanumDESC:
-			return natsort.Compare(util.RemoveEmojiInvisible(backlinks[j].Name), util.RemoveEmojiInvisible(backlinks[i].Name))
+			return util.NaturalCompare(backlinks[j].Name, backlinks[i].Name)
 		case util.SortModeAlphanumASC:
-			return natsort.Compare(util.RemoveEmojiInvisible(backlinks[i].Name), util.RemoveEmojiInvisible(backlinks[j].Name))
+			return util.NaturalCompare(backlinks[i].Name, backlinks[j].Name)
 		}
 		return backlinks[i].ID > backlinks[j].ID
 	})
@@ -304,13 +303,13 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 		case util.SortModeCreatedASC:
 			return backmentions[i].Created < backmentions[j].Created
 		case util.SortModeNameDESC:
-			return util.PinYinCompare(util.RemoveEmojiInvisible(backmentions[j].Name), util.RemoveEmojiInvisible(backmentions[i].Name))
+			return util.PinYinCompare(backmentions[j].Name, backmentions[i].Name)
 		case util.SortModeNameASC:
-			return util.PinYinCompare(util.RemoveEmojiInvisible(backmentions[i].Name), util.RemoveEmojiInvisible(backmentions[j].Name))
+			return util.PinYinCompare(backmentions[i].Name, backmentions[j].Name)
 		case util.SortModeAlphanumDESC:
-			return natsort.Compare(util.RemoveEmojiInvisible(backmentions[j].Name), util.RemoveEmojiInvisible(backmentions[i].Name))
+			return util.NaturalCompare(backmentions[j].Name, backmentions[i].Name)
 		case util.SortModeAlphanumASC:
-			return natsort.Compare(util.RemoveEmojiInvisible(backmentions[i].Name), util.RemoveEmojiInvisible(backmentions[j].Name))
+			return util.NaturalCompare(backmentions[i].Name, backmentions[j].Name)
 		}
 		return backmentions[i].ID > backmentions[j].ID
 	})
@@ -520,7 +519,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 	}
 
 	var paragraphParentIDs []string
-	for parentID, _ := range parentRefParagraphs {
+	for parentID := range parentRefParagraphs {
 		paragraphParentIDs = append(paragraphParentIDs, parentID)
 	}
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)

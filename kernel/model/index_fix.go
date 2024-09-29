@@ -239,7 +239,7 @@ func resetDuplicateBlocksOnFileSys() {
 
 			if needOverwrite {
 				logging.LogWarnf("exist more than one node with the same id in tree [%s], reset it", box.ID+p)
-				if writeErr := filesys.WriteTree(tree); nil != writeErr {
+				if _, writeErr := filesys.WriteTree(tree); nil != writeErr {
 					logging.LogErrorf("write tree [%s] failed: %s", p, writeErr)
 				}
 			}
@@ -266,7 +266,7 @@ func recreateTree(tree *parse.Tree, absPath string) {
 	treenode.RemoveBlockTreesByRootID(tree.ID)
 
 	resetTree(tree, "", true)
-	if err := filesys.WriteTree(tree); err != nil {
+	if _, err := filesys.WriteTree(tree); err != nil {
 		logging.LogWarnf("write tree [%s] failed: %s", tree.Path, err)
 		return
 	}

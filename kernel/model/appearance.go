@@ -29,6 +29,7 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/bazaar"
+	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -49,11 +50,11 @@ func InitAppearance() {
 	}
 	loadThemes()
 
-	if !gulu.Str.Contains(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) {
+	if !containTheme(Conf.Appearance.ThemeDark, Conf.Appearance.DarkThemes) {
 		Conf.Appearance.ThemeDark = "midnight"
 		Conf.Appearance.ThemeJS = false
 	}
-	if !gulu.Str.Contains(Conf.Appearance.ThemeLight, Conf.Appearance.LightThemes) {
+	if !containTheme(Conf.Appearance.ThemeLight, Conf.Appearance.LightThemes) {
 		Conf.Appearance.ThemeLight = "daylight"
 		Conf.Appearance.ThemeJS = false
 	}
@@ -64,6 +65,15 @@ func InitAppearance() {
 	}
 
 	Conf.Save()
+}
+
+func containTheme(name string, themes []*conf.AppearanceTheme) bool {
+	for _, t := range themes {
+		if t.Name == name {
+			return true
+		}
+	}
+	return false
 }
 
 var themeWatchers = sync.Map{} // [string]*fsnotify.Watcher{}
@@ -118,10 +128,33 @@ func loadThemes() {
 
 		modes := themeConf.Modes
 		for _, mode := range modes {
+			t := &conf.AppearanceTheme{Name: name}
+			if "zh_CN" == util.Lang {
+				if "midnight" == name {
+					t.Label = name + "（默认主题）"
+				} else if "daylight" == name {
+					t.Label = name + "（默认主题）"
+				} else {
+					if nil != themeConf.DisplayName && "" != themeConf.DisplayName.ZhCN && name != themeConf.DisplayName.ZhCN {
+						t.Label = themeConf.DisplayName.ZhCN + "（" + name + "）"
+					} else {
+						t.Label = name
+					}
+				}
+			} else {
+				if "midnight" == name {
+					t.Label = name + " (Default)"
+				} else if "daylight" == name {
+					t.Label = name + " (Default)"
+				} else {
+					t.Label = name
+				}
+			}
+
 			if "dark" == mode {
-				Conf.Appearance.DarkThemes = append(Conf.Appearance.DarkThemes, name)
+				Conf.Appearance.DarkThemes = append(Conf.Appearance.DarkThemes, t)
 			} else if "light" == mode {
-				Conf.Appearance.LightThemes = append(Conf.Appearance.LightThemes, name)
+				Conf.Appearance.LightThemes = append(Conf.Appearance.LightThemes, t)
 			}
 		}
 

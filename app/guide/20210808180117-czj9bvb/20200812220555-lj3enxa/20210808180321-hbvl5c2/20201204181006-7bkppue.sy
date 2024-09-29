@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20240403150838"
+		"updated": "20240921122737"
 	},
 	"Children": [
 		{
@@ -68,7 +68,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091309-fhb549c"
+				"id": "20210104091309-fhb549c",
+				"updated": "20240921122737"
 			},
 			"Children": [
 				{
@@ -236,7 +237,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20240403150838"
+				"updated": "20240921122737"
 			},
 			"Children": [
 				{
@@ -247,7 +248,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210104091309-p88fqma"
+						"id": "20210104091309-p88fqma",
+						"updated": "20210104091309"
 					},
 					"Children": [
 						{
@@ -292,7 +294,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20210221131427-rfs2tcl"
+						"id": "20210221131427-rfs2tcl",
+						"updated": "20210221131427"
 					},
 					"Children": [
 						{
@@ -328,7 +331,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20211213120720-ulwzg6f"
+						"id": "20211213120720-ulwzg6f",
+						"updated": "20211213120720"
 					},
 					"Children": [
 						{
@@ -388,6 +392,43 @@
 								{
 									"Type": "NodeText",
 									"Data": "​：该变量用于插入当前文档别名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20240921122137-pujjn08",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20240921122137-pujjn08",
+						"updated": "20240921122737"
+					},
+					"Children": [
+						{
+							"ID": "20240921122137-e7nma1b",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20240921122137-e7nma1b",
+								"updated": "20240921122737"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getHPathByID"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回块 ID 对应块的可读路径"
 								}
 							]
 						}
@@ -521,7 +562,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308161717-xkgiour"
+						"id": "20240308161717-xkgiour",
+						"updated": "20240308161717"
 					},
 					"Children": [
 						{
@@ -566,7 +608,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162051-g575lg1"
+						"id": "20240308162051-g575lg1",
+						"updated": "20240308162051"
 					},
 					"Children": [
 						{
@@ -611,7 +654,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162109-paei265"
+						"id": "20240308162109-paei265",
+						"updated": "20240308162109"
 					},
 					"Children": [
 						{
@@ -656,7 +700,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162139-yt96e2z"
+						"id": "20240308162139-yt96e2z",
+						"updated": "20240308162139"
 					},
 					"Children": [
 						{
@@ -692,7 +737,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162209-vls60yh"
+						"id": "20240308162209-vls60yh",
+						"updated": "20240308162209"
 					},
 					"Children": [
 						{
@@ -728,7 +774,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162455-c15kzsv"
+						"id": "20240308162455-c15kzsv",
+						"updated": "20240308162455"
 					},
 					"Children": [
 						{
@@ -764,7 +811,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20240308162518-1ouvecu"
+						"id": "20240308162518-1ouvecu",
+						"updated": "20240308162518"
 					},
 					"Children": [
 						{

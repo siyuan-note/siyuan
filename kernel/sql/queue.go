@@ -187,13 +187,13 @@ func execOp(op *dbQueueOperation, tx *sql.Tx, context map[string]interface{}) (e
 	case "delete_ids":
 		err = batchDeleteByRootIDs(tx, op.removeTreeIDs, context)
 	case "rename":
-		err = batchUpdateHPath(tx, op.renameTree.ID, op.renameTree.HPath, context)
+		err = batchUpdateHPath(tx, op.renameTree, context)
 		if err != nil {
 			break
 		}
 		err = updateRootContent(tx, path.Base(op.renameTree.HPath), op.renameTree.Root.IALAttr("updated"), op.renameTree.ID)
 	case "rename_sub_tree":
-		err = batchUpdateHPath(tx, op.renameTree.ID, op.renameTree.HPath, context)
+		err = batchUpdatePath(tx, op.renameTree, context)
 	case "delete_box":
 		err = deleteByBoxTx(tx, op.box)
 	case "delete_box_refs":

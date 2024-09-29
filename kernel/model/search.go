@@ -798,6 +798,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		refreshProtyle(id)
 	}
 
+	sql.WaitForWritingDatabase()
 	util.PushClearProgress()
 	return
 }
@@ -823,8 +824,30 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, rep
 // Supports replacing text elements with other elements https://github.com/siyuan-note/siyuan/issues/11058
 func replaceTextNode(text *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, luteEngine *lute.Lute) bool {
 	if 0 == method {
-		if bytes.Contains(text.Tokens, []byte(keyword)) {
-			newContent := bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
+		newContent := text.Tokens
+		if Conf.Search.CaseSensitive {
+			if bytes.Contains(text.Tokens, []byte(keyword)) {
+				newContent = bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
+			}
+		} else {
+			// 当搜索结果中的文本元素包含大小写混合时替换失败
+			// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
+			keywords := strings.Split(keyword, " ")
+			// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
+			if 1 < len(keywords) {
+				var lowerKeywords []string
+				for _, k := range keywords {
+					lowerKeywords = append(lowerKeywords, strings.ToLower(k))
+				}
+				lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
+				keyword = strings.Join(lowerKeywords, " ")
+			}
+
+			if bytes.Contains(bytes.ToLower(text.Tokens), []byte(keyword)) {
+				newContent = replaceCaseInsensitive(text.Tokens, []byte(keyword), []byte(replacement))
+			}
+		}
+		if !bytes.Equal(newContent, text.Tokens) {
 			tree := parse.Inline("", newContent, luteEngine.ParseOptions)
 			if nil == tree.Root.FirstChild {
 				return false
@@ -1179,7 +1202,7 @@ func fullTextSearchRefBlock(keyword string, beforeLen int, onlyDoc bool) (ret []
 		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS name, " +
 		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS alias, " +
 		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS memo, " +
-		"tag, " +
+		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE " + table + " MATCH '" + columnFilter() + ":(" + quotedKeyword + ")' AND type"
@@ -1267,8 +1290,8 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy stri
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
 	stmt += " " + orderBy
-	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmtNoParse(stmt, Conf.Search.Limit)
+	regex := regexp.MustCompile(exp)
+	blocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -1302,7 +1325,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
 		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
 		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
-		"tag, " +
+		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
@@ -1331,7 +1354,7 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy strin
 	return
 }
 
-func highlightByQuery(query, typeFilter, id string) (ret []string) {
+func highlightByFTS(query, typeFilter, id string) (ret []string) {
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {
@@ -1342,7 +1365,7 @@ func highlightByQuery(query, typeFilter, id string) (ret []string) {
 		"highlight(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS name, " +
 		"highlight(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS alias, " +
 		"highlight(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS memo, " +
-		"tag, " +
+		"highlight(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS tag, " +
 		"highlight(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "') AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
@@ -1350,6 +1373,22 @@ func highlightByQuery(query, typeFilter, id string) (ret []string) {
 	stmt += " AND root_id = '" + id + "'"
 	stmt += " LIMIT " + strconv.Itoa(limit)
 	sqlBlocks := sql.SelectBlocksRawStmt(stmt, 1, limit)
+	for _, block := range sqlBlocks {
+		keyword := gulu.Str.SubstringsBetween(block.Content, search.SearchMarkLeft, search.SearchMarkRight)
+		if 0 < len(keyword) {
+			ret = append(ret, keyword...)
+		}
+	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
+	return
+}
+
+func highlightByRegexp(query, typeFilter, id string) (ret []string) {
+	fieldFilter := fieldRegexp(query)
+	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
+	stmt += " AND root_id = '" + id + "'"
+	regex := regexp.MustCompile(query)
+	sqlBlocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.Content, search.SearchMarkLeft, search.SearchMarkRight)
 		if 0 < len(keyword) {
@@ -1451,6 +1490,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
+	tag, _ := markSearch(sqlBlock.Tag, terms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
 	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
 	block = &Block{
@@ -1462,7 +1502,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		Alias:    sqlBlock.Alias,
 		Name:     sqlBlock.Name,
 		Memo:     sqlBlock.Memo,
-		Tag:      sqlBlock.Tag,
+		Tag:      tag,
 		Content:  content,
 		FContent: fContent,
 		Markdown: markdown,
@@ -1816,4 +1856,9 @@ func filterQueryInvisibleChars(query string) string {
 	query = gulu.Str.RemoveInvisible(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
 	return query
+}
+
+func replaceCaseInsensitive(input, old, new []byte) []byte {
+	re := regexp.MustCompile("(?i)" + regexp.QuoteMeta(string(old)))
+	return []byte(re.ReplaceAllString(string(input), string(new)))
 }

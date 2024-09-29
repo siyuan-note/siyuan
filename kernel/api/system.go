@@ -17,6 +17,7 @@
 package api
 
 import (
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -24,10 +25,10 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/lute"
-
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/gin-gonic/gin"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -204,6 +205,211 @@ func exportLog(c *gin.Context) {
 	ret.Data = map[string]interface{}{
 		"zip": zipPath,
 	}
+}
+
+func exportConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	logging.LogInfof("exporting conf...")
+
+	name := "siyuan-conf-" + time.Now().Format("20060102150405") + ".json"
+	tmpDir := filepath.Join(util.TempDir, "export")
+	if err := os.MkdirAll(tmpDir, 0755); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	clonedConf := &model.AppConf{}
+	if err := copier.CopyWithOption(clonedConf, model.Conf, copier.Option{IgnoreEmpty: false, DeepCopy: true}); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if nil != clonedConf.Appearance {
+		clonedConf.Appearance.DarkThemes = nil
+		clonedConf.Appearance.LightThemes = nil
+		clonedConf.Appearance.Icons = nil
+	}
+	if nil != clonedConf.Editor {
+		clonedConf.Editor.Emoji = []string{}
+	}
+	if nil != clonedConf.Export {
+		clonedConf.Export.PandocBin = ""
+	}
+	clonedConf.UserData = ""
+	clonedConf.Account = nil
+	clonedConf.AccessAuthCode = ""
+	if nil != clonedConf.System {
+		clonedConf.System.ID = ""
+		clonedConf.System.Name = ""
+		clonedConf.System.OSPlatform = ""
+		clonedConf.System.Container = ""
+		clonedConf.System.IsMicrosoftStore = false
+		clonedConf.System.IsInsider = false
+	}
+	clonedConf.Sync = nil
+	clonedConf.Stat = nil
+	clonedConf.Api = nil
+	clonedConf.Repo = nil
+	clonedConf.Publish = nil
+	clonedConf.CloudRegion = 0
+	clonedConf.DataIndexState = 0
+
+	data, err := gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
+	if err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(tmpDir, name)
+	if err = os.WriteFile(tmp, data, 0644); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	zipFile, err := gulu.Zip.Create(tmp + ".zip")
+	if err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.AddEntry(name, tmp); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = zipFile.Close(); err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	logging.LogInfof("exported conf")
+
+	zipPath := "/export/" + name + ".zip"
+	ret.Data = map[string]interface{}{
+		"name": name,
+		"zip":  zipPath,
+	}
+}
+
+func importConf(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	logging.LogInfof("importing conf...")
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file"]
+	if 1 != len(files) {
+		ret.Code = -1
+		ret.Msg = "invalid upload file"
+		return
+	}
+
+	f := files[0]
+	fh, err := f.Open()
+	if err != nil {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	data, err := io.ReadAll(fh)
+	fh.Close()
+	if err != nil {
+		logging.LogErrorf("read upload file failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	importDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(importDir, 0755); err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmp := filepath.Join(importDir, f.Filename)
+	if err = os.WriteFile(tmp, data, 0644); err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	tmpDir := filepath.Join(importDir, "conf")
+	if err = gulu.Zip.Unzip(tmp, tmpDir); err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	entries, err := os.ReadDir(tmpDir)
+	if err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if 1 != len(entries) {
+		logging.LogErrorf("invalid conf package")
+		ret.Code = -1
+		ret.Msg = "invalid conf package"
+		return
+	}
+
+	tmp = filepath.Join(tmpDir, entries[0].Name())
+	data, err = os.ReadFile(tmp)
+	if err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	importedConf := model.NewAppConf()
+	if err = gulu.JSON.UnmarshalJSON(data, importedConf); err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	if err = copier.CopyWithOption(model.Conf, importedConf, copier.Option{IgnoreEmpty: true, DeepCopy: true}); err != nil {
+		logging.LogErrorf("import conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	logging.LogInfof("imported conf")
 }
 
 func getConf(c *gin.Context) {

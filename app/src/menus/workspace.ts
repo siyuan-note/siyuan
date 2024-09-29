@@ -92,6 +92,7 @@ const editLayout = (layoutName?: string) => {
                     layoutItem.name = value;
                     layoutItem.time = new Date().getTime();
                     layoutItem.layout = getAllLayout();
+                    layoutItem.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                     return true;
                 }
@@ -103,6 +104,7 @@ const editLayout = (layoutName?: string) => {
                 confirmDialog(window.siyuan.languages.save, window.siyuan.languages.exportTplTip, () => {
                     item.layout = getAllLayout();
                     item.time = new Date().getTime();
+                    item.filesPaths = window.siyuan.storage[Constants.LOCAL_FILESPATHS];
                     setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
                 });
                 return true;
@@ -114,7 +116,8 @@ const editLayout = (layoutName?: string) => {
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].push({
             name: value,
             time: new Date().getTime(),
-            layout: getAllLayout()
+            layout: getAllLayout(),
+            filesPaths: window.siyuan.storage[Constants.LOCAL_FILESPATHS]
         });
         setStorageVal(Constants.LOCAL_LAYOUTS, window.siyuan.storage[Constants.LOCAL_LAYOUTS]);
     });
@@ -344,7 +347,14 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             window.location.reload();
                         } else {
                             fetchPost("/api/system/setUILayout", {layout: item.layout}, () => {
-                                window.location.reload();
+                                if (item.filesPaths) {
+                                    window.siyuan.storage[Constants.LOCAL_FILESPATHS] = item.filesPaths;
+                                    setStorageVal(Constants.LOCAL_FILESPATHS, item.filesPaths, () => {
+                                        window.location.reload();
+                                    });
+                                } else {
+                                    window.location.reload();
+                                }
                             });
                         }
                     });

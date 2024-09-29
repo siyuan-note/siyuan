@@ -119,11 +119,11 @@ export const initBar = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (targetId === "barExit") {
+                event.stopPropagation();
                 exportLayout({
                     errorExit: true,
                     cb: exitSiYuan,
                 });
-                event.stopPropagation();
                 break;
             } else if (targetId === "barMode") {
                 if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&

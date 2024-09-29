@@ -91,7 +91,7 @@ func containTask(task *Task, tasks []*Task) bool {
 			}
 
 			for i, arg := range t.Args {
-				if arg != task.Args[i] {
+				if !reflect.DeepEqual(arg, task.Args[i]) {
 					return false
 				}
 			}

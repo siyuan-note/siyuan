@@ -843,10 +843,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 nextSibling = nextSibling.nextSibling as Element;
                             }
                             if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
-                                removeImage(nextSibling as Element, nodeElement, range, protyle);
-                                event.stopPropagation();
-                                event.preventDefault();
-                                return;
+                                // 光标需在图片前 https://github.com/siyuan-note/siyuan/issues/12452
+                                const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range)
+                                if (textPosition.start === range.startContainer.textContent.length) {
+                                    removeImage(nextSibling as Element, nodeElement, range, protyle);
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                    return;
+                                }
                             }
                         }
                     }

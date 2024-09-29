@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, getNextBlock, hasNextSibling, isNotEditBlock} from "./getBlock";
+import {getContenteditableElement, hasNextSibling, isNotEditBlock} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";

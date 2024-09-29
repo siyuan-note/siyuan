@@ -45,7 +45,7 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
         setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
             resolve(true);
         });
-    })
+    });
 };
 
 export const getDocByScroll = (options: {

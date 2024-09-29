@@ -735,7 +735,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.preventDefault();
                 } else if (nodeEditableElement?.innerText.substr(position.end).indexOf("\n") === -1 || position.end >= nodeEditableElement.innerText.trimEnd().length) {
                     // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
-                    range.collapse(false)
+                    range.collapse(false);
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement) {
                         if(nodeEditableElement.getBoundingClientRect().bottom - getSelectionPosition(nodeElement, range).top < 40) {
@@ -844,7 +844,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }
                             if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
                                 // 光标需在图片前 https://github.com/siyuan-note/siyuan/issues/12452
-                                const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range)
+                                const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range);
                                 if (textPosition.start === range.startContainer.textContent.length) {
                                     removeImage(nextSibling as Element, nodeElement, range, protyle);
                                     event.stopPropagation();

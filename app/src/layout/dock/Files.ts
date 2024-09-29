@@ -1129,7 +1129,7 @@ export class Files extends Model {
         if (item.count && item.count > 0) {
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
-        const ariaLabel = this.genDocAriaLabel(item)
+        const ariaLabel = this.genDocAriaLabel(item);
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${(item.path.split("/").length - 2) * 18 + 40}px" 
@@ -1148,7 +1148,7 @@ aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</
     </span>
     ${countHTML}
 </li>`;
-    };
+    }
 
     private initMoreMenu() {
         window.siyuan.menus.menu.remove();

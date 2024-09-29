@@ -39,8 +39,13 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (getObject) {
         return attr;
     }
+
     window.siyuan.storage[Constants.LOCAL_FILEPOSITION][protyle.block.rootID] = attr;
-    setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION]);
+    return new Promise(resolve => {
+        setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
+            resolve(true);
+        });
+    });
 };
 
 export const getDocByScroll = (options: {

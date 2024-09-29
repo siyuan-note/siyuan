@@ -1060,7 +1060,7 @@
         "description": "Purple Heart",
         "description_ja_jp": "紫のハート",
         "description_zh_cn": "紫心",
-        "keywords": "bestest,emotion,heart,ily,love,purple,ハート,愛,紫,我爱你,紫"
+        "keywords": "bestest,emotion,heart,ily,love,purple,ハート,愛,紫,我爱你"
       },
       {
         "unicode": "1f90e",
@@ -1557,14 +1557,14 @@
         "description": "Anatomical Heart",
         "description_ja_jp": "心臓",
         "description_zh_cn": "心脏器官",
-        "keywords": "anatomical,beat,cardiology,heart,heartbeat,organ,pulse,real heart,red,体,身体,心拍,脈,臓器,鼓動,中心,器官,心率,心脏,心脏病学,心跳,真心,红心,解剖,身体"
+        "keywords": "anatomical,beat,cardiology,heart,heartbeat,organ,pulse,real heart,red,体,身体,心拍,脈,臓器,鼓動,中心,器官,心率,心脏,心脏病学,心跳,真心,红心,解剖"
       },
       {
         "unicode": "1fac1",
         "description": "Lungs",
         "description_ja_jp": "肺",
         "description_zh_cn": "肺",
-        "keywords": "breath,breathe,exhalation,inhalation,lung,organ,respiration,体,身体,呼吸,臓器,吸气,呼吸作用,呼气,器官,肺部,身体"
+        "keywords": "breath,breathe,exhalation,inhalation,lung,organ,respiration,体,身体,呼吸,臓器,吸气,呼吸作用,呼气,器官,肺部"
       },
       {
         "unicode": "1f9b7",
@@ -1585,21 +1585,21 @@
         "description": "Eyes",
         "description_ja_jp": "目",
         "description_zh_cn": "双眼",
-        "keywords": "body,eye,face,googly,look,looking,omg,peep,see,seeing,両目,体,身体,動く目玉,看,眼睛,窥视,身体"
+        "keywords": "body,eye,face,googly,look,looking,omg,peep,see,seeing,両目,体,身体,動く目玉,看,眼睛,窥视"
       },
       {
         "unicode": "1f441-fe0f",
         "description": "Eye",
         "description_ja_jp": "片目",
         "description_zh_cn": "眼睛",
-        "keywords": "body,one eye,一つ目,体,身体,目,单眼,看,眼,身体"
+        "keywords": "body,one eye,一つ目,体,身体,目,单眼,看,眼"
       },
       {
         "unicode": "1f445",
         "description": "Tongue",
         "description_ja_jp": "舌",
         "description_zh_cn": "舌头",
-        "keywords": "body,lick,slurp,べろ,べー,体,身体,啧啧地喝,舌,舔,身体"
+        "keywords": "body,lick,slurp,べろ,べー,体,身体,啧啧地喝,舌,舔"
       },
       {
         "unicode": "1f444",
@@ -3720,98 +3720,98 @@
         "description": "Family: man,woman,girl",
         "description_ja_jp": "家族: 男性,女性,女の子",
         "description_zh_cn": "家庭: 男人,女人,女孩",
-        "keywords": "family,father,mother,,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男人,女人,男,女,男人,女人,女孩,儿童"
+        "keywords": "family,father,mother,,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男人,女人,男,女,女孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f469-200d-1f467-200d-1f466",
         "description": "Family: man,woman,girl,boy",
         "description_ja_jp": "家族: 男性,女性,女の子,男の子",
         "description_zh_cn": "家庭: 男人,女人,女孩,男孩",
-        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,女孩,儿童"
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,妇女,男孩,女孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f469-200d-1f466-200d-1f466",
         "description": "Family: man,woman,boy,boy",
         "description_ja_jp": "家族: 男性,女性,男の子,男の子",
         "description_zh_cn": "家庭: 男人,女人,男孩,男孩",
-        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,男孩,儿童"
+        "keywords": "family,father,mother,man,woman,male,female,men,women,boy,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,妇女,男孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f469-200d-1f467-200d-1f467",
         "description": "Family: man,woman,girl,girl",
         "description_ja_jp": "家族: 男性,女性,女の子,女の子",
         "description_zh_cn": "家庭: 男人,女人,女孩,女孩",
-        "keywords": "family,father,mother,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,男子,妇女,女孩,儿童"
+        "keywords": "family,father,mother,man,woman,male,female,men,women,girl,child,家族,親子,亲子,父母,家庭,父亲,母亲,男子,女子,男,女,妇女,女孩,儿童"
       },
       {
         "unicode": "1f469-200d-1f469-200d-1f466",
         "description": "Family: woman,woman,boy",
         "description_ja_jp": "家族: 女性,女性,男の子",
         "description_zh_cn": "家庭: 女人,女人,男孩",
-        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,女同性恋"
       },
       {
         "unicode": "1f469-200d-1f469-200d-1f467",
         "description": "Family: woman,woman,girl",
         "description_ja_jp": "家族: 女性,女性,女の子",
         "description_zh_cn": "家庭: 女人,女人,女孩",
-        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,女同性恋"
       },
       {
         "unicode": "1f469-200d-1f469-200d-1f467-200d-1f466",
         "description": "Family: woman,woman,girl,boy",
         "description_ja_jp": "家族: 女性,女性,女の子,男の子",
         "description_zh_cn": "家庭: 女人,女人,女孩,男孩",
-        "keywords": "family,mother,woman,female,women,boy,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,女孩,儿童,骄傲,lgbt,女同性恋"
+        "keywords": "family,mother,woman,female,women,boy,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,男孩,女孩,儿童,骄傲,女同性恋"
       },
       {
         "unicode": "1f469-200d-1f469-200d-1f466-200d-1f466",
         "description": "Family: woman,woman,boy,boy",
         "description_ja_jp": "家族: 女性,女性,男の子,男の子",
         "description_zh_cn": "家庭: 女人,女人,男孩,男孩",
-        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,lgbt,女同性恋"
+        "keywords": "family,mother,woman,female,women,boy,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女人,女性,妇女,男孩,儿童,骄傲,女同性恋"
       },
       {
         "unicode": "1f469-200d-1f469-200d-1f467-200d-1f467",
         "description": "Family: woman,woman,girl,girl",
         "description_ja_jp": "家族: 女性,女性,女の子,女の子",
         "description_zh_cn": "家庭: 女人,女人,女孩,女孩",
-        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,lgbt,女同性恋"
+        "keywords": "family,mother,woman,female,women,girl,child,pride,lgbt,lesbian,家族,親子,亲子,家庭,母亲,女子,女性,妇女,女孩,儿童,骄傲,女同性恋"
       },
       {
         "unicode": "1f468-200d-1f468-200d-1f466",
         "description": "Family: man,man,boy",
         "description_ja_jp": "家族: 男性,男性,男の子",
         "description_zh_cn": "家庭: 男人,男人,男孩",
-        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男孩,儿童,骄傲,同性恋"
       },
       {
         "unicode": "1f468-200d-1f468-200d-1f467",
         "description": "Family: man,man,girl",
         "description_ja_jp": "家族: 男性,男性,女の子",
         "description_zh_cn": "家庭: 男人,男人,女孩",
-        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,女孩,儿童,骄傲,同性恋"
       },
       {
         "unicode": "1f468-200d-1f468-200d-1f467-200d-1f466",
         "description": "Family: man,man,girl,boy",
         "description_ja_jp": "家族: 男性,男性,女の子,男の子",
         "description_zh_cn": "家庭: 男人,男人,女孩,男孩",
-        "keywords": "family,father,man,male,men,boy,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童,骄傲,同性恋,同性恋"
+        "keywords": "family,father,man,male,men,boy,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男孩,女孩,儿童,骄傲,同性恋"
       },
       {
         "unicode": "1f468-200d-1f468-200d-1f466-200d-1f466",
         "description": "Family: man,man,boy,boy",
         "description_ja_jp": "家族: 男性,男性,男の子,男の子",
         "description_zh_cn": "家庭: 男人,男人,男孩,男孩",
-        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童,骄傲,同性恋,同性恋"
+        "keywords": "family,father,man,male,men,boy,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男孩,儿童,骄傲,同性恋"
       },
       {
         "unicode": "1f468-200d-1f468-200d-1f467-200d-1f467",
         "description": "Family: man,man,girl,girl",
         "description_ja_jp": "家族: 男性,男性,女の子,女の子",
         "description_zh_cn": "家庭: 男人,男人,女孩,女孩",
-        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,男子,女孩,儿童,骄傲,lgbt,同性恋"
+        "keywords": "family,father,man,male,men,girl,child,pride,lgbt,gay,家族,親子,亲子,家庭,父亲,男子,男性,女孩,儿童,骄傲,同性恋"
       },
       {
         "unicode": "1f469-200d-1f466",
@@ -3853,7 +3853,7 @@
         "description": "Family: man,boy",
         "description_ja_jp": "家族: 男性,男の子",
         "description_zh_cn": "家庭: 男人,男孩",
-        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f467",
@@ -3867,14 +3867,14 @@
         "description": "Family: man,girl,boy",
         "description_ja_jp": "家族: 男性,女の子,男の子",
         "description_zh_cn": "家庭: 男人,女孩,男孩",
-        "keywords": "family,father,man,male,men,boy,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,女孩,儿童"
+        "keywords": "family,father,man,male,men,boy,girl,child,家族,親子,亲子,家庭,父亲,男子,男性,男孩,女孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f466-200d-1f466",
         "description": "Family: man,boy,boy",
         "description_ja_jp": "家族: 男性,男の子,男の子",
         "description_zh_cn": "家庭: 男人,男孩,男孩",
-        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男子,男孩,儿童"
+        "keywords": "family,father,man,male,men,boy,child,家族,親子,亲子,家庭,父亲,男子,男性,男孩,儿童"
       },
       {
         "unicode": "1f468-200d-1f467-200d-1f467",
@@ -4092,7 +4092,7 @@
         "description": "Tiger",
         "description_ja_jp": "トラ",
         "description_zh_cn": "老虎",
-        "keywords": "animal,animals,big cat,predator,zoo,タイガー,動物,哺乳類,猛獣,肉食,肉食動物,虎,动物园,虎"
+        "keywords": "animal,animals,big cat,predator,zoo,タイガー,動物,哺乳類,猛獣,肉食,肉食動物,虎,动物园"
       },
       {
         "unicode": "1f406",
@@ -4155,7 +4155,7 @@
         "description": "Bison",
         "description_ja_jp": "バイソン",
         "description_zh_cn": "大野牛",
-        "keywords": "animal,buffalo,herd,wisent,バッファロー,動物,哺乳類,牛,群れ,野牛,动物,欧洲野牛,水牛,牦牛,畜群,野牛"
+        "keywords": "animal,buffalo,herd,wisent,バッファロー,動物,哺乳類,牛,群れ,野牛,动物,欧洲野牛,水牛,牦牛,畜群"
       },
       {
         "unicode": "1f42e",
@@ -4204,7 +4204,7 @@
         "description": "Boar",
         "description_ja_jp": "イノシシ",
         "description_zh_cn": "野猪",
-        "keywords": "animal,pig,動物,哺乳類,猪,顔,权力的游戏,猪"
+        "keywords": "animal,pig,動物,哺乳類,猪,顔,权力的游戏"
       },
       {
         "unicode": "1f43d",
@@ -4267,7 +4267,7 @@
         "description": "Elephant",
         "description_ja_jp": "ゾウ",
         "description_zh_cn": "大象",
-        "keywords": "animal,動物,哺乳類,象,动物,象"
+        "keywords": "animal,動物,哺乳類,象,动物"
       },
       {
         "unicode": "1f9a3",
@@ -4358,7 +4358,7 @@
         "description": "Bat",
         "description_ja_jp": "コウモリ",
         "description_zh_cn": "蝙蝠",
-        "keywords": "animal,vampire,こうもり,バンパイア,動物,吸血鬼,哺乳類,吸血鬼"
+        "keywords": "animal,vampire,こうもり,バンパイア,動物,吸血鬼,哺乳類"
       },
       {
         "unicode": "1f43b",
@@ -4729,7 +4729,7 @@
         "description": "Jellyfish",
         "description_ja_jp": "クラゲ",
         "description_zh_cn": "水母",
-        "keywords": "animal,aquarium,burn,invertebrate,jelly,marine,ocean,ouch,plankton,sea,sea life,sting,stinger,tentacles,刺す,毒,水族館,海,無脊椎動物,触手,刺毛,动物,发光,哎哟,无脊椎动物,有刺动物,果冻,水族馆,浮游生物,海洋,海洋生物,海蜇,触手"
+        "keywords": "animal,aquarium,burn,invertebrate,jelly,marine,ocean,ouch,plankton,sea,sea life,sting,stinger,tentacles,刺す,毒,水族館,海,無脊椎動物,触手,刺毛,动物,发光,哎哟,无脊椎动物,有刺动物,果冻,水族馆,浮游生物,海洋,海洋生物,海蜇"
       },
       {
         "unicode": "1f40c",
@@ -4981,7 +4981,7 @@
         "description": "Herb",
         "description_ja_jp": "ハーブ",
         "description_zh_cn": "药草",
-        "keywords": "leaf,plant,植物,草,葉,薬草,香草,草药,香草"
+        "keywords": "leaf,plant,植物,草,葉,薬草,香草,草药"
       },
       {
         "unicode": "2618-fe0f",
@@ -5009,7 +5009,7 @@
         "description": "Fallen Leaf",
         "description_ja_jp": "落ち葉",
         "description_zh_cn": "落叶",
-        "keywords": "autumn,fall,falling,leaf,木の葉,枯れ葉,植物,秋,葉,葉っぱ,叶,秋"
+        "keywords": "autumn,fall,falling,leaf,木の葉,枯れ葉,植物,秋,葉,葉っぱ,叶"
       },
       {
         "unicode": "1f343",
@@ -6089,7 +6089,7 @@
         "description": "Pine Decoration",
         "description_ja_jp": "門松",
         "description_zh_cn": "门松",
-        "keywords": "bamboo,celebration,japanese,pine,plant,お祝い,イベント,和,新年,日本,正月,竹,行事,庆祝,松树,盆栽,竹"
+        "keywords": "bamboo,celebration,japanese,pine,plant,お祝い,イベント,和,新年,日本,正月,竹,行事,庆祝,松树,盆栽"
       },
       {
         "unicode": "1f38e",
@@ -6376,7 +6376,7 @@
         "description": "Skis",
         "description_ja_jp": "スキー",
         "description_zh_cn": "滑雪",
-        "keywords": "ski,snow,sport,ウィンタースポーツ,ストック,スポーツ,冬,雪,运动,雪"
+        "keywords": "ski,snow,sport,ウィンタースポーツ,ストック,スポーツ,冬,雪,运动"
       },
       {
         "unicode": "1f6f7",
@@ -6404,7 +6404,7 @@
         "description": "Yo-Yo",
         "description_ja_jp": "ヨーヨー",
         "description_zh_cn": "悠悠球",
-        "keywords": "fluctuate,toy,おもちゃ,ゲーム,上下,回転,玩具,遊戯,上下起落,溜溜球,犹豫不决,玩具"
+        "keywords": "fluctuate,toy,おもちゃ,ゲーム,上下,回転,玩具,遊戯,上下起落,溜溜球,犹豫不决"
       },
       {
         "unicode": "1fa81",
@@ -6418,7 +6418,7 @@
         "description": "Water Pistol",
         "description_ja_jp": "水鉄砲",
         "description_zh_cn": "水枪",
-        "keywords": "gun,handgun,pistol,revolver,tool,water,weapon,おもちゃ,ゲーム,ピストル,リボルバー,拳銃,武器,玩具,遊戯,銃,工具,左轮,手枪,枪,武器"
+        "keywords": "gun,handgun,pistol,revolver,tool,water,weapon,おもちゃ,ゲーム,ピストル,リボルバー,拳銃,武器,玩具,遊戯,銃,工具,左轮,手枪,枪"
       },
       {
         "unicode": "1f3b1",
@@ -6432,14 +6432,14 @@
         "description": "Crystal Ball",
         "description_ja_jp": "水晶玉",
         "description_zh_cn": "水晶球",
-        "keywords": "ball,crystal,fairy tale,fairytale,fantasy,fortune,future,magic,tool,おもちゃ,クリスタル,ゲーム,占い,水晶,水晶球,玉,玩具,遊戯,運命,魔法,命运,工具,梦幻,球,童话,财富,魔法"
+        "keywords": "ball,crystal,fairy tale,fairytale,fantasy,fortune,future,magic,tool,おもちゃ,クリスタル,ゲーム,占い,水晶,水晶球,玉,玩具,遊戯,運命,魔法,命运,工具,梦幻,球,童话,财富"
       },
       {
         "unicode": "1fa84",
         "description": "Magic Wand",
         "description_ja_jp": "魔法の杖",
         "description_zh_cn": "魔棒",
-        "keywords": "magic,magician,wand,witch,wizard,おもちゃ,つえ,マジック,手品,杖,玩具,遊戯,魔法,魔術,魔術師,女巫,巫师,魔术,魔术师,魔杖,魔法"
+        "keywords": "magic,magician,wand,witch,wizard,おもちゃ,つえ,マジック,手品,杖,玩具,遊戯,魔法,魔術,魔術師,女巫,巫师,魔术,魔术师,魔杖"
       },
       {
         "unicode": "1f3ae",
@@ -8422,7 +8422,7 @@
         "description": "Woman’s Hat",
         "description_ja_jp": "婦人帽子",
         "description_zh_cn": "女帽",
-        "keywords": "clothes,clothing,garden party,hat,hats,woman,帽子,麦わら,麦わら帽子,女,女式,帽子,花园派对"
+        "keywords": "clothes,clothing,garden party,hat,hats,woman,帽子,麦わら,麦わら帽子,女,女式,花园派对"
       },
       {
         "unicode": "1f3a9",
@@ -8443,7 +8443,7 @@
         "description": "Billed Cap",
         "description_ja_jp": "キャップ",
         "description_zh_cn": "鸭舌帽",
-        "keywords": "baseball cap,bent hat,cap,dad cap,dad hat,帽子,野球帽,帽子,棒球帽"
+        "keywords": "baseball cap,bent hat,cap,dad cap,dad hat,帽子,野球帽,棒球帽"
       },
       {
         "unicode": "1fa96",
@@ -8499,7 +8499,7 @@
         "description": "Speaker Low Volume",
         "description_ja_jp": "スピーカー",
         "description_zh_cn": "低音量的扬声器",
-        "keywords": "soft,sound,ボリューム,音量,低音量扬扬声,喇叭,小声,小音量,扬声器,轻声,音量"
+        "keywords": "soft,sound,ボリューム,音量,低音量扬扬声,喇叭,小声,小音量,扬声器,轻声"
       },
       {
         "unicode": "1f509",
@@ -8569,7 +8569,7 @@
         "description": "Musical Notes",
         "description_ja_jp": "複数の音符",
         "description_zh_cn": "多个音符",
-        "keywords": "music,note,notes,sound,連符,音楽,音符,乐谱,五线谱,八分音符,音乐,音符"
+        "keywords": "music,note,notes,sound,連符,音楽,音符,乐谱,五线谱,八分音符,音乐"
       },
       {
         "unicode": "1f399-fe0f",
@@ -9227,7 +9227,7 @@
         "description": "Ballot Box with Ballot",
         "description_ja_jp": "投票箱",
         "description_zh_cn": "投票箱",
-        "keywords": "ballot,box,投票,選挙,投票,盒子,票箱,选举,选票"
+        "keywords": "ballot,box,投票,選挙,盒子,票箱,选举,选票"
       },
       {
         "unicode": "270f-fe0f",
@@ -9297,7 +9297,7 @@
         "description": "Open File Folder",
         "description_ja_jp": "開いたフォルダー",
         "description_zh_cn": "打开的文件夹",
-        "keywords": "file,folder,open,オフィス,ファイル,フォルダー,文具,文房具,開く,办公,打开,打开文件夹,文件,文件夹,文具"
+        "keywords": "file,folder,open,オフィス,ファイル,フォルダー,文具,文房具,開く,办公,打开,打开文件夹,文件,文件夹"
       },
       {
         "unicode": "1f5c2-fe0f",
@@ -9500,7 +9500,7 @@
         "description": "Pick",
         "description_ja_jp": "つるはし",
         "description_zh_cn": "铁镐",
-        "keywords": "hammer,mining,tool,工具,採掘,工具,挖,挖掘,采矿,锄头,鹤嘴锄"
+        "keywords": "hammer,mining,tool,工具,採掘,挖,挖掘,采矿,锄头,鹤嘴锄"
       },
       {
         "unicode": "2692-fe0f",
@@ -9528,7 +9528,7 @@
         "description": "Crossed Swords",
         "description_ja_jp": "クロスした剣",
         "description_zh_cn": "交叉放置的剑",
-        "keywords": "crossed,swords,weapon,つるぎ,刀,剣,武器,交叉,剑,十字,双剑,战死,武器"
+        "keywords": "crossed,swords,weapon,つるぎ,刀,剣,武器,交叉,剑,十字,双剑,战死"
       },
       {
         "unicode": "1f4a3",
@@ -9549,7 +9549,7 @@
         "description": "Bow and Arrow",
         "description_ja_jp": "弓矢",
         "description_zh_cn": "弓和箭",
-        "keywords": "archer,archery,arrow,bow,sagittarius,tool,weapon,zodiac,射手,射手座,弓,星座,武器,矢,人马座,射手,射箭,弓箭,箭"
+        "keywords": "archer,archery,arrow,bow,sagittarius,tool,weapon,zodiac,射手,射手座,弓,星座,武器,矢,人马座,射箭,弓箭,箭"
       },
       {
         "unicode": "1f6e1-fe0f",
@@ -9675,14 +9675,14 @@
         "description": "Alembic",
         "description_ja_jp": "蒸留器",
         "description_zh_cn": "蒸馏器",
-        "keywords": "chemistry,tool,化学,実験,净化,化学,实验,工具,蒸馏"
+        "keywords": "chemistry,tool,化学,実験,净化,实验,工具,蒸馏"
       },
       {
         "unicode": "1f9ea",
         "description": "Test Tube",
         "description_ja_jp": "試験管",
         "description_zh_cn": "试管",
-        "keywords": "chemist,chemistry,experiment,lab,science,ラボ,化学,化学者,実験,科学,化学家,实验,实验室,科学"
+        "keywords": "chemist,chemistry,experiment,lab,science,ラボ,化学,化学者,実験,科学,化学家,实验,实验室"
       },
       {
         "unicode": "1f9eb",
@@ -10152,7 +10152,7 @@
         "description": "No Littering",
         "description_ja_jp": "ポイ捨て禁止",
         "description_zh_cn": "禁止乱扔垃圾",
-        "keywords": "forbidden,litter,no,not,prohibited,ごみ,ゴミ,ゴミ捨て禁止,標識,禁止,严禁,垃圾,禁丢垃圾,禁止"
+        "keywords": "forbidden,litter,no,not,prohibited,ごみ,ゴミ,ゴミ捨て禁止,標識,禁止,严禁,垃圾,禁丢垃圾"
       },
       {
         "unicode": "1f6b1",
@@ -10180,7 +10180,7 @@
         "description": "No One Under Eighteen",
         "description_ja_jp": "18歳未満禁止",
         "description_zh_cn": "18禁",
-        "keywords": "age,eighteen,forbidden,no,not,prohibited,restriction,underage,年齢制限,未成年,標識,禁止,儿童不宜,未成年人不宜,禁止"
+        "keywords": "age,eighteen,forbidden,no,not,prohibited,restriction,underage,年齢制限,未成年,標識,禁止,儿童不宜,未成年人不宜"
       },
       {
         "unicode": "2622-fe0f",
@@ -10243,7 +10243,7 @@
         "description": "Left Arrow",
         "description_ja_jp": "左矢印",
         "description_zh_cn": "向左箭头",
-        "keywords": "arrow,cardinal,direction,west,左,矢印,西,方向,标识,箭头,西"
+        "keywords": "arrow,cardinal,direction,west,左,矢印,西,方向,标识,箭头"
       },
       {
         "unicode": "2196-fe0f",
@@ -10348,7 +10348,7 @@
         "description": "Place of Worship",
         "description_ja_jp": "礼拝所",
         "description_zh_cn": "宗教场所",
-        "keywords": "pray,religion,worship,宗教,礼拝,祈り,地点,宗教,崇拜,敬神,礼拜,祈祷"
+        "keywords": "pray,religion,worship,宗教,礼拝,祈り,地点,崇拜,敬神,礼拜,祈祷"
       },
       {
         "unicode": "269b-fe0f",
@@ -10362,7 +10362,7 @@
         "description": "Om",
         "description_ja_jp": "オーム",
         "description_zh_cn": "奥姆",
-        "keywords": "hindu,religion,ヒンズー教,ヒンドゥー教,宗教,印度,印度教,唵,宗教"
+        "keywords": "hindu,religion,ヒンズー教,ヒンドゥー教,宗教,印度,印度教,唵"
       },
       {
         "unicode": "2721-fe0f",
@@ -10957,7 +10957,7 @@
         "description": "Copyright",
         "description_ja_jp": "著作権マーク",
         "description_zh_cn": "版权",
-        "keywords": "c,cマーク,コピーライト,マーク,著作権,記号,著作権"
+        "keywords": "c,cマーク,コピーライト,マーク,著作権,記号"
       },
       {
         "unicode": "00ae-fe0f",
@@ -11090,7 +11090,7 @@
         "description": "Input Numbers",
         "description_ja_jp": "数字の入力",
         "description_zh_cn": "输入数字",
-        "keywords": "input,numbers,入力,数字,打字,数字"
+        "keywords": "input,numbers,入力,数字,打字"
       },
       {
         "unicode": "1f523",
@@ -11146,7 +11146,7 @@
         "description": "FREE Button",
         "description_ja_jp": "FREEマーク",
         "description_zh_cn": "免费按钮",
-        "keywords": "button,free,タダ,フリー,無料,自由,不收费,免费,按钮,自由"
+        "keywords": "button,free,タダ,フリー,無料,自由,不收费,免费,按钮"
       },
       {
         "unicode": "2139-fe0f",
@@ -11174,7 +11174,7 @@
         "description": "NEW Button",
         "description_ja_jp": "NEWマーク",
         "description_zh_cn": "new按钮",
-        "keywords": "button,new,新,新しい,按键,新,新的"
+        "keywords": "button,new,新,新しい,按键,新的"
       },
       {
         "unicode": "1f196",
@@ -11244,14 +11244,14 @@
         "description": "Japanese “Monthly Amount” Button",
         "description_ja_jp": "月マーク",
         "description_zh_cn": "日文的“月总量”按钮",
-        "keywords": "ideograph,japanese,monthly amount,monthly amount,月,月極,月額,按键,日文,月度,统计,表意文字"
+        "keywords": "ideograph,japanese,monthly amount,月,月極,月額,按键,日文,月度,统计,表意文字"
       },
       {
         "unicode": "1f236",
         "description": "Japanese “Not Free of Charge” Button",
         "description_ja_jp": "有マーク",
         "description_zh_cn": "日文的“收费”按钮",
-        "keywords": "ideograph,japanese,not free of charge,not free of charge,有,有料,有限,按键,日文,表意文字,要收费,费用"
+        "keywords": "ideograph,japanese,not free of charge,有,有料,有限,按键,日文,表意文字,要收费,费用"
       },
       {
         "unicode": "1f22f",
@@ -11307,7 +11307,7 @@
         "description": "Japanese “Passing Grade” Button",
         "description_ja_jp": "合マーク",
         "description_zh_cn": "日文的“合格”按钮",
-        "keywords": "ideograph,japanese,passing grade,passing grade,合,合格,及格,按键,日文,表意文字,过关,通过"
+        "keywords": "ideograph,japanese,passing grade,合,合格,及格,按键,日文,表意文字,过关,通过"
       },
       {
         "unicode": "1f233",
@@ -11335,14 +11335,14 @@
         "description": "Japanese “Open for Business” Button",
         "description_ja_jp": "営マーク",
         "description_zh_cn": "日文的“开始营业”按钮",
-        "keywords": "ideograph,japanese,open for business,open for business,営,営業中,営業日,开门,按键,日文,营,营业,营业中,表意文字"
+        "keywords": "ideograph,japanese,open for business,営,営業中,営業日,开门,按键,日文,营,营业,营业中,表意文字"
       },
       {
         "unicode": "1f235",
         "description": "Japanese “No Vacancy” Button",
         "description_ja_jp": "満マーク",
         "description_zh_cn": "日文的“没有空位”按钮",
-        "keywords": "ideograph,japanese,no vacancy,no vacancy,満員,満室,満席,満車,座位,按键,日文,满,表意文字"
+        "keywords": "ideograph,japanese,no vacancy,満員,満室,満席,満車,座位,按键,日文,满,表意文字"
       },
       {
         "unicode": "1f534",
@@ -11426,7 +11426,7 @@
         "description": "Yellow Square",
         "description_ja_jp": "黄色い四角",
         "description_zh_cn": "黄色方块",
-        "keywords": "square,yellow,四角,正方形,黄色,方块,方框,黄,黄色"
+        "keywords": "square,yellow,四角,正方形,黄色,方块,方框,黄"
       },
       {
         "unicode": "1f7e9",

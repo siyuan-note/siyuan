@@ -175,36 +175,53 @@ The overall program is located under `/opt/siyuan/`, which is basically the stru
 
 #### Entrypoint
 
-The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan/kernel" ]`, use `docker run b3log/siyuan` with parameters to start:
+The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]`. This script allows changing the `PUID` and `PGID` of the user that will run inside the container. This is especially relevant to solve permission issues when mounting directories from the host. The `PUID` (User ID) and `PGID` (Group ID) can be passed as environment variables, making it easier to ensure correct permissions when accessing host-mounted directories.
+
+Use the following parameters when running the container with `docker run b3log/siyuan`:
 
 * `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
 * `--accessAuthCode`: Specifies the access authorization code
 
-More parameters can refer to `--help`. The following is an example of a startup command:
+More parameters can be found using `--help`. Here’s an example of a startup command with the new environment variables:
 
-```
-docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container --accessAuthCode=xxx
+```bash
+docker run -d \
+  -v workspace_dir_host:workspace_dir_container \
+  -p 6806:6806 \
+  -e PUID=1001 -e PGID=1002 \
+  b3log/siyuan \
+  --workspace=workspace_dir_container \
+  --accessAuthCode=xxx
 ```
 
+* `PUID`: Custom user ID (optional, defaults to `1000` if not provided)
+* `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
 * `workspace_dir_host`: The workspace folder path on the host
-* `workspace_dir_container`: The path of the workspace folder in the container, which is the same as specified in `--workspace`
-* `accessAuthCode`: Access authorization code, please **be sure to modify**, otherwise anyone can read and write your data
+* `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
+* `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
 
-To simplify, it is recommended to configure the workspace folder path to be consistent on the host and container, such as: `workspace_dir_host` and `workspace_dir_container` are configured as `/siyuan/workspace`, the corresponding startup commands is:
+To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
 
+```bash
+docker run -d \
+  -v /siyuan/workspace:/siyuan/workspace \
+  -p 6806:6806 \
+  -e PUID=1001 -e PGID=1002 \
+  b3log/siyuan \
+  --workspace=/siyuan/workspace/ \
+  --accessAuthCode=xxx
 ```
-docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
-```
 
-Alternatively, see below for an example Docker Compose file:
+#### Docker Compose
 
-```
+For users running Siyuan with Docker Compose, the environment variables `PUID` and `PGID` can be passed to customize the user and group IDs. Here's an example of a Docker Compose configuration:
+
+```yaml
 version: "3.9"
 services:
   main:
     image: b3log/siyuan
     command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
-    user: '1000:1000'
     ports:
       - 6806:6806
     volumes:
@@ -212,12 +229,27 @@ services:
     restart: unless-stopped
     environment:
       # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - TZ=${TimeZone}
+      - TZ=${YOUR_TIME_ZONE}
+      - PUID=${YOUR_USER_PUID}  # Customize user ID
+      - PGID=${YOUR_USER_PGID}  # Customize group ID
 ```
 
-#### User permissions
+In this setup:
 
-In the image, the normal user `siyuan` (uid 1000/gid 1000) created by default is used to start the kernel process. Therefore, when the host creates a workspace folder, please pay attention to setting the user group of the folder:  `chown -R 1000:1000 /siyuan/workspace`. The parameter `-u 1000:1000` is required when starting the container.
+* `PUID` and `PGID` are set dynamically and passed to the container
+* If these variables are not provided, the default `1000` will be used
+
+By specifying `PUID` and `PGID` in the environment, you avoid the need to explicitly set the `user` directive (`user: '1000:1000'`) in the compose file. The container will dynamically adjust the user and group based on these environment variables at startup.
+
+#### User Permissions
+
+In the image, the `entrypoint.sh` script ensures the creation of the `siyuan` user and group with the specified `PUID` and `PGID`. Therefore, when the host creates a workspace folder, pay attention to setting the user and group ownership of the folder to match the `PUID` and `PGID` you plan to use. For example:
+
+```bash
+chown -R 1001:1002 /siyuan/workspace
+```
+
+If you use custom `PUID` and `PGID` values, the entrypoint script will ensure that the correct user and group are created inside the container, and ownership of mounted volumes will be adjusted accordingly. There’s no need to manually pass `-u` in `docker run` or `docker-compose` as the environment variables will handle the customization.
 
 #### Hidden port
 
@@ -229,6 +261,7 @@ Use NGINX reverse proxy to hide port 6806, please note:
 
 * Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted
 * Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy
+* If you encounter permission issues, verify that the `PUID` and `PGID` environment variables match the ownership of the mounted directories on your host system
 
 #### Limitations
 

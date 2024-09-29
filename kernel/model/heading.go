@@ -118,6 +118,10 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath string, err error) {
+	if !ast.IsNodeIDPattern(srcID) || !ast.IsNodeIDPattern(targetID) {
+		return
+	}
+
 	srcTree, _ := LoadTreeByBlockID(srcID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
@@ -136,9 +140,14 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		}
 	}
 
+	if nil == treenode.GetBlockTree(targetID) {
+		// 目标块不存在时忽略处理
+		return
+	}
+
 	targetTree, _ := LoadTreeByBlockID(targetID)
 	if nil == targetTree {
-		err = ErrBlockNotFound
+		// 目标块不存在时忽略处理
 		return
 	}
 

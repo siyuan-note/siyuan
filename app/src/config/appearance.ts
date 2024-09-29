@@ -121,7 +121,12 @@ export const appearance = {
 <div class="b3-label fn__flex config__item">
     <div class="fn__flex-1 fn__flex-center">
         ${window.siyuan.languages.codeSnippet}
+        <div class="b3-label__text">${window.siyuan.languages.codeSnippetTip}</div>
     </div>
+    <span class="fn__space"></span>
+    <a class="b3-button b3-button--outline fn__flex-center fn__size200${"zh_CN" !== window.siyuan.config.lang ? " fn__none" : ""}" target="_blank" href="https://ld246.com/tag/code-snippet">
+        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.visitCommunityShare}
+    </a>
     <span class="fn__space"></span>
     <button class="b3-button b3-button--outline fn__flex-center fn__size200" id="codeSnippet">
         <svg><use xlink:href="#iconSettings"></use></svg>${window.siyuan.languages.config}

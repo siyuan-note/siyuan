@@ -225,18 +225,19 @@ export const saveLayout = () => {
     }
 };
 
-export const exportLayout = (options: {
+export const exportLayout = async (options: {
     cb: () => void,
     errorExit: boolean
 }) => {
+    const editors = getAllModels().editor;
+    for (let i = 0; i < editors.length; i++) {
+        await saveScroll(editors[i].editor.protyle);
+    }
     if (isWindow()) {
         const layoutJSON: any = {
             layout: {},
         };
         layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-        getAllModels().editor.forEach(item => {
-            saveScroll(item.editor.protyle);
-        });
         sessionStorage.setItem("layout", JSON.stringify(layoutJSON));
         options.cb();
         return;
@@ -253,10 +254,6 @@ export const exportLayout = (options: {
         right: dockToJSON(window.siyuan.layout.rightDock),
     };
     layoutToJSON(window.siyuan.layout.layout, layoutJSON.layout);
-    getAllModels().editor.forEach(item => {
-        saveScroll(item.editor.protyle);
-    });
-
     if (window.siyuan.config.readonly) {
         options.cb();
     } else {

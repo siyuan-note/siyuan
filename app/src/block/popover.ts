@@ -9,6 +9,7 @@ import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
 
 let popoverTargetElement: HTMLElement;
+let notebookItemElement: HTMLElement | false;
 export const initBlockPopover = (app: App) => {
     let timeout: number;
     let timeoutHide: number;
@@ -87,11 +88,30 @@ export const initBlockPopover = (app: App) => {
                 hideTooltip();
             }
         } else if (!aElement) {
-            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
-            if (!tipElement || (
-                tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
-            )) {
-                hideTooltip();
+            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
+                showTooltip(notebookItemElement.getAttribute("aria-label") || "", notebookItemElement);
+                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
+                    const boxData = response.data.boxInfo;
+                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
+
+                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+                    if (notebookItemElement && scopeNotebookItemElement && notebookItemElement.isSameNode(scopeNotebookItemElement)) {
+                        showTooltip(tip, notebookItemElement);
+                    }
+                    if (scopeNotebookItemElement &&
+                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
+                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
+                        scopeNotebookItemElement.setAttribute("aria-label", tip);
+                    }
+                });
+            } else {
+                const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
+                if (!tipElement || (
+                    tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
+                )) {
+                    hideTooltip();
+                }
             }
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {
@@ -233,6 +253,9 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                 if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false") {
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
+                    } else if (item.targetElement && item.targetElement.classList.contains("protyle-wysiwyg__embed") &&
+                        item.targetElement.contains(targetElement)) {
+                        // 点击嵌入块后浮窗消失后再快速点击嵌入块无法弹出浮窗 https://github.com/siyuan-note/siyuan/issues/12511
                     } else {
                         item.destroy();
                     }

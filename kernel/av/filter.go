@@ -313,15 +313,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return false
 			}
 
-			if nil != relativeDate {
-				// 使用相对时间比较
-
-				count := relativeDate.Count
-				unit := relativeDate.Unit
-				direction := relativeDate.Direction
-				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				_, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
-				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, relativeTimeStart, relativeTimeEnd, relativeTimeEnd2, operator)
+			if nil != relativeDate { // 使用相对时间比较
+				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+				return filterRelativeTime(value.Date.Content, value.Date.IsNotEmpty, relativeTimeStart, relativeTimeEnd, relativeTimeStart2, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Date {
 					return true
@@ -331,14 +326,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeCreated:
 		if nil != value.Created {
-			if nil != relativeDate {
-				// 使用相对时间比较
-
-				count := relativeDate.Count
-				unit := relativeDate.Unit
-				direction := relativeDate.Direction
-				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterRelativeTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+			if nil != relativeDate { // 使用相对时间比较
+				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+				return filterRelativeTime(value.Created.Content, true, relativeTimeStart, relativeTimeEnd, relativeTimeStart2, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Created {
 					return true
@@ -348,14 +339,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeUpdated:
 		if nil != value.Updated {
-			if nil != relativeDate {
-				// 使用相对时间比较
-
-				count := relativeDate.Count
-				unit := relativeDate.Unit
-				direction := relativeDate.Direction
-				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(count, unit, direction)
-				return filterRelativeTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, time.Now(), operator)
+			if nil != relativeDate { // 使用相对时间比较
+				relativeTimeStart, relativeTimeEnd := calcRelativeTimeRegion(relativeDate.Count, relativeDate.Unit, relativeDate.Direction)
+				relativeTimeStart2, relativeTimeEnd2 := calcRelativeTimeRegion(relativeDate2.Count, relativeDate2.Unit, relativeDate2.Direction)
+				return filterRelativeTime(value.Updated.Content, true, relativeTimeStart, relativeTimeEnd, relativeTimeStart2, relativeTimeEnd2, operator)
 			} else { // 使用具体时间比较
 				if nil == other.Updated {
 					return true
@@ -582,7 +569,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	return false
 }
 
-func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherValueEnd, otherValueEnd2 time.Time, operator FilterOperator) bool {
+func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, otherValueStart, otherValueEnd, otherValueStart2, otherValueEnd2 time.Time, operator FilterOperator) bool {
 	valueTime := time.UnixMilli(valueMills)
 	switch operator {
 	case FilterOperatorIsEqual:
@@ -598,7 +585,7 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, otherValueStart,
 	case FilterOperatorIsLessOrEqual:
 		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
-		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2))
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueStart2)
 	case FilterOperatorIsEmpty:
 		return !valueIsNotEmpty
 	case FilterOperatorIsNotEmpty:

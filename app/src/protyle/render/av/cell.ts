@@ -170,8 +170,16 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 }
             };
         } else if (colType === "date") {
-            const dateObj = dayjs(value)
-            if (isNaN(dateObj.valueOf())) {
+            let values = value.split("→");
+            if (values.length !== 2) {
+                values = value.split("-");
+                if (values.length !== 2) {
+                    values = value.split("~");
+                }
+            }
+            const dateObj1 = dayjs(values[0]);
+            const dateObj2 = dayjs(values[1] || "");
+            if (isNaN(dateObj1.valueOf())) {
                 cellValue = {
                     type: colType,
                     date: {
@@ -188,13 +196,13 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                 cellValue = {
                     type: colType,
                     date: {
-                        content: dateObj.valueOf(),
+                        content: dateObj1.valueOf(),
                         isNotEmpty: true,
-                        content2: 0,
+                        content2: dateObj2.valueOf() || 0,
+                        isNotEmpty2: !isNaN(dateObj2.valueOf()),
+                        hasEndDate: !isNaN(dateObj2.valueOf()),
+                        isNotTime: dateObj1.hour() === 0,
                         formattedContent: "",
-                        isNotEmpty2: false,
-                        hasEndDate: false,
-                        isNotTime: dateObj.hour() === 0,
                     }
                 };
             }
@@ -285,9 +293,11 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
                 if (rowElement) {
                     const stickyElement = rowElement.querySelector(".av__colsticky");
                     if (stickyElement) {
-                        const stickyRight = stickyElement.getBoundingClientRect().right;
-                        if (stickyRight > cellRect.left) {
-                            avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                        if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
+                            const stickyRight = stickyElement.getBoundingClientRect().right;
+                            if (stickyRight > cellRect.left) {
+                                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                            }
                         }
                     } else if (avScrollRect.left > cellRect.left) {
                         avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
@@ -487,6 +497,14 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     });
     avMaskElement.addEventListener("contextmenu", (event) => {
         removeAvMask(event);
+    });
+    avMaskElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+        if (event.button === 1) {
+            if (event.target.classList.contains("av__mask") && document.activeElement && document.activeElement.nodeType === 1) {
+                (document.activeElement as HTMLElement).blur();
+            }
+            removeAvMask(event);
+        }
     });
 };
 

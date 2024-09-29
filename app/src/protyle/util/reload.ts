@@ -54,7 +54,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
         getDocByScroll({
             protyle,
             focus,
-            scrollAttr: saveScroll(protyle, true),
+            scrollAttr: saveScroll(protyle, true) as IScrollAttr,
             updateReadonly
         });
     }

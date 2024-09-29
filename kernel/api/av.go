@@ -606,8 +606,16 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	rowID := arg["rowID"].(string)
 	cellID := arg["cellID"].(string)
 	value := arg["value"].(interface{})
-	blockAttributeViewKeys := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, cellID, value)
-	ret.Data = blockAttributeViewKeys
+	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, cellID, value)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"value": updatedVal,
+	}
 
 	model.ReloadAttrView(avID)
 }

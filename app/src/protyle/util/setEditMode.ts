@@ -16,6 +16,9 @@ export const setEditMode = (protyle: IProtyle, type: TEditorMode) => {
             protyle.breadcrumb.toggleExit(true);
         }
         protyle.preview.render(protyle);
+        /// #if !MOBILE
+        updateOutline(getAllModels(), protyle, true);
+        /// #endif
     } else if (type === "wysiwyg") {
         if (!protyle.contentElement.classList.contains("fn__none")) {
             return;

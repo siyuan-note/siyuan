@@ -179,7 +179,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             }
         });
         const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-        const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
+        const selectedElement = menuElement.querySelector(".b3-chips");
+        const oldChipsHeight = selectedElement ? selectedElement.clientHeight : 0;
         if (!cellElements) {
             menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
             bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -205,13 +206,16 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             menuElement.innerHTML = getSelectHTML(data.view, cellElements);
             bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         }
-        menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+        if (selectedElement) {
+            menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+        }
     });
     if (menu.isOpen) {
         return;
     }
     menu.addItem({
         iconHTML: "",
+        type: "readonly",
         label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`,
         bind(element) {
             element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
@@ -255,7 +259,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     }
                 });
                 const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-                const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;
+                const selectedElement = menuElement.querySelector(".b3-chips");
+                const oldChipsHeight = selectedElement?selectedElement.clientHeight:0;
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                     bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -281,7 +286,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     menuElement.innerHTML = getSelectHTML(data.view, cellElements);
                     bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
                 }
-                menuElement.querySelector(".b3-menu__items").scrollTop =  oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+                if (selectedElement) {
+                    menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+                }
             });
         }
     });
@@ -541,7 +548,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         menuElement.innerHTML = getSelectHTML(data.view, cellElements);
         bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
         menuElement.querySelector("input").focus();
-        menuElement.querySelector(".b3-menu__items").scrollTop =  oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
+        menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
     }
 };
 

@@ -192,6 +192,11 @@ interface Window {
     destroyTheme(): Promise<void>
 }
 
+interface filesPath {
+    notebookId: string,
+    openPaths: string[]
+}
+
 interface IPosition {
     x: number,
     y: number,
@@ -204,6 +209,7 @@ interface ISaveLayout {
     name: string,
     layout: IObject
     time: number
+    filesPaths: filesPath[]
 }
 
 interface IWorkspace {
@@ -552,7 +558,7 @@ interface IOpenFileOptions {
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
-    afterOpen?: () => void // 打开后回调
+    afterOpen?: (model?: import("../layout/Model").Model) => void // 打开后回调
 }
 
 interface ILayoutOptions {
@@ -662,6 +668,7 @@ interface IBlock {
     name?: string;
     memo?: string;
     alias?: string;
+    tag?: string;
     refs?: IBlock[];
     children?: IBlock[]
     length?: number

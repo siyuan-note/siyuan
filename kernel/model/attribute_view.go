@@ -75,6 +75,23 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			v.UpdatedAt = now
 
 			keyValues.Values = append(keyValues.Values, v)
+
+			if av.KeyTypeSelect == v.Type || av.KeyTypeMSelect == v.Type {
+				// 保存选项 https://github.com/siyuan-note/siyuan/issues/12475
+				key, _ := attrView.GetKey(v.KeyID)
+				if nil != key && 0 < len(v.MSelect) {
+					for _, valOpt := range v.MSelect {
+						if opt := key.GetOption(valOpt.Content); nil == opt {
+							// 不存在的选项新建保存
+							opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+							key.Options = append(key.Options, opt)
+						} else {
+							// 已经存在的选项颜色需要保持不变
+							valOpt.Color = opt.Color
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -528,6 +545,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeCreated})
 			case av.KeyTypeUpdated:
 				kValues.Values = append(kValues.Values, &av.Value{ID: ast.NewNodeID(), KeyID: kValues.Key.ID, BlockID: blockID, Type: av.KeyTypeUpdated})
+			case av.KeyTypeNumber:
+				for _, v := range kValues.Values {
+					if nil != v.Number {
+						v.Number.Format = kValues.Key.NumberFormat
+						v.Number.FormatNumber()
+					}
+				}
 			}
 
 			if 0 < len(kValues.Values) {
@@ -1651,7 +1675,7 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 }
 
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewName(operation)
+	err := tx.setAttributeViewName(operation)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -1660,7 +1684,7 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 
 const attrAvNameTpl = `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
 
-func setAttributeViewName(operation *Operation) (err error) {
+func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	avID := operation.ID
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
@@ -1670,7 +1694,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
 
-	_, nodes := getAttrViewBoundNodes(attrView)
+	_, nodes := tx.getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
@@ -1707,7 +1731,7 @@ func getAvNames(avIDs string) (ret string) {
 	return
 }
 
-func getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
+func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
 	treeCache := map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
@@ -1718,7 +1742,11 @@ func getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nod
 		var tree *parse.Tree
 		tree = treeCache[blockKeyValue.BlockID]
 		if nil == tree {
-			tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
+			if nil == tx {
+				tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
+			} else {
+				tree, _ = tx.loadTree(blockKeyValue.BlockID)
+			}
 		}
 		if nil == tree {
 			continue
@@ -2954,11 +2982,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -2978,7 +3006,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	}
 
 	now := time.Now().UnixMilli()
-	var val *av.Value
 	oldIsDetached := true
 	if nil != blockVal {
 		oldIsDetached = blockVal.IsDetached
@@ -3024,9 +3051,13 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 	key, _ := attrView.GetKey(keyID)
 
 	if av.KeyTypeNumber == val.Type {
-		if nil != val.Number && !val.Number.IsNotEmpty {
-			val.Number.Content = 0
-			val.Number.FormattedContent = ""
+		if nil != val.Number {
+			if !val.Number.IsNotEmpty {
+				val.Number.Content = 0
+				val.Number.FormattedContent = ""
+			} else {
+				val.Number.FormatNumber()
+			}
 		}
 	} else if av.KeyTypeDate == val.Type {
 		if nil != val.Date && !val.Date.IsNotEmpty {

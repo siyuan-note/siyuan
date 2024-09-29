@@ -763,7 +763,6 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(node)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
@@ -820,14 +819,14 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 	}
 
 	if needSyncDel2AvBlock {
-		syncDelete2AvBlock(node)
+		syncDelete2AvBlock(node, tree, tx)
 	}
 	return
 }
 
-func syncDelete2AvBlock(node *ast.Node) {
+func syncDelete2AvBlock(node *ast.Node, nodeTree *parse.Tree, tx *Transaction) {
 	changedAvIDs := syncDelete2AttributeView(node)
-	avIDs := syncDelete2Block(node)
+	avIDs := tx.syncDelete2Block(node, nodeTree)
 	changedAvIDs = append(changedAvIDs, avIDs...)
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 
@@ -836,7 +835,7 @@ func syncDelete2AvBlock(node *ast.Node) {
 	}
 }
 
-func syncDelete2Block(node *ast.Node) (changedAvIDs []string) {
+func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (changedAvIDs []string) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
@@ -858,7 +857,7 @@ func syncDelete2Block(node *ast.Node) (changedAvIDs []string) {
 			return ast.WalkContinue
 		}
 
-		trees, nodes := getAttrViewBoundNodes(attrView)
+		trees, nodes := tx.getAttrViewBoundNodes(attrView)
 		for _, toChangNode := range nodes {
 			avs := toChangNode.IALAttr(av.NodeAttrNameAvs)
 			if "" != avs {
@@ -875,8 +874,13 @@ func syncDelete2Block(node *ast.Node) (changedAvIDs []string) {
 			toChangNode.SetIALAttr(av.NodeAttrViewNames, avNames)
 			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
 		}
+
+		nodeTreeID := nodeTree.ID
 		for _, tree := range trees {
-			indexWriteTreeUpsertQueue(tree)
+			self := nodeTreeID == tree.ID
+			if !self {
+				indexWriteTreeUpsertQueue(tree)
+			}
 		}
 		return ast.WalkContinue
 	})
@@ -1082,7 +1086,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	// 收集引用的定义块 ID
 	refDefIDs := getRefDefIDs(insertedNode)
 	// 推送定义节点引用计数
-	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	for _, defID := range refDefIDs {
 		defTree, _ := LoadTreeByBlockID(defID)
 		if nil != defTree {
@@ -1233,9 +1236,13 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 
 		if treenode.IsBlockRef(n) {
 			refDefIDs = append(refDefIDs, n.TextMarkBlockRefID)
+		} else if treenode.IsEmbedBlockRef(n) {
+			defID := treenode.GetEmbedBlockRef(n)
+			refDefIDs = append(refDefIDs, defID)
 		}
 		return ast.WalkContinue
 	})
+	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
 	return
 }
 

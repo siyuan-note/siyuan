@@ -3,8 +3,11 @@ import {genUUID} from "../util/genID";
 import {
     fixWndFlex1,
     getInstanceById,
-    getWndByLayout, JSONToCenter,
-    newModelByInitData, pdfIsLoading, saveLayout,
+    getWndByLayout,
+    JSONToCenter,
+    newModelByInitData,
+    pdfIsLoading,
+    saveLayout,
     setPanelFocus,
     switchWnd
 } from "./util";
@@ -20,7 +23,7 @@ import {
 } from "../protyle/util/hasClosest";
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {webFrame, ipcRenderer} from "electron";
+import {ipcRenderer, webFrame} from "electron";
 import {setModelsHash, setTabPosition} from "../window/setHeader";
 /// #endif
 import {Search} from "../search";
@@ -198,20 +201,29 @@ export class Wnd {
             }
         });
         let dragleaveTimeout: number;
+        let headerDragCounter = 0;
         this.headersElement.parentElement.addEventListener("dragleave", function () {
-            clearTimeout(dragleaveTimeout);
-            // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
-            dragleaveTimeout = window.setTimeout(() => {
-                document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
-                    item.remove();
-                });
-            }, 1000);
-            const it = this as HTMLElement;
-            it.classList.remove("layout-tab-bars--drag");
+            headerDragCounter--;
+            if (headerDragCounter === 0) {
+                clearTimeout(dragleaveTimeout);
+                // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
+                dragleaveTimeout = window.setTimeout(() => {
+                    document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                        item.remove();
+                    });
+                }, 1000);
+                const it = this as HTMLElement;
+                it.classList.remove("layout-tab-bars--drag");
+            }
+        });
+        this.headersElement.parentElement.addEventListener("dragenter", (event) => {
+            event.preventDefault();
+            headerDragCounter++;
         });
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
         }) {
+            headerDragCounter = 0;
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽

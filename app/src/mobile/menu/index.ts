@@ -170,9 +170,9 @@ export const initRightMenu = (app: App) => {
                 event.stopPropagation();
                 break;
             } else if (target.id === "menuSafeQuit") {
-                exitSiYuan();
                 event.preventDefault();
                 event.stopPropagation();
+                exitSiYuan();
                 break;
             } else if (target.id === "menuAbout") {
                 initAbout();

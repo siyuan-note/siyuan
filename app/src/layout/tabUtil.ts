@@ -253,13 +253,13 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
-                const newAction: string[] = []
+                const newAction: string[] = [];
                 // https://github.com/siyuan-note/siyuan/issues/12132
                 tab.model.editor.protyle.block.action.forEach(item => {
                     if (item !== Constants.CB_GET_APPEND && item !== Constants.CB_GET_BEFORE && item !== Constants.CB_GET_HTML) {
-                        newAction.push(item)
+                        newAction.push(item);
                     }
-                })
+                });
                 model = new Editor({
                     app,
                     tab: newTab,

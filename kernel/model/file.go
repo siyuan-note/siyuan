@@ -37,7 +37,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
-	"github.com/facette/natsort"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -181,10 +180,11 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		boxes[box.ID] = box
 	}
 
+	keywords := strings.Fields(keyword)
 	var rootBlocks []*sql.Block
-	if "" != keyword {
+	if 0 < len(keywords) {
 		for _, box := range boxes {
-			if strings.Contains(box.Name, keyword) {
+			if gulu.Str.Contains(box.Name, keywords) {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
@@ -196,13 +196,18 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			}
 		}
 
-		condition := "hpath LIKE '%" + keyword + "%'"
-		if "" != keyword {
-			namCondition := Conf.Search.NAMFilter(keyword)
-			if "" != namCondition {
-				condition += " " + namCondition
+		var condition string
+		for i, k := range keywords {
+			condition += "(hpath LIKE '%" + k + "%'"
+			namCondition := Conf.Search.NAMFilter(k)
+			condition += " " + namCondition
+			condition += ")"
+
+			if i < len(keywords)-1 {
+				condition += " AND "
 			}
 		}
+
 		rootBlocks = sql.QueryRootBlockByCondition(condition)
 	} else {
 		for _, box := range boxes {
@@ -388,11 +393,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	switch sortMode {
 	case util.SortModeNameASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
+			return util.PinYinCompare(docs[i].Name, docs[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
+			return util.PinYinCompare(docs[j].Name, docs[i].Name)
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })
@@ -400,11 +405,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime > docs[j].Mtime })
 	case util.SortModeAlphanumASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(docs[i].Name), util.RemoveEmojiInvisible(docs[j].Name))
+			return util.NaturalCompare(docs[i].Name, docs[j].Name)
 		})
 	case util.SortModeAlphanumDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return natsort.Compare(util.RemoveEmojiInvisible(docs[j].Name), util.RemoveEmojiInvisible(docs[i].Name))
+			return util.NaturalCompare(docs[j].Name, docs[i].Name)
 		})
 	case util.SortModeCustom:
 		fileTreeFiles := docs
@@ -805,12 +810,16 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 
 	var keywords []string
-	if "" != query && (0 == queryMethod || 1 == queryMethod) { // 只有关键字搜索和查询语法搜索才支持高亮
+	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
 		if 0 == queryMethod {
 			query = stringQuery(query)
 		}
 		typeFilter := buildTypeFilter(queryTypes)
-		keywords = highlightByQuery(query, typeFilter, rootID)
+		if 0 == queryMethod || 1 == queryMethod {
+			keywords = highlightByFTS(query, typeFilter, rootID)
+		} else {
+			keywords = highlightByRegexp(query, typeFilter, rootID)
+		}
 	}
 
 	for _, n := range nodes {
@@ -1066,18 +1075,22 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
 func writeTreeIndexQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
@@ -1092,11 +1105,13 @@ func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.RenameTreeQueue(tree)
 	treenode.UpsertBlockTree(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
@@ -1160,7 +1175,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (retID string, err error) {
+func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1178,6 +1193,19 @@ func CreateWithMarkdown(boxID, hPath, md, parentID, id string, withMath bool) (r
 	luteEngine.SetHTMLTag2TextMark(true)
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
+
+	nameValues := map[string]string{}
+	tags = strings.TrimSpace(tags)
+	tags = strings.ReplaceAll(tags, "，", ",")
+	tagArray := strings.Split(tags, ",")
+	var tmp []string
+	for _, tag := range tagArray {
+		tmp = append(tmp, strings.TrimSpace(tag))
+	}
+	tags = strings.Join(tmp, ",")
+	nameValues["tags"] = tags
+	SetBlockAttrs(retID, nameValues)
+
 	WaitForWritingFiles()
 	return
 }
@@ -1682,7 +1710,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 			continue
 		}
 
-		syncDelete2AvBlock(removeTree.Root)
+		syncDelete2AvBlock(removeTree.Root, removeTree, nil)
 	}
 
 	if existChildren {
@@ -1713,6 +1741,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	}
 	util.PushEvent(evt)
 
+	refreshParentDocInfo(tree)
 	task.AppendTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
 }
 
@@ -1748,7 +1777,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 	if "" == title {
-		title = Conf.language(105)
+		title = Conf.language(16)
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
@@ -1786,7 +1815,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = strings.ReplaceAll(title, "/", "")
 	title = strings.TrimSpace(title)
 	if "" == title {
-		title = Conf.Language(105)
+		title = Conf.Language(16)
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))

@@ -5,7 +5,7 @@ import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "./transaction";
 import {mathRender} from "../render/mathRender";
 import {highlightRender} from "../render/highlightRender";
-import {getContenteditableElement, getNextBlock, hasNextSibling, isNotEditBlock} from "./getBlock";
+import {getContenteditableElement, hasNextSibling, isNotEditBlock} from "./getBlock";
 import {genEmptyBlock} from "../../block/util";
 import {blockRender} from "../render/blockRender";
 import {hideElements} from "../ui/hideElements";
@@ -54,13 +54,20 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     const wbrElement: HTMLElement = document.createElement("wbr");
     range.insertNode(wbrElement);
-    if (event && event.inputType === "deleteContentForward") {
+    if (event) {
         const wbrNextElement = hasNextSibling(wbrElement) as HTMLElement;
-        if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
-            const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
-            if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
-                wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
+        if (event.inputType === "deleteContentForward") {
+            if (wbrNextElement && wbrNextElement.nodeType === 1 && !wbrNextElement.textContent.startsWith(Constants.ZWSP)) {
+                const nextType = (wbrNextElement.getAttribute("data-type") || "").split(" ");
+                if (nextType.includes("code") || nextType.includes("kbd") || nextType.includes("tag")) {
+                    wbrNextElement.insertAdjacentElement("afterbegin", wbrElement);
+                }
             }
+        }
+        // https://github.com/siyuan-note/siyuan/issues/12468
+        if ((event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") &&
+            wbrNextElement && wbrNextElement.nodeType === 1 && wbrNextElement.tagName === "BR") {
+            wbrNextElement.remove();
         }
     }
     const id = blockElement.getAttribute("data-node-id");
@@ -116,8 +123,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     let focusHR = false;
     if (["---", "___", "***"].includes(editElement.textContent) && type !== "NodeCodeBlock") {
         html = `<div data-node-id="${id}" data-type="NodeThematicBreak" class="hr"><div></div></div>`;
-        const nextBlockElement = getNextBlock(editElement);
-        if (nextBlockElement) {
+        // https://github.com/siyuan-note/siyuan/issues/12593
+        const nextBlockElement = blockElement.nextElementSibling;
+        if (nextBlockElement && nextBlockElement.getAttribute("data-node-id")) {
             if (!isNotEditBlock(nextBlockElement)) {
                 focusBlock(nextBlockElement);
             } else {

@@ -376,7 +376,7 @@ func BazaarThemes(keyword string) (ret []*bazaar.Theme) {
 	installs = append(installs, Conf.Appearance.LightThemes...)
 	for _, installed := range installs {
 		for _, theme := range ret {
-			if installed == theme.Name {
+			if installed.Name == theme.Name {
 				theme.Installed = true
 				if themeConf, err := bazaar.ThemeJSON(theme.Name); err == nil {
 					theme.Outdated = 0 > semver.Compare("v"+themeConf.Version, "v"+theme.Version)

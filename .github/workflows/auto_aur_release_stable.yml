@@ -36,6 +36,7 @@ jobs:
           # PKGBUILD is modified from https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=siyuan-appimage
           # which is made by vvxxp8 <concatenate[g] the characters[x] in square[b] brackets[1] in[5] order[3] at gmail dot com>
           # had agreement with the author to use the PKGBUILD
+          # for change request, PLEASE MAKE A PR ON GITHUB REPO, keep commenting here would be ignored
 
           pkgname=siyuan-bin
           pkgver=${{ steps.get_version_without_v.outputs.TAG_VERSION_WITHOUT_V }}

@@ -178,36 +178,53 @@
 
 #### 启动入口
 
-构建 Docker 镜像时设置了入口：`ENTRYPOINT [ "/opt/siyuan/kernel" ]`，使用 `docker run b3log/siyuan` 并带参即可启动：
+入口点在构建 Docker 镜像时设置：`ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]`。该脚本允许更改将在容器内运行的用户的 `PUID` 和 `PGID`。这对于解决从主机挂载目录时的权限问题尤为重要。`PUID` 和 `PGID` 可以作为环境变量传递，这样在访问主机挂载的目录时就能更容易地确保正确的权限。
+
+使用 `docker run b3log/siyuan` 运行容器时，请带入以下参数：
 
 * `--workspace`：指定工作空间文件夹路径，在宿主机上通过 `-v` 挂载到容器中
 * `--accessAuthCode`：指定访问授权码
 
 更多的参数可参考 `--help`。下面是一条启动命令示例：
 
-```
-docker run -d -v workspace_dir_host:workspace_dir_container -p 6806:6806 b3log/siyuan --workspace=workspace_dir_container --accessAuthCode=xxx
+```bash
+docker run -d \
+  -v workspace_dir_host:workspace_dir_container \
+  -p 6806:6806 \
+  -e PUID=1001 -e PGID=1002 \
+  b3log/siyuan \
+  --workspace=workspace_dir_container \
+  --accessAuthCode=xxx
 ```
 
+* `PUID`: 自定义用户 ID（可选，如果未提供，默认为 `1000`）
+* `PGID`: 自定义组 ID（可选，如果未提供，默认为 `1000`）
 * `workspace_dir_host`：宿主机上的工作空间文件夹路径
 * `workspace_dir_container`：容器内工作空间文件夹路径，和后面 `--workspace` 指定成一样的
 * `accessAuthCode`：访问授权码，请**务必修改**，否则任何人都可以读写你的数据
 
 为了简化，建议将 workspace 文件夹路径在宿主机和容器上配置为一致的，比如将 `workspace_dir_host` 和 `workspace_dir_container` 都配置为 `/siyuan/workspace`，对应的启动命令示例：
 
-```
-docker run -d -v /siyuan/workspace:/siyuan/workspace -p 6806:6806 -u 1000:1000 b3log/siyuan --workspace=/siyuan/workspace/ --accessAuthCode=xxx
+```bash
+docker run -d \
+  -v /siyuan/workspace:/siyuan/workspace \
+  -p 6806:6806 \
+  -e PUID=1001 -e PGID=1002 \
+  b3log/siyuan \
+  --workspace=/siyuan/workspace/ \
+  --accessAuthCode=xxx
 ```
 
-使用 Docker Compose 部署请参考下面的示例：
+#### Docker Compose
 
-```
+对于使用 Docker Compose 运行思源的用户，可以通过环境变量 `PUID` 和 `PGID` 来自定义用户和组的 ID。下面是一个 Docker Compose 配置示例：
+
+```yaml
 version: "3.9"
 services:
   main:
     image: b3log/siyuan
     command: ['--workspace=/siyuan/workspace/', '--accessAuthCode=${AuthCode}']
-    user: '1000:1000'
     ports:
       - 6806:6806
     volumes:
@@ -215,12 +232,27 @@ services:
     restart: unless-stopped
     environment:
       # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
-      - TZ=${TimeZone}
+      - TZ=${YOUR_TIME_ZONE}
+      - PUID=${YOUR_USER_PUID}  # 自定义用户 ID
+      - PGID=${YOUR_USER_PGID}  # 自定义组 ID
 ```
+
+在此设置中：
+
+* PUID “和 ”PGID "是动态设置并传递给容器的
+* 如果没有提供这些变量，将使用默认的 `1000`
+
+在环境中指定 `PUID` 和 `PGID` 后，就无需在组成文件中明确设置 `user` 指令（`user: '1000:1000'`）。容器将在启动时根据这些环境变量动态调整用户和组。
 
 #### 用户权限
 
-镜像中是使用默认创建的普通用户 `siyuan`（uid 1000/gid 1000）来启动内核进程的，所以在宿主机创建工作空间文件夹时请注意设置该文件夹所属用户组：`chown -R 1000:1000 /siyuan/workspace`，在启动容器时需要带参数 `-u 1000:1000`。
+在图片中，“entrypoint.sh ”脚本确保以指定的 “PUID ”和 “PGID ”创建 “siyuan ”用户和组。因此，当主机创建工作区文件夹时，请注意设置文件夹的用户和组所有权，使其与计划使用的 `PUID` 和 `PGID` 匹配。例如
+
+```bash
+chown -R 1001:1002 /siyuan/workspace
+```
+
+如果使用自定义的 `PUID` 和 `PGID` 值，入口点脚本将确保在容器内创建正确的用户和组，并相应调整挂载卷的所有权。无需在 `docker run` 或 `docker-compose` 中手动传递 `-u`，因为环境变量会处理自定义。
 
 #### 隐藏端口
 

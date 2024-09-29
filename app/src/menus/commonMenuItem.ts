@@ -447,10 +447,12 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
 
 export const exportMd = (id: string) => {
     return new MenuItem({
+        id: "export",
         label: window.siyuan.languages.export,
         type: "submenu",
         icon: "iconUpload",
         submenu: [{
+            id: "exportTemplate",
             label: window.siyuan.languages.template,
             iconClass: "ft__error",
             icon: "iconMarkdown",
@@ -520,6 +522,7 @@ export const exportMd = (id: string) => {
                 });
             }
         }, {
+            id: "exportMarkdown",
             label: "Markdown",
             icon: "iconMarkdown",
             click: () => {
@@ -532,6 +535,7 @@ export const exportMd = (id: string) => {
                 });
             }
         }, {
+            id: "exportSiYuanZip",
             label: "SiYuan .sy.zip",
             icon: "iconSiYuan",
             click: () => {
@@ -544,6 +548,7 @@ export const exportMd = (id: string) => {
                 });
             }
         }, {
+            id: "exportImage",
             label: window.siyuan.languages.image,
             icon: "iconImage",
             click: () => {
@@ -552,12 +557,14 @@ export const exportMd = (id: string) => {
         },
             /// #if !BROWSER
             {
+                id: "exportPDF",
                 label: "PDF",
                 icon: "iconPDF",
                 click: () => {
                     saveExport({type: "pdf", id});
                 }
             }, {
+                id: "exportHTML_SiYuan",
                 label: "HTML (SiYuan)",
                 iconClass: "ft__error",
                 icon: "iconHTML5",
@@ -565,22 +572,26 @@ export const exportMd = (id: string) => {
                     saveExport({type: "html", id});
                 }
             }, {
+                id: "exportHTML_Markdown",
                 label: "HTML (Markdown)",
                 icon: "iconHTML5",
                 click: () => {
                     saveExport({type: "htmlmd", id});
                 }
             }, {
+                id: "exportWord",
                 label: "Word .docx",
                 icon: "iconExact",
                 click: () => {
                     saveExport({type: "word", id});
                 }
             }, {
+                id: "exportMore",
                 label: window.siyuan.languages.more,
                 icon: "iconMore",
                 type: "submenu",
                 submenu: [{
+                    id: "exportReStructuredText",
                     label: "reStructuredText",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -592,6 +603,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportAsciiDoc",
                     label: "AsciiDoc",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -603,6 +615,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportTextile",
                     label: "Textile",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -614,6 +627,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportOPML",
                     label: "OPML",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -625,6 +639,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportOrgMode",
                     label: "Org-Mode",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -636,6 +651,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportMediaWiki",
                     label: "MediaWiki",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -647,6 +663,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportODT",
                     label: "ODT",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -658,6 +675,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportRTF",
                     label: "RTF",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -669,6 +687,7 @@ export const exportMd = (id: string) => {
                         });
                     }
                 }, {
+                    id: "exportEPUB",
                     label: "EPUB",
                     click: () => {
                         const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -814,6 +833,7 @@ export const renameMenu = (options: {
     type: "notebook" | "file"
 }) => {
     return new MenuItem({
+        id: "rename",
         accelerator: window.siyuan.config.keymap.editor.general.rename.custom,
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
@@ -825,6 +845,7 @@ export const renameMenu = (options: {
 
 export const movePathToMenu = (paths: string[]) => {
     return new MenuItem({
+        id: "move",
         label: window.siyuan.languages.move,
         icon: "iconMove",
         accelerator: window.siyuan.config.keymap.general.move.custom,

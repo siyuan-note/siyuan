@@ -62,6 +62,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/exportLog", model.CheckAuth, model.CheckAdminRole, exportLog)
 	ginServer.Handle("POST", "/api/system/getChangelog", model.CheckAuth, getChangelog)
 	ginServer.Handle("POST", "/api/system/getNetwork", model.CheckAuth, model.CheckAdminRole, getNetwork)
+	ginServer.Handle("POST", "/api/system/exportConf", model.CheckAuth, model.CheckAdminRole, exportConf)
+	ginServer.Handle("POST", "/api/system/importConf", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importConf)
 
 	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorage)
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)
@@ -88,6 +90,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/notebook/renameNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameNotebook)
 	ginServer.Handle("POST", "/api/notebook/changeSortNotebook", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, changeSortNotebook)
 	ginServer.Handle("POST", "/api/notebook/setNotebookIcon", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setNotebookIcon)
+	ginServer.Handle("POST", "/api/notebook/getNotebookInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getNotebookInfo)
 
 	ginServer.Handle("POST", "/api/filetree/searchDocs", model.CheckAuth, searchDocs)
 	ginServer.Handle("POST", "/api/filetree/listDocsByPath", model.CheckAuth, listDocsByPath)

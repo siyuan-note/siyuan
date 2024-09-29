@@ -180,10 +180,11 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 		boxes[box.ID] = box
 	}
 
+	keywords := strings.Fields(keyword)
 	var rootBlocks []*sql.Block
-	if "" != keyword {
+	if 0 < len(keywords) {
 		for _, box := range boxes {
-			if strings.Contains(box.Name, keyword) {
+			if gulu.Str.Contains(box.Name, keywords) {
 				if flashcard {
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countBoxFlashcard(box.ID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
@@ -195,13 +196,18 @@ func SearchDocsByKeyword(keyword string, flashcard bool) (ret []map[string]strin
 			}
 		}
 
-		condition := "hpath LIKE '%" + keyword + "%'"
-		if "" != keyword {
-			namCondition := Conf.Search.NAMFilter(keyword)
-			if "" != namCondition {
-				condition += " " + namCondition
+		var condition string
+		for i, k := range keywords {
+			condition += "(hpath LIKE '%" + k + "%'"
+			namCondition := Conf.Search.NAMFilter(k)
+			condition += " " + namCondition
+			condition += ")"
+
+			if i < len(keywords)-1 {
+				condition += " AND "
 			}
 		}
+
 		rootBlocks = sql.QueryRootBlockByCondition(condition)
 	} else {
 		for _, box := range boxes {
@@ -1069,18 +1075,22 @@ func loadNodesByMode(node *ast.Node, inputIndex, mode, size int, isDoc, isHeadin
 }
 
 func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.UpsertTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
 func writeTreeIndexQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
@@ -1095,11 +1105,13 @@ func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
 }
 
 func renameWriteJSONQueue(tree *parse.Tree) (err error) {
-	if err = filesys.WriteTree(tree); err != nil {
+	size, err := filesys.WriteTree(tree)
+	if err != nil {
 		return
 	}
 	sql.RenameTreeQueue(tree)
 	treenode.UpsertBlockTree(tree)
+	refreshDocInfo(tree, size)
 	return
 }
 
@@ -1698,7 +1710,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 			continue
 		}
 
-		syncDelete2AvBlock(removeTree.Root)
+		syncDelete2AvBlock(removeTree.Root, removeTree, nil)
 	}
 
 	if existChildren {
@@ -1729,6 +1741,7 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	}
 	util.PushEvent(evt)
 
+	refreshParentDocInfo(tree)
 	task.AppendTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
 }
 
@@ -1764,7 +1777,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 	if "" == title {
-		title = Conf.language(105)
+		title = Conf.language(16)
 	}
 	title = strings.ReplaceAll(title, "/", "")
 
@@ -1802,7 +1815,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	title = strings.ReplaceAll(title, "/", "")
 	title = strings.TrimSpace(title)
 	if "" == title {
-		title = Conf.Language(105)
+		title = Conf.Language(16)
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))

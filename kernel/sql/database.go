@@ -752,7 +752,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 
 		var src []byte
 		for _, attr := range nodes[0].Attr {
-			if "src" == attr.Key || "data-assets" == attr.Key || "custom-data-assets" == attr.Key {
+			if "src" == attr.Key || strings.HasPrefix(attr.Key, "data-assets") || strings.HasPrefix(attr.Key, "custom-data-assets") {
 				src = gulu.Str.ToBytes(attr.Val)
 				break
 			}

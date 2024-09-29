@@ -19,7 +19,6 @@ package model
 import (
 	"bytes"
 	"fmt"
-	"github.com/siyuan-note/siyuan/kernel/task"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -41,6 +40,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/mod/semver"
@@ -51,7 +51,7 @@ var Conf *AppConf
 
 // AppConf 维护应用元数据，保存在 ~/.siyuan/conf.json。
 type AppConf struct {
-	LogLevel       string           `json:"logLevel"`       // 日志级别：Off, Trace, Debug, Info, Warn, Error, Fatal
+	LogLevel       string           `json:"logLevel"`       // 日志级别：off, trace, debug, info, warn, error, fatal
 	Appearance     *conf.Appearance `json:"appearance"`     // 外观
 	Langs          []*conf.Lang     `json:"langs"`          // 界面语言列表
 	Lang           string           `json:"lang"`           // 选择的界面语言，同 Appearance.Lang
@@ -87,6 +87,10 @@ type AppConf struct {
 	m *sync.Mutex
 }
 
+func NewAppConf() *AppConf {
+	return &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
+}
+
 func (conf *AppConf) GetUILayout() *conf.UILayout {
 	conf.m.Lock()
 	defer conf.m.Unlock()
@@ -114,7 +118,7 @@ func (conf *AppConf) SetUser(user *conf.User) {
 func InitConf() {
 	initLang()
 
-	Conf = &AppConf{LogLevel: "debug", m: &sync.Mutex{}}
+	Conf = NewAppConf()
 	confPath := filepath.Join(util.ConfDir, "conf.json")
 	if gulu.File.IsExist(confPath) {
 		if data, err := os.ReadFile(confPath); err != nil {

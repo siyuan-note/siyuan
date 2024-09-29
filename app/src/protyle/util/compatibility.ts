@@ -6,12 +6,16 @@ export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
     }
-    if (window.siyuan.config.system.container === "ios") {
-        try {
-            new URL(uri);
-            window.location.href = uri;
-        } catch (e) {
-            window.location.href = "https://" + uri;
+    if (isInIOS()) {
+        if (uri.startsWith("assets/")) {
+            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/" + uri);
+        } else {
+            try {
+                new URL(uri);
+                window.webkit.messageHandlers.openLink.postMessage(uri);
+            } catch (e) {
+                window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
+            }
         }
     } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
@@ -292,11 +296,10 @@ export const getLocalStorage = (cb: () => void) => {
     });
 };
 
-export const setStorageVal = (key: string, val: any, cb?:()=>void) => {
+export const setStorageVal = (key: string, val: any, cb?: () => void) => {
     if (window.siyuan.config.readonly) {
         return;
     }
-
     fetchPost("/api/storage/setLocalStorageVal", {
         app: Constants.SIYUAN_APPID,
         key,

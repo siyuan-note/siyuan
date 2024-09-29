@@ -43,7 +43,8 @@ export const reloadSync = (
     hideMsg = true,
     // 同步的时候需要更新只读状态 https://github.com/siyuan-note/siyuan/issues/11517
     // 调整大纲的时候需要使用现有状态 https://github.com/siyuan-note/siyuan/issues/11808
-    updateReadonly = true
+    updateReadonly = true,
+    onlyUpdateDoc = false
 ) => {
     if (hideMsg) {
         hideMessage();
@@ -124,11 +125,13 @@ export const reloadSync = (
             }
         }
     });
-    allModels.files.forEach(item => {
-        setNoteBook(() => {
-            item.init(false);
+    if (onlyUpdateDoc) {
+        allModels.files.forEach(item => {
+            setNoteBook(() => {
+                item.init(false);
+            });
         });
-    });
+    }
     allModels.bookmark.forEach(item => {
         item.update();
     });
@@ -171,7 +174,7 @@ export const setDefRefCount = (data: {
     getAllEditor().forEach(item => {
         if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
             const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
-            const countElement = attrElement.querySelector(".popover__block");
+            const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove();
@@ -277,11 +280,11 @@ export const kernelError = () => {
     }
 };
 
-export const exitSiYuan = () => {
+export const exitSiYuan = async () => {
     hideAllElements(["util"]);
     /// #if MOBILE
     if (window.siyuan.mobile.editor) {
-        saveScroll(window.siyuan.mobile.editor.protyle);
+        await saveScroll(window.siyuan.mobile.editor.protyle);
     }
     /// #endif
     fetchPost("/api/system/exit", {force: false}, (response) => {

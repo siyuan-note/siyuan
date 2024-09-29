@@ -1675,7 +1675,7 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 }
 
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
-	err := setAttributeViewName(operation)
+	err := tx.setAttributeViewName(operation)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
@@ -1684,7 +1684,7 @@ func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 
 const attrAvNameTpl = `<span data-av-id="${avID}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block">${avName}</span>`
 
-func setAttributeViewName(operation *Operation) (err error) {
+func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	avID := operation.ID
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
@@ -1694,7 +1694,7 @@ func setAttributeViewName(operation *Operation) (err error) {
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	err = av.SaveAttributeView(attrView)
 
-	_, nodes := getAttrViewBoundNodes(attrView)
+	_, nodes := tx.getAttrViewBoundNodes(attrView)
 	for _, node := range nodes {
 		avNames := getAvNames(node.IALAttr(av.NodeAttrNameAvs))
 		oldAttrs := parse.IAL2Map(node.KramdownIAL)
@@ -1731,7 +1731,7 @@ func getAvNames(avIDs string) (ret string) {
 	return
 }
 
-func getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
+func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
 	treeCache := map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
@@ -1742,7 +1742,11 @@ func getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nod
 		var tree *parse.Tree
 		tree = treeCache[blockKeyValue.BlockID]
 		if nil == tree {
-			tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
+			if nil == tx {
+				tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
+			} else {
+				tree, _ = tx.loadTree(blockKeyValue.BlockID)
+			}
 		}
 		if nil == tree {
 			continue

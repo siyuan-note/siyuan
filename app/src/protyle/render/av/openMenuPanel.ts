@@ -488,6 +488,11 @@ export const openMenuPanel = (options: {
                 window.siyuan.dragElement = undefined;
             }
         });
+        avPanelElement.addEventListener("mousedown", (event: MouseEvent & { target: HTMLElement }) => {
+            if (event.button === 1 && !hasClosestByClassName(event.target, "b3-menu")) {
+                document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}));
+            }
+        });
         avPanelElement.addEventListener("click", (event: MouseEvent) => {
             let type: string;
             if (typeof event.detail === "string") {

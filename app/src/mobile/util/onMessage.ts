@@ -31,6 +31,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "setConf":
                 window.siyuan.config = data.data;
                 break;
+            case "reloaddoc":
+                reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false, true);
+                break;
             case "readonly":
                 window.siyuan.config.editor.readOnly = data.data;
                 break;

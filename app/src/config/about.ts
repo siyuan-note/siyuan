@@ -184,7 +184,7 @@ ${checkUpdateHTML}
             <option value="http" ${window.siyuan.config.system.networkProxy.scheme === "http" ? "selected" : ""}>HTTP</option>
         </select>
         <span class="fn__space"></span>
-        <input id="aboutHost" placeholder="Host/IP" class="b3-text-field fn__block" value="${window.siyuan.config.system.networkProxy.host}"/>
+        <input id="aboutHost" placeholder="user:pass@IP" class="b3-text-field fn__block" value="${window.siyuan.config.system.networkProxy.host}"/>
         <span class="fn__space"></span>
         <input id="aboutPort" placeholder="Port" class="b3-text-field fn__block" value="${window.siyuan.config.system.networkProxy.port}" type="number"/>
         <span class="fn__space"></span>

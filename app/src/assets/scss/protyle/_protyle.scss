@@ -252,15 +252,12 @@
     .protyle-title {
       transition: margin .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
-
-    .protyle-background__iconw {
-      transition: left .3s cubic-bezier(.25, .46, .45, .94) 0ms;
-    }
   }
 }
 
-.protyle-top:hover {
-  .protyle-background--enable .protyle-background__action {
+.protyle-top:hover .protyle-background--enable {
+  .protyle-background__action,
+  .protyle-background__img .protyle-icons {
     opacity: .86;
   }
 }
@@ -276,7 +273,7 @@
   }
 
   &--mobileshow {
-    .protyle-background__iconw > .protyle-icons,
+    .protyle-background__action,
     .protyle-background__img .protyle-icons {
       opacity: .86;
     }

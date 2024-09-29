@@ -623,6 +623,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             const tdElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
             const nodeEditableElement = (tdElement || getContenteditableElement(nodeElement) || nodeElement) as HTMLElement;
             const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
+            if (nodeElement.classList.contains("code-block") && position.end === nodeEditableElement.innerText.length) {
+                // 代码块换最后一个 /n 肉眼是无法区分是否在其后的，因此统一在之前
+                position.end -= 1;
+
+            }
             // 需使用 innerText 否则表格内 br 无法传唤为 /n
             if (event.key === "ArrowDown" && nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 && (
                 (tdElement && !tdElement.parentElement.nextElementSibling && nodeElement.getAttribute("data-type") === "NodeTable" && !getNextBlock(nodeElement)) ||
@@ -643,7 +648,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     ) ||
                     (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
-                    if (getSelectionPosition(nodeElement, range).top - parseInt(getComputedStyle(nodeElement).paddingTop) - protyle.wysiwyg.element.getBoundingClientRect().top < 40 || nodeElement.classList.contains("av")) {
+                    if (getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20 || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
                             (protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") === "1" ||
                                 protyle.contentElement.scrollTop === 0)) {
@@ -658,7 +663,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else {
-                    if (nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1 || (!isMac() && position.start === 0)) {
+                    if (((nodeEditableElement?.innerText.substr(0, position.end).indexOf("\n") === -1 || position.start === 0) &&
+                        getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20)) {
                         let previousElement: HTMLElement = getPreviousBlock(nodeElement) as HTMLElement;
                         if (previousElement) {
                             previousElement = getLastBlock(previousElement) as HTMLElement;
@@ -727,17 +733,17 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     event.stopPropagation();
                     event.preventDefault();
-                } else if (nodeEditableElement?.innerText.substr(position.end).indexOf("\n") === -1) {
+                } else if (nodeEditableElement?.innerText.substr(position.end).indexOf("\n") === -1 || position.end >= nodeEditableElement.innerText.trimEnd().length) {
                     // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
-                    // 下一个块是折叠块
+                    range.collapse(false);
                     const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
                     if (nextFoldElement) {
-                        focusBlock(nextFoldElement);
-                        scrollCenter(protyle, nextFoldElement);
-                        event.stopPropagation();
-                        event.preventDefault();
-                    } else {
-                        range.collapse(false);
+                        if(nodeEditableElement.getBoundingClientRect().bottom - getSelectionPosition(nodeElement, range).top < 40) {
+                            focusBlock(nextFoldElement);
+                            scrollCenter(protyle, nextFoldElement);
+                            event.stopPropagation();
+                            event.preventDefault();
+                        }
                     }
                 }
             }
@@ -837,10 +843,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 nextSibling = nextSibling.nextSibling as Element;
                             }
                             if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
-                                removeImage(nextSibling as Element, nodeElement, range, protyle);
-                                event.stopPropagation();
-                                event.preventDefault();
-                                return;
+                                // 光标需在图片前 https://github.com/siyuan-note/siyuan/issues/12452
+                                const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range);
+                                if (textPosition.start === range.startContainer.textContent.length) {
+                                    removeImage(nextSibling as Element, nodeElement, range, protyle);
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                    return;
+                                }
                             }
                         }
                     }
@@ -882,7 +892,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const inlineElement = hasClosestByMatchTag(range.startContainer, "SPAN");
                     if (position.start === 2 && inlineElement &&
                         getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
-                        inlineElement.innerText.startsWith(Constants.ZWSP)) {
+                        inlineElement.innerText.startsWith(Constants.ZWSP) &&
+                        // 需排除行内代码前有一个字符的情况
+                        editElement.innerText.startsWith(Constants.ZWSP)) {
                         focusBlock(nodeElement);
                         event.stopPropagation();
                         event.preventDefault();
@@ -1424,7 +1436,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 id,
                                 type: isMatchList ? "TL2UL" : "TL2OL",
                             });
-                        } else if (isMatchCheck || isMatchOList) {
+                        } else if (subType === "u" && (isMatchCheck || isMatchOList)) {
                             turnsOneInto({
                                 protyle,
                                 nodeElement: selectsElement[0],

@@ -37,6 +37,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         window.siyuan.menus.menu.remove();
         window.siyuan.menus.menu.element.setAttribute("data-name", "titleMenu");
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
@@ -46,6 +47,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             window.siyuan.menus.menu.append(movePathToMenu([protyle.path]));
             const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "addToDatabase",
                 label: window.siyuan.languages.addToDatabase,
                 accelerator: window.siyuan.config.keymap.general.addToDatabase.custom,
                 icon: "iconDatabase",
@@ -54,6 +56,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "delete",
                 icon: "iconTrashcan",
                 label: window.siyuan.languages.delete,
                 click: () => {
@@ -62,8 +65,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }).element);
         }
         /// #if !MOBILE
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "outline",
             icon: "iconAlignCenter",
             label: window.siyuan.languages.outline,
             accelerator: window.siyuan.config.keymap.editor.general.outline.custom,
@@ -72,6 +76,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "backlinks",
             icon: "iconLink",
             label: window.siyuan.languages.backlinks,
             accelerator: window.siyuan.config.keymap.editor.general.backlinks.custom,
@@ -86,6 +91,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "graphView",
             icon: "iconGraph",
             label: window.siyuan.languages.graphView,
             accelerator: window.siyuan.config.keymap.editor.general.graphView.custom,
@@ -100,8 +106,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         /// #endif
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "attr",
             label: window.siyuan.languages.attr,
             icon: "iconAttr",
             accelerator: window.siyuan.config.keymap.editor.general.attr.custom + "/" + updateHotkeyTip("⇧" + window.siyuan.languages.click),
@@ -111,6 +118,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         }).element);
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "wechatReminder",
                 label: window.siyuan.languages.wechatReminder,
                 icon: "iconMp",
                 click() {
@@ -118,6 +126,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 }
             }).element);
             const riffCardMenu: IMenu[] = [{
+                id: "spaceRepetition",
                 iconHTML: "",
                 label: window.siyuan.languages.spaceRepetition,
                 accelerator: window.siyuan.config.keymap.editor.general.spaceRepetition.custom,
@@ -127,6 +136,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
+                id: "manage",
                 iconHTML: "",
                 label: window.siyuan.languages.manage,
                 click: () => {
@@ -137,6 +147,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     });
                 }
             }, {
+                id: "quickMakeCard",
                 iconHTML: "",
                 label: window.siyuan.languages.quickMakeCard,
                 accelerator: window.siyuan.config.keymap.editor.general.quickMakeCard.custom,
@@ -152,6 +163,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }];
             if (window.siyuan.config.flashcard.deck) {
                 riffCardMenu.push({
+                    id: "addToDeck",
                     iconHTML: "",
                     label: window.siyuan.languages.addToDeck,
                     click: () => {
@@ -160,6 +172,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 });
             }
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "riffCard",
                 label: window.siyuan.languages.riffCard,
                 type: "submenu",
                 icon: "iconRiffCard",
@@ -167,6 +180,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "search",
             label: window.siyuan.languages.search,
             icon: "iconSearch",
             accelerator: window.siyuan.config.keymap.general.search.custom,
@@ -196,10 +210,11 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         if (!protyle.disabled) {
             transferBlockRef(protyle.block.rootID);
         }
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
         /// #if !MOBILE
         if (!protyle.model) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
                 click() {
@@ -214,6 +229,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         /// #endif
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "openByNewWindow",
             label: window.siyuan.languages.openByNewWindow,
             icon: "iconOpenWindow",
             click() {
@@ -221,6 +237,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "showInFolder",
             icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click: () => {
@@ -230,6 +247,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         /// #endif
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "fileHistory",
                 label: window.siyuan.languages.fileHistory,
                 icon: "iconHistory",
                 click() {
@@ -256,8 +274,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                 separatorPosition: "top",
             });
         }
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "updateAndCreatedAt",
             iconHTML: "",
             type: "readonly",
             // 不能换行，否则移动端间距过大

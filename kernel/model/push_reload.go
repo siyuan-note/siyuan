@@ -17,9 +17,16 @@
 package model
 
 import (
+	"github.com/88250/lute"
+	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"os"
+	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -30,6 +37,68 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
+
+func refreshDocInfo(tree *parse.Tree, size uint64) {
+	refreshDocInfo0(tree, size)
+	refreshParentDocInfo(tree)
+}
+
+func refreshParentDocInfo(tree *parse.Tree) {
+	luteEngine := lute.New()
+	boxDir := filepath.Join(util.DataDir, tree.Box)
+	parentDir := path.Dir(tree.Path)
+	if parentDir == boxDir || parentDir == "/" {
+		return
+	}
+
+	parentPath := parentDir + ".sy"
+	parentTree, err := filesys.LoadTree(tree.Box, parentPath, luteEngine)
+	if err != nil {
+		return
+	}
+
+	renderer := render.NewJSONRenderer(parentTree, luteEngine.RenderOptions)
+	data := renderer.Render()
+	refreshDocInfo0(parentTree, uint64(len(data)))
+}
+
+func refreshDocInfo0(tree *parse.Tree, size uint64) {
+	cTime, _ := time.ParseInLocation("20060102150405", tree.ID[:14], time.Local)
+	mTime := cTime
+	if updated := tree.Root.IALAttr("updated"); "" != updated {
+		if updatedTime, err := time.ParseInLocation("20060102150405", updated, time.Local); err == nil {
+			mTime = updatedTime
+		}
+	}
+
+	subFileCount := 0
+	subFiles, err := os.ReadDir(filepath.Join(util.DataDir, tree.Box, strings.TrimSuffix(tree.Path, ".sy")))
+	if err == nil {
+		for _, subFile := range subFiles {
+			if "true" == tree.Root.IALAttr("custom-hidden") {
+				continue
+			}
+
+			if strings.HasSuffix(subFile.Name(), ".sy") {
+				subFileCount++
+			}
+		}
+	}
+
+	docInfo := map[string]interface{}{
+		"rootID":       tree.ID,
+		"name":         tree.Root.IALAttr("title"),
+		"size":         size,
+		"hSize":        humanize.BytesCustomCeil(size, 2),
+		"mtime":        mTime.Unix(),
+		"ctime":        cTime.Unix(),
+		"hMtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hCtime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+		"subFileCount": subFileCount,
+	}
+
+	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, util.PushReloadDocInfo, docInfo)
+}
 
 func refreshProtyle(rootID string) {
 	// 刷新关联的引用

@@ -58,8 +58,6 @@ type Box struct {
 	NewFlashcardCount int `json:"newFlashcardCount"`
 	DueFlashcardCount int `json:"dueFlashcardCount"`
 	FlashcardCount    int `json:"flashcardCount"`
-
-	historyGenerated int64 // 最近一次历史生成时间
 }
 
 func StatJob() {
@@ -381,6 +379,70 @@ func (box *Box) listFiles(files, ret *[]*FileInfo) {
 			*ret = append(*ret, file)
 		}
 	}
+	return
+}
+
+type BoxInfo struct {
+	ID       string `json:"id"`
+	Name     string `json:"name"`
+	DocCount int    `json:"docCount"`
+	Size     uint64 `json:"size"`
+	HSize    string `json:"hSize"`
+	Mtime    int64  `json:"mtime"`
+	CTime    int64  `json:"ctime"`
+	HMtime   string `json:"hMtime"`
+	HCtime   string `json:"hCtime"`
+}
+
+func (box *Box) GetInfo() (ret *BoxInfo) {
+	ret = &BoxInfo{
+		ID:   box.ID,
+		Name: box.Name,
+	}
+
+	fileInfos := box.ListFiles("/")
+
+	t, _ := time.ParseInLocation("20060102150405", box.ID[:14], time.Local)
+	ret.CTime = t.Unix()
+	ret.HCtime = t.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(t, Conf.Lang)
+
+	docLatestModTime := t
+	for _, fileInfo := range fileInfos {
+		if fileInfo.isdir {
+			continue
+		}
+
+		if strings.HasPrefix(fileInfo.name, ".") {
+			continue
+		}
+
+		if !strings.HasSuffix(fileInfo.path, ".sy") {
+			continue
+		}
+
+		id := strings.TrimSuffix(fileInfo.name, ".sy")
+		if !ast.IsNodeIDPattern(id) {
+			continue
+		}
+
+		absPath := filepath.Join(util.DataDir, box.ID, fileInfo.path)
+		info, err := os.Stat(absPath)
+		if err != nil {
+			logging.LogErrorf("stat [%s] failed: %s", absPath, err)
+			continue
+		}
+
+		ret.DocCount++
+		ret.Size += uint64(info.Size())
+		docModT := info.ModTime()
+		if docModT.After(docLatestModTime) {
+			docLatestModTime = docModT
+		}
+	}
+
+	ret.HSize = humanize.BytesCustomCeil(ret.Size, 2)
+	ret.Mtime = docLatestModTime.Unix()
+	ret.HMtime = docLatestModTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(docLatestModTime, Conf.Lang)
 	return
 }
 

@@ -347,6 +347,22 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
                         return true;
                     }
                 });
+                if (target.parentElement.classList.contains("b3-chip--current")) {
+                    updateConfig(element, {
+                        removed: true,
+                        sort: 0,
+                        group: 0,
+                        hasReplace: false,
+                        method: 0,
+                        hPath: "",
+                        idPath: [],
+                        k: "",
+                        r: "",
+                        page: 1,
+                        types: getDefaultType(),
+                        replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
+                    }, config);
+                }
                 if (target.parentElement.parentElement.childElementCount === 1) {
                     target.parentElement.parentElement.classList.add("fn__none");
                 }

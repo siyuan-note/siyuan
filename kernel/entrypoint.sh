@@ -19,7 +19,7 @@ fi
 
 # Get or create user
 user_name="${USER_NAME}"
-if id -u "${PUID}" > /dev/null 2>&1; then
+if getent passwd "${PUID}" > /dev/null 2>&1; then
     user_name=$(getent passwd "${PUID}" | cut -d: -f1)
     echo "Using existing user ${user_name} (PUID: ${PUID}, PGID: ${PGID})"
 else
@@ -31,6 +31,7 @@ fi
 echo "Adjusting ownership of /opt/siyuan and /home/siyuan/"
 chown -R "${PUID}:${PGID}" /opt/siyuan
 chown -R "${PUID}:${PGID}" /home/siyuan/
+chown -R "${PUID}:${PGID}" /siyuan/workspace
 
 # Switch to the newly created user and start the main process
 echo "Starting Siyuan with UID:${PUID} and GID:${PGID}"

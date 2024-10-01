@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20240119212048-0huuevw",
 		"title": "Ignore search",
-		"updated": "20240202105500"
+		"type": "doc",
+		"updated": "20241001011905"
 	},
 	"Children": [
 		{
@@ -43,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119212104-9fehl3c",
-				"updated": "20240119212108"
+				"updated": "20241001011905"
 			},
 			"Children": [
 				{
@@ -171,7 +172,7 @@
 			"IsFencedCodeBlock": true,
 			"Properties": {
 				"id": "20240119212104-tepuwbm",
-				"updated": "20240119212108"
+				"updated": "20241001011008"
 			},
 			"Children": [
 				{
@@ -183,11 +184,133 @@
 				},
 				{
 					"Type": "NodeCodeBlockCode",
-					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nid != '20200923234011-ieuun1p'\n"
+					"Data": "path NOT LIKE '/20210808180117-6v0mkxr%'\nbox != '20210808180117-czj9bvb'\nid != '20200923234011-ieuun1p'"
 				},
 				{
 					"Type": "NodeCodeBlockFenceCloseMarker",
 					"Data": "```"
+				}
+			]
+		},
+		{
+			"ID": "20241001011027-qi6o51q",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241001011027-qi6o51q",
+				"updated": "20241001011905"
+			},
+			"Children": [
+				{
+					"ID": "20241001011027-2kgpqv7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-2kgpqv7",
+						"updated": "20241001011838"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-rc5tn93",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-rc5tn93",
+								"updated": "20241001011838"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "path NOT LIKE '/20210808180117-6v0mkxr%'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches where the document path begins with ​/20210808180117-6v0mkxr"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001011027-jsngmc7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-jsngmc7",
+						"updated": "20241001011854"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-tn2cjwl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-tn2cjwl",
+								"updated": "20241001011854"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "box != '20210808180117-czj9bvb'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches under the notebook data/20210808180117-czj9bvb"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241001011027-02lmjzy",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241001011027-02lmjzy",
+						"updated": "20241001011905"
+					},
+					"Children": [
+						{
+							"ID": "20241001011027-qsadi2j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241001011027-qsadi2j",
+								"updated": "20241001011905"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "id != '20200923234011-ieuun1p'"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Ignore content block searches with id ​20200923234011-ieuun1p"
+								}
+							]
+						}
+					]
 				}
 			]
 		},

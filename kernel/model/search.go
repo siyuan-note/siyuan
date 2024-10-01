@@ -1419,6 +1419,17 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
+
+	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		buf := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			buf.WriteString(" AND ")
+			buf.WriteString(line)
+		}
+		stmt += buf.String()
+	}
+
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return

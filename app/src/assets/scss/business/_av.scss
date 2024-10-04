@@ -535,6 +535,8 @@
   }
 }
 
+// https://github.com/siyuan-note/siyuan/pull/12643
+// 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除 --av-background: 后面的 !important
 .protyle-wysiwyg--select {
   .av__container {
     --av-background: var(--b3-av-background-hl) !important;
@@ -557,10 +559,6 @@
   }
 }
 
-// https://github.com/siyuan-note/siyuan/pull/12643
-// 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除 --av-background: 后面的 !important
-
-// Define a map of all backgrounds and their corresponding selected state
 $backgrounds: (
   "font-background" 13,
   "card-error-background" 1,
@@ -568,37 +566,63 @@ $backgrounds: (
   "card-info-background" 1,
   "card-success-background" 1,
 );
-// Loop through each background to generate the corresponding styles
 @each $key, $count in $backgrounds {
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 外面
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-      // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 外面
       .protyle-wysiwyg--select .av__container,
       .protyle-wysiwyg--hl .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
-      // 带背景色的块 就是 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl
+    }
+  }
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 就是 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       &.protyle-wysiwyg--select .av__container,
       &.protyle-wysiwyg--hl .av__container{
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }
+  }
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
     // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 里面
     .protyle-wysiwyg--select,
     .protyle-wysiwyg--hl {
       [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
+    }
+  }
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 里面
+    .protyle-wysiwyg--select,
+    .protyle-wysiwyg--hl {
       &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }
+  }
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
     // 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 时按最近的父块背景色（包括数据库块本身）
     [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }
+  }
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 时按最近的父块背景色（包括数据库块本身）
     [data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }

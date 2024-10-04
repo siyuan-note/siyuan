@@ -7,7 +7,7 @@
 		"id": "20240530101000-mrlr6e9",
 		"title": "インデックスから除外",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20241001012007"
 	},
 	"Children": [
 		{
@@ -48,7 +48,7 @@
 			"Properties": {
 				"ID": "20240530101000-xgjmbei",
 				"id": "20240530101000-ky4bdz8",
-				"updated": "20240530101000"
+				"updated": "20241001012007"
 			},
 			"Children": [
 				{
@@ -78,6 +78,32 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ というテキストファイルを作成して編集します。各行が除外するパスとして機能する gitignore 構文をサポートしています:"
+				}
+			]
+		},
+		{
+			"ID": "20241001011425-32ydib4",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20241001011425-32ydib4",
+				"updated": "20241001011425"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
 				}
 			]
 		},
@@ -170,27 +196,18 @@
 			]
 		},
 		{
-			"ID": "20240530101000-3iwxa5b",
+			"ID": "20240530101000-6wnsued",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-2hze5e6",
-				"id": "20240530101000-3iwxa5b",
-				"updated": "20240530101000"
+				"id": "20240530101000-6wnsued",
+				"updated": "20241001012007"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "設定ファイルを変更した後は手動でインデックスを再構築する必要があります。"
+					"Data": "構成ファイルを変更して保存した後、手動でインデックスを再構築する必要があります。"
 				}
 			]
-		},
-		{
-			"ID": "20240530101000-6wnsued",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-yitptkt",
-				"id": "20240530101000-6wnsued"
-			}
 		}
 	]
 }

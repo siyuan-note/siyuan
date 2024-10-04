@@ -143,14 +143,33 @@ func extensionCopy(c *gin.Context) {
 				}
 
 				md = string(bodyData)
+				luteEngine.SetIndentCodeBlock(true) // 链滴支持缩进代码块，因此需要开启
 				tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
 				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 					if ast.NodeInlineMath == n.Type {
 						withMath = true
 						return ast.WalkStop
+					} else if ast.NodeCodeBlock == n.Type {
+						if !n.IsFencedCodeBlock {
+							// 将缩进代码块转换为围栏代码块
+							n.IsFencedCodeBlock = true
+							n.CodeBlockFenceChar = '`'
+							n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker})
+							n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
+							n.LastChild.InsertAfter(&ast.Node{Type: ast.NodeCodeBlockFenceCloseMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
+							code := n.ChildByType(ast.NodeCodeBlockCode)
+							if nil != code {
+								code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("    "))
+								code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n    "), []byte("\n"))
+								code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("\t"))
+								code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n\t"), []byte("\n"))
+							}
+						}
 					}
 					return ast.WalkContinue
 				})
+
+				md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 			}
 		}
 	}

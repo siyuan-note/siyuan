@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20240119205452-o8xp4ve",
 		"title": "忽略索引",
-		"updated": "20240202105353"
+		"type": "doc",
+		"updated": "20241001010441"
 	},
 	"Children": [
 		{
@@ -43,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119205942-35rq58s",
-				"updated": "20240119210019"
+				"updated": "20241001010441"
 			},
 			"Children": [
 				{
@@ -72,6 +73,32 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ 文本文件，其中每一行作为一个忽略路径，支持 gitignore 语法。例如："
+				}
+			]
+		},
+		{
+			"ID": "20240930233109-sv59af0",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20240930233109-sv59af0",
+				"updated": "20240930233133"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
 				}
 			]
 		},
@@ -165,12 +192,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240202105353-qaj8ahd",
-				"updated": "20240202105353"
+				"updated": "20241001010441"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "调整完以后需要手动重建索引。"
+					"Data": "配置文件修改保存后需要手动重建索引。"
 				}
 			]
 		}

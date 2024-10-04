@@ -31,7 +31,6 @@ import (
 	sqlparser2 "github.com/rqlite/sql"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func QueryEmptyContentEmbedBlocks() (ret []*Block) {
@@ -120,32 +119,6 @@ func queryBlockIDByParentID(parentID string) (ret []string) {
 		rows.Scan(&id)
 		ret = append(ret, id)
 	}
-	return
-}
-
-func QueryRecentUpdatedBlocks() (ret []*Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1 ORDER BY updated DESC LIMIT 16"
-	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
-		sqlStmt = "SELECT * FROM blocks WHERE type = 'd' ORDER BY updated DESC LIMIT 16"
-	}
-	rows, err := query(sqlStmt)
-	if err != nil {
-		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
-		return
-	}
-	defer rows.Close()
-	for rows.Next() {
-		if block := scanBlockRows(rows); nil != block {
-			ret = append(ret, block)
-		}
-	}
-	return
-}
-
-func QueryBlockByNameOrAlias(rootID, text string) (ret *Block) {
-	sqlStmt := "SELECT * FROM blocks WHERE root_id = ? AND (alias LIKE ? OR name = ?)"
-	row := queryRow(sqlStmt, rootID, "%"+text+"%", text)
-	ret = scanBlockRow(row)
 	return
 }
 

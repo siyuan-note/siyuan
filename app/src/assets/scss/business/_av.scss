@@ -581,7 +581,7 @@ $backgrounds: (
       [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
-      &[data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+      &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }
@@ -624,7 +624,7 @@ $backgrounds: (
       [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
-      &[data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+      &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }

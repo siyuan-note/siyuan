@@ -547,7 +547,6 @@ $backgrounds: (
   "card-info-background" 1,
   "card-success-background" 1,
 );
-
 // Loop through each background to generate the corresponding styles
 @each $key, $count in $backgrounds {
   @for $i from 1 through $count {
@@ -559,7 +558,33 @@ $backgrounds: (
   }
 }
 
-// .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 在带背景色的块外面
+// 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 外面
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select .av__container,
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl .av__container {
+      --av-background: var(#{$bg-select-variable}) !important;
+    }
+  }
+}
+
+// 带背景色的块 就是 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+
+    [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--select .av__container,
+    [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--hl .av__container {
+      --av-background: var(#{$bg-select-variable}) !important;
+    }
+  }
+}
+
+// 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 里面
 .protyle-wysiwyg--select {
   // https://github.com/siyuan-note/siyuan/pull/12643
   .av__container {
@@ -588,7 +613,6 @@ $backgrounds: (
     }
   }
 }
-
 .protyle-wysiwyg--hl {
   // https://github.com/siyuan-note/siyuan/pull/12643
   .av__container {
@@ -625,18 +649,6 @@ $backgrounds: (
       &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
-    }
-  }
-}
-
-// .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 在带背景色的块里面
-@each $key, $count in $backgrounds {
-  @for $i from 1 through $count {
-    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
-
-    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select .av__container,
-    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl .av__container {
-      --av-background: var(#{$bg-variable}) !important;
     }
   }
 }

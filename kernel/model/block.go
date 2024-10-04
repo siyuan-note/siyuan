@@ -17,6 +17,7 @@
 package model
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"strconv"
@@ -298,7 +299,23 @@ func IsBlockFolded(id string) (isFolded, isRoot bool) {
 func RecentUpdatedBlocks() (ret []*Block) {
 	ret = []*Block{}
 
-	sqlBlocks := sql.QueryRecentUpdatedBlocks()
+	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+		sqlStmt = "SELECT * FROM blocks WHERE type = 'd'"
+	}
+
+	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		buf := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			buf.WriteString(" AND ")
+			buf.WriteString(line)
+		}
+		sqlStmt += buf.String()
+	}
+
+	sqlStmt += " ORDER BY updated DESC"
+	sqlBlocks := sql.SelectBlocksRawStmt(sqlStmt, 1, 16)
 	if 1 > len(sqlBlocks) {
 		return
 	}

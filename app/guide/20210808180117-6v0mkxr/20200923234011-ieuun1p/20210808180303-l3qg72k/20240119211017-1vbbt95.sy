@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20240119211017-1vbbt95",
 		"title": "Ignore indexing",
-		"updated": "20240202105426"
+		"type": "doc",
+		"updated": "20241001011235"
 	},
 	"Children": [
 		{
@@ -43,7 +44,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240119211037-cjq7aer",
-				"updated": "20240119211121"
+				"updated": "20241001011235"
 			},
 			"Children": [
 				{
@@ -72,6 +73,32 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ text file on the file system, where each line serves as an ignore path and supports gitignore syntax. For example:"
+				}
+			]
+		},
+		{
+			"ID": "20241001010953-34lxthr",
+			"Type": "NodeCodeBlock",
+			"IsFencedCodeBlock": true,
+			"Properties": {
+				"id": "20241001010953-34lxthr",
+				"updated": "20241001010953"
+			},
+			"Children": [
+				{
+					"Type": "NodeCodeBlockFenceOpenMarker",
+					"Data": "```"
+				},
+				{
+					"Type": "NodeCodeBlockFenceInfoMarker"
+				},
+				{
+					"Type": "NodeCodeBlockCode",
+					"Data": "20210808180117-6v0mkxr/20200923234011-ieuun1p.sy\n20210808180117-6v0mkxr/**/*\n"
+				},
+				{
+					"Type": "NodeCodeBlockFenceCloseMarker",
+					"Data": "```"
 				}
 			]
 		},
@@ -165,12 +192,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240202105425-d8fq0vu",
-				"updated": "20240202105426"
+				"updated": "20241001011235"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "After the adjustment, you need to manually rebuild the index."
+					"Data": "You need to manually rebuild the index after modifying the configuration file."
 				}
 			]
 		}

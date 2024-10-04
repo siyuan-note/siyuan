@@ -1567,6 +1567,8 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	util.PushEndlessProgress(Conf.Language(65))
 
 	// 按文件夹结构复制选择的树
+	count := 0
+	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
 		data, readErr := filelock.ReadFile(readPath)
@@ -1586,6 +1588,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
 			continue
 		}
+		count++
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
 	}
 
 	// 引用树放在导出文件夹根路径下
@@ -1603,6 +1608,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			logging.LogErrorf("write export file [%s] failed: %s", writePath, writeErr)
 			continue
 		}
+		count++
+
+		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
 	}
 
 	// 将引用树合并到选择树中，以便后面一次性导出资源文件

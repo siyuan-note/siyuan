@@ -1742,13 +1742,26 @@ func removeDoc(box *Box, p string, luteEngine *lute.Lute) {
 	util.PushEvent(evt)
 
 	refreshParentDocInfo(tree)
-	task.AppendTask(task.DatabaseIndex, removeDoc0, box, p, childrenDir)
+	task.AppendTask(task.DatabaseIndex, removeDoc0, tree, childrenDir)
 }
 
-func removeDoc0(box *Box, p, childrenDir string) {
+func removeDoc0(tree *parse.Tree, childrenDir string) {
+	// 收集引用的定义块 ID
+	refDefIDs := getRefDefIDs(tree.Root)
+	// 推送定义节点引用计数
+	for _, defID := range refDefIDs {
+		defTree, _ := LoadTreeByBlockID(defID)
+		if nil != defTree {
+			defNode := treenode.GetNodeInTree(defTree, defID)
+			if nil != defNode {
+				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, defTree.ID, defNode.ID)
+			}
+		}
+	}
+
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)
-	sql.RemoveTreePathQueue(box.ID, childrenDir)
-	cache.RemoveDocIAL(p)
+	sql.RemoveTreePathQueue(tree.Box, childrenDir)
+	cache.RemoveDocIAL(tree.Path)
 	return
 }
 

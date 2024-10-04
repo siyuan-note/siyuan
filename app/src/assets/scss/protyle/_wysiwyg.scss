@@ -480,10 +480,14 @@
       @for $i from 1 through $count {
         $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
         $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
-  
+
         [data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
-            transition: var(--b3-background-transition);
+            background-color: #{$bg-select-variable} !important;
+          }
+        }
+        &[data-node-id] {
+          &[style*="background-color: #{$bg-variable}"] {
             background-color: #{$bg-select-variable} !important;
           }
         }
@@ -517,6 +521,12 @@
         $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
   
         [data-node-id] {
+          &[style*="background-color: #{$bg-variable}"] {
+            transition: var(--b3-background-transition);
+            background-color: #{$bg-select-variable} !important;
+          }
+        }
+        &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
             transition: var(--b3-background-transition);
             background-color: #{$bg-select-variable} !important;

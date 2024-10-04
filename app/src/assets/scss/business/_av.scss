@@ -556,31 +556,13 @@
       $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
       $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
 
-      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-        .av__row--header,
-        .av__row--footer,
-        .av__row--footer .av__colsticky,
-        .av__row--select .av__cell,
-        .av__colsticky.av__firstcol,
-        .av__colsticky > div,
-        .av__cell--select,
-        .av__cell--active,
-        .av__counter {
-          background-color: var(#{$bg-select-variable}) !important;
-        }
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+        // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+        --av-background: var(#{$bg-select-variable}) !important;
       }
-      &[data-node-id][style*="background-color: var(#{$bg-variable})"] {
-        .av__row--header,
-        .av__row--footer,
-        .av__row--footer .av__colsticky,
-        .av__row--select .av__cell,
-        .av__colsticky.av__firstcol,
-        .av__colsticky > div,
-        .av__cell--select,
-        .av__cell--active,
-        .av__counter {
-          background-color: var(#{$bg-select-variable}) !important;
-        }
+      &[data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+        // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+        --av-background: var(#{$bg-select-variable}) !important;
       }
     }
   }
@@ -616,32 +598,13 @@
       $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
       $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
 
-      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-        .av__row--header,
-        .av__row--footer,
-        .av__row--footer .av__colsticky,
-        .av__row--select .av__cell,
-        .av__colsticky.av__firstcol,
-        .av__colsticky > div,
-        .av__cell--select,
-        .av__cell--active,
-        .av__counter {
-          transition: var(--b3-background-transition);
-          background-color: var(#{$bg-select-variable}) !important;
-        }
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+        // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+        --av-background: var(#{$bg-select-variable}) !important;
       }
-      &[data-node-id][style*="background-color: var(#{$bg-variable})"] {
-        .av__row--header,
-        .av__row--footer,
-        .av__row--footer .av__colsticky,
-        .av__row--select .av__cell,
-        .av__colsticky.av__firstcol,
-        .av__colsticky > div,
-        .av__cell--select,
-        .av__cell--active,
-        .av__counter {
-          background-color: var(#{$bg-select-variable}) !important;
-        }
+      &[data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+        // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+        --av-background: var(#{$bg-select-variable}) !important;
       }
     }
   }

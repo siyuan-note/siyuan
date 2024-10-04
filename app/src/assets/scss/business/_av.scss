@@ -555,14 +555,17 @@ $backgrounds: (
     [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }
-    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl > .av__container {
-      --av-background: var(--b3-av-background-hl) !important;
-    }
+    // [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl > .av__container {
+    //   --av-background: var(--b3-av-background-hl) !important;
+    // }
   }
 }
 
 .protyle-wysiwyg--select {
   // https://github.com/siyuan-note/siyuan/pull/12643
+  .av__container {
+    --av-background: var(--b3-av-background-hl) !important;
+  }
   // Define a map of all backgrounds and their corresponding selected state
   $backgrounds: (
     "font-background" 13,
@@ -586,14 +589,13 @@ $backgrounds: (
       }
     }
   }
-  
-  .av__container {
-    --av-background: var(--b3-av-background-hl) !important;
-  }
 }
 
 .protyle-wysiwyg--hl {
   // https://github.com/siyuan-note/siyuan/pull/12643
+  .av__container {
+    --av-background: var(--b3-av-background-hl) !important;
+  }
   .av__row--header,
   .av__row--footer,
   .av__row--footer .av__colsticky,
@@ -628,10 +630,6 @@ $backgrounds: (
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }
-  }
-  
-  .av__container {
-    --av-background: var(--b3-av-background-hl) !important;
   }
 }
 

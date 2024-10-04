@@ -466,126 +466,27 @@
     background-color: var(--b3-theme-primary-lightest) !important;
 
     // https://github.com/siyuan-note/siyuan/pull/12643
-    [data-node-id][style*="background-color: var(--b3-font-background1)"] {
-      background-color: var(--b3-font-background1-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background2)"] {
-      background-color: var(--b3-font-background2-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background3)"] {
-      background-color: var(--b3-font-background3-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background4)"] {
-      background-color: var(--b3-font-background4-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background5)"] {
-      background-color: var(--b3-font-background5-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background6)"] {
-      background-color: var(--b3-font-background6-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background7)"] {
-      background-color: var(--b3-font-background7-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background8)"] {
-      background-color: var(--b3-font-background8-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background9)"] {
-      background-color: var(--b3-font-background9-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background10)"] {
-      background-color: var(--b3-font-background10-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background11)"] {
-      background-color: var(--b3-font-background11-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background12)"] {
-      background-color: var(--b3-font-background12-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-font-background13)"] {
-      background-color: var(--b3-font-background13-select) !important;
-    }
-    [data-node-id][style*="background-color: var(--b3-card-error-background)"] {
-      background-color: var(--b3-card-error-background-select)!important;
-    }
-    [data-node-id][style*="background-color: var(--b3-card-warning-background)"] {
-      background-color: var(--b3-card-warning-background-select)!important;
-    }
-    [data-node-id][style*="background-color: var(--b3-card-info-background)"] {
-      background-color: var(--b3-card-info-background-select)!important;
-    }
-    [data-node-id][style*="background-color: var(--b3-card-success-background)"] {
-      background-color: var(--b3-card-success-background-select)!important;
-    }
-
-    &[data-node-id] {
-      &[style*="background-color: var(--b3-font-background1)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background1-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background2)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background2-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background3)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background3-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background4)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background4-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background5)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background5-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background6)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background6-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background7)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background7-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background8)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background8-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background9)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background9-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background10)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background10-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background11)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background11-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background12)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background12-select) !important;
-      }
-      &[style*="background-color: var(--b3-font-background13)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-font-background13-select) !important;
-      }
-      &[data-node-id][style*="background-color: var(--b3-card-error-background)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-card-error-background-select)!important;
-      }
-      &[data-node-id][style*="background-color: var(--b3-card-warning-background)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-card-warning-background-select)!important;
-      }
-      &[data-node-id][style*="background-color: var(--b3-card-info-background)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-card-info-background-select)!important;
-      }
-      &[data-node-id][style*="background-color: var(--b3-card-success-background)"] {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-card-success-background-select)!important;
+    // Define a map of all backgrounds and their corresponding selected state
+    $backgrounds: (
+      "font-background": 13,
+      "card-error-background": 1,
+      "card-warning-background": 1,
+      "card-info-background": 1,
+      "card-success-background": 1,
+    );
+  
+    // Loop through each background to generate the corresponding styles
+    @each $key, $count in $backgrounds {
+      @for $i from 1 through $count {
+        $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
+        $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
+  
+        [data-node-id] {
+          &[style*="background-color: #{$bg-variable}"] {
+            transition: var(--b3-background-transition);
+            background-color: #{$bg-select-variable} !important;
+          }
+        }
       }
     }
   }

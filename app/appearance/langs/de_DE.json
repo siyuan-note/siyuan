@@ -14,7 +14,7 @@
   "publishService": "Veröffentlichungsdienst",
   "publishServiceNotStarted": "Veröffentlichungsdienst nicht gestartet",
   "publishServiceTip": "Wenn aktiviert, wird der Veröffentlichungsdienst gestartet. Dieser Dienst veröffentlicht den Inhalt des aktuellen Arbeitsbereichs im Nur-Lese-Modus im lokalen Netzwerk.",
-  "publishServicePort": "Diensteport",
+  "publishServicePort": "Dienst-Port",
   "publishServicePortTip": "Aktivieren Sie den Veröffentlichungsdienst mit der angegebenen Portnummer. Wenn auf <code class='fn__code'>0</code> gesetzt, wird ein zufälliger Port verwendet.",
   "publishServiceAddresses": "Zugriffsadressen des Dienstes",
   "publishServiceAddressesTip": "Mögliche Netzwerkadressen zum Zugreifen auf den Veröffentlichungsdienst.",

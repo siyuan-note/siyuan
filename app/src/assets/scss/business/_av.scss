@@ -538,6 +538,7 @@
 // https://github.com/siyuan-note/siyuan/pull/12643
 // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除 --av-background: 后面的 !important
 
+// 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl
 // Define a map of all backgrounds and their corresponding selected state
 $backgrounds: (
   "font-background" 13,
@@ -555,18 +556,16 @@ $backgrounds: (
     [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }
-    // [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl > .av__container {
-    //   --av-background: var(--b3-av-background-hl) !important;
-    // }
   }
 }
 
+// .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 在带背景色的块外面
 .protyle-wysiwyg--select {
   // https://github.com/siyuan-note/siyuan/pull/12643
   .av__container {
     --av-background: var(--b3-av-background-hl) !important;
   }
-  // Define a map of all backgrounds and their corresponding selected state
+
   $backgrounds: (
     "font-background" 13,
     "card-error-background" 1,
@@ -575,7 +574,6 @@ $backgrounds: (
     "card-success-background" 1,
   );
 
-  // Loop through each background to generate the corresponding styles
   @each $key, $count in $backgrounds {
     @for $i from 1 through $count {
       $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
@@ -608,7 +606,6 @@ $backgrounds: (
     transition: var(--b3-background-transition);
   }
 
-  // Define a map of all backgrounds and their corresponding selected state
   $backgrounds: (
     "font-background" 13,
     "card-error-background" 1,
@@ -617,7 +614,6 @@ $backgrounds: (
     "card-success-background" 1,
   );
 
-  // Loop through each background to generate the corresponding styles
   @each $key, $count in $backgrounds {
     @for $i from 1 through $count {
       $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
@@ -629,6 +625,18 @@ $backgrounds: (
       &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
+    }
+  }
+}
+
+// .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 在带背景色的块里面
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select .av__container,
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl .av__container {
+      --av-background: var(#{$bg-variable}) !important;
     }
   }
 }

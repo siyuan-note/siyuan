@@ -1,4 +1,4 @@
-import { isMobile } from "../util/functions";
+import {isMobile} from "../util/functions";
 
 export const showTooltip = (message: string, target: Element, error = false) => {
     if (isMobile()) {
@@ -40,7 +40,7 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     }
 
     if (position?.endsWith("bottom")) {
-        top += parseInt(position.replace("right", ""));
+        top += parseInt(position.replace("right", "").replace("left", ""));
     } else if (position?.endsWith("top")) {
         top = targetRect.top - messageElement.clientHeight;
     } else if (position === "parentE") {
@@ -55,8 +55,9 @@ export const showTooltip = (message: string, target: Element, error = false) => 
 
     const topHeight = position === "parentE" ? top : targetRect.top;
     const bottomHeight = window.innerHeight - top;
-    messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
+    messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
+    
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
         messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {

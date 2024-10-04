@@ -527,6 +527,28 @@
   }
 }
 
+// https://github.com/siyuan-note/siyuan/pull/12643
+// Define a map of all backgrounds and their corresponding selected state
+$backgrounds: (
+  "font-background" 13,
+  "card-error-background" 1,
+  "card-warning-background" 1,
+  "card-info-background" 1,
+  "card-success-background" 1,
+);
+
+// Loop through each background to generate the corresponding styles
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+      // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+      --av-background: var(#{$bg-variable}) !important;
+    }
+  }
+}
+
 .protyle-wysiwyg--select {
   // https://github.com/siyuan-note/siyuan/pull/12643
   .av__container {

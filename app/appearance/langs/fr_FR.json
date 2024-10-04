@@ -362,7 +362,7 @@
   "apiTimeout": "Délai d'expiration",
   "apiTimeoutTip": "Le délai d'attente pour lancer une requête, unité : seconde",
   "apiProxy": "Proxy Web",
-  "apiProxyTip": "Le proxy réseau qui lance la requête, tel que <code class='fn__code'>socks://127.0.0.1:1080</code>",
+  "apiProxyTip": "Le proxy réseau qui lance la requête, tel que <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Modelo",
   "apiModelTip": "Le paramètre <code class='fn__code'>model</code> transmis lors de la demande de l'API est utilisé pour contrôler le style de texte généré (l'ID de déploiement doit être renseigné lors de l'utilisation du service Azure OpenAI)",
   "apiMaxTokens": "Nombre maximum de jetons",

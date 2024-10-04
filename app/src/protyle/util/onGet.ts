@@ -249,6 +249,12 @@ const setHTML = (options: {
         return;
     }
 
+    /// #if MOBILE
+    if (!protyle.disabled && !options.action.includes(Constants.CB_GET_ALL)) {
+        protyle.background.element.classList.add("protyle-background--mobileshow");
+    }
+    /// #endif
+
     if (protyle.options.render.breadcrumb) {
         protyle.breadcrumb.toggleExit(!options.action.includes(Constants.CB_GET_ALL));
         protyle.breadcrumb.render(protyle);

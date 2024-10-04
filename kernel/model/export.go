@@ -1540,11 +1540,14 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	trees := map[string]*parse.Tree{}
 	refTrees := map[string]*parse.Tree{}
-	for _, p := range docPaths {
+	for i, p := range docPaths {
 		docIAL := box.docIAL(p)
 		if nil == docIAL {
 			continue
 		}
+
+		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), docIAL["title"]))
+		util.PushEndlessProgress(msg)
 
 		id := docIAL["id"]
 		tree, err := LoadTreeByBlockID(id)
@@ -1552,15 +1555,16 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			continue
 		}
 		trees[tree.ID] = tree
-	}
-	for _, tree := range trees {
-		refs := exportRefTrees(tree)
+
+		refs := exportRefTrees(tree, trees)
 		for refTreeID, refTree := range refs {
 			if nil == trees[refTreeID] {
 				refTrees[refTreeID] = refTree
 			}
 		}
 	}
+
+	util.PushEndlessProgress(Conf.Language(65))
 
 	// 按文件夹结构复制选择的树
 	for _, tree := range trees {
@@ -2722,13 +2726,13 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func exportRefTrees(tree *parse.Tree) (ret map[string]*parse.Tree) {
+func exportRefTrees(tree *parse.Tree, treeCache map[string]*parse.Tree) (ret map[string]*parse.Tree) {
 	ret = map[string]*parse.Tree{}
-	exportRefTrees0(tree, &ret)
+	exportRefTrees0(tree, &ret, treeCache)
 	return
 }
 
-func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
+func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCache map[string]*parse.Tree) {
 	if nil != (*retTrees)[tree.ID] {
 		return
 	}
@@ -2748,12 +2752,20 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 			if nil == defBlock {
 				return ast.WalkSkipChildren
 			}
-			defTree, err := LoadTreeByBlockID(defBlock.RootID)
-			if err != nil {
-				return ast.WalkSkipChildren
+
+			var defTree *parse.Tree
+			var err error
+			if treeCache[defBlock.RootID] != nil {
+				defTree = treeCache[defBlock.RootID]
+			} else {
+				defTree, err = LoadTreeByBlockID(defBlock.RootID)
+				if err != nil {
+					return ast.WalkSkipChildren
+				}
+				treeCache[defBlock.RootID] = defTree
 			}
 
-			exportRefTrees0(defTree, retTrees)
+			exportRefTrees0(defTree, retTrees, treeCache)
 		} else if ast.NodeAttributeView == n.Type {
 			// 导出数据库所在文档时一并导出绑定块所在文档
 			// Export the binding block docs when exporting the doc where the database is located https://github.com/siyuan-note/siyuan/issues/11486
@@ -2779,12 +2791,19 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree) {
 					continue
 				}
 
-				defTree, _ := LoadTreeByBlockID(defBlock.RootID)
-				if nil == defTree {
-					continue
+				var defTree *parse.Tree
+				var err error
+				if treeCache[defBlock.RootID] != nil {
+					defTree = treeCache[defBlock.RootID]
+				} else {
+					defTree, err = LoadTreeByBlockID(defBlock.RootID)
+					if err != nil {
+						continue
+					}
+					treeCache[defBlock.RootID] = defTree
 				}
 
-				exportRefTrees0(defTree, retTrees)
+				exportRefTrees0(defTree, retTrees, treeCache)
 			}
 		}
 		return ast.WalkContinue

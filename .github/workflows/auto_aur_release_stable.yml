@@ -8,7 +8,6 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-
       - name: Check tag aka check release type
         id: checktag
         run: |
@@ -29,10 +28,6 @@ jobs:
         id: get_version_without_v
         run: echo ::set-output name=TAG_VERSION_WITHOUT_V::$(echo "${{ github.event.release.tag_name }}" | sed 's/^v//')
 
-      - name: Extract package_file_name
-        id: get_package_file_name
-        run: echo ::set-output name=PACKAGE_FILE_NAME::siyuan-${{ steps.get_version_without_v.outputs.TAG_VERSION_WITHOUT_V }}-linux.AppImage
-
       - name: Create PKGBUILD
         run: |
           cat << EOF >> PKGBUILD
@@ -40,35 +35,37 @@ jobs:
           # auto running on siyuan official repo
           # PKGBUILD is modified from https://aur.archlinux.org/cgit/aur.git/tree/PKGBUILD?h=siyuan-appimage
           # which is made by vvxxp8 <concatenate[g] the characters[x] in square[b] brackets[1] in[5] order[3] at gmail dot com>
-          
-          pkgname=siyuan_stable
-          pkgver=${{ steps.get_version.outputs.TAG_VERSION }}
-          pkgrel=0
+          # had agreement with the author to use the PKGBUILD
+          # for change request, PLEASE MAKE A PR ON GITHUB REPO, keep commenting here would be ignored
+
+          pkgname=siyuan-bin
+          pkgver=${{ steps.get_version_without_v.outputs.TAG_VERSION_WITHOUT_V }}
+          pkgrel=1
           pkgdesc="auto upload to AUR when SiYuan stable release"
           arch=("x86_64")
           url="https://b3log.org/siyuan"
           license=("AGPL-3.0-only")
-          _pkgname=${{ steps.get_package_file_name.outputs.PACKAGE_FILE_NAME }}
-          noextract=(${{ steps.get_package_file_name.outputs.PACKAGE_FILE_NAME }})
+          _pkgname=siyuan-\${pkgver}-linux.AppImage
+          noextract=(siyuan-\${pkgver}-linux.AppImage)
           options=("!strip" "!debug")
           depends=("fuse2")
           optdepends=('pandoc: docx export')
-          source=("\${_pkgname}::https://github.com/siyuan-note/siyuan/releases/download/${{ steps.get_version.outputs.TAG_VERSION }}/${{ steps.get_package_file_name.outputs.PACKAGE_FILE_NAME }}")
+          source=("https://github.com/siyuan-note/siyuan/releases/download/v\${pkgver}/siyuan-\${pkgver}-linux.AppImage")
           sha256sums=('SKIP')
-          
+
           _installdir=/opt/appimages
 
           prepare() {
               chmod a+x \${_pkgname}
               ./\${_pkgname} --appimage-extract >/dev/null
               sed -i "s+AppRun+\${_installdir}/siyuan.AppImage+" "squashfs-root/siyuan.desktop"
-              sed -i "s+^Icon=.*+Icon=siyuan_stable+" "squashfs-root/siyuan.desktop"
+              sed -i "s+^Icon=.*+Icon=siyuan-bin+" "squashfs-root/siyuan.desktop"
           }
 
           package() {
               install -Dm755 \${_pkgname} "\${pkgdir}/\${_installdir}/siyuan.AppImage"
-              install -Dm644 "squashfs-root/resources/stage/icon.png" "\${pkgdir}/usr/share/icons/hicolor/512x512/apps/siyuan_stable.png"
-              install -Dm644 "squashfs-root/siyuan.desktop" "\${pkgdir}/usr/share/applications/siyuan_stable.desktop"
+              install -Dm644 "squashfs-root/resources/stage/icon.png" "\${pkgdir}/usr/share/icons/hicolor/512x512/apps/siyuan-bin.png"
+              install -Dm644 "squashfs-root/siyuan.desktop" "\${pkgdir}/usr/share/applications/siyuan-bin.desktop"
 
               if [ ! -f "${pkgdir}/usr/bin/siyuan" ]; then
                 mkdir -p "${pkgdir}/usr/bin"
@@ -82,7 +79,7 @@ jobs:
       - name: Publish AUR package
         uses: KSXGitHub/github-actions-deploy-aur@v2.7.2
         with:
-          pkgname: siyuan_stable
+          pkgname: siyuan-bin
           pkgbuild: ./PKGBUILD
           commit_username: ${{ secrets.AUR_USERNAME }}
           commit_email: ${{ secrets.AUR_EMAIL }}

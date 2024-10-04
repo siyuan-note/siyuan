@@ -229,7 +229,7 @@ export const exportLayout = async (options: {
     cb: () => void,
     errorExit: boolean
 }) => {
-    const editors = getAllModels().editor
+    const editors = getAllModels().editor;
     for (let i = 0; i < editors.length; i++) {
         await saveScroll(editors[i].editor.protyle);
     }

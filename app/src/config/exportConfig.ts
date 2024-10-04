@@ -239,7 +239,7 @@ export const exportConfig = {
                     fetchPost("/api/system/importConf", formData, response => {
                         if (response.code !== 0) {
                             showMessage(response.msg);
-                            return
+                            return;
                         }
 
                         showMessage(window.siyuan.languages.imported);

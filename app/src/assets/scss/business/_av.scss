@@ -528,19 +528,12 @@
 }
 
 .protyle-wysiwyg--select {
-  .av__row--header,
-  .av__row--footer,
-  .av__row--footer .av__colsticky,
-  .av__row--select .av__cell,
-  .av__colsticky.av__firstcol,
-  .av__colsticky > div,
-  .av__cell--select,
-  .av__cell--active,
-  .av__counter {
-    background-color: var(--b3-av-background-hl) !important;
+  // https://github.com/siyuan-note/siyuan/pull/12643
+  .av__container {
+    // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+    --av-background: var(--b3-av-background-hl) !important;
   }
 
-  // https://github.com/siyuan-note/siyuan/pull/12643
   // Define a map of all backgrounds and their corresponding selected state
   $backgrounds: (
     "font-background" 13,
@@ -569,6 +562,11 @@
 }
 
 .protyle-wysiwyg--hl {
+  // https://github.com/siyuan-note/siyuan/pull/12643
+  .av__container {
+    // 删除给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑之后就可以删除这里的 !important
+    --av-background: var(--b3-av-background-hl) !important;
+  }
   .av__row--header,
   .av__row--footer,
   .av__row--footer .av__colsticky,
@@ -579,10 +577,8 @@
   .av__cell--active,
   .av__counter {
     transition: var(--b3-background-transition);
-    background-color: var(--b3-av-background-hl) !important;
   }
 
-  // https://github.com/siyuan-note/siyuan/pull/12643
   // Define a map of all backgrounds and their corresponding selected state
   $backgrounds: (
     "font-background" 13,

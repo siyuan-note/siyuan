@@ -573,8 +573,9 @@ $backgrounds: (
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
-    // 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 时按最近的父块背景色
-    [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+    // 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 时按最近的父块背景色（包括数据库块本身）
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container,
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {

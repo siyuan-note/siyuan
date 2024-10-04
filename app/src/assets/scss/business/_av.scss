@@ -576,7 +576,9 @@ $backgrounds: (
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 外面
       .protyle-wysiwyg--select .av__container,
-      .protyle-wysiwyg--hl .av__container,
+      .protyle-wysiwyg--hl .av__container {
+        --av-background: var(#{$bg-select-variable}) !important;
+      }
       // 带背景色的块 就是 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl
       &.protyle-wysiwyg--select .av__container,
       &.protyle-wysiwyg--hl .av__container{
@@ -586,13 +588,17 @@ $backgrounds: (
     // 带背景色的块 在 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 里面
     .protyle-wysiwyg--select,
     .protyle-wysiwyg--hl {
-      [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container,
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+        --av-background: var(#{$bg-select-variable}) !important;
+      }
       &[data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
         --av-background: var(#{$bg-select-variable}) !important;
       }
     }
     // 没有 .protyle-wysiwyg--select 或 .protyle-wysiwyg--hl 时按最近的父块背景色（包括数据库块本身）
-    [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container,
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] .av__container {
+      --av-background: var(#{$bg-variable}) !important;
+    }
     [data-node-id][style*="background-color: var(#{$bg-variable})"] > .av__container {
       --av-background: var(#{$bg-variable}) !important;
     }

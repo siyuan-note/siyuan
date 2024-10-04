@@ -16,6 +16,7 @@
   &__container {
     overflow: auto;
     cursor: auto;
+    --av-background: var(--b3-theme-background);
   }
 
   &__pulse {

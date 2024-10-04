@@ -462,32 +462,35 @@
     }
   }
 
-  &--select {
-    background-color: var(--b3-theme-primary-lightest) !important;
+  // https://github.com/siyuan-note/siyuan/pull/12643
+  $backgrounds: (
+    "font-background": 13,
+    "card-error-background": 1,
+    "card-warning-background": 1,
+    "card-info-background": 1,
+    "card-success-background": 1,
+  );
+  @each $key, $count in $backgrounds {
+    @for $i from 1 through $count {
+      $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
+      $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
 
-    // https://github.com/siyuan-note/siyuan/pull/12643
-    // Define a map of all backgrounds and their corresponding selected state
-    $backgrounds: (
-      "font-background": 13,
-      "card-error-background": 1,
-      "card-warning-background": 1,
-      "card-info-background": 1,
-      "card-success-background": 1,
-    );
-  
-    // Loop through each background to generate the corresponding styles
-    @each $key, $count in $backgrounds {
-      @for $i from 1 through $count {
-        $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
-        $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
-
-        [data-node-id] {
+      &--select {
+        background-color: var(--b3-theme-primary-lightest) !important;
+        [data-node-id],
+        &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
             background-color: #{$bg-select-variable} !important;
           }
         }
+      }
+      &--hl {
+        transition: var(--b3-background-transition);
+        background-color: var(--b3-theme-primary-lightest) !important;
+        [data-node-id],
         &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
+            transition: var(--b3-background-transition);
             background-color: #{$bg-select-variable} !important;
           }
         }
@@ -498,42 +501,6 @@
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;
-  }
-
-  &--hl {
-    transition: var(--b3-background-transition);
-    background-color: var(--b3-theme-primary-lightest) !important;
-
-    // https://github.com/siyuan-note/siyuan/pull/12643
-    // Define a map of all backgrounds and their corresponding selected states
-    $backgrounds: (
-      "font-background": 13,
-      "card-error-background": 1,
-      "card-warning-background": 1,
-      "card-info-background": 1,
-      "card-success-background": 1,
-    );
-  
-    // Loop through each background to generate the corresponding styles
-    @each $key, $count in $backgrounds {
-      @for $i from 1 through $count {
-        $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
-        $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
-  
-        [data-node-id] {
-          &[style*="background-color: #{$bg-variable}"] {
-            transition: var(--b3-background-transition);
-            background-color: #{$bg-select-variable} !important;
-          }
-        }
-        &[data-node-id] {
-          &[style*="background-color: #{$bg-variable}"] {
-            transition: var(--b3-background-transition);
-            background-color: #{$bg-select-variable} !important;
-          }
-        }
-      }
-    }
   }
 
   .dragover {

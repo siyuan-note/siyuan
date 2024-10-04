@@ -263,6 +263,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         genImportMenu(protyle.notebookId, protyle.path);
         window.siyuan.menus.menu.append(exportMd(protyle.block.showAll ? protyle.block.id : protyle.block.rootID));
 
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         if (protyle?.app?.plugins) {
             emitOpenMenu({
                 plugins: protyle.app.plugins,
@@ -271,10 +272,9 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                     protyle,
                     data: response.data,
                 },
-                separatorPosition: "top",
+                separatorPosition: "bottom",
             });
         }
-        window.siyuan.menus.menu.append(new MenuItem({id: "separator_4", type: "separator"}).element);
         window.siyuan.menus.menu.append(new MenuItem({
             id: "updateAndCreatedAt",
             iconHTML: "",

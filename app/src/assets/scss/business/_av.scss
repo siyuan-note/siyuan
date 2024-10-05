@@ -550,6 +550,7 @@
     background-color: var(--b3-av-background-hl) !important;
   }
 }
+
 .protyle-wysiwyg--hl {
   --b3-av-background: var(--b3-av-background-hl);
   .av__row--header,
@@ -562,6 +563,7 @@
   .av__cell--active,
   .av__counter {
     transition: var(--b3-background-transition);
+    background-color: var(--b3-av-background-hl) !important;
   }
 }
 

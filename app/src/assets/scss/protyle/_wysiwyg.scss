@@ -496,7 +496,7 @@
             background-color: #{$bg-select-variable} !important;
           }
         }
-        &--hl {
+        .protyle-wysiwyg--hl {
           [data-node-id],
           &[data-node-id] {
             &[style*="background-color: #{$bg-variable}"] {

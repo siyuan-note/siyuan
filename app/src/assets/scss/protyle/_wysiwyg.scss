@@ -496,6 +496,7 @@
             background-color: #{$bg-select-variable} !important;
           }
         }
+        // 叠加两层高亮的样式
         .protyle-wysiwyg--hl {
           [data-node-id],
           &[data-node-id] {
@@ -512,6 +513,7 @@
             background-color: #{$bg-select-variable} !important;
           }
         }
+        // 叠加两层高亮的样式
         .protyle-wysiwyg--select {
           [data-node-id],
           &[data-node-id] {

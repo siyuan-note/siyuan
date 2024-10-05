@@ -62,6 +62,7 @@
 
     /* av */
     --b3-av-hover: #e8e8e9;
+    --b3-av-background: var(--b3-theme-background);
     --b3-av-background-hl: #e8eefc;
 
     /* 为空提示 */

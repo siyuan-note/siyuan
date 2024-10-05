@@ -611,8 +611,7 @@ $backgrounds: (
   }
 }
 // 某种情况下 .protyle-wysiwyg--hl 和 .protyle-wysiwyg--select 会叠加，--b3-av-background 需要再叠加一层 --b3-theme-primary-lightest
-// .protyle-wysiwyg--select 在外，.protyle-wysiwyg--hl 在内
-// .protyle-wysiwyg--hl 在外，.protyle-wysiwyg--select 在内
+// ".protyle-wysiwyg--select 在外，.protyle-wysiwyg--hl 在内"与".protyle-wysiwyg--hl 在外，.protyle-wysiwyg--select 在内"两种情况
 @each $key, $count in $backgrounds {
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");

@@ -614,7 +614,7 @@ $backgrounds: (
     // 带背景色的块 在 选中块 的外层
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       .protyle-wysiwyg--hl {
-        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-background: var(#{$bg-select-variable}) !important;
       }
     }
   }
@@ -626,7 +626,7 @@ $backgrounds: (
     // 带背景色的块 就是 选中块
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       &.protyle-wysiwyg--hl {
-        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-background: var(#{$bg-select-variable}) !important;
       }
     }
   }
@@ -638,7 +638,7 @@ $backgrounds: (
     // 带背景色的块 在 选中块 的内层
     .protyle-wysiwyg--hl {
       [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-background: var(#{$bg-select-variable}) !important;
       }
     }
   }

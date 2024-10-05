@@ -64,6 +64,23 @@
     --b3-av-hover: #e8e8e9;
     --b3-av-background: var(--b3-theme-background);
     --b3-av-background-hl: #e8eefc;
+    --b3-av-font-background1-hl: rgb(202, 188, 214);
+    --b3-av-font-background2-hl: rgb(210, 206, 209);
+    --b3-av-font-background3-hl: rgb(178, 208, 247);
+    --b3-av-font-background4-hl: rgb(179, 210, 222);
+    --b3-av-font-background5-hl: rgb(187, 202, 230);
+    --b3-av-font-background6-hl: rgb(145, 187, 250);
+    --b3-av-font-background7-hl: rgb(208, 210, 220);
+    --b3-av-font-background8-hl: rgb(205, 201, 214);
+    --b3-av-font-background9-hl: rgb(208, 191, 233);
+    --b3-av-font-background10-hl: rgb(190, 180, 232);
+    --b3-av-font-background11-hl: rgb(184, 212, 222);
+    --b3-av-font-background12-hl: rgb(205, 202, 230);
+    --b3-av-font-background13-hl: rgb(38, 53, 81);
+    --b3-av-card-error-background-hl: var(--b3-av-font-background1-hl);
+    --b3-av-card-warning-background-hl: var(--b3-av-font-background2-hl);
+    --b3-av-card-info-background-hl: var(--b3-av-font-background3-hl);
+    --b3-av-card-success-background-hl: var(--b3-av-font-background4-hl);
 
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface-light);

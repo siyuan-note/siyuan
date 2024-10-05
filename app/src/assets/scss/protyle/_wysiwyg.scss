@@ -462,6 +462,19 @@
     }
   }
 
+  &--select {
+    background-color: var(--b3-theme-primary-lightest) !important;
+  }
+  &--hl {
+    transition: var(--b3-background-transition);
+    background-color: var(--b3-theme-primary-lightest) !important;
+
+    [data-node-id],
+    &[data-node-id] {
+        transition: var(--b3-background-transition);
+      }
+    }
+  }
   // https://github.com/siyuan-note/siyuan/pull/12706
   $backgrounds: (
     "font-background": 13,
@@ -476,7 +489,6 @@
       $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
 
       &--select {
-        background-color: var(--b3-theme-primary-lightest) !important;
         [data-node-id],
         &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
@@ -485,12 +497,9 @@
         }
       }
       &--hl {
-        transition: var(--b3-background-transition);
-        background-color: var(--b3-theme-primary-lightest) !important;
         [data-node-id],
         &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
-            transition: var(--b3-background-transition);
             background-color: #{$bg-select-variable} !important;
           }
         }

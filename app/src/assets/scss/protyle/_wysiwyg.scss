@@ -512,6 +512,14 @@
             background-color: #{$bg-select-variable} !important;
           }
         }
+        .protyle-wysiwyg--select {
+          [data-node-id],
+          &[data-node-id] {
+            &[style*="background-color: #{$bg-variable}"] {
+              background-color: #{$bg-hl-variable} !important;
+            }
+          }
+        }
       }
     }
   }

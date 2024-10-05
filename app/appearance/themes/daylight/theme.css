@@ -116,6 +116,7 @@
     --b3-font-background11: #def0d9;
     --b3-font-background12: #fae3e4;
     --b3-font-background13: var(--b3-theme-on-background);
+    /* -select 是与 --b3-theme-primary-lightest 混合后的颜色 */
     --b3-font-background1-select: var(--b3-card-error-background-select);
     --b3-font-background2-select: var(--b3-card-warning-background-select);
     --b3-font-background3-select: var(--b3-card-info-background-select);
@@ -129,6 +130,7 @@
     --b3-font-background11-select: rgb(202, 225, 220);
     --b3-font-background12-select: rgb(226, 214, 229);
     --b3-font-background13-select: var(--b3-theme-on-background-select);
+    /* -hl 是 -select 与 --b3-theme-primary-lightest 再次混合后的颜色 */
     --b3-font-background1-hl: var(--b3-card-error-background-hl);
     --b3-font-background2-hl: var(--b3-card-warning-background-hl);
     --b3-font-background3-hl: var(--b3-card-info-background-hl);

@@ -643,12 +643,13 @@ $backgrounds: (
     }
   }
 }
-// 某种情况下 .protyle-wysiwyg--hl 是 .protyle-wysiwyg--select 的子元素，--b3-av-background 需要再叠加一层 --b3-theme-primary-lightest
+// 某种情况下 .protyle-wysiwyg--hl 和 .protyle-wysiwyg--select 会叠加，--b3-av-background 需要再叠加一层 --b3-theme-primary-lightest
+// .protyle-wysiwyg--select 在外，.protyle-wysiwyg--hl 在内
 @each $key, $count in $backgrounds {
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
-    // 带背景色的块 在 选中块 的外层
+    // 带背景色的块 在 两个选中块 的外层
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       .protyle-wysiwyg--select .protyle-wysiwyg--hl {
         --b3-av-background: var(#{$bg-hl-variable});
@@ -660,9 +661,52 @@ $backgrounds: (
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
-    // 带背景色的块 就是 选中块
+    // 带背景色的块 在 两个选中块 的中间，并且是靠外层的选中块
+    .protyle-wysiwyg--select[data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的中间
+    .protyle-wysiwyg--select [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的中间，并且是靠内层的选中块
+    .protyle-wysiwyg--select [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--hl {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的内层
+    .protyle-wysiwyg--select .protyle-wysiwyg--hl {
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+        --b3-av-background: var(#{$bg-hl-variable});
+      }
+    }
+  }
+}
+// .protyle-wysiwyg--hl 在外，.protyle-wysiwyg--select 在内
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的外层
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-      &.protyle-wysiwyg--select .protyle-wysiwyg--hl {
+      .protyle-wysiwyg--hl .protyle-wysiwyg--select {
         --b3-av-background: var(#{$bg-hl-variable});
       }
     }
@@ -672,8 +716,38 @@ $backgrounds: (
   @for $i from 1 through $count {
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
-    // 带背景色的块 在 选中块 的内层
-    .protyle-wysiwyg--select .protyle-wysiwyg--hl {
+    // 带背景色的块 在 两个选中块 的中间，并且是靠外层的选中块
+    .protyle-wysiwyg--hl[data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的中间
+    .protyle-wysiwyg--hl [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的中间，并且是靠内层的选中块
+    .protyle-wysiwyg--hl [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-hl-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-hl-variable: if($count == 1, "--b3-#{$key}-hl", "--b3-#{$key}#{$i}-hl");
+    // 带背景色的块 在 两个选中块 的内层
+    .protyle-wysiwyg--hl .protyle-wysiwyg--select {
       [data-node-id][style*="background-color: var(#{$bg-variable})"] {
         --b3-av-background: var(#{$bg-hl-variable});
       }

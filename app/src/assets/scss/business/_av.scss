@@ -97,7 +97,7 @@
     bottom: 0;
     height: 26px;
     padding: 0 5px;
-    background-color: var(--av-background);
+    background-color: var(--b3-av-background);
     font-size: 87.5%;
   }
 
@@ -160,7 +160,7 @@
 
     &--header,
     &--footer {
-      background-color: var(--av-background);
+      background-color: var(--b3-av-background);
     }
 
     &--footer {
@@ -176,7 +176,7 @@
       }
 
       .av__colsticky {
-        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+        background-color: var(--b3-av-background); // 保证钉住时无计算结果的列不被覆盖
       }
 
       .av__calc {
@@ -434,7 +434,14 @@
 
     &.av__firstcol,
     & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
-      background-color: var(--av-background);
+      background-color: var(--b3-av-background);
+
+      &.av__cell--header:hover {
+        background-color: var(--b3-av-hover);
+      }
+      &.av__calc:hover {
+        background-color: var(--b3-av-hover);
+      }
     }
   }
 
@@ -527,7 +534,13 @@
   }
 }
 
+// https://github.com/siyuan-note/siyuan/pull/12643
+// 给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑可以删除掉，用不上 --av-background 了
 .protyle-wysiwyg--select {
+    --b3-av-background: var(--b3-av-background-hl);
+}
+.protyle-wysiwyg--hl {
+    --b3-av-background: var(--b3-av-background-hl);
   .av__row--header,
   .av__row--footer,
   .av__row--footer .av__colsticky,
@@ -537,22 +550,64 @@
   .av__cell--select,
   .av__cell--active,
   .av__counter {
-    background-color: var(--b3-av-background-hl) !important;
+    transition: var(--b3-background-transition);
   }
 }
 
-.protyle-wysiwyg--hl {
-  .av__row--header,
-  .av__row--footer,
-  .av__row--footer .av__colsticky,
-  .av__row--select .av__cell,
-  .av__colsticky.av__firstcol,
-  .av__colsticky > div,
-  .av__cell--select,
-  .av__cell--active,
-  .av__counter {
-    background-color: var(--b3-av-background-hl) !important;
-    transition: var(--b3-background-transition);
+$backgrounds: (
+  "font-background" 13,
+  "card-error-background" 1,
+  "card-warning-background" 1,
+  "card-info-background" 1,
+  "card-success-background" 1,
+);
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 没有 选中块 时从最近的 带背景色的父块 继承
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      --b3-av-background: var(#{$bg-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 选中块 的外层
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      .protyle-wysiwyg--select,
+      .protyle-wysiwyg--hl {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 就是 选中块
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      &.protyle-wysiwyg--select ,
+      &.protyle-wysiwyg--hl {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 选中块 的内层
+    .protyle-wysiwyg--select,
+    .protyle-wysiwyg--hl {
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
   }
 }
 

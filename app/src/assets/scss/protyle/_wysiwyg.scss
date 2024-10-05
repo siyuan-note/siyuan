@@ -487,12 +487,21 @@
     @for $i from 1 through $count {
       $bg-variable: if($count == 1, var(--b3-#{$key}), var(--b3-#{$key}#{$i}));
       $bg-select-variable: if($count == 1, var(--b3-#{$key}-select), var(--b3-#{$key}#{$i}-select));
+      $bg-hl-variable: if($count == 1, var(--b3-#{$key}-hl), var(--b3-#{$key}#{$i}-hl));
 
       &--select {
         [data-node-id],
         &[data-node-id] {
           &[style*="background-color: #{$bg-variable}"] {
             background-color: #{$bg-select-variable} !important;
+          }
+        }
+        &--hl {
+          [data-node-id],
+          &[data-node-id] {
+            &[style*="background-color: #{$bg-variable}"] {
+              background-color: #{$bg-hl-variable} !important;
+            }
           }
         }
       }

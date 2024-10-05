@@ -577,7 +577,42 @@ $backgrounds: (
     $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
     // 带背景色的块 在 选中块 的外层
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-      .protyle-wysiwyg--select,
+      .protyle-wysiwyg--select {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 就是 选中块
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      &.protyle-wysiwyg--select {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 选中块 的内层
+    .protyle-wysiwyg--select {
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+        --b3-av-background: var(#{$bg-select-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    // 带背景色的块 在 选中块 的外层
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
       .protyle-wysiwyg--hl {
         --b3-av-background: var(#{$bg-select-variable});
       }
@@ -590,7 +625,6 @@ $backgrounds: (
     $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
     // 带背景色的块 就是 选中块
     [data-node-id][style*="background-color: var(#{$bg-variable})"] {
-      &.protyle-wysiwyg--select ,
       &.protyle-wysiwyg--hl {
         --b3-av-background: var(#{$bg-select-variable});
       }
@@ -602,7 +636,6 @@ $backgrounds: (
     $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
     $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
     // 带背景色的块 在 选中块 的内层
-    .protyle-wysiwyg--select,
     .protyle-wysiwyg--hl {
       [data-node-id][style*="background-color: var(#{$bg-variable})"] {
         --b3-av-background: var(#{$bg-select-variable});

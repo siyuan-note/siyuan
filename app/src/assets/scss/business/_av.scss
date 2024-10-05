@@ -534,8 +534,6 @@
   }
 }
 
-// https://github.com/siyuan-note/siyuan/pull/12706
-// 给 .av__container 添加(更新) style="--av-background:var(xxx)" 的逻辑可以删除掉，用不上 --av-background 了
 .protyle-wysiwyg--select {
   --b3-av-background: var(--b3-av-background-hl);
   .av__row--header,
@@ -567,6 +565,7 @@
   }
 }
 
+// https://github.com/siyuan-note/siyuan/pull/12706
 $backgrounds: (
   "font-background" 13,
   "card-error-background" 1,

@@ -341,7 +341,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
-                id: `${item.name}`,
                 iconHTML: "",
                 action: "iconEdit",
                 label: `${item.name} <span class="ft__smaller ft__on-surface">${item.time ? dayjs(item.time).format("YYYY-MM-DD HH:mm") : ""}</span>`,
@@ -537,7 +536,6 @@ const openWorkspace = (workspace: string) => {
 const workspaceItem = (item: IWorkspace) => {
     /// #if !BROWSER
     return {
-        id: `${item.path}`,
         label: `<div aria-label="${item.path}" class="fn__ellipsis ariaLabel" style="max-width: 256px">
     ${originalPath().basename(item.path)}
 </div>`,

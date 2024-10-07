@@ -24,6 +24,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
@@ -37,20 +38,32 @@ import (
 )
 
 func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
-	ret, tmpCache := map[string]*parse.Tree{}, map[string]*parse.Tree{}
+	ret = map[string]*parse.Tree{}
 	bts := treenode.GetBlockTrees(ids)
 	luteEngine := util.NewLute()
-	for id, bt := range bts {
-		tree := tmpCache[bt.RootID]
-		if nil == tree {
-			tree, _ = LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil == tree {
-				logging.LogWarnf("load tree [%s] failed: %s", id, bt.Path)
-				continue
-			}
-			tmpCache[bt.RootID] = tree
+	var boxIDs []string
+	var paths []string
+	seen := make(map[string]bool)
+	for _, bt := range bts {
+		key := bt.BoxID + bt.Path
+		if !seen[key] {
+			seen[key] = true
+			boxIDs = append(boxIDs, bt.BoxID)
+			paths = append(paths, bt.Path)
 		}
-		ret[id] = tree
+	}
+
+	trees, errs := BatchLoadTrees(boxIDs, paths, luteEngine)
+
+	for i := range trees {
+		tree := trees[i]
+		err := errs[i]
+		if err != nil || tree == nil {
+			logging.LogErrorf("load tree failed: %s", err)
+			continue
+		}
+
+		ret[tree.ID] = tree
 	}
 	return
 }
@@ -65,6 +78,28 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 
 	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
 	return
+}
+
+func BatchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) ([]*parse.Tree, []error) {
+	results := make([]*parse.Tree, len(paths))
+	errs := make([]error, len(paths))
+
+	var wg sync.WaitGroup
+	for i := range paths {
+		wg.Add(1)
+		go func(i int) {
+			defer wg.Done()
+
+			boxID := boxIDs[i]
+			path := paths[i]
+			tree, err := LoadTree(boxID, path, luteEngine)
+			results[i] = tree
+			errs[i] = err
+		}(i)
+	}
+	wg.Wait()
+
+	return results, errs
 }
 
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {

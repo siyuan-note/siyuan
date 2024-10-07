@@ -278,6 +278,30 @@ func getDocInfo(c *gin.Context) {
 	ret.Data = info
 }
 
+func getDocsInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	idsArg := arg["ids"].([]interface{})
+	var ids []string
+	for _, id := range idsArg {
+		ids = append(ids, id.(string))
+	}
+	queryRefCount := arg["refCount"].(bool)
+	queryAv := arg["av"].(bool)
+	info := model.GetDocsInfo(ids, queryRefCount, queryAv)
+	if nil == info {
+		ret.Code = -1
+		ret.Msg = fmt.Sprintf(model.Conf.Language(15), ids)
+		return
+	}
+	ret.Data = info
+}
+
 func getRecentUpdatedBlocks(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -21,6 +21,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"os"
+	"path/filepath"
+	"strings"
+	"sync"
+
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
@@ -30,10 +35,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"os"
-	"path/filepath"
-	"strings"
-	"sync"
 )
 
 func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
@@ -80,10 +81,10 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 }
 
 func BatchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) ([]*parse.Tree, []error) {
-	var wg sync.WaitGroup
 	results := make([]*parse.Tree, len(paths))
-	errors := make([]error, len(paths))
+	errs := make([]error, len(paths))
 
+	var wg sync.WaitGroup
 	for i := range paths {
 		wg.Add(1)
 		go func(i int) {
@@ -91,17 +92,14 @@ func BatchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) ([]*parse.Tre
 
 			boxID := boxIDs[i]
 			path := paths[i]
-
 			tree, err := LoadTree(boxID, path, luteEngine)
-
 			results[i] = tree
-			errors[i] = err
+			errs[i] = err
 		}(i)
 	}
-
 	wg.Wait()
 
-	return results, errors
+	return results, errs
 }
 
 func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {

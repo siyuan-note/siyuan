@@ -347,6 +347,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "unfoldHeading") {
         const scrollTop = protyle.contentElement.scrollTop;
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+            if (isInEmbedBlock(item)) {
+                return;
+            }
             if (operation.retData) { // undo 的时候没有 retData
                 removeUnfoldRepeatBlock(operation.retData, protyle);
                 item.insertAdjacentHTML("afterend", operation.retData);
@@ -1178,6 +1181,9 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
         if (operation.action === "unfoldHeading") {
             const scrollTop = protyle.contentElement.scrollTop;
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
+                if (isInEmbedBlock(item)) {
+                    return;
+                }
                 if (!item.lastElementChild.classList.contains("protyle-attr")) {
                     item.lastElementChild.remove();
                 }

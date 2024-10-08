@@ -289,7 +289,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
             response.data.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push({
-                    id: item.path,
                     iconHTML: "",
                     action: "iconCloseRound",
                     current: window.siyuan.config.system.workspaceDir === item.path,
@@ -395,7 +394,6 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 window.siyuan.notebooks.forEach(item => {
                     if (!item.closed) {
                         submenu.push({
-                            id: item.id,
                             label: escapeHtml(item.name),
                             iconHTML: unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, "b3-menu__icon", true),
                             accelerator: window.siyuan.storage[Constants.LOCAL_DAILYNOTEID] === item.id ? window.siyuan.config.keymap.general.dailyNote.custom : "",

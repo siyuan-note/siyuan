@@ -6,7 +6,7 @@
 		"id": "20210110181011-fbhoesf",
 		"title": "Daily notes",
 		"type": "doc",
-		"updated": "20210110181011"
+		"updated": "20241008202033"
 	},
 	"Children": [
 		{
@@ -14,12 +14,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210110181041-j47iwxx",
-				"updated": "20210302223722"
+				"updated": "20241008201757"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "We can quickly create a document through the daily note. The entry of the daily note function in the top toolbar looks like a calendar button."
+					"Data": "We can quickly create a document through the daily note, and the daily note function entrance is in the top main menu."
 				}
 			]
 		},
@@ -28,12 +28,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210110181041-dnap16f",
-				"updated": "20210303230545"
+				"updated": "20241008202033"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "But before using the daily note, you need to select settings in the right-click drop-down menu of the notebook, and configure in the new diary settings:"
+					"Data": "Before using the daily note, you need to open "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ in the notebook right-click menu, and configure in the new diary settings:"
 				}
 			]
 		},
@@ -48,7 +57,8 @@
 				"Num": -1
 			},
 			"Properties": {
-				"id": "20210110181041-24ejxr4"
+				"id": "20210110181041-24ejxr4",
+				"updated": "20241008202018"
 			},
 			"Children": [
 				{
@@ -63,19 +73,21 @@
 						"Num": -1
 					},
 					"Properties": {
-						"id": "20210110181041-3dq1cg4"
+						"id": "20210110181041-3dq1cg4",
+						"updated": "20241008202018"
 					},
 					"Children": [
 						{
 							"ID": "20210302223720-m8ekt02",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20210302223720-m8ekt02"
+								"id": "20210302223720-m8ekt02",
+								"updated": "20241008202018"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Storage path: the path under the notebook, support "
+									"Data": "Save path: the path under the notebook, support "
 								},
 								{
 									"Type": "NodeTextMark",

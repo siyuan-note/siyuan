@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20240921122726"
+		"updated": "20241008202623"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20240921122726"
+				"updated": "20241008202623"
 			},
 			"Children": [
 				{
@@ -117,12 +117,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091444-c7gg3ak",
-				"updated": "20230820185644"
+				"updated": "20241008202623"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "We have built-in variables and functions to enrich the template through the open source project Sprig (github repo: Masterminds/sprig). For example, you can use "
+					"Data": "We have built-in variables and functions to enrich the template through the open source project Sprig (GitHub repo: Masterminds/sprig). For example, you can use "
 				},
 				{
 					"Type": "NodeTextMark",

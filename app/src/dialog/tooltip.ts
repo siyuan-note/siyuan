@@ -35,13 +35,12 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     if (position?.startsWith("right")) {
         // block icon and background icon
         left = targetRect.right - messageElement.clientWidth;
-    } else if (position?.startsWith("left")) {
-        left = targetRect.left;
     }
 
     if (position?.endsWith("bottom")) {
         top += parseInt(position.replace("right", "").replace("left", ""));
     } else if (position?.endsWith("top")) {
+        // 编辑器动态滚动条
         top = targetRect.top - messageElement.clientHeight;
     } else if (position === "parentE") {
         // file tree and outline、backlink
@@ -57,7 +56,7 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     const bottomHeight = window.innerHeight - top;
 
     messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
-    
+
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
         messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {

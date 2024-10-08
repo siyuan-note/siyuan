@@ -23,7 +23,7 @@ import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
-import {isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isIPad, isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {
     filterMenu,
@@ -943,10 +943,12 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                     let isClick = event.detail === 1;
                     let isDblClick = event.detail === 2;
                     /// #if BROWSER
-                    const newDate = new Date().getTime();
-                    isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK;
-                    isDblClick = !isClick;
-                    lastClickTime = newDate;
+                    if (isIPad()) { // 需要进行 ipad 判断 https://github.com/siyuan-note/siyuan/issues/12704
+                        const newDate = new Date().getTime();
+                        isClick = newDate - lastClickTime > Constants.TIMEOUT_DBLCLICK;
+                        isDblClick = !isClick;
+                        lastClickTime = newDate;
+                    }
                     /// #endif
                     if (isClick) {
                         clickTimeout = window.setTimeout(() => {

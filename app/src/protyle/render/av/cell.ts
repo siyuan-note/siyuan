@@ -308,8 +308,15 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     }
     /// #if MOBILE
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-    if (contentElement) {
-        contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
+    if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
+        const keyboardToolbarElement = document.getElementById("keyboardToolbar")
+        const keyboardH = parseInt(keyboardToolbarElement.getAttribute("data-keyboardheight")) || (window.outerHeight / 2 - 42)
+        console.log(keyboardH, window.innerHeight, cellRect.bottom)
+        if (cellRect.bottom > window.innerHeight - keyboardH - 42) {
+            contentElement.scrollTop += cellRect.bottom - window.innerHeight + 42 + keyboardH;
+        } else if (cellRect.top < 110) {
+            contentElement.scrollTop -= 110 - cellRect.top;
+        }
     }
     /// #else
     if (!blockElement.querySelector(".av__header")) {

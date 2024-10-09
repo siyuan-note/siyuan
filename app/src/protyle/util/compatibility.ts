@@ -8,13 +8,13 @@ export const openByMobile = (uri: string) => {
     }
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
-            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/" + uri);
+            window.webkit.messageHandlers.openLink.postMessage(encodeURI(location.origin + "/" + uri));
         } else {
             try {
                 new URL(uri);
-                window.webkit.messageHandlers.openLink.postMessage(uri);
+                window.webkit.messageHandlers.openLink.postMessage(encodeURI(uri));
             } catch (e) {
-                window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
+                window.webkit.messageHandlers.openLink.postMessage(encodeURI("https://" + uri));
             }
         }
     } else if (isInAndroid()) {

@@ -1018,85 +1018,103 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 dragoverElement = undefined;
             }
-        } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1
-            && targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
+        } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1) {
             // 文件树拖拽
-            const scrollTop = protyle.contentElement.scrollTop;
             const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
-            if (targetElement.classList.contains("av__row")) {
-                // 拖拽到属性视图内
-                const blockElement = hasClosestBlock(targetElement);
-                if (blockElement) {
-                    let previousID = "";
-                    if (targetElement.classList.contains("dragover__bottom")) {
-                        previousID = targetElement.getAttribute("data-id") || "";
+            if (event.altKey) {
+                if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
+                    insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
+                } else {
+                    const range = getRangeByPoint(event.clientX, event.clientY);
+                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                        return;
                     } else {
-                        previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        focusByRange(range);
                     }
-                    const avID = blockElement.getAttribute("data-av-id");
-                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-                    const srcs: IOperationSrcs[] = [];
-                    ids.forEach(id => {
-                        srcs.push({
-                            id,
-                            isDetached: false,
-                        });
-                    });
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        previousID,
-                        srcs,
-                        blockID: blockElement.dataset.nodeId,
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: blockElement.dataset.nodeId,
-                        data: newUpdated,
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs: ids,
-                        avID,
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: blockElement.dataset.nodeId,
-                        data: blockElement.getAttribute("updated")
-                    }]);
-                    insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
-                    blockElement.setAttribute("updated", newUpdated);
                 }
-            } else {
+                let html = "";
                 for (let i = 0; i < ids.length; i++) {
-                    if (ids[i]) {
-                        await fetchSyncPost("/api/filetree/doc2Heading", {
-                            srcID: ids[i],
-                            after: targetElement.classList.contains("dragover__bottom"),
-                            targetID: targetElement.getAttribute("data-node-id"),
-                        });
-                    }
+                    const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
+                    html += `((${ids[i]} '${response.data}')) `;
                 }
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.id,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet({data: getResponse, protyle});
-                    /// #if !MOBILE
-                    // 文档标题互转后，需更新大纲
-                    updatePanelByEditor({
-                        protyle,
-                        focus: false,
-                        pushBackStack: false,
-                        reload: true,
-                        resize: false,
+                insertHTML(html, protyle);
+            } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
+                const scrollTop = protyle.contentElement.scrollTop;
+                if (targetElement.classList.contains("av__row")) {
+                    // 拖拽到属性视图内
+                    const blockElement = hasClosestBlock(targetElement);
+                    if (blockElement) {
+                        let previousID = "";
+                        if (targetElement.classList.contains("dragover__bottom")) {
+                            previousID = targetElement.getAttribute("data-id") || "";
+                        } else {
+                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        }
+                        const avID = blockElement.getAttribute("data-av-id");
+                        const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                        const srcs: IOperationSrcs[] = [];
+                        ids.forEach(id => {
+                            srcs.push({
+                                id,
+                                isDetached: false,
+                            });
+                        });
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            avID,
+                            previousID,
+                            srcs,
+                            blockID: blockElement.dataset.nodeId,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: blockElement.dataset.nodeId,
+                            data: newUpdated,
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: ids,
+                            avID,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: blockElement.dataset.nodeId,
+                            data: blockElement.getAttribute("updated")
+                        }]);
+                        insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                        blockElement.setAttribute("updated", newUpdated);
+                    }
+                } else {
+                    for (let i = 0; i < ids.length; i++) {
+                        if (ids[i]) {
+                            await fetchSyncPost("/api/filetree/doc2Heading", {
+                                srcID: ids[i],
+                                after: targetElement.classList.contains("dragover__bottom"),
+                                targetID: targetElement.getAttribute("data-node-id"),
+                            });
+                        }
+                    }
+                    fetchPost("/api/filetree/getDoc", {
+                        id: protyle.block.id,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
+                    }, getResponse => {
+                        onGet({data: getResponse, protyle});
+                        /// #if !MOBILE
+                        // 文档标题互转后，需更新大纲
+                        updatePanelByEditor({
+                            protyle,
+                            focus: false,
+                            pushBackStack: false,
+                            reload: true,
+                            resize: false,
+                        });
+                        /// #endif
+                        // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
+                        setTimeout(() => {
+                            protyle.contentElement.scrollTop = scrollTop;
+                            protyle.scroll.lastScrollTop = scrollTop - 1;
+                        }, Constants.TIMEOUT_LOAD);
                     });
-                    /// #endif
-                    // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
-                    setTimeout(() => {
-                        protyle.contentElement.scrollTop = scrollTop;
-                        protyle.scroll.lastScrollTop = scrollTop - 1;
-                    }, Constants.TIMEOUT_LOAD);
-                });
+                }
+                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
-            targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544

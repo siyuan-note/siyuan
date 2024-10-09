@@ -70,7 +70,7 @@ export const openMenuPanel = (options: {
         const data = response.data as IAV;
         let html;
         if (options.type === "config") {
-            html = getViewHTML(data.view);
+            html = getViewHTML(data);
         } else if (options.type === "properties") {
             html = getPropertiesHTML(data.view);
         } else if (options.type === "sorts") {
@@ -518,7 +518,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "go-config") {
-                    menuElement.innerHTML = getViewHTML(data.view);
+                    menuElement.innerHTML = getViewHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
@@ -758,16 +758,12 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "delete-view") {
-                    if (data.views.length === 1) {
-                        removeBlock(options.protyle, options.blockElement, getEditorRange(options.blockElement), "remove");
-                    } else {
-                        transaction(options.protyle, [{
-                            action: "removeAttrViewView",
-                            avID,
-                            id: data.viewID,
-                            blockID
-                        }]);
-                    }
+                    transaction(options.protyle, [{
+                        action: "removeAttrViewView",
+                        avID,
+                        id: data.viewID,
+                        blockID
+                    }]);
                     avPanelElement.remove();
                     event.preventDefault();
                     event.stopPropagation();

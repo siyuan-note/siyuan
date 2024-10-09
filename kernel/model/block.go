@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/open-spaced-repetition/go-fsrs/v3"
@@ -859,13 +860,30 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
 	var defIDs []string
 	for _, n := range nodes {
-		defIDs = append(defIDs, n.ID)
+		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if n.IsBlock() {
+				defIDs = append(defIDs, n.ID)
+			}
+			return ast.WalkContinue
+		})
 	}
+	defIDs = gulu.Str.RemoveDuplicatedElem(defIDs)
 	refCount := sql.QueryRefCount(defIDs)
 	for _, n := range nodes {
-		if cnt := refCount[n.ID]; 0 < cnt {
-			n.SetIALAttr("refcount", strconv.Itoa(cnt))
-		}
+		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			if cnt := refCount[n.ID]; 0 < cnt {
+				n.SetIALAttr("refcount", strconv.Itoa(cnt))
+			}
+			return ast.WalkContinue
+		})
 	}
 
 	luteEngine := NewLute()

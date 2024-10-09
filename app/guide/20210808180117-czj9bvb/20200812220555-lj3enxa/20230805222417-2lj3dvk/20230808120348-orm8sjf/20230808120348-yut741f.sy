@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230808120348-yut741f",
 		"title": "限制",
-		"updated": "20230808220435"
+		"type": "doc",
+		"updated": "20241010010937"
 	},
 	"Children": [
 		{
@@ -14,7 +15,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230808120348-fti66eq",
-				"updated": "20230808220435"
+				"updated": "20241010010937"
 			},
 			"Children": [
 				{
@@ -25,7 +26,8 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20230808120348-or1vtrh"
+						"id": "20230808120348-or1vtrh",
+						"updated": "20230808120348"
 					},
 					"Children": [
 						{
@@ -38,15 +40,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最多支持创建 7 个"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "同步目录"
+									"Data": "最多支持创建 7 个云端同步目录"
 								}
 							]
 						}
@@ -74,11 +68,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最多支持保存 12 个"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "数据快照"
+									"Data": "最多支持保存 12 个数据快照"
 								}
 							]
 						}
@@ -106,15 +96,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "云端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "存储空间"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "初始化总大小为 "
+									"Data": "云端存储空间初始化总大小为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -124,6 +106,129 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010010525-v947wk6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010010525-v947wk6",
+						"updated": "20241010010937"
+					},
+					"Children": [
+						{
+							"ID": "20241010010525-ufbwxie",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010010525-ufbwxie",
+								"updated": "20241010010653"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "云端存储中的数据快照最长保留 30 天，即 30 天之前的未引用快照会被自动清理"
+								}
+							]
+						},
+						{
+							"ID": "20241010010721-h2nxf9s",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010010721-h2nxf9s",
+								"updated": "20241010010937"
+							},
+							"Children": [
+								{
+									"ID": "20241010010720-gdh7tx0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010720-gdh7tx0",
+										"updated": "20241010010937"
+									},
+									"Children": [
+										{
+											"ID": "20241010010720-q53dcr4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010720-q53dcr4",
+												"updated": "20241010010937"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "每次数据同步后的最新快照不会被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010727-fa6g8uw",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010727-fa6g8uw",
+										"updated": "20241010010727"
+									},
+									"Children": [
+										{
+											"ID": "20241010010727-sm3elkr",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010727-sm3elkr",
+												"updated": "20241010010734"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "手动标记备份上传到云端的快照不会被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010735-1sh1m73",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010735-1sh1m73",
+										"updated": "20241010010808"
+									},
+									"Children": [
+										{
+											"ID": "20241010010735-z4sgvdd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010735-z4sgvdd",
+												"updated": "20241010010808"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "30 天内的快照不会被清理"
+												}
+											]
+										}
+									]
 								}
 							]
 						}
@@ -172,7 +277,8 @@
 										"Marker": "Kg=="
 									},
 									"Properties": {
-										"id": "20230808120348-ovfk4gl"
+										"id": "20230808120348-ovfk4gl",
+										"updated": "20230808120348"
 									},
 									"Children": [
 										{

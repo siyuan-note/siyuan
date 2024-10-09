@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20240921122737"
+		"updated": "20241008201610"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20240921122737"
+				"updated": "20241008201610"
 			},
 			"Children": [
 				{
@@ -129,12 +129,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091309-mvyh081",
-				"updated": "20240308161634"
+				"updated": "20241008201610"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们通过开源项目 Sprig (github repo: Masterminds/sprig) 内置了一些变量和函数来丰富模板。比如可通过 "
+					"Data": "我们通过开源项目 Sprig (GitHub repo: Masterminds/sprig) 内置了一些变量和函数来丰富模板。比如可通过 "
 				},
 				{
 					"Type": "NodeTextMark",

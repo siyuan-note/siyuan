@@ -6,19 +6,20 @@
 		"id": "20210110175347-2xrwoiq",
 		"title": "日记",
 		"type": "doc",
-		"updated": "20210110175347"
+		"updated": "20241008201419"
 	},
 	"Children": [
 		{
 			"ID": "20210110175347-jvtq2ap",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210110175347-jvtq2ap"
+				"id": "20210110175347-jvtq2ap",
+				"updated": "20241008201121"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "我们可以通过日记来快速创建文档，日记功能入口在顶部工具栏形似日历的按钮。"
+					"Data": "我们可以通过日记来快速创建文档，日记功能入口在顶部主菜单中。"
 				}
 			]
 		},
@@ -27,12 +28,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210110175631-umo8b4h",
-				"updated": "20210303230529"
+				"updated": "20241008201419"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "但在使用日记前，需要在笔记本右键下拉菜单中选择设置，在新建日记设置中配置："
+					"Data": "使用日记前，需要在笔记本右键菜单中打开 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ ，在新建日记设置中配置："
 				}
 			]
 		},

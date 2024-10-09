@@ -306,6 +306,12 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             }
         }
     }
+    /// #if MOBILE
+    const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+    if (contentElement) {
+        contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
+    }
+    /// #else
     if (!blockElement.querySelector(".av__header")) {
         // 属性面板
         return;
@@ -336,6 +342,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             }
         }
     }
+    /// #endif
 };
 
 export const getTypeByCellElement = (cellElement: Element) => {
@@ -365,13 +372,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-    /// #if MOBILE
-    if (contentElement) {
-        contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
-    }
-    /// #else
     cellScrollIntoView(blockElement, cellElements[0], false);
-    /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     let height = cellRect.height;

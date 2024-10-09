@@ -171,9 +171,9 @@ export const setDefRefCount = (data: {
     "rootID": string
     refIDs: string[]
 }) => {
-    getAllEditor().forEach(item => {
-        if (data.rootID === data.blockID && item.protyle.block.rootID === data.rootID) {
-            const attrElement = item.protyle.title.element.querySelector(".protyle-attr");
+    getAllEditor().forEach(editor => {
+        if (data.rootID === data.blockID && editor.protyle.block.rootID === data.rootID) {
+            const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");
             const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
@@ -188,8 +188,9 @@ export const setDefRefCount = (data: {
             return;
         }
         // 不能对比 rootId，否则嵌入块中的锚文本无法更新
-        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
-            const countElement = item.querySelector(".protyle-attr--refcount");
+        editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"]`).forEach(item => {
+            // 不能直接查询，否则列表中会获取到第一个列表项的 attr https://github.com/siyuan-note/siyuan/issues/12738
+            const countElement = item.lastElementChild.querySelector(".protyle-attr--refcount");
             if (countElement) {
                 if (data.refCount === 0) {
                     countElement.remove();
@@ -197,7 +198,7 @@ export const setDefRefCount = (data: {
                     countElement.textContent = data.refCount.toString();
                 }
             } else if (data.refCount > 0) {
-                const attrElement = item.querySelector(".protyle-attr");
+                const attrElement = item.lastElementChild;
                 if (attrElement.childElementCount > 0) {
                     attrElement.lastElementChild.insertAdjacentHTML("afterend", `<div class="protyle-attr--refcount popover__block">${data.refCount}</div>`);
                 } else {

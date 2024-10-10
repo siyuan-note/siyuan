@@ -217,6 +217,26 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
 					var md string
 					if "d" == sqlBlock.Type {
+						if 0 == blockEmbedMode {
+							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
+							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
+							embedTopLevel := 0
+							ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+								if !entering || ast.NodeHeading != n.Type {
+									return ast.WalkContinue
+								}
+
+								embedTopLevel = n.HeadingLevel
+								if parentHeadingLevel >= embedTopLevel {
+									n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+									if 6 < n.HeadingLevel {
+										n.HeadingLevel = 6
+									}
+								}
+								return ast.WalkContinue
+							})
+						}
+
 						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 					} else if "h" == sqlBlock.Type {
 						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
@@ -225,8 +245,6 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 
 						if 0 == blockEmbedMode {
-							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
-							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233
 							embedTopLevel := 0
 							for _, hChild := range hChildren {
 								if ast.NodeHeading == hChild.Type {

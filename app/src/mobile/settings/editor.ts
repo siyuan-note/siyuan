@@ -22,6 +22,7 @@ const setEditor = (modelMainElement: Element) => {
         inlineTag: (modelMainElement.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,
         inlineMath: (modelMainElement.querySelector("#editorMarkdownInlineMath") as HTMLInputElement).checked
     };
+    window.siyuan.config.editor.allowHTMLBLockScript = (modelMainElement.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked;
     window.siyuan.config.editor.dynamicLoadBlocks = dynamicLoadBlocks;
     window.siyuan.config.editor.justify = (modelMainElement.querySelector("#justify") as HTMLInputElement).checked;
     window.siyuan.config.editor.rtl = (modelMainElement.querySelector("#rtl") as HTMLInputElement).checked;

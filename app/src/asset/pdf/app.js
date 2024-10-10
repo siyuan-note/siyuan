@@ -90,7 +90,7 @@ import {Toolbar} from "./toolbar";
 import {ViewHistory} from "./view_history.js";
 import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {Constants} from "../../constants";
-import {getPdfInstance} from "../anno";
+import {getPdfInstance, hlPDFRect} from "../anno";
 
 const FORCE_PAGES_LOADED_TIMEOUT = 10000; // ms
 
@@ -2469,7 +2469,10 @@ function onPageNumberChanged(evt) {
     if (evt.value !== "") {
         it.pdfLinkService.goToPage(evt.value);
     }
-
+    // NOTE
+    if (evt.id) {
+        hlPDFRect(it.pdfViewer.container, evt.id)
+    }
     // Ensure that the page number input displays the correct value, even if the
     // value entered by the user was invalid (e.g. a floating point number).
     if (
@@ -2815,7 +2818,9 @@ function onKeyUp(evt) {
         return
     }
     // NOTE 4+ 版本不知道为 r 后不 focus 了
-    pdfInstance.pdfViewer.focus();
+    if (!["SELECT", "TEXTAREA", "INPUT"].includes(evt.target.tagName)) {
+        pdfInstance.pdfViewer.focus();
+    }
 
     // evt.ctrlKey is false hence we use evt.key.
     if (evt.key === "Control") {

@@ -371,6 +371,7 @@
   margin-right: 8px;
   color: var(--b3-theme-on-surface);
   overflow: initial;
+  align-self: center;
 
   &:hover,
   &:focus {
@@ -412,6 +413,7 @@
     width: inherit;
     min-width: auto;
     padding: 0 8px;
+    height: 26px;
   }
 }
 

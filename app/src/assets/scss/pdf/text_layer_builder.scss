@@ -16,82 +16,116 @@
 .textLayer {
   position: absolute;
   text-align: initial;
-  left: 0;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  overflow: hidden;
-  // NOTE
+  inset: 0;
+  overflow: clip;
+  opacity: 1;
   line-height: 1;
   text-size-adjust: none;
+  forced-color-adjust: none;
   transform-origin: 0 0;
-}
+  caret-color: CanvasText;
+  z-index: 0;
 
-.textLayer span,
-.textLayer br {
-  color: transparent;
-  position: absolute;
-  white-space: pre;
-  cursor: text;
-  transform-origin: 0% 0%;
-}
+  &.highlighting {
+    touch-action: none;
+  }
 
-/* Only necessary in Google Chrome, see issue 14205, and most unfortunately
- * the problem doesn't show up in "text" reference tests. */
-.textLayer span.markedContent {
-  top: 0;
-  height: 0;
-}
+  :is(span, br) {
+    color: transparent;
+    position: absolute;
+    white-space: pre;
+    cursor: text;
+    transform-origin: 0% 0%;
+  }
 
-.textLayer .highlight {
-  margin: -1px;
-  padding: 1px;
-  background-color: rgba(180, 0, 170, 1);
-  border-radius: var(--b3-border-radius);
-}
+  > :not(.markedContent),
+  .markedContent span:not(.markedContent) {
+    z-index: 1;
+  }
 
-.textLayer .highlight.appended {
-  position: initial;
-}
+  /* Only necessary in Google Chrome, see issue 14205, and most unfortunately
+   * the problem doesn't show up in "text" reference tests. */
+  /*#if !MOZCENTRAL*/
+  span.markedContent {
+    top: 0;
+    height: 0;
+  }
+  /*#endif*/
 
-.textLayer .highlight.begin {
-  border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
-}
+  span[role="img"] {
+    user-select: none;
+    cursor: default;
+  }
 
-.textLayer .highlight.end {
-  border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
-}
+  .highlight {
+    --highlight-bg-color: rgb(180 0 170 / 0.25);
+    --highlight-selected-bg-color: rgb(0 100 0 / 0.25);
+    --highlight-backdrop-filter: none;
+    --highlight-selected-backdrop-filter: none;
 
-.textLayer .highlight.middle {
-  border-radius: 0;
-}
+    @media screen and (forced-colors: active) {
+      --highlight-bg-color: transparent;
+      --highlight-selected-bg-color: transparent;
+      --highlight-backdrop-filter: var(--hcm-highlight-filter);
+      --highlight-selected-backdrop-filter: var(
+                      --hcm-highlight-selected-filter
+      );
+    }
 
-.textLayer .highlight.selected {
-  background-color: rgba(0, 100, 0, 1);
-}
+    margin: -1px;
+    padding: 1px;
+    background-color: var(--highlight-bg-color);
+    backdrop-filter: var(--highlight-backdrop-filter);
+    border-radius: 4px;
 
-.textLayer ::selection {
-  // NOTE
-  background: var(--b3-pdf-selection);
-}
+    &.appended {
+      position: initial;
+    }
 
-/* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
-.textLayer br::selection {
-  background: transparent;
-}
+    &.begin {
+      border-radius: 4px 0 0 4px;
+    }
 
-.textLayer .endOfContent {
-  display: block;
-  position: absolute;
-  left: 0;
-  top: 100%;
-  right: 0;
-  bottom: 0;
-  z-index: -1;
-  cursor: default;
-  user-select: none;
-}
+    &.end {
+      border-radius: 0 4px 4px 0;
+    }
 
-.textLayer .endOfContent.active {
-  top: 0;
+    &.middle {
+      border-radius: 0;
+    }
+
+    &.selected {
+      background-color: var(--highlight-selected-bg-color);
+      backdrop-filter: var(--highlight-selected-backdrop-filter);
+    }
+  }
+
+  ::selection {
+    /* stylelint-disable declaration-block-no-duplicate-properties */
+    /*#if !MOZCENTRAL*/
+    background: var(--b3-pdf-selection); // NOTE
+    /*#endif*/
+    /* stylelint-enable declaration-block-no-duplicate-properties */
+    background: color-mix(in srgb, AccentColor, transparent 75%);
+  }
+
+  /* Avoids https://github.com/mozilla/pdf.js/issues/13840 in Chrome */
+  /*#if !MOZCENTRAL*/
+  br::selection {
+    background: transparent;
+  }
+  /*#endif*/
+
+  .endOfContent {
+    display: block;
+    position: absolute;
+    inset: 100% 0 0;
+    z-index: 0;
+    cursor: default;
+    user-select: none;
+  }
+
+  &.selecting .endOfContent {
+    top: 0;
+  }
 }

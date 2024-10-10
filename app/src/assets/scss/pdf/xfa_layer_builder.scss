@@ -14,14 +14,28 @@
  */
 
 :root {
-  --xfa-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, .13);'/></svg>");
+  --xfa-unfocused-field-background: url("data:image/svg+xml;charset=UTF-8,<svg width='1px' height='1px' xmlns='http://www.w3.org/2000/svg'><rect width='100%' height='100%' style='fill:rgba(0, 54, 255, 0.13);'/></svg>");
+  --xfa-focus-outline: auto;
+}
+
+@media screen and (forced-colors: active) {
+  :root {
+    --xfa-focus-outline: 2px solid CanvasText;
+  }
+  .xfaLayer *:required {
+    outline: 1.5px solid selectedItem;
+  }
+}
+
+.xfaLayer {
+  background-color: transparent;
 }
 
 .xfaLayer .highlight {
   margin: -1px;
   padding: 1px;
-  background-color: rgba(239, 203, 237, 1);
-  border-radius: var(--b3-border-radius);
+  background-color: rgb(239 203 237);
+  border-radius: 4px;
 }
 
 .xfaLayer .highlight.appended {
@@ -29,11 +43,11 @@
 }
 
 .xfaLayer .highlight.begin {
-  border-radius: var(--b3-border-radius) 0 0 var(--b3-border-radius);
+  border-radius: 4px 0 0 4px;
 }
 
 .xfaLayer .highlight.end {
-  border-radius: 0 var(--b3-border-radius) var(--b3-border-radius) 0;
+  border-radius: 0 4px 4px 0;
 }
 
 .xfaLayer .highlight.middle {
@@ -41,12 +55,7 @@
 }
 
 .xfaLayer .highlight.selected {
-  background-color: rgba(203, 223, 203, 1);
-}
-
-.xfaLayer ::selection {
-  // NOTE
-  background: var(--b3-pdf-selection);
+  background-color: var(--b3-pdf-selection);  // NOTE
 }
 
 .xfaPage {
@@ -77,7 +86,7 @@
   font-style: inherit;
   font-weight: inherit;
   font-kerning: inherit;
-  letter-spacing: -.01px;
+  letter-spacing: -0.01px;
   text-align: inherit;
   text-decoration: inherit;
   box-sizing: border-box;
@@ -88,14 +97,12 @@
   line-height: inherit;
 }
 
-.xfaLayer div {
-  pointer-events: none;
+.xfaLayer *:required {
+  outline: 1.5px solid red;
 }
 
-.xfaLayer svg {
-  pointer-events: none;
-}
-
+.xfaLayer div,
+.xfaLayer svg,
 .xfaLayer svg * {
   pointer-events: none;
 }
@@ -146,10 +153,7 @@
   align-items: center;
 }
 
-.xfaLeft > .xfaCaption,
-.xfaLeft > .xfaCaptionForCheckButton,
-.xfaRight > .xfaCaption,
-.xfaRight > .xfaCaptionForCheckButton {
+:is(.xfaLeft, .xfaRight) > :is(.xfaCaption, .xfaCaptionForCheckButton) {
   max-height: 100%;
 }
 
@@ -165,10 +169,7 @@
   align-items: flex-start;
 }
 
-.xfaTop > .xfaCaption,
-.xfaTop > .xfaCaptionForCheckButton,
-.xfaBottom > .xfaCaption,
-.xfaBottom > .xfaCaptionForCheckButton {
+:is(.xfaTop, .xfaBottom) > :is(.xfaCaption, .xfaCaptionForCheckButton) {
   width: 100%;
 }
 
@@ -183,17 +184,15 @@
   height: 100%;
 }
 
-.xfaTextfield:focus,
-.xfaSelect:focus {
+:is(.xfaTextfield, .xfaSelect):focus {
   background-image: none;
   background-color: transparent;
-  outline: auto;
+  outline: var(--xfa-focus-outline);
   outline-offset: -1px;
 }
 
-.xfaCheckbox:focus,
-.xfaRadio:focus {
-  outline: auto;
+:is(.xfaCheckbox, .xfaRadio):focus {
+  outline: var(--xfa-focus-outline);
 }
 
 .xfaTextfield,
@@ -206,10 +205,11 @@
   background-image: var(--xfa-unfocused-field-background);
 }
 
-.xfaTop > .xfaTextfield,
-.xfaTop > .xfaSelect,
-.xfaBottom > .xfaTextfield,
-.xfaBottom > .xfaSelect {
+.xfaSelect {
+  padding-inline: 2px;
+}
+
+:is(.xfaTop, .xfaBottom) > :is(.xfaTextfield, .xfaSelect) {
   flex: 0 1 auto;
 }
 
@@ -310,12 +310,7 @@
   flex: 1;
 }
 
-.xfaNonInteractive input,
-.xfaNonInteractive textarea,
-.xfaDisabled input,
-.xfaDisabled textarea,
-.xfaReadOnly input,
-.xfaReadOnly textarea {
+:is(.xfaNonInteractive, .xfaDisabled, .xfaReadOnly) :is(input, textarea) {
   background: initial;
 }
 

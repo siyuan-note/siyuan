@@ -702,7 +702,6 @@
   "unitInches": "in",
   "unitMillimeters": "mm",
   "additionalLayers": "Dodatkowe warstwy",
-  "thumbPage": "Miniatura strony {{page}}",
   "thumbsTitle": "Pokaż miniatury",
   "document_properties_page_size_name_a3": "A3",
   "document_properties_page_size_name_a4": "A4",

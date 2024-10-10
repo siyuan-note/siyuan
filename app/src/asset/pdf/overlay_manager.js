@@ -37,42 +37,9 @@ class OverlayManager {
     }
     this.#overlays.set(dialog, { canForceClose });
 
-    // NOTE
-    // if (
-    //   typeof PDFJSDev !== "undefined" &&
-    //   PDFJSDev.test("GENERIC && !SKIP_BABEL") &&
-    //   !dialog.showModal
-    // ) {
-    //   const dialogPolyfill = require("dialog-polyfill/dist/dialog-polyfill.js");
-    //   dialogPolyfill.registerDialog(dialog);
-    //
-    //   if (!this._dialogPolyfillCSS) {
-    //     this._dialogPolyfillCSS = true;
-    //
-    //     const style = document.createElement("style");
-    //     style.textContent = PDFJSDev.eval("DIALOG_POLYFILL_CSS");
-    //
-    //     document.head.prepend(style);
-    //   }
-    // }
-
     dialog.addEventListener("cancel", evt => {
       this.#active = null;
     });
-  }
-
-  /**
-   * @param {HTMLDialogElement} dialog - The overlay's DOM element.
-   * @returns {Promise} A promise that is resolved when the overlay has been
-   *                    unregistered.
-   */
-  async unregister(dialog) {
-    if (!this.#overlays.has(dialog)) {
-      throw new Error("The overlay does not exist.");
-    } else if (this.#active === dialog) {
-      throw new Error("The overlay cannot be removed while it is active.");
-    }
-    this.#overlays.delete(dialog);
   }
 
   /**
@@ -95,6 +62,7 @@ class OverlayManager {
     this.#active = dialog;
     // NOTE
     dialog.classList.add("dialog--open")
+    // dialog.showModal();
   }
 
   /**
@@ -112,6 +80,7 @@ class OverlayManager {
     }
     // NOTE
     dialog.classList.remove("dialog--open")
+    // dialog.close();
     this.#active = null;
   }
 }

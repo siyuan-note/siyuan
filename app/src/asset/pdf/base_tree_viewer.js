@@ -20,11 +20,15 @@ const TREEITEM_SELECTED_CLASS = "selected";
 
 class BaseTreeViewer {
   constructor(options) {
-    if (this.constructor === BaseTreeViewer) {
+    if (
+      (typeof PDFJSDev === "undefined" || PDFJSDev.test("TESTING")) &&
+      this.constructor === BaseTreeViewer
+    ) {
       throw new Error("Cannot initialize BaseTreeViewer.");
     }
     this.container = options.container;
     this.eventBus = options.eventBus;
+    this._l10n = options.l10n;
 
     this.reset();
   }
@@ -42,14 +46,14 @@ class BaseTreeViewer {
   }
 
   /**
-   * @private
+   * @protected
    */
   _dispatchEvent(count) {
     throw new Error("Not implemented: _dispatchEvent");
   }
 
   /**
-   * @private
+   * @protected
    */
   _bindLink(element, params) {
     throw new Error("Not implemented: _bindLink");
@@ -70,7 +74,9 @@ class BaseTreeViewer {
   /**
    * Prepend a button before a tree item which allows the user to collapse or
    * expand all tree items at that level; see `_toggleTreeItem`.
-   * @private
+   * @param {HTMLDivElement} div
+   * @param {boolean|object} [hidden]
+   * @protected
    */
   _addToggleButton(div, hidden = false) {
     const toggler = document.createElement("div");
@@ -101,10 +107,14 @@ class BaseTreeViewer {
    * @private
    */
   _toggleTreeItem(root, show = false) {
+    // Pause translation when collapsing/expanding the subtree.
+    this._l10n.pause();
+
     this._lastToggleIsShow = show;
     for (const toggler of root.querySelectorAll(".treeItemToggler")) {
       toggler.classList.toggle("treeItemsHidden", !show);
     }
+    this._l10n.resume();
   }
 
   /**
@@ -124,7 +134,10 @@ class BaseTreeViewer {
 
       this._lastToggleIsShow = !fragment.querySelector(".treeItemsHidden");
     }
+    // Pause translation when inserting the tree into the DOM.
+    this._l10n.pause();
     this.container.append(fragment);
+    this._l10n.resume();
 
     this._dispatchEvent(count);
   }
@@ -155,6 +168,8 @@ class BaseTreeViewer {
     if (!treeItem) {
       return;
     }
+    // Pause translation when expanding the treeItem.
+    this._l10n.pause();
     // Ensure that the treeItem is *fully* expanded, such that it will first of
     // all be visible and secondly that scrolling it into view works correctly.
     let currentNode = treeItem.parentNode;
@@ -165,6 +180,8 @@ class BaseTreeViewer {
       }
       currentNode = currentNode.parentNode;
     }
+    this._l10n.resume();
+
     this._updateCurrentTreeItem(treeItem);
 
     this.container.scrollTo(

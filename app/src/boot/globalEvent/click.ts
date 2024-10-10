@@ -73,8 +73,8 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     }
 
     // 点击空白，pdf 搜索、更多消失
-    if (hasClosestByAttribute(event.target, "id", "secondaryToolbarToggle") ||
-        hasClosestByAttribute(event.target, "id", "viewFind") ||
+    if (hasClosestByAttribute(event.target, "id", "secondaryToolbarToggleButton") ||
+        hasClosestByAttribute(event.target, "id", "viewFindButton") ||
         hasClosestByAttribute(event.target, "id", "findbar")) {
         return;
     }

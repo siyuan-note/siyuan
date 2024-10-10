@@ -5,6 +5,7 @@
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag
     <meta http-equiv="Content-Security-Policy" content="script-src 'self'"/>-->
     <style id="editorAttr" type="text/css"></style>
+    <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.7.85" type="module"></script>
 </head>
 <body class="fn__flex-column">
 <div id="loading" class="b3-dialog b3-dialog--open">

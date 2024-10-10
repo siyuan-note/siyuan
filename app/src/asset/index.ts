@@ -9,7 +9,7 @@ import {setModelsHash} from "../window/setHeader";
 // @ts-ignore
 import {webViewerLoad} from "./pdf/viewer";
 // @ts-ignore
-import {webViewerPageNumberChanged} from "./pdf/app";
+import {onPageNumberChanged} from "./pdf/app";
 /// #endif
 import {fetchPost} from "../util/fetch";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
@@ -73,12 +73,12 @@ export class Asset extends Model {
         /// #if !MOBILE
         if (typeof pdfId === "string") {
             this.getPdfId(() => {
-                webViewerPageNumberChanged({value: this.pdfPage, pdfInstance: this.pdfObject, id: this.pdfId});
+                onPageNumberChanged({value: this.pdfPage, pdfInstance: this.pdfObject, id: this.pdfId});
             });
             return;
         }
         if (typeof pdfId === "number" && !isNaN(pdfId)) {
-            webViewerPageNumberChanged({value: this.pdfId, pdfInstance: this.pdfObject});
+            onPageNumberChanged({value: this.pdfId, pdfInstance: this.pdfObject});
         }
         /// #endif
     }
@@ -135,10 +135,10 @@ export class Asset extends Model {
         <div class="findbar b3-menu fn__hidden doorHanger" id="findbar">
             <input id="findInput" class="toolbarField b3-text-field" placeholder="${window.siyuan.languages.search}">
             <div class="fn__space"></div>
-            <button id="findPrevious" class="toolbarButton findPrevious b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.previous}">
+            <button id="findPreviousButton" class="toolbarButton findPrevious b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.previous}">
                 <svg><use xlink:href="#iconUp"></use></svg>
             </button>
-            <button id="findNext" class="toolbarButton findNext b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.next}">
+            <button id="findNextButton" class="toolbarButton findNext b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.next}">
                 <svg><use xlink:href="#iconDown"></use></svg>
             </button>
             <label class="b3-button b3-button--outline b3-button--small">
@@ -196,12 +196,12 @@ export class Asset extends Model {
               <span class="b3-menu__accelerator">End</span>
             </button>
             <div class="horizontalToolbarSeparator b3-menu__separator"></div>
-            <button id="zoomOut" class="secondaryToolbarButton b3-menu__item zoomOut">
+            <button id="zoomOutButton" class="secondaryToolbarButton b3-menu__item zoomOut">
                <svg class="b3-menu__icon"><use xlink:href="#iconLine"></use></svg> 
                <span class="b3-menu__label">${window.siyuan.languages.zoomOut}</span>
                <span class="b3-menu__accelerator">${updateHotkeyTip("⌘-")}</span>
             </button>
-            <button id="zoomIn" class="secondaryToolbarButton b3-menu__item zoomIn">
+            <button id="zoomInButton" class="secondaryToolbarButton b3-menu__item zoomIn">
                <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg> 
                <span class="b3-menu__label">${window.siyuan.languages.zoomIn}</span>
                <span class="b3-menu__accelerator">${updateHotkeyTip("⌘=")}</span>
@@ -273,10 +273,10 @@ export class Asset extends Model {
         <div class="pdf__toolbar">
           <div id="toolbarContainer">
             <div id="toolbarViewer">
-                <button id="sidebarToggle" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
+                <button id="sidebarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="sidebarContainer" aria-label="${window.siyuan.languages.toggleSidebarNotification2Title} ${updateHotkeyTip("F4")}">
                     <svg><use xlink:href="#iconLayoutRight"></use></svg>
                 </button>
-                <button id="viewFind" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
+                <button id="viewFindButton" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.search} ${updateHotkeyTip("⌘F")}">
                   <svg><use xlink:href="#iconSearch"></use></svg>
                 </button>
                 <button id="rectAnno" class="toolbarButton b3-tooltips b3-tooltips__se" aria-expanded="false" aria-controls="findbar" aria-label="${window.siyuan.languages.rectAnnotation} ${updateHotkeyTip("⌘D")}/${updateHotkeyTip("⌥D")}">
@@ -303,11 +303,11 @@ export class Asset extends Model {
                   </select>
                 </span>
                 <span id="scrollPage" class="fn__none"></span>
-                <span id="print" class="fn__none"></span>
+                <span id="printButton" class="fn__none"></span>
                 <span id="secondaryPrint" class="fn__none"></span>
                 <span id="viewBookmark" class="fn__none"></span>
                 <span id="secondaryViewBookmark" class="fn__none"></span>
-                <button id="secondaryToolbarToggle" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.more}" aria-expanded="false" aria-controls="secondaryToolbar">
+                <button id="secondaryToolbarToggleButton" class="toolbarButton b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.more}" aria-expanded="false" aria-controls="secondaryToolbar">
                   <svg><use xlink:href="#iconMore"></use></svg>
                 </button>
             </div>
@@ -453,11 +453,18 @@ export class Asset extends Model {
         <input id="editorInkColor">
         <input id="editorInkThickness">
         <input id="editorInkOpacity">
-        <input id="download">
+        <input id="editorStampAddImage">
+        <input id="editorFreeHighlightThickness">
+        <input id="editorHighlightShowAll">
+        <input id="downloadButton">
         <input id="secondaryDownload">
-        <input id="editorFreeText">
+        <input id="editorFreeTextButton">
         <input id="openFile">
-        <input id="editorInk">
+        <input id="editorInkButton">
+        <input id="editorStampButton">
+        <input id="editorHighlightButton">
+        <input id="imageAltTextSettings">
+        <input id="secondaryOpenFile">
       </div>
     </div> <!-- outerContainer -->
     <div id="printContainer"></div>`;

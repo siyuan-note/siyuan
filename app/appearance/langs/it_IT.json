@@ -702,7 +702,6 @@
     "unitInches": "in",
     "unitMillimeters": "mm",
     "additionalLayers": "Livelli aggiuntivi",
-    "thumbPage": "Miniatura di pagina {{page}}",
     "thumbsTitle": "Mostra miniature",
     "document_properties_page_size_name_a3": "A3",
     "document_properties_page_size_name_a4": "A4",
@@ -1556,4 +1555,3 @@
       "248": "L'intestazione di destinazione si trova nel blocco contenitore e non può essere utilizzata come punto di rilascio"
     }
   }
-  

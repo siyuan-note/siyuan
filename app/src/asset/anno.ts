@@ -8,8 +8,9 @@ import {Constants} from "../constants";
 import {Dialog} from "../dialog";
 import {showMessage} from "../dialog/message";
 
-export const initAnno = (element: HTMLElement, pdf: any, pdfConfig: any) => {
+export const initAnno = (element: HTMLElement, pdf: any) => {
     getConfig(pdf);
+    const pdfConfig = pdf.appConfig;
     const rectAnnoElement = pdfConfig.toolbar.rectAnno;
     rectAnnoElement.addEventListener("click", () => {
         if (rectAnnoElement.classList.contains("toggled")) {
@@ -644,16 +645,17 @@ export const getHighlight = (element: HTMLElement) => {
 const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
     const pageIndex = selected.index;
     const page = pdf.pdfViewer.getPageView(pageIndex);
-    let textLayerElement = page.textLayer.div;
+    const textLayerElement = page.textLayer.div;
     if (!textLayerElement.lastElementChild) {
         return;
     }
 
     const viewport = page.viewport.clone({rotation: 0}); // rotation https://github.com/siyuan-note/siyuan/issues/9831
-    if (textLayerElement.lastElementChild.classList.contains("endOfContent")) {
-        textLayerElement.insertAdjacentHTML("beforeend", "<div></div>");
+    let rectsElement = textLayerElement.querySelector(".pdf__rects");
+    if (!rectsElement) {
+        textLayerElement.insertAdjacentHTML("beforeend", "<div class='pdf__rects'></div>");
+        rectsElement = textLayerElement.querySelector(".pdf__rects");
     }
-    textLayerElement = textLayerElement.lastElementChild;
     let html = `<div class="pdf__rect popover__block" data-node-id="${selected.id}" data-relations="${selected.ids || ""}" data-mode="${selected.mode}">`;
     selected.coords.forEach((rect) => {
         const bounds = viewport.convertToViewportRectangle(rect);
@@ -666,17 +668,17 @@ const showHighlight = (selected: IPdfAnno, pdf: any, hl?: boolean) => {
             style = `border: 2px solid ${selected.color};`;
         }
         html += `<div style="${style}
-        left:${Math.min(bounds[0], bounds[2])}px;
-        top:${Math.min(bounds[1], bounds[3])}px;
-        width:${width}px;
-        height: ${Math.abs(bounds[1] - bounds[3])}px"></div>`;
+left:${Math.min(bounds[0], bounds[2])}px;
+top:${Math.min(bounds[1], bounds[3])}px;
+width:${width}px;
+height: ${Math.abs(bounds[1] - bounds[3])}px"></div>`;
     });
-    textLayerElement.insertAdjacentHTML("beforeend", html + "</div>");
-    textLayerElement.lastElementChild.setAttribute("data-content", selected.content);
+    rectsElement.insertAdjacentHTML("beforeend", html + "</div>");
+    rectsElement.lastElementChild.setAttribute("data-content", selected.content);
     if (hl) {
-        hlPDFRect(textLayerElement, selected.id);
+        hlPDFRect(rectsElement, selected.id);
     }
-    return textLayerElement.lastElementChild;
+    return rectsElement.lastElementChild;
 };
 
 export const hlPDFRect = (element: HTMLElement, id: string) => {

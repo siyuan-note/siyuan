@@ -20,12 +20,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     if (tooltipClass) {
         messageElement.classList.add("tooltip--" + tooltipClass);
     } else {
-        const classesToRemove = Array.from(messageElement.classList).filter(className => 
-            className.startsWith("tooltip--")
-        );
-        classesToRemove.forEach(className => {
-            messageElement.classList.remove(className);
-        });
+        messageElement.className = "tooltip";
     }
 
     let left = targetRect.left;

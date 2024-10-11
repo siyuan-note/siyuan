@@ -236,11 +236,8 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 	// 2. 更新属性视图主键内容
 	var parents []*ast.Node
 	for _, updatedDefNode := range updatedDefNodes {
-		parent := updatedDefNode.Parent
-		for ; nil != parent && ast.NodeDocument != parent.Type && parent.IsContainerBlock(); parent = parent.Parent {
-			if ast.NodeDocument != parent.Type && parent.IsContainerBlock() && treenode.FirstLeafBlock(parent) == updatedDefNode {
-				parents = append(parents, parent)
-			}
+		for parent := updatedDefNode.Parent; nil != parent && ast.NodeDocument != parent.Type; parent = parent.Parent {
+			parents = append(parents, parent)
 		}
 	}
 	for _, parent := range parents {
@@ -248,10 +245,6 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 	}
 
 	for _, updatedDefNode := range updatedDefNodes {
-		if nil != updatedDefNode.Parent && ast.NodeDocument != updatedDefNode.Parent.Type &&
-			updatedDefNode.Parent.IsContainerBlock() && treenode.FirstLeafBlock(updatedDefNode.Parent) == updatedDefNode {
-			updatedDefNode = updatedDefNode.Parent
-		}
 		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
 		if "" == avs {
 			continue

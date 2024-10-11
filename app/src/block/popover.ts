@@ -25,7 +25,8 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "av__calc--ashow") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
-            let tip = aElement.getAttribute("aria-label") || aElement.getAttribute("data-inline-memo-content");
+            let tooltipClass = "";
+            let tip = aElement.getAttribute("aria-label");
             if (aElement.classList.contains("av__cell")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
@@ -52,10 +53,17 @@ export const initBlockPopover = (app: App) => {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
             }
             if (!tip) {
+                tip = aElement.getAttribute("data-inline-memo-content");
+                if (tip) {
+                    tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+                }
+            }
+            if (!tip) {
                 const href = aElement.getAttribute("data-href") || "";
                 // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
                 if (href) {
                     tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
+                    tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
                 }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
@@ -78,10 +86,10 @@ export const initBlockPopover = (app: App) => {
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement);
+                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement);
+                    showTooltip(tip, aElement, tooltipClass);
                 }
                 event.stopPropagation();
             } else {

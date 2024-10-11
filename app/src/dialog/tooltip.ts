@@ -1,6 +1,6 @@
 import {isMobile} from "../util/functions";
 
-export const showTooltip = (message: string, target: Element, error = false) => {
+export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {
         return;
     }
@@ -16,15 +16,16 @@ export const showTooltip = (message: string, target: Element, error = false) => 
     } else {
         messageElement.innerHTML = message;
     }
-    if (error) {
-        messageElement.classList.add("tooltip--error");
+
+    if (tooltipClass) {
+        messageElement.classList.add("tooltip--" + tooltipClass);
     } else {
-        messageElement.classList.remove("tooltip--error");
-    }
-    if (target.getAttribute("data-inline-memo-content")) {
-        messageElement.classList.add("tooltip--memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
-    } else {
-        messageElement.classList.remove("tooltip--memo");
+        const classesToRemove = Array.from(messageElement.classList).filter(className => 
+            className.startsWith("tooltip--")
+        );
+        classesToRemove.forEach(className => {
+            messageElement.classList.remove(className);
+        });
     }
 
     let left = targetRect.left;

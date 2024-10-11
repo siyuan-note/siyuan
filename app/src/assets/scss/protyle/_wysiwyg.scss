@@ -280,7 +280,7 @@
       }
 
       &[data-type="NodeBlockQueryEmbed"] {
-        background-color: var(--b3-theme-surface);
+        background-color: var(--b3-embed-background);
         border-left: 1px dashed var(--b3-theme-surface-lighter);
         max-width: 100%;
 

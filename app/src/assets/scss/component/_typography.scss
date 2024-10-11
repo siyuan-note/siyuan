@@ -212,13 +212,12 @@
     border-spacing: 0;
     width: max-content;
 
-    tr:nth-child(2n) td {
-      background-color: var(--b3-theme-background);
+    tr:nth-child(even) td {
+      background-color: var(--b3-table-even-background);
     }
 
     td,
     th {
-      background-color: var(--b3-theme-surface);
       padding: 4px 8px;
       border: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;

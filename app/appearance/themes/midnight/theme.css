@@ -192,6 +192,9 @@
     --b3-pdf-background6: #69B0F2;
     --b3-pdf-background7: #C885DA;
     --b3-pdf-dark: #212224;
+
+    /* 表格偶数行 */
+    --b3-table-even-background: rgba(255, 255, 255, .03);
 }
 
 :lang(ja_JP):root {

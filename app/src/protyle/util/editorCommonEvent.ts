@@ -1342,6 +1342,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (gutterType) {
             disabledPosition = "";
+            // https://github.com/siyuan-note/siyuan/issues/12651
+            if (dragoverElement) {
+                dragoverElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                dragoverElement = undefined;
+            }
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
@@ -1403,6 +1408,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
             });
+            dragoverElement = undefined;
         }
     });
     editorElement.addEventListener("dragenter", (event) => {

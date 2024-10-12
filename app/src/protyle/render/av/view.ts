@@ -2,9 +2,10 @@ import {Menu} from "../../../plugin/Menu";
 import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
-import {removeBlock} from "../../wysiwyg/remove";
-import {getEditorRange} from "../../util/selection";
+import {focusBlock} from "../../util/selection";
 import {Constants} from "../../../constants";
+import {upDownHint} from "../../../util/upDownHint";
+import {avRender} from "./render";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
@@ -210,6 +211,57 @@ export const getViewHTML = (data: IAV) => {
 </div>`;
 };
 
+export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Element, blockElement: Element }) => {
+    const inputElement = options.menuElement.querySelector(".b3-text-field") as HTMLInputElement;
+    inputElement.focus();
+    inputElement.addEventListener("keydown", (event) => {
+        event.stopPropagation();
+        if (event.isComposing) {
+            return;
+        }
+        upDownHint(options.menuElement.querySelector('.fn__flex-1'), event, "b3-menu__item--current");
+        if (event.key === "Enter") {
+            const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
+            if (currentElement) {
+                options.blockElement.removeAttribute("data-render");
+                avRender(options.blockElement, options.protyle, undefined, currentElement.dataset.id);
+                options.menuElement.remove();
+                focusBlock(options.blockElement)
+            }
+        } else if (event.key === "Escape") {
+            options.menuElement.remove();
+            focusBlock(options.blockElement)
+        }
+    })
+    inputElement.addEventListener("input", (event: InputEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        filterSwitcher(options.menuElement);
+    });
+    inputElement.addEventListener("compositionend", () => {
+        filterSwitcher(options.menuElement);
+    });
+}
+
+const filterSwitcher = (menuElement: Element) => {
+    const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
+    const key = inputElement.value;
+    menuElement.querySelectorAll('.b3-menu__item[draggable="true"]').forEach(item => {
+        if (!key ||
+            (key.toLowerCase().indexOf(item.textContent.trim().toLowerCase()) > -1 ||
+                item.textContent.trim().toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+            item.classList.remove("fn__none")
+        } else {
+            item.classList.add("fn__none")
+            item.classList.remove("b3-menu__item--current")
+        }
+    })
+    if (!menuElement.querySelector('.b3-menu__item--current')) {
+        menuElement.querySelector(".fn__flex-1 .b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current")
+    }
+}
+
 export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     let html = "";
     views.forEach((item) => {
@@ -222,13 +274,18 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
     });
-    return `<div class="b3-menu__items">
+    return `<div class="b3-menu__items fn__flex-column">
 <button class="b3-menu__item" data-type="av-add">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
 </button>
 <button class="b3-menu__separator"></button>
-${html}
+<div class="b3-menu__item b3-menu__item--readonly fn__flex-shrink" data-type="nobg">
+    <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
+</div>
+<div class="fn__flex-1" style="overflow: auto">
+    ${html}
+</div>
 </div>`;
 };
 

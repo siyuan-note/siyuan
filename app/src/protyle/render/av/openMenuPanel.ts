@@ -20,9 +20,8 @@ import {openAsset} from "../../../editor/util";
 /// #endif
 import {previewImage} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
-import {addView, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
-import {removeBlock} from "../../wysiwyg/remove";
-import {focusBlock, getEditorRange} from "../../util/selection";
+import {addView, bindSwitcherEvent, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
+import {focusBlock} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
@@ -170,6 +169,8 @@ export const openMenuPanel = (options: {
                 bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});
             } else if (options.type === "config") {
                 bindViewEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
+            } else if (options.type === "switcher") {
+                bindSwitcherEvent({protyle: options.protyle, menuElement, blockElement: options.blockElement});
             }
         }
         if (options.cb) {

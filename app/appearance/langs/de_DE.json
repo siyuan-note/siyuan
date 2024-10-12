@@ -190,7 +190,7 @@
   "unlockEdit": "Dokument beschreibbar machen",
   "enable": "Aktivieren",
   "disable": "Deaktivieren",
-  "removeWorkspacePhysically": "Möchten Sie die Daten im Arbeitsbereich ${x} physisch löschen? (Physische Löschung kann nicht wiederhergestellt werden)",
+  "removeWorkspacePhysically": "Der Arbeitsbereich wurde aus der Liste entfernt, und die Daten in diesem Arbeitsbereich ${x} werden dauerhaft gelöscht. Diese Löschaktion kann nicht rückgängig gemacht werden, möchten Sie fortfahren?",
   "mainMenu": "Hauptmenü",
   "searchRemoveName": "Möchten Sie ${x} löschen und seine Abfragebedingung auf ${y} festlegen?",
   "searchUpdateName": "Name ${x} auf ${y} aktualisieren?",

@@ -190,7 +190,7 @@
   "unlockEdit": "Uczyń dokument do edycji",
   "enable": "Włącz",
   "disable": "Wyłącz",
-  "removeWorkspacePhysically": "Czy chcesz fizycznie usunąć dane w obszarze roboczym ${x}? (Fizyczne usunięcie nie może być odzyskane)",
+  "removeWorkspacePhysically": "Przestrzeń robocza została usunięta z listy, a dane w tej przestrzeni roboczej ${x} zostaną trwale usunięte. Ta operacja usunięcia nie może być cofnięta, czy chcesz kontynuować?",
   "mainMenu": "Menu główne",
   "searchRemoveName": "Czy chcesz usunąć ${x} i przypisać jego warunek zapytania do ${y}?",
   "searchUpdateName": "Zaktualizować nazwę ${x} na ${y}?",

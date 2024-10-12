@@ -190,7 +190,7 @@
     "unlockEdit": "Rendi il documento scrivibile",
     "enable": "Abilita",
     "disable": "Disabilita",
-    "removeWorkspacePhysically": "Vuoi eliminare fisicamente i dati nell'area di lavoro ${x}? (L'eliminazione fisica non può essere recuperata)",
+    "removeWorkspacePhysically": "Lo spazio di lavoro è stato rimosso dall'elenco e i dati nello spazio di lavoro ${x} verranno eliminati permanentemente. Questa operazione di eliminazione non può essere annullata, vuoi continuare?",
     "mainMenu": "Menu principale",
     "searchRemoveName": "Vuoi eliminare ${x} e assegnare la sua condizione di ricerca a ${y}?",
     "searchUpdateName": "Aggiornare il nome ${x} a ${y}?",

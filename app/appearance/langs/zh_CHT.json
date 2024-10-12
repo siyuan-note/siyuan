@@ -190,7 +190,7 @@
   "marginLeft": "左",
   "enable": "啟用",
   "disable": "禁用",
-  "removeWorkspacePhysically": "是否物理刪除工作空間 ${x} 的數據？（物理刪除無法恢復）",
+  "removeWorkspacePhysically": "工作空間已從列表中移除，接下來將永久刪除該工作空間 ${x} 中的數據。此刪除操作無法恢復，是否繼續？",
   "mainMenu": "主菜單",
   "searchRemoveName": "是否刪 ${x} 並將其查詢條件賦值給 ${y}？",
   "searchUpdateName": "是否將查詢名稱 ${x} 更新為 ${y}？",

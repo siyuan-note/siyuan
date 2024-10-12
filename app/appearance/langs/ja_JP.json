@@ -190,7 +190,7 @@
   "unlockEdit": "ドキュメントを書き込み可能にする",
   "enable": "有効",
   "disable": "無効",
-  "removeWorkspacePhysically": "ワークスペース ${x} のデータを削除しますか？(この操作は元に戻せません)",
+  "removeWorkspacePhysically": "ワークスペースはリストから削除されました。これから、ワークスペース ${x} のデータが永久に削除されます。この削除操作は元に戻せませんが、続行しますか？",
   "mainMenu": "メインメニュー",
   "searchRemoveName": "${x} を削除して、そのクエリ条件を ${y} に割り当てますか？",
   "searchUpdateName": "名前 ${x} を ${y} に更新しますか？",

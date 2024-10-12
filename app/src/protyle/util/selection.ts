@@ -317,9 +317,9 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
         // 最后一个为多种行内元素嵌套
         lastNode = lastNode.lastChild as Element;
     }
+    // https://github.com/siyuan-note/siyuan/issues/12753
     if (!lastNode) {
-        range.selectNodeContents(editElement);
-        return range;
+        lastNode = editElement;
     }
     if (setStart) {
         range.setStart(lastNode, lastNode.textContent.length);

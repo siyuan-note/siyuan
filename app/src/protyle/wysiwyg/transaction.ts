@@ -352,7 +352,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             if (isUndo) {
                 return;
             }
-            const embedElement = isInEmbedBlock(item)
+            const embedElement = isInEmbedBlock(item);
             if (embedElement) {
                 embedElement.removeAttribute("data-render");
                 blockRender(protyle, embedElement);
@@ -1192,7 +1192,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
         if (operation.action === "unfoldHeading") {
             const scrollTop = protyle.contentElement.scrollTop;
             protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-                const embedElement = isInEmbedBlock(item)
+                const embedElement = isInEmbedBlock(item);
                 if (embedElement) {
                     embedElement.removeAttribute("data-render");
                     blockRender(protyle, embedElement);
@@ -1224,7 +1224,7 @@ const processFold = (operation: IOperation, protyle: IProtyle) => {
             return;
         }
         protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`).forEach(item => {
-            const embedElement = isInEmbedBlock(item)
+            const embedElement = isInEmbedBlock(item);
             if (embedElement) {
                 embedElement.removeAttribute("data-render");
                 blockRender(protyle, embedElement);

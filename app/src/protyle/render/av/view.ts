@@ -219,20 +219,20 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.isComposing) {
             return;
         }
-        upDownHint(options.menuElement.querySelector('.fn__flex-1'), event, "b3-menu__item--current");
+        upDownHint(options.menuElement.querySelector(".fn__flex-1"), event, "b3-menu__item--current");
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
                 options.blockElement.removeAttribute("data-render");
                 avRender(options.blockElement, options.protyle, undefined, currentElement.dataset.id);
                 options.menuElement.remove();
-                focusBlock(options.blockElement)
+                focusBlock(options.blockElement);
             }
         } else if (event.key === "Escape") {
             options.menuElement.remove();
-            focusBlock(options.blockElement)
+            focusBlock(options.blockElement);
         }
-    })
+    });
     inputElement.addEventListener("input", (event: InputEvent) => {
         if (event.isComposing) {
             return;
@@ -242,7 +242,7 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
     inputElement.addEventListener("compositionend", () => {
         filterSwitcher(options.menuElement);
     });
-}
+};
 
 const filterSwitcher = (menuElement: Element) => {
     const inputElement = menuElement.querySelector(".b3-text-field") as HTMLInputElement;
@@ -251,16 +251,16 @@ const filterSwitcher = (menuElement: Element) => {
         if (!key ||
             (key.toLowerCase().indexOf(item.textContent.trim().toLowerCase()) > -1 ||
                 item.textContent.trim().toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-            item.classList.remove("fn__none")
+            item.classList.remove("fn__none");
         } else {
-            item.classList.add("fn__none")
-            item.classList.remove("b3-menu__item--current")
+            item.classList.add("fn__none");
+            item.classList.remove("b3-menu__item--current");
         }
-    })
-    if (!menuElement.querySelector('.b3-menu__item--current')) {
-        menuElement.querySelector(".fn__flex-1 .b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current")
+    });
+    if (!menuElement.querySelector(".b3-menu__item--current")) {
+        menuElement.querySelector(".fn__flex-1 .b3-menu__item:not(.fn__none)")?.classList.add("b3-menu__item--current");
     }
-}
+};
 
 export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     let html = "";

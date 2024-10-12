@@ -312,7 +312,7 @@ export const bindCardEvent = async (options: {
                             fetchPost("/api/riff/batchSetRiffCardsDueTime", {
                                 cardDues: [{
                                     id: currentCard.cardID,
-                                    due: dayjs().add(parseInt(inputElement.value), 'day').format("YYYYMMDDHHmmss")
+                                    due: dayjs().add(parseInt(inputElement.value), "day").format("YYYYMMDDHHmmss")
                                 }]
                             }, () => {
                                 actionElements[0].classList.add("fn__none");

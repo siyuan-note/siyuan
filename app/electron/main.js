@@ -777,6 +777,7 @@ app.whenReady().then(() => {
                 return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
             } catch (e) {
                 writeLog(e);
+                throw e;
             }
         }
         if (data.cmd === "siyuan-open-file") {

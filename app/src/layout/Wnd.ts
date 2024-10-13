@@ -275,13 +275,6 @@ export class Wnd {
                 }
                 cloneTabElement.before(oldTab.headElement);
                 cloneTabElement.remove();
-                if (oldTab.model instanceof Asset) {
-                    // https://github.com/siyuan-note/siyuan/issues/6890
-                    const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer");
-                    if (pdfViewerElement) {
-                        pdfViewerElement.setAttribute("data-scrolltop", pdfViewerElement.scrollTop.toString());
-                    }
-                }
                 // 对象顺序
                 wnd.moveTab(oldTab, nextTabHeaderElement ? nextTabHeaderElement.getAttribute("data-id") : undefined);
                 resizeTabs();
@@ -364,13 +357,7 @@ export class Wnd {
             if (!oldTab) {
                 return;
             }
-            if (oldTab.model instanceof Asset) {
-                // https://github.com/siyuan-note/siyuan/issues/6890
-                const pdfViewerElement = oldTab.model.element.querySelector("#viewerContainer");
-                if (pdfViewerElement) {
-                    pdfViewerElement.setAttribute("data-scrolltop", pdfViewerElement.scrollTop.toString());
-                }
-            }
+
             if (dragElement.style.height === "50%" || dragElement.style.width === "50%") {
                 // split
                 if (dragElement.style.height === "50%") {

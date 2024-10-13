@@ -1,4 +1,5 @@
 {
+  "exportPDFLowMemory": "Nicht genügend verfügbarer Speicher, um dieses PDF zu exportieren, bitte reduzieren Sie den Inhalt oder erhöhen Sie den verfügbaren Speicher und versuchen Sie es erneut",
   "exportConf": "Export-Einstellungen",
   "exportConfTip": "Konto, Zugriffscode, Synchronisation, API-Token und Daten-Repo-Schlüssel werden nicht exportiert",
   "importConf": "Import-Einstellungen",

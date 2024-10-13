@@ -334,6 +334,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 });
             });
         } catch (e) {
+            console.error(e);
             showMessage("Export PDF failed: " + e, 0, "error", msgId);
             ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
         }

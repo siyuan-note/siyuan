@@ -776,7 +776,7 @@ app.whenReady().then(() => {
             try {
                 return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
             } catch (e) {
-                writeLog(e);
+                writeLog("printToPDF: ", e);
                 throw e;
             }
         }

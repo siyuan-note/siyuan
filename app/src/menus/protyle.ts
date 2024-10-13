@@ -58,6 +58,7 @@ import {hintRenderAssets} from "../protyle/hint/extend";
 import {Menu} from "../plugin/Menu";
 import {getFirstBlock} from "../protyle/wysiwyg/getBlock";
 import {popSearch} from "../mobile/menu/search";
+import {showMessage} from "../dialog/message";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -990,13 +991,31 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: "",
             type: "readonly",
-            label: `<div>${window.siyuan.languages.imageURL}</div>
+            label: `<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.imageURL}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.title}</div>
+<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.title}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.tooltipText}</div>
+<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.tooltipText}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
@@ -1025,6 +1044,17 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     mathRender(titleElement);
                 });
                 textElements[2].value = imgElement.getAttribute("alt") || "";
+                element.addEventListener("click", (event) => {
+                    let target = event.target as HTMLElement
+                    while (target) {
+                        if (target.dataset.action === "copy") {
+                            writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
+                            showMessage(window.siyuan.languages.copied);
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                })
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1040,6 +1070,15 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             writeText(content);
         }
     }).element);
+    if (protyle.disabled) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy + " " + window.siyuan.languages.imageURL,
+            icon: "iconLink",
+            click() {
+                writeText(imgElement.getAttribute("src"));
+            }
+        }).element);
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.copyAsPNG,
         accelerator: window.siyuan.config.keymap.editor.general.copyBlockRef.custom,
@@ -1313,13 +1352,31 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         window.siyuan.menus.menu.append(new MenuItem({
             iconHTML: "",
             type: "readonly",
-            label: `<div>${window.siyuan.languages.link}</div>
+            label: `<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.link}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.anchor}</div>
+<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.anchor}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.title}</div>
+<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.title}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
@@ -1390,6 +1447,18 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         return;
                     }
                 });
+
+                element.addEventListener("click", (event) => {
+                    let target = event.target as HTMLElement
+                    while (target) {
+                        if (target.dataset.action === "copy") {
+                            writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
+                            showMessage(window.siyuan.languages.copied);
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                })
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1454,6 +1523,15 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             writeText(protyle.lute.BlockDOM2StdMd(linkElement.outerHTML));
         }
     }).element);
+    if (protyle.disabled) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.copy + " " + window.siyuan.languages.replaceTypes.aHref,
+            icon: "iconLink",
+            click() {
+                writeText(linkAddress);
+            }
+        }).element);
+    }
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
             icon: "iconCut",

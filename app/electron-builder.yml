@@ -22,8 +22,8 @@ win:
   # certificateSubjectName: "Yunnan Liandi Technology Co., Ltd."
   signingHashAlgorithms: [ 'sha256' ]
   #rfc3161TimeStampServer: "http://sha256timestamp.ws.symantec.com/sha256/timestamp"
-  #rfc3161TimeStampServer: "http://time.certum.pl"
-  rfc3161TimeStampServer: "http://timestamp.entrust.net/TSS/RFC3161sha2TS"
+  rfc3161TimeStampServer: "http://time.certum.pl"
+#  rfc3161TimeStampServer: "http://timestamp.entrust.net/TSS/RFC3161sha2TS"
   target:
     - target: "nsis"
 nsis:

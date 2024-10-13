@@ -12,6 +12,8 @@ env:
   repo_name: "siyuan"
   repo_owner: "EightDoor"
   package_json: "app/package.json"
+  http_proxy: "http://127.0.0.1:7890"
+  https_proxy: "http://127.0.0.1:7890"
 
 jobs:
   create_release:
@@ -23,6 +25,10 @@ jobs:
       version: ${{ steps.version.outputs.value }}
       packageManager: ${{ steps.packageManager.outputs.value }}
     steps:
+      - name: Set up proxy
+        run: |
+          git config --global http.proxy ${{env.http_proxy}}
+          git config --global https.proxy ${{env.https_proxy}}
       - name: Checkout code
         uses: actions/checkout@v4
 

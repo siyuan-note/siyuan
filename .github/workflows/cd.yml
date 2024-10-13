@@ -59,18 +59,18 @@ jobs:
         with:
           cmd: "jq .packageManager ${{ env.package_json }} -r"
 
-#      - name: Gather Release Information
-#        id: release_info
-#        run: |
-#          echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
-#          echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
-#          changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ env.repo_owner }}/${{ env.repo_name }})
-#          changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ env.repo_owner }}/${{ env.repo_name }})
-#          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-#          echo "release_body<<$EOF" >> $GITHUB_ENV
-#          echo "$changelog_header" >> $GITHUB_ENV
-#          echo "$changelog" >> $GITHUB_ENV
-#          echo "$EOF" >> $GITHUB_ENV
+      - name: Gather Release Information
+        id: release_info
+        run: |
+          echo "release_title=$(git show --format=%s --no-patch | head -1)" >> $GITHUB_OUTPUT
+          echo "release_version=$(TZ=Asia/Shanghai date +'v%Y%m%d%H%M')" >> $GITHUB_OUTPUT
+          changelog_header=$(python scripts/parse-changelog-HEAD.py -t ${{ github.ref }} -b ${{ steps.thisLatestRelease.outputs.release }} -e ${{ steps.electronVersion.outputs.value }} ${{ env.repo_owner }}/${{ env.repo_name }})
+          changelog=$(python scripts/parse-changelog.py -t ${{ github.ref }} ${{ env.repo_owner }}/${{ env.repo_name }})
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          echo "release_body<<$EOF" >> $GITHUB_ENV
+          echo "$changelog_header" >> $GITHUB_ENV
+          echo "$changelog" >> $GITHUB_ENV
+          echo "$EOF" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -150,11 +150,6 @@ jobs:
         if: "contains( matrix.config.goos, 'windows')"
         with:
           install: p7zip mingw-w64-x86_64-lua
-
-      - name: Set up TDM-GCC
-        run: msys2 -c "bash go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/scripts/get-tdm-gcc.sh tdm https://github.com/jmeubank/tdm-gcc/releases/download/v10.3.0-tdm-1/tdm-gcc-10.3.0.exe" && echo "CC=${{ github.workspace }}/tdm/bin/gcc.exe" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
-        if: "contains( matrix.config.goarch, '386')"
-        working-directory: ${{ github.workspace }}
 
       - name: Set up Go
         uses: actions/setup-go@v5

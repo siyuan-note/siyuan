@@ -1333,7 +1333,8 @@ class PDFViewerApplication {
                     if (stored?.page && viewOnLoad !== ViewOnLoad.INITIAL) {
                         hash =
                             `page=${stored.page}&zoom=${zoom || stored.zoom},` +
-                            `${stored.scrollLeft},${stored.scrollTop}`;
+                            // NOTE https://github.com/siyuan-note/siyuan/issues/12291
+                            `${stored.scrollLeft}${this.pdfId ? "" : "," + stored.scrollTop}`;
 
                         rotation = parseInt(stored.rotation, 10);
                         // Always let user preference take precedence over the view history.

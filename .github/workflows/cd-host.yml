@@ -1,4 +1,4 @@
-name: CD For SiYuan Host Build
+name: CD For SiYuan
 
 on:
   push:
@@ -71,8 +71,8 @@ jobs:
 #          echo "$changelog_header" >> $GITHUB_ENV
 #          echo "$changelog" >> $GITHUB_ENV
 #          echo "$EOF" >> $GITHUB_ENV
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
         id: create_release

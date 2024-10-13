@@ -16,7 +16,7 @@ import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
-import {lockScreen} from "../dialog/processSystem";
+import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 
 let openTab;
@@ -175,6 +175,7 @@ export const API = {
     getFrontend,
     getBackend,
     lockScreen,
+    exitSiYuan,
     openMobileFileById,
     openTab,
     openWindow,

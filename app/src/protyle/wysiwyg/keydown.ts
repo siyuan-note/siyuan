@@ -1599,6 +1599,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             const tabSpace = window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ");
             if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && selectText !== "") {
+                // https://github.com/siyuan-note/siyuan/issues/12650
+                if (!hasNextSibling(range.endContainer) && range.endContainer.textContent.endsWith("\n") && range.endOffset > 0) {
+                    range.setEnd(range.endContainer, range.endOffset - 1);
+                }
                 const wbrElement = document.createElement("wbr");
                 range.insertNode(wbrElement);
                 range.setStartAfter(wbrElement);

@@ -1,4 +1,4 @@
-name: CD For SiYuan
+name: CD For SiYuan Host Build
 
 on:
   push:

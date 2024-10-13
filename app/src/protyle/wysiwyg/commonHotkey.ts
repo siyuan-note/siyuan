@@ -104,10 +104,7 @@ export const upSelect = (options: {
                 // 当第一行太长自然换行的情况
                 options.range.getBoundingClientRect().top - nodeEditableElement.getBoundingClientRect().top - parseInt(getComputedStyle(nodeEditableElement).paddingTop) < 14) {
                 setFirstNodeRange(nodeEditableElement, options.range);
-                if (!isMac()) {
-                    // windows 中 shift 向上选中三行后，最后的光标会乱跳
-                    options.event.preventDefault();
-                }
+                options.event.preventDefault();
             }
             return;
         }

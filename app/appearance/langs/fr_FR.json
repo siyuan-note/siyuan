@@ -190,7 +190,7 @@
   "marginLeft": "Gauche",
   "enable": "Activer",
   "disable": "Désactiver",
-  "removeWorkspacePhysically": "Voulez-vous supprimer physiquement les données de l'espace de travail ${x} ? (La suppression physique ne peut pas être récupérée)",
+  "removeWorkspacePhysically": "L'espace de travail a été retiré de la liste, et les données de cet espace de travail ${x} seront définitivement supprimées. Cette opération de suppression ne peut pas être annulée, souhaitez-vous continuer ?",
   "mainMenu": "Menu principal",
   "searchRemoveName": "Voulez-vous supprimer ${x} et affecter sa condition de requête à ${y} ?",
   "searchUpdateName": "Mettre à jour le nom ${x} en ${y} ?",

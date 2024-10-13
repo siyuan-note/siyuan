@@ -3,7 +3,7 @@ name: CD For SiYuan
 on:
   push:
     tags:
-      - '*-dev*'
+      - '*-z*'
   workflow_dispatch:
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
@@ -16,7 +16,7 @@ env:
 jobs:
   create_release:
     name: Create Release
-    runs-on: ubuntu-latest
+    runs-on: self-hosted
     outputs:
       upload_url: ${{ steps.create_release.outputs.upload_url }}
       release_version: ${{ steps.release_info.outputs.release_version }}
@@ -86,7 +86,8 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
-    runs-on: ${{ matrix.config.os }}
+    # runs-on: ${{ matrix.config.os }}
+    runs-on: self-hosted
     name: ${{ matrix.config.name }}
     needs: create_release
     strategy:

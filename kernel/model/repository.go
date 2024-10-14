@@ -660,7 +660,7 @@ func checkoutRepo(id string) {
 	task.AppendTask(task.DatabaseIndexFull, fullReindex)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 		ResetVirtualBlockRefCache()
 	}()
 	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)

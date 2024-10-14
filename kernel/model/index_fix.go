@@ -50,15 +50,15 @@ func checkIndex() {
 		logging.LogInfof("start checking index...")
 
 		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 
 		task.AppendTask(task.DatabaseIndexFix, resetDuplicateBlocksOnFileSys)
 
 		task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 
 		task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 
 		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseRefs)
 

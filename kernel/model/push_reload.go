@@ -140,7 +140,7 @@ func refreshProtyle(rootID string) {
 
 // refreshRefCount 用于刷新定义块处的引用计数。
 func refreshRefCount(rootID, blockID string) {
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 
 	bt := treenode.GetBlockTree(blockID)
 	if nil == bt {

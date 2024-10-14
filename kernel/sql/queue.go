@@ -58,44 +58,6 @@ func FlushTxJob() {
 	task.AppendTask(task.DatabaseIndexCommit, FlushQueue)
 }
 
-func WaitForWritingDatabase() {
-	var printLog bool
-	var lastPrintLog bool
-	for i := 0; isWritingDatabase(util.SQLFlushInterval + 50*time.Millisecond); i++ {
-		time.Sleep(50 * time.Millisecond)
-		if 200 < i && !printLog { // 10s 后打日志
-			logging.LogWarnf("database is writing: \n%s", logging.ShortStack())
-			printLog = true
-		}
-		if 1200 < i && !lastPrintLog { // 60s 后打日志
-			logging.LogWarnf("database is still writing")
-			lastPrintLog = true
-		}
-	}
-}
-
-func WaitForWritingDatabaseIn(duration time.Duration) {
-	for i := 0; isWritingDatabase(duration); i++ {
-		time.Sleep(50 * time.Millisecond)
-	}
-}
-
-func isWritingDatabase(d time.Duration) bool {
-	time.Sleep(d)
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-	if 0 < len(operationQueue) || isWriting {
-		return true
-	}
-	return false
-}
-
-func IsEmptyQueue() bool {
-	dbQueueLock.Lock()
-	defer dbQueueLock.Unlock()
-	return 1 > len(operationQueue)
-}
-
 func ClearQueue() {
 	dbQueueLock.Lock()
 	defer dbQueueLock.Unlock()

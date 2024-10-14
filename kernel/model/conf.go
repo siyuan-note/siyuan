@@ -612,7 +612,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	closeUserGuide()
 
 	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
-	sql.WaitForWritingDatabaseIn(200 * time.Millisecond)
+	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false

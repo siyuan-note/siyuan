@@ -1532,7 +1532,7 @@ func updateRefTextRenameDoc(renamedTree *parse.Tree) {
 }
 
 func FlushUpdateRefTextRenameDocJob() {
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 	flushUpdateRefTextRenameDoc()
 }
 

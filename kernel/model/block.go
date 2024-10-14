@@ -364,7 +364,7 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 		}
 	}
 
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 	return
 }
 

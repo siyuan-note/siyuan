@@ -295,7 +295,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	}
 
 	go func() {
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 
 		tree, _ = LoadTreeByBlockID(id)
 		if nil == tree {

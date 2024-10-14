@@ -791,14 +791,14 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(renameRoots)))
 	}
 
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
 	for _, id := range reloadTreeIDs {
 		refreshProtyle(id)
 	}
 
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 	util.PushClearProgress()
 	return
 }

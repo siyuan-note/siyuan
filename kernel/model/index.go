@@ -107,7 +107,7 @@ func listSyFiles(dir string) (ret []string) {
 func (box *Box) Unindex() {
 	task.AppendTask(task.DatabaseIndex, unindex, box.ID)
 	go func() {
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 		ResetVirtualBlockRefCache()
 	}()
 }
@@ -123,7 +123,7 @@ func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndex, index, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
-		sql.WaitForWritingDatabase()
+		sql.FlushQueue()
 		ResetVirtualBlockRefCache()
 	}()
 }

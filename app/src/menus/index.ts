@@ -14,6 +14,7 @@ import {hasClosestByClassName, hasTopClosestByTag} from "../protyle/util/hasClos
 import {App} from "../index";
 import {Constants} from "../constants";
 import {textMenu} from "./text";
+import {hideTooltip} from "../dialog/tooltip";
 
 export class Menus {
     public menu: Menu;
@@ -86,6 +87,7 @@ export class Menus {
                     event.stopPropagation();
                     break;
                 } else if (dataType && target.classList.contains("dock__item")) {
+                    hideTooltip();
                     initDockMenu(target).popup({x: event.clientX, y: event.clientY});
                     event.stopPropagation();
                     break;

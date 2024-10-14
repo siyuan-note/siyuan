@@ -178,7 +178,7 @@ jobs:
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/app
 
       - name: Install Node Dependencies
-        run: pnpm install --no-frozen-lockfile
+        run: pnpm install
         working-directory: ${{ github.workspace }}/go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/app
 
       - name: Building UI

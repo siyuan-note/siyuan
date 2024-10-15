@@ -48,7 +48,7 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
-                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><br>${aElement.getAttribute("data-name")}` : aElement.getAttribute("data-name");
+                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><div class="fn__hr"></div>${aElement.getAttribute("data-name")}` : aElement.getAttribute("data-name");
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
             }
@@ -71,16 +71,16 @@ export const initBlockPopover = (app: App) => {
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
                         if (response.code === 1) {
                             if (title) {
-                                assetTip += "<br>" + title;
+                                assetTip += '<div class="fn__hr"></div>' + title;
                             }
                         } else {
-                            assetTip += ` ${response.data.hSize}${title ? "<br>" + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
+                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div>' + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
                         showTooltip(assetTip, aElement);
                     });
                     tip = "";
                 } else if (title) {
-                    tip += "<br>" + title;
+                    tip += '<div class="fn__hr"></div>' + title;
                 }
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {

@@ -1045,7 +1045,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 });
                 textElements[2].value = imgElement.getAttribute("alt") || "";
                 element.addEventListener("click", (event) => {
-                    let target = event.target as HTMLElement
+                    let target = event.target as HTMLElement;
                     while (target) {
                         if (target.dataset.action === "copy") {
                             writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
@@ -1054,7 +1054,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         }
                         target = target.parentElement;
                     }
-                })
+                });
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
@@ -1449,7 +1449,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 });
 
                 element.addEventListener("click", (event) => {
-                    let target = event.target as HTMLElement
+                    let target = event.target as HTMLElement;
                     while (target) {
                         if (target.dataset.action === "copy") {
                             writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
@@ -1458,7 +1458,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                         }
                         target = target.parentElement;
                     }
-                })
+                });
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);

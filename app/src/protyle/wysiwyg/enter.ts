@@ -249,7 +249,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     const undoOperation: IOperation[] = [];
     let currentElement = blockElement;
     // 回车之前的块为 1\n\n2 时会产生多个块
-    const selectsElement: Element[] = []
+    const selectsElement: Element[] = [];
     Array.from(enterElement.children).forEach((item: HTMLElement) => {
         if (item.dataset.nodeId === id) {
             blockElement.before(item);
@@ -303,7 +303,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement = item;
         selectsElement.push(item);
     });
-    const parentElement = currentElement.parentElement
+    const parentElement = currentElement.parentElement;
     transaction(protyle, doOperation, undoOperation);
     if (parentElement.classList.contains("sb") && parentElement.getAttribute("data-sb-layout") === "col") {
         turnsIntoOneTransaction({

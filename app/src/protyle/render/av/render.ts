@@ -434,7 +434,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         } else {
             // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
-            const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID
+            const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
                 const updateRow = item.querySelector('.av__row[data-need-update="true"]');

@@ -291,9 +291,11 @@ packages:
   '@humanwhocodes/config-array@0.9.5':
     resolution: {integrity: sha512-ObyMyWxZiCu/yTisA7uzx81s40xR2fD5Cg/2Kq7G02ajkNubJf6BopgDTmDyc3U7sXpNKM8cYOw7s7Tyr+DnCw==}
     engines: {node: '>=10.10.0'}
+    deprecated: Use @eslint/config-array instead
 
   '@humanwhocodes/object-schema@1.2.1':
     resolution: {integrity: sha512-ZnQMnLV4e7hDlUvw8H+U8ASL02SS2Gn6+9Ac3wGGLIe7+je2AeAOxPY+izIPJDfFDb7eDjev0Us8MO1iFRN8hA==}
+    deprecated: Use @eslint/object-schema instead
 
   '@isaacs/cliui@8.0.2':
     resolution: {integrity: sha512-O8jcjabXaleOG9DQ0+ARXWZBTfnP4WNAqzuiJK7ll44AmxGKv/J2M4TPjxjY3znBCfvBXFzucm1twdyFybFqEA==}
@@ -1084,8 +1086,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  ejs@3.1.9:
-    resolution: {integrity: sha512-rC+QVNMJWv+MtPgkt0y+0rVEIdbtxVADApW9JXrUVlzHetgcyczP/E7DJmWJ4fJCZF2cPcBk0laWO9ZHMG3DmQ==}
+  ejs@3.1.10:
+    resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
     hasBin: true
 
@@ -1195,6 +1197,7 @@ packages:
   eslint@8.19.0:
     resolution: {integrity: sha512-SXOPj3x9VKvPe81TjjUJCYlV4oJjQw68Uek+AM0X4p+33dj2HY5bpTZOgnQHcG2eAm1mtCU9uNMnJi7exU/kYw==}
     engines: {node: ^12.22.0 || ^14.17.0 || >=16.0.0}
+    deprecated: This version is no longer supported. Please see https://eslint.org/version-support for other options.
     hasBin: true
 
   espree@9.3.2:
@@ -1368,6 +1371,7 @@ packages:
 
   glob@7.2.3:
     resolution: {integrity: sha512-nFR0zLpU2YCaRxwoCJvL6UvCH2JFyFVIvwTLsIf21AuHlMskA1hhTdk+LlYJtOlYt9v6dvszD2BGRqBL+iQK9Q==}
+    deprecated: Glob versions prior to v9 are no longer supported
 
   glob@8.1.0:
     resolution: {integrity: sha512-r8hpEjiQEYlF2QU0df3dS+nxxSIreXQS1qRhMJM0Q5NDdR386C7jb7Hwwod8Fgiuex+k0GFjgft18yvxm5XoCQ==}
@@ -1524,6 +1528,7 @@ packages:
 
   inflight@1.0.6:
     resolution: {integrity: sha512-k92I/b08q4wvFscXCLvqfsHCrjrF7yiXsQuIVvVE7N82W3+aqpzuUdBbfhWcy/FZR3/4IgflMgKLOsvPDrGCJA==}
+    deprecated: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
 
   inherits@2.0.4:
     resolution: {integrity: sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==}
@@ -2224,10 +2229,12 @@ packages:
 
   rimraf@2.7.1:
     resolution: {integrity: sha512-uWjbaKIK3T1OSVptzX7Nl6PvQ3qAGtKEtVRjRuazjfL3Bx5eI409VZSqgND+4UNnmzLVdPj9FqFJNPqBZFve4w==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   rimraf@3.0.2:
     resolution: {integrity: sha512-JZkJMZkAGFFPP2YqXZXPbMlMBgsxzE8ILs4lMIX/2o0L9UBw9O/Y3o6wFw/i9YLapcUJWwqbi3kdxIPdC62TIA==}
+    deprecated: Rimraf versions prior to v4 are no longer supported
     hasBin: true
 
   roarr@2.15.4:
@@ -3300,7 +3307,7 @@ snapshots:
 
   app-builder-bin@5.0.0-alpha.7: {}
 
-  app-builder-lib@24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
+  app-builder-lib@24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
     dependencies:
       '@develar/schema-utils': 2.6.5
       '@electron/notarize': 2.2.1
@@ -3314,8 +3321,8 @@ snapshots:
       builder-util-runtime: 9.2.4
       chromium-pickle-js: 0.2.0
       debug: 4.3.4
-      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5)
-      ejs: 3.1.9
+      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
+      ejs: 3.1.10
       electron-builder-squirrel-windows: 25.0.5(dmg-builder@24.13.3)
       electron-publish: 24.13.1
       form-data: 4.0.0
@@ -3334,7 +3341,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  app-builder-lib@25.0.5(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
+  app-builder-lib@25.0.5(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
     dependencies:
       '@develar/schema-utils': 2.6.5
       '@electron/notarize': 2.3.2
@@ -3349,8 +3356,8 @@ snapshots:
       builder-util-runtime: 9.2.5
       chromium-pickle-js: 0.2.0
       debug: 4.3.4
-      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5)
-      ejs: 3.1.9
+      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
+      ejs: 3.1.10
       electron-builder-squirrel-windows: 25.0.5(dmg-builder@24.13.3)
       electron-publish: 25.0.3
       form-data: 4.0.0
@@ -3814,9 +3821,9 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5):
+  dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
     dependencies:
-      app-builder-lib: 24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
+      app-builder-lib: 24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
       builder-util: 24.13.1
       builder-util-runtime: 9.2.4
       fs-extra: 10.1.0
@@ -3885,13 +3892,13 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  ejs@3.1.9:
+  ejs@3.1.10:
     dependencies:
       jake: 10.8.5
 
   electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3):
     dependencies:
-      app-builder-lib: 25.0.5(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
+      app-builder-lib: 25.0.5(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
       archiver: 5.3.2
       builder-util: 25.0.3
       fs-extra: 10.1.0
@@ -3902,11 +3909,11 @@ snapshots:
 
   electron-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)):
     dependencies:
-      app-builder-lib: 24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
+      app-builder-lib: 24.13.3(dmg-builder@24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3)))(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
       builder-util: 24.13.1
       builder-util-runtime: 9.2.4
       chalk: 4.1.2
-      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5)
+      dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
       fs-extra: 10.1.0
       is-ci: 3.0.1
       lazy-val: 1.0.5

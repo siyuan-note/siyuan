@@ -834,7 +834,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 			// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
 			keywords := strings.Split(keyword, " ")
 			// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
-			if 1 < len(keywords) {
+			if 0 < len(keywords) {
 				var lowerKeywords []string
 				for _, k := range keywords {
 					lowerKeywords = append(lowerKeywords, strings.ToLower(k))

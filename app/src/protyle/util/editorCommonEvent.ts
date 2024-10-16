@@ -28,6 +28,9 @@ import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
 import {zoomOut} from "../../menus/protyle";
+/// #if !BROWSER
+import {webUtils} from "electron";
+/// #endif
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -1124,7 +1127,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                     const files: string[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push(event.dataTransfer.files[i].path);
+                        files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                     }
                     uploadLocalFiles(files, protyle, !event.altKey);
                 } else {
@@ -1137,7 +1140,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (cellType === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                         const files: string[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                            files.push(event.dataTransfer.files[i].path);
+                            files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                         }
                         dragUpload(files, protyle, cellElement);
                     }

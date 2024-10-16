@@ -508,7 +508,7 @@ export class Wnd {
         }
     }
 
-    public addTab(tab: Tab, keepCursor = false, isSaveLayout = true) {
+    public addTab(tab: Tab, keepCursor = false, isSaveLayout = true, activeTime?: string) {
         if (keepCursor) {
             tab.headElement?.classList.remove("item--focus");
             tab.panelElement.classList.add("fn__none");
@@ -548,8 +548,7 @@ export class Wnd {
                 event.stopPropagation();
                 event.preventDefault();
             });
-
-            tab.headElement.setAttribute("data-activetime", (new Date()).getTime().toString());
+            tab.headElement.setAttribute("data-activetime", activeTime || (new Date()).getTime().toString());
         }
         const containerElement = this.element.querySelector(".layout-tab-container");
         if (!containerElement.querySelector(".fn__flex-1")) {

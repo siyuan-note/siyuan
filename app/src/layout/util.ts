@@ -366,7 +366,7 @@ export const JSONToCenter = (
         if (json.active && child.headElement) {
             child.headElement.setAttribute("data-init-active", "true");
         }
-        (layout as Wnd).addTab(child, false, false);
+        (layout as Wnd).addTab(child, false, false, json.activeTime);
         (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -548,6 +548,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             }
         }
         json.instance = "Tab";
+        json.activeTime = layout.headElement.getAttribute("data-activetime");
     } else if (layout instanceof Editor) {
         if (!layout.editor.protyle.notebookId && breakObj) {
             breakObj.editor = "true";

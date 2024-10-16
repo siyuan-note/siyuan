@@ -1774,6 +1774,10 @@ declare namespace Config {
          * Tab title
          */
         title?: string;
+        /**
+         * Tab recent view time
+         */
+        activeTime?: string;
     }
 
     /**

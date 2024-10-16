@@ -320,9 +320,7 @@ export const alignImgCenter = (protyle: IProtyle, nodeElement: Element, assetEle
 export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetElements: Element[], id: string, html: string) => {
     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     assetElements.forEach((item: HTMLElement) => {
-        item.style.minWidth = "";
-        // 兼容历史居中问题
-        item.style.display = "";
+        item.removeAttribute("style");
     });
     updateTransaction(protyle, id, nodeElement.outerHTML, html);
 };

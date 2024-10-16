@@ -1959,6 +1959,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 			PathStyle:     Conf.Sync.S3.PathStyle,
 			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
 			Timeout:       Conf.Sync.S3.Timeout,
+			ConcurrentReqs: Conf.Sync.S3.ConcurrentReqs,
 		}
 	case conf.ProviderWebDAV:
 		ret.WebDAV = &cloud.ConfWebDAV{
@@ -1967,6 +1968,7 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 			Password:      Conf.Sync.WebDAV.Password,
 			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
 			Timeout:       Conf.Sync.WebDAV.Timeout,
+			ConcurrentReqs: Conf.Sync.WebDAV.ConcurrentReqs,
 		}
 	default:
 		err = fmt.Errorf("invalid provider [%d]", Conf.Sync.Provider)

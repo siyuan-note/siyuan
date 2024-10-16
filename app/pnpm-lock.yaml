@@ -2491,8 +2491,8 @@ packages:
       uglify-js:
         optional: true
 
-  terser@4.8.0:
-    resolution: {integrity: sha512-EAPipTNeWsb/3wLPeup1tVPaXfIaU68xMnVdPafIL1TV05OhASArYyIfFvnvJCNrR2NIOvDVNNTFRa+Re2MWyw==}
+  terser@4.8.1:
+    resolution: {integrity: sha512-4GnLC0x667eJG0ewJTa6z/yXrbLGv80D9Ru6HIpCQmO+Q4PfEtBFi0ObSckqwL6VyQv/7ENJieXHo2ANmdQwgw==}
     engines: {node: '>=6.0.0'}
     hasBin: true
 
@@ -4431,7 +4431,7 @@ snapshots:
       he: 1.2.0
       param-case: 3.0.4
       relateurl: 0.2.7
-      terser: 4.8.0
+      terser: 4.8.1
 
   html-minifier-terser@6.1.0:
     dependencies:
@@ -5425,7 +5425,7 @@ snapshots:
       terser: 5.34.1
       webpack: 5.95.0(webpack-cli@4.10.0)
 
-  terser@4.8.0:
+  terser@4.8.1:
     dependencies:
       acorn: 8.7.1
       commander: 2.20.3

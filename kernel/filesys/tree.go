@@ -43,19 +43,17 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 	luteEngine := util.NewLute()
 	var boxIDs []string
 	var paths []string
-	blockIDs := map[string]string{}
-	seen := map[string]bool{}
+	blockIDs := map[string][]string{}
 	for _, bt := range bts {
-		key := bt.BoxID + bt.Path
-		if !seen[key] {
-			seen[key] = true
-			boxIDs = append(boxIDs, bt.BoxID)
-			paths = append(paths, bt.Path)
-			blockIDs[bt.RootID] = bt.ID
+		boxIDs = append(boxIDs, bt.BoxID)
+		paths = append(paths, bt.Path)
+		if _, ok := blockIDs[bt.RootID]; !ok {
+			blockIDs[bt.RootID] = []string{}
 		}
+		blockIDs[bt.RootID] = append(blockIDs[bt.RootID], bt.ID)
 	}
 
-	trees, errs := batchLoadTrees(boxIDs, paths, luteEngine)
+	trees, errs := BatchLoadTrees(boxIDs, paths, luteEngine)
 	for i := range trees {
 		tree := trees[i]
 		err := errs[i]
@@ -64,8 +62,10 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 			continue
 		}
 
-		id := blockIDs[tree.Root.ID]
-		ret[id] = tree
+		bIDs := blockIDs[tree.Root.ID]
+		for _, bID := range bIDs {
+			ret[bID] = tree
+		}
 	}
 	return
 }
@@ -82,11 +82,18 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
-func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
+func BatchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
 	var wg sync.WaitGroup
 	lock := sync.Mutex{}
+	loaded := map[string]bool{}
 	for i := range paths {
+		if loaded[boxIDs[i]+paths[i]] {
+			continue
+		}
+
+		loaded[boxIDs[i]+paths[i]] = true
 		wg.Add(1)
+
 		go func(i int) {
 			defer wg.Done()
 

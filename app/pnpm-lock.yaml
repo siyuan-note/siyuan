@@ -1099,8 +1099,8 @@ packages:
   eastasianwidth@0.2.0:
     resolution: {integrity: sha512-I88TYZWc9XiYHRQ4/3c5rjjfgkjhLyW2luGIheGERbNQ6OY7yTybanSpDXZa8y7VUP9YmDcYa+eyq4ca7iLqWA==}
 
-  ejs@3.1.9:
-    resolution: {integrity: sha512-rC+QVNMJWv+MtPgkt0y+0rVEIdbtxVADApW9JXrUVlzHetgcyczP/E7DJmWJ4fJCZF2cPcBk0laWO9ZHMG3DmQ==}
+  ejs@3.1.10:
+    resolution: {integrity: sha512-UeJmFfOrAQS8OJWPZ4qtgHyWExa088/MtK5UEyoJGFH67cDEXkZSviOiKRCZ4Xij0zxI3JECgYs3oKx+AizQBA==}
     engines: {node: '>=0.10.0'}
     hasBin: true
 
@@ -3361,7 +3361,7 @@ snapshots:
       chromium-pickle-js: 0.2.0
       debug: 4.3.4
       dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
-      ejs: 3.1.9
+      ejs: 3.1.10
       electron-builder-squirrel-windows: 25.0.5(dmg-builder@24.13.3)
       electron-publish: 24.13.1
       form-data: 4.0.0
@@ -3396,7 +3396,7 @@ snapshots:
       chromium-pickle-js: 0.2.0
       debug: 4.3.4
       dmg-builder: 24.13.3(electron-builder-squirrel-windows@25.0.5(dmg-builder@24.13.3))
-      ejs: 3.1.9
+      ejs: 3.1.10
       electron-builder-squirrel-windows: 25.0.5(dmg-builder@24.13.3)
       electron-publish: 25.0.3
       form-data: 4.0.0
@@ -3931,7 +3931,7 @@ snapshots:
 
   eastasianwidth@0.2.0: {}
 
-  ejs@3.1.9:
+  ejs@3.1.10:
     dependencies:
       jake: 10.8.5
 

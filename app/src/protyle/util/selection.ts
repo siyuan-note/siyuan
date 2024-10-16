@@ -314,6 +314,10 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
             // 防止单元格中 ⇧↓ 全部选中
             return range;
         }
+        // https://github.com/siyuan-note/siyuan/issues/12792
+        if (!lastNode.lastChild) {
+            break;
+        }
         // 最后一个为多种行内元素嵌套
         lastNode = lastNode.lastChild as Element;
     }
@@ -322,9 +326,17 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
         lastNode = editElement;
     }
     if (setStart) {
-        range.setStart(lastNode, lastNode.textContent.length);
+        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
+            range.setStartAfter(lastNode);
+        } else {
+            range.setStart(lastNode, lastNode.textContent.length);
+        }
     } else {
-        range.setEnd(lastNode, lastNode.textContent.length);
+        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
+            range.setStartAfter(lastNode);
+        } else {
+            range.setEnd(lastNode, lastNode.textContent.length);
+        }
     }
     return range;
 };

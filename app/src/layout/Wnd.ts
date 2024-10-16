@@ -416,6 +416,7 @@ export class Wnd {
 
     public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true, isSaveLayout = true) {
         let currentTab: Tab;
+        let isInitActive = false
         this.children.forEach((item) => {
             if (target === item.headElement) {
                 if (item.headElement && item.headElement.classList.contains("fn__none")) {
@@ -423,7 +424,12 @@ export class Wnd {
                 } else {
                     if (item.headElement) {
                         item.headElement.classList.add("item--focus");
-                        item.headElement.setAttribute("data-activetime", (new Date()).getTime().toString());
+                        if (item.headElement.getAttribute("data-init-active") === "true") {
+                            item.headElement.removeAttribute("data-init-active");
+                            isInitActive = true;
+                        } else {
+                            item.headElement.setAttribute("data-activetime", (new Date()).getTime().toString());
+                        }
                     }
                     item.panelElement.classList.remove("fn__none");
                 }
@@ -436,7 +442,10 @@ export class Wnd {
                 }
             }
         });
-        setPanelFocus(this.headersElement.parentElement.parentElement);
+        // 在 JSONToLayout 中进行 focus
+        if (!isInitActive) {
+            setPanelFocus(this.headersElement.parentElement.parentElement);
+        }
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
             if (initData) {

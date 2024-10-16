@@ -54,6 +54,7 @@ export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
         element.classList.add("layout__wnd--active");
         element.querySelector(".layout-tab-bar .item--focus")?.setAttribute("data-activetime", (new Date()).getTime().toString());
+        saveLayout();
     } else {
         element.classList.add("layout__tab--active");
         Array.from(element.classList).find(item => {
@@ -492,11 +493,21 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             zoomIn: idZoomIn.isZoomIn
         });
     } else {
+        let latestTabHeaderElement:HTMLElement
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
-            item.removeAttribute("data-init-active");
+            if (!latestTabHeaderElement) {
+                latestTabHeaderElement = item
+            } else {
+                if (item.dataset.activetime > latestTabHeaderElement.dataset.activetime) {
+                    latestTabHeaderElement = item
+                }
+            }
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
             tab.parent.switchTab(item, false, false, true, false);
         });
+        if (latestTabHeaderElement) {
+            setPanelFocus(latestTabHeaderElement.parentElement.parentElement.parentElement);
+        }
     }
     // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个
     app.plugins.forEach(item => {

@@ -1381,6 +1381,10 @@ declare namespace Config {
          * Timeout (unit: seconds)
          */
         timeout: number;
+        /**
+         * Concurrent requests.
+         */
+        concurrentReqs: number;
     }
 
     /**
@@ -1403,6 +1407,10 @@ declare namespace Config {
          * Timeout (unit: seconds)
          */
         timeout: number;
+        /**
+         * Concurrent requests.
+         */
+        concurrentReqs: number;
         /**
          * Username
          */

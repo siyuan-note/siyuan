@@ -243,6 +243,7 @@
 .protyle-content {
   overflow: auto;
   flex: 1;
+  scrollbar-gutter: stable;
 
   &--transition {
     .protyle-wysiwyg {

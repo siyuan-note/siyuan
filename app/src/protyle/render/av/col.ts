@@ -911,33 +911,41 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
 export const removeCol = (options: {
     protyle: IProtyle,
     data: IAV,
-    previousID: string,
-    colData: IAVColumn,
     avID: string,
     blockID: string,
     isCustomAttr: boolean
     menuElement: HTMLElement,
     blockElement: Element
     avPanelElement: Element
-    tabRect: DOMRect
+    tabRect: DOMRect,
+    isTwoWay: boolean
 }) => {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+    let previousID = "";
+    const colData = options.data.view.columns.find((item: IAVColumn, index) => {
+        if (item.id === colId) {
+            previousID = options.data.view.columns[index - 1]?.id;
+            options.data.view.columns.splice(index, 1);
+            return true;
+        }
+    });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     transaction(options.protyle, [{
         action: "removeAttrViewCol",
         id: colId,
         avID: options.avID,
+        removeDest: options.isTwoWay
     }, {
         action: "doUpdateUpdated",
         id: options.blockID,
         data: newUpdated,
     }], [{
         action: "addAttrViewCol",
-        name: options.colData.name,
+        name: colData.name,
         avID: options.avID,
-        type: options.colData.type,
+        type: colData.type,
         id: colId,
-        previousID:options.previousID
+        previousID: previousID
     }, {
         action: "doUpdateUpdated",
         id: options.blockID,

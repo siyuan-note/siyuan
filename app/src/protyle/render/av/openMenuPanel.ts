@@ -1083,33 +1083,72 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCol") {
-                    tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                    if (!isCustomAttr) {
+                        tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                    }
                     const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                    let previousID = "";
-                    const colData = data.view.columns.find((item: IAVColumn, index) => {
+                    const colData = data.view.columns.find((item: IAVColumn) => {
                         if (item.id === colId) {
-                            previousID = data.view.columns[index - 1]?.id;
-                            data.view.columns.splice(index, 1);
                             return true;
                         }
                     });
-                    if (isCustomAttr || (colData.type === "relation" && colData.relation.isTwoWay)) {
+                    const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay
+                    if (isCustomAttr || isTwoWay) {
                         const dialog = new Dialog({
-                            title: window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value),
+                            title: isTwoWay ? window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value) : window.siyuan.languages.deleteOpConfirm,
                             content: `<div class="b3-dialog__content">
-    ${window.siyuan.languages.confirmRemoveRelationField.replace("${x}", (menuElement.querySelector('.b3-text-field[data-type="colName"]') as HTMLInputElement).value)}
-</div>
-<div class="b3-dialog__action">
-    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button>
-    <button class="b3-button b3-button--warning">${window.siyuan.languages.removeButKeepRelationField}</button>
-    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+    ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField.replace("${x}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent) : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value)}
+    <div class="fn__hr--b"></div>
+    <button class="fn__block b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <div class="fn__hr"></div>
+    <button class="fn__block b3-button b3-button--warning${isTwoWay ? "" : " fn__none"}">${window.siyuan.languages.removeButKeepRelationField}</button>
+    <div class="fn__hr"></div>
+    <button class="fn__block b3-button b3-button--info">${window.siyuan.languages.cancel}</button>
 </div>`,
                         });
+                        dialog.element.addEventListener("click", (event) => {
+                            let target = event.target as HTMLElement;
+                            while (target && !target.isSameNode(dialog.element)) {
+                                if (target.classList.contains("b3-button--error")) {
+                                    removeCol({
+                                        protyle: options.protyle,
+                                        data,
+                                        avID,
+                                        blockID,
+                                        menuElement,
+                                        isCustomAttr,
+                                        blockElement: options.blockElement,
+                                        avPanelElement,
+                                        tabRect,
+                                        isTwoWay: true
+                                    });
+                                    dialog.destroy();
+                                    break;
+                                } else if (target.classList.contains("b3-button--warning")) {
+                                    removeCol({
+                                        protyle: options.protyle,
+                                        data,
+                                        avID,
+                                        blockID,
+                                        menuElement,
+                                        isCustomAttr,
+                                        blockElement: options.blockElement,
+                                        avPanelElement,
+                                        tabRect,
+                                        isTwoWay: false
+                                    });
+                                    dialog.destroy();
+                                    break;
+                                } else if (target.classList.contains("b3-button--info")) {
+                                    dialog.destroy();
+                                    break;
+                                }
+                                target = target.parentElement;
+                            }
+                        })
                     } else {
                         removeCol({
                             protyle: options.protyle,
-                            previousID,
-                            colData,
                             data,
                             avID,
                             blockID,
@@ -1117,7 +1156,8 @@ export const openMenuPanel = (options: {
                             isCustomAttr,
                             blockElement: options.blockElement,
                             avPanelElement,
-                            tabRect
+                            tabRect,
+                            isTwoWay: false
                         });
                     }
                     event.preventDefault();

@@ -35,7 +35,7 @@ import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 
-export const setPanelFocus = (element: Element) => {
+export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {
         setTitle(element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || window.siyuan.languages.siyuanNote);
     }
@@ -54,7 +54,9 @@ export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
         element.classList.add("layout__wnd--active");
         element.querySelector(".layout-tab-bar .item--focus")?.setAttribute("data-activetime", (new Date()).getTime().toString());
-        saveLayout();
+        if (isSaveLayout) {
+            saveLayout();
+        }
     } else {
         element.classList.add("layout__tab--active");
         Array.from(element.classList).find(item => {
@@ -506,7 +508,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             tab.parent.switchTab(item, false, false, true, false);
         });
         if (latestTabHeaderElement) {
-            setPanelFocus(latestTabHeaderElement.parentElement.parentElement.parentElement);
+            setPanelFocus(latestTabHeaderElement.parentElement.parentElement.parentElement, false);
         }
     }
     // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个

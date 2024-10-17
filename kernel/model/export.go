@@ -1540,6 +1540,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	trees := map[string]*parse.Tree{}
 	refTrees := map[string]*parse.Tree{}
+	treeCache := map[string]*parse.Tree{}
 	for i, p := range docPaths {
 		docIAL := box.docIAL(p)
 		if nil == docIAL {
@@ -1556,7 +1557,8 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 		trees[tree.ID] = tree
 
-		refs := exportRefTrees(tree, trees)
+		refs := map[string]*parse.Tree{}
+		exportRefTrees(tree, &refs, &treeCache)
 		for refTreeID, refTree := range refs {
 			if nil == trees[refTreeID] {
 				refTrees[refTreeID] = refTree
@@ -2733,13 +2735,7 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func exportRefTrees(tree *parse.Tree, treeCache map[string]*parse.Tree) (ret map[string]*parse.Tree) {
-	ret = map[string]*parse.Tree{}
-	exportRefTrees0(tree, &ret, treeCache)
-	return
-}
-
-func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCache map[string]*parse.Tree) {
+func exportRefTrees(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCache *map[string]*parse.Tree) {
 	if nil != (*retTrees)[tree.ID] {
 		return
 	}
@@ -2762,17 +2758,17 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCac
 
 			var defTree *parse.Tree
 			var err error
-			if treeCache[defBlock.RootID] != nil {
-				defTree = treeCache[defBlock.RootID]
+			if (*treeCache)[defBlock.RootID] != nil {
+				defTree = (*treeCache)[defBlock.RootID]
 			} else {
 				defTree, err = LoadTreeByBlockID(defBlock.RootID)
 				if err != nil {
 					return ast.WalkSkipChildren
 				}
-				treeCache[defBlock.RootID] = defTree
+				(*treeCache)[defBlock.RootID] = defTree
 			}
 
-			exportRefTrees0(defTree, retTrees, treeCache)
+			exportRefTrees(defTree, retTrees, treeCache)
 		} else if ast.NodeAttributeView == n.Type {
 			// 导出数据库所在文档时一并导出绑定块所在文档
 			// Export the binding block docs when exporting the doc where the database is located https://github.com/siyuan-note/siyuan/issues/11486
@@ -2800,17 +2796,17 @@ func exportRefTrees0(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCac
 
 				var defTree *parse.Tree
 				var err error
-				if treeCache[defBlock.RootID] != nil {
-					defTree = treeCache[defBlock.RootID]
+				if (*treeCache)[defBlock.RootID] != nil {
+					defTree = (*treeCache)[defBlock.RootID]
 				} else {
 					defTree, err = LoadTreeByBlockID(defBlock.RootID)
 					if err != nil {
 						continue
 					}
-					treeCache[defBlock.RootID] = defTree
+					(*treeCache)[defBlock.RootID] = defTree
 				}
 
-				exportRefTrees0(defTree, retTrees, treeCache)
+				exportRefTrees(defTree, retTrees, treeCache)
 			}
 		}
 		return ast.WalkContinue

@@ -121,6 +121,7 @@ export abstract class Constants {
     public static readonly LOCAL_DIALOGPOSITION = "local-dialogposition";
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
     public static readonly LOCAL_OUTLINE = "local-outline";
+    public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
 
     // dialog
     public static readonly DIALOG_OPENCARD = "dialog-opencard";

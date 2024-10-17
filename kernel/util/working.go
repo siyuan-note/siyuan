@@ -413,9 +413,10 @@ func initMime() {
 	// https://github.com/siyuan-note/siyuan/issues/247
 	// https://github.com/siyuan-note/siyuan/issues/3813
 	mime.AddExtensionType(".css", "text/css")
-	mime.AddExtensionType(".js", "application/x-javascript")
-	mime.AddExtensionType(".json", "application/json")
+	mime.AddExtensionType(".js", "text/javascript")
+	mime.AddExtensionType(".mjs", "text/javascript")
 	mime.AddExtensionType(".html", "text/html")
+	mime.AddExtensionType(".json", "application/json")
 
 	// 某些系统上下载资源文件后打开是 zip https://github.com/siyuan-note/siyuan/issues/6347
 	mime.AddExtensionType(".doc", "application/msword")

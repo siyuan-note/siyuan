@@ -27,23 +27,11 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string,
-	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (ret *av.Table) {
-	if nil == GetBlockAttrsWithoutWaitWriting {
-		GetBlockAttrsWithoutWaitWriting = func(id string) (ret map[string]string) {
-			ret = cache.GetBlockIAL(id)
-			if nil == ret {
-				ret = map[string]string{}
-			}
-			return
-		}
-	}
-
+func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {
 	ret = &av.Table{
 		ID:               view.ID,
 		Icon:             view.Icon,
@@ -568,8 +556,7 @@ func FillAttributeViewTableCellNilValue(tableCell *av.TableCell, rowID, colID st
 	}
 }
 
-func getAttributeViewContent(avID string,
-	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) (content string) {
+func getAttributeViewContent(avID string) (content string) {
 	if "" == avID {
 		return
 	}
@@ -605,7 +592,7 @@ func getAttributeViewContent(avID string,
 		return
 	}
 
-	table := RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
+	table := RenderAttributeViewTable(attrView, view, "")
 	for _, col := range table.Columns {
 		buf.WriteString(col.Name)
 		buf.WriteByte(' ')

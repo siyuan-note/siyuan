@@ -19,6 +19,8 @@ package sql
 import (
 	"bytes"
 	"database/sql"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"strings"
 
 	"github.com/88250/gulu"
@@ -104,7 +106,6 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		return
 	}
 
-	luteEngine := util.NewLute()
 	tree, _ := filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
 	if nil == tree {
 		return
@@ -115,7 +116,7 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 		return
 	}
 
-	content := NodeStaticContent(node, nil, true, indexAssetPath, true, nil)
+	content := NodeStaticContent(node, nil, true, indexAssetPath, true)
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, content, id); err != nil {
 		tx.Rollback()
@@ -136,15 +137,14 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 	return
 }
 
-func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool,
-	GetBlockAttrsWithoutWaitWriting func(id string) (ret map[string]string)) string {
+func NodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATitleURL, includeAssetPath, fullAttrView bool) string {
 	if nil == node {
 		return ""
 	}
 
 	if ast.NodeAttributeView == node.Type {
 		if fullAttrView {
-			return getAttributeViewContent(node.AttributeViewID, GetBlockAttrsWithoutWaitWriting)
+			return getAttributeViewContent(node.AttributeViewID)
 		}
 
 		ret, _ := av.GetAttributeViewName(node.AttributeViewID)
@@ -273,4 +273,55 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 	// 这里不要 trim，否则无法搜索首尾空格
 	// Improve search and replace for spaces https://github.com/siyuan-note/siyuan/issues/10231
 	return buf.String()
+}
+
+func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
+	ret = map[string]string{}
+	if cached := cache.GetBlockIAL(id); nil != cached {
+		ret = cached
+		return
+	}
+
+	ret = GetBlockAttrs(id)
+	cache.PutBlockIAL(id, ret)
+	return
+}
+
+func GetBlockAttrs(id string) (ret map[string]string) {
+	ret = map[string]string{}
+
+	tree := loadTreeByBlockID(id)
+	if nil == tree {
+		return
+	}
+
+	ret = GetBlockAttrs0(id, tree)
+	return
+}
+
+func GetBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
+	ret = map[string]string{}
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		logging.LogWarnf("block [%s] not found", id)
+		return
+	}
+
+	for _, kv := range node.KramdownIAL {
+		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
+	}
+	return
+}
+
+func loadTreeByBlockID(id string) (ret *parse.Tree) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	ret, err := filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
+	if nil != err {
+		return
+	}
+	return
 }

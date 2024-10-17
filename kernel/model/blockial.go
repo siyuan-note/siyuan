@@ -24,11 +24,9 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -67,7 +65,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	content := sql.NodeStaticContent(node, nil, false, false, false, GetBlockAttrsWithoutWaitWriting)
+	content := sql.NodeStaticContent(node, nil, false, false, false)
 	content = gulu.Str.SubStr(content, 128)
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if err != nil {
@@ -297,7 +295,7 @@ func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 			continue
 		}
 
-		ret[id] = getBlockAttrs0(id, tree)
+		ret[id] = sql.GetBlockAttrs0(id, tree)
 		cache.PutBlockIAL(id, ret[id])
 	}
 	return
@@ -312,45 +310,7 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 
 	WaitForWritingFiles()
 
-	ret = getBlockAttrs(id)
+	ret = sql.GetBlockAttrs(id)
 	cache.PutBlockIAL(id, ret)
-	return
-}
-
-func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
-	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
-		ret = cached
-		return
-	}
-
-	ret = getBlockAttrs(id)
-	cache.PutBlockIAL(id, ret)
-	return
-}
-
-func getBlockAttrs(id string) (ret map[string]string) {
-	ret = map[string]string{}
-
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return
-	}
-
-	ret = getBlockAttrs0(id, tree)
-	return
-}
-
-func getBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
-	ret = map[string]string{}
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		logging.LogWarnf("block [%s] not found", id)
-		return
-	}
-
-	for _, kv := range node.KramdownIAL {
-		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
-	}
 	return
 }

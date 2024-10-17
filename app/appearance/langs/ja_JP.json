@@ -1,4 +1,6 @@
 {
+  "confirmRemoveRelationField": "<b>${x}</b> に関連するフィールドを同時に削除してもよろしいですか？",
+  "removeButKeepRelationField": "削除して関連フィールドを保持",
   "exportPDFLowMemory": "システムの利用可能なメモリが不足しているため、このPDFをエクスポートできません。内容を減らすか、利用可能なメモリを増やしてから再試行してください",
   "exportConf": "設定のエクスポート",
   "exportConfTip": "アカウント、アクセス コード、同期、API トークン、データ ウェアハウス キーはエクスポートされません",

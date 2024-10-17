@@ -2772,14 +2772,14 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doRemoveAttrViewColumn(operation *Operation) (ret *TxErr) {
-	err := RemoveAttributeViewKey(operation.AvID, operation.ID)
+	err := RemoveAttributeViewKey(operation.AvID, operation.ID, operation.RemoveDest)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func RemoveAttributeViewKey(avID, keyID string) (err error) {
+func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -2796,47 +2796,47 @@ func RemoveAttributeViewKey(avID, keyID string) (err error) {
 
 	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation {
 		if removedKey.Relation.IsTwoWay {
-			// 删除双向关联的目标列
-
-			var destAv *av.AttributeView
-			if avID == removedKey.Relation.AvID {
-				destAv = attrView
-			} else {
-				destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
-			}
-
-			if nil != destAv {
-				destAvRelSrcAv := false
-				for i, keyValues := range destAv.KeyValues {
-					if keyValues.Key.ID == removedKey.Relation.BackKeyID {
-						destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
-						continue
-					}
-
-					if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
-						destAvRelSrcAv = true
-					}
+			if removeRelationDest { // 删除双向关联的目标列
+				var destAv *av.AttributeView
+				if avID == removedKey.Relation.AvID {
+					destAv = attrView
+				} else {
+					destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
 				}
 
-				for _, view := range destAv.Views {
-					switch view.LayoutType {
-					case av.LayoutTypeTable:
-						for i, column := range view.Table.Columns {
-							if column.ID == removedKey.Relation.BackKeyID {
-								view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
-								break
+				if nil != destAv {
+					destAvRelSrcAv := false
+					for i, keyValues := range destAv.KeyValues {
+						if keyValues.Key.ID == removedKey.Relation.BackKeyID {
+							destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
+							continue
+						}
+
+						if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
+							destAvRelSrcAv = true
+						}
+					}
+
+					for _, view := range destAv.Views {
+						switch view.LayoutType {
+						case av.LayoutTypeTable:
+							for i, column := range view.Table.Columns {
+								if column.ID == removedKey.Relation.BackKeyID {
+									view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+									break
+								}
 							}
 						}
 					}
-				}
 
-				if destAv != attrView {
-					av.SaveAttributeView(destAv)
-					ReloadAttrView(destAv.ID)
-				}
+					if destAv != attrView {
+						av.SaveAttributeView(destAv)
+						ReloadAttrView(destAv.ID)
+					}
 
-				if !destAvRelSrcAv {
-					av.RemoveAvRel(destAv.ID, attrView.ID)
+					if !destAvRelSrcAv {
+						av.RemoveAvRel(destAv.ID, attrView.ID)
+					}
 				}
 			}
 

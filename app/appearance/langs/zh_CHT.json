@@ -1,4 +1,6 @@
 {
+  "confirmRemoveRelationField": "確定同時刪除關聯至 <b>${x}</b> 中的字段嗎？",
+  "removeButKeepRelationField": "刪除，保留關聯字段",
   "exportPDFLowMemory": "系統可用記憶體不足，無法導出該 PDF，請減少內容或者增加可用記憶體後再嘗試導出",
   "exportConf": "匯出設定",
   "exportConfTip": "帳號、存取授權碼、同步、API token 和資料倉儲金鑰不會被匯出",

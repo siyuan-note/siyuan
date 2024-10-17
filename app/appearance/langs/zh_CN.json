@@ -1,4 +1,6 @@
 {
+  "confirmRemoveRelationField": "确定同时删除关联至 <b>${x}</b> 中的字段吗？",
+  "removeButKeepRelationField": "删除，保留关联字段",
   "exportPDFLowMemory": "系统可用内存不足，无法导出该 PDF，请减少内容或者增加可用内存后再尝试导出",
   "exportConf": "导出设置",
   "exportConfTip": "账号、访问授权码、同步、API token 和数据仓库密钥不会被导出",

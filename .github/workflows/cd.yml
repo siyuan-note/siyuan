@@ -128,7 +128,7 @@ jobs:
             goos: "darwin"
             goarch: "arm64"
             suffix: "mac-arm64.dmg"
-          - os: windows-latest
+          - os: self-hosted
             name: windows build win.exe
             kernel_path: "../app/kernel/SiYuan-Kernel.exe"
             build_args_prefix: "-s -w -H=windowsgui -X"

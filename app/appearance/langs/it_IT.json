@@ -1,4 +1,6 @@
 {
+  "confirmRemoveRelationField": "Sei sicuro di voler eliminare il campo associato a <b>${x}</b>?",
+  "keepRelationField": "Mantieni il campo associato",
   "exportPDFLowMemory": "Memoria disponibile insufficiente per esportare questo PDF, riduci il contenuto o aumenta la memoria disponibile e riprova a esportare",
   "exportConf": "Impostazioni di esportazione",
   "exportConfTip": "Account, codici di accesso, sincronizzazione, token API e chiavi di data warehouse non verranno esportati",

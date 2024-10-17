@@ -314,7 +314,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 						return ast.WalkContinue
 					}
 
-					table := sql.RenderAttributeViewTable(attrView, view, "", GetBlockAttrsWithoutWaitWriting)
+					table := sql.RenderAttributeViewTable(attrView, view, "")
 
 					var aligns []int
 					for range table.Columns {

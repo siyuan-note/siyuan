@@ -1,6 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol, bindEditEvent, duplicateCol, getColIconByType, getEditHTML} from "./col";
+import {addCol, bindEditEvent, duplicateCol, getColIconByType, getEditHTML, removeCol} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
@@ -8,7 +8,7 @@ import {addFilter, getFiltersHTML, setFilter} from "./filter";
 import {addSort, bindSortsEvent, getSortsHTML} from "./sort";
 import {bindDateEvent, getDateHTML} from "./date";
 import {formatNumber} from "./number";
-import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
+import {updateAttrViewCellAnimation} from "./action";
 import {addAssetLink, bindAssetEvent, editAssetItem, getAssetHTML, updateAssetCell} from "./asset";
 import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
@@ -28,9 +28,8 @@ import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updat
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
-import * as dayjs from "dayjs";
-import {confirmDialog} from "../../../dialog/confirmDialog";
 import {escapeAttr} from "../../../util/escape";
+import {Dialog} from "../../../dialog";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1084,48 +1083,43 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "removeCol") {
-                    confirmDialog(isCustomAttr ? window.siyuan.languages.deleteOpConfirm : "", isCustomAttr ? window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value) : "", () => {
-                        const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-                        let previousID: string;
-                        const colData = data.view.columns.find((item: IAVColumn, index) => {
-                            if (item.id === colId) {
-                                previousID = data.view.columns[index - 1]?.id;
-                                data.view.columns.splice(index, 1);
-                                return true;
-                            }
-                        });
-                        const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-                        transaction(options.protyle, [{
-                            action: "removeAttrViewCol",
-                            id: colId,
-                            avID,
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: blockID,
-                            data: newUpdated,
-                        }], [{
-                            action: "addAttrViewCol",
-                            name: colData.name,
-                            avID,
-                            type: colData.type,
-                            id: colId,
-                            previousID
-                        }, {
-                            action: "doUpdateUpdated",
-                            id: blockID,
-                            data: options.blockElement.getAttribute("updated")
-                        }]);
-                        removeAttrViewColAnimation(options.blockElement, colId);
-                        options.blockElement.setAttribute("updated", newUpdated);
-
-                        if (isCustomAttr) {
-                            avPanelElement.remove();
-                        } else {
-                            tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
-                            menuElement.innerHTML = getPropertiesHTML(data.view);
-                            setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                    const colId = menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                    let previousID = "";
+                    const colData = data.view.columns.find((item: IAVColumn, index) => {
+                        if (item.id === colId) {
+                            previousID = data.view.columns[index - 1]?.id;
+                            data.view.columns.splice(index, 1);
+                            return true;
                         }
                     });
+                    if (isCustomAttr || (colData.type === "relation" && colData.relation.isTwoWay)) {
+                        const dialog = new Dialog({
+                            title: window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value),
+                            content: `<div class="b3-dialog__content">
+    ${window.siyuan.languages.confirmRemoveRelationField.replace("${x}", (menuElement.querySelector('.b3-text-field[data-type="colName"]') as HTMLInputElement).value)}
+</div>
+<div class="b3-dialog__action">
+    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <button class="b3-button b3-button--warning">${window.siyuan.languages.removeButKeepRelationField}</button>
+    <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
+</div>`,
+                        });
+                    } else {
+                        removeCol({
+                            protyle: options.protyle,
+                            previousID,
+                            colData,
+                            data,
+                            avID,
+                            blockID,
+                            menuElement,
+                            isCustomAttr,
+                            blockElement: options.blockElement,
+                            avPanelElement,
+                            tabRect
+                        });
+                    }
                     event.preventDefault();
                     event.stopPropagation();
                     break;

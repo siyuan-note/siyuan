@@ -3,7 +3,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
 import {getDefaultOperatorByType, setFilter} from "./filter";
 import {genCellValue} from "./cell";
-import {openMenuPanel} from "./openMenuPanel";
+import {getPropertiesHTML, openMenuPanel} from "./openMenuPanel";
 import {getLabelByNumberFormat} from "./number";
 import {removeAttrViewColAnimation, updateAttrViewCellAnimation} from "./action";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
@@ -907,6 +907,54 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         inputElement.focus();
     }
 };
+
+export const removeCol = (options: {
+    protyle: IProtyle,
+    data: IAV,
+    previousID: string,
+    colData: IAVColumn,
+    avID: string,
+    blockID: string,
+    isCustomAttr: boolean
+    menuElement: HTMLElement,
+    blockElement: Element
+    avPanelElement: Element
+    tabRect: DOMRect
+}) => {
+    const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+    transaction(options.protyle, [{
+        action: "removeAttrViewCol",
+        id: colId,
+        avID: options.avID,
+    }, {
+        action: "doUpdateUpdated",
+        id: options.blockID,
+        data: newUpdated,
+    }], [{
+        action: "addAttrViewCol",
+        name: options.colData.name,
+        avID: options.avID,
+        type: options.colData.type,
+        id: colId,
+        previousID:options.previousID
+    }, {
+        action: "doUpdateUpdated",
+        id: options.blockID,
+        data: options.blockElement.getAttribute("updated")
+    }]);
+    removeAttrViewColAnimation(options.blockElement, colId);
+    options.blockElement.setAttribute("updated", newUpdated);
+
+    if (options.isCustomAttr) {
+        options.avPanelElement.remove();
+    } else {
+        options.menuElement.innerHTML = getPropertiesHTML(options.data.view);
+        setPosition(options.menuElement,
+            options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom,
+            options.tabRect.height);
+    }
+}
 
 const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
     return `<button class="b3-menu__item" data-type="updateColType" data-old-type="${oldType}" data-new-type="${type}">

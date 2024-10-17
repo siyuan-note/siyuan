@@ -66,7 +66,7 @@
   "removeCard": "Remove flashcard",
   "updateLayout": "Update layout",
   "dndFolderTip": "Please note that ${x} only inserts the file:// hyperlink and does not copy the file",
-  "removeCol": "Are you sure you want to delete the ${x} column in the database?",
+  "removeCol": "Are you sure you want to delete the <b>${x}</b> column in the database?",
   "video": "Video",
   "audio": "Audio",
   "updateAll": "Update all",

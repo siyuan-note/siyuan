@@ -66,7 +66,7 @@
   "removeCard": "Usuń fiszkę",
   "updateLayout": "Zaktualizuj układ",
   "dndFolderTip": "Proszę pamiętać, że ${x} tylko wstawia link file:// i nie kopiuje pliku",
-  "removeCol": "Czy na pewno chcesz usunąć ${x} kolumnę w bazie danych?",
+  "removeCol": "Czy na pewno chcesz usunąć <b>${x}</b> kolumnę w bazie danych?",
   "video": "Wideo",
   "audio": "Audio",
   "updateAll": "Zaktualizuj wszystko",

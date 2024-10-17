@@ -66,7 +66,7 @@
   "removeCard": "Rimuovi flashcard",
   "updateLayout": "Aggiorna layout",
   "dndFolderTip": "Nota che ${x} inserisce solo il collegamento file:// e non copia il file",
-  "removeCol": "Sei sicuro di voler eliminare la colonna ${x} nel database?",
+  "removeCol": "Sei sicuro di voler eliminare la colonna <b>${x}</b> nel database?",
   "video": "Video",
   "audio": "Audio",
   "updateAll": "Aggiorna tutto",

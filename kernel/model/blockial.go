@@ -28,7 +28,6 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -51,7 +50,9 @@ func SetBlockReminder(id string, timed string) (err error) {
 		timedMills = t.UnixMilli()
 	}
 
-	attrs := GetBlockAttrs(id) // 获取属性是会等待树写入
+	WaitForWritingFiles()
+
+	attrs := sql.GetBlockAttrs(id)
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -281,36 +282,5 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 	IncSync()
 	cache.RemoveBlockIAL(id)
-	return
-}
-
-func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
-	WaitForWritingFiles()
-
-	ret = map[string]map[string]string{}
-	trees := filesys.LoadTrees(ids)
-	for _, id := range ids {
-		tree := trees[id]
-		if nil == tree {
-			continue
-		}
-
-		ret[id] = sql.GetBlockAttrs0(id, tree)
-		cache.PutBlockIAL(id, ret[id])
-	}
-	return
-}
-
-func GetBlockAttrs(id string) (ret map[string]string) {
-	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
-		ret = cached
-		return
-	}
-
-	WaitForWritingFiles()
-
-	ret = sql.GetBlockAttrs(id)
-	cache.PutBlockIAL(id, ret)
 	return
 }

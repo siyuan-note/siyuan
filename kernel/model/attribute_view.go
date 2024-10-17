@@ -493,7 +493,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	waitForSyncingStorages()
 
 	ret = []*BlockAttributeViewKeys{}
-	attrs := sql.GetBlockAttrsWithoutWaitWriting(blockID)
+	attrs := sql.GetBlockAttrs(blockID)
 	avs := attrs[av.NodeAttrNameAvs]
 	if "" == avs {
 		return
@@ -631,7 +631,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 			case av.KeyTypeUpdated:
-				ial := sql.GetBlockAttrsWithoutWaitWriting(blockID)
+				ial := sql.GetBlockAttrs(blockID)
 				updatedStr := ial["updated"]
 				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
 				if nil == parseErr {
@@ -655,7 +655,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					ial := map[string]string{}
 					block := av.GetKeyBlockValue(keyValues)
 					if nil != block && !block.IsDetached {
-						ial = sql.GetBlockAttrsWithoutWaitWriting(block.BlockID)
+						ial = sql.GetBlockAttrs(block.BlockID)
 					}
 
 					if nil == kv.Values[0].Template {

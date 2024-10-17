@@ -19,13 +19,13 @@ package sql
 import (
 	"bytes"
 	"database/sql"
-	"github.com/88250/lute/parse"
-	"github.com/siyuan-note/logging"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
+	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -275,31 +275,39 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 	return buf.String()
 }
 
-func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
-	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
-		ret = cached
-		return
-	}
+func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
+	ret = map[string]map[string]string{}
+	trees := filesys.LoadTrees(ids)
+	for _, id := range ids {
+		tree := trees[id]
+		if nil == tree {
+			continue
+		}
 
-	ret = GetBlockAttrs(id)
-	cache.PutBlockIAL(id, ret)
+		ret[id] = getBlockAttrsFromTree(id, tree)
+	}
 	return
 }
 
 func GetBlockAttrs(id string) (ret map[string]string) {
 	ret = map[string]string{}
 
+	ret = map[string]string{}
+	if cached := cache.GetBlockIAL(id); nil != cached {
+		ret = cached
+		return
+	}
+
 	tree := loadTreeByBlockID(id)
 	if nil == tree {
 		return
 	}
 
-	ret = GetBlockAttrs0(id, tree)
+	ret = getBlockAttrsFromTree(id, tree)
 	return
 }
 
-func GetBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
+func getBlockAttrsFromTree(id string, tree *parse.Tree) (ret map[string]string) {
 	ret = map[string]string{}
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
@@ -310,6 +318,7 @@ func GetBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
 	for _, kv := range node.KramdownIAL {
 		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
 	}
+	cache.PutBlockIAL(id, ret)
 	return
 }
 

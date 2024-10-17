@@ -269,7 +269,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if nil != block && !block.IsDetached {
-					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
+					ial = GetBlockAttrs(row.ID)
 				}
 				updatedStr := ial["updated"]
 				if "" == updatedStr && nil != block {
@@ -305,7 +305,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				ial := map[string]string{}
 				block := row.GetBlockValue()
 				if nil != block && !block.IsDetached {
-					ial = GetBlockAttrsWithoutWaitWriting(row.ID)
+					ial = GetBlockAttrs(row.ID)
 				}
 				content, renderErr := RenderTemplateCol(ial, keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content

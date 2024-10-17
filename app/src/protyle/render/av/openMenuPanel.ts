@@ -1092,7 +1092,7 @@ export const openMenuPanel = (options: {
                             return true;
                         }
                     });
-                    const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay
+                    const isTwoWay = colData.type === "relation" && colData.relation?.isTwoWay;
                     if (isCustomAttr || isTwoWay) {
                         const dialog = new Dialog({
                             title: isTwoWay ? window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value) : window.siyuan.languages.deleteOpConfirm,
@@ -1145,7 +1145,7 @@ export const openMenuPanel = (options: {
                                 }
                                 target = target.parentElement;
                             }
-                        })
+                        });
                     } else {
                         removeCol({
                             protyle: options.protyle,

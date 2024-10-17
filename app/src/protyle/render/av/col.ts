@@ -848,12 +848,12 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             label: window.siyuan.languages.delete,
             async click() {
                 if (type === "relation") {
-                    const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID})
+                    const response = await fetchSyncPost("/api/av/getAttributeView", {id: avID});
                     const colData = response.data.av.keyValues.find((item: {
                         key: { id: string }
                     }) => item.key.id === colId);
                     if (colData.key.relation?.isTwoWay) {
-                        const relResponse = await fetchSyncPost("/api/av/getAttributeView", {id: colData.key.relation.avID})
+                        const relResponse = await fetchSyncPost("/api/av/getAttributeView", {id: colData.key.relation.avID});
                         const dialog = new Dialog({
                             title: window.siyuan.languages.removeCol.replace("${x}", colData.key.name),
                             content: `<div class="b3-dialog__content">
@@ -880,7 +880,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                         cellElement,
                                         blockElement,
                                         removeDest: true
-                                    })
+                                    });
                                     dialog.destroy();
                                     break;
                                 } else if (target.classList.contains("b3-button--warning")) {
@@ -894,7 +894,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                         cellElement,
                                         blockElement,
                                         removeDest: false
-                                    })
+                                    });
                                     dialog.destroy();
                                     break;
                                 } else if (target.classList.contains("b3-button--info")) {
@@ -903,8 +903,8 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 }
                                 target = target.parentElement;
                             }
-                        })
-                        return
+                        });
+                        return;
                     }
                 }
                 removeColByMenu({
@@ -917,7 +917,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     cellElement,
                     blockElement,
                     removeDest: false
-                })
+                });
             }
         });
         menu.addSeparator();
@@ -992,7 +992,7 @@ const removeColByMenu = (options: {
     }]);
     removeAttrViewColAnimation(options.blockElement, options.colId);
     options.blockElement.setAttribute("updated", newUpdated);
-}
+};
 
 export const removeCol = (options: {
     protyle: IProtyle,
@@ -1048,7 +1048,7 @@ export const removeCol = (options: {
             options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom,
             options.tabRect.height);
     }
-}
+};
 
 const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
     return `<button class="b3-menu__item" data-type="updateColType" data-old-type="${oldType}" data-new-type="${type}">

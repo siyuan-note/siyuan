@@ -493,13 +493,13 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             zoomIn: idZoomIn.isZoomIn
         });
     } else {
-        let latestTabHeaderElement:HTMLElement
+        let latestTabHeaderElement:HTMLElement;
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
             if (!latestTabHeaderElement) {
-                latestTabHeaderElement = item
+                latestTabHeaderElement = item;
             } else {
                 if (item.dataset.activetime > latestTabHeaderElement.dataset.activetime) {
-                    latestTabHeaderElement = item
+                    latestTabHeaderElement = item;
                 }
             }
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;

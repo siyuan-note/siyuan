@@ -416,7 +416,7 @@ export class Wnd {
 
     public switchTab(target: HTMLElement, pushBack = false, update = true, resize = true, isSaveLayout = true) {
         let currentTab: Tab;
-        let isInitActive = false
+        let isInitActive = false;
         this.children.forEach((item) => {
             if (target === item.headElement) {
                 if (item.headElement && item.headElement.classList.contains("fn__none")) {

@@ -157,7 +157,7 @@ export const updateRelation = (options: {
         action: "updateAttrViewColRelation",
         avID: options.avID,
         keyID: colId,
-        id: colData.relation.avID,
+        id: colData.relation.avID || newAVId,
         backRelationKeyID: colData.relation.backKeyID,
         isTwoWay: colData.relation.isTwoWay,
         name: inputElement.dataset.oldValue,

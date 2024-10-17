@@ -291,8 +291,6 @@ func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 
 func GetBlockAttrs(id string) (ret map[string]string) {
 	ret = map[string]string{}
-
-	ret = map[string]string{}
 	if cached := cache.GetBlockIAL(id); nil != cached {
 		ret = cached
 		return

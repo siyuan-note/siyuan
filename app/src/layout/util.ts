@@ -559,7 +559,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             }
         }
         json.instance = "Tab";
-        json.activeTime = layout.headElement.getAttribute("data-activetime");
+        json.activeTime = layout.headElement?.getAttribute("data-activetime");
     } else if (layout instanceof Editor) {
         if (!layout.editor.protyle.notebookId && breakObj) {
             breakObj.editor = "true";

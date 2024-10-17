@@ -25,11 +25,13 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	jsoniter "github.com/json-iterator/go"
+	"github.com/panjf2000/ants/v2"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -53,7 +55,7 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 		blockIDs[bt.RootID] = append(blockIDs[bt.RootID], bt.ID)
 	}
 
-	trees, errs := BatchLoadTrees(boxIDs, paths, luteEngine)
+	trees, errs := batchLoadTrees(boxIDs, paths, luteEngine)
 	for i := range trees {
 		tree := trees[i]
 		err := errs[i]
@@ -82,31 +84,37 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 	return
 }
 
-func BatchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
-	var wg sync.WaitGroup
+func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
+	waitGroup := sync.WaitGroup{}
 	lock := sync.Mutex{}
 	loaded := map[string]bool{}
+
+	start := time.Now()
+	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
+		defer waitGroup.Done()
+
+		i := arg.(int)
+		boxID := boxIDs[i]
+		path := paths[i]
+		tree, err := LoadTree(boxID, path, luteEngine)
+		lock.Lock()
+		ret = append(ret, tree)
+		errs = append(errs, err)
+		lock.Unlock()
+	})
 	for i := range paths {
 		if loaded[boxIDs[i]+paths[i]] {
 			continue
 		}
 
 		loaded[boxIDs[i]+paths[i]] = true
-		wg.Add(1)
 
-		go func(i int) {
-			defer wg.Done()
-
-			boxID := boxIDs[i]
-			path := paths[i]
-			tree, err := LoadTree(boxID, path, luteEngine)
-			lock.Lock()
-			ret = append(ret, tree)
-			errs = append(errs, err)
-			lock.Unlock()
-		}(i)
+		waitGroup.Add(1)
+		p.Invoke(i)
 	}
-	wg.Wait()
+	waitGroup.Wait()
+	p.Release()
+	logging.LogInfof("batch load trees [%d] cost [%s]", len(paths), time.Since(start))
 	return
 }
 

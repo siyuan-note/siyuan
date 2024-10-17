@@ -1,6 +1,6 @@
 {
   "confirmRemoveRelationField": "Sind Sie sicher, dass Sie das Feld, das mit <b>${x}</b> verknüpft ist, löschen möchten?",
-  "keepRelationField": "Verknüpftes Feld behalten",
+  "removeButKeepRelationField": "Entfernen, verknüpftes Feld behalten",
   "exportPDFLowMemory": "Nicht genügend verfügbarer Speicher, um dieses PDF zu exportieren, bitte reduzieren Sie den Inhalt oder erhöhen Sie den verfügbaren Speicher und versuchen Sie es erneut",
   "exportConf": "Export-Einstellungen",
   "exportConfTip": "Konto, Zugriffscode, Synchronisation, API-Token und Daten-Repo-Schlüssel werden nicht exportiert",

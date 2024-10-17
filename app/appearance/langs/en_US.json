@@ -1,6 +1,6 @@
 {
   "confirmRemoveRelationField": "Are you sure you want to delete the field associated with <b>${x}</b>?",
-  "keepRelationField": "Keep associated field",
+  "removeButKeepRelationField": "Remove, keep related field",
   "exportPDFLowMemory": "Insufficient available memory to export this PDF, please reduce the content or increase available memory and try exporting again",
   "exportConf": "Export settings",
   "exportConfTip": "Account, access authorization code, synchronization, API token and data repo key will not be exported",

@@ -8,7 +8,7 @@
 		"title": "排版元素",
 		"title-img": "background-color: hsl(2, 57%, 40%);background-image: repeating-linear-gradient(transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(270deg, transparent, transparent 50px, rgba(0,0,0,.4) 50px, rgba(0,0,0,.4) 53px, transparent 53px, transparent 63px, rgba(0,0,0,.4) 63px, rgba(0,0,0,.4) 66px, transparent 66px, transparent 116px, rgba(0,0,0,.5) 116px, rgba(0,0,0,.5) 166px, rgba(255,255,255,.2) 166px, rgba(255,255,255,.2) 169px, rgba(0,0,0,.5) 169px, rgba(0,0,0,.5) 179px, rgba(255,255,255,.2) 179px, rgba(255,255,255,.2) 182px, rgba(0,0,0,.5) 182px, rgba(0,0,0,.5) 232px, transparent 232px),repeating-linear-gradient(125deg, transparent, transparent 2px, rgba(0,0,0,.2) 2px, rgba(0,0,0,.2) 3px, transparent 3px, transparent 5px, rgba(0,0,0,.2) 5px);",
 		"type": "doc",
-		"updated": "20240702222119"
+		"updated": "20241018105327"
 	},
 	"Children": [
 		{
@@ -2251,7 +2251,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220312004712-5dfiars",
-				"updated": "20220312004723"
+				"updated": "20241018105327"
 			},
 			"Children": [
 				{
@@ -2274,7 +2274,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220312122707-8258e11",
-				"updated": "20240427231052"
+				"updated": "20241018105327"
 			},
 			"Children": [
 				{
@@ -2286,7 +2286,7 @@
 					"TextMarkType": "block-ref",
 					"TextMarkBlockRefID": "20240427230732-snprakd",
 					"TextMarkBlockRefSubtype": "s",
-					"TextMarkTextContent": "HTML 區塊注意"
+					"TextMarkTextContent": "HTML 塊注意"
 				},
 				{
 					"Type": "NodeText",

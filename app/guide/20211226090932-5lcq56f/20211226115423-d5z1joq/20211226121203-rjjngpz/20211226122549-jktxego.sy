@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20241009230052"
+		"updated": "20241018105254"
 	},
 	"Children": [
 		{
@@ -3122,7 +3122,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20240524085750"
+				"updated": "20241018105254"
 			},
 			"Children": [
 				{
@@ -3137,7 +3137,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20240524085750"
+				"updated": "20241018105254"
 			},
 			"Children": [
 				{
@@ -3157,7 +3157,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20240524085750"
+				"updated": "20241018105254"
 			},
 			"Children": [
 				{
@@ -3577,7 +3577,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "跳到父區塊的下一個區塊"
+									"Data": "跳到父塊的下一個塊"
 								}
 							]
 						},
@@ -3644,7 +3644,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "跳到父區塊的上一個區塊"
+									"Data": "跳到父塊的上一個塊"
 								}
 							]
 						},
@@ -3704,7 +3704,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "跳到父區塊"
+									"Data": "跳到父塊"
 								}
 							]
 						},
@@ -3892,7 +3892,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "選擇內容時為設定區塊命名"
+									"Data": "選擇內容時為設定塊命名"
 								}
 							]
 						}
@@ -7149,7 +7149,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "對於資料庫區塊是 "
+									"Data": "對於資料庫塊是 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -7203,7 +7203,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "僅對資料庫區塊可用，可前往 "
+									"Data": "僅對資料庫塊可用，可前往 "
 								},
 								{
 									"Type": "NodeTextMark",

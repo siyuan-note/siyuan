@@ -7,7 +7,7 @@
 		"id": "20221223221501-mops33i",
 		"title": "閃卡",
 		"type": "doc",
-		"updated": "20240326165451"
+		"updated": "20241018105514"
 	},
 	"Children": [
 		{
@@ -522,7 +522,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240128111751-bb41541",
-				"updated": "20240128111854"
+				"updated": "20241018105514"
 			},
 			"Children": [
 				{
@@ -536,7 +536,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240128111910-2n2j702",
-				"updated": "20240224103933"
+				"updated": "20241018105514"
 			},
 			"Children": [
 				{
@@ -577,7 +577,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 可以使用文件區塊自訂屬性進行覆寫："
+					"Data": "​ 可以使用文檔塊自訂屬性進行覆寫："
 				}
 			]
 		},

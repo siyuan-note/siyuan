@@ -144,7 +144,6 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	luteEngine := util.NewLute()
 	blockIDs := map[string]string{}
-	avBlockIDs := map[string]string{}
 	trees := map[string]*parse.Tree{}
 
 	// 重新生成块 ID
@@ -170,19 +169,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			// Keep original creation time when importing .sy.zip https://github.com/siyuan-note/siyuan/issues/9923
 			newNodeID := util.TimeFromID(n.ID) + "-" + util.RandString(7)
 			blockIDs[n.ID] = newNodeID
-			oldNodeID := n.ID
 			n.ID = newNodeID
 			n.SetIALAttr("id", newNodeID)
-
-			// 重新指向数据库属性值
-			for _, kv := range n.KramdownIAL {
-				if 2 > len(kv) {
-					continue
-				}
-				if strings.HasPrefix(kv[0], av.NodeAttrNameAvs) {
-					avBlockIDs[oldNodeID] = newNodeID
-				}
-			}
 			return ast.WalkContinue
 		})
 		tree.ID = tree.Root.ID
@@ -249,13 +237,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 				return nil
 			}
 
-			// 将数据库文件中的块 ID 替换为新的块 ID
+			// 将数据库文件中的 ID 替换为新的 ID
 			newData := data
 			for oldAvID, newAvID := range avIDs {
-				for oldID, newID := range avBlockIDs {
-					newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
-				}
 				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
+			}
+			for oldID, newID := range blockIDs {
+				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
 			}
 			if !bytes.Equal(data, newData) {
 				if writeErr := os.WriteFile(oldPath, newData, 0644); nil != writeErr {

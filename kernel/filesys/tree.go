@@ -25,7 +25,6 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/parse"
@@ -89,7 +88,7 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	lock := sync.Mutex{}
 	loaded := map[string]bool{}
 
-	start := time.Now()
+	//start := time.Now()
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
 		defer waitGroup.Done()
 
@@ -114,7 +113,7 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	}
 	waitGroup.Wait()
 	p.Release()
-	logging.LogInfof("batch load trees [%d] cost [%s]", len(paths), time.Since(start))
+	//logging.LogInfof("batch load trees [%d] cost [%s]", len(paths), time.Since(start))
 	return
 }
 

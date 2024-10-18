@@ -425,6 +425,7 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 			dataModel["created"] = created
 		} else {
 			errMsg := parseErr.Error()
+			//logging.LogWarnf("parse created [%s] failed: %s", createdStr, errMsg)
 			if strings.Contains(errMsg, "minute out of range") {
 				// parsing time "20240709158553": minute out of range
 				// 将分秒部分置为 0000

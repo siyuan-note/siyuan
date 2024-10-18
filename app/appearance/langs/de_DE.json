@@ -1380,7 +1380,7 @@
   "70": "Verarbeite [%s], bitte warten...",
   "71": "Fehler beim Einfügen der Asset-Datei, bitte Dokument erneut öffnen",
   "72": "Inhalt wurde in die Systemzwischenablage kopiert, bitte gehen Sie zu SiYuan, um einzufügen",
-  "73": "Importieren, bitte warten...",
+  "73": "Daten werden importiert...",
   "74": "Der Kernel ist nicht vollständig gestartet [%d%%], bitte versuchen Sie es später erneut",
   "75": "Zugriff auf die Datei fehlgeschlagen",
   "76": "Die Netzwerkverbindungsprüfung des Cloud-Speicherdienstanbieters ist abnormal, bitte überprüfen Sie die Netzwerkkonfiguration",

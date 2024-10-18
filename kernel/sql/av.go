@@ -176,6 +176,16 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		ret.Rows = append(ret.Rows, &tableRow)
 	}
 
+	// 批量获取块属性以提升性能
+	var ialIDs []string
+	for _, row := range ret.Rows {
+		block := row.GetBlockValue()
+		if nil != block && !block.IsDetached {
+			ialIDs = append(ialIDs, row.ID)
+		}
+	}
+	ials := BatchGetBlockAttrs(ialIDs)
+
 	// 渲染自动生成的列值，比如关联列、汇总列、创建时间列和更新时间列
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
@@ -266,11 +276,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: createdKey.ID, BlockID: row.ID, Type: av.KeyTypeCreated, Created: cell.Value.Created}}})
 				rows[row.ID] = keyValues
 			case av.KeyTypeUpdated: // 渲染更新时间
-				ial := map[string]string{}
-				block := row.GetBlockValue()
-				if nil != block && !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+				ial := ials[row.ID]
+				if nil == ial {
+					ial = map[string]string{}
 				}
+				block := row.GetBlockValue()
 				updatedStr := ial["updated"]
 				if "" == updatedStr && nil != block {
 					cell.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
@@ -302,10 +312,9 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			switch cell.ValueType {
 			case av.KeyTypeTemplate: // 渲染模板列
 				keyValues := rows[row.ID]
-				ial := map[string]string{}
-				block := row.GetBlockValue()
-				if nil != block && !block.IsDetached {
-					ial = GetBlockAttrs(row.ID)
+				ial := ials[row.ID]
+				if nil == ial {
+					ial = map[string]string{}
 				}
 				content, renderErr := RenderTemplateCol(ial, keyValues, cell.Value.Template.Content)
 				cell.Value.Template.Content = content
@@ -415,6 +424,20 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		if nil == parseErr {
 			dataModel["created"] = created
 		} else {
+			errMsg := parseErr.Error()
+			//logging.LogWarnf("parse created [%s] failed: %s", createdStr, errMsg)
+			if strings.Contains(errMsg, "minute out of range") {
+				// parsing time "20240709158553": minute out of range
+				// 将分秒部分置为 0000
+				createdStr = createdStr[:len("2006010215")] + "0000"
+			} else if strings.Contains(errMsg, "second out of range") {
+				// parsing time "20240709154592": second out of range
+				// 将秒部分置为 00
+				createdStr = createdStr[:len("200601021504")] + "00"
+			}
+			created, parseErr = time.ParseInLocation("20060102150405", createdStr, time.Local)
+		}
+		if nil != parseErr {
 			logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
 			dataModel["created"] = time.Now()
 		}

@@ -8,7 +8,7 @@
 		"title": "Please Start Here",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240612234733"
+		"updated": "20241018102340"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20210528120135-bznvpp6",
-				"updated": "20240508004007"
+				"updated": "20241018102340"
 			},
 			"Children": [
 				{
@@ -31,7 +31,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20210528120142-hprb4ja",
-						"updated": "20230728103732"
+						"updated": "20241018102340"
 					},
 					"Children": [
 						{
@@ -47,7 +47,7 @@
 							"HeadingLevel": 2,
 							"Properties": {
 								"id": "20201225220954-keui8uy",
-								"updated": "20210601233810"
+								"updated": "20241018102340"
 							},
 							"Children": [
 								{
@@ -62,7 +62,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20201225220954-dlgzk1o",
-								"updated": "20230728103732"
+								"updated": "20241018102340"
 							},
 							"Children": [
 								{
@@ -74,7 +74,7 @@
 									},
 									"Properties": {
 										"id": "20201225220954-e913snx",
-										"updated": "20230728103732"
+										"updated": "20241018102340"
 									},
 									"Children": [
 										{
@@ -82,12 +82,21 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20210131161940-kfs31q6",
-												"updated": "20230728103732"
+												"updated": "20241018102340"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Create a new notebook in the doc tree panel, and create a new doc under the notebook"
+													"Data": "Create a new notebook in the "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "More"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ menu of the doc tree panel, and create a new doc under the notebook"
 												}
 											]
 										}

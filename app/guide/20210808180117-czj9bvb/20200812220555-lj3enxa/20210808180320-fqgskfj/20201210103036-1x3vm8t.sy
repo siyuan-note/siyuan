@@ -6,7 +6,7 @@
 		"id": "20201210103036-1x3vm8t",
 		"title": "文档块和标题块的转换",
 		"type": "doc",
-		"updated": "20240415092415"
+		"updated": "20241018104534"
 	},
 	"Children": [
 		{
@@ -441,7 +441,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090801-s48mpeu"
+				"id": "20210104090801-s48mpeu",
+				"updated": "20241018104534"
 			},
 			"Children": [
 				{
@@ -459,12 +460,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090801-9kyqggg",
-				"updated": "20240415092405"
+				"updated": "20241018104534"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在编辑器页签中选择需要转换的标题块，按住该标题块标识图标，然后就可以将其拖拽到文档树上转换了，标题块转换为文档块后："
+					"Data": "在编辑器页签中选择需要转换的标题块，按住该标题块的块标，然后就可以将其拖拽到文档树上转换了，标题块转换为文档块后："
 				}
 			]
 		},
@@ -526,6 +527,102 @@
 								{
 									"Type": "NodeText",
 									"Data": "原标题块下如果有子标题，则会按照这些子标题中最大的层级作为新文档中二级标题，其余子标题会根据相对层级进行调整，比如原标题块下包含了三、四、五级子标题，则转换为文档块后会将这些子标题转换为二、三、四级标题"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20241018104519-pb6ln2k",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20241018104519-pb6ln2k",
+				"updated": "20241018104519"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "将列表项块转换为文档块"
+				}
+			]
+		},
+		{
+			"ID": "20241018104519-a4rvy3v",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20241018104519-a4rvy3v",
+				"updated": "20241018104519"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了将标题块转换为文档块，还可以将列表项块转换为文档块（是列表项块，不是列表块），按住该列表项块的块标，然后就可以将其拖拽到文档树上转换了，列表项块转换为文档块后："
+				}
+			]
+		},
+		{
+			"ID": "20241018104519-kr24kek",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241018104519-kr24kek",
+				"updated": "20241018104519"
+			},
+			"Children": [
+				{
+					"ID": "20241018104519-1kegugk",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018104519-1kegugk",
+						"updated": "20241018104519"
+					},
+					"Children": [
+						{
+							"ID": "20241018104519-cb7isjy",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018104519-cb7isjy",
+								"updated": "20241018104519"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表项块的首个子块的内容将变为文档名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241018104519-y2qhagm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018104519-y2qhagm",
+						"updated": "20241018104519"
+					},
+					"Children": [
+						{
+							"ID": "20241018104519-nfdaro6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018104519-nfdaro6",
+								"updated": "20241018104519"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表项块的子块保持原样"
 								}
 							]
 						}

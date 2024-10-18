@@ -1380,7 +1380,7 @@
     "70": "Procesando [%s], por favor espere...",
     "71": "Fallo en la inserción del archivo de activos, por favor reabra el documento",
     "72": "El contenido se ha copiado en el portapapeles del sistema, por favor vaya a SiYuan para pegar",
-    "73": "Importando, por favor espere...",
+    "73": "Importando datos...",
     "74": "El kernel no ha sido arrancado completamente [%d%%], por favor, inténtelo de nuevo más tarde",
     "75": "Error al intentar acceder al archivo",
     "76": "La verificaci\u00f3n de conectividad de red del proveedor de servicios de almacenamiento en la nube es anormal, verifique la configuraci\u00f3n de red",

@@ -208,6 +208,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		})
 	}
 
+	var replacements []string
+	for oldID, newID := range blockIDs {
+		replacements = append(replacements, oldID, newID)
+	}
+	blockIDReplacer := strings.NewReplacer(replacements...)
+
 	// 将关联的数据库文件移动到 data/storage/av/ 下
 	storage := filepath.Join(unzipRootPath, "storage")
 	storageAvDir := filepath.Join(storage, "av")
@@ -242,9 +248,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			for oldAvID, newAvID := range avIDs {
 				newData = bytes.ReplaceAll(newData, []byte(oldAvID), []byte(newAvID))
 			}
-			for oldID, newID := range blockIDs {
-				newData = bytes.ReplaceAll(newData, []byte(oldID), []byte(newID))
-			}
+			newData = []byte(blockIDReplacer.Replace(string(newData)))
 			if !bytes.Equal(data, newData) {
 				if writeErr := os.WriteFile(oldPath, newData, 0644); nil != writeErr {
 					logging.LogErrorf("write av file [%s] failed: %s", oldPath, writeErr)

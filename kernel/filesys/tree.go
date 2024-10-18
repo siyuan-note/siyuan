@@ -23,6 +23,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"sync"
 
@@ -86,10 +87,11 @@ func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err erro
 func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
 	waitGroup := sync.WaitGroup{}
 	lock := sync.Mutex{}
-	loaded := map[string]bool{}
-
-	//start := time.Now()
-	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
+	poolSize := runtime.NumCPU()
+	if 8 < poolSize {
+		poolSize = 8
+	}
+	p, _ := ants.NewPoolWithFunc(poolSize, func(arg interface{}) {
 		defer waitGroup.Done()
 
 		i := arg.(int)
@@ -101,6 +103,7 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 		errs = append(errs, err)
 		lock.Unlock()
 	})
+	loaded := map[string]bool{}
 	for i := range paths {
 		if loaded[boxIDs[i]+paths[i]] {
 			continue
@@ -113,7 +116,6 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	}
 	waitGroup.Wait()
 	p.Release()
-	//logging.LogInfof("batch load trees [%d] cost [%s]", len(paths), time.Since(start))
 	return
 }
 

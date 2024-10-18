@@ -10,7 +10,7 @@ import {
 import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
-import {transaction} from "../wysiwyg/transaction";
+import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -271,6 +271,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
+    let hasFoldHeading = false;
     if (newSourceElement) {
         const newSourceId = newSourceElement.getAttribute("data-node-id");
         sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -369,9 +370,12 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             if (index === 0) {
                 afterPreviousID = isCopy ? copyId : id;
             }
-            if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-                item.removeAttribute("fold");
-                foldHeadingIds.push({id, parentID});
+            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                if (isCopy) {
+                    item.removeAttribute("fold");
+                    foldHeadingIds.push({id, parentID});
+                }
+                hasFoldHeading = true;
             }
             if (isCopy) {
                 undoOperations.push({
@@ -569,6 +573,14 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         // 跨文档不支持撤销
         transaction(protyle, doOperations);
     }
+    if (direct === "col" && (sourceElements.length > 1 || hasFoldHeading) && !isCopy) {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement: sourceElements.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
+    }
     focusBlock(sourceElements[0]);
 };
 
@@ -752,6 +764,23 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     } else {
         // 跨文档不支持撤销
         transaction(protyle, doOperations);
+    }
+    let hasFoldHeading = false;
+    sourceElements.find(item => {
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            hasFoldHeading = true;
+            return true;
+        }
+    })
+    if (!isCopy && (sourceElements.length > 1 || hasFoldHeading) &&
+        sourceElements[0].parentElement.classList.contains("sb") &&
+        sourceElements[0].parentElement.getAttribute("data-sb-layout") === "col") {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement: sourceElements.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
     }
     focusBlock(sourceElements[0]);
 };

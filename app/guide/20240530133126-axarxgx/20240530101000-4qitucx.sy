@@ -9,7 +9,7 @@
 		"title": "スタートガイド",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240612234804"
+		"updated": "20241018102426"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"Properties": {
 				"ID": "20240530101000-bw4rbw9",
 				"id": "20240530101000-x3xk6o7",
-				"updated": "20240530101000"
+				"updated": "20241018102426"
 			},
 			"Children": [
 				{
@@ -34,7 +34,7 @@
 					"Properties": {
 						"ID": "20240530101000-wuwb451",
 						"id": "20240530101000-wzoxemv",
-						"updated": "20240530101000"
+						"updated": "20241018102426"
 					},
 					"Children": [
 						{
@@ -51,7 +51,7 @@
 							"Properties": {
 								"ID": "20240530101000-1pmo5nw",
 								"id": "20240530101000-ocvz556",
-								"updated": "20240530101000"
+								"updated": "20241018102426"
 							},
 							"Children": [
 								{
@@ -67,7 +67,7 @@
 							"Properties": {
 								"ID": "20240530101000-2p15cvs",
 								"id": "20240530101000-jrj1ipn",
-								"updated": "20240530101000"
+								"updated": "20241018102426"
 							},
 							"Children": [
 								{
@@ -80,21 +80,29 @@
 									"Properties": {
 										"ID": "20240530101000-a3cojva",
 										"id": "20240530101000-kocadwy",
-										"updated": "20240530101000"
+										"updated": "20241018102426"
 									},
 									"Children": [
 										{
 											"ID": "20240530101000-ohhb34s",
 											"Type": "NodeParagraph",
 											"Properties": {
-												"ID": "20240530101000-xldcivl",
 												"id": "20240530101000-ohhb34s",
-												"updated": "20240530101000"
+												"updated": "20241018102426"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "ドキュメントツリーパネルで新しいノートブックを作成し、その中に新しいドキュメントを作成します"
+													"Data": "ドキュメント ツリー パネルの "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "その他"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ メニューで新しいノートブックを作成し、そのノートブックの下に新しいドキュメントを作成します"
 												}
 											]
 										}

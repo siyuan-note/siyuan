@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20240818174636"
+		"updated": "20241018105422"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208171620-hbecr4u",
-				"updated": "20240208171620"
+				"updated": "20241018105422"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240208171620-r36g6d4",
-				"updated": "20240208171621"
+				"updated": "20241018105422"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20240208171620-b1b1l10",
-						"updated": "20240208171620"
+						"updated": "20241018105422"
 					},
 					"Children": [
 						{
@@ -160,7 +160,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20240208171620-o6mi24d",
-								"updated": "20240208171620"
+								"updated": "20241018105422"
 							},
 							"Children": [
 								{
@@ -200,7 +200,7 @@
 									},
 									"Properties": {
 										"id": "20240208171620-ks66a38",
-										"updated": "20240208171620"
+										"updated": "20241018105422"
 									},
 									"Children": [
 										{
@@ -208,12 +208,12 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20240208171620-eo37wp1",
-												"updated": "20240208171620"
+												"updated": "20241018105422"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "內容塊：透過拖曳到表格新增的行，或透過區塊標選單 "
+													"Data": "內容塊：透過拖曳到表格新增的行，或透過塊標選單 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -296,7 +296,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208171620-kdmsvx8",
-				"updated": "20240208171620"
+				"updated": "20241018105418"
 			},
 			"Children": [
 				{
@@ -310,12 +310,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240208171620-3oc3qf5",
-				"updated": "20240208171621"
+				"updated": "20241018105418"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "複製資料庫區塊後貼上將形成鏡像資料庫，即這些資料庫區塊共享相同的資料庫數據，修改任何一個資料庫區塊的資料會同步到其他所有鏡像中。"
+					"Data": "複製資料庫塊後貼上將形成鏡像資料庫，即這些資料庫塊共享相同的資料庫數據，修改任何一個資料庫塊的資料會同步到其他所有鏡像中。"
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20211226120422-bkzsd2e",
 		"title": "文檔塊和標題塊的轉換",
 		"type": "doc",
-		"updated": "20240415092439"
+		"updated": "20241018105510"
 	},
 	"Children": [
 		{
@@ -384,7 +384,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120500-hi5u5jt",
-				"updated": "20211225234143"
+				"updated": "20241018105510"
 			},
 			"Children": [
 				{
@@ -398,12 +398,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240415092439-6is1c68",
-				"updated": "20240415092439"
+				"updated": "20241018105006"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在編輯器頁簽中選擇需要轉換的標題塊，按住該標題塊標識圖標，然後就可以將其拖曳到文檔樹上轉換了，標題塊轉換為文檔塊後："
+					"Data": "在編輯器頁簽中選擇需要轉換的標題塊，按住該標題塊的塊標，然後就可以將其拖曳到文檔樹上轉換了，標題塊轉換為文檔塊後："
 				}
 			]
 		},
@@ -413,7 +413,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240415092439-ffkmd1j",
-				"updated": "20240415092439"
+				"updated": "20241018105510"
 			},
 			"Children": [
 				{
@@ -453,7 +453,7 @@
 					},
 					"Properties": {
 						"id": "20240415092439-smqxbga",
-						"updated": "20240415092439"
+						"updated": "20241018105510"
 					},
 					"Children": [
 						{
@@ -461,12 +461,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240415092439-t6bu4l9",
-								"updated": "20240415092439"
+								"updated": "20241018105510"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "原標題區塊下方如果有子標題，則會依照這些子標題中最大的層級作為新文件中二級標題，其餘子標題會根據相對層級進行調整，例如原標題區塊下方包含了三、四、五 層級子標題，則轉換為文件區塊後會將這些子標題轉換為二、三、四級標題"
+									"Data": "原標題塊下方如果有子標題，則會依照這些子標題中最大的層級作為新文件中二級標題，其餘子標題會根據相對層級進行調整，例如原標題塊下方包含了三、四、五 層級子標題，則轉換為文檔塊後會將這些子標題轉換為二、三、四級標題"
 								}
 							]
 						}
@@ -475,12 +475,100 @@
 			]
 		},
 		{
-			"ID": "20211226120500-8o1jmk7",
+			"ID": "20241018104604-vokj7e6",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20241018104604-vokj7e6",
+				"updated": "20241018105050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "將列表項塊轉換為文檔塊"
+				}
+			]
+		},
+		{
+			"ID": "20241018104604-tjb0e1m",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20211226120500-8o1jmk7",
-				"updated": "20211225234143"
-			}
+				"id": "20241018104604-tjb0e1m",
+				"updated": "20241018105050"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "除了將標題塊轉換為文檔塊，還可以將列表項塊轉換為文檔塊（是列表項塊，不是列表塊），按住列表項塊的塊標，然後就可以將其拖曳到文檔樹上轉換了，列表項塊轉換為文檔塊後："
+				}
+			]
+		},
+		{
+			"ID": "20241018104604-53lc1kw",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241018104604-53lc1kw",
+				"updated": "20241018104901"
+			},
+			"Children": [
+				{
+					"ID": "20241018104604-9na2y62",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018104604-9na2y62",
+						"updated": "20241018104901"
+					},
+					"Children": [
+						{
+							"ID": "20241018104604-p6wr23d",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018104604-p6wr23d",
+								"updated": "20241018104901"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表項塊的首個子塊的內容將變成文檔名"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241018104604-194ukvr",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018104604-194ukvr",
+						"updated": "20241018104604"
+					},
+					"Children": [
+						{
+							"ID": "20241018104604-e1qzuat",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018104604-e1qzuat",
+								"updated": "20241018104604"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "列表項塊的子塊保持原樣"
+								}
+							]
+						}
+					]
+				}
+			]
 		}
 	]
 }

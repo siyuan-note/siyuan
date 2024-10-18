@@ -1380,7 +1380,7 @@
     "70": "Traitement de [%s], veuillez patienter...",
     "71": "L'insertion du fichier asset a échoué, veuillez rouvrir le document.",
     "72": "Le contenu a été copié dans le presse-papiers du système, veuillez vous rendre sur SiYuan pour le coller.",
-    "73": "En cours d'importation, veuillez patienter...",
+    "73": "Importation des données...",
     "74": "Le kernel n'a pas été complètement démarré [%d%%], veuillez réessayer plus tard.",
     "75": "La tentative d'accès au fichier a échoué",
     "76": "La vérification de la connectivité réseau du fournisseur de service de stockage cloud est anormale, veuillez vérifier la configuration réseau",

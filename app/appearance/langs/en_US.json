@@ -1380,7 +1380,7 @@
     "70": "Processing [%s], please wait...",
     "71": "Failed to insert asset file, please reopen the document",
     "72": "Content has been copied to the system clipboard, please go to SiYuan to paste",
-    "73": "Importing, please wait...",
+    "73": "Importing data...",
     "74": "The kernel has not been fully booted [%d%%], please try again later",
     "75": "Attempt to access file failed",
     "76": "The network connectivity verification of the cloud storage service provider is abnormal, please check the network configuration",

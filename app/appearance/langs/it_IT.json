@@ -1380,7 +1380,7 @@
     "70": "Elaborazione [%s], attendere prego...",
     "71": "Impossibile inserire il file dell'asset, riapri il documento",
     "72": "Il contenuto è stato copiato negli appunti di sistema, vai su SiYuan per incollare",
-    "73": "Importazione in corso, attendere prego...",
+    "73": "Importazione dei dati in corso...",
     "74": "Il kernel non è stato avviato completamente [%d%%], riprova più tardi",
     "75": "Tentativo di accesso al file fallito",
     "76": "La verifica della connettività di rete del servizio di archiviazione cloud è anomala, controlla la configurazione della rete",

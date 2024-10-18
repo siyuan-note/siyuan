@@ -147,7 +147,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	trees := map[string]*parse.Tree{}
 
 	// 重新生成块 ID
-	for _, syPath := range syPaths {
+	for i, syPath := range syPaths {
 		data, readErr := os.ReadFile(syPath)
 		if nil != readErr {
 			logging.LogErrorf("read .sy [%s] failed: %s", syPath, readErr)
@@ -176,10 +176,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		tree.ID = tree.Root.ID
 		tree.Path = filepath.ToSlash(strings.TrimPrefix(syPath, unzipRootPath))
 		trees[tree.ID] = tree
+		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d", i+1, len(syPaths))))
 	}
 
 	// 引用和嵌入指向重新生成的块 ID
 	for _, tree := range trees {
+		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
 				return ast.WalkContinue
@@ -269,6 +271,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		// 重新指向数据库属性值
 		for _, tree := range trees {
+			util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering || "" == n.ID {
 					return ast.WalkContinue
@@ -362,6 +365,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	// 写回 .sy
 	for _, tree := range trees {
+		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 		syPath := filepath.Join(unzipRootPath, tree.Path)
 		if "" == tree.Root.Spec {
 			parse.NestedInlines2FlattedSpans(tree, false)
@@ -587,6 +591,7 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 		treenode.IndexBlockTree(tree)
 		sql.IndexTreeQueue(tree)
+		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
 	}
 
 	IncSync()

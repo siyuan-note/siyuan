@@ -537,6 +537,7 @@
   }
 }
 
+// https://github.com/siyuan-note/siyuan/pull/12837
 .protyle-wysiwyg--select {
   --b3-av-background: var(--b3-av-background-hl);
 
@@ -572,7 +573,6 @@
   }
 }
 
-// https://github.com/siyuan-note/siyuan/pull/12706
 $backgrounds: (
   "font-background" 13,
   "card-error-background" 1,

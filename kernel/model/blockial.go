@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/siyuan/kernel/cache"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -101,31 +102,21 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 	}
 
 	WaitForWritingFiles()
-	trees := map[string]*parse.Tree{}
-	for _, blockAttr := range blockAttrs {
-		id := blockAttr["id"].(string)
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
-			return errors.New(fmt.Sprintf(Conf.Language(15), id))
-		}
 
-		if nil == trees[bt.RootID] {
-			tree, e := LoadTreeByBlockID(id)
-			if nil != e {
-				return e
-			}
-			trees[bt.RootID] = tree
-		}
+	var blockIDs []string
+	for _, blockAttr := range blockAttrs {
+		blockIDs = append(blockIDs, blockAttr["id"].(string))
 	}
 
+	trees := filesys.LoadTrees(blockIDs)
 	var nodes []*ast.Node
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
+		tree := trees[id]
+		if nil == tree {
 			return errors.New(fmt.Sprintf(Conf.Language(15), id))
 		}
-		tree := trees[bt.RootID]
+
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			return errors.New(fmt.Sprintf(Conf.Language(15), id))

@@ -215,6 +215,10 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					}
 
 					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+					if nil == subTree {
+						continue
+					}
+
 					var md string
 					if "d" == sqlBlock.Type {
 						if 0 == blockEmbedMode {

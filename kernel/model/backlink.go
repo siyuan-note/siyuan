@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -82,32 +83,27 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
-	luteEngine := NewLute()
-	treeCache := map[string]*parse.Tree{}
+	luteEngine := util.NewLute()
 	var mentions []*Block
 	for _, mention := range tmpMentions {
 		if mention.RootID == refTreeID {
 			mentions = append(mentions, mention)
 		}
 	}
+	var mentionBlockIDs []string
+	for _, mention := range mentions {
+		mentionBlockIDs = append(mentionBlockIDs, mention.ID)
+	}
+	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
 
 	if "" != keyword {
 		mentionKeywords = append(mentionKeywords, keyword)
 	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
-	for _, mention := range mentions {
-		refTree := treeCache[mention.RootID]
-		if nil == refTree {
-			var loadErr error
-			refTree, loadErr = LoadTreeByBlockID(mention.ID)
-			if nil != loadErr {
-				logging.LogWarnf("load ref tree [%s] failed: %s", mention.ID, loadErr)
-				continue
-			}
-			treeCache[mention.RootID] = refTree
-		}
 
-		backlink := buildBacklink(mention.ID, refTree, mentionKeywords, luteEngine)
+	trees := filesys.LoadTrees(mentionBlockIDs)
+	for id, tree := range trees {
+		backlink := buildBacklink(id, tree, mentionKeywords, luteEngine)
 		ret = append(ret, backlink)
 	}
 	return
@@ -138,7 +134,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 		return
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
 		var keywords []string
 		if "" != keyword {

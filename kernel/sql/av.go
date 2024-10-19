@@ -187,6 +187,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	ials := BatchGetBlockAttrs(ialIDs)
 
 	// 渲染自动生成的列值，比如关联列、汇总列、创建时间列和更新时间列
+	avCache := map[string]*av.AttributeView{}
+	avCache[attrView.ID] = attrView
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
@@ -206,7 +208,13 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					break
 				}
 
-				destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+				destAv := avCache[relKey.Relation.AvID]
+				if nil == destAv {
+					destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+					if nil != destAv {
+						avCache[relKey.Relation.AvID] = destAv
+					}
+				}
 				if nil == destAv {
 					break
 				}
@@ -244,7 +252,13 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {
-					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					destAv := avCache[relKey.Relation.AvID]
+					if nil == destAv {
+						destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+						if nil != destAv {
+							avCache[relKey.Relation.AvID] = destAv
+						}
+					}
 					if nil != destAv {
 						blocks := map[string]*av.Value{}
 						for _, blockValue := range destAv.GetBlockKeyValues().Values {

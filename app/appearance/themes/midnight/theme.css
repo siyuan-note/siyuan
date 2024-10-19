@@ -4,6 +4,7 @@
     --b3-theme-primary-light: rgba(53, 115, 240, .72);
     --b3-theme-primary-lighter: rgba(53, 115, 240, .48);
     --b3-theme-primary-lightest: rgba(53, 115, 240, .24);
+    --b3-theme-primary-lightest-light: rgba(53, 115, 240, .04);
     --b3-theme-secondary: #f3a92f;
     --b3-theme-background: #1e1e1e;
     --b3-theme-background-light: rgba(255, 255, 255, .075);
@@ -18,6 +19,8 @@
     --b3-theme-on-secondary: #fff;
     --b3-theme-on-background: #dadada;
     --b3-theme-on-background-select: rgb(198, 206, 221);
+    --b3-theme-on-background-select-double: rgb(181, 195, 223);
+    --b3-theme-on-background-av-hover: rgb(202, 202, 202);
     --b3-theme-on-surface: #9aa0a6;
     --b3-theme-on-surface-light: #bababa;
     --b3-theme-on-error: #fff;
@@ -60,7 +63,8 @@
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .3);
 
     /* av */
-    --b3-av-hover: #2a2a2a;
+    --b3-av-hover: rgb(42, 42, 42); /* 初始值为 --b3-theme-background 混合 --b3-list-hover */
+    --b3-av-background: var(--b3-theme-background);
     --b3-av-background-hl: #28324e;
 
     /* 为空提示 */
@@ -74,18 +78,22 @@
     --b3-card-error-background: #442724;
     --b3-card-error-background-select: rgb(66, 48, 60);
     --b3-card-error-background-select-double: rgb(64, 56, 82);
+    --b3-card-error-background-av-hover: rgb(63, 36, 33);
     --b3-card-warning-color: rgb(255, 213, 153);
     --b3-card-warning-background: #554636;
     --b3-card-warning-background-select: rgb(81, 76, 76);
     --b3-card-warning-background-select-double: rgb(78, 81, 96);
+    --b3-card-warning-background-av-hover: rgb(79, 65, 50);
     --b3-card-info-color: rgb(166, 213, 250);
     --b3-card-info-background: #28405c;
     --b3-card-info-background-select: rgb(42, 70, 110);
     --b3-card-info-background-select-double: rgb(43, 76, 126);
+    --b3-card-info-background-av-hover: rgb(37, 59, 85);
     --b3-card-success-color: rgb(183, 223, 185);
     --b3-card-success-background: #425347;
     --b3-card-success-background-select: rgb(64, 87, 91);
     --b3-card-success-background-select-double: rgb(63, 91, 109);
+    --b3-card-success-background-av-hover: rgb(61, 77, 66);
 
     /* 自定义文字 */
     --b3-font-color1: var(--b3-card-error-color);
@@ -141,7 +149,21 @@
     --b3-font-background10-select-double: rgb(95, 62, 137);
     --b3-font-background11-select-double: rgb(55, 106, 86);
     --b3-font-background12-select-double: rgb(111, 71, 59);
-    --b3-font-background13-select-double: rgb(181, 195, 223);
+    --b3-font-background13-select-double: var(--b3-theme-on-background-select-double);
+    /* -av-hover 是块的背景色与 --b3-list-hover 混合后的颜色 */
+    --b3-font-background1-av-hover: var(--b3-card-error-background-av-hover);
+    --b3-font-background2-av-hover: var(--b3-card-warning-background-av-hover);
+    --b3-font-background3-av-hover: var(--b3-card-info-background-av-hover);
+    --b3-font-background4-av-hover: var(--b3-card-success-background-av-hover);
+    --b3-font-background5-av-hover: rgb(70, 76, 80);
+    --b3-font-background6-av-hover: rgb(11, 56, 126);
+    --b3-font-background7-av-hover: rgb(82, 53, 5);
+    --b3-font-background8-av-hover: rgb(78, 22, 17);
+    --b3-font-background9-av-hover: rgb(98, 6, 48);
+    --b3-font-background10-av-hover: rgb(99, 43, 99);
+    --b3-font-background11-av-hover: rgb(51, 94, 38);
+    --b3-font-background12-av-hover: rgb(118, 54, 6);
+    --b3-font-background13-av-hover: var(--b3-theme-on-background-av-hover);
 
     /* 动画效果 */
     --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;

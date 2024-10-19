@@ -98,7 +98,7 @@
     bottom: 0;
     height: 26px;
     padding: 0 5px;
-    background-color: var(--av-background);
+    background-color: var(--b3-av-background);
     font-size: 87.5%;
   }
 
@@ -161,7 +161,7 @@
 
     &--header,
     &--footer {
-      background-color: var(--av-background);
+      background-color: var(--b3-av-background);
     }
 
     &--footer {
@@ -177,7 +177,7 @@
       }
 
       .av__colsticky {
-        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+        background-color: var(--b3-av-background); // 保证钉住时无计算结果的列不被覆盖
       }
 
       .av__calc {
@@ -301,13 +301,13 @@
     }
 
     &--select {
-      background-color: var(--b3-menu-background);
+      background-color: var(--b3-theme-primary-lightest-light);
       box-shadow: 2px 2px 0 var(--b3-theme-primary-lighter) inset, -2px -2px 0 var(--b3-theme-primary-lighter) inset;
       border-radius: var(--b3-border-radius);
     }
 
     &--active {
-      background-color: var(--b3-menu-background);
+      background-color: var(--b3-theme-primary-lightest-light);
     }
 
     &--header {
@@ -436,7 +436,14 @@
 
     &.av__firstcol,
     & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
-      background-color: var(--av-background);
+      background-color: var(--b3-av-background);
+
+      &.av__cell--header:hover {
+        background-color: var(--b3-av-hover);
+      }
+      &.av__calc:hover {
+        background-color: var(--b3-av-hover);
+      }
     }
   }
 
@@ -531,31 +538,173 @@
 }
 
 .protyle-wysiwyg--select {
+  --b3-av-background: var(--b3-av-background-hl);
+
   .av__row--header,
   .av__row--footer,
   .av__row--footer .av__colsticky,
   .av__row--select .av__cell,
-  .av__colsticky.av__firstcol,
-  .av__colsticky > div,
-  .av__cell--select,
-  .av__cell--active,
+  .av__colsticky > div:not(.av__cell--select):not(.av__cell--active),
   .av__counter {
-    background-color: var(--b3-av-background-hl) !important;
+    background-color: var(--b3-av-background);
+  }
+  .av__cell--select,
+  .av__cell--active {
+    background-color: var(--b3-theme-primary-lightest-light);
   }
 }
 
 .protyle-wysiwyg--hl {
+  --b3-av-background: var(--b3-av-background-hl);
+
   .av__row--header,
   .av__row--footer,
   .av__row--footer .av__colsticky,
   .av__row--select .av__cell,
-  .av__colsticky.av__firstcol,
-  .av__colsticky > div,
-  .av__cell--select,
-  .av__cell--active,
+  .av__colsticky > div:not(.av__cell--select):not(.av__cell--active),
   .av__counter {
-    background-color: var(--b3-av-background-hl) !important;
     transition: var(--b3-background-transition);
+    background-color: var(--b3-av-background);
+  }
+  .av__cell--select,
+  .av__cell--active {
+    background-color: var(--b3-theme-primary-lightest-light);
+  }
+}
+
+// https://github.com/siyuan-note/siyuan/pull/12706
+$backgrounds: (
+  "font-background" 13,
+  "card-error-background" 1,
+  "card-warning-background" 1,
+  "card-info-background" 1,
+  "card-success-background" 1,
+);
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 外层没有被选中的块时，从最近的“带背景色的父块（包括数据库块本身）”继承背景色
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      --b3-av-background: var(#{$bg-variable});
+      --b3-av-hover: var(#{$bg-av-hover-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 选中块 的外层
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      .protyle-wysiwyg--select,
+      .protyle-wysiwyg--hl {
+        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-hover: var(#{$bg-av-hover-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 就是 选中块
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      &.protyle-wysiwyg--select,
+      &.protyle-wysiwyg--hl {
+        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-hover: var(#{$bg-av-hover-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-variable: if($count == 1, "--b3-#{$key}-select", "--b3-#{$key}#{$i}-select");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 选中块 的内层
+    .protyle-wysiwyg--select,
+    .protyle-wysiwyg--hl {
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+        --b3-av-background: var(#{$bg-select-variable});
+        --b3-av-hover: var(#{$bg-av-hover-variable});
+      }
+    }
+  }
+}
+// 某种情况下 .protyle-wysiwyg--hl 和 .protyle-wysiwyg--select 会叠加，此时 --b3-av-background 需要再叠加一层 --b3-theme-primary-lightest ，使用 -select-double
+// ".protyle-wysiwyg--select 在外，.protyle-wysiwyg--hl 在内"与".protyle-wysiwyg--hl 在外，.protyle-wysiwyg--select 在内"两种情况
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-double-variable: if($count == 1, "--b3-#{$key}-select-double", "--b3-#{$key}#{$i}-select-double");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 两个选中块 的外层
+    [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+      .protyle-wysiwyg--select .protyle-wysiwyg--hl,
+      .protyle-wysiwyg--hl .protyle-wysiwyg--select {
+        --b3-av-background: var(#{$bg-select-double-variable});
+        --b3-av-hover: var(#{$bg-av-hover-variable});
+      }
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-double-variable: if($count == 1, "--b3-#{$key}-select-double", "--b3-#{$key}#{$i}-select-double");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 两个选中块 的中间，并且就是靠外层的选中块
+    .protyle-wysiwyg--select[data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl,
+    .protyle-wysiwyg--hl[data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-select-double-variable});
+      --b3-av-hover: var(#{$bg-av-hover-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-double-variable: if($count == 1, "--b3-#{$key}-select-double", "--b3-#{$key}#{$i}-select-double");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 两个选中块 的中间
+    .protyle-wysiwyg--select [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--hl,
+    .protyle-wysiwyg--hl [data-node-id][style*="background-color: var(#{$bg-variable})"] .protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-select-double-variable});
+      --b3-av-hover: var(#{$bg-av-hover-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-double-variable: if($count == 1, "--b3-#{$key}-select-double", "--b3-#{$key}#{$i}-select-double");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 两个选中块 的中间，并且就是靠内层的选中块
+    .protyle-wysiwyg--select [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--hl,
+    .protyle-wysiwyg--hl [data-node-id][style*="background-color: var(#{$bg-variable})"].protyle-wysiwyg--select {
+      --b3-av-background: var(#{$bg-select-double-variable});
+      --b3-av-hover: var(#{$bg-av-hover-variable});
+    }
+  }
+}
+@each $key, $count in $backgrounds {
+  @for $i from 1 through $count {
+    $bg-variable: if($count == 1, "--b3-#{$key}", "--b3-#{$key}#{$i}");
+    $bg-select-double-variable: if($count == 1, "--b3-#{$key}-select-double", "--b3-#{$key}#{$i}-select-double");
+    $bg-av-hover-variable: if($count == 1, "--b3-#{$key}-av-hover", "--b3-#{$key}#{$i}-av-hover");
+    // 带背景色的块 在 两个选中块 的内层
+    .protyle-wysiwyg--select .protyle-wysiwyg--hl,
+    .protyle-wysiwyg--hl .protyle-wysiwyg--select {
+      [data-node-id][style*="background-color: var(#{$bg-variable})"] {
+        --b3-av-background: var(#{$bg-select-double-variable});
+        --b3-av-hover: var(#{$bg-av-hover-variable});
+      }
+    }
   }
 }
 

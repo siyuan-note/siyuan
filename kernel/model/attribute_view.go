@@ -209,28 +209,17 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 
 	keyValues = attrView.GetBlockKeyValues()
-	// 过滤掉不在视图中的值
-	tmp := map[string]*av.Value{}
+	var values []*av.Value
 	for _, kv := range keyValues.Values {
-		for _, view := range attrView.Views {
-			switch view.LayoutType {
-			case av.LayoutTypeTable:
-				if !kv.IsDetached {
-					if !treenode.ExistBlockTree(kv.BlockID) {
-						break
-					}
-				}
+		if !kv.IsDetached && !treenode.ExistBlockTree(kv.BlockID) {
+			continue
+		}
 
-				tmp[kv.Block.ID] = kv
-			}
+		if strings.Contains(strings.ToLower(kv.String(true)), strings.ToLower(keyword)) {
+			values = append(values, kv)
 		}
 	}
-	keyValues.Values = []*av.Value{}
-	for _, v := range tmp {
-		if strings.Contains(strings.ToLower(v.String(true)), strings.ToLower(keyword)) {
-			keyValues.Values = append(keyValues.Values, v)
-		}
-	}
+	keyValues.Values = values
 
 	if 1 > pageSize {
 		pageSize = 16
@@ -2796,27 +2785,35 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 
 	if nil != removedKey && av.KeyTypeRelation == removedKey.Type && nil != removedKey.Relation {
 		if removedKey.Relation.IsTwoWay {
-			if removeRelationDest { // 删除双向关联的目标列
-				var destAv *av.AttributeView
-				if avID == removedKey.Relation.AvID {
-					destAv = attrView
-				} else {
-					destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
+			var destAv *av.AttributeView
+			if avID == removedKey.Relation.AvID {
+				destAv = attrView
+			} else {
+				destAv, _ = av.ParseAttributeView(removedKey.Relation.AvID)
+			}
+
+			if nil != destAv {
+				oldDestKey, _ := destAv.GetKey(removedKey.Relation.BackKeyID)
+				if nil != oldDestKey && nil != oldDestKey.Relation && oldDestKey.Relation.AvID == attrView.ID && oldDestKey.Relation.IsTwoWay {
+					oldDestKey.Relation.IsTwoWay = false
+					oldDestKey.Relation.BackKeyID = ""
 				}
 
-				if nil != destAv {
-					destAvRelSrcAv := false
-					for i, keyValues := range destAv.KeyValues {
-						if keyValues.Key.ID == removedKey.Relation.BackKeyID {
+				destAvRelSrcAv := false
+				for i, keyValues := range destAv.KeyValues {
+					if keyValues.Key.ID == removedKey.Relation.BackKeyID {
+						if removeRelationDest { // 删除双向关联的目标列
 							destAv.KeyValues = append(destAv.KeyValues[:i], destAv.KeyValues[i+1:]...)
-							continue
 						}
-
-						if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
-							destAvRelSrcAv = true
-						}
+						continue
 					}
 
+					if av.KeyTypeRelation == keyValues.Key.Type && keyValues.Key.Relation.AvID == attrView.ID {
+						destAvRelSrcAv = true
+					}
+				}
+
+				if removeRelationDest {
 					for _, view := range destAv.Views {
 						switch view.LayoutType {
 						case av.LayoutTypeTable:
@@ -2828,15 +2825,15 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 							}
 						}
 					}
+				}
 
-					if destAv != attrView {
-						av.SaveAttributeView(destAv)
-						ReloadAttrView(destAv.ID)
-					}
+				if destAv != attrView {
+					av.SaveAttributeView(destAv)
+					ReloadAttrView(destAv.ID)
+				}
 
-					if !destAvRelSrcAv {
-						av.RemoveAvRel(destAv.ID, attrView.ID)
-					}
+				if !destAvRelSrcAv {
+					av.RemoveAvRel(destAv.ID, attrView.ID)
 				}
 			}
 

@@ -1,6 +1,6 @@
 {
   "confirmRemoveRelationField": "¿Está seguro de que desea eliminar el campo asociado a <b>${x}</b>?",
-  "removeButKeepRelationField": "Eliminar, mantener el campo relacionado",
+  "removeButKeepRelationField": "Eliminar, pero mantener el campo relacionado",
   "exportPDFLowMemory": "Memoria disponible insuficiente para exportar este PDF, por favor reduzca el contenido o aumente la memoria disponible y vuelva a intentar exportar",
   "exportConf": "Configuración de exportación",
   "exportConfTip": "Las cuentas, los códigos de acceso, la sincronización, los tokens API y las claves del almacén de datos no se exportarán",

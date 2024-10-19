@@ -46,7 +46,7 @@ func NewExport() *Export {
 	return &Export{
 		ParagraphBeginningSpace: false,
 		AddTitle:                true,
-		BlockRefMode:            3,
+		BlockRefMode:            4,
 		BlockEmbedMode:          1,
 		BlockRefTextLeft:        "",
 		BlockRefTextRight:       "",

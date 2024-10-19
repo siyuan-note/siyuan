@@ -81,7 +81,16 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 			dom := luteEngine.RenderNodeBlockDOM(n)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren
+		case ast.NodeEmoji:
+			dom := luteEngine.RenderNodeBlockDOM(n)
+			buf.WriteString(dom)
+			return ast.WalkSkipChildren
 		case ast.NodeImage:
+			// 标题后直接跟图片时图片的提示文本不再渲染到大纲中 https://github.com/siyuan-note/siyuan/issues/6278
+			title := n.ChildByType(ast.NodeLinkTitle)
+			title.Unlink()
+			dom := luteEngine.RenderNodeBlockDOM(n)
+			buf.WriteString(dom)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
@@ -215,6 +224,10 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					}
 
 					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+					if nil == subTree {
+						continue
+					}
+
 					var md string
 					if "d" == sqlBlock.Type {
 						if 0 == blockEmbedMode {

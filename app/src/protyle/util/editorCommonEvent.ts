@@ -573,13 +573,23 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         // 跨文档不支持撤销
         transaction(protyle, doOperations);
     }
-    if (direct === "col" && (sourceElements.length > 1 || hasFoldHeading) && !isCopy) {
-        turnsIntoOneTransaction({
-            protyle,
-            selectsElement: sourceElements.reverse(),
-            type: "BlocksMergeSuperBlock",
-            level: "row"
-        });
+    if (!isCopy && direct === "col") {
+        if (targetElement.getAttribute("data-type") === "NodeHeading" && targetElement.getAttribute("fold") === "1") {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [targetElement],
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
+        if ((sourceElements.length > 1 || hasFoldHeading)) {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: sourceElements.reverse(),
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
     }
     focusBlock(sourceElements[0]);
 };

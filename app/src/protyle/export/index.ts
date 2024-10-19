@@ -269,7 +269,7 @@ const renderPDF = async (id: string) => {
     </div>
 </div>
 <div style="zoom:${localData.scale || 1}" id="preview">
-    <div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
+    <div class="fn__loading" style="left:0;height:100vh"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>
 </div>
 <script src="${servePath}/appearance/icons/${window.siyuan.config.appearance.icon}/icon.js?${Constants.SIYUAN_VERSION}"></script>
 <script src="${servePath}/stage/build/export/protyle-method.js?${Constants.SIYUAN_VERSION}"></script>
@@ -474,7 +474,7 @@ const renderPDF = async (id: string) => {
             }
         });
         const refreshPreview = () => {
-          previewElement.innerHTML = '<div class="fn__loading" style="left:0"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
+            previewElement.innerHTML = '<div class="fn__loading" style="left:0;height: 100vh"><img width="48px" src="${servePath}/stage/loading-pure.svg"></div>'
             fetchPost("/api/export/exportPreviewHTML", {
                 id: "${id}",
                 keepFold: keepFoldElement.checked,

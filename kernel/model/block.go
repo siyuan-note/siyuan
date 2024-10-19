@@ -130,26 +130,8 @@ type BlockTreeInfo struct {
 
 func GetBlockTreeInfos(ids []string) (ret map[string]*BlockTreeInfo) {
 	ret = map[string]*BlockTreeInfo{}
-	luteEngine := util.NewLute()
-	treeCache := map[string]*parse.Tree{}
-	for _, id := range ids {
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
-			ret[id] = &BlockTreeInfo{ID: id}
-			continue
-		}
-
-		tree := treeCache[bt.RootID]
-		if nil == tree {
-			tree, _ = filesys.LoadTree(bt.BoxID, bt.Path, luteEngine)
-			if nil == tree {
-				ret[id] = &BlockTreeInfo{ID: id}
-				continue
-			}
-
-			treeCache[bt.RootID] = tree
-		}
-
+	trees := filesys.LoadTrees(ids)
+	for id, tree := range trees {
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			ret[id] = &BlockTreeInfo{ID: id}

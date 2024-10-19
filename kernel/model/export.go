@@ -1558,6 +1558,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				refTrees[refTreeID] = refTree
 			}
 		}
+		count++
 	}
 
 	util.PushEndlessProgress(Conf.Language(65))
@@ -1589,6 +1590,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
 	}
 
+	count = 0
 	// 引用树放在导出文件夹根路径下
 	for treeID, tree := range refTrees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)

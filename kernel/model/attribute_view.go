@@ -209,28 +209,17 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	databaseBlockIDs = treenode.GetMirrorAttrViewBlockIDs(avID)
 
 	keyValues = attrView.GetBlockKeyValues()
-	// 过滤掉不在视图中的值
-	tmp := map[string]*av.Value{}
+	var values []*av.Value
 	for _, kv := range keyValues.Values {
-		for _, view := range attrView.Views {
-			switch view.LayoutType {
-			case av.LayoutTypeTable:
-				if !kv.IsDetached {
-					if !treenode.ExistBlockTree(kv.BlockID) {
-						break
-					}
-				}
+		if !kv.IsDetached && !treenode.ExistBlockTree(kv.BlockID) {
+			continue
+		}
 
-				tmp[kv.Block.ID] = kv
-			}
+		if strings.Contains(strings.ToLower(kv.String(true)), strings.ToLower(keyword)) {
+			values = append(values, kv)
 		}
 	}
-	keyValues.Values = []*av.Value{}
-	for _, v := range tmp {
-		if strings.Contains(strings.ToLower(v.String(true)), strings.ToLower(keyword)) {
-			keyValues.Values = append(keyValues.Values, v)
-		}
-	}
+	keyValues.Values = values
 
 	if 1 > pageSize {
 		pageSize = 16

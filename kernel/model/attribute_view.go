@@ -1449,38 +1449,17 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 
 func getMirrorBlocksNodes(avID string) (trees []*parse.Tree, nodes []*ast.Node) {
 	mirrorBlockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
-	mirrorBlockTree := map[string]*parse.Tree{}
-	treeCache := map[string]*parse.Tree{}
-	for _, mirrorBlock := range mirrorBlockIDs {
-		bt := treenode.GetBlockTree(mirrorBlock)
-		if nil == bt {
-			logging.LogErrorf("get block tree by block ID [%s] failed", mirrorBlock)
-			continue
-		}
-
-		tree := mirrorBlockTree[mirrorBlock]
-		if nil == tree {
-			tree, _ = LoadTreeByBlockID(mirrorBlock)
-			if nil == tree {
-				logging.LogErrorf("load tree by block ID [%s] failed", mirrorBlock)
-				continue
-			}
-			treeCache[tree.ID] = tree
-			mirrorBlockTree[mirrorBlock] = tree
-		}
-	}
-
-	for _, mirrorBlockID := range mirrorBlockIDs {
-		tree := mirrorBlockTree[mirrorBlockID]
-		node := treenode.GetNodeInTree(tree, mirrorBlockID)
+	mirrorBlockTrees := filesys.LoadTrees(mirrorBlockIDs)
+	for id, tree := range mirrorBlockTrees {
+		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
-			logging.LogErrorf("get node in tree by block ID [%s] failed", mirrorBlockID)
+			logging.LogErrorf("get node in tree by block ID [%s] failed", id)
 			continue
 		}
 		nodes = append(nodes, node)
 	}
 
-	for _, tree := range treeCache {
+	for _, tree := range mirrorBlockTrees {
 		trees = append(trees, tree)
 	}
 	return

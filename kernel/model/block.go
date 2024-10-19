@@ -325,11 +325,13 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	if 1 > len(refIDs) { // 如果不指定 refIDs，则转移所有引用了 fromID 的块
 		refIDs, _ = sql.QueryRefIDsByDefID(fromID, false)
 	}
-	for _, refID := range refIDs {
-		tree, _ := LoadTreeByBlockID(refID)
+
+	trees := filesys.LoadTrees(refIDs)
+	for refID, tree := range trees {
 		if nil == tree {
 			continue
 		}
+
 		node := treenode.GetNodeInTree(tree, refID)
 		textMarks := node.ChildrenByType(ast.NodeTextMark)
 		for _, textMark := range textMarks {

@@ -255,8 +255,7 @@ func Export2Liandi(id string) (err error) {
 		case 404:
 			foundArticle = false
 		default:
-			msg := fmt.Sprintf("get liandi article info failed [sc=%d]", resp.StatusCode)
-			err = errors.New(msg)
+			err = errors.New(fmt.Sprintf("get liandi article info failed [sc=%d]", resp.StatusCode))
 			return
 		}
 	}
@@ -315,8 +314,7 @@ func Export2Liandi(id string) (err error) {
 		}
 	}
 
-	msg := fmt.Sprintf(Conf.Language(181), util.GetCloudAccountServer()+"/article/"+articleId)
-	util.PushMsg(msg, 7000)
+	util.PushMsg(fmt.Sprintf(Conf.Language(181), util.GetCloudAccountServer()+"/article/"+articleId), 7000)
 	return
 }
 
@@ -505,8 +503,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	zipCallback := func(filename string) {
-		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename)
-		util.PushEndlessProgress(msg)
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename))
 	}
 
 	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
@@ -619,8 +616,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	if "" != docxTemplate {
 		if !gulu.File.IsExist(docxTemplate) {
 			logging.LogErrorf("docx template [%s] not found", docxTemplate)
-			msg := fmt.Sprintf(Conf.Language(197), docxTemplate)
-			err = errors.New(msg)
+			err = errors.New(fmt.Sprintf(Conf.Language(197), docxTemplate))
 			return
 		}
 
@@ -633,8 +629,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	output, err := pandoc.CombinedOutput()
 	if err != nil {
 		logging.LogErrorf("export docx failed: %s", gulu.Str.FromBytes(output))
-		msg := fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output))
-		err = errors.New(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(14), gulu.Str.FromBytes(output)))
 		return
 	}
 
@@ -1540,22 +1535,21 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 
 	trees := map[string]*parse.Tree{}
 	refTrees := map[string]*parse.Tree{}
-	treeCache := map[string]*parse.Tree{}
+	luteEngine := util.NewLute()
 	for i, p := range docPaths {
-		docIAL := box.docIAL(p)
-		if nil == docIAL {
-			continue
-		}
-
-		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), docIAL["title"]))
-		util.PushEndlessProgress(msg)
-
-		id := docIAL["id"]
-		tree, err := LoadTreeByBlockID(id)
+		tree, err := filesys.LoadTree(boxID, p, luteEngine)
 		if err != nil {
 			continue
 		}
 		trees[tree.ID] = tree
+
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), tree.Root.IALAttr("title"))))
+	}
+
+	count := 1
+	treeCache := map[string]*parse.Tree{}
+	for _, tree := range trees {
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", count, len(docPaths), tree.Root.IALAttr("title"))))
 
 		refs := map[string]*parse.Tree{}
 		exportRefTrees(tree, &refs, &treeCache)
@@ -1567,9 +1561,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	util.PushEndlessProgress(Conf.Language(65))
+	count = 0
 
 	// 按文件夹结构复制选择的树
-	count := 0
 	total := len(trees) + len(refTrees)
 	for _, tree := range trees {
 		readPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
@@ -1592,7 +1586,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 		count++
 
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
 	}
 
 	// 引用树放在导出文件夹根路径下
@@ -1612,7 +1606,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		}
 		count++
 
-		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.Language(66), fmt.Sprintf("%d/%d ", count, total)+tree.HPath))
 	}
 
 	// 将引用树合并到选择树中，以便后面一次性导出资源文件
@@ -1798,8 +1792,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	zipCallback := func(filename string) {
-		msg := Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename)
-		util.PushEndlessProgress(msg)
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename))
 	}
 
 	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
@@ -2735,7 +2728,7 @@ type refAsFootnotes struct {
 	refAnchorText string
 }
 
-func exportRefTrees(tree *parse.Tree, retTrees *map[string]*parse.Tree, treeCache *map[string]*parse.Tree) {
+func exportRefTrees(tree *parse.Tree, retTrees, treeCache *map[string]*parse.Tree) {
 	if nil != (*retTrees)[tree.ID] {
 		return
 	}

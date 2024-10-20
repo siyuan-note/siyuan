@@ -95,7 +95,7 @@ export const initBar = (app: App) => {
                             }
                         }
                     };
-                    if (!useElement) {
+                    if (!useElement && hideElement.querySelector("svg")) {
                         const svgElement = hideElement.querySelector("svg").cloneNode(true) as HTMLElement;
                         svgElement.classList.add("b3-menu__icon");
                         menuOptions.iconHTML = svgElement.outerHTML;

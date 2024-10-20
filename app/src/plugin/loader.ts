@@ -159,7 +159,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         updateDock(dockItem, index, plugin, "Bottom");
     });
     Object.keys(plugin.docks).forEach(key => {
-        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
+        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name]  && window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
             plugin.docks[key].config = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
         }
         const dock = plugin.docks[key];

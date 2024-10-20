@@ -57,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "שימוש בתחביר כוכבית פנימית ב-Markdown",
   "editorMarkdownInlineAsteriskTip": "לאחר הפעלה, <code class='fn__code'>*foo*</code> תחביר נטוי ו <code class='fn__code'>**foo**</code> תחביר מודגש יתמוך בקלט",
   "editorMarkdownInlineUnderscore": "שימוש בתחביר קו תחתון פנימי ב-Markdown",
-  "editorMarkdownInlineUnderscoreTip": "לאחר הפעלה, <code class='fn__code'>_foo_</code> תחביר נטוי ו <code class='fn__code'>__foo__</code> תחביר מודגש יתמוך בקלט"
+  "editorMarkdownInlineUnderscoreTip": "לאחר הפעלה, <code class='fn__code'>_foo_</code> תחביר נטוי ו <code class='fn__code'>__foo__</code> תחביר מודגש יתמוך בקלט",
   "currentNotebook": "מחברת נוכחית",
   "containerBlockTip1": "הפעלת בלוקים יחידתיים תוביל לתוצאות חיפוש כפולות",
   "containerBlockTip2": "הפעלת בלוקי מסמכים תומכת כרגע רק בחיפוש הכותרות של המסמכים",

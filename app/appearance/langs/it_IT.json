@@ -57,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "Sintassi asterisco in linea Markdown",
   "editorMarkdownInlineAsteriskTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>*foo*</code> e la sintassi in grassetto <code class='fn__code'>**foo**</code>",
   "editorMarkdownInlineUnderscore": "Sintassi underscore in linea Markdown",
-  "editorMarkdownInlineUnderscoreTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>_foo_</code> e la sintassi in grassetto <code class='fn__code'>__foo__</code>"
+  "editorMarkdownInlineUnderscoreTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>_foo_</code> e la sintassi in grassetto <code class='fn__code'>__foo__</code>",
   "currentNotebook": "Taccuino corrente",
   "containerBlockTip1": "L'abilitazione dei blocchi contenitore comporterà risultati di ricerca duplicati",
   "containerBlockTip2": "L'abilitazione dei blocchi documento attualmente supporta solo la ricerca per titoli di documento",

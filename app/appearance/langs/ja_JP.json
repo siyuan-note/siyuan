@@ -57,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "Markdown インラインアスタリスク構文",
   "editorMarkdownInlineAsteriskTip": "<code class='fn__code'>*foo*</code> 形式の斜体構文と <code class='fn__code'>**foo**</code> 形式の太字構文を有効にします",
   "editorMarkdownInlineUnderscore": "Markdown インライン下線構文",
-  "editorMarkdownInlineUnderscoreTip": "<code class='fn__code'>_foo_</code> 形式の斜体構文と <code class='fn__code'>__foo__</code> 形式の太字構文を有効にします"
+  "editorMarkdownInlineUnderscoreTip": "<code class='fn__code'>_foo_</code> 形式の斜体構文と <code class='fn__code'>__foo__</code> 形式の太字構文を有効にします",
   "currentNotebook": "現在のノートブック",
   "containerBlockTip1": "コンテナブロックを有効にすると重複した検索結果が表示されます",
   "containerBlockTip2": "ドキュメントブロックはタイトルの検索のみをサポートしています",

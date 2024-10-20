@@ -206,6 +206,8 @@ declare class Lute {
 
     public SetInlineMath(enable: boolean): void;
 
+    public SetGFMStrikethrough(enable: boolean): void;
+
     public SetGFMStrikethrough1(enable: boolean): void;
 
     public SetMark(enable: boolean): void;

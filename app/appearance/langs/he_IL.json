@@ -44,6 +44,8 @@
   "autoLaunchMode0": "אל תצא אוטומטית",
   "autoLaunchMode1": "צא אוטומטית לאחר אתחול",
   "autoLaunchMode2": "צא אוטומטית ומזער את הממשק העיקרי לאחר אתחול",
+  "editorMarkdownInlineStrikethrough": "תחביר קו חוצה בשורת Markdown",
+  "editorMarkdownInlineStrikethroughTip": "לאחר ההפעלה, ייתמך קלט תחביר קו חוצה בשורת <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "תחביר עליון בתוך Markdown",
   "editorMarkdownInlineSupTip": "לאחר הפעלה, <code class='fn__code'>^foo^</code> תחביר עליון פנימי יתמוך בקלט",
   "editorMarkdownInlineSub": "תחביר תת-מצבה בתוך Markdown",
@@ -55,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "שימוש בתחביר כוכבית פנימית ב-Markdown",
   "editorMarkdownInlineAsteriskTip": "לאחר הפעלה, <code class='fn__code'>*foo*</code> תחביר נטוי ו <code class='fn__code'>**foo**</code> תחביר מודגש יתמוך בקלט",
   "editorMarkdownInlineUnderscore": "שימוש בתחביר קו תחתון פנימי ב-Markdown",
-  "editorMarkdownInlineUnderscoreTip": "לאחר הפעלה, <code class='fn__code'>_foo_</code> תחביר נטוי ו <code class='fn__code'>__foo__</code> תחביר מודגש יתמוך בקלט",
+  "editorMarkdownInlineUnderscoreTip": "לאחר הפעלה, <code class='fn__code'>_foo_</code> תחביר נטוי ו <code class='fn__code'>__foo__</code> תחביר מודגש יתמוך בקלט"
   "currentNotebook": "מחברת נוכחית",
   "containerBlockTip1": "הפעלת בלוקים יחידתיים תוביל לתוצאות חיפוש כפולות",
   "containerBlockTip2": "הפעלת בלוקי מסמכים תומכת כרגע רק בחיפוש הכותרות של המסמכים",

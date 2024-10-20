@@ -44,6 +44,8 @@
   "autoLaunchMode0": "Nie uruchamiaj automatycznie",
   "autoLaunchMode1": "Uruchom automatycznie po włączeniu",
   "autoLaunchMode2": "Uruchom automatycznie i zminimalizuj główny interfejs po włączeniu",
+  "editorMarkdownInlineStrikethrough": "Markdown składnia przekreślenia",
+  "editorMarkdownInlineStrikethroughTip": "Po włączeniu będzie obsługiwane wprowadzanie składni przekreślenia <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Składnia Markdown dla indeksów dolnych w tekście",
   "editorMarkdownInlineSupTip": "Po włączeniu zostanie obsługiwana składnia indeksów dolnych w formacie <code class='fn__code'>^foo^</code>",
   "editorMarkdownInlineSub": "Składnia Markdown dla indeksów górnych w tekście",

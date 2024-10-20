@@ -44,6 +44,8 @@
   "autoLaunchMode0": "Non avviare automaticamente",
   "autoLaunchMode1": "Avvio automatico dopo l'accensione",
   "autoLaunchMode2": "Avvio automatico e minimizzazione dell'interfaccia principale dopo l'accensione",
+  "editorMarkdownInlineStrikethrough": "Sintassi di barratura in linea di Markdown",
+  "editorMarkdownInlineStrikethroughTip": "Dopo l'attivazione, sarà supportato l'inserimento della sintassi di barratura in linea <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Sintassi Markdown per apice in linea",
   "editorMarkdownInlineSupTip": "Dopo l'abilitazione, verrà supportato l'input della sintassi per apice in linea <code class='fn__code'>^foo^</code>",
   "editorMarkdownInlineSub": "Sintassi Markdown per pedice in linea",
@@ -55,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "Sintassi asterisco in linea Markdown",
   "editorMarkdownInlineAsteriskTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>*foo*</code> e la sintassi in grassetto <code class='fn__code'>**foo**</code>",
   "editorMarkdownInlineUnderscore": "Sintassi underscore in linea Markdown",
-  "editorMarkdownInlineUnderscoreTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>_foo_</code> e la sintassi in grassetto <code class='fn__code'>__foo__</code>",
+  "editorMarkdownInlineUnderscoreTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>_foo_</code> e la sintassi in grassetto <code class='fn__code'>__foo__</code>"
   "currentNotebook": "Taccuino corrente",
   "containerBlockTip1": "L'abilitazione dei blocchi contenitore comporterà risultati di ricerca duplicati",
   "containerBlockTip2": "L'abilitazione dei blocchi documento attualmente supporta solo la ricerca per titoli di documento",

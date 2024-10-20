@@ -312,6 +312,10 @@ declare namespace Config {
          * Whether to enable the inline math
          */
         inlineMath: boolean;
+        /**
+         * Whether to enable the inline strikethrough
+         */
+        inlineStrikethrough: boolean;
     }
 
     /**

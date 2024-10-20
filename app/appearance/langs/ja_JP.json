@@ -44,6 +44,8 @@
   "autoLaunchMode0": "自動的に起動しない",
   "autoLaunchMode1": "システムの起動後に自動的に起動する",
   "autoLaunchMode2": "システムの起動後にインターフェースを最小化して自動的に起動する",
+  "editorMarkdownInlineStrikethrough": "Markdown 行内取り消し線の構文",
+  "editorMarkdownInlineStrikethroughTip": "<code class='fn__code'>~~foo~~</code> 形式のインライン取り消し線構文を有効にします",
   "editorMarkdownInlineSup": "Markdown インライン上付き文字構文",
   "editorMarkdownInlineSupTip": "<code class='fn__code'>^foo^</code> 形式のインライン上付き文字構文を有効にします",
   "editorMarkdownInlineSub": "Markdown インライン下付き文字構文",
@@ -55,7 +57,7 @@
   "editorMarkdownInlineAsterisk": "Markdown インラインアスタリスク構文",
   "editorMarkdownInlineAsteriskTip": "<code class='fn__code'>*foo*</code> 形式の斜体構文と <code class='fn__code'>**foo**</code> 形式の太字構文を有効にします",
   "editorMarkdownInlineUnderscore": "Markdown インライン下線構文",
-  "editorMarkdownInlineUnderscoreTip": "<code class='fn__code'>_foo_</code> 形式の斜体構文と <code class='fn__code'>__foo__</code> 形式の太字構文を有効にします",
+  "editorMarkdownInlineUnderscoreTip": "<code class='fn__code'>_foo_</code> 形式の斜体構文と <code class='fn__code'>__foo__</code> 形式の太字構文を有効にします"
   "currentNotebook": "現在のノートブック",
   "containerBlockTip1": "コンテナブロックを有効にすると重複した検索結果が表示されます",
   "containerBlockTip2": "ドキュメントブロックはタイトルの検索のみをサポートしています",

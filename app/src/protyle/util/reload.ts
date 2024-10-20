@@ -32,6 +32,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
     protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
     protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
     protyle.lute.SetGFMStrikethrough1(false);
     addLoading(protyle);
     if (protyle.options.backlinkData) {

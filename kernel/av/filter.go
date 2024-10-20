@@ -79,7 +79,7 @@ const (
 	FilterOperatorIsFalse          FilterOperator = "Is false"
 )
 
-func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID string) bool {
+func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID string, attrViewCache *map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
@@ -117,7 +117,13 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		destAv, _ := ParseAttributeView(relKey.Relation.AvID)
+		destAv := (*attrViewCache)[relKey.Relation.AvID]
+		if nil == destAv {
+			destAv, _ = ParseAttributeView(relKey.Relation.AvID)
+			if nil != destAv {
+				(*attrViewCache)[relKey.Relation.AvID] = destAv
+			}
+		}
 		if nil == destAv {
 			return false
 		}

@@ -13,13 +13,6 @@
   img {
     max-width: 100%;
     margin: 0 auto;
-
-    &.emoji {
-      width: 1.25em;
-      cursor: auto;
-      max-width: none;
-      vertical-align: sub; // text-top windows 不兼容
-    }
   }
 
   // 需显示 p 的使用范围 https://github.com/siyuan-note/siyuan/issues/11670
@@ -638,4 +631,11 @@
   background-color: var(--b3-theme-surface);
   z-index: 304;
   padding: 4px;
+}
+
+.emoji {
+  width: 1.25em;
+  cursor: auto;
+  max-width: none;
+  vertical-align: sub; // text-top windows 不兼容
 }

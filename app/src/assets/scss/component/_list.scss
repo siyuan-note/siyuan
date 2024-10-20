@@ -190,7 +190,7 @@
       @include text-clamp(1);
 
       // 搜索列表中自定义图标
-      & > img,
+      & > img:not(.emoji),
       & > .custom-icon {
         height: 14px;
         width: 14px;

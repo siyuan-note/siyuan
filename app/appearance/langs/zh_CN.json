@@ -1,4 +1,5 @@
 {
+  "workspaceData": "工作空间数据",
   "confirmRemoveRelationField": "确定同时删除关联至 <b>${x}</b> 中的字段吗？",
   "removeButKeepRelationField": "删除，但保留关联字段",
   "exportPDFLowMemory": "系统可用内存不足，无法导出该 PDF，请减少内容或者增加可用内存后再尝试导出",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "移动到下侧右方",
   "accountDisplayTitle": "顶栏显示头衔",
   "accountDisplayVIP": "顶栏显示 VIP",
-  "rollbackConfirm": "回滚操作无法撤销，确定要将 <b>${date}</b> 回滚吗？",
+  "rollbackConfirm": "回滚操作无法撤销，请谨慎决定。确定要将 <b>${name}</b> 回滚到 <b>${time}</b> 吗？",
   "pdfTip": "PDF 导出不支持深色主题",
   "pdfConfirm": "是否使用已选择的浅色主题继续导出？",
   "import": "导入",

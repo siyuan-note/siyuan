@@ -1,4 +1,5 @@
 {
+  "workspaceData": "Workspace data",
   "confirmRemoveRelationField": "Are you sure you want to delete the field associated with <b>${x}</b>?",
   "removeButKeepRelationField": "Remove, but keep related field",
   "exportPDFLowMemory": "Insufficient available memory to export this PDF, please reduce the content or increase available memory and try exporting again",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "Move to the Bottom Right",
   "accountDisplayTitle": "Display the title icon",
   "accountDisplayVIP": "Display the VIP icon",
-  "rollbackConfirm": "Rollback operation cannot be undone, are you sure you want to rollback <b>${date}</b> ?",
+  "rollbackConfirm": "The rollback operation cannot be undone, please proceed with caution. Are you sure you want to roll back <b>${name}</b> to <b>${time}</b>?",
   "pdfTip": "PDF export does not support Dark theme",
   "pdfConfirm": "Do you want to continue exporting with the selected Light theme?",
   "import": "Import",

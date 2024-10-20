@@ -1,19 +1,19 @@
-import { Dialog } from "../dialog";
-import { confirmDialog } from "../dialog/confirmDialog";
-import { Constants } from "../constants";
-import { hasClosestByClassName } from "../protyle/util/hasClosest";
-import { renderAssetsPreview } from "../asset/renderAssets";
-import { Protyle } from "../protyle";
-import { disabledProtyle, onGet } from "../protyle/util/onGet";
+import {Dialog} from "../dialog";
+import {confirmDialog} from "../dialog/confirmDialog";
+import {Constants} from "../constants";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {renderAssetsPreview} from "../asset/renderAssets";
+import {Protyle} from "../protyle";
+import {disabledProtyle, onGet} from "../protyle/util/onGet";
 import * as dayjs from "dayjs";
-import { fetchPost } from "../util/fetch";
-import { escapeAttr, escapeHtml } from "../util/escape";
-import { isMobile } from "../util/functions";
-import { showDiff } from "./diff";
-import { setStorageVal } from "../protyle/util/compatibility";
-import { openModel } from "../mobile/menu/model";
-import { closeModel } from "../mobile/util/closePanel";
-import { App } from "../index";
+import {fetchPost} from "../util/fetch";
+import {escapeAttr, escapeHtml} from "../util/escape";
+import {isMobile} from "../util/functions";
+import {showDiff} from "./diff";
+import {setStorageVal} from "../protyle/util/compatibility";
+import {openModel} from "../mobile/menu/model";
+import {closeModel} from "../mobile/util/closePanel";
+import {App} from "../index";
 
 let historyEditor: Protyle;
 
@@ -530,8 +530,18 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item__action") && type === "rollback" && !window.siyuan.config.readonly) {
-                confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
-                    const dataType = target.parentElement.getAttribute("data-type");
+                const dataType = target.parentElement.getAttribute("data-type");
+                let name = target.previousElementSibling.previousElementSibling.textContent.trim();
+                let time = dayjs(parseInt(target.parentElement.getAttribute("data-created")) * 1000).format("YYYY-MM-DD HH:mm:ss");
+                if (dataType === "notebook") {
+                    time = target.parentElement.parentElement.previousElementSibling.textContent.trim();
+                } else if (dataType === "repoitem") {
+                    name = window.siyuan.languages.workspaceData;
+                    time = target.parentElement.querySelector("span[data-type='hCreated']").textContent.trim();
+                }
+                let confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", name)
+                    .replace("${time}", time);
+                confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                     if (dataType === "assets") {
                         fetchPost("/api/history/rollbackAssetsHistory", {
                             historyPath: target.parentElement.getAttribute("data-path")

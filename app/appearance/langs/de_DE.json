@@ -1,4 +1,5 @@
 {
+  "workspaceData": "Arbeitsbereichsdaten",
   "confirmRemoveRelationField": "Sind Sie sicher, dass Sie das Feld, das mit <b>${x}</b> verknüpft ist, löschen möchten?",
   "removeButKeepRelationField": "Entfernen, aber verknüpftes Feld behalten",
   "exportPDFLowMemory": "Nicht genügend verfügbarer Speicher, um dieses PDF zu exportieren, bitte reduzieren Sie den Inhalt oder erhöhen Sie den verfügbaren Speicher und versuchen Sie es erneut",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "In die untere rechte Ecke verschieben",
   "accountDisplayTitle": "Das Titelsymbol anzeigen",
   "accountDisplayVIP": "Das VIP-Symbol anzeigen",
-  "rollbackConfirm": "Rollback-Operation kann nicht rückgängig gemacht werden, sind Sie sicher, dass Sie <b>${date}</b> zurückrollen möchten?",
+  "rollbackConfirm": "Der Rollback-Vorgang kann nicht rückgängig gemacht werden, bitte gehen Sie vorsichtig vor. Sind Sie sicher, dass Sie <b>${name}</b> auf <b>${time}</b> zurücksetzen möchten?",
   "pdfTip": "PDF-Export unterstützt kein Dunkelthema",
   "pdfConfirm": "Möchten Sie mit dem ausgewählten Lichtthema weiter exportieren?",
   "import": "Importieren",

@@ -83,20 +83,20 @@ export class Toolbar {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/5157
-        let hasImg = true;
-        let noText = true;
+        let hasImg = false;
+        let hasText = false;
         Array.from(range.cloneContents().childNodes).find(item => {
             if (item.nodeType !== 1) {
-                if (item.textContent.length > 0) {
-                    noText = false;
+                if (item.textContent.length > 0 && item.textContent !== Constants.ZWSP) {
+                    hasText = true;
                     return true;
                 }
-            } else if (!(item as HTMLElement).classList.contains("img")) {
-                hasImg = false;
+            } else if ((item as HTMLElement).classList.contains("img")) {
+                hasImg = true;
                 return true;
             }
         });
-        if ((hasImg && noText) ||
+        if ((hasImg && !hasText) ||
             // 拖拽图片到最右侧
             (range.commonAncestorContainer.nodeType !== 3 && (range.commonAncestorContainer as HTMLElement).classList.contains("img"))) {
             this.element.classList.add("fn__none");

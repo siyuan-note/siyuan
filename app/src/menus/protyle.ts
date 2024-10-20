@@ -1324,7 +1324,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
         const textElements = window.siyuan.menus.menu.element.querySelectorAll("textarea");
-        textElements[0].focus();
+        textElements[1].select();
         window.siyuan.menus.menu.removeCB = () => {
             const ocrElement = window.siyuan.menus.menu.element.querySelector('[data-type="ocr"]') as HTMLTextAreaElement;
             if (ocrElement && ocrElement.dataset.ocrText !== ocrElement.value) {
@@ -1585,7 +1585,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (protyle.disabled) {
         return;
     }
-    if (focusText || protyle.lute.GetLinkDest(linkAddress)) {
+    if (focusText || protyle.lute.GetLinkDest(linkAddress) || linkAddress?.startsWith("assets/")) {
         inputElements[1].select();
     } else {
         inputElements[0].select();

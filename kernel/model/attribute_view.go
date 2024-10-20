@@ -488,17 +488,20 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		return
 	}
 
+	attrViewCache := map[string]*av.AttributeView{}
 	avIDs := strings.Split(avs, ",")
 	for _, avID := range avIDs {
-		attrView, err := av.ParseAttributeView(avID)
-		if err != nil {
-			logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-			unbindBlockAv(nil, avID, blockID)
-			return
+		attrView := attrViewCache[avID]
+		if nil == attrView {
+			attrView, _ = av.ParseAttributeView(avID)
+			if nil == attrView {
+				unbindBlockAv(nil, avID, blockID)
+				return
+			}
+			attrViewCache[avID] = attrView
 		}
 
 		if 1 > len(attrView.Views) {
-			err = av.ErrViewNotFound
 			unbindBlockAv(nil, avID, blockID)
 			return
 		}
@@ -568,9 +571,17 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 
 				relVal := attrView.GetValue(kv.Key.Rollup.RelationKeyID, kv.Values[0].BlockID)
 				if nil != relVal && nil != relVal.Relation {
-					destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
+					destAv := attrViewCache[relKey.Relation.AvID]
+					if nil == destAv {
+						destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+						if nil == destAv {
+							break
+						}
+						attrViewCache[relKey.Relation.AvID] = destAv
+					}
+
 					destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
-					if nil != destAv && nil != destKey {
+					if nil != destKey {
 						for _, bID := range relVal.Relation.BlockIDs {
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
 							if nil == destVal {
@@ -596,9 +607,14 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					break
 				}
 
-				destAv, _ := av.ParseAttributeView(kv.Key.Relation.AvID)
+				destAv := attrViewCache[kv.Key.Relation.AvID]
 				if nil == destAv {
-					break
+					destAv, _ = av.ParseAttributeView(kv.Key.Relation.AvID)
+					if nil == destAv {
+						break
+					}
+
+					attrViewCache[kv.Key.Relation.AvID] = destAv
 				}
 
 				blocks := map[string]*av.Value{}

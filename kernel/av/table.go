@@ -256,6 +256,8 @@ func (table *Table) FilterRows(attrView *AttributeView) {
 	}
 
 	rows := []*TableRow{}
+	attrViewCache := map[string]*AttributeView{}
+	attrViewCache[attrView.ID] = attrView
 	for _, row := range table.Rows {
 		pass := true
 		for j, index := range colIndexes {
@@ -275,7 +277,7 @@ func (table *Table) FilterRows(attrView *AttributeView) {
 				break
 			}
 
-			if !row.Cells[index].Value.Filter(table.Filters[j], attrView, row.ID) {
+			if !row.Cells[index].Value.Filter(table.Filters[j], attrView, row.ID, &attrViewCache) {
 				pass = false
 				break
 			}

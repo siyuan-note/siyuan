@@ -1,4 +1,5 @@
 {
+  "workspaceData": "Datos del espacio de trabajo",
   "confirmRemoveRelationField": "¿Está seguro de que desea eliminar el campo asociado a <b>${x}</b>?",
   "removeButKeepRelationField": "Eliminar, pero mantener el campo relacionado",
   "exportPDFLowMemory": "Memoria disponible insuficiente para exportar este PDF, por favor reduzca el contenido o aumente la memoria disponible y vuelva a intentar exportar",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "Mover a la parte inferior derecha",
   "accountDisplayTitle": "Mostrar el icono del título",
   "accountDisplayVIP": "Mostrar el icono VIP",
-  "rollbackConfirm": "La operación de retroceso no se puede deshacer, ¿estás seguro de que quieres revertir <b>${date}</b> ?",
+  "rollbackConfirm": "La operación de reversión no se puede deshacer, por favor proceda con precaución. ¿Está seguro de que desea revertir <b>${name}</b> a <b>${time}</b>?",
   "pdfTip": "La exportación de PDF no es compatible con el tema oscuro",
   "pdfConfirm": "¿Desea seguir exportando con el tema Claro seleccionado?",
   "import": "Importar",

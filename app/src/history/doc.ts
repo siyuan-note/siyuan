@@ -130,9 +130,12 @@ export const openDocHistory = (options: {
             if (type === "close") {
                 dialog.destroy();
             } else if (type === "rollback" && !isLoading) {
-                getHistoryPath(target.parentElement, opElement.value, options.id, (dataPath) => {
+                getHistoryPath(target.parentElement, opElement.value, options.id, (item) => {
+                    let dataPath = item.path;
                     isLoading = false;
-                    confirmDialog("⚠️ " + window.siyuan.languages.rollback, `${window.siyuan.languages.rollbackConfirm.replace("${date}", target.parentElement.textContent.trim())}`, () => {
+                    let confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", item.title)
+                        .replace("${time}", target.previousElementSibling.previousElementSibling.textContent.trim());
+                    confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                         fetchPost("/api/history/rollbackDocHistory", {
                             notebook: options.notebookId,
                             historyPath: dataPath
@@ -143,7 +146,8 @@ export const openDocHistory = (options: {
                 event.preventDefault();
                 break;
             } else if (target.classList.contains("b3-list-item") && !isLoading) {
-                getHistoryPath(target, opElement.value, options.id, (dataPath) => {
+                getHistoryPath(target, opElement.value, options.id, (item) => {
+                    let dataPath = item.path;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                     }, (response) => {
@@ -180,7 +184,7 @@ export const openDocHistory = (options: {
     });
 };
 
-const getHistoryPath = (target: Element, op: string, id: string, cb: (path: string) => void) => {
+const getHistoryPath = (target: Element, op: string, id: string, cb: (item: any) => void) => {
     isLoading = true;
     const path = target.getAttribute("data-path");
     if (path) {
@@ -194,6 +198,6 @@ const getHistoryPath = (target: Element, op: string, id: string, cb: (path: stri
         type: 3,
         created
     }, (response) => {
-        cb(response.data.items[0].path);
+        cb(response.data.items[0]);
     });
 };

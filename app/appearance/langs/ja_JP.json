@@ -1,4 +1,5 @@
 {
+  "workspaceData": "ワークスペースデータ",
   "confirmRemoveRelationField": "<b>${x}</b> に関連するフィールドを同時に削除してもよろしいですか？",
   "removeButKeepRelationField": "削除して関連フィールドを保持",
   "exportPDFLowMemory": "システムの利用可能なメモリが不足しているため、この PDF をエクスポートできません。内容を減らすか、利用可能なメモリを増やしてから再試行してください",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "右底",
   "accountDisplayTitle": "タイトルアイコンを表示",
   "accountDisplayVIP": "VIP アイコンを表示",
-  "rollbackConfirm": "ロールバック操作を取り消すことはできません。本当に <b>${date}</b> をロールバックしてもよろしいですか？",
+  "rollbackConfirm": "ロールバック操作は元に戻せません。慎重に決定してください。<b>${name}</b> を <b>${time}</b> にロールバックしてもよろしいですか？",
   "pdfTip": "PDF エクスポートはダークテーマに対応していません",
   "pdfConfirm": "選択したライトテーマでエクスポートを続行しますか？",
   "import": "インポート",

@@ -1,4 +1,5 @@
 {
+  "workspaceData": "Dane przestrzeni roboczej",
   "confirmRemoveRelationField": "Czy na pewno chcesz usunąć pole powiązane z <b>${x}</b>?",
   "removeButKeepRelationField": "Usuń, ale zachowaj powiązane pole",
   "exportPDFLowMemory": "Za mało dostępnej pamięci, aby wyeksportować ten PDF, proszę zmniejszyć zawartość lub zwiększyć dostępną pamięć i spróbować ponownie",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "Przenieś do dolnego prawego rogu",
   "accountDisplayTitle": "Wyświetl ikonę tytułu",
   "accountDisplayVIP": "Wyświetl ikonę VIP",
-  "rollbackConfirm": "Operacja wycofania nie może być cofnieta, czy na pewno chcesz cofnąć <b>${date}</b>?",
+  "rollbackConfirm": "Operacja cofania nie może zostać anulowana, proszę zachować ostrożność. Czy na pewno chcesz cofnąć <b>${name}</b> do <b>${time}</b>?",
   "pdfTip": "Eksport PDF nie wspiera ciemnego motywu",
   "pdfConfirm": "Czy chcesz kontynuować eksport z wybranym jasnym motywem?",
   "import": "Importuj",

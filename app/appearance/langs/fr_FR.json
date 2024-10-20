@@ -1,4 +1,5 @@
 {
+  "workspaceData": "Données de l'espace de travail",
   "confirmRemoveRelationField": "Êtes-vous sûr de vouloir supprimer le champ associé à <b>${x}</b>?",
   "removeButKeepRelationField": "Supprimer, mais conserver le champ associé",
   "exportPDFLowMemory": "Mémoire disponible insuffisante pour exporter ce PDF, veuillez réduire le contenu ou augmenter la mémoire disponible et réessayer d'exporter",
@@ -855,7 +856,7 @@
   "moveToBottomRight": "Déplacer vers la Bas à Droit",
   "accountDisplayTitle": "Afficher l'icône du titre",
   "accountDisplayVIP": "Afficher l'icône VIP",
-  "rollbackConfirm": "L'opération de retour en arrière est irréversible. Êtes-vous sûr de vouloir revenir en arrière à la date <b>${date}</b> ?",
+  "rollbackConfirm": "L'opération de restauration ne peut pas être annulée, veuillez procéder avec prudence. Êtes-vous sûr de vouloir restaurer <b>${name}</b> à <b>${time}</b>?",
   "pdfTip": "L'exportation de PDF ne supporte pas le thème Dark",
   "pdfConfirm": "Voulez-vous continuer à exporter avec le thème clear sélectionné ?",
   "import": "Importer",

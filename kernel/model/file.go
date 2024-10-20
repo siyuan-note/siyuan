@@ -118,14 +118,12 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	filePath := filepath.Join(util.DataDir, box.ID, p)
 
 	filelock.Lock(filePath)
-	defer filelock.Unlock(filePath)
-
 	file, err := os.Open(filePath)
 	if err != nil {
 		logging.LogErrorf("open file [%s] failed: %s", p, err)
+		filelock.Unlock(filePath)
 		return nil
 	}
-	defer file.Close()
 
 	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
 	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
@@ -136,6 +134,8 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 			iter.Skip()
 		}
 	}
+	file.Close()
+	filelock.Unlock(filePath)
 
 	if 1 > len(ret) {
 		logging.LogWarnf("properties not found in file [%s]", p)

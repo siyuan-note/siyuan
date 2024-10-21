@@ -245,7 +245,6 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
-
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
 		backlinks = append(backlinks, l)

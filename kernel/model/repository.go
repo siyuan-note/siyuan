@@ -1550,6 +1550,7 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
 			util.BroadcastByType("main", "syncMergeResult", 0, "",
 				map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
+			util.PushReloadFiletree()
 		}
 
 		time.Sleep(2 * time.Second)
@@ -1951,23 +1952,23 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		ret.Endpoint = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
-			Endpoint:      Conf.Sync.S3.Endpoint,
-			AccessKey:     Conf.Sync.S3.AccessKey,
-			SecretKey:     Conf.Sync.S3.SecretKey,
-			Bucket:        Conf.Sync.S3.Bucket,
-			Region:        Conf.Sync.S3.Region,
-			PathStyle:     Conf.Sync.S3.PathStyle,
-			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
-			Timeout:       Conf.Sync.S3.Timeout,
+			Endpoint:       Conf.Sync.S3.Endpoint,
+			AccessKey:      Conf.Sync.S3.AccessKey,
+			SecretKey:      Conf.Sync.S3.SecretKey,
+			Bucket:         Conf.Sync.S3.Bucket,
+			Region:         Conf.Sync.S3.Region,
+			PathStyle:      Conf.Sync.S3.PathStyle,
+			SkipTlsVerify:  Conf.Sync.S3.SkipTlsVerify,
+			Timeout:        Conf.Sync.S3.Timeout,
 			ConcurrentReqs: Conf.Sync.S3.ConcurrentReqs,
 		}
 	case conf.ProviderWebDAV:
 		ret.WebDAV = &cloud.ConfWebDAV{
-			Endpoint:      Conf.Sync.WebDAV.Endpoint,
-			Username:      Conf.Sync.WebDAV.Username,
-			Password:      Conf.Sync.WebDAV.Password,
-			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
-			Timeout:       Conf.Sync.WebDAV.Timeout,
+			Endpoint:       Conf.Sync.WebDAV.Endpoint,
+			Username:       Conf.Sync.WebDAV.Username,
+			Password:       Conf.Sync.WebDAV.Password,
+			SkipTlsVerify:  Conf.Sync.WebDAV.SkipTlsVerify,
+			Timeout:        Conf.Sync.WebDAV.Timeout,
 			ConcurrentReqs: Conf.Sync.WebDAV.ConcurrentReqs,
 		}
 	default:

@@ -133,6 +133,15 @@
     /* 下拉菜单 */
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
 
+    /* switch */
+    --b3-switch-background: #444746;
+    --b3-switch-border: #8e918f;
+    --b3-switch-hover: rgba(253, 252, 251, .10);
+    --b3-switch-checked: #0842a0;
+    --b3-switch-checked-background: #a8c7fa;
+    --b3-switch-checked-hover: #0842a0;
+    --b3-switch-checked-hover2: rgba( 253,252,251, .10);
+
     /* 阴影 */
     --b3-point-shadow: inset 0 .5px .5px .5px rgba(255, 255, 255, .09), 0 3px 6px rgba(0, 0, 0, .04), 0 0 0 0 transparent;
     --b3-dialog-shadow: 0 8px 24px #010409;

@@ -39,8 +39,15 @@
   }
 
   &--error .b3-snackbar__content {
-    background-color: var(--b3-theme-error);
-    color: var(--b3-theme-on-error);
+    padding-left: 47px;
+
+    &:after {
+      content: "❗";
+      position: absolute;
+      left: 16px;
+      top: 10px;
+      font-size: 16px;
+    }
   }
 
   &__content {

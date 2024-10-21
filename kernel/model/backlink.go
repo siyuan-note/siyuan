@@ -96,7 +96,9 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	trees := filesys.LoadTrees(mentionBlockIDs)
 	for id, tree := range trees {
 		backlink := buildBacklink(id, tree, mentionKeywords, luteEngine)
-		ret = append(ret, backlink)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
 	}
 	return
 }
@@ -133,7 +135,9 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 			keywords = append(keywords, keyword)
 		}
 		backlink := buildBacklink(linkRef.ID, refTree, keywords, luteEngine)
-		ret = append(ret, backlink)
+		if nil != backlink {
+			ret = append(ret, backlink)
+		}
 	}
 	return
 }

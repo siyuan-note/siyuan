@@ -1521,10 +1521,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		return
 	}
 
-	if needReloadFiletree {
-		util.PushReloadFiletree()
-	}
-
 	if exit { // 退出时同步不用推送事件
 		return
 	}
@@ -1539,11 +1535,18 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			box.Index()
 		}
 	}
-	if 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes) {
+
+	needReloadUI := 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes)
+	if needReloadUI {
 		util.ReloadUI()
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	needReloadFiletree = !needReloadUI && (needReloadFiletree || 0 < len(upsertRootIDs) || 0 < len(removeRootIDs))
+	if needReloadFiletree {
+		util.PushReloadFiletree()
+	}
+
 	go func() {
 		util.WaitForUILoaded()
 
@@ -1951,23 +1954,23 @@ func buildCloudConf() (ret *cloud.Conf, err error) {
 		ret.Endpoint = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		ret.S3 = &cloud.ConfS3{
-			Endpoint:      Conf.Sync.S3.Endpoint,
-			AccessKey:     Conf.Sync.S3.AccessKey,
-			SecretKey:     Conf.Sync.S3.SecretKey,
-			Bucket:        Conf.Sync.S3.Bucket,
-			Region:        Conf.Sync.S3.Region,
-			PathStyle:     Conf.Sync.S3.PathStyle,
-			SkipTlsVerify: Conf.Sync.S3.SkipTlsVerify,
-			Timeout:       Conf.Sync.S3.Timeout,
+			Endpoint:       Conf.Sync.S3.Endpoint,
+			AccessKey:      Conf.Sync.S3.AccessKey,
+			SecretKey:      Conf.Sync.S3.SecretKey,
+			Bucket:         Conf.Sync.S3.Bucket,
+			Region:         Conf.Sync.S3.Region,
+			PathStyle:      Conf.Sync.S3.PathStyle,
+			SkipTlsVerify:  Conf.Sync.S3.SkipTlsVerify,
+			Timeout:        Conf.Sync.S3.Timeout,
 			ConcurrentReqs: Conf.Sync.S3.ConcurrentReqs,
 		}
 	case conf.ProviderWebDAV:
 		ret.WebDAV = &cloud.ConfWebDAV{
-			Endpoint:      Conf.Sync.WebDAV.Endpoint,
-			Username:      Conf.Sync.WebDAV.Username,
-			Password:      Conf.Sync.WebDAV.Password,
-			SkipTlsVerify: Conf.Sync.WebDAV.SkipTlsVerify,
-			Timeout:       Conf.Sync.WebDAV.Timeout,
+			Endpoint:       Conf.Sync.WebDAV.Endpoint,
+			Username:       Conf.Sync.WebDAV.Username,
+			Password:       Conf.Sync.WebDAV.Password,
+			SkipTlsVerify:  Conf.Sync.WebDAV.SkipTlsVerify,
+			Timeout:        Conf.Sync.WebDAV.Timeout,
 			ConcurrentReqs: Conf.Sync.WebDAV.ConcurrentReqs,
 		}
 	default:

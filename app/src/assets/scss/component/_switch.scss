@@ -41,6 +41,7 @@
   }
 
   &:before {
+    z-index: 2;
     content: "";
     left: 9px;
     position: absolute;

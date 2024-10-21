@@ -1521,10 +1521,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 		return
 	}
 
-	if needReloadFiletree {
-		util.PushReloadFiletree()
-	}
-
 	if exit { // 退出时同步不用推送事件
 		return
 	}
@@ -1539,18 +1535,24 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			box.Index()
 		}
 	}
-	if 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes) {
+
+	needReloadUI := 0 < len(needUnindexBoxes) || 0 < len(needIndexBoxes)
+	if needReloadUI {
 		util.ReloadUI()
 	}
 
 	upsertRootIDs, removeRootIDs := incReindex(upserts, removes)
+	needReloadFiletree = !needReloadUI && (needReloadFiletree || 0 < len(upsertRootIDs) || 0 < len(removeRootIDs))
+	if needReloadFiletree {
+		util.PushReloadFiletree()
+	}
+
 	go func() {
 		util.WaitForUILoaded()
 
 		if 0 < len(upsertRootIDs) || 0 < len(removeRootIDs) {
 			util.BroadcastByType("main", "syncMergeResult", 0, "",
 				map[string]interface{}{"upsertRootIDs": upsertRootIDs, "removeRootIDs": removeRootIDs})
-			util.PushReloadFiletree()
 		}
 
 		time.Sleep(2 * time.Second)

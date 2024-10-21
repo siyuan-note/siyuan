@@ -101,7 +101,7 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
 
 export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst = false) => {
     if (1 > blockPaths.length) {
-        return `<div contenteditable="false" style="border-top: 1px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>`;
+        return '<div contenteditable="false" style="border-top: 1px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>';
     }
 
     let html = "";

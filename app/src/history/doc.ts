@@ -131,9 +131,9 @@ export const openDocHistory = (options: {
                 dialog.destroy();
             } else if (type === "rollback" && !isLoading) {
                 getHistoryPath(target.parentElement, opElement.value, options.id, (item) => {
-                    let dataPath = item.path;
+                    const dataPath = item.path;
                     isLoading = false;
-                    let confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", item.title)
+                    const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", item.title)
                         .replace("${time}", target.previousElementSibling.previousElementSibling.textContent.trim());
                     confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                         fetchPost("/api/history/rollbackDocHistory", {
@@ -147,7 +147,7 @@ export const openDocHistory = (options: {
                 break;
             } else if (target.classList.contains("b3-list-item") && !isLoading) {
                 getHistoryPath(target, opElement.value, options.id, (item) => {
-                    let dataPath = item.path;
+                    const dataPath = item.path;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                     }, (response) => {

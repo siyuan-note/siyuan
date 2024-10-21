@@ -781,7 +781,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             hasFoldHeading = true;
             return true;
         }
-    })
+    });
     if (!isCopy && (sourceElements.length > 1 || hasFoldHeading) &&
         sourceElements[0].parentElement.classList.contains("sb") &&
         sourceElements[0].parentElement.getAttribute("data-sb-layout") === "col") {

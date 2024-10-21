@@ -539,7 +539,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     name = window.siyuan.languages.workspaceData;
                     time = target.parentElement.querySelector("span[data-type='hCreated']").textContent.trim();
                 }
-                let confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", name)
+                const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", name)
                     .replace("${time}", time);
                 confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                     if (dataType === "assets") {

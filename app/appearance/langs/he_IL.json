@@ -1,4 +1,6 @@
 {
+  "backlinkContainChildren": "האם קישורים חוזרים כוללים בלוקים משניים",
+  "backlinkContainChildrenTip": "לאחר ההפעלה, בלוקים משניים ייכללו בחישוב הקישורים החוזרים",
   "entryNum": "מספר ערכים",
   "workspaceData": "נתוני סביבת עבודה",
   "confirmRemoveRelationField": "האם אתה בטוח שברצונך למחוק את השדה המשויך ל-<b>${x}</b>?",

@@ -44,7 +44,6 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,
                 keyword: isMention ? inputsElement[1].value : inputsElement[0].value,
-                containChildren: false
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);

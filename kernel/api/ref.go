@@ -51,7 +51,7 @@ func getBackmentionDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
-	containChildren := false
+	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
@@ -73,7 +73,7 @@ func getBacklinkDoc(c *gin.Context) {
 	defID := arg["defID"].(string)
 	refTreeID := arg["refTreeID"].(string)
 	keyword := arg["keyword"].(string)
-	containChildren := false
+	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
@@ -109,7 +109,7 @@ func getBacklink2(c *gin.Context) {
 	if nil != mentionSortArg {
 		mentionSort, _ = strconv.Atoi(mentionSortArg.(string))
 	}
-	containChildren := false
+	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}
@@ -145,7 +145,7 @@ func getBacklink(c *gin.Context) {
 	if nil != arg["beforeLen"] {
 		beforeLen = int(arg["beforeLen"].(float64))
 	}
-	containChildren := false
+	containChildren := model.Conf.Editor.BacklinkContainChildren
 	if val, ok := arg["containChildren"]; ok {
 		containChildren = val.(bool)
 	}

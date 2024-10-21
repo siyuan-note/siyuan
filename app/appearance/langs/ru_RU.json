@@ -1,4 +1,5 @@
 {
+  "entryNum": "Количество записей",
   "workspaceData": "Данные рабочей области",
   "confirmRemoveRelationField": "Вы уверены, что хотите удалить поле, связанное с <b>${x}</b>?",
   "removeButKeepRelationField": "Удалить, но сохранить связанное поле",

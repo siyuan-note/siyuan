@@ -1,4 +1,5 @@
 {
+  "entryNum": "מספר ערכים",
   "workspaceData": "נתוני סביבת עבודה",
   "confirmRemoveRelationField": "האם אתה בטוח שברצונך למחוק את השדה המשויך ל-<b>${x}</b>?",
   "removeButKeepRelationField": "מחק, אך שמור על שדה הקשר",

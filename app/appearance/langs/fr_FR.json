@@ -1,4 +1,5 @@
 {
+  "entryNum": "Nombre d'entrées",
   "workspaceData": "Données de l'espace de travail",
   "confirmRemoveRelationField": "Êtes-vous sûr de vouloir supprimer le champ associé à <b>${x}</b>?",
   "removeButKeepRelationField": "Supprimer, mais conserver le champ associé",

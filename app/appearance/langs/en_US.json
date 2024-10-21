@@ -1,4 +1,5 @@
 {
+  "entryNum": "Number of entries",
   "workspaceData": "Workspace data",
   "confirmRemoveRelationField": "Are you sure you want to delete the field associated with <b>${x}</b>?",
   "removeButKeepRelationField": "Remove, but keep related field",

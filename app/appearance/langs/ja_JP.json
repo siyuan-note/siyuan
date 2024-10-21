@@ -1,4 +1,5 @@
 {
+  "entryNum": "エントリ数",
   "workspaceData": "ワークスペースデータ",
   "confirmRemoveRelationField": "<b>${x}</b> に関連するフィールドを同時に削除してもよろしいですか？",
   "removeButKeepRelationField": "削除して関連フィールドを保持",

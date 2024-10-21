@@ -170,11 +170,13 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	}
 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
-	ret = &Backlink{
-		DOM:        dom,
-		BlockPaths: buildBlockBreadcrumb(n, nil),
-		Expand:     expand,
+	blockPaths := []*BlockPath{}
+	if nil != n.Parent && nil != n.Parent.Parent {
+		// 仅在多余一层时才显示面包屑，这样界面展示更加简洁
+		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
+		blockPaths = buildBlockBreadcrumb(n, nil)
 	}
+	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand}
 	return
 }
 

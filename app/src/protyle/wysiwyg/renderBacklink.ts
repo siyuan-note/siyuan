@@ -100,6 +100,10 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
 };
 
 export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst = false) => {
+    if (1 > blockPaths.length) {
+        return "";
+    }
+
     let html = "";
     blockPaths.forEach((item, index) => {
         if (index === 0 && !renderFirst) {

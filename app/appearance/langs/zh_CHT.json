@@ -1,4 +1,5 @@
 {
+  "entryNum": "條目數",
   "workspaceData": "工作空間數據",
   "confirmRemoveRelationField": "確定同時刪除關聯至 <b>${x}</b> 中的字段嗎？",
   "removeButKeepRelationField": "刪除，但保留關聯字段",

@@ -726,7 +726,7 @@
   "closeNotebook": "Zamknięte notesy",
   "widget": "Widżet",
   "customEmoji": "Dodaj niestandardowy emoji",
-  "customEmojiTip": "Umieść obrazy w folderze emoji i użyj folderów do ich klasyfikacji.",
+  "customEmojiTip": "Umieść obrazy w folderze emojis, można użyć jednego folderu do klasyfikacji, ścieżka nie może zawierać spacji i znaków Markdown",
   "recentEmoji": "Najpopularniejsze emoji",
   "changeIcon": "Zmień ikonę",
   "addIcon": "Dodaj ikonę",

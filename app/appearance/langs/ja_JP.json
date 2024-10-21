@@ -726,7 +726,7 @@
   "closeNotebook": "閉じたノートブック",
   "widget": "ウィジェット",
   "customEmoji": "絵文字を追加",
-  "customEmojiTip": "画像を絵文字フォルダに入れて、フォルダを使用して分類します",
+  "customEmojiTip": "画像を絵文字フォルダーに置きます。分類にはフォルダーの 1 つのレイヤーを使用できます。パスにはスペースや Markdown タグを含めることはできません",
   "recentEmoji": "よく使う絵文字",
   "changeIcon": "アイコンを変更",
   "addIcon": "アイコンを追加",

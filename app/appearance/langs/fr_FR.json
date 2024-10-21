@@ -726,7 +726,7 @@
   "closeNotebook": "Carnets fermés",
   "widget": "Widget",
   "customEmoji": "Ajouter un emoji personnalisé",
-  "customEmojiTip": "Mettez les images dans le dossier emojis et utilisez des dossiers pour les classer",
+  "customEmojiTip": "Mettez les images dans le dossier emojis, vous pouvez utiliser un dossier pour la classification, le chemin ne doit pas contenir d'espaces ni de caractères Markdown",
   "recentEmoji": "Emoticônes courantes",
   "changeIcon": "Changer l'icône",
   "addIcon": "Ajouter une icône",

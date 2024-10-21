@@ -726,7 +726,7 @@
   "closeNotebook": "Closed notebooks",
   "widget": "Widget",
   "customEmoji": "Add custom emoji",
-  "customEmojiTip": "Put the images into the emojis folder, and use folders to classify them",
+  "customEmojiTip": "Place images in the emojis folder, you can use one folder for classification, the path must not contain spaces or Markdown markers",
   "recentEmoji": "Common Emoticons",
   "changeIcon": "Change icon",
   "addIcon": "Add icon",

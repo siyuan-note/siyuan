@@ -726,7 +726,7 @@
   "closeNotebook": "Cuadernos de notas cerrados",
   "widget": "Widget",
   "customEmoji": "Añadir un emoji personalizado",
-  "customEmojiTip": "Coloca las imágenes en la carpeta de emojis y usa carpetas para clasificarlas",
+  "customEmojiTip": "Coloca las imágenes en la carpeta emojis, puedes usar una carpeta para la clasificación, la ruta no debe contener espacios ni caracteres de Markdown",
   "recentEmoji": "Emoticonos comunes",
   "changeIcon": "Cambiar el icono",
   "addIcon": "Agregar icono",

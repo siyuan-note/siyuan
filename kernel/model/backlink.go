@@ -230,7 +230,7 @@ func getBacklinkRenderNodes(n *ast.Node) (ret []*ast.Node, expand bool) {
 	return
 }
 
-func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
+func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
@@ -242,7 +242,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	rootID := sqlBlock.RootID
 	boxID = sqlBlock.Box
 
-	refs := sql.QueryRefsByDefID(id, false)
+	refs := sql.QueryRefsByDefID(id, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
@@ -328,7 +328,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	return
 }
 
-func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
+func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChildren bool) (boxID string, linkPaths, mentionPaths []*Path, linkRefsCount, mentionsCount int) {
 	linkPaths = []*Path{}
 	mentionPaths = []*Path{}
 
@@ -340,7 +340,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 	boxID = sqlBlock.Box
 
 	var links []*Block
-	refs := sql.QueryRefsByDefID(id, false)
+	refs := sql.QueryRefsByDefID(id, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
 	// 为了减少查询，组装好 IDs 后一次查出

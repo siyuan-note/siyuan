@@ -4,7 +4,7 @@ import {Constants} from "../constants";
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
     messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<button class="b3-button--cancel b3-button b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.clearMessage}"><svg style="margin-right: 0"><use xlink:href="#iconSelect"></use></svg></button>`;
+<button class="b3-button ft__smaller">${window.siyuan.languages.clearMessage}</button>`;
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(messageElement)) {

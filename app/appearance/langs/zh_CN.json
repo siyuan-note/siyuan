@@ -726,7 +726,7 @@
   "closeNotebook": "已关闭的笔记本",
   "widget": "挂件",
   "customEmoji": "添加自定义表情",
-  "customEmojiTip": "将图片放入 emojis 文件夹中，可使用文件夹进行分类",
+  "customEmojiTip": "将图片放入 emojis 文件夹中，可使用一层文件夹进行分类，路径不能包含空格和 Markdown 标记符",
   "recentEmoji": "常用表情",
   "changeIcon": "修改图标",
   "addIcon": "添加图标",

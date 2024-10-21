@@ -726,7 +726,7 @@
   "closeNotebook": "Taccuini chiusi",
   "widget": "Widget",
   "customEmoji": "Aggiungi emoji personalizzata",
-  "customEmojiTip": "Inserisci le immagini nella cartella delle emoji e usa le cartelle per classificarle",
+  "customEmojiTip": "Inserisci le immagini nella cartella emojis, puoi utilizzare una cartella per la classificazione, il percorso non deve contenere spazi e simboli di Markdown",
   "recentEmoji": "Emoticon comuni",
   "changeIcon": "Cambia icona",
   "addIcon": "Aggiungi icona",

@@ -726,7 +726,7 @@
   "closeNotebook": "Geschlossene Notizbücher",
   "widget": "Widget",
   "customEmoji": "Benutzerdefiniertes Emoji hinzufügen",
-  "customEmojiTip": "Legen Sie die Bilder in den Emoji-Ordner und verwenden Sie Ordner, um sie zu klassifizieren.",
+  "customEmojiTip": "Legen Sie Bilder in den Ordner emojis, Sie können einen Ordner zur Klassifizierung verwenden, der Pfad darf keine Leerzeichen oder Markdown-Zeichen enthalten",
   "recentEmoji": "Häufige Emojis",
   "changeIcon": "Symbol ändern",
   "addIcon": "Symbol hinzufügen",

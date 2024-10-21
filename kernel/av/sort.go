@@ -44,6 +44,10 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other.Block {
+			if 0 == strings.Compare(value.Block.Content, other.Block.Content) {
+				return 0
+			}
+
 			if util.PinYinCompare(value.Block.Content, other.Block.Content) {
 				return -1
 			}
@@ -59,6 +63,11 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			} else if "" == other.Text.Content {
 				return -1
 			}
+
+			if 0 == strings.Compare(value.Text.Content, other.Text.Content) {
+				return 0
+			}
+
 			if util.PinYinCompare(value.Text.Content, other.Text.Content) {
 				return -1
 			}
@@ -229,6 +238,11 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 			for _, v := range other.MAsset {
 				v2 += v.Content
 			}
+
+			if 0 == strings.Compare(v1, v2) {
+				return 0
+			}
+
 			if util.PinYinCompare(v1, v2) {
 				return -1
 			}
@@ -247,6 +261,11 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				}
 				return 0
 			}
+
+			if 0 == strings.Compare(value.Template.Content, other.Template.Content) {
+				return 0
+			}
+
 			if util.PinYinCompare(value.Template.Content, other.Template.Content) {
 				return -1
 			}
@@ -290,6 +309,11 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				oContentBuf.WriteByte(' ')
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
+
+			if 0 == strings.Compare(vContent, oContent) {
+				return 0
+			}
+
 			if util.PinYinCompare(vContent, oContent) {
 				return -1
 			}
@@ -323,6 +347,11 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				oContentBuf.WriteByte(' ')
 			}
 			oContent := strings.TrimSpace(oContentBuf.String())
+
+			if 0 == strings.Compare(vContent, oContent) {
+				return 0
+			}
+
 			if util.PinYinCompare(vContent, oContent) {
 				return -1
 			}

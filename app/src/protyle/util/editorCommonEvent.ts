@@ -10,7 +10,7 @@ import {
 import {Constants} from "../../constants";
 import {paste} from "./paste";
 import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
-import {transaction} from "../wysiwyg/transaction";
+import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
 import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
@@ -28,6 +28,9 @@ import {insertAttrViewBlockAnimation} from "../render/av/row";
 import {dragUpload} from "../render/av/asset";
 import * as dayjs from "dayjs";
 import {zoomOut} from "../../menus/protyle";
+/// #if !BROWSER
+import {webUtils} from "electron";
+/// #endif
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -268,6 +271,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         previousID: sbElement.previousElementSibling?.getAttribute("data-node-id"),
         parentID: sbElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID || protyle.block.rootID
     }];
+    let hasFoldHeading = false;
     if (newSourceElement) {
         const newSourceId = newSourceElement.getAttribute("data-node-id");
         sbElement.insertAdjacentElement("afterbegin", targetElement);
@@ -366,9 +370,12 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             if (index === 0) {
                 afterPreviousID = isCopy ? copyId : id;
             }
-            if (isCopy && item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
-                item.removeAttribute("fold");
-                foldHeadingIds.push({id, parentID});
+            if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+                if (isCopy) {
+                    item.removeAttribute("fold");
+                    foldHeadingIds.push({id, parentID});
+                }
+                hasFoldHeading = true;
             }
             if (isCopy) {
                 undoOperations.push({
@@ -566,6 +573,24 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         // 跨文档不支持撤销
         transaction(protyle, doOperations);
     }
+    if (!isCopy && direct === "col") {
+        if (targetElement.getAttribute("data-type") === "NodeHeading" && targetElement.getAttribute("fold") === "1") {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [targetElement],
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
+        if ((sourceElements.length > 1 || hasFoldHeading)) {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: sourceElements.reverse(),
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
+    }
     focusBlock(sourceElements[0]);
 };
 
@@ -749,6 +774,23 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     } else {
         // 跨文档不支持撤销
         transaction(protyle, doOperations);
+    }
+    let hasFoldHeading = false;
+    sourceElements.find(item => {
+        if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {
+            hasFoldHeading = true;
+            return true;
+        }
+    })
+    if (!isCopy && (sourceElements.length > 1 || hasFoldHeading) &&
+        sourceElements[0].parentElement.classList.contains("sb") &&
+        sourceElements[0].parentElement.getAttribute("data-sb-layout") === "col") {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement: sourceElements.reverse(),
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
     }
     focusBlock(sourceElements[0]);
 };
@@ -1018,85 +1060,103 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 dragoverElement = undefined;
             }
-        } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1
-            && targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
+        } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1) {
             // 文件树拖拽
-            const scrollTop = protyle.contentElement.scrollTop;
             const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
-            if (targetElement.classList.contains("av__row")) {
-                // 拖拽到属性视图内
-                const blockElement = hasClosestBlock(targetElement);
-                if (blockElement) {
-                    let previousID = "";
-                    if (targetElement.classList.contains("dragover__bottom")) {
-                        previousID = targetElement.getAttribute("data-id") || "";
+            if (event.altKey) {
+                if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
+                    insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
+                } else {
+                    const range = getRangeByPoint(event.clientX, event.clientY);
+                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeBlockQueryEmbed")) {
+                        return;
                     } else {
-                        previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        focusByRange(range);
                     }
-                    const avID = blockElement.getAttribute("data-av-id");
-                    const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-                    const srcs: IOperationSrcs[] = [];
-                    ids.forEach(id => {
-                        srcs.push({
-                            id,
-                            isDetached: false,
-                        });
-                    });
-                    transaction(protyle, [{
-                        action: "insertAttrViewBlock",
-                        avID,
-                        previousID,
-                        srcs,
-                        blockID: blockElement.dataset.nodeId,
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: blockElement.dataset.nodeId,
-                        data: newUpdated,
-                    }], [{
-                        action: "removeAttrViewBlock",
-                        srcIDs: ids,
-                        avID,
-                    }, {
-                        action: "doUpdateUpdated",
-                        id: blockElement.dataset.nodeId,
-                        data: blockElement.getAttribute("updated")
-                    }]);
-                    insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
-                    blockElement.setAttribute("updated", newUpdated);
                 }
-            } else {
+                let html = "";
                 for (let i = 0; i < ids.length; i++) {
-                    if (ids[i]) {
-                        await fetchSyncPost("/api/filetree/doc2Heading", {
-                            srcID: ids[i],
-                            after: targetElement.classList.contains("dragover__bottom"),
-                            targetID: targetElement.getAttribute("data-node-id"),
-                        });
-                    }
+                    const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
+                    html += `((${ids[i]} '${response.data}')) `;
                 }
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.block.id,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    onGet({data: getResponse, protyle});
-                    /// #if !MOBILE
-                    // 文档标题互转后，需更新大纲
-                    updatePanelByEditor({
-                        protyle,
-                        focus: false,
-                        pushBackStack: false,
-                        reload: true,
-                        resize: false,
+                insertHTML(html, protyle);
+            } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
+                const scrollTop = protyle.contentElement.scrollTop;
+                if (targetElement.classList.contains("av__row")) {
+                    // 拖拽到属性视图内
+                    const blockElement = hasClosestBlock(targetElement);
+                    if (blockElement) {
+                        let previousID = "";
+                        if (targetElement.classList.contains("dragover__bottom")) {
+                            previousID = targetElement.getAttribute("data-id") || "";
+                        } else {
+                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        }
+                        const avID = blockElement.getAttribute("data-av-id");
+                        const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                        const srcs: IOperationSrcs[] = [];
+                        ids.forEach(id => {
+                            srcs.push({
+                                id,
+                                isDetached: false,
+                            });
+                        });
+                        transaction(protyle, [{
+                            action: "insertAttrViewBlock",
+                            avID,
+                            previousID,
+                            srcs,
+                            blockID: blockElement.dataset.nodeId,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: blockElement.dataset.nodeId,
+                            data: newUpdated,
+                        }], [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: ids,
+                            avID,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id: blockElement.dataset.nodeId,
+                            data: blockElement.getAttribute("updated")
+                        }]);
+                        insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                        blockElement.setAttribute("updated", newUpdated);
+                    }
+                } else {
+                    for (let i = 0; i < ids.length; i++) {
+                        if (ids[i]) {
+                            await fetchSyncPost("/api/filetree/doc2Heading", {
+                                srcID: ids[i],
+                                after: targetElement.classList.contains("dragover__bottom"),
+                                targetID: targetElement.getAttribute("data-node-id"),
+                            });
+                        }
+                    }
+                    fetchPost("/api/filetree/getDoc", {
+                        id: protyle.block.id,
+                        size: window.siyuan.config.editor.dynamicLoadBlocks,
+                    }, getResponse => {
+                        onGet({data: getResponse, protyle});
+                        /// #if !MOBILE
+                        // 文档标题互转后，需更新大纲
+                        updatePanelByEditor({
+                            protyle,
+                            focus: false,
+                            pushBackStack: false,
+                            reload: true,
+                            resize: false,
+                        });
+                        /// #endif
+                        // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
+                        setTimeout(() => {
+                            protyle.contentElement.scrollTop = scrollTop;
+                            protyle.scroll.lastScrollTop = scrollTop - 1;
+                        }, Constants.TIMEOUT_LOAD);
                     });
-                    /// #endif
-                    // 文档标题互转后，编辑区会跳转到开头 https://github.com/siyuan-note/siyuan/issues/2939
-                    setTimeout(() => {
-                        protyle.contentElement.scrollTop = scrollTop;
-                        protyle.scroll.lastScrollTop = scrollTop - 1;
-                    }, Constants.TIMEOUT_LOAD);
-                });
+                }
+                targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
             }
-            targetElement.classList.remove("dragover__bottom", "dragover__top", "dragover__left", "dragover__right");
         } else if (!window.siyuan.dragElement && (event.dataTransfer.types[0] === "Files" || event.dataTransfer.types.includes("text/html"))) {
             // 外部文件拖入编辑器中或者编辑器内选中文字拖拽
             // https://github.com/siyuan-note/siyuan/issues/9544
@@ -1106,7 +1166,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                     const files: string[] = [];
                     for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                        files.push(event.dataTransfer.files[i].path);
+                        files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                     }
                     uploadLocalFiles(files, protyle, !event.altKey);
                 } else {
@@ -1119,7 +1179,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (cellType === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                         const files: string[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
-                            files.push(event.dataTransfer.files[i].path);
+                            files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                         }
                         dragUpload(files, protyle, cellElement);
                     }
@@ -1324,6 +1384,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (gutterType) {
             disabledPosition = "";
+            // https://github.com/siyuan-note/siyuan/issues/12651
+            if (dragoverElement) {
+                dragoverElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                dragoverElement = undefined;
+            }
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
@@ -1385,6 +1450,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
             });
+            dragoverElement = undefined;
         }
     });
     editorElement.addEventListener("dragenter", (event) => {

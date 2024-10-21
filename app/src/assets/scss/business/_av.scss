@@ -14,7 +14,8 @@
   }
 
   &__container {
-    overflow: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
     cursor: auto;
   }
 
@@ -336,6 +337,7 @@
         margin: 0 5px 0 0;
         flex-shrink: 0;
         font-size: inherit;
+        font-family: var(--b3-font-family-emoji);
 
         &--pin {
           margin: 0 0 0 5px;
@@ -490,6 +492,7 @@
         line-height: 20px;
         padding: 0 4px;
         font-size: 12px;
+        font-family: var(--b3-font-family-emoji);
         align-self: center;
         opacity: 1;
       }

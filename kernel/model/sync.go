@@ -426,6 +426,7 @@ func SetSyncProviderS3(s3 *conf.S3) (err error) {
 	s3.Bucket = strings.TrimSpace(s3.Bucket)
 	s3.Region = strings.TrimSpace(s3.Region)
 	s3.Timeout = util.NormalizeTimeout(s3.Timeout)
+	s3.ConcurrentReqs = util.NormalizeConcurrentReqs(s3.ConcurrentReqs, conf.ProviderS3)
 
 	if !cloud.IsValidCloudDirName(s3.Bucket) {
 		util.PushErrMsg(Conf.Language(37), 5000)
@@ -450,6 +451,7 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	webdav.Username = strings.TrimSpace(webdav.Username)
 	webdav.Password = strings.TrimSpace(webdav.Password)
 	webdav.Timeout = util.NormalizeTimeout(webdav.Timeout)
+	webdav.ConcurrentReqs = util.NormalizeConcurrentReqs(webdav.ConcurrentReqs, conf.ProviderWebDAV)
 
 	Conf.Sync.WebDAV = webdav
 	Conf.Save()
@@ -648,20 +650,23 @@ func planSyncAfter(d time.Duration) {
 func isProviderOnline(byHand bool) (ret bool) {
 	checkURL := util.GetCloudSyncServer()
 	skipTlsVerify := false
+	timeout := 3000
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
 	case conf.ProviderS3:
 		checkURL = Conf.Sync.S3.Endpoint
 		skipTlsVerify = Conf.Sync.S3.SkipTlsVerify
+		timeout = Conf.Sync.S3.Timeout * 1000
 	case conf.ProviderWebDAV:
 		checkURL = Conf.Sync.WebDAV.Endpoint
 		skipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
+		timeout = Conf.Sync.WebDAV.Timeout * 1000
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
 		return false
 	}
 
-	if ret = util.IsOnline(checkURL, skipTlsVerify); !ret {
+	if ret = util.IsOnline(checkURL, skipTlsVerify, timeout); !ret {
 		if 1 > autoSyncErrCount || byHand {
 			util.PushErrMsg(Conf.Language(76)+" (Provider: "+conf.ProviderToStr(Conf.Sync.Provider)+")", 5000)
 		}

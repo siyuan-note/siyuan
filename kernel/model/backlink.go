@@ -30,6 +30,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -43,20 +44,12 @@ func RefreshBacklink(id string) {
 
 func refreshRefsByDefID(defID string) {
 	refs := sql.QueryRefsByDefID(defID, false)
-	trees := map[string]*parse.Tree{}
+	var rootIDs []string
 	for _, ref := range refs {
-		tree := trees[ref.RootID]
-		if nil != tree {
-			continue
-		}
-
-		var loadErr error
-		tree, loadErr = LoadTreeByBlockID(ref.RootID)
-		if nil != loadErr {
-			logging.LogErrorf("refresh tree refs failed: %s", loadErr)
-			continue
-		}
-		trees[ref.RootID] = tree
+		rootIDs = append(rootIDs, ref.RootID)
+	}
+	trees := filesys.LoadTrees(rootIDs)
+	for _, tree := range trees {
 		sql.UpdateRefsTreeQueue(tree)
 	}
 }
@@ -82,32 +75,27 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
-	luteEngine := NewLute()
-	treeCache := map[string]*parse.Tree{}
+	luteEngine := util.NewLute()
 	var mentions []*Block
 	for _, mention := range tmpMentions {
 		if mention.RootID == refTreeID {
 			mentions = append(mentions, mention)
 		}
 	}
+	var mentionBlockIDs []string
+	for _, mention := range mentions {
+		mentionBlockIDs = append(mentionBlockIDs, mention.ID)
+	}
+	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
 
 	if "" != keyword {
 		mentionKeywords = append(mentionKeywords, keyword)
 	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
-	for _, mention := range mentions {
-		refTree := treeCache[mention.RootID]
-		if nil == refTree {
-			var loadErr error
-			refTree, loadErr = LoadTreeByBlockID(mention.ID)
-			if nil != loadErr {
-				logging.LogWarnf("load ref tree [%s] failed: %s", mention.ID, loadErr)
-				continue
-			}
-			treeCache[mention.RootID] = refTree
-		}
 
-		backlink := buildBacklink(mention.ID, refTree, mentionKeywords, luteEngine)
+	trees := filesys.LoadTrees(mentionBlockIDs)
+	for id, tree := range trees {
+		backlink := buildBacklink(id, tree, mentionKeywords, luteEngine)
 		ret = append(ret, backlink)
 	}
 	return
@@ -138,7 +126,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 		return
 	}
 
-	luteEngine := NewLute()
+	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
 		var keywords []string
 		if "" != keyword {
@@ -182,11 +170,13 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	}
 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
-	ret = &Backlink{
-		DOM:        dom,
-		BlockPaths: buildBlockBreadcrumb(n, nil),
-		Expand:     expand,
+	blockPaths := []*BlockPath{}
+	if nil != n.Parent && nil != n.Parent.Parent {
+		// 仅在多余一层时才显示面包屑，这样界面展示更加简洁
+		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
+		blockPaths = buildBlockBreadcrumb(n, nil)
 	}
+	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand}
 	return
 }
 
@@ -252,12 +242,11 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	rootID := sqlBlock.RootID
 	boxID = sqlBlock.Box
 
-	refs := sql.QueryRefsByDefID(id, true)
+	refs := sql.QueryRefsByDefID(id, false)
 	refs = removeDuplicatedRefs(refs)
 
 	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
-
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
 		backlinks = append(backlinks, l)
@@ -351,7 +340,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int) (boxID strin
 	boxID = sqlBlock.Box
 
 	var links []*Block
-	refs := sql.QueryRefsByDefID(id, true)
+	refs := sql.QueryRefsByDefID(id, false)
 	refs = removeDuplicatedRefs(refs)
 
 	// 为了减少查询，组装好 IDs 后一次查出

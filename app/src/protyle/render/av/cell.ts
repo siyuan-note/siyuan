@@ -306,6 +306,19 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             }
         }
     }
+    /// #if MOBILE
+    const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
+    if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
+        const keyboardToolbarElement = document.getElementById("keyboardToolbar");
+        const keyboardH = parseInt(keyboardToolbarElement.getAttribute("data-keyboardheight")) || (window.outerHeight / 2 - 42);
+        console.log(keyboardH, window.innerHeight, cellRect.bottom);
+        if (cellRect.bottom > window.innerHeight - keyboardH - 42) {
+            contentElement.scrollTop += cellRect.bottom - window.innerHeight + 42 + keyboardH;
+        } else if (cellRect.top < 110) {
+            contentElement.scrollTop -= 110 - cellRect.top;
+        }
+    }
+    /// #else
     if (!blockElement.querySelector(".av__header")) {
         // 属性面板
         return;
@@ -336,6 +349,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             }
         }
     }
+    /// #endif
 };
 
 export const getTypeByCellElement = (cellElement: Element) => {
@@ -365,13 +379,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
     let cellRect = cellElements[0].getBoundingClientRect();
     const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
-    /// #if MOBILE
-    if (contentElement) {
-        contentElement.scrollTop = contentElement.scrollTop + cellRect.top - 110;
-    }
-    /// #else
     cellScrollIntoView(blockElement, cellElements[0], false);
-    /// #endif
     cellRect = cellElements[0].getBoundingClientRect();
     let html = "";
     let height = cellRect.height;

@@ -13,7 +13,10 @@
  * limitations under the License.
  */
 
-import { createPromiseCapability, getFilenameFromUrl } from "./pdfjs";
+/** @typedef {import("./event_utils.js").EventBus} EventBus */
+// eslint-disable-next-line max-len
+/** @typedef {import("./download_manager.js").DownloadManager} DownloadManager */
+
 import { BaseTreeViewer } from "./base_tree_viewer.js";
 import { waitOnEventOrTimeout } from "./event_utils.js";
 
@@ -27,6 +30,7 @@ import { waitOnEventOrTimeout } from "./event_utils.js";
 /**
  * @typedef {Object} PDFAttachmentViewerRenderParameters
  * @property {Object|null} attachments - A lookup table of attachment objects.
+ * @property {boolean} [keepRenderedCapability]
  */
 
 class PDFAttachmentViewer extends BaseTreeViewer {
@@ -50,13 +54,13 @@ class PDFAttachmentViewer extends BaseTreeViewer {
     if (!keepRenderedCapability) {
       // The only situation in which the `_renderedCapability` should *not* be
       // replaced is when appending FileAttachment annotations.
-      this._renderedCapability = createPromiseCapability();
+      this._renderedCapability = Promise.withResolvers();
     }
     this._pendingDispatchEvent = false;
   }
 
   /**
-   * @private
+   * @protected
    */
   async _dispatchEvent(attachmentsCount) {
     this._renderedCapability.resolve();
@@ -87,11 +91,14 @@ class PDFAttachmentViewer extends BaseTreeViewer {
   }
 
   /**
-   * @private
+   * @protected
    */
-  _bindLink(element, { content, filename }) {
+  _bindLink(element, { content, description, filename }) {
+    if (description) {
+      element.title = description;
+    }
     element.onclick = () => {
-      this.downloadManager.openOrDownloadData(element, content, filename);
+      this.downloadManager.openOrDownloadData(content, filename);
       return false;
     };
   }
@@ -109,26 +116,18 @@ class PDFAttachmentViewer extends BaseTreeViewer {
       this._dispatchEvent(/* attachmentsCount = */ 0);
       return;
     }
-    const names = Object.keys(attachments).sort(function (a, b) {
-      return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
 
     const fragment = document.createDocumentFragment();
     let attachmentsCount = 0;
-    for (const name of names) {
+    for (const name in attachments) {
       const item = attachments[name];
-      const content = item.content,
-        filename = getFilenameFromUrl(
-          item.filename,
-          /* onlyStripPath = */ true
-        );
 
       const div = document.createElement("div");
       div.className = "treeItem";
 
       const element = document.createElement("a");
-      this._bindLink(element, { content, filename });
-      element.textContent = this._normalizeTextContent(filename);
+      this._bindLink(element, item);
+      element.textContent = this._normalizeTextContent(item.filename);
 
       div.append(element);
 
@@ -142,7 +141,7 @@ class PDFAttachmentViewer extends BaseTreeViewer {
   /**
    * Used to append FileAttachment annotations to the sidebar.
    */
-  #appendAttachment({ filename, content }) {
+  #appendAttachment(item) {
     const renderedPromise = this._renderedCapability.promise;
 
     renderedPromise.then(() => {
@@ -152,14 +151,12 @@ class PDFAttachmentViewer extends BaseTreeViewer {
       const attachments = this._attachments || Object.create(null);
 
       for (const name in attachments) {
-        if (filename === name) {
+        if (item.filename === name) {
           return; // Ignore the new attachment if it already exists.
         }
       }
-      attachments[filename] = {
-        filename,
-        content,
-      };
+      attachments[item.filename] = item;
+
       this.render({
         attachments,
         keepRenderedCapability: true,

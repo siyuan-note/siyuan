@@ -277,8 +277,12 @@ func removeAttributeViewKey(c *gin.Context) {
 
 	avID := arg["avID"].(string)
 	keyID := arg["keyID"].(string)
+	removeRelationDest := false
+	if nil != arg["removeRelationDest"] {
+		removeRelationDest = arg["removeRelationDest"].(bool)
+	}
 
-	err := model.RemoveAttributeViewKey(avID, keyID)
+	err := model.RemoveAttributeViewKey(avID, keyID, removeRelationDest)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

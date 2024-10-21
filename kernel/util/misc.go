@@ -96,6 +96,8 @@ func EscapeHTML(s string) (ret string) {
 	ret = strings.ReplaceAll(ret, "__@gt__", "&gt;")
 	ret = strings.ReplaceAll(ret, "__@34__", "&#34;")
 	ret = strings.ReplaceAll(ret, "__@13__", "&#13;")
+	ret = strings.ReplaceAll(ret, "&lt;", "&amp;lt;")
+	ret = strings.ReplaceAll(ret, "&gt;", "&amp;gt;")
 	return
 }
 

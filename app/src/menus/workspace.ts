@@ -123,8 +123,9 @@ const editLayout = (layoutName?: string) => {
     });
 };
 
-const togglePinDock = (dock: Dock, icon: string) => {
+const togglePinDock = (id: string, dock: Dock, icon: string) => {
     return {
+        id,
         label: `${dock.pin ? window.siyuan.languages.unpin : window.siyuan.languages.pin}`,
         icon,
         current: !dock.pin,
@@ -145,6 +146,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         window.siyuan.menus.menu.element.setAttribute("data-name", "barWorkspace");
         if (!window.siyuan.config.readonly) {
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "config",
                 label: window.siyuan.languages.config,
                 icon: "iconSettings",
                 accelerator: window.siyuan.config.keymap.general.config.custom,
@@ -156,6 +158,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         const dockMenu: IMenu[] = [];
         getAllDocks().forEach(item => {
             dockMenu.push({
+                id: item.type,
                 icon: item.icon,
                 accelerator: item.hotkey,
                 label: item.title,
@@ -165,12 +168,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             });
         });
         if (!window.siyuan.config.readonly) {
-            dockMenu.push({type: "separator"});
-            dockMenu.push(togglePinDock(window.siyuan.layout.leftDock, "iconLeftTop"));
-            dockMenu.push(togglePinDock(window.siyuan.layout.rightDock, "iconRightTop"));
-            dockMenu.push(togglePinDock(window.siyuan.layout.bottomDock, "iconBottomLeft"));
+            dockMenu.push({id: "separator_1", type: "separator"});
+            dockMenu.push(togglePinDock("leftDock", window.siyuan.layout.leftDock, "iconLeftTop"));
+            dockMenu.push(togglePinDock("rightDock", window.siyuan.layout.rightDock, "iconRightTop"));
+            dockMenu.push(togglePinDock("bottomDock", window.siyuan.layout.bottomDock, "iconBottomLeft"));
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "panels",
             label: window.siyuan.languages.panels,
             icon: "iconDock",
             type: "submenu",
@@ -180,6 +184,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             let workspaceSubMenu: IMenu[];
             /// #if !BROWSER
             workspaceSubMenu = [{
+                id: "newOrOpenBy",
                 label: `${window.siyuan.languages.new} / ${window.siyuan.languages.openBy}`,
                 iconHTML: "",
                 click: async () => {
@@ -202,12 +207,13 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     });
                 }
             }];
-            workspaceSubMenu.push({type: "separator"});
+            workspaceSubMenu.push({id: "separator_1", type: "separator"});
             response.data.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push(workspaceItem(item) as IMenu);
             });
             /// #else
             workspaceSubMenu = [{
+                id: "new",
                 label: window.siyuan.languages.new,
                 iconHTML: "",
                 click() {
@@ -238,6 +244,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     });
                 }
             }, {
+                id: "openBy",
                 label: `${window.siyuan.languages.openBy}...`,
                 iconHTML: "",
                 click() {
@@ -279,7 +286,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     });
                 }
             }];
-            workspaceSubMenu.push({type: "separator"});
+            workspaceSubMenu.push({id: "separator_1", type: "separator"});
             response.data.forEach((item: IWorkspace) => {
                 workspaceSubMenu.push({
                     iconHTML: "",
@@ -312,6 +319,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             /// #endif
             if (!isBrowser() || isInIOS() || isInAndroid()) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "workspaceList",
                     label: window.siyuan.languages.workspaceList,
                     icon: "iconWorkspace",
                     type: "submenu",
@@ -320,6 +328,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }
         const layoutSubMenu: IMenu[] = [{
+            id: "save",
             iconHTML: "",
             label: window.siyuan.languages.save,
             click() {
@@ -327,7 +336,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }];
         if (window.siyuan.storage[Constants.LOCAL_LAYOUTS].length > 0) {
-            layoutSubMenu.push({type: "separator"});
+            layoutSubMenu.push({id: "separator_1", type: "separator"});
         }
         window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
@@ -362,15 +371,17 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             });
         });
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "layout",
             label: window.siyuan.languages.layout,
             icon: "iconLayout",
             type: "submenu",
             submenu: layoutSubMenu
         }).element);
-        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+        window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
         if (!window.siyuan.config.readonly) {
             if (getOpenNotebookCount() < 2) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "dailyNote",
                     label: window.siyuan.languages.dailyNote,
                     icon: "iconCalendar",
                     accelerator: window.siyuan.config.keymap.general.dailyNote.custom,
@@ -395,6 +406,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     }
                 });
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "dailyNote",
                     label: window.siyuan.languages.dailyNote,
                     icon: "iconCalendar",
                     type: "submenu",
@@ -403,10 +415,12 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
             if (!window.siyuan.config.readonly) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "riffCard",
                     label: window.siyuan.languages.riffCard,
                     type: "submenu",
                     icon: "iconRiffCard",
                     submenu: [{
+                        id: "spaceRepetition",
                         iconHTML: "",
                         label: window.siyuan.languages.spaceRepetition,
                         accelerator: window.siyuan.config.keymap.general.riffCard.custom,
@@ -414,6 +428,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                             openCard(app);
                         }
                     }, {
+                        id: "manage",
                         iconHTML: "",
                         label: window.siyuan.languages.manage,
                         click: () => {
@@ -423,6 +438,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "recentDocs",
                 label: window.siyuan.languages.recentDocs,
                 icon: "iconFile",
                 accelerator: window.siyuan.config.keymap.general.recentDocs.custom,
@@ -431,6 +447,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "lockScreen",
                 label: window.siyuan.languages.lockScreen,
                 icon: "iconLock",
                 accelerator: window.siyuan.config.keymap.general.lockScreen.custom,
@@ -439,6 +456,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "dataHistory",
                 label: window.siyuan.languages.dataHistory,
                 icon: "iconHistory",
                 accelerator: window.siyuan.config.keymap.general.dataHistory.custom,
@@ -446,9 +464,10 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     openHistory(app);
                 }
             }).element);
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
         }
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "userGuide",
             label: window.siyuan.languages.userGuide,
             icon: "iconHelp",
             ignore: isIPad() || window.siyuan.config.readonly,
@@ -457,6 +476,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "feedback",
             label: window.siyuan.languages.feedback,
             icon: "iconFeedback",
             click: () => {
@@ -469,6 +489,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         }).element);
         /// #if !BROWSER
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "debug",
             label: window.siyuan.languages.debug,
             icon: "iconBug",
             click: () => {
@@ -477,8 +498,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         }).element);
         /// #endif
         if (isIPad() || isInAndroid() || !isBrowser()) {
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "safeQuit",
                 label: window.siyuan.languages.safeQuit,
                 icon: "iconQuit",
                 click: () => {
@@ -519,18 +541,21 @@ const workspaceItem = (item: IWorkspace) => {
         iconHTML: "",
         type: "submenu",
         submenu: [{
+            id: "openBy",
             icon: "iconOpenWindow",
             label: window.siyuan.languages.openBy,
             click() {
                 openWorkspace(item.path);
             }
         }, {
+            id: "showInFolder",
             icon: "iconFolder",
             label: window.siyuan.languages.showInFolder,
             click() {
                 showFileInFolder(item.path);
             }
         }, {
+            id: "copyPath",
             icon: "iconCopy",
             label: window.siyuan.languages.copyPath,
             click() {
@@ -538,6 +563,7 @@ const workspaceItem = (item: IWorkspace) => {
                 showMessage(window.siyuan.languages.copied);
             }
         }, {
+            id: "removeWorkspaceTip",
             icon: "iconTrashcan",
             label: window.siyuan.languages.removeWorkspaceTip,
             click() {

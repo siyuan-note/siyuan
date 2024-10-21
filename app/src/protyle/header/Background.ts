@@ -416,12 +416,6 @@ export class Background {
                 target = target.parentElement;
             }
         });
-
-        /// #if MOBILE
-        if (!protyle.disabled) {
-          this.element.classList.add("protyle-background--mobileshow");
-        }
-        /// #endif
     }
 
     private removeTag(protyle: IProtyle) {

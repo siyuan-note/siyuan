@@ -63,6 +63,7 @@
     & > div {
       box-sizing: border-box;
       position: absolute;
+      z-index: 1;
 
       &:first-child {
         border-bottom-left-radius: var(--b3-border-radius);
@@ -136,7 +137,7 @@
 
 #sidebarContainer {
   position: absolute;
-  top: 32px;
+  top: 30px;
   bottom: 0;
   width: var(--b3-pdf-sidebar-width);
   visibility: hidden;
@@ -174,7 +175,7 @@
 }
 
 #sidebarContent {
-  top: 32px;
+  top: 30px;
   bottom: 0;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
@@ -187,7 +188,7 @@
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   position: absolute;
-  top: 32px;
+  top: 30px;
   right: 0;
   bottom: 0;
   left: 0;
@@ -213,14 +214,14 @@
 #toolbarSidebar,
 #toolbarViewer {
   width: 100%;
-  height: 32px;
+  height: 30px;
   display: flex;
   padding-left: 8px;
   box-sizing: border-box;
 }
 
 #toolbarViewer #numPages {
-  line-height: 32px;
+  line-height: 30px;
   padding-left: 4px;
 }
 
@@ -316,9 +317,9 @@
 }
 
 .findbar {
-  left: 64px;
+  left: 40px;
   position: absolute;
-  top: 36px;
+  top: 30px;
   padding: 4px 8px;
   display: flex;
   align-items: center;
@@ -334,10 +335,11 @@
 .secondaryToolbar {
   right: 4px;
   position: absolute;
-  top: 36px;
+  top: 30px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
-  z-index: 3;
+  // 需高于 pdf 中的链接
+  z-index: 38;
 
   .b3-menu__items {
     max-height: 60vh;
@@ -361,15 +363,15 @@
   border: none;
   background: none;
   cursor: pointer;
-  padding: 0 4px;
-  line-height: 32px;
+  padding: 5px;
   user-select: none;
-  width: 20px;
+  width: 24px;
   box-sizing: border-box;
-  height: 32px;
+  height: 24px;
   margin-right: 8px;
   color: var(--b3-theme-on-surface);
   overflow: initial;
+  align-self: center;
 
   &:hover,
   &:focus {
@@ -377,8 +379,8 @@
   }
 
   & > svg {
-    height: 12px;
-    width: 12px;
+    height: 14px;
+    width: 14px;
   }
 
   &[disabled] {
@@ -405,14 +407,13 @@
 .dropdownToolbarButton {
   --scale-select-width: 140px;
   width: var(--scale-select-width);
-  margin: 4px 8px 0 0;
+  margin: 2px 8px 2px 0;
 
   select {
     width: inherit;
     min-width: auto;
-    height: 24px;
-    line-height: 24px;
     padding: 0 8px;
+    height: 26px;
   }
 }
 
@@ -440,7 +441,7 @@
   text-align: right;
   width: 48px;
   padding: 1px 8px;
-  margin: 4px 0;
+  margin: 2px 0;
 }
 
 .toolbarField.pageNumber::-webkit-inner-spin-button,
@@ -459,10 +460,10 @@
 #outlineView,
 #attachmentsView,
 #layersView {
-  width: calc(100% - 16px);
+  width: calc(100% - 60px);
   top: 0;
   bottom: 0;
-  padding: 8px;
+  padding: 10px 30px;
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   position: absolute;
@@ -474,7 +475,18 @@
 }
 
 #thumbnailView .thumbnail {
-  margin-bottom: 8px;
+  margin-bottom: 5px;
+  padding: 1px;
+  border: 7px solid transparent;
+  border-radius: 2px;
+
+  &:hover {
+    border-color: var(--b3-list-hover);
+  }
+
+  &.selected {
+    border-color: var(--b3-border-color);
+  }
 }
 
 .thumbnailImage {
@@ -740,7 +752,7 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
   background: none repeat scroll 0 0 rgba(255, 255, 255, 1);
   border: 1px solid rgba(102, 102, 102, 1);
   position: fixed;
-  top: 32px;
+  top: 30px;
   right: 0;
   bottom: 0;
   font-size: 10px;
@@ -838,6 +850,10 @@ a:focus > .thumbnail > .thumbnailSelectionRing,
 #viewer.textLayer-shadow .textLayer span {
   background-color: rgba(255, 255, 255, .6);
   color: rgba(0, 0, 0, 1);
+}
+
+.editToolbar {
+  display: none;
 }
 
 .rect-to-annotation {

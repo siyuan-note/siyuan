@@ -280,7 +280,7 @@
       }
 
       &[data-type="NodeBlockQueryEmbed"] {
-        background-color: var(--b3-theme-surface);
+        background-color: var(--b3-embed-background);
         border-left: 1px dashed var(--b3-theme-surface-lighter);
         max-width: 100%;
 
@@ -319,9 +319,14 @@
 
       thead {
         position: sticky;
-        top: -1px;
+        top: 1px;
         z-index: 2;
-        box-shadow: 0 -1px 0 var(--b3-theme-on-surface-light) inset;
+        box-shadow: 0 -1px 0 var(--b3-border-color) inset, 0 -1px 0 0 var(--b3-border-color);
+        background-color: var(--b3-theme-background);
+
+        th {
+          border-top: 0;
+        }
       }
     }
 

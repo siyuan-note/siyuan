@@ -174,7 +174,7 @@ export const initFramework = (app: App, isStart: boolean) => {
         const idZoomIn = getIdZoomInByPath();
         if (idZoomIn.id) {
             openMobileFileById(app, idZoomIn.id,
-                idZoomIn.isZoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                idZoomIn.isZoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
             return;
         }
         if (window.siyuan.config.fileTree.closeTabsOnStart && isStart) {

@@ -791,14 +791,14 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(207), i+1, len(renameRoots)))
 	}
 
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
 	for _, id := range reloadTreeIDs {
 		refreshProtyle(id)
 	}
 
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 	util.PushClearProgress()
 	return
 }
@@ -834,7 +834,7 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 			// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
 			keywords := strings.Split(keyword, " ")
 			// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
-			if 1 < len(keywords) {
+			if 0 < len(keywords) {
 				var lowerKeywords []string
 				for _, k := range keywords {
 					lowerKeywords = append(lowerKeywords, strings.ToLower(k))
@@ -1419,6 +1419,17 @@ func fullTextSearchCount(query, boxFilter, pathFilter, typeFilter string) (match
 	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
 	stmt += ") AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter
+
+	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
+		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
+		buf := bytes.Buffer{}
+		for _, line := range ignoreLines {
+			buf.WriteString(" AND ")
+			buf.WriteString(line)
+		}
+		stmt += buf.String()
+	}
+
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return

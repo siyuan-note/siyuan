@@ -7,7 +7,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "./getBlock";
-import {transaction, updateTransaction} from "./transaction";
+import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {breakList, genListItemElement, listOutdent, updateListOrder} from "./list";
 import {highlightRender} from "../render/highlightRender";
 import {Constants} from "../../constants";
@@ -17,7 +17,7 @@ import {isIPad, setStorageVal} from "../util/compatibility";
 import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
-import {hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
@@ -198,7 +198,19 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     range.insertNode(wbrElement);
     const html = blockElement.outerHTML;
     wbrElement.remove();
+
     if (range.toString() !== "") {
+        // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
+        const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
+        if (mathElement) {
+            const nextSibling = hasNextSibling(mathElement);
+            if (nextSibling) {
+                range = getSelection().getRangeAt(0);
+                range.setEnd(nextSibling, nextSibling.textContent.startsWith(Constants.ZWSP) ? 1 : 0);
+                range.collapse(false);
+            }
+            return true;
+        }
         range.extractContents();
     }
     if (editableElement.lastChild) {
@@ -237,6 +249,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     const undoOperation: IOperation[] = [];
     let currentElement = blockElement;
     // 回车之前的块为 1\n\n2 时会产生多个块
+    const selectsElement: Element[] = [];
     Array.from(enterElement.children).forEach((item: HTMLElement) => {
         if (item.dataset.nodeId === id) {
             blockElement.before(item);
@@ -266,6 +279,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         }
         mathRender(item);
         currentElement = item;
+        selectsElement.push(item);
     });
 
     Array.from(newElement.children).forEach((item: HTMLElement) => {
@@ -287,8 +301,18 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             mathRender(currentElement.nextElementSibling);
         }
         currentElement = item;
+        selectsElement.push(item);
     });
+    const parentElement = currentElement.parentElement;
     transaction(protyle, doOperation, undoOperation);
+    if (parentElement.classList.contains("sb") && parentElement.getAttribute("data-sb-layout") === "col") {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement,
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
+    }
     focusBlock(currentElement);
     scrollCenter(protyle);
     return true;
@@ -433,6 +457,17 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     const listItemHTML = listItemElement.outerHTML;
     const html = listItemElement.parentElement.outerHTML;
     if (range.toString() !== "") {
+        // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
+        const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
+        if (mathElement) {
+            const nextSibling = hasNextSibling(mathElement);
+            if (nextSibling) {
+                range = getSelection().getRangeAt(0);
+                range.setEnd(nextSibling, nextSibling.textContent.startsWith(Constants.ZWSP) ? 1 : 0);
+                range.collapse(false);
+            }
+            return true;
+        }
         range.extractContents();
         range.insertNode(document.createElement("wbr"));
     }

@@ -83,20 +83,19 @@ export class Toolbar {
             return;
         }
         // https://github.com/siyuan-note/siyuan/issues/5157
-        let hasImg = true;
-        let noText = true;
+        let hasText = false;
         Array.from(range.cloneContents().childNodes).find(item => {
-            if (item.nodeType !== 1) {
-                if (item.textContent.length > 0) {
-                    noText = false;
+            // zwsp 不显示工具栏
+            if (item.textContent.length > 0 && item.textContent !== Constants.ZWSP) {
+                if (item.nodeType === 1 && (item as HTMLElement).classList.contains("img")) {
+                    // 图片不显示工具栏
+                } else {
+                    hasText = true;
                     return true;
                 }
-            } else if (!(item as HTMLElement).classList.contains("img")) {
-                hasImg = false;
-                return true;
             }
         });
-        if ((hasImg && noText) ||
+        if (!hasText ||
             // 拖拽图片到最右侧
             (range.commonAncestorContainer.nodeType !== 3 && (range.commonAncestorContainer as HTMLElement).classList.contains("img"))) {
             this.element.classList.add("fn__none");
@@ -370,7 +369,11 @@ export class Toolbar {
                 }
             }
             contents.childNodes.forEach((item: HTMLElement, index) => {
-                if (item.nodeType !== 3 && item.tagName !== "BR" && item.tagName !== "IMG") {
+                if (item.nodeType !== 3 && item.tagName !== "BR" && item.tagName !== "IMG" && !item.classList.contains("img")) {
+                    // 图片后有粗体，仅选中图片后，rang 中会包含一个空的粗体，需移除
+                    if (item.textContent === "") {
+                        return;
+                    }
                     const types = (item.getAttribute("data-type") || "").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
@@ -484,12 +487,14 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.textContent + nextElement.innerHTML;
-                        } else {
+                        } else  if (item.textContent !== Constants.ZWSP) {
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
                             inlineElement.textContent = item.textContent;
                             setFontStyle(inlineElement, textObj);
                             newNodes.push(inlineElement);
+                        } else {
+                            newNodes.push(item);
                         }
                     } else {
                         let types = (item.getAttribute("data-type") || "").split(" ");
@@ -500,7 +505,9 @@ export class Toolbar {
                                 i--;
                             }
                         }
-                        types.push(type);
+                        if (!types.includes("img")) {
+                            types.push(type);
+                        }
                         // 上标和下标不能同时存在 https://github.com/siyuan-note/insider/issues/1049
                         if (type === "sub" && types.includes("sup")) {
                             types.find((item, index) => {

@@ -77,16 +77,17 @@ export const commandPanel = (app: App) => {
         plugin.commands.forEach(command => {
             const liElement = document.createElement("li");
             liElement.classList.add("b3-list-item");
-            liElement.dataset.command = command.langKey;
             liElement.innerHTML = `<span class="b3-list-item__text">${plugin.displayName}: ${command.langText || plugin.i18n[command.langKey]}</span>
 <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(command.customHotkey)}</span>`;
-            liElement.addEventListener("click", () => {
+            liElement.addEventListener("click", (event) => {
                 if (command.callback) {
                     command.callback();
                 } else if (command.globalCallback) {
                     command.globalCallback();
                 }
                 dialog.destroy();
+                event.preventDefault();
+                event.stopPropagation();
             });
             listElement.insertAdjacentElement("beforeend", liElement);
         });

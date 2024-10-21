@@ -280,6 +280,7 @@ ${padHTML}
                     uploadHTML += ">";
                 }
                 const uploadMenu = new MenuItem({
+                    id: "insertAsset",
                     icon: "iconDownload",
                     label: `${window.siyuan.languages.insertAsset}${uploadHTML}`,
                 }).element;
@@ -295,6 +296,7 @@ ${padHTML}
                 window.siyuan.menus.menu.append(uploadMenu);
                 if (!isInAndroid()) {
                     window.siyuan.menus.menu.append(new MenuItem({
+                        id: this.mediaRecorder?.isRecording ? "endRecord" : "startRecord",
                         current: this.mediaRecorder && this.mediaRecorder.isRecording,
                         icon: "iconRecord",
                         label: this.mediaRecorder?.isRecording ? window.siyuan.languages.endRecord : window.siyuan.languages.startRecord,
@@ -351,6 +353,7 @@ ${padHTML}
             }
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "netImg2LocalAsset",
                     label: window.siyuan.languages.netImg2LocalAsset,
                     icon: "iconImgDown",
                     accelerator: window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom,
@@ -359,6 +362,7 @@ ${padHTML}
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "netAssets2LocalAssets",
                     label: window.siyuan.languages.netAssets2LocalAssets,
                     icon: "iconTransform",
                     accelerator: window.siyuan.config.keymap.editor.general.netAssets2LocalAssets.custom,
@@ -367,6 +371,7 @@ ${padHTML}
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "uploadAssets2CDN",
                     label: window.siyuan.languages.uploadAssets2CDN,
                     icon: "iconCloudSucc",
                     click() {
@@ -379,6 +384,7 @@ ${padHTML}
                 }).element);
                 if (window.siyuan.user) { // 登录链滴账号后即可使用 `分享到链滴` https://github.com/siyuan-note/siyuan/issues/7392
                     window.siyuan.menus.menu.append(new MenuItem({
+                        id: "share2Liandi",
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",
                         click() {
@@ -391,6 +397,7 @@ ${padHTML}
             }
             if (!protyle.scroll?.element.classList.contains("fn__none")) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "keepLazyLoad",
                     current: protyle.scroll.keepLazyLoad,
                     label: window.siyuan.languages.keepLazyLoad,
                     click: () => {
@@ -399,9 +406,10 @@ ${padHTML}
                 }).element);
             }
             if (window.siyuan.menus.menu.element.lastElementChild.childElementCount > 0) {
-                window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "refresh",
                 icon: "iconRefresh",
                 accelerator: window.siyuan.config.keymap.editor.general.refresh.custom,
                 label: window.siyuan.languages.refresh,
@@ -411,6 +419,7 @@ ${padHTML}
             }).element);
             if (!protyle.disabled) {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "optimizeTypography",
                     label: window.siyuan.languages.optimizeTypography,
                     accelerator: window.siyuan.config.keymap.editor.general.optimizeTypography.custom,
                     icon: "iconFormat",
@@ -424,6 +433,7 @@ ${padHTML}
             }
             /// #if !MOBILE
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "fullscreen",
                 icon: protyle.element.className.includes("fullscreen") ? "iconFullscreenExit" : "iconFullscreen",
                 accelerator: window.siyuan.config.keymap.editor.general.fullscreen.custom,
                 label: window.siyuan.languages.fullscreen,
@@ -434,10 +444,12 @@ ${padHTML}
             }).element);
             /// #endif
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "editMode",
                 icon: "iconEdit",
                 label: window.siyuan.languages["edit-mode"],
                 type: "submenu",
                 submenu: [{
+                    id: "wysiwyg",
                     current: !protyle.contentElement.classList.contains("fn__none"),
                     label: window.siyuan.languages.wysiwyg,
                     accelerator: window.siyuan.config.keymap.editor.general.wysiwyg.custom,
@@ -455,6 +467,7 @@ ${padHTML}
                         /// #endif
                     }
                 }, {
+                    id: "preview",
                     current: !protyle.preview.element.classList.contains("fn__none"),
                     icon: "iconPreview",
                     label: window.siyuan.languages.preview,
@@ -471,10 +484,12 @@ ${padHTML}
             if (!window.siyuan.config.editor.readOnly && !window.siyuan.config.readonly) {
                 const isCustomReadonly = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_READONLY);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "editReadonly",
                     label: window.siyuan.languages.editReadonly,
                     icon: "iconLock",
                     type: "submenu",
                     submenu: [{
+                        id: "enable",
                         iconHTML: "",
                         current: isCustomReadonly === "true",
                         label: window.siyuan.languages.enable,
@@ -485,6 +500,7 @@ ${padHTML}
                             });
                         }
                     }, {
+                        id: "disable",
                         iconHTML: "",
                         current: !isCustomReadonly || isCustomReadonly === "false",
                         label: window.siyuan.languages.disable,
@@ -501,10 +517,12 @@ ${padHTML}
             if (!protyle.disabled) {
                 const isCustomFullWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "fullWidth",
                     label: window.siyuan.languages.fullWidth,
                     icon: "iconDock",
                     type: "submenu",
                     submenu: [{
+                        id: "enable",
                         iconHTML: "",
                         current: isCustomFullWidth === "true",
                         label: window.siyuan.languages.enable,
@@ -515,6 +533,7 @@ ${padHTML}
                             });
                         }
                     }, {
+                        id: "disable",
                         iconHTML: "",
                         current: isCustomFullWidth === "false",
                         label: window.siyuan.languages.disable,
@@ -525,6 +544,7 @@ ${padHTML}
                             });
                         }
                     }, {
+                        id: "default",
                         iconHTML: "",
                         current: !isCustomFullWidth,
                         label: window.siyuan.languages.default,
@@ -549,8 +569,9 @@ ${padHTML}
                     separatorPosition: "top",
                 });
             }
-            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "docInfo",
                 iconHTML: "",
                 type: "readonly",
                 // 不能换行，否则移动端间距过大

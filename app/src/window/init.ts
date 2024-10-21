@@ -65,7 +65,6 @@ const afterLayout = (app: App) => {
         afterLoadPlugin(item);
     });
     document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
-        item.removeAttribute("data-init-active");
         const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
         tab.parent.switchTab(item, false, false);
     });

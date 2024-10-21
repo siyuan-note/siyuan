@@ -7,21 +7,20 @@
 		"id": "20240530101000-scr2p21",
 		"title": "デイリーノート",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20241008202730"
 	},
 	"Children": [
 		{
 			"ID": "20240530101000-bzkce2v",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-6y7pqdq",
 				"id": "20240530101000-bzkce2v",
-				"updated": "20240530101000"
+				"updated": "20241008202730"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "メインメニューからデイリーノートを作成できます。"
+					"Data": "デイリーノートを通じて素早く文書を作成できる、デイリーノート機能への入り口は上部のメインメニュにあります。"
 				}
 			]
 		},
@@ -29,9 +28,8 @@
 			"ID": "20240530101000-efq2rys",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-xwijoqj",
 				"id": "20240530101000-efq2rys",
-				"updated": "20240530101000"
+				"updated": "20241008202721"
 			},
 			"Children": [
 				{

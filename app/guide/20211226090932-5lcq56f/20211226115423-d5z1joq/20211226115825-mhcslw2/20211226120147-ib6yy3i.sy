@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20240818175953"
+		"updated": "20241018105334"
 	},
 	"Children": [
 		{
@@ -1525,7 +1525,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429114938-37kksd9",
-				"updated": "20220429114945"
+				"updated": "20241018105334"
 			},
 			"Children": [
 				{
@@ -1611,7 +1611,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240427230732-snprakd",
-				"updated": "20240427230732"
+				"updated": "20241018105334"
 			},
 			"Children": [
 				{
@@ -1623,7 +1623,7 @@
 					},
 					"Properties": {
 						"id": "20240427230732-tgvmt21",
-						"updated": "20240427230732"
+						"updated": "20241018105334"
 					},
 					"Children": [
 						{
@@ -1631,12 +1631,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-p75fah5",
-								"updated": "20240427230732"
+								"updated": "20241018105334"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "使用 HTML 區塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
+									"Data": "使用 HTML 塊時預設會對其中的程式碼進行安全過濾，如果不需要過濾，請開啟 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -1659,7 +1659,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "允許執行 HTML 區塊內腳本"
+									"TextMarkTextContent": "允許執行 HTML 塊內腳本"
 								},
 								{
 									"Type": "NodeText",
@@ -1678,7 +1678,7 @@
 					},
 					"Properties": {
 						"id": "20240427230732-dhlczme",
-						"updated": "20240427230732"
+						"updated": "20241018105314"
 					},
 					"Children": [
 						{
@@ -1686,12 +1686,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240427230732-an8u8ps",
-								"updated": "20240427230732"
+								"updated": "20241018105314"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "因為 Markdown 規範對 HTML 區塊解析規則較為複雜，建議使用 "
+									"Data": "因為 Markdown 規範對 HTML 塊解析規則較為複雜，建議使用 "
 								},
 								{
 									"Type": "NodeTextMark",

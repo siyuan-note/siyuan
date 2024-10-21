@@ -828,13 +828,13 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = NodeStaticContent(n, nil, true, indexAssetPath, true, nil)
+		content = NodeStaticContent(n, nil, true, indexAssetPath, true)
 
 		fc := treenode.FirstLeafBlock(n)
 		if !treenode.IsNodeOCRed(fc) {
 			util.PushNodeOCRQueue(fc)
 		}
-		fcontent = NodeStaticContent(fc, nil, true, false, true, nil)
+		fcontent = NodeStaticContent(fc, nil, true, false, true)
 
 		parentID = n.Parent.ID
 		if h := heading(n); nil != h { // 如果在标题块下方，则将标题块作为父节点
@@ -846,7 +846,7 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		if !treenode.IsNodeOCRed(n) {
 			util.PushNodeOCRQueue(n)
 		}
-		content = NodeStaticContent(n, nil, true, indexAssetPath, true, nil)
+		content = NodeStaticContent(n, nil, true, indexAssetPath, true)
 
 		parentID = n.Parent.ID
 		if h := heading(n); nil != h {

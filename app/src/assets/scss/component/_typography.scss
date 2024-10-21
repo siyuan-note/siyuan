@@ -13,13 +13,6 @@
   img {
     max-width: 100%;
     margin: 0 auto;
-
-    &.emoji {
-      width: 1.25em;
-      cursor: auto;
-      max-width: none;
-      vertical-align: sub; // text-top windows 不兼容
-    }
   }
 
   // 需显示 p 的使用范围 https://github.com/siyuan-note/siyuan/issues/11670
@@ -131,7 +124,7 @@
     padding: 4px;
     color: var(--b3-theme-on-surface);
     border-left: .25em solid var(--b3-theme-surface-lighter);
-    background-color: var(--b3-list-hover);
+    background-color: var(--b3-bq-background);
     margin: 4px 0;
   }
 
@@ -212,13 +205,12 @@
     border-spacing: 0;
     width: max-content;
 
-    tr:nth-child(2n) td {
-      background-color: var(--b3-theme-background);
+    tr:nth-child(even) td {
+      background-color: var(--b3-table-even-background);
     }
 
     td,
     th {
-      background-color: var(--b3-theme-surface);
       padding: 4px 8px;
       border: 1px solid var(--b3-theme-surface-lighter);
       box-sizing: border-box;
@@ -639,4 +631,11 @@
   background-color: var(--b3-theme-surface);
   z-index: 304;
   padding: 4px;
+}
+
+.emoji {
+  width: 1.25em;
+  cursor: auto;
+  max-width: none;
+  vertical-align: sub; // text-top windows 不兼容
 }

@@ -671,7 +671,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (previousElement) {
                                 const foldElement = hasClosestByAttribute(previousElement, "fold", "1") as HTMLElement;
                                 // 代码块或以软换行结尾的块移动光标 ↑ 会跳过 https://github.com/siyuan-note/siyuan/issues/5498
-                                if (!foldElement) {
+                                // 代码块全选后 ↑ 光标不会上移 https://github.com/siyuan-note/siyuan/issues/11581
+                                // 段落块不能设置，否则 ↑ 后光标位置不能保持 https://github.com/siyuan-note/siyuan/issues/12710
+                                if (!foldElement && previousElement.classList.contains("code-block")) {
                                     focusBlock(previousElement, undefined, false);
                                     scrollCenter(protyle, previousElement);
                                     event.stopPropagation();
@@ -736,14 +738,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (nodeEditableElement?.innerText.substr(position.end).indexOf("\n") === -1 || position.end >= nodeEditableElement.innerText.trimEnd().length) {
                     // 需使用 innerText，否则 td 中的 br 无法转换为 \n; position.end 不能加1，否则倒数第二行行末无法下移
                     range.collapse(false);
-                    const nextFoldElement = getNextBlock(nodeElement) as HTMLElement;
-                    if (nextFoldElement) {
-                        if(nodeEditableElement.getBoundingClientRect().bottom - getSelectionPosition(nodeElement, range).top < 40) {
-                            focusBlock(nextFoldElement);
-                            scrollCenter(protyle, nextFoldElement);
-                            event.stopPropagation();
-                            event.preventDefault();
-                        }
+                    const nextElement = getNextBlock(nodeElement) as HTMLElement;
+                    if (nextElement &&
+                        (nextElement.getAttribute("fold") === "1" || nextElement.classList.contains("code-block")) &&
+                        nodeEditableElement.getBoundingClientRect().bottom - getSelectionPosition(nodeElement, range).top < 40) {
+                        focusBlock(nextElement);
+                        scrollCenter(protyle, nextElement);
+                        event.stopPropagation();
+                        event.preventDefault();
                     }
                 }
             }
@@ -1597,6 +1599,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             const tabSpace = window.siyuan.config.editor.codeTabSpaces === 0 ? "\t" : "".padStart(window.siyuan.config.editor.codeTabSpaces, " ");
             if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" && selectText !== "") {
+                // https://github.com/siyuan-note/siyuan/issues/12650
+                if (!hasNextSibling(range.endContainer) && range.endContainer.textContent.endsWith("\n") && range.endOffset > 0) {
+                    range.setEnd(range.endContainer, range.endOffset - 1);
+                }
                 const wbrElement = document.createElement("wbr");
                 range.insertNode(wbrElement);
                 range.setStartAfter(wbrElement);

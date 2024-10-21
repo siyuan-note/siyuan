@@ -72,7 +72,7 @@ func IsLocalOrigin(origin string) bool {
 	return false
 }
 
-func IsOnline(checkURL string, skipTlsVerify bool) bool {
+func IsOnline(checkURL string, skipTlsVerify bool, timeout int) bool {
 	_, err := url.Parse(checkURL)
 	if err != nil {
 		logging.LogWarnf("invalid check URL [%s]", checkURL)
@@ -83,7 +83,7 @@ func IsOnline(checkURL string, skipTlsVerify bool) bool {
 		return false
 	}
 
-	if isOnline(checkURL, skipTlsVerify) {
+	if isOnline(checkURL, skipTlsVerify, timeout) {
 		return true
 	}
 
@@ -104,8 +104,8 @@ func IsPortOpen(port string) bool {
 	return false
 }
 
-func isOnline(checkURL string, skipTlsVerify bool) (ret bool) {
-	c := req.C().SetTimeout(3 * time.Second)
+func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
+	c := req.C().SetTimeout(time.Duration(timeout) * time.Millisecond)
 	if skipTlsVerify {
 		c.EnableInsecureSkipVerify()
 	}

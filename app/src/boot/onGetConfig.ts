@@ -289,7 +289,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 webContentsId: ipcData.webContentsId
             });
             const savePath = ipcData.filePaths[0];
-            let pdfFilePath  = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
+            let pdfFilePath = path.join(savePath, replaceLocalPath(ipcData.rootTitle) + ".pdf");
             const responseUnique = await fetchSyncPost("/api/file/getUniqueFilename", {path: pdfFilePath});
             pdfFilePath = responseUnique.data.path;
             fetchPost("/api/export/exportHTML", {
@@ -334,7 +334,8 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                 });
             });
         } catch (e) {
-            showMessage("Export PDF failed: " + e, 0, "error", msgId);
+            console.error(e);
+            showMessage(window.siyuan.languages.exportPDFLowMemory, 0, "error", msgId);
             ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "destroy", webContentsId: ipcData.webContentsId});
         }
         ipcRenderer.send(Constants.SIYUAN_CMD, {cmd: "hide", webContentsId: ipcData.webContentsId});

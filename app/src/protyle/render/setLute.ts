@@ -31,6 +31,7 @@ export const setLute = (options: ILuteOptions) => {
     lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
     lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
     lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
     lute.SetGFMStrikethrough1(false);
     lute.SetSpin(true);
     lute.SetProtyleWYSIWYG(true);

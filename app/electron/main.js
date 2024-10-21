@@ -773,7 +773,12 @@ app.whenReady().then(() => {
             return systemPreferences.askForMediaAccess("microphone");
         }
         if (data.cmd === "printToPDF") {
-            return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
+            try {
+                return getWindowByContentId(data.webContentsId).webContents.printToPDF(data.pdfOptions);
+            } catch (e) {
+                writeLog("printToPDF: ", e);
+                throw e;
+            }
         }
         if (data.cmd === "siyuan-open-file") {
             let hasMatch = false;

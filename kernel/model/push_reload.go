@@ -140,7 +140,7 @@ func refreshProtyle(rootID string) {
 
 // refreshRefCount 用于刷新定义块处的引用计数。
 func refreshRefCount(rootID, blockID string) {
-	sql.WaitForWritingDatabase()
+	sql.FlushQueue()
 
 	bt := treenode.GetBlockTree(blockID)
 	if nil == bt {
@@ -234,6 +234,16 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 	}
 
 	// 2. 更新属性视图主键内容
+	var parents []*ast.Node
+	for _, updatedDefNode := range updatedDefNodes {
+		for parent := updatedDefNode.Parent; nil != parent && ast.NodeDocument != parent.Type; parent = parent.Parent {
+			parents = append(parents, parent)
+		}
+	}
+	for _, parent := range parents {
+		updatedDefNodes[parent.ID] = parent
+	}
+
 	for _, updatedDefNode := range updatedDefNodes {
 		avs := updatedDefNode.IALAttr(av.NodeAttrNameAvs)
 		if "" == avs {

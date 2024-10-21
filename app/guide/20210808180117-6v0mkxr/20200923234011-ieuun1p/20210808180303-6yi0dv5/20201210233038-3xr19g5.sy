@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20240415092701"
+		"updated": "20241018105907"
 	},
 	"Children": [
 		{
@@ -445,7 +445,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091550-fualfrs",
-				"updated": "20210104091550"
+				"updated": "20241018105626"
 			},
 			"Children": [
 				{
@@ -528,6 +528,102 @@
 								{
 									"Type": "NodeText",
 									"Data": "If there are subheadings under the original heading block, the largest level among these subheadings will be used as the second-level heading in the new document. The remaining subheadings will be adjusted according to the relative levels. For example, the original heading block contains three, four, and five. level subheadings, these subheadings will be converted into second, third, and fourth level headings after conversion to document blocks."
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20241018105907-fja873w",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20241018105907-fja873w",
+				"updated": "20241018105907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Convert List Item block to Document block"
+				}
+			]
+		},
+		{
+			"ID": "20241018105907-kbn7z2a",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20241018105907-kbn7z2a",
+				"updated": "20241018105907"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In addition to converting heading blocks to document blocks, you can also convert list item blocks (not list blocks) to document blocks. Press and hold the block icon of the list item block, and then drag it to the document tree for conversion. After the list item block is converted to a document block:"
+				}
+			]
+		},
+		{
+			"ID": "20241018105907-m783fzm",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241018105907-m783fzm",
+				"updated": "20241018105907"
+			},
+			"Children": [
+				{
+					"ID": "20241018105907-grua5xf",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018105907-grua5xf",
+						"updated": "20241018105907"
+					},
+					"Children": [
+						{
+							"ID": "20241018105907-iempctf",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018105907-iempctf",
+								"updated": "20241018105907"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The content of the first sub-block of the list item block will become the document title"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241018105907-ayck4c3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018105907-ayck4c3",
+						"updated": "20241018105907"
+					},
+					"Children": [
+						{
+							"ID": "20241018105907-xna1wua",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018105907-xna1wua",
+								"updated": "20241018105907"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The sub-blocks of the list item block will remain unchanged"
 								}
 							]
 						}

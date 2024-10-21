@@ -437,6 +437,12 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
         });
+        // https://github.com/siyuan-note/siyuan/issues/12751
+        this.element.addEventListener("mousewheel", (event) => {
+            hideElements(["gutter"], protyle);
+            event.stopPropagation();
+            event.preventDefault();
+        });
     }
 
     private isMatchNode(item: Element) {

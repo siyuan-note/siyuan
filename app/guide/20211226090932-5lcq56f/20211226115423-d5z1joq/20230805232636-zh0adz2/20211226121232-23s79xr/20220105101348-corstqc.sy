@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220105101348-corstqc",
 		"title": "限制",
-		"updated": "20230808220451"
+		"type": "doc",
+		"updated": "20241010011131"
 	},
 	"Children": [
 		{
@@ -14,7 +15,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105101409-es213ce",
-				"updated": "20230808220451"
+				"updated": "20241010011131"
 			},
 			"Children": [
 				{
@@ -39,11 +40,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最多支持保存 12 個"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "資料快照"
+									"Data": "最多支持保存 12 個資料快照"
 								}
 							]
 						}
@@ -57,27 +54,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220105101409-0c3wlyv"
+						"id": "20220105101409-0c3wlyv",
+						"updated": "20220105101409"
 					},
 					"Children": [
 						{
 							"ID": "20220105101409-2awkety",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220105101409-2awkety"
+								"id": "20220105101409-2awkety",
+								"updated": "20220105101409"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最多支持建立 7 個"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "雲端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "同步目錄"
+									"Data": "最多支持建立 7 個雲端同步目錄"
 								}
 							]
 						}
@@ -91,27 +82,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220105101409-7pgt847"
+						"id": "20220105101409-7pgt847",
+						"updated": "20220105101409"
 					},
 					"Children": [
 						{
 							"ID": "20220105101409-7009hm1",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220105101409-7009hm1"
+								"id": "20220105101409-7009hm1",
+								"updated": "20220105101409"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "雲端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "存儲空間"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "初始化總大小為 "
+									"Data": "雲端存儲空間初始化總大小為 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -121,6 +106,129 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010011126-lo7wzgl",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010011126-lo7wzgl",
+						"updated": "20241010011131"
+					},
+					"Children": [
+						{
+							"ID": "20241010011131-1bdnqa3",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010011131-1bdnqa3",
+								"updated": "20241010011131"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "雲端儲存中的資料快照最長保留 30 天，即 30 天之前的未引用快照會自動清理"
+								}
+							]
+						},
+						{
+							"ID": "20241010011131-2egibp2",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010011131-2egibp2",
+								"updated": "20241010011131"
+							},
+							"Children": [
+								{
+									"ID": "20241010011131-saf8vu8",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-saf8vu8",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-8yhnff8",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-8yhnff8",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "每次資料同步後的最新快照不會被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010011131-cpuww84",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-cpuww84",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-l03qyip",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-l03qyip",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "手動標記備份上傳到雲端的快照不會被清理"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010011131-g5u8rek",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010011131-g5u8rek",
+										"updated": "20241010011131"
+									},
+									"Children": [
+										{
+											"ID": "20241010011131-miuu9d9",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010011131-miuu9d9",
+												"updated": "20241010011131"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "30 天內的快照不會被清理"
+												}
+											]
+										}
+									]
 								}
 							]
 						}
@@ -148,15 +256,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "付費訂閱到期以後，"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "雲端"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "存儲會被徹底刪除"
+									"Data": "付費訂閱到期以後，雲端存儲會被徹底刪除"
 								}
 							]
 						},

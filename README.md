@@ -25,21 +25,34 @@
 </p>
 
 <p align="center">
+<<<<<<< HEAD
 <a href="README_en.md">English</a>
+=======
+<a href="README_zh_CN.md">中文</a> | <a href="README_ja_JP.md">日本語</a>
+>>>>>>> 071fbf060564857c9ea212592f4948cd25927778
 </p>
 
 ## 更新
-### 简介
-- 同步 https://github.com/siyuan-note/siyuan 更新
-### 修改项
-- 去除更新提示、去除用户相关内容，可以云端同步
-### docker
-- docker镜像：docker pull 851708184/siyuan
-### android
-- [查看v2.12.4-android release](https://github.com/EightDoor/siyuan/releases/tag/v2.12.4-android)
-### 其他
-- 定期同步思源最新版本，自己也一直在用思源笔记
 
+### 简介
+
+- 同步 https://github.com/siyuan-note/siyuan 更新
+
+### 修改项
+
+- 去除更新提示、去除用户相关内容，可以云端同步
+
+### docker
+
+- docker 镜像：docker pull 851708184/siyuan
+
+### android
+
+- [查看 v2.12.4-android release](https://github.com/EightDoor/siyuan/releases/tag/v2.12.4-android)
+
+### 其他
+
+- 定期同步思源最新版本，自己也一直在用思源笔记
 
 ## 💡 简介
 
@@ -53,46 +66,46 @@
 
 ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
-* Content block
-    * Block-level reference and two-way links
-    * Custom attributes
-    * SQL query embed
-    * Protocol `siyuan://`
-* Editor
-  * Block-style
-  * Markdown WYSIWYG
-  * List outline
-  * Block zoom-in
-  * Million-word large document editing
-  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  * Web clipping
-  * PDF Annotation link
-* Export
-    * Block ref and embed
-    * Standard Markdown with assets
-    * PDF, Word and HTML
-    * Copy to WeChat MP, Zhihu and Yuque
-* Database
-  * Table view
-* Flashcard spaced repetition
-* AI writing and Q/A chat via OpenAI API
-* Tesseract OCR 
-* Multi-tab, drag and drop to split screen
-* Template snippet
-* JavaScript/CSS snippet
-* Android/iOS App
-* Docker deployment
-* [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
-* Community marketplace
+- Content block
+  - Block-level reference and two-way links
+  - Custom attributes
+  - SQL query embed
+  - Protocol `siyuan://`
+- Editor
+  - Block-style
+  - Markdown WYSIWYG
+  - List outline
+  - Block zoom-in
+  - Million-word large document editing
+  - Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+  - Web clipping
+  - PDF Annotation link
+- Export
+  - Block ref and embed
+  - Standard Markdown with assets
+  - PDF, Word and HTML
+  - Copy to WeChat MP, Zhihu and Yuque
+- Database
+  - Table view
+- Flashcard spaced repetition
+- AI writing and Q/A chat via OpenAI API
+- Tesseract OCR
+- Multi-tab, drag and drop to split screen
+- Template snippet
+- JavaScript/CSS snippet
+- Android/iOS App
+- Docker deployment
+- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+- Community marketplace
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
 ## 🏗️ Architecture and Ecosystem
 
-![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png "思源笔记架构设计")
+![思源笔记架构设计](https://b3logfile.com/file/2023/05/SiYuan_Arch-Sgu8vXT.png '思源笔记架构设计')
 
-| Project                                                  | Description           | Forks                                                                           | Stars                                                                                | 
-|----------------------------------------------------------|-----------------------|---------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| Project                                                  | Description           | Forks                                                                           | Stars                                                                                |
+| -------------------------------------------------------- | --------------------- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
 | [lute](https://github.com/88250/lute)                    | Editor engine         | ![GitHub forks](https://img.shields.io/github/forks/88250/lute)                 | ![GitHub Repo stars](https://img.shields.io/github/stars/88250/lute)                 |
 | [chrome](https://github.com/siyuan-note/siyuan-chrome)   | Chrome/Edge extension | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-chrome)  | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-chrome)  |
 | [bazaar](https://github.com/siyuan-note/bazaar)          | Community marketplace | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/bazaar)         | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/bazaar)         |
@@ -108,8 +121,8 @@
 
 ## 🗺️ Roadmap
 
-* [SiYuan development plan and progress](https://github.com/orgs/siyuan-note/projects/1)
-* [SiYuan changelog](CHANGELOG.md)
+- [SiYuan development plan and progress](https://github.com/orgs/siyuan-note/projects/1)
+- [SiYuan changelog](CHANGELOG.md)
 
 ## 🚀 Download Setup
 
@@ -119,13 +132,13 @@ It is recommended to give priority to installing through the application market 
 
 Mobile:
 
-* [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
-* [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
-* [F-Droid](https://f-droid.org/packages/org.b3log.siyuan)
+- [App Store](https://apps.apple.com/us/app/siyuan/id1583226508)
+- [Google Play](https://play.google.com/store/apps/details?id=org.b3log.siyuan)
+- [F-Droid](https://f-droid.org/packages/org.b3log.siyuan)
 
 Desktop:
 
-* [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
+- [Microsoft Store](https://www.microsoft.com/store/apps/9P7HPMXP73K4)
 
 ### Docker Hosting
 
@@ -136,17 +149,17 @@ Desktop:
 
 The easiest way to serve SiYuan on a server is to deploy it through Docker.
 
-* Image name `b3log/siyuan`
-* [Image URL](https://hub.docker.com/r/b3log/siyuan)
+- Image name `b3log/siyuan`
+- [Image URL](https://hub.docker.com/r/b3log/siyuan)
 
 #### File structure
 
 The overall program is located under `/opt/siyuan/`, which is basically the structure under the resources folder of the Electron installation package:
 
-* appearance: icon, theme, languages
-* guide: user guide document
-* stage: interface and static resources
-* kernel: kernel program
+- appearance: icon, theme, languages
+- guide: user guide document
+- stage: interface and static resources
+- kernel: kernel program
 
 #### Entrypoint
 
@@ -154,8 +167,8 @@ The entry point is set when building the Docker image: `ENTRYPOINT ["/opt/siyuan
 
 Use the following parameters when running the container with `docker run b3log/siyuan`:
 
-* `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
-* `--accessAuthCode`: Specifies the access authorization code
+- `--workspace`: Specifies the workspace folder path, mounted to the container via `-v` on the host
+- `--accessAuthCode`: Specifies the access authorization code
 
 More parameters can be found using `--help`. Here’s an example of a startup command with the new environment variables:
 
@@ -169,11 +182,11 @@ docker run -d \
   --accessAuthCode=xxx
 ```
 
-* `PUID`: Custom user ID (optional, defaults to `1000` if not provided)
-* `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
-* `workspace_dir_host`: The workspace folder path on the host
-* `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
-* `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
+- `PUID`: Custom user ID (optional, defaults to `1000` if not provided)
+- `PGID`: Custom group ID (optional, defaults to `1000` if not provided)
+- `workspace_dir_host`: The workspace folder path on the host
+- `workspace_dir_container`: The path of the workspace folder in the container, as specified in `--workspace`
+- `accessAuthCode`: Access authorization code (please **be sure to modify**, otherwise anyone can access your data)
 
 To simplify things, it is recommended to configure the workspace folder path to be consistent on the host and container, such as having both `workspace_dir_host` and `workspace_dir_container` configured as `/siyuan/workspace`. The corresponding startup command would be:
 
@@ -192,7 +205,7 @@ docker run -d \
 For users running Siyuan with Docker Compose, the environment variables `PUID` and `PGID` can be passed to customize the user and group IDs. Here's an example of a Docker Compose configuration:
 
 ```yaml
-version: "3.9"
+version: '3.9'
 services:
   main:
     image: b3log/siyuan
@@ -205,14 +218,14 @@ services:
     environment:
       # A list of time zone identifiers can be found at https://en.wikipedia.org/wiki/List_of_tz_database_time_zones
       - TZ=${YOUR_TIME_ZONE}
-      - PUID=${YOUR_USER_PUID}  # Customize user ID
-      - PGID=${YOUR_USER_PGID}  # Customize group ID
+      - PUID=${YOUR_USER_PUID} # Customize user ID
+      - PGID=${YOUR_USER_PGID} # Customize group ID
 ```
 
 In this setup:
 
-* `PUID` and `PGID` are set dynamically and passed to the container
-* If these variables are not provided, the default `1000` will be used
+- `PUID` and `PGID` are set dynamically and passed to the container
+- If these variables are not provided, the default `1000` will be used
 
 By specifying `PUID` and `PGID` in the environment, you avoid the need to explicitly set the `user` directive (`user: '1000:1000'`) in the compose file. The container will dynamically adjust the user and group based on these environment variables at startup.
 
@@ -230,26 +243,26 @@ If you use custom `PUID` and `PGID` values, the entrypoint script will ensure th
 
 Use NGINX reverse proxy to hide port 6806, please note:
 
-* Configure WebSocket reverse proxy `/ws`
+- Configure WebSocket reverse proxy `/ws`
 
 #### Note
 
-* Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted
-* Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy
-* If you encounter permission issues, verify that the `PUID` and `PGID` environment variables match the ownership of the mounted directories on your host system
+- Be sure to confirm the correctness of the mounted volume, otherwise the data will be lost after the container is deleted
+- Do not use URL rewriting for redirection, otherwise there may be problems with authentication, it is recommended to configure a reverse proxy
+- If you encounter permission issues, verify that the `PUID` and `PGID` environment variables match the ownership of the mounted directories on your host system
 
 #### Limitations
 
-* Does not support desktop and mobile application connections, only supports use on browsers
-* Export to PDF, HTML and Word formats is not supported
-* Import Markdown file is not supported
+- Does not support desktop and mobile application connections, only supports use on browsers
+- Export to PDF, HTML and Word formats is not supported
+- Import Markdown file is not supported
 
 </details>
 
 ### Installation Package
 
-* [B3log](https://b3log.org/siyuan/en/download.html)
-* [GitHub](https://github.com/siyuan-note/siyuan/releases)
+- [B3log](https://b3log.org/siyuan/en/download.html)
+- [GitHub](https://github.com/siyuan-note/siyuan/releases)
 
 ### Insider Preview
 
@@ -257,9 +270,9 @@ We release insider preview before major updates, please visit [https://github.co
 
 ## 🏘️ Community
 
-* [English Discussion Forum](https://liuyun.io)
-* [User community summary](https://liuyun.io/article/1687779743723)
-* [Awesome SiYuan](https://github.com/siyuan-note/awesome)
+- [English Discussion Forum](https://liuyun.io)
+- [User community summary](https://liuyun.io/article/1687779743723)
+- [Awesome SiYuan](https://github.com/siyuan-note/awesome)
 
 ## 🛠️ Development Guide
 
@@ -271,15 +284,15 @@ See [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.githu
 
 The data is saved in the workspace folder, in the workspace data folder:
 
-* `assets` is used to save all inserted assets
-* `emojis` is used to save emoji images
-* `snippets` is used to save code snippets
-* `storage` is used to save query conditions, layouts and flashcards, etc.
-* `templates` is used to save template snippets
-* `widgets` is used to save widgets
-* `plugins` is used to save plugins
-* `public` is used to save public data
-* The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
+- `assets` is used to save all inserted assets
+- `emojis` is used to save emoji images
+- `snippets` is used to save code snippets
+- `storage` is used to save query conditions, layouts and flashcards, etc.
+- `templates` is used to save template snippets
+- `widgets` is used to save widgets
+- `plugins` is used to save plugins
+- `public` is used to save public data
+- The rest of the folders are the notebook folders created by the user, files with the suffix of `.sy` in the notebook folder are used to save the document data, and the data format is JSON
 
 ### Does it support data synchronization through a third-party sync disk?
 
@@ -289,25 +302,25 @@ Although it does not support third-party sync disks, it supports connect with th
 
 In addition, you can also consider manually exporting and importing data to achieve data synchronization:
 
-* Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
-* Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
+- Desktop: <kbd>Settings</kbd> - <kbd>Export</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
+- Mobile: <kbd>Right column</kbd> - <kbd>About</kbd> - <kbd>Export Data</kbd> / <kbd>Import Data</kbd>
 
 ### Is SiYuan open source?
 
 SiYuan is completely open source, and contributions are welcome:
 
-* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
-* [Android](https://github.com/siyuan-note/siyuan-android)
-* [iOS](https://github.com/siyuan-note/siyuan-ios)
-* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+- [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
+- [Android](https://github.com/siyuan-note/siyuan-android)
+- [iOS](https://github.com/siyuan-note/siyuan-ios)
+- [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 
 ### How to upgrade to a new version?
 
-* If installed via app store, please update via app store
-* If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
-* If it is installed by manual installation package, please download the installation package again to install
+- If installed via app store, please update via app store
+- If it is installed through the installation package on the desktop, you can open the option of <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Automatically download update installation package</kbd>, so that SiYuan will automatically download The latest version of the installation package and prompts to install
+- If it is installed by manual installation package, please download the installation package again to install
 
 You can <kbd>Check update</kbd> in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Current Version</kbd>, or pay attention to [Official Download](https://b3log.org/siyuan/en/download.html) or [GitHub Releases](https://github.com/siyuan-note/siyuan/releases) to get the new version.
 
@@ -325,16 +338,16 @@ The first sub-block under the list item is the block icon omitted. You can move 
 
 ### How to share notes?
 
-* Share document to Liandi
-* Export and import `.sy.zip` package
-* Via network hosting
-* Export and import Markdown
-* <kbd>Export Preview</kbd> to copy to third-party online services
+- Share document to Liandi
+- Export and import `.sy.zip` package
+- Via network hosting
+- Export and import Markdown
+- <kbd>Export Preview</kbd> to copy to third-party online services
 
 ### What should I do if the data repo key is lost?
 
-* If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd> retrieve
-* If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
+- If the data repo key is correctly initialized on multiple devices before, the key is the same on all devices and can be set in <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data repo key</kbd> - <kbd>Copy key string</kbd> retrieve
+- If it has not been configured correctly before (for example, the keys on multiple devices are inconsistent) or all devices are unavailable and the key string cannot be obtained, you can reset the key by following the steps below:
 
   1. Manually back up the data, you can use <kbd>Export Data</kbd> or directly copy the <kbd>workspace/data/</kbd> folder on the file system
   2. <kbd>Settings</kbd> - <kbd>About</kbd> - <kbd>Data rep key</kbd> - <kbd>Reset data repo</kbd>

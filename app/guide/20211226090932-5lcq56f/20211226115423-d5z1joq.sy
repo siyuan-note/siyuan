@@ -8,7 +8,7 @@
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20240612234708"
+		"updated": "20241018105300"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20211226115745-rorv31l",
-				"updated": "20240508002520"
+				"updated": "20241018102255"
 			},
 			"Children": [
 				{
@@ -31,7 +31,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20211226115745-mwd9by9",
-						"updated": "20230728103709"
+						"updated": "20241018102255"
 					},
 					"Children": [
 						{
@@ -47,7 +47,7 @@
 							"HeadingLevel": 2,
 							"Properties": {
 								"id": "20211226115745-zr6pkjl",
-								"updated": "20211225212423"
+								"updated": "20241018102255"
 							},
 							"Children": [
 								{
@@ -62,7 +62,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20211226115745-f8vrixq",
-								"updated": "20230728103709"
+								"updated": "20241018102255"
 							},
 							"Children": [
 								{
@@ -74,7 +74,7 @@
 									},
 									"Properties": {
 										"id": "20211226115745-5043oh9",
-										"updated": "20230728103709"
+										"updated": "20241018102255"
 									},
 									"Children": [
 										{
@@ -82,12 +82,21 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20211226115745-n838dky",
-												"updated": "20230728103709"
+												"updated": "20241018102255"
 											},
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "在文檔樹面板中新建筆記本，在筆記本下新建文檔"
+													"Data": "在文檔樹面板的 "
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "kbd",
+													"TextMarkTextContent": "更多"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​ 選單中新筆記本，在筆記本下新建文檔"
 												}
 											]
 										}
@@ -560,7 +569,7 @@
 			"Type": "NodeSuperBlock",
 			"Properties": {
 				"id": "20240508002937-5bjgjq8",
-				"updated": "20240508002937"
+				"updated": "20241018105300"
 			},
 			"Children": [
 				{
@@ -575,7 +584,7 @@
 					"Type": "NodeSuperBlock",
 					"Properties": {
 						"id": "20240508002640-v70zcaf",
-						"updated": "20240508002937"
+						"updated": "20241018105300"
 					},
 					"Children": [
 						{
@@ -593,7 +602,7 @@
 								"bookmark": "✨",
 								"id": "20211226115745-mwqouic",
 								"style": "background-color: var(--b3-font-background5);",
-								"updated": "20240508002640"
+								"updated": "20241018105300"
 							},
 							"Children": [
 								{
@@ -607,7 +616,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226115745-bygtonj",
-								"updated": "20240508002640"
+								"updated": "20241018105300"
 							},
 							"Children": [
 								{
@@ -634,7 +643,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "。通過排版格式即可形成內容塊，這樣我們就能在區塊級上對思緒和知識進行整理，同時也能方便長文閱讀和輸出。"
+									"Data": "。通過排版格式即可形成內容塊，這樣我們就能在塊級上對思緒和知識進行整理，同時也能方便長文閱讀和輸出。"
 								}
 							]
 						},

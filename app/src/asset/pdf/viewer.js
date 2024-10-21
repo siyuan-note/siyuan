@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-import { RenderingStates, ScrollMode, SpreadMode } from "./ui_utils.js";
+import {RenderingStates, ScrollMode, SpreadMode, TextLayerMode} from "./ui_utils.js";
+import { AppOptions } from "./app_options.js";
 import { LinkTarget } from "./pdf_link_service.js";
 import { PDFViewerApplication } from "./app.js";
-import { initAnno } from "../anno";
+import {Constants} from "../../constants";
+import {initAnno} from "../anno";
 
 /* eslint-disable-next-line no-unused-vars */
 const pdfjsVersion =
@@ -36,39 +38,46 @@ const AppConstants =
 // window.PDFViewerApplicationOptions = AppOptions;
 
 function getViewerConfiguration(element) {
+  // NOTE
   return {
     appContainer: element,
+    principalContainer: element.querySelector("#mainContainer"),
     mainContainer: element.querySelector("#viewerContainer"),
     viewerContainer: element.querySelector("#viewer"),
     toolbar: {
-      // NOTE
       rectAnno: element.querySelector("#rectAnno"),
-      container: element.querySelector("#toolbarViewer"),
+      container: element.querySelector("#toolbarContainer"),
       numPages: element.querySelector("#numPages"),
       pageNumber: element.querySelector("#pageNumber"),
       scaleSelect: element.querySelector("#scaleSelect"),
       customScaleOption: element.querySelector("#customScaleOption"),
       previous: element.querySelector("#previous"),
       next: element.querySelector("#next"),
-      zoomIn: element.querySelector("#zoomIn"),
-      zoomOut: element.querySelector("#zoomOut"),
-      viewFind: element.querySelector("#viewFind"),
-      openFile:
-        typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
-          ? element.querySelector("#openFile")
-          : null,
-      print: element.querySelector("#print"),
-      editorFreeTextButton: element.querySelector("#editorFreeText"),
+      zoomIn: element.querySelector("#zoomInButton"),
+      zoomOut: element.querySelector("#zoomOutButton"),
+      print: element.querySelector("#printButton"),
+      editorFreeTextButton: element.querySelector("#editorFreeTextButton"),
       editorFreeTextParamsToolbar: element.querySelector(
         "#editorFreeTextParamsToolbar"
       ),
-      editorInkButton: element.querySelector("#editorInk"),
+      editorHighlightButton: element.querySelector("#editorHighlightButton"),
+      editorHighlightParamsToolbar: element.querySelector(
+        "#editorHighlightParamsToolbar"
+      ),
+      editorHighlightColorPicker: element.querySelector(
+        "#editorHighlightColorPicker"
+      ),
+      editorInkButton: element.querySelector("#editorInkButton"),
       editorInkParamsToolbar: element.querySelector("#editorInkParamsToolbar"),
-      download: element.querySelector("#download"),
+      editorStampButton: element.querySelector("#editorStampButton"),
+      editorStampParamsToolbar: element.querySelector(
+        "#editorStampParamsToolbar"
+      ),
+      download: element.querySelector("#downloadButton"),
     },
     secondaryToolbar: {
       toolbar: element.querySelector("#secondaryToolbar"),
-      toggleButton: element.querySelector("#secondaryToolbarToggle"),
+      toggleButton: element.querySelector("#secondaryToolbarToggleButton"),
       presentationModeButton: element.querySelector("#presentationMode"),
       openFileButton:
         typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
@@ -90,13 +99,20 @@ function getViewerConfiguration(element) {
       spreadNoneButton: element.querySelector("#spreadNone"),
       spreadOddButton: element.querySelector("#spreadOdd"),
       spreadEvenButton: element.querySelector("#spreadEven"),
+      imageAltTextSettingsButton: element.querySelector(
+        "#imageAltTextSettings"
+      ),
+      imageAltTextSettingsSeparator: element.querySelector(
+        "#imageAltTextSettingsSeparator"
+      ),
       documentPropertiesButton: element.querySelector("#documentProperties"),
     },
     sidebar: {
       // Divs (and sidebar button)
       outerContainer: element.querySelector("#outerContainer"),
       sidebarContainer: element.querySelector("#sidebarContainer"),
-      toggleButton: element.querySelector("#sidebarToggle"),
+      toggleButton: element.querySelector("#sidebarToggleButton"),
+      resizer: element.querySelector("#sidebarResizer"),
       // Buttons
       thumbnailButton: element.querySelector("#viewThumbnail"),
       outlineButton: element.querySelector("#viewOutline"),
@@ -108,16 +124,11 @@ function getViewerConfiguration(element) {
       attachmentsView: element.querySelector("#attachmentsView"),
       layersView: element.querySelector("#layersView"),
       // View-specific options
-      outlineOptionsContainer: element.querySelector("#outlineOptionsContainer"),
       currentOutlineItemButton: element.querySelector("#currentOutlineItem"),
-    },
-    sidebarResizer: {
-      outerContainer: element.querySelector("#outerContainer"),
-      resizer: element.querySelector("#sidebarResizer"),
     },
     findBar: {
       bar: element.querySelector("#findbar"),
-      toggleButton: element.querySelector("#viewFind"),
+      toggleButton: element.querySelector("#viewFindButton"),
       findField: element.querySelector("#findInput"),
       highlightAllCheckbox: element.querySelector("#findHighlightAll"),
       caseSensitiveCheckbox: element.querySelector("#findMatchCase"),
@@ -125,8 +136,8 @@ function getViewerConfiguration(element) {
       entireWordCheckbox: element.querySelector("#findEntireWord"),
       findMsg: element.querySelector("#findMsg"),
       findResultsCount: element.querySelector("#findResultsCount"),
-      findPreviousButton: element.querySelector("#findPrevious"),
-      findNextButton: element.querySelector("#findNext"),
+      findPreviousButton: element.querySelector("#findPreviousButton"),
+      findNextButton: element.querySelector("#findNextButton"),
     },
     passwordOverlay: {
       dialog: element.querySelector("#passwordDialog"),
@@ -155,35 +166,91 @@ function getViewerConfiguration(element) {
         linearized: element.querySelector("#linearizedField"),
       },
     },
+    altTextDialog: {
+      dialog: element.querySelector("#altTextDialog"),
+      optionDescription: element.querySelector("#descriptionButton"),
+      optionDecorative: element.querySelector("#decorativeButton"),
+      textarea: element.querySelector("#descriptionTextarea"),
+      cancelButton: element.querySelector("#altTextCancel"),
+      saveButton: element.querySelector("#altTextSave"),
+    },
+    newAltTextDialog: {
+      dialog: element.querySelector("#newAltTextDialog"),
+      title: element.querySelector("#newAltTextTitle"),
+      descriptionContainer: element.querySelector(
+        "#newAltTextDescriptionContainer"
+      ),
+      textarea: element.querySelector("#newAltTextDescriptionTextarea"),
+      disclaimer: element.querySelector("#newAltTextDisclaimer"),
+      learnMore: element.querySelector("#newAltTextLearnMore"),
+      imagePreview: element.querySelector("#newAltTextImagePreview"),
+      createAutomatically: element.querySelector(
+        "#newAltTextCreateAutomatically"
+      ),
+      createAutomaticallyButton: element.querySelector(
+        "#newAltTextCreateAutomaticallyButton"
+      ),
+      downloadModel: element.querySelector("#newAltTextDownloadModel"),
+      downloadModelDescription: element.querySelector(
+        "#newAltTextDownloadModelDescription"
+      ),
+      error: element.querySelector("#newAltTextError"),
+      errorCloseButton: element.querySelector("#newAltTextCloseButton"),
+      cancelButton: element.querySelector("#newAltTextCancel"),
+      notNowButton: element.querySelector("#newAltTextNotNow"),
+      saveButton: element.querySelector("#newAltTextSave"),
+    },
+    altTextSettingsDialog: {
+      dialog: element.querySelector("#altTextSettingsDialog"),
+      createModelButton: element.querySelector("#createModelButton"),
+      aiModelSettings: element.querySelector("#aiModelSettings"),
+      learnMore: element.querySelector("#altTextSettingsLearnMore"),
+      deleteModelButton: element.querySelector("#deleteModelButton"),
+      downloadModelButton: element.querySelector("#downloadModelButton"),
+      showAltTextDialogButton: element.querySelector(
+        "#showAltTextDialogButton"
+      ),
+      altTextSettingsCloseButton: element.querySelector(
+        "#altTextSettingsCloseButton"
+      ),
+      closeButton: element.querySelector("#altTextSettingsCloseButton"),
+    },
     annotationEditorParams: {
       editorFreeTextFontSize: element.querySelector("#editorFreeTextFontSize"),
       editorFreeTextColor: element.querySelector("#editorFreeTextColor"),
       editorInkColor: element.querySelector("#editorInkColor"),
       editorInkThickness: element.querySelector("#editorInkThickness"),
       editorInkOpacity: element.querySelector("#editorInkOpacity"),
+      editorStampAddImage: element.querySelector("#editorStampAddImage"),
+      editorFreeHighlightThickness: element.querySelector(
+        "#editorFreeHighlightThickness"
+      ),
+      editorHighlightShowAll: element.querySelector("#editorHighlightShowAll"),
     },
     printContainer: element.querySelector("#printContainer"),
-    openFileInput:
-      typeof PDFJSDev === "undefined" || PDFJSDev.test("GENERIC")
-        ? element.querySelector("#fileInput")
-        : null,
-    debuggerScriptPath: "./debugger.js",
   };
 }
 
 // NOTE
 function webViewerLoad(file, element, pdfPage, annoId) {
+  AppOptions.set("workerSrc", `${Constants.PROTYLE_CDN}/js/pdf/pdf.worker.min.mjs?v=4.7.85`);
+  AppOptions.set("defaultUrl", file);
+  AppOptions.set("cMapUrl", 'cmaps/');
+  AppOptions.set("standardFontDataUrl", 'standard_fonts/');
   const pdf = new PDFViewerApplication(pdfPage)
   pdf.annoId = annoId
   const config = getViewerConfiguration(element);
-
+  config.file = file;
   if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("GENERIC")) {
     // Give custom implementations of the default viewer a simpler way to
     // set various `AppOptions`, by dispatching an event once all viewer
     // files are loaded but *before* the viewer initialization has run.
-    const event = document.createEvent("CustomEvent");
-    event.initCustomEvent("webviewerloaded", true, true, {
-      source: window,
+    const event = new CustomEvent("webviewerloaded", {
+      bubbles: true,
+      cancelable: true,
+      detail: {
+        source: window,
+      },
     });
     try {
       // Attempt to dispatch the event at the embedding `document`,
@@ -196,11 +263,9 @@ function webViewerLoad(file, element, pdfPage, annoId) {
       console.error(`webviewerloaded: ${ex}`);
       document.dispatchEvent(event);
     }
-  } else {
-    config.file = file
   }
-  pdf.run(config)
-  initAnno(element, pdf, config);
+  pdf.run(config);
+  initAnno(element, pdf);
   return pdf
 }
 
@@ -220,5 +285,8 @@ document.blockUnblockOnload?.(true);
 
 // NOTE
 export {
-  webViewerLoad,
+  // PDFViewerApplication,
+  // AppConstants as PDFViewerApplicationConstants,
+  // AppOptions as PDFViewerApplicationOptions,
+  webViewerLoad
 };

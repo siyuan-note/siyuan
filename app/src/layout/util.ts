@@ -35,7 +35,7 @@ import {setTitle} from "../dialog/processSystem";
 import {newCenterEmptyTab, resizeTabs} from "./tabUtil";
 import {setStorageVal} from "../protyle/util/compatibility";
 
-export const setPanelFocus = (element: Element) => {
+export const setPanelFocus = (element: Element, isSaveLayout = true) => {
     if (element.getAttribute("data-type") === "wnd") {
         setTitle(element.querySelector('.layout-tab-bar .item--focus[data-type="tab-header"] .item__text')?.textContent || window.siyuan.languages.siyuanNote);
     }
@@ -54,6 +54,9 @@ export const setPanelFocus = (element: Element) => {
     if (element.getAttribute("data-type") === "wnd") {
         element.classList.add("layout__wnd--active");
         element.querySelector(".layout-tab-bar .item--focus")?.setAttribute("data-activetime", (new Date()).getTime().toString());
+        if (isSaveLayout) {
+            saveLayout();
+        }
     } else {
         element.classList.add("layout__tab--active");
         Array.from(element.classList).find(item => {
@@ -366,7 +369,7 @@ export const JSONToCenter = (
         if (json.active && child.headElement) {
             child.headElement.setAttribute("data-init-active", "true");
         }
-        (layout as Wnd).addTab(child, false, false);
+        (layout as Wnd).addTab(child, false, false, json.activeTime);
         (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
@@ -492,11 +495,21 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             zoomIn: idZoomIn.isZoomIn
         });
     } else {
+        let latestTabHeaderElement:HTMLElement;
         document.querySelectorAll('li[data-type="tab-header"][data-init-active="true"]').forEach((item: HTMLElement) => {
-            item.removeAttribute("data-init-active");
+            if (!latestTabHeaderElement) {
+                latestTabHeaderElement = item;
+            } else {
+                if (item.dataset.activetime > latestTabHeaderElement.dataset.activetime) {
+                    latestTabHeaderElement = item;
+                }
+            }
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
             tab.parent.switchTab(item, false, false, true, false);
         });
+        if (latestTabHeaderElement) {
+            setPanelFocus(latestTabHeaderElement.parentElement.parentElement.parentElement, false);
+        }
     }
     // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个
     app.plugins.forEach(item => {
@@ -548,6 +561,7 @@ export const layoutToJSON = (layout: Layout | Wnd | Tab | Model, json: any, brea
             }
         }
         json.instance = "Tab";
+        json.activeTime = layout.headElement?.getAttribute("data-activetime");
     } else if (layout instanceof Editor) {
         if (!layout.editor.protyle.notebookId && breakObj) {
             breakObj.editor = "true";

@@ -150,11 +150,21 @@ func InitPandoc() {
 	pandocZip := filepath.Join(WorkingDir, "pandoc.zip")
 	if "dev" == Mode || !gulu.File.IsExist(pandocZip) {
 		if gulu.OS.IsWindows() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
+			if "amd64" == runtime.GOARCH {
+				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-windows-amd64.zip")
+			}
 		} else if gulu.OS.IsDarwin() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-amd64.zip")
+			if "amd64" == runtime.GOARCH {
+				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-amd64.zip")
+			} else if "arm64" == runtime.GOARCH {
+				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-darwin-arm64.zip")
+			}
 		} else if gulu.OS.IsLinux() {
-			pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
+			if "amd64" == runtime.GOARCH {
+				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-amd64.zip")
+			} else if "arm64" == runtime.GOARCH {
+				pandocZip = filepath.Join(WorkingDir, "pandoc/pandoc-linux-arm64.zip")
+			}
 		}
 	}
 

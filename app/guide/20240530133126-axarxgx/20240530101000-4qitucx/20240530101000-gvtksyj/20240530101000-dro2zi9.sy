@@ -7,7 +7,7 @@
 		"id": "20240530101000-dro2zi9",
 		"title": "ドキュメントと見出しの変換",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20241018110150"
 	},
 	"Children": [
 		{
@@ -501,7 +501,7 @@
 			"Properties": {
 				"ID": "20240530101000-5vxf106",
 				"id": "20240530101000-0zk926s",
-				"updated": "20240530101000"
+				"updated": "20241018110150"
 			},
 			"Children": [
 				{
@@ -620,6 +620,116 @@
 								{
 									"Type": "NodeText",
 									"Data": "たとえば、元の見出しブロックにレベル 3、4、5 の小見出しが含まれていたとすると、それらの小見出しは文書ブロックに変換された後、レベル 2、3、4 の見出しに変換されます。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20241018110150-w9cib6e",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20241018110150-w9cib6e",
+				"updated": "20241018110150"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストアイテムブロックからドキュメントブロックへの変換"
+				}
+			]
+		},
+		{
+			"ID": "20241018110150-xld5f58",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20241018110150-xld5f58",
+				"updated": "20241018110150"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "見出しブロックをドキュメントブロックに変換することに加えて、リストアイテムブロックをドキュメントブロックに変換することもできます（ここで言うリストアイテムブロックはリストブロックではありません）。対象のリストアイテムブロックを選択し、ブロックアイコンをドキュメントツリーにドラッグ＆ドロップすると、リストアイテムブロックがドキュメントブロックに変換されます。"
+				}
+			]
+		},
+		{
+			"ID": "20241018110150-r0km996",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20241018110150-r0km996",
+				"updated": "20241018110150"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "リストアイテムブロックがドキュメントブロックに変換されると:"
+				}
+			]
+		},
+		{
+			"ID": "20241018110150-0u2apch",
+			"Type": "NodeList",
+			"ListData": {},
+			"Properties": {
+				"id": "20241018110150-0u2apch",
+				"updated": "20241018110150"
+			},
+			"Children": [
+				{
+					"ID": "20241018110150-f842c4j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018110150-f842c4j",
+						"updated": "20241018110150"
+					},
+					"Children": [
+						{
+							"ID": "20241018110150-pljtq8j",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018110150-pljtq8j",
+								"updated": "20241018110150"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リストアイテムブロックの最初のサブブロックの内容がドキュメントの名前になります"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241018110150-lta3vv6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241018110150-lta3vv6",
+						"updated": "20241018110150"
+					},
+					"Children": [
+						{
+							"ID": "20241018110150-r699zi0",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241018110150-r699zi0",
+								"updated": "20241018110150"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "リストアイテムブロックのサブブロックはそのまま保持されます"
 								}
 							]
 						}

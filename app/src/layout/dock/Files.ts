@@ -192,6 +192,8 @@ export class Files extends Model {
                     liElement.nextElementSibling.remove();
                 }
             });
+            window.siyuan.storage[Constants.LOCAL_FILESPATHS] = [];
+            setStorageVal(Constants.LOCAL_FILESPATHS, []);
         });
         this.actionsElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             let target = event.target as HTMLElement;

@@ -433,7 +433,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 });
             });
         } else {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
+            const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
                 item.removeAttribute("data-render");
                 const updateRow = item.querySelector('.av__row[data-need-update="true"]');
                 if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
@@ -444,7 +446,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     addDragFill(item.querySelector(".av__cell--select"));
                 }
                 avRender(item, protyle, () => {
-                    const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${operation.avID}"]`) as HTMLElement;
+                    const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {
                         // 更新属性面板
                         renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);

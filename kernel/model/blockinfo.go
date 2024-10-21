@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -120,6 +121,85 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	}
 	ret.SubFileCount = subFileCount
 	ret.Icon = tree.Root.IALAttr("icon")
+	return
+}
+
+func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*BlockInfo) {
+	WaitForWritingFiles()
+
+	trees := filesys.LoadTrees(blockIDs)
+	for _, blockID := range blockIDs {
+		tree := trees[blockID]
+		if nil == tree {
+			continue
+		}
+		title := tree.Root.IALAttr("title")
+		ret := &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
+		ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+		scrollData := ret.IAL["scroll"]
+		if 0 < len(scrollData) {
+			scroll := map[string]interface{}{}
+			if parseErr := gulu.JSON.UnmarshalJSON([]byte(scrollData), &scroll); nil != parseErr {
+				logging.LogWarnf("parse scroll data [%s] failed: %s", scrollData, parseErr)
+				delete(ret.IAL, "scroll")
+			} else {
+				if zoomInId := scroll["zoomInId"]; nil != zoomInId {
+					if !treenode.ExistBlockTree(zoomInId.(string)) {
+						delete(ret.IAL, "scroll")
+					}
+				} else {
+					if startId := scroll["startId"]; nil != startId {
+						if !treenode.ExistBlockTree(startId.(string)) {
+							delete(ret.IAL, "scroll")
+						}
+					}
+					if endId := scroll["endId"]; nil != endId {
+						if !treenode.ExistBlockTree(endId.(string)) {
+							delete(ret.IAL, "scroll")
+						}
+					}
+				}
+			}
+		}
+		if queryRefCount {
+			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+			ret.RefCount = len(ret.RefIDs) // 填充块引计数
+		}
+
+		if queryAv {
+			// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+			avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
+			for _, avID := range avIDs {
+				avName, getErr := av.GetAttributeViewName(avID)
+				if nil != getErr {
+					continue
+				}
+
+				if "" == avName {
+					avName = Conf.language(105)
+				}
+
+				attrView := &AttrView{ID: avID, Name: avName}
+				ret.AttrViews = append(ret.AttrViews, attrView)
+			}
+		}
+
+		var subFileCount int
+		boxLocalPath := filepath.Join(util.DataDir, tree.Box)
+		subFiles, err := os.ReadDir(filepath.Join(boxLocalPath, strings.TrimSuffix(tree.Path, ".sy")))
+		if err == nil {
+			for _, subFile := range subFiles {
+				if strings.HasSuffix(subFile.Name(), ".sy") {
+					subFileCount++
+				}
+			}
+		}
+		ret.SubFileCount = subFileCount
+		ret.Icon = tree.Root.IALAttr("icon")
+
+		rets = append(rets, ret)
+
+	}
 	return
 }
 

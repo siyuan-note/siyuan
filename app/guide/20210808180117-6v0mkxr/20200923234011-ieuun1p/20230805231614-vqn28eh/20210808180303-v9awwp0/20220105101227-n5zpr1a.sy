@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220105101227-n5zpr1a",
 		"title": "Limitations",
-		"updated": "20230526091044"
+		"type": "doc",
+		"updated": "20241010011042"
 	},
 	"Children": [
 		{
@@ -14,7 +15,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220105101254-dhwb8a1",
-				"updated": "20230526091044"
+				"updated": "20241010011042"
 			},
 			"Children": [
 				{
@@ -53,27 +54,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220105101254-hqgvkpw"
+						"id": "20220105101254-hqgvkpw",
+						"updated": "20220105101254"
 					},
 					"Children": [
 						{
 							"ID": "20220105101254-9uc9ujk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220105101254-9uc9ujk"
+								"id": "20220105101254-9uc9ujk",
+								"updated": "20220105101254"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Supports the creation of up to 7 "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "cloud"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " synchronization directories"
+									"Data": "Supports the creation of up to 7 cloud synchronization directories"
 								}
 							]
 						}
@@ -87,35 +82,21 @@
 						"Marker": "Kg=="
 					},
 					"Properties": {
-						"id": "20220105101254-7efd0tf"
+						"id": "20220105101254-7efd0tf",
+						"updated": "20220105101254"
 					},
 					"Children": [
 						{
 							"ID": "20220105101254-2pos3yt",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"id": "20220105101254-2pos3yt"
+								"id": "20220105101254-2pos3yt",
+								"updated": "20220105101254"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "The initial total size of "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "cloud"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "storage"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " space is "
+									"Data": "The initial total size of cloud storage space is "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -125,6 +106,129 @@
 								{
 									"Type": "NodeText",
 									"Data": "​"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241010010954-pclixbt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241010010954-pclixbt",
+						"updated": "20241010011042"
+					},
+					"Children": [
+						{
+							"ID": "20241010010955-t8t3map",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241010010955-t8t3map",
+								"updated": "20241010010955"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Data snapshots in cloud storage are retained for up to 30 days, that is, unreferenced snapshots older than 30 days will be automatically cleaned up"
+								}
+							]
+						},
+						{
+							"ID": "20241010010955-9lsrcx5",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241010010955-9lsrcx5",
+								"updated": "20241010011042"
+							},
+							"Children": [
+								{
+									"ID": "20241010010955-ztvcl95",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-ztvcl95",
+										"updated": "20241010010955"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-gju74g2",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-gju74g2",
+												"updated": "20241010010955"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "The latest snapshot after each data synchronization will not be cleaned up"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010955-3tlm4gr",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-3tlm4gr",
+										"updated": "20241010011042"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-xaxm8k4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-xaxm8k4",
+												"updated": "20241010011042"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Snapshots manually tagged for backup and uploaded to the cloud will not be cleaned up"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241010010955-zi1t1um",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241010010955-zi1t1um",
+										"updated": "20241010010955"
+									},
+									"Children": [
+										{
+											"ID": "20241010010955-vt9tf3b",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241010010955-vt9tf3b",
+												"updated": "20241010010955"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "Snapshots within 30 days will not be cleaned up"
+												}
+											]
+										}
+									]
 								}
 							]
 						}
@@ -152,23 +256,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "After the paid subscription expires, the "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "cloud"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "storage"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " will be completely deleted"
+									"Data": "After the paid subscription expires, the cloud storage will be completely deleted"
 								}
 							]
 						},

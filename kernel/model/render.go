@@ -81,7 +81,16 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 			dom := luteEngine.RenderNodeBlockDOM(n)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren
+		case ast.NodeEmoji:
+			dom := luteEngine.RenderNodeBlockDOM(n)
+			buf.WriteString(dom)
+			return ast.WalkSkipChildren
 		case ast.NodeImage:
+			// 标题后直接跟图片时图片的提示文本不再渲染到大纲中 https://github.com/siyuan-note/siyuan/issues/6278
+			title := n.ChildByType(ast.NodeLinkTitle)
+			title.Unlink()
+			dom := luteEngine.RenderNodeBlockDOM(n)
+			buf.WriteString(dom)
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
@@ -97,7 +106,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
 		return
 	}
 
-	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false, GetBlockAttrsWithoutWaitWriting)
+	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")
 	ret = util.EscapeHTML(ret)
@@ -160,7 +169,7 @@ func renderBlockContentByNodes(nodes []*ast.Node) string {
 
 	buf := bytes.Buffer{}
 	for _, n := range subNodes {
-		buf.WriteString(sql.NodeStaticContent(n, nil, false, false, false, GetBlockAttrsWithoutWaitWriting))
+		buf.WriteString(sql.NodeStaticContent(n, nil, false, false, false))
 	}
 	return buf.String()
 }
@@ -215,8 +224,32 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 					}
 
 					subTree, _ := LoadTreeByBlockID(sqlBlock.ID)
+					if nil == subTree {
+						continue
+					}
+
 					var md string
 					if "d" == sqlBlock.Type {
+						if 0 == blockEmbedMode {
+							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
+							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233 https://github.com/siyuan-note/siyuan/issues/12741
+							embedTopLevel := 0
+							ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+								if !entering || ast.NodeHeading != n.Type {
+									return ast.WalkContinue
+								}
+
+								embedTopLevel = n.HeadingLevel
+								if parentHeadingLevel >= embedTopLevel {
+									n.HeadingLevel += parentHeadingLevel - embedTopLevel + 1
+									if 6 < n.HeadingLevel {
+										n.HeadingLevel = 6
+									}
+								}
+								return ast.WalkContinue
+							})
+						}
+
 						md, _ = lute.FormatNodeSync(subTree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 					} else if "h" == sqlBlock.Type {
 						h := treenode.GetNodeInTree(subTree, sqlBlock.ID)
@@ -225,8 +258,6 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						hChildren = append(hChildren, treenode.HeadingChildren(h)...)
 
 						if 0 == blockEmbedMode {
-							// 嵌入块中出现了大于等于上方非嵌入块的标题时需要降低嵌入块中的标题级别
-							// Improve export of heading levels in embedded blocks https://github.com/siyuan-note/siyuan/issues/12233
 							embedTopLevel := 0
 							for _, hChild := range hChildren {
 								if ast.NodeHeading == hChild.Type {

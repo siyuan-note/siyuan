@@ -14,6 +14,7 @@
  */
 
 import {setStorageVal} from "../../protyle/util/compatibility";
+
 const DEFAULT_VIEW_HISTORY_CACHE_SIZE = 20;
 
 /**
@@ -66,6 +67,7 @@ class ViewHistory {
     // NOTE
     window.siyuan.storage["pdfjs.history"] = databaseStr
     setStorageVal("pdfjs.history", databaseStr)
+    // localStorage.setItem("pdfjs.history", databaseStr);
   }
 
   async _readFromStorage() {
@@ -74,6 +76,7 @@ class ViewHistory {
     }
     // NOTE
     return window.siyuan.storage["pdfjs.history"];
+    // return localStorage.getItem("pdfjs.history");
   }
 
   async set(name, val) {

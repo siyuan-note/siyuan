@@ -26,21 +26,23 @@ import (
 
 // MarkdownSettings 运行时 Markdown 配置。
 var MarkdownSettings = &Markdown{
-	InlineAsterisk:   true,
-	InlineUnderscore: true,
-	InlineSup:        true,
-	InlineSub:        true,
-	InlineTag:        true,
-	InlineMath:       true,
+	InlineAsterisk:      true,
+	InlineUnderscore:    true,
+	InlineSup:           true,
+	InlineSub:           true,
+	InlineTag:           true,
+	InlineMath:          true,
+	InlineStrikethrough: true,
 }
 
 type Markdown struct {
-	InlineAsterisk   bool `json:"inlineAsterisk"`   // 是否启用行级 * 语法
-	InlineUnderscore bool `json:"inlineUnderscore"` // 是否启用行级 _ 语法
-	InlineSup        bool `json:"inlineSup"`        // 是否启用行级上标
-	InlineSub        bool `json:"inlineSub"`        // 是否启用行级下标
-	InlineTag        bool `json:"inlineTag"`        // 是否启用行级标签
-	InlineMath       bool `json:"inlineMath"`       // 是否启用行级公式
+	InlineAsterisk      bool `json:"inlineAsterisk"`      // 是否启用行级 * 语法
+	InlineUnderscore    bool `json:"inlineUnderscore"`    // 是否启用行级 _ 语法
+	InlineSup           bool `json:"inlineSup"`           // 是否启用行级上标
+	InlineSub           bool `json:"inlineSub"`           // 是否启用行级下标
+	InlineTag           bool `json:"inlineTag"`           // 是否启用行级标签
+	InlineMath          bool `json:"inlineMath"`          // 是否启用行级公式
+	InlineStrikethrough bool `json:"inlineStrikethrough"` // 是否启用行级删除线
 }
 
 func NewLute() (ret *lute.Lute) {
@@ -61,6 +63,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetSub(MarkdownSettings.InlineSub)
 	ret.SetTag(MarkdownSettings.InlineTag)
 	ret.SetInlineMath(MarkdownSettings.InlineMath)
+	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
 	ret.SetGFMStrikethrough1(false)
 	ret.SetFootnotes(false)
@@ -96,6 +99,7 @@ func NewStdLute() (ret *lute.Lute) {
 	ret.SetSub(MarkdownSettings.InlineSub)
 	ret.SetTag(MarkdownSettings.InlineTag)
 	ret.SetInlineMath(MarkdownSettings.InlineMath)
+	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
 	ret.SetGFMStrikethrough1(false)
 	return
 }

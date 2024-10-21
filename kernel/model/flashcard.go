@@ -598,7 +598,7 @@ func GetTreeDueFlashcards(rootID string, reviewedCardIDs []string) (ret []*Flash
 	newCardLimit := Conf.Flashcard.NewCardLimit
 	reviewCardLimit := Conf.Flashcard.ReviewCardLimit
 	// 文档级新卡/复习卡上限控制 Document-level new card/review card limit control https://github.com/siyuan-note/siyuan/issues/9365
-	ial := GetBlockAttrs(rootID)
+	ial := sql.GetBlockAttrs(rootID)
 	if newCardLimitStr := ial["custom-riff-new-card-limit"]; "" != newCardLimitStr {
 		var convertErr error
 		newCardLimit, convertErr = strconv.Atoi(newCardLimitStr)

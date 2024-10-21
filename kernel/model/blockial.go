@@ -24,11 +24,9 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/araddon/dateparse"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -53,7 +51,9 @@ func SetBlockReminder(id string, timed string) (err error) {
 		timedMills = t.UnixMilli()
 	}
 
-	attrs := GetBlockAttrs(id) // 获取属性是会等待树写入
+	WaitForWritingFiles()
+
+	attrs := sql.GetBlockAttrs(id)
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
@@ -67,7 +67,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	content := sql.NodeStaticContent(node, nil, false, false, false, GetBlockAttrsWithoutWaitWriting)
+	content := sql.NodeStaticContent(node, nil, false, false, false)
 	content = gulu.Str.SubStr(content, 128)
 	err = SetCloudBlockReminder(id, content, timedMills)
 	if err != nil {
@@ -102,31 +102,21 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 	}
 
 	WaitForWritingFiles()
-	trees := map[string]*parse.Tree{}
-	for _, blockAttr := range blockAttrs {
-		id := blockAttr["id"].(string)
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
-			return errors.New(fmt.Sprintf(Conf.Language(15), id))
-		}
 
-		if nil == trees[bt.RootID] {
-			tree, e := LoadTreeByBlockID(id)
-			if nil != e {
-				return e
-			}
-			trees[bt.RootID] = tree
-		}
+	var blockIDs []string
+	for _, blockAttr := range blockAttrs {
+		blockIDs = append(blockIDs, blockAttr["id"].(string))
 	}
 
+	trees := filesys.LoadTrees(blockIDs)
 	var nodes []*ast.Node
 	for _, blockAttr := range blockAttrs {
 		id := blockAttr["id"].(string)
-		bt := treenode.GetBlockTree(id)
-		if nil == bt {
+		tree := trees[id]
+		if nil == tree {
 			return errors.New(fmt.Sprintf(Conf.Language(15), id))
 		}
-		tree := trees[bt.RootID]
+
 		node := treenode.GetNodeInTree(tree, id)
 		if nil == node {
 			return errors.New(fmt.Sprintf(Conf.Language(15), id))
@@ -191,9 +181,7 @@ func setNodeAttrs(node *ast.Node, tree *parse.Tree, nameValues map[string]string
 	pushBroadcastAttrTransactions(oldAttrs, node)
 
 	go func() {
-		if !sql.IsEmptyQueue() {
-			sql.WaitForWritingDatabase()
-		}
+		sql.FlushQueue()
 		refreshDynamicRefText(node, tree)
 	}()
 	return
@@ -285,74 +273,5 @@ func ResetBlockAttrs(id string, nameValues map[string]string) (err error) {
 	}
 	IncSync()
 	cache.RemoveBlockIAL(id)
-	return
-}
-
-func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
-	WaitForWritingFiles()
-
-	ret = map[string]map[string]string{}
-	trees := filesys.LoadTrees(ids)
-	for _, id := range ids {
-		tree := trees[id]
-		if nil == tree {
-			continue
-		}
-
-		ret[id] = getBlockAttrs0(id, tree)
-		cache.PutBlockIAL(id, ret[id])
-	}
-	return
-}
-
-func GetBlockAttrs(id string) (ret map[string]string) {
-	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
-		ret = cached
-		return
-	}
-
-	WaitForWritingFiles()
-
-	ret = getBlockAttrs(id)
-	cache.PutBlockIAL(id, ret)
-	return
-}
-
-func GetBlockAttrsWithoutWaitWriting(id string) (ret map[string]string) {
-	ret = map[string]string{}
-	if cached := cache.GetBlockIAL(id); nil != cached {
-		ret = cached
-		return
-	}
-
-	ret = getBlockAttrs(id)
-	cache.PutBlockIAL(id, ret)
-	return
-}
-
-func getBlockAttrs(id string) (ret map[string]string) {
-	ret = map[string]string{}
-
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return
-	}
-
-	ret = getBlockAttrs0(id, tree)
-	return
-}
-
-func getBlockAttrs0(id string, tree *parse.Tree) (ret map[string]string) {
-	ret = map[string]string{}
-	node := treenode.GetNodeInTree(tree, id)
-	if nil == node {
-		logging.LogWarnf("block [%s] not found", id)
-		return
-	}
-
-	for _, kv := range node.KramdownIAL {
-		ret[kv[0]] = html.UnescapeAttrVal(kv[1])
-	}
 	return
 }

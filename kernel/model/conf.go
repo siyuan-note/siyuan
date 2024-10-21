@@ -339,15 +339,17 @@ func InitConf() {
 		Conf.Sync.Mode = 1
 	}
 	if nil == Conf.Sync.S3 {
-		Conf.Sync.S3 = &conf.S3{}
+		Conf.Sync.S3 = &conf.S3{SkipTlsVerify: true}
 	}
 	Conf.Sync.S3.Endpoint = util.NormalizeEndpoint(Conf.Sync.S3.Endpoint)
 	Conf.Sync.S3.Timeout = util.NormalizeTimeout(Conf.Sync.S3.Timeout)
+	Conf.Sync.S3.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.S3.ConcurrentReqs, conf.ProviderS3)
 	if nil == Conf.Sync.WebDAV {
-		Conf.Sync.WebDAV = &conf.WebDAV{}
+		Conf.Sync.WebDAV = &conf.WebDAV{SkipTlsVerify: true}
 	}
 	Conf.Sync.WebDAV.Endpoint = util.NormalizeEndpoint(Conf.Sync.WebDAV.Endpoint)
 	Conf.Sync.WebDAV.Timeout = util.NormalizeTimeout(Conf.Sync.WebDAV.Timeout)
+	Conf.Sync.WebDAV.ConcurrentReqs = util.NormalizeConcurrentReqs(Conf.Sync.WebDAV.ConcurrentReqs, conf.ProviderWebDAV)
 	if util.ContainerDocker == util.Container {
 		Conf.Sync.Perception = false
 	}
@@ -612,7 +614,7 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 	closeUserGuide()
 
 	// Improve indexing completeness when exiting https://github.com/siyuan-note/siyuan/issues/12039
-	sql.WaitForWritingDatabaseIn(200 * time.Millisecond)
+	sql.FlushQueue()
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false

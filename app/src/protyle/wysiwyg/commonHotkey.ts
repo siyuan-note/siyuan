@@ -104,10 +104,7 @@ export const upSelect = (options: {
                 // 当第一行太长自然换行的情况
                 options.range.getBoundingClientRect().top - nodeEditableElement.getBoundingClientRect().top - parseInt(getComputedStyle(nodeEditableElement).paddingTop) < 14) {
                 setFirstNodeRange(nodeEditableElement, options.range);
-                if (!isMac()) {
-                    // windows 中 shift 向上选中三行后，最后的光标会乱跳
-                    options.event.preventDefault();
-                }
+                options.event.preventDefault();
             }
             return;
         }
@@ -323,9 +320,7 @@ export const alignImgCenter = (protyle: IProtyle, nodeElement: Element, assetEle
 export const alignImgLeft = (protyle: IProtyle, nodeElement: Element, assetElements: Element[], id: string, html: string) => {
     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     assetElements.forEach((item: HTMLElement) => {
-        item.style.minWidth = "";
-        // 兼容历史居中问题
-        item.style.display = "";
+        item.removeAttribute("style");
     });
     updateTransaction(protyle, id, nodeElement.outerHTML, html);
 };

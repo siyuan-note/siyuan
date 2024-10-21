@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
+import { AppOptions } from "./app_options.js";
+import { BaseExternalServices } from "./external_services.js";
 import { BasePreferences } from "./preferences.js";
+import { GenericL10n } from "./genericl10n.js";
 import { GenericScripting } from "./generic_scripting.js";
-import {shadow} from "./pdfjs";
 
 if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("GENERIC")) {
   throw new Error(
@@ -23,76 +25,121 @@ if (typeof PDFJSDev !== "undefined" && !PDFJSDev.test("GENERIC")) {
   );
 }
 
-const GenericCom = {};
+function initCom(app) {}
 
-class GenericPreferences extends BasePreferences {
+class Preferences extends BasePreferences {
   async _writeToStorage(prefObj) {
     localStorage.setItem("pdfjs.preferences", JSON.stringify(prefObj));
   }
 
   async _readFromStorage(prefObj) {
-    return JSON.parse(localStorage.getItem("pdfjs.preferences"));
+    return { prefs: JSON.parse(localStorage.getItem("pdfjs.preferences")) };
   }
 }
 
-class DefaultExternalServices {
-  constructor() {
-    throw new Error("Cannot initialize DefaultExternalServices.");
+class ExternalServices extends BaseExternalServices {
+  async createL10n() {
+    return new GenericL10n(AppOptions.get("localeProperties")?.lang);
   }
 
-  static updateFindControlState(data) {}
+  createScripting() {
+    return new GenericScripting(AppOptions.get("sandboxBundleSrc"));
+  }
+}
 
-  static updateFindMatchesCount(data) {}
-
-  static initPassiveLoading(callbacks) {}
-
-  static reportTelemetry(data) {}
-
-  static get supportsPinchToZoom() {
-    return shadow(this, "supportsPinchToZoom", true);
+class MLManager {
+  async isEnabledFor(_name) {
+    return false;
   }
 
-  static get supportsIntegratedFind() {
-    return shadow(this, "supportsIntegratedFind", false);
+  async deleteModel(_service) {
+    return null;
   }
 
-  static get supportsDocumentFonts() {
-    return shadow(this, "supportsDocumentFonts", true);
+  isReady(_name) {
+    return false;
   }
 
-  static get supportedMouseWheelZoomModifierKeys() {
-    return shadow(this, "supportedMouseWheelZoomModifierKeys", {
-      ctrlKey: true,
-      metaKey: true,
+  guess(_data) {}
+
+  toggleService(_name, _enabled) {}
+
+  static getFakeMLManager(options) {
+    return new FakeMLManager(options);
+  }
+}
+
+class FakeMLManager {
+  eventBus = null;
+
+  hasProgress = false;
+
+  constructor({ enableGuessAltText, enableAltTextModelDownload }) {
+    this.enableGuessAltText = enableGuessAltText;
+    this.enableAltTextModelDownload = enableAltTextModelDownload;
+  }
+
+  setEventBus(eventBus, abortSignal) {
+    this.eventBus = eventBus;
+  }
+
+  async isEnabledFor(_name) {
+    return this.enableGuessAltText;
+  }
+
+  async deleteModel(_name) {
+    this.enableAltTextModelDownload = false;
+    return null;
+  }
+
+  async loadModel(_name) {}
+
+  async downloadModel(_name) {
+    // Simulate downloading the model but with progress.
+    // The progress can be seen in the new alt-text dialog.
+    this.hasProgress = true;
+
+    const { promise, resolve } = Promise.withResolvers();
+    const total = 1e8;
+    const end = 1.5 * total;
+    const increment = 5e6;
+    let loaded = 0;
+    const id = setInterval(() => {
+      loaded += increment;
+      if (loaded <= end) {
+        this.eventBus.dispatch("loadaiengineprogress", {
+          source: this,
+          detail: {
+            total,
+            totalLoaded: loaded,
+            finished: loaded + increment >= end,
+          },
+        });
+        return;
+      }
+      clearInterval(id);
+      this.hasProgress = false;
+      this.enableAltTextModelDownload = true;
+      resolve(true);
+    }, 900);
+    return promise;
+  }
+
+  isReady(_name) {
+    return this.enableAltTextModelDownload;
+  }
+
+  guess({ request: { data } }) {
+    return new Promise(resolve => {
+      setTimeout(() => {
+        resolve(data ? { output: "Fake alt text" } : { error: true });
+      }, 3000);
     });
   }
 
-  static get isInAutomation() {
-    return shadow(this, "isInAutomation", false);
-  }
-
-  static updateEditorStates(data) {
-    throw new Error("Not implemented: updateEditorStates");
-  }
-
-  static createDownloadManager() {
-    // NOTE return new DownloadManager();
-  }
-
-  static createPreferences() {
-    return new GenericPreferences();
-  }
-
-  static createL10n({ locale = "en-US" }) {
-    // NOTE return new GenericL10n(locale);
-  }
-
-  static createScripting({ sandboxBundleSrc }) {
-    return new GenericScripting(sandboxBundleSrc);
+  toggleService(_name, enabled) {
+    this.enableGuessAltText = enabled;
   }
 }
 
-// NOTE
-// PDFViewerApplication.externalServices = GenericExternalServices;
-
-export { GenericCom, DefaultExternalServices };
+export { ExternalServices, initCom, MLManager, Preferences };

@@ -32,6 +32,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
     protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
     protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
     protyle.lute.SetGFMStrikethrough1(false);
     addLoading(protyle);
     if (protyle.options.backlinkData) {
@@ -43,7 +44,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,
                 keyword: isMention ? inputsElement[1].value : inputsElement[0].value,
-                containChildren: true
+                containChildren: false
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);

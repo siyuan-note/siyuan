@@ -44,7 +44,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.1.8"
+	Ver       = "3.1.9"
 	IsInsider = false
 )
 
@@ -80,7 +80,7 @@ func Boot() {
 	readOnly := flag.String("readonly", "false", "read-only mode")
 	accessAuthCode := flag.String("accessAuthCode", "", "access auth code")
 	ssl := flag.Bool("ssl", false, "for https and wss")
-	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES/ja_JP/it_IT")
+	lang := flag.String("lang", "", "zh_CN/zh_CHT/en_US/fr_FR/es_ES/ja_JP/it_IT/de_DE/he_IL/ru_RU/pl_PL")
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
@@ -413,9 +413,10 @@ func initMime() {
 	// https://github.com/siyuan-note/siyuan/issues/247
 	// https://github.com/siyuan-note/siyuan/issues/3813
 	mime.AddExtensionType(".css", "text/css")
-	mime.AddExtensionType(".js", "application/x-javascript")
-	mime.AddExtensionType(".json", "application/json")
+	mime.AddExtensionType(".js", "text/javascript")
+	mime.AddExtensionType(".mjs", "text/javascript")
 	mime.AddExtensionType(".html", "text/html")
+	mime.AddExtensionType(".json", "application/json")
 
 	// 某些系统上下载资源文件后打开是 zip https://github.com/siyuan-note/siyuan/issues/6347
 	mime.AddExtensionType(".doc", "application/msword")

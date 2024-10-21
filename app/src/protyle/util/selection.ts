@@ -314,17 +314,29 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
             // 防止单元格中 ⇧↓ 全部选中
             return range;
         }
+        // https://github.com/siyuan-note/siyuan/issues/12792
+        if (!lastNode.lastChild) {
+            break;
+        }
         // 最后一个为多种行内元素嵌套
         lastNode = lastNode.lastChild as Element;
     }
+    // https://github.com/siyuan-note/siyuan/issues/12753
     if (!lastNode) {
-        range.selectNodeContents(editElement);
-        return range;
+        lastNode = editElement;
     }
     if (setStart) {
-        range.setStart(lastNode, lastNode.textContent.length);
+        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
+            range.setStartAfter(lastNode);
+        } else {
+            range.setStart(lastNode, lastNode.textContent.length);
+        }
     } else {
-        range.setEnd(lastNode, lastNode.textContent.length);
+        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
+            range.setStartAfter(lastNode);
+        } else {
+            range.setEnd(lastNode, lastNode.textContent.length);
+        }
     }
     return range;
 };
@@ -538,6 +550,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.collapse(true);
             setRange = true;
         } else if (type === "NodeAttributeView") {
+            /// #if !MOBILE
             const cursorElement = element.querySelector(".av__cursor");
             if (cursorElement) {
                 range.setStart(cursorElement.firstChild, 0);
@@ -545,6 +558,9 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             } else {
                 return false;
             }
+            /// #else
+            return false;
+            /// #endif
         }
         if (setRange) {
             focusByRange(range);

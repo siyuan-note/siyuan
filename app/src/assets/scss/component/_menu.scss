@@ -141,7 +141,11 @@
   &--list {
     overflow: auto;
     // https://github.com/siyuan-note/siyuan/issues/11919
-    max-height: calc(80vh + 18px);
+    max-height: calc(60vh + 18px);
+
+    .b3-menu__items {
+      max-height: 60vh;
+    }
 
     .b3-menu__label {
       @include text-clamp(1);

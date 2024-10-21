@@ -1,4 +1,6 @@
 {
+  "backlinkContainChildren": "反向鏈接包含子塊",
+  "backlinkContainChildrenTip": "啟用後子塊將被納入到反向鏈接計算中",
   "entryNum": "條目數",
   "workspaceData": "工作空間數據",
   "confirmRemoveRelationField": "確定同時刪除關聯至 <b>${x}</b> 中的字段嗎？",

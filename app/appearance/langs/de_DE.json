@@ -1,4 +1,6 @@
 {
+  "backlinkContainChildren": "Enthalten Rückverweise untergeordnete Blöcke",
+  "backlinkContainChildrenTip": "Wenn aktiviert, werden untergeordnete Blöcke in die Berechnung der Rückverweise einbezogen",
   "entryNum": "Anzahl der Einträge",
   "workspaceData": "Arbeitsbereichsdaten",
   "confirmRemoveRelationField": "Sind Sie sicher, dass Sie das Feld, das mit <b>${x}</b> verknüpft ist, löschen möchten?",

@@ -1,4 +1,6 @@
 {
+  "backlinkContainChildren": "Les liens retour contiennent-ils des sous-blocs",
+  "backlinkContainChildrenTip": "Une fois activé, les sous-blocs seront inclus dans le calcul des liens retour",
   "entryNum": "Nombre d'entrées",
   "workspaceData": "Données de l'espace de travail",
   "confirmRemoveRelationField": "Êtes-vous sûr de vouloir supprimer le champ associé à <b>${x}</b>?",

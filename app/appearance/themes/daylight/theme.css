@@ -136,10 +136,10 @@
 
     /* switch */
     --b3-switch-background: #e1e3e1;
-    --b3-switch-border: #747775;
+    --b3-switch-border: #aeaeae;
     --b3-switch-hover: rgba(31, 31, 31, 0.06);
     --b3-switch-checked: #fff;
-    --b3-switch-checked-background: #0b57d0;
+    --b3-switch-checked-background: var(--b3-theme-primary);
     --b3-switch-checked-hover: #d3e3fd;
     --b3-switch-checked-hover2: rgba(31, 31, 31, .06);
 

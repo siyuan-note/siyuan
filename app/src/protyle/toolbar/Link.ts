@@ -45,6 +45,10 @@ export class Link extends ToolbarItem {
                         }
                     }
                 }
+                // https://github.com/siyuan-note/siyuan/issues/12867
+                if (!dataHref && clipText.startsWith("assets/")) {
+                    dataHref = clipText;
+                }
             } catch (e) {
                 console.log(e);
             }

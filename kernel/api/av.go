@@ -560,12 +560,18 @@ func renderAttributeView(c *gin.Context) {
 
 	var views []map[string]interface{}
 	for _, v := range attrView.Views {
+		pSize := 10
+		if nil != v.Table && av.LayoutTypeTable == v.LayoutType {
+			pSize = v.Table.PageSize
+		}
+
 		view := map[string]interface{}{
 			"id":               v.ID,
 			"icon":             v.Icon,
 			"name":             v.Name,
 			"hideAttrViewName": v.HideAttrViewName,
 			"type":             v.LayoutType,
+			"pageSize":         pSize,
 		}
 
 		views = append(views, view)

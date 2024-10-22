@@ -70,7 +70,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             const snapshot = protyle.options.history?.snapshot;
             let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
             if (typeof viewID === "string") {
-                const viewTabElement = e.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${viewID}"]`) as HTMLElement
+                const viewTabElement = e.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${viewID}"]`) as HTMLElement;
                 if (viewTabElement) {
                     e.dataset.pageSize = viewTabElement.dataset.page;
                 }

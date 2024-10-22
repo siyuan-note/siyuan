@@ -36,7 +36,6 @@ var (
 	operationQueue []*dbQueueOperation
 	dbQueueLock    = sync.Mutex{}
 	txLock         = sync.Mutex{}
-	isWriting      = false
 )
 
 type dbQueueOperation struct {
@@ -72,11 +71,7 @@ func FlushQueue() {
 	}
 
 	txLock.Lock()
-	isWriting = true
-	defer func() {
-		isWriting = false
-		txLock.Unlock()
-	}()
+	defer txLock.Unlock()
 
 	start := time.Now()
 

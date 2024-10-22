@@ -223,7 +223,7 @@ func heading2Doc(c *gin.Context) {
 		return
 	}
 
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(targetNotebook, targetPath, luteEngine)
 	if err != nil {
@@ -268,7 +268,7 @@ func li2Doc(c *gin.Context) {
 		return
 	}
 
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(targetNotebook, targetPath, luteEngine)
 	if err != nil {
@@ -591,7 +591,7 @@ func createDoc(c *gin.Context) {
 		return
 	}
 
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
 	pushCreate(box, p, tree.Root.ID, arg)
 
@@ -621,7 +621,7 @@ func createDailyNote(c *gin.Context) {
 		return
 	}
 
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
@@ -720,7 +720,7 @@ func createDocWithMd(c *gin.Context) {
 	}
 	ret.Data = id
 
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
 	b, _ := model.GetBlock(id, nil)
 	p := b.Path

@@ -38,7 +38,7 @@ import (
 )
 
 func RefreshBacklink(id string) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 	refreshRefsByDefID(id)
 }
 

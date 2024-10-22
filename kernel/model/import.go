@@ -660,7 +660,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	lockSync()
 	defer unlockSync()
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	var baseHPath, baseTargetPath, boxLocalPath string
 	if "/" == toPath {

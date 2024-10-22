@@ -53,7 +53,7 @@ type AttrView struct {
 }
 
 func GetDocInfo(blockID string) (ret *BlockInfo) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	tree, err := LoadTreeByBlockID(blockID)
 	if err != nil {
@@ -125,7 +125,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 }
 
 func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*BlockInfo) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	trees := filesys.LoadTrees(blockIDs)
 	for _, blockID := range blockIDs {

@@ -760,6 +760,7 @@ interface IAVView {
     type: string
     icon: string
     hideAttrViewName: boolean
+    pageSize: number
 }
 
 interface IAVTable extends IAVView {

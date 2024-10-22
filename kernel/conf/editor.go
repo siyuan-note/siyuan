@@ -51,6 +51,7 @@ type Editor struct {
 	OnlySearchForDoc                bool           `json:"onlySearchForDoc"`                // 是否启用 [[ 仅搜索文档块
 	BacklinkExpandCount             int            `json:"backlinkExpandCount"`             // 反向链接默认展开数量
 	BackmentionExpandCount          int            `json:"backmentionExpandCount"`          // 反链提及默认展开数量
+	BacklinkContainChildren         bool           `json:"backlinkContainChildren"`         // 反向链接是否包含子块进行计算
 	Markdown                        *util.Markdown `json:"markdown"`                        // Markdown 配置
 }
 
@@ -86,6 +87,7 @@ func NewEditor() *Editor {
 		RTL:                             false,
 		BacklinkExpandCount:             8,
 		BackmentionExpandCount:          -1,
+		BacklinkContainChildren:         false,
 		Markdown:                        util.MarkdownSettings,
 	}
 }

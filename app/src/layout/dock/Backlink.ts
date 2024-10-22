@@ -437,7 +437,6 @@ export class Backlink extends Model {
                 defID: this.blockId,
                 refTreeID: docId,
                 keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value,
-                containChildren: false
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");

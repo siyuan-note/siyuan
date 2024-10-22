@@ -104,7 +104,7 @@ const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: 
             plugin.docks[tabItem.type].config.show = tabItem.show;
             plugin.docks[tabItem.type].config.size = tabItem.size;
             if (!window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name]) {
-                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {}
+                window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] = {};
             }
             window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][tabItem.type] = plugin.docks[tabItem.type].config;
             setStorageVal(Constants.LOCAL_PLUGIN_DOCKS, window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS]);

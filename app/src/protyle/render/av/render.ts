@@ -70,6 +70,10 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
             const snapshot = protyle.options.history?.snapshot;
             let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
             if (typeof viewID === "string") {
+                const viewTabElement = e.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${viewID}"]`) as HTMLElement;
+                if (viewTabElement) {
+                    e.dataset.pageSize = viewTabElement.dataset.page;
+                }
                 newViewID = viewID;
                 fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
                 e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
@@ -195,7 +199,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let tabHTML = "";
                 let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-id="${item.id}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div data-id="${item.id}" data-page="${item.pageSize}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
     <span class="item__text">${item.name}</span>
 </div>`;

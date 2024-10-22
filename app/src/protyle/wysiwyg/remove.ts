@@ -389,7 +389,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         focusBlock(previousLastElement, undefined, false);
     } else {
         const previousLastEditElement = getContenteditableElement(previousLastElement);
-        if (editableElement && editableElement.textContent !== "") {
+        if (editableElement && (editableElement.textContent !== "" || editableElement.querySelector(".emoji"))) {
             // 非空块
             range.setEndAfter(editableElement.lastChild);
             // 数学公式回车后再删除 https://github.com/siyuan-note/siyuan/issues/3850

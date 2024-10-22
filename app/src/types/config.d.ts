@@ -342,6 +342,10 @@ declare namespace Config {
          */
         backmentionExpandCount: number;
         /**
+         * Whether the backlink contains children
+         */
+        backlinkContainChildren: boolean;
+        /**
          * The maximum length of the dynamic anchor text for block references
          */
         blockRefDynamicAnchorTextMaxLen: number;

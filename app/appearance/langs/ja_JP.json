@@ -1,4 +1,7 @@
 {
+  "backlinkContainChildren": "バックリンクに子ブロックを含めるかどうか",
+  "backlinkContainChildrenTip": "有効にすると、子ブロックがバックリンク計算に含まれます",
+  "entryNum": "エントリ数",
   "workspaceData": "ワークスペースデータ",
   "confirmRemoveRelationField": "<b>${x}</b> に関連するフィールドを同時に削除してもよろしいですか？",
   "removeButKeepRelationField": "削除して関連フィールドを保持",

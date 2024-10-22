@@ -24,8 +24,9 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "onlySearchForDoc", "onlySearchForDocTip", "dynamicLoadBlocks", "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip",
             "listItemDotNumberClickFocus", "listItemDotNumberClickFocusTip", "editorMarkdownInlineAsterisk", "editorMarkdownInlineUnderscore",
             "editorMarkdownInlineSup", "editorMarkdownInlineSupTip", "editorMarkdownInlineSub", "editorMarkdownInlineSubTip",
-            "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip",
-            "allowHTMLBLockScript", "allowHTMLBLockScriptTip",
+            "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip", "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip",
+            "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "backlinkExpandCount", "backlinkExpandTip", "backmentionExpandCount", "backmentionExpandTip",
+            "backlinkContainChildren", "backlinkContainChildrenTip"
         ]),
 
         // 文档树

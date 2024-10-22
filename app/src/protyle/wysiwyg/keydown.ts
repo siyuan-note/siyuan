@@ -696,7 +696,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 页面按向下/右箭头丢失焦点 https://ld246.com/article/1629954026096
                 const lastEditElement = getContenteditableElement(nodeElement);
                 // 代码块需替换最后一个 /n  https://github.com/siyuan-note/siyuan/issues/3221
-                if (lastEditElement && lastEditElement.textContent.replace(/\n$/, "").length <= getSelectionOffset(lastEditElement, undefined, range).end) {
+                if (lastEditElement && !lastEditElement.querySelector(".emoji") && lastEditElement.textContent.replace(/\n$/, "").length <= getSelectionOffset(lastEditElement, undefined, range).end) {
                     event.stopPropagation();
                     event.preventDefault();
                     focusByRange(range);
@@ -860,7 +860,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const currentNode = range.startContainer.childNodes[range.startOffset - 1] as HTMLElement;
                     if (position.start === 0 && (
                         range.startOffset === 0 ||
-                        (currentNode && currentNode.nodeType === 3 && !hasPreviousSibling(currentNode) && currentNode.innerText === "") // https://ld246.com/article/1649251218696
+                        (currentNode && currentNode.nodeType === 3 && !hasPreviousSibling(currentNode) &&
+                            // 需使用 textContent，文本元素没有 innerText
+                            currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
                         removeBlock(protyle, nodeElement, range, "Backspace");
                         event.stopPropagation();

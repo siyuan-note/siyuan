@@ -27,7 +27,6 @@
     & > .b3-button {
       align-self: flex-end;
       margin-right: 18px;
-
     }
 
     & > .fn__flex-1 {
@@ -40,8 +39,15 @@
   }
 
   &--error .b3-snackbar__content {
-    background-color: var(--b3-theme-error);
-    color: var(--b3-theme-on-error);
+    padding-left: 47px;
+
+    &:after {
+      content: "❗";
+      position: absolute;
+      left: 16px;
+      top: 10px;
+      font-size: 16px;
+    }
   }
 
   &__content {
@@ -50,16 +56,16 @@
     padding: 8px 16px;
     color: var(--b3-theme-on-primary);
     font-size: inherit;
-    background-color: var(--b3-theme-primary);
+    background-color: var(--b3-tooltips-background);
     box-sizing: border-box;
-    box-shadow: 0 3px 5px -1px rgb(0 0 0 / 20%), 0 6px 10px 0 rgb(0 0 0 / 14%), 0 1px 18px 0 rgb(0 0 0 / 12%);
+    box-shadow: var(--b3-tooltips-shadow);
     word-break: break-word;
     max-width: 20vw;
     text-align: left;
     display: inline-block;
 
     &--close {
-      padding-right: 27px;
+      padding-right: 50px;
     }
 
     a {
@@ -75,13 +81,14 @@
   &__close {
     position: absolute;
     cursor: pointer;
-    height: 16px;
-    width: 16px;
+    height: 18px;
+    width: 18px;
     color: var(--b3-theme-on-primary);
     transition: var(--b3-transition);
-    opacity: .68;
-    right: 5px;
+    right: 16px;
     top: 10px;
+    box-sizing: border-box;
+    opacity: .68;
 
     &:hover {
       opacity: 1;

@@ -4,8 +4,8 @@ import {hintEmbed, hintRef, hintSlash, hintTag} from "../hint/extend";
 import {isMobile} from "../../util/functions";
 
 export class Options {
-    public options: IOptions;
-    private defaultOptions: IOptions = {
+    public options: IProtyleOptions;
+    private defaultOptions: IProtyleOptions = {
         mode: "wysiwyg",
         blockId: "",
         render: {
@@ -132,11 +132,11 @@ export class Options {
         }
     };
 
-    constructor(options: IOptions) {
+    constructor(options: IProtyleOptions) {
         this.options = options;
     }
 
-    public merge(): IOptions {
+    public merge(): IProtyleOptions {
         if (this.options) {
             if (this.options.toolbar) {
                 this.options.toolbar = this.mergeToolbar(this.options.toolbar);

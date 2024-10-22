@@ -1,7 +1,6 @@
 type TPluginDockPosition = "LeftTop" | "LeftBottom" | "RightTop" | "RightBottom" | "BottomLeft" | "BottomRight"
 type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
-type TEditorMode = "preview" | "wysiwyg"
 type TOperation =
     "insert"
     | "update"
@@ -426,17 +425,6 @@ interface ISiyuan {
     blockPanels: import("../block/Panel").BlockPanel[],
     dialogs: import("../dialog").Dialog[],
     viewer?: Viewer
-}
-
-interface IScrollAttr {
-    rootId: string,
-    startId: string,
-    endId: string
-    scrollTop: number,
-    focusId?: string,
-    focusStart?: number
-    focusEnd?: number
-    zoomInId?: string
 }
 
 interface IOperation {

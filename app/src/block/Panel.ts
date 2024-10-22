@@ -161,7 +161,7 @@ export class BlockPanel {
             if (!this.targetElement && typeof this.x === "undefined" && typeof this.y === "undefined") {
                 return;
             }
-            const action = [];
+            const action: TProtyleAction[] = [];
             if (response.data.rootID !== this.nodeIds[index]) {
                 action.push(Constants.CB_GET_ALL);
             } else {

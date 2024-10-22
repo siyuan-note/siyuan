@@ -10,7 +10,9 @@
     "types": [
       "./src/types",
       "node"
-    ]
+    ],
+    "declaration": true,
+    "emitDeclarationOnly": true,
   },
   "include": [
     "src"

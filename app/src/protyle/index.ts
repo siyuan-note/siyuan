@@ -51,9 +51,9 @@ export class Protyle {
      * @param id 要挂载 Protyle 的元素或者元素 ID。
      * @param options Protyle 参数
      */
-    constructor(app: App, id: HTMLElement, options?: IOptions) {
+    constructor(app: App, id: HTMLElement, options?: IProtyleOptions) {
         this.version = Constants.SIYUAN_VERSION;
-        let pluginsOptions: IOptions = options;
+        let pluginsOptions: IProtyleOptions = options;
         app.plugins.forEach(item => {
             if (item.protyleOptions) {
                 pluginsOptions = merge(pluginsOptions, item.protyleOptions);
@@ -260,7 +260,7 @@ export class Protyle {
         }
     }
 
-    private getDoc(mergedOptions: IOptions) {
+    private getDoc(mergedOptions: IProtyleOptions) {
         fetchPost("/api/filetree/getDoc", {
             id: mergedOptions.blockId,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
@@ -279,7 +279,7 @@ export class Protyle {
         });
     }
 
-    private afterOnGet(mergedOptions: IOptions) {
+    private afterOnGet(mergedOptions: IProtyleOptions) {
         if (this.protyle.model) {
             /// #if !MOBILE
             if (mergedOptions.action?.includes(Constants.CB_GET_FOCUS) || mergedOptions.action?.includes(Constants.CB_GET_OPENNEW)) {

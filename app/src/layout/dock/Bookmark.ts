@@ -85,7 +85,7 @@ export class Bookmark extends Model {
                     }
                 }
                 const id = element.getAttribute("data-node-id");
-                checkFold(id, (zoomIn, action: string[]) => {
+                checkFold(id, (zoomIn, action: TProtyleAction[]) => {
                     openFileById({
                         app,
                         id,
@@ -111,7 +111,7 @@ export class Bookmark extends Model {
             },
             altClick: (element: HTMLElement,) => {
                 const id = element.getAttribute("data-node-id");
-                checkFold(id, (zoomIn, action: string[]) => {
+                checkFold(id, (zoomIn, action: TProtyleAction[]) => {
                     openFileById({
                         app,
                         id,
@@ -123,7 +123,7 @@ export class Bookmark extends Model {
             },
             shiftClick: (element: HTMLElement) => {
                 const id = element.getAttribute("data-node-id");
-                checkFold(id, (zoomIn, action: string[]) => {
+                checkFold(id, (zoomIn, action: TProtyleAction[]) => {
                     openFileById({
                         app,
                         id,

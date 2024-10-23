@@ -41,7 +41,7 @@ export const openFileById = async (options: {
     id: string,
     position?: string,
     mode?: TEditorMode,
-    action?: string[]
+    action?: TProtyleAction[]
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean

@@ -498,7 +498,7 @@ interface IProtyle {
         showAll?: boolean
         mode?: number
         blockCount?: number
-        action?: string[]
+        action?: TProtyleAction[]
     },
     disabled: boolean,
     selectElement?: HTMLElement,

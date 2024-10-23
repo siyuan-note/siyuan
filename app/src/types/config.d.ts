@@ -1646,7 +1646,7 @@ declare namespace Config {
         /**
          * Tab type
          */
-        type: string;
+        type: TDock | string;
     }
 
     /**

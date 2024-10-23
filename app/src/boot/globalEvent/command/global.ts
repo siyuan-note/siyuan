@@ -262,10 +262,10 @@ export const globalCommand = (command: string, app: App) => {
     if (command === "closeTab") {
         const activeTabElement = document.querySelector(".layout__tab--active");
         if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-            let type = "";
+            let type: TDock;
             Array.from(activeTabElement.classList).find(item => {
                 if (item.startsWith("sy__")) {
-                    type = item.replace("sy__", "");
+                    type = item.replace("sy__", "") as TDock;
                     return true;
                 }
             });

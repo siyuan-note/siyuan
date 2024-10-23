@@ -1,6 +1,7 @@
 type TPluginDockPosition = "LeftTop" | "LeftBottom" | "RightTop" | "RightBottom" | "BottomLeft" | "BottomRight"
 type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
+type TDock = "file" | "outline" | "inbox" | "bookmark" | "tag" | "graph" | "globalGraph" | "backlink"
 type TOperation =
     "insert"
     | "update"
@@ -63,7 +64,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "closed-notebook" |
     "paste" |
     "input-search" |
-    "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
+    "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
     "lock-screen" |
@@ -316,7 +317,7 @@ interface IBackStack {
         notebookId: string
     },
     scrollTop?: number,
-    callback?: string[],
+    callback?: TProtyleAction[],
     position?: {
         start: number,
         end: number
@@ -543,7 +544,7 @@ interface IOpenFileOptions {
     position?: string, // file 或者 asset，打开位置
     page?: number | string, // asset
     mode?: TEditorMode // file
-    action?: string[]
+    action?: TProtyleAction[]
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签

@@ -35,7 +35,7 @@ export const getWorkspaceName = () => {
     return pathPosix().basename(window.siyuan.config.system.workspaceDir.replace(/\\/g, "/"));
 };
 
-export const checkFold = (id: string, cb: (zoomIn: boolean, action: string[], isRoot: boolean) => void) => {
+export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleAction[], isRoot: boolean) => void) => {
     if (!id) {
         return;
     }

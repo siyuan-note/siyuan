@@ -1,7 +1,6 @@
 build
-dist
 node_modules
-public
 src/asset/pdf
+src/types/dist
 stage
 appearance

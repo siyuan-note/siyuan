@@ -56,7 +56,7 @@ export const getDocByScroll = (options: {
     focus?: boolean,
     updateReadonly?: boolean
 }) => {
-    let actions: string[] = [];
+    let actions: TProtyleAction[] = [];
     if (options.mergedOptions) {
         actions = options.mergedOptions.action;
     } else {

@@ -667,7 +667,7 @@ export class Graph extends Model {
                         return;
                     }
                     if (window.siyuan.shiftIsPressed) {
-                        checkFold(node.id, (zoomIn, action: string[]) => {
+                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
                             openFileById({
                                 app: this.app,
                                 id: node.id,
@@ -677,7 +677,7 @@ export class Graph extends Model {
                             });
                         });
                     } else if (window.siyuan.altIsPressed) {
-                        checkFold(node.id, (zoomIn, action: string[]) => {
+                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
                             openFileById({
                                 app: this.app,
                                 id: node.id,
@@ -695,7 +695,7 @@ export class Graph extends Model {
                             nodeIds: [node.id],
                         }));
                     } else {
-                        checkFold(node.id, (zoomIn, action: string[]) => {
+                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
                             openFileById({
                                 app: this.app,
                                 id: node.id,

@@ -376,7 +376,7 @@ func getRefText(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 	refText := model.GetBlockRefText(id)
 	if "" == refText {
 		// 空块返回 id https://github.com/siyuan-note/siyuan/issues/10259

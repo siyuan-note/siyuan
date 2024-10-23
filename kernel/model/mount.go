@@ -45,7 +45,7 @@ func CreateBox(name string) (id string, err error) {
 		name = Conf.language(105)
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -106,7 +106,7 @@ func RemoveBox(boxID string) (err error) {
 		return errors.New(fmt.Sprintf("can not remove [%s] caused by it is a reserved file", boxID))
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	isUserGuide := IsUserGuide(boxID)
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
@@ -147,7 +147,7 @@ func RemoveBox(boxID string) (err error) {
 }
 
 func Unmount(boxID string) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	unmount0(boxID)
 	evt := util.NewCmdResult("unmount", 0, util.PushModeBroadcast)
@@ -178,7 +178,7 @@ func Mount(boxID string) (alreadyMount bool, err error) {
 	boxLock.Store(boxID, true)
 	defer boxLock.Delete(boxID)
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	isUserGuide := IsUserGuide(boxID)
 
 	localPath := filepath.Join(util.DataDir, boxID)

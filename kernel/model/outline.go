@@ -210,7 +210,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
 	time.Sleep(util.FrontendQueueInterval)
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	ret = []*Path{}
 	tree, _ := LoadTreeByBlockID(rootID)

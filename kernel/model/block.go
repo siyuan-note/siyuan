@@ -463,7 +463,7 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 			return
 		}
 	}
-	WaitForWritingFiles()
+	FlushTxQueue()
 	util.ReloadUI()
 	return
 }

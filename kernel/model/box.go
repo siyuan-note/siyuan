@@ -619,7 +619,7 @@ func fullReindex() {
 	util.PushEndlessProgress(Conf.language(35))
 	defer util.PushClearProgress()
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	if err := sql.InitDatabase(true); err != nil {
 		os.Exit(logging.ExitCodeReadOnlyDatabase)

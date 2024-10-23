@@ -478,7 +478,7 @@ func ExportData() (zipPath string, err error) {
 }
 
 func exportData(exportFolder string) (zipPath string, err error) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	logging.LogInfof("exporting data...")
 
@@ -521,7 +521,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 }
 
 func ExportResources(resourcePaths []string, mainName string) (exportFilePath string, err error) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	// 用于导出的临时文件夹完整路径
 	exportFolderPath := filepath.Join(util.TempDir, "export", mainName)

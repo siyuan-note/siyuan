@@ -51,7 +51,7 @@ func SetBlockReminder(id string, timed string) (err error) {
 		timedMills = t.UnixMilli()
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	attrs := sql.GetBlockAttrs(id)
 	tree, err := LoadTreeByBlockID(id)
@@ -101,7 +101,7 @@ func BatchSetBlockAttrs(blockAttrs []map[string]interface{}) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	var blockIDs []string
 	for _, blockAttr := range blockAttrs {
@@ -149,7 +149,7 @@ func SetBlockAttrs(id string, nameValues map[string]string) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {

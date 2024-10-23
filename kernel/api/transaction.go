@@ -85,7 +85,7 @@ func performTransactions(c *gin.Context) {
 func pushTransactions(app, session string, transactions []*model.Transaction) {
 	pushMode := util.PushModeBroadcastExcludeSelf
 	if 0 < len(transactions) && 0 < len(transactions[0].DoOperations) {
-		model.WaitForWritingFiles() // 等待文件写入完成，后续渲染才能读取到最新的数据
+		model.FlushTxQueue() // 等待文件写入完成，后续渲染才能读取到最新的数据
 
 		action := transactions[0].DoOperations[0].Action
 		isAttrViewTx := strings.Contains(strings.ToLower(action), "attrview")

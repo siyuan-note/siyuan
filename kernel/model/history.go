@@ -63,7 +63,7 @@ func generateFileHistory() {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	// 生成文档历史
 	for _, box := range Conf.GetOpenedBoxes() {
@@ -225,7 +225,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	srcPath := historyPath
 	var destPath, parentHPath string

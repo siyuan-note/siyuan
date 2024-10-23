@@ -56,19 +56,9 @@ func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 	return false
 }
 
-func WaitForWritingFiles() {
-	var printLog bool
-	var lastPrintLog bool
-	for i := 0; isWritingFiles(); i++ {
-		time.Sleep(5 * time.Millisecond)
-		if 2000 < i && !printLog { // 10s 后打日志
-			logging.LogWarnf("file is writing: \n%s", logging.ShortStack())
-			printLog = true
-		}
-		if 12000 < i && !lastPrintLog { // 60s 后打日志
-			logging.LogWarnf("file is still writing")
-			lastPrintLog = true
-		}
+func FlushTxQueue() {
+	for 0 < len(txQueue) || isFlushing {
+		time.Sleep(10 * time.Millisecond)
 	}
 }
 
@@ -78,20 +68,17 @@ var (
 	isFlushing = false
 )
 
-func isWritingFiles() bool {
-	time.Sleep(time.Duration(50) * time.Millisecond)
-	return 0 < len(txQueue) || isFlushing
+func init() {
+	go flushQueue()
 }
 
-func init() {
-	go func() {
-		for {
-			select {
-			case tx := <-txQueue:
-				flushTx(tx)
-			}
+func flushQueue() {
+	for {
+		select {
+		case tx := <-txQueue:
+			flushTx(tx)
 		}
-	}()
+	}
 }
 
 func flushTx(tx *Transaction) {

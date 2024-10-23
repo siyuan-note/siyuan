@@ -628,7 +628,7 @@ func checkoutRepo(id string) {
 	}
 
 	util.PushEndlessProgress(Conf.Language(63))
-	WaitForWritingFiles()
+	FlushTxQueue()
 	CloseWatchAssets()
 	defer WatchAssets()
 	CloseWatchEmojis()
@@ -962,7 +962,7 @@ func IndexRepo(memo string) (err error) {
 
 	start := time.Now()
 	latest, _ := repo.Latest()
-	WaitForWritingFiles()
+	FlushTxQueue()
 	index, err := repo.Index(memo, map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
 	})

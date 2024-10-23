@@ -1279,7 +1279,7 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, or
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-	return fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
+	return fullTextSearchByUnion(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -1393,7 +1393,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter string) (
 	return
 }
 
-func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+func fullTextSearchByUnion(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1411,8 +1411,8 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 	}
 
 	mQ := stringQuery(query)
-	matchStmt := "SELECT * FROM " + table + " WHERE (" + table + " MATCH '" + columnFilter() + ":(" + mQ + ")')"
-	matchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
+	bMatchStmt := "SELECT id FROM " + table + " WHERE (" + table + " MATCH '" + columnFilter() + ":(" + mQ + ")')"
+	bMatchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
 
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
@@ -1425,20 +1425,15 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 		}
 	}
 	likeFilter += ")"
-	subquery := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
+	dMatchStmt := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
 		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter + orderBy
-	result, _ := sql.Query(subquery, -1)
-	var rootIDs []string
-	for _, r := range result {
-		rootIDs = append(rootIDs, r["root_id"].(string))
-	}
-	likeFilter = strings.ReplaceAll(likeFilter, "docContent LIKE", "content LIKE")
-	docMatchStmt := "SELECT * FROM " + table + " WHERE id IN ('" + strings.Join(rootIDs, "','") + "')"
-
-	unionStmt := "SELECT * FROM (" + matchStmt + " UNION ALL " + docMatchStmt + ")"
+		" GROUP BY root_id HAVING " + likeFilter
+	cteStmt := "WITH docs AS (" + dMatchStmt + "), blocks AS (" + bMatchStmt + ")"
+	docMatchStmt := "SELECT * FROM " + table + " WHERE id IN (SELECT root_id FROM docs)"
+	blockMatchStmt := "SELECT * FROM " + table + " WHERE id IN (SELECT id FROM blocks)"
+	unionStmt := cteStmt + "\nSELECT * FROM (" + blockMatchStmt + " UNION ALL " + docMatchStmt + ")"
 	countStmt := unionStmt
-	unionStmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	unionStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	resultBlocks := sql.SelectBlocksRawStmtNoParse(unionStmt, -1)
 
 	// FTS 高亮
@@ -1470,11 +1465,11 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByLIKE(countStmt)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByUnion(countStmt)
 	return
 }
 
-func fullTextSearchCountByLIKE(stmt string) (matchedBlockCount, matchedRootCount int) {
+func fullTextSearchCountByUnion(stmt string) (matchedBlockCount, matchedRootCount int) {
 	stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM (" + stmt + ")"
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {

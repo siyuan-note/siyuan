@@ -440,7 +440,7 @@ interface IProtyleOptions {
     }[],
     action?: TProtyleAction[],
     mode?: TEditorMode,
-    blockId: string
+    blockId?: string
     rootId?: string
     key?: string
     defId?: string

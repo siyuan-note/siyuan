@@ -945,7 +945,6 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-
 		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize

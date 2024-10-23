@@ -6,7 +6,7 @@
 		"id": "20201222100339-i5hzcph",
 		"title": "Database table",
 		"type": "doc",
-		"updated": "20241024001049"
+		"updated": "20241024010556"
 	},
 	"Children": [
 		{
@@ -690,7 +690,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201224120448-dd94dgz",
-				"updated": "20241024001049"
+				"updated": "20241024010556"
 			},
 			"Children": [
 				{
@@ -714,7 +714,7 @@
 			},
 			"Properties": {
 				"id": "20210112165011-irm4wch",
-				"updated": "20241024001049"
+				"updated": "20241024010556"
 			},
 			"Children": [
 				{
@@ -793,7 +793,7 @@
 					},
 					"Properties": {
 						"id": "20210112165011-n8zrkxm",
-						"updated": "20241024001049"
+						"updated": "20241024010556"
 					},
 					"Children": [
 						{
@@ -825,7 +825,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20210112165011-fodiphq",
-								"updated": "20241024001049"
+								"updated": "20241024010556"
 							},
 							"Children": [
 								{
@@ -1244,7 +1244,7 @@
 									},
 									"Properties": {
 										"id": "20241024001039-ohxxgjo",
-										"updated": "20241024001039"
+										"updated": "20241024010556"
 									},
 									"Children": [
 										{
@@ -1252,7 +1252,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20241024001039-pm9zy3x",
-												"updated": "20241024001041"
+												"updated": "20241024010556"
 											},
 											"Children": [
 												{
@@ -1262,7 +1262,7 @@
 												{
 													"Type": "NodeTextMark",
 													"TextMarkType": "code",
-													"TextMarkTextContent": "100"
+													"TextMarkTextContent": "0"
 												},
 												{
 													"Type": "NodeText",

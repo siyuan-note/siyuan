@@ -1445,7 +1445,7 @@ func nSort(n *ast.Node) int {
 	case ast.NodeAttributeView:
 		return 30
 	case ast.NodeDocument:
-		return 100
+		return 0
 	case ast.NodeText, ast.NodeTextMark:
 		if n.IsTextMarkType("tag") {
 			return 205

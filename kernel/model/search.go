@@ -1279,9 +1279,6 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, or
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-
-	query = strings.ReplaceAll(query, "'", "''")
-	query = strings.ReplaceAll(query, "\"", "\"\"")
 	return fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
@@ -1317,6 +1314,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter string) 
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	query = stringQuery(query)
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1400,15 +1398,6 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
 	}
-	projections := "id, parent_id, root_id, hash, box, path, " +
-		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
-		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
-		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
-		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
-		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
-		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
-		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
-		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
 
 	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
@@ -1421,6 +1410,12 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 		ignoreFilter += buf.String()
 	}
 
+	mQ := stringQuery(query)
+	matchStmt := "SELECT * FROM " + table + " WHERE (" + table + " MATCH '" + columnFilter() + ":(" + mQ + ")')"
+	matchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
+
+	query = strings.ReplaceAll(query, "'", "''")
+	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
 	likeFilter := "("
 	for i, keyword := range keywords {
@@ -1431,22 +1426,46 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 	}
 	likeFilter += ")"
 	subquery := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
-		" FROM " + table + " WHERE type IN " + typeFilter + " " + boxFilter + " " + pathFilter + " " + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter
-	result, _ := sql.Query(subquery, 10)
+		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" GROUP BY root_id HAVING " + likeFilter + orderBy
+	result, _ := sql.Query(subquery, -1)
 	var rootIDs []string
 	for _, r := range result {
 		rootIDs = append(rootIDs, r["root_id"].(string))
 	}
 	likeFilter = strings.ReplaceAll(likeFilter, "docContent LIKE", "content LIKE")
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE" +
-		" ((" + likeFilter + " AND root_id IN ('" + strings.Join(rootIDs, "','") + "')) OR" +
-		" (id IN ('" + strings.Join(rootIDs, "','") + "'))) AND" +
-		" type IN " + typeFilter + " " + boxFilter + " " + pathFilter + " " + ignoreFilter
-	countStmt := stmt
-	stmt += " " + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	docMatchStmt := "SELECT * FROM " + table + " WHERE id IN ('" + strings.Join(rootIDs, "','") + "')"
+
+	unionStmt := "SELECT * FROM (" + matchStmt + " UNION ALL " + docMatchStmt + ")"
+	countStmt := unionStmt
+	unionStmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	resultBlocks := sql.SelectBlocksRawStmtNoParse(unionStmt, -1)
+
+	// FTS 高亮
+	projections := "id, parent_id, root_id, hash, box, path, " +
+		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
+		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
+		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
+		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
+		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
+		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
+		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
+		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
+	stmt += ") AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
-	ret = fromSQLBlocks(&blocks, "", beforeLen)
+	for i, resultBlock := range resultBlocks {
+		for j, block := range blocks {
+			if resultBlock.ID == block.ID {
+				resultBlocks[i] = block
+				// 减少 blocks
+				blocks = append(blocks[:j], blocks[j+1:]...)
+				break
+			}
+		}
+	}
+
+	ret = fromSQLBlocks(&resultBlocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}

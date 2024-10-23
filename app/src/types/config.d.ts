@@ -1875,7 +1875,7 @@ declare namespace Config {
         /**
          * (Editor) Actions to be performed after the tab is loaded
          */
-        action: string;
+        action: TProtyleAction;
         /**
          * (Editor) Block ID
          */

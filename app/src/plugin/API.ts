@@ -166,6 +166,14 @@ openTab = (options: {
 };
 /// #endif
 
+const getModelByDockType = (type: TDock | string) => {
+    /// #if MOBILE
+    return window.siyuan.mobile.docks[type];
+    /// #else
+    return getDockByType(type).data[type];
+    /// #endif
+}
+
 export const API = {
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
@@ -176,7 +184,7 @@ export const API = {
     fetchGet,
     getFrontend,
     getBackend,
-    getDockByType,
+    getModelByDockType,
     openTab,
     openWindow,
     openMobileFileById,

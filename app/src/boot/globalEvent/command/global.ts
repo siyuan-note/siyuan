@@ -46,7 +46,7 @@ const selectOpenTab = () => {
     /// #if MOBILE
     if (window.siyuan.mobile.editor?.protyle) {
         openDock("file");
-        window.siyuan.mobile.files.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
+        window.siyuan.mobile.docks.file.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
     }
     /// #else
     const dockFile = getDockByType("file");

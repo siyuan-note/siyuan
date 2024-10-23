@@ -47,7 +47,16 @@ class App {
             backStack: [],
             dialogs: [],
             blockPanels: [],
-            mobile: {},
+            mobile: {
+                docks: {
+                    outline: null,
+                    file: null,
+                    bookmark: null,
+                    tag: null,
+                    backlink: null,
+                    inbox: null,
+                }
+            },
             ws: new Model({
                 app: this,
                 id: genUUID(),
@@ -149,7 +158,7 @@ const siyuanApp = new App();
 // https://github.com/siyuan-note/siyuan/issues/8441
 window.reconnectWebSocket = () => {
     window.siyuan.ws.send("ping", {});
-    window.siyuan.mobile.files.send("ping", {});
+    window.siyuan.mobile.docks.file.send("ping", {});
     window.siyuan.mobile.editor.protyle.ws.send("ping", {});
     window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
 };

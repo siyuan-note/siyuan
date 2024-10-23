@@ -376,7 +376,14 @@ interface ISiyuan {
     mobile?: {
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
-        files?: import("../mobile/dock/MobileFiles").MobileFiles
+        docks?: {
+            outline: import("../mobile/dock/MobileOutline").MobileOutline | null,
+            file: import("../mobile/dock/MobileFiles").MobileFiles | null,
+            bookmark: import("../mobile/dock/MobileBookmarks").MobileBookmarks | null,
+            tag: import("../mobile/dock/MobileTags").MobileTags | null,
+            backlink: import("../mobile/dock/MobileBacklinks").MobileBacklinks | null,
+            inbox: import("../layout/dock/Inbox").Inbox | null,
+        } & { [key: string]: import("../layout/Model").Model | boolean };
     },
     user?: {
         userId: string

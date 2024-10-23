@@ -1279,7 +1279,9 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter string, or
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-	query = stringQuery(query)
+
+	query = strings.ReplaceAll(query, "'", "''")
+	query = strings.ReplaceAll(query, "\"", "\"\"")
 	return fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy, beforeLen, page, pageSize)
 }
 
@@ -1407,20 +1409,8 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	subquery := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
-		" FROM " + table + " WHERE 1=1" +
-		" GROUP BY root_id HAVING docContent LIKE '%foo%' AND docContent LIKE '%zzztest%'"
-	result, _ := sql.Query(subquery, 10)
-	var rootIDs []string
-	for _, r := range result {
-		rootIDs = append(rootIDs, r["root_id"].(string))
-	}
 
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE " +
-		"((content LIKE '%foo%' AND content LIKE '%zzztest%' AND" +
-		" root_id IN ('" + strings.Join(rootIDs, "','") + "')) OR" +
-		" (id IN ('" + strings.Join(rootIDs, "','") + "')" +
-		")) AND type IN " + typeFilter + " " + boxFilter + " " + pathFilter
+	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
 		buf := bytes.Buffer{}
@@ -1428,51 +1418,45 @@ func fullTextSearchByLIKE(query, boxFilter, pathFilter, typeFilter, orderBy stri
 			buf.WriteString(" AND ")
 			buf.WriteString(line)
 		}
-		stmt += buf.String()
+		ignoreFilter += buf.String()
 	}
 
-	stmt += " " + orderBy
-	stmt += " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	keywords := strings.Split(query, " ")
+	likeFilter := "("
+	for i, keyword := range keywords {
+		likeFilter += "docContent LIKE '%" + keyword + "%'"
+		if i < len(keywords)-1 {
+			likeFilter += " AND "
+		}
+	}
+	likeFilter += ")"
+	subquery := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
+		" FROM " + table + " WHERE type IN " + typeFilter + " " + boxFilter + " " + pathFilter + " " + ignoreFilter +
+		" GROUP BY root_id HAVING " + likeFilter
+	result, _ := sql.Query(subquery, 10)
+	var rootIDs []string
+	for _, r := range result {
+		rootIDs = append(rootIDs, r["root_id"].(string))
+	}
+	likeFilter = strings.ReplaceAll(likeFilter, "docContent LIKE", "content LIKE")
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE" +
+		" ((" + likeFilter + " AND root_id IN ('" + strings.Join(rootIDs, "','") + "')) OR" +
+		" (id IN ('" + strings.Join(rootIDs, "','") + "'))) AND" +
+		" type IN " + typeFilter + " " + boxFilter + " " + pathFilter + " " + ignoreFilter
+	countStmt := stmt
+	stmt += " " + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByLIKE(query, boxFilter, pathFilter, typeFilter)
+	matchedBlockCount, matchedRootCount = fullTextSearchCountByLIKE(countStmt)
 	return
 }
 
-func fullTextSearchCountByLIKE(query, boxFilter, pathFilter, typeFilter string) (matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
-		if 1 > len(ret) {
-			return
-		}
-		matchedBlockCount = int(ret[0]["matches"].(int64))
-		matchedRootCount = int(ret[0]["docs"].(int64))
-		return
-	}
-
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
-
-	stmt := "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `" + table + "` WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
-	stmt += ") AND type IN " + typeFilter
-	stmt += boxFilter + pathFilter
-
-	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
-		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
-		buf := bytes.Buffer{}
-		for _, line := range ignoreLines {
-			buf.WriteString(" AND ")
-			buf.WriteString(line)
-		}
-		stmt += buf.String()
-	}
-
+func fullTextSearchCountByLIKE(stmt string) (matchedBlockCount, matchedRootCount int) {
+	stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM (" + stmt + ")"
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return

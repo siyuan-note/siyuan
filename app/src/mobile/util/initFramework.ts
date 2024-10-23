@@ -46,6 +46,7 @@ const openDockMenu = (app: App) => {
                             }
                         }
                         custom = plugin.docks[dockId].mobileModel(document.querySelector('#sidebar [data-type="sidebar-plugin"]'));
+                        window.siyuan.mobile.docks[dockId] = custom
                     }
                 }
             });
@@ -135,7 +136,7 @@ export const initFramework = (app: App, isStart: boolean) => {
             }
         });
     });
-    window.siyuan.mobile.docks.files = new MobileFiles(app);
+    window.siyuan.mobile.docks.file = new MobileFiles(app);
     document.getElementById("toolbarFile").addEventListener("click", () => {
         hideKeyboardToolbar();
         activeBlur();

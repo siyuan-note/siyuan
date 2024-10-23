@@ -172,7 +172,7 @@ const getModelByDockType = (type: TDock | string) => {
     /// #else
     return getDockByType(type).data[type];
     /// #endif
-}
+};
 
 export const API = {
     adaptHotkey: updateHotkeyTip,

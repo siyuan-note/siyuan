@@ -383,7 +383,7 @@ interface ISiyuan {
             tag: import("../mobile/dock/MobileTags").MobileTags | null,
             backlink: import("../mobile/dock/MobileBacklinks").MobileBacklinks | null,
             inbox: import("../layout/dock/Inbox").Inbox | null,
-        } & { [key: string]: import("../layout/Model").Model | boolean };
+        } & { [key: string]: import("../layout/Model").Model | any };
     },
     user?: {
         userId: string

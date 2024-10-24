@@ -206,7 +206,7 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
-            notebookId: "%", type: 0, operation: "all"
+            notebookId: "%", type: 0, operation: "all", sideWidth: "256px", sideDocWidth: "256px", sideDiffWidth: "256px",
         };
         defaultStorage[Constants.LOCAL_FLASHCARD] = {
             fullscreen: false

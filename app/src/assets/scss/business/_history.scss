@@ -10,7 +10,6 @@
   }
 
   &__repo {
-    background-color: var(--b3-theme-background);
     display: flex;
     flex-direction: column;
     height: 100%;
@@ -25,16 +24,17 @@
     background: var(--b3-theme-background);
   }
 
-  &__diff {
+  &__side {
     width: 256px;
-    border-right: 1px solid var(--b3-border-color);
     padding: 8px 0;
     overflow: auto;
     user-select: none;
   }
 
-  &__panel > .b3-list {
-    width: 256px;
-    user-select: none;
+  &__resize {
+    cursor: col-resize;
+    box-shadow: 2px 0 0 0 var(--b3-theme-background) inset, 3px 0 0 0 var(--b3-border-color) inset;
+    width: 5px;
+    margin-left: -2px;
   }
 }

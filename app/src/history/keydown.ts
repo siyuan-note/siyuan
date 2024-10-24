@@ -1,8 +1,8 @@
 import {Dialog} from "../dialog";
 
 export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
-    let currentItem = dialog.element.querySelector(".history__diff .b3-list-item--focus");
-    const items = Array.from(dialog.element.querySelectorAll(".history__diff .b3-list-item[data-id]"));
+    let currentItem = dialog.element.querySelector(".history__side .b3-list-item--focus");
+    const items = Array.from(dialog.element.querySelectorAll(".history__side .b3-list-item[data-id]"));
     if (items.length < 2) {
         return;
     }
@@ -41,7 +41,7 @@ export const historyKeydown = (event: KeyboardEvent, dialog: Dialog) => {
         currentItem.parentElement.previousElementSibling.querySelector("svg").classList.add("b3-list-item__arrow--open");
     }
     const currentItemRect = currentItem.getBoundingClientRect();
-    const historyDiffElement = dialog.element.querySelector(".history__diff");
+    const historyDiffElement = dialog.element.querySelector(".history__side");
     const historyDiffRect = historyDiffElement.getBoundingClientRect();
     if (currentItemRect.bottom > historyDiffRect.bottom) {
         currentItem.scrollIntoView(false);

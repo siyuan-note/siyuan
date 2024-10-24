@@ -10,6 +10,7 @@ import {isMobile} from "../util/functions";
 import {App} from "../index";
 import {pathPosix} from "../util/pathName";
 import {renderAssetsPreview} from "../asset/renderAssets";
+import {resizeSide} from "./resizeSide";
 
 const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
     if (!data || data.length === 0) {
@@ -31,7 +32,7 @@ const genItem = (data: [], data2?: { title: string, fileID: string }[]) => {
 let leftEditor: Protyle;
 let rightEditor: Protyle;
 const renderCompare = (app: App, element: HTMLElement) => {
-    const listElement = hasClosestByClassName(element, "history__diff");
+    const listElement = hasClosestByClassName(element, "history__side");
     if (!listElement) {
         return;
     }
@@ -39,8 +40,9 @@ const renderCompare = (app: App, element: HTMLElement) => {
     if (!dialogContainerElement) {
         return;
     }
-    const leftElement = listElement.nextElementSibling.firstElementChild;
-    const rightElement = listElement.nextElementSibling.lastElementChild;
+    const editorsElement = dialogContainerElement.querySelector('[data-type="editors"]');
+    const leftElement = editorsElement.firstElementChild;
+    const rightElement = editorsElement.lastElementChild;
     if (!leftEditor) {
         leftEditor = new Protyle(app, leftElement.lastElementChild as HTMLElement, {
             blockId: "",
@@ -154,6 +156,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
         content: "",
         width: isMobile() ? "92vw" : "90vw",
         height: "80vh",
+        containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
             leftEditor = undefined;
             rightEditor = undefined;
@@ -162,7 +165,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
     dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORYCOMPARE);
     dialog.element.addEventListener("click", (event) => {
         if (typeof event.detail === "string") {
-            renderCompare(app, dialog.element.querySelector(".history__diff .b3-list-item--focus"));
+            renderCompare(app, dialog.element.querySelector(".history__side .b3-list-item--focus"));
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -179,7 +182,7 @@ export const showDiff = (app: App, data: { id: string, time: string }[]) => {
                 if (target.classList.contains("b3-list-item--focus")) {
                     return;
                 }
-                dialog.element.querySelector(".history__diff .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
+                dialog.element.querySelector(".history__side .b3-list-item--focus")?.classList.remove("b3-list-item--focus");
                 target.classList.add("b3-list-item--focus");
                 renderCompare(app, target);
                 event.preventDefault();
@@ -223,7 +226,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
     <span class="fn__flex-1"></span>
 </div>`;
         headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel" style="height: 100%">
-    <div class="history__diff">
+    <div class="history__side" style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}">
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
@@ -255,7 +258,8 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
             <ul class="fn__none">${genItem(response.data.removesRight)}</ul>
         </ul>
     </div>
-    <div class="fn__flex-1 fn__flex">
+    <div class="history__resize"></div>
+    <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
             <div class="ft__center"></div>
@@ -270,5 +274,6 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
         </div>
     </div>
 </div>`;
+        resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideDiffWidth");
     });
 };

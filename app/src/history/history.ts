@@ -14,6 +14,7 @@ import {setStorageVal} from "../protyle/util/compatibility";
 import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
 import {App} from "../index";
+import {resizeSide} from "./resizeSide";
 
 let historyEditor: Protyle;
 
@@ -65,11 +66,9 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         opElement.querySelector('option[value="replace"]').classList.remove("fn__none");
         opElement.querySelector('option[value="outline"]').classList.remove("fn__none");
     }
-    window.siyuan.storage[Constants.LOCAL_HISTORY] = {
-        notebookId: notebookElement.value,
-        type: parseInt(typeElement.value),
-        operation: opElement.value
-    };
+    window.siyuan.storage[Constants.LOCAL_HISTORY].notebookId = notebookElement.value
+    window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value)
+    window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value
     setStorageVal(Constants.LOCAL_HISTORY, window.siyuan.storage[Constants.LOCAL_HISTORY]);
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
@@ -276,7 +275,7 @@ const renderRepo = (element: Element, currentPage: number) => {
             previousElement.setAttribute("disabled", "disabled");
         }
         nextElement.setAttribute("disabled", "disabled");
-        fetchPost(`/api/repo/${selectValue}`, { page: currentPage }, (response) => {
+        fetchPost(`/api/repo/${selectValue}`, {page: currentPage}, (response) => {
             selectElement.disabled = false;
             if (currentPage < response.data.pageCount) {
                 nextElement.removeAttribute("disabled");
@@ -355,7 +354,7 @@ export const openHistory = (app: App) => {
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div style="overflow:auto;">
+            <div style="overflow:auto;border-bottom: 1px solid var(--b3-border-color);">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpHistoryPage" data-totalpage="1">1</button>
@@ -394,9 +393,10 @@ export const openHistory = (app: App) => {
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
-                <ul class="b3-list b3-list--background" style="overflow:auto;">
+                <ul class="b3-list b3-list--background history__side" style="width: ${localHistory.sideWidth}">
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
+                <div class="history__resize"></div>
                 <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
                 <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
                 <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
@@ -450,12 +450,14 @@ export const openHistory = (app: App) => {
             content: contentHTML,
             width: "90vw",
             height: "80vh",
+            containerClassName: "b3-dialog__container--theme",
             destroyCallback() {
                 historyEditor = undefined;
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
         bindEvent(app, dialog.element, dialog);
+        resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
     }
 };
 
@@ -666,7 +668,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             target.parentElement.querySelector(`.b3-list-item[data-id="${idJSON.splice(0, 1)[0].id}"]`)?.classList.remove("b3-list-item--focus");
                         }
                     }
-                    idJSON.push({ id, time: target.querySelector('[data-type="hCreated"]').textContent });
+                    idJSON.push({id, time: target.querySelector('[data-type="hCreated"]').textContent});
                 }
 
                 if (idJSON.length === 2) {
@@ -738,7 +740,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     genRepoDialog.destroy();
                 });
                 btnsElement[1].addEventListener("click", () => {
-                    fetchPost("/api/repo/createSnapshot", { memo: textareaElement.value }, () => {
+                    fetchPost("/api/repo/createSnapshot", {memo: textareaElement.value}, () => {
                         renderRepo(repoElement, 1);
                     });
                     genRepoDialog.destroy();
@@ -749,7 +751,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
             } else if (type === "removeRepoTagSnapshot" || type === "removeCloudRepoTagSnapshot") {
                 const tag = target.parentElement.getAttribute("data-tag");
                 confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <i>${tag}</i>?`, () => {
-                    fetchPost("/api/repo/" + type, { tag }, () => {
+                    fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });
                 });

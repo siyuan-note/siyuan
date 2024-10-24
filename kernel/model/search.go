@@ -1382,9 +1382,6 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 
 func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	start := time.Now()
-	defer func() {
-		logging.LogInfof("time cost: %v", time.Since(start))
-	}()
 
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
@@ -1407,10 +1404,14 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + "), nonDocBlocks AS (" + bMatchStmt + ")"
-	cteStmt += "\nSELECT * FROM " + table + " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
-	countStmt := cteStmt
+	wheheClause := " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
+	selectStmt := cteStmt + "\nSELECT * FROM " + table + wheheClause
+	countStmt := cteStmt + "\nSELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM " + table + wheheClause
 	cteStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	resultBlocks := sql.SelectBlocksRawStmtNoParse(cteStmt, -1)
+	resultBlocks := sql.SelectBlocksRawStmtNoParse(selectStmt, -1)
+
+	logging.LogInfof("time cost [main search]: %v", time.Since(start))
+	now := time.Now()
 
 	// FTS 高亮
 	projections := "id, parent_id, root_id, hash, box, path, " +
@@ -1441,12 +1442,15 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
+	logging.LogInfof("time cost [highlight search]: %v", time.Since(now))
+	now = time.Now()
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByStmt(countStmt)
+	logging.LogInfof("time cost [count search]: %v", time.Since(now))
+	logging.LogInfof("time cost [all]: %v", time.Since(start))
 	return
 }
 
 func fullTextSearchCountByStmt(stmt string) (matchedBlockCount, matchedRootCount int) {
-	stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM (" + stmt + ")"
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return

@@ -277,6 +277,12 @@ export class Toolbar {
             this.range = setLastNodeRange(getContenteditableElement(nodeElement), this.range, false);
         }
         const rangeTypes = this.getCurrentType(this.range);
+
+        // https://github.com/siyuan-note/siyuan/issues/6501
+        // https://github.com/siyuan-note/siyuan/issues/12877
+        if (rangeTypes.length === 1 && ["block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
+            return;
+        }
         const selectText = this.range.toString();
         fixTableRange(this.range);
         let previousElement: HTMLElement;
@@ -487,7 +493,7 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.textContent + nextElement.innerHTML;
-                        } else  if (item.textContent !== Constants.ZWSP) {
+                        } else if (item.textContent !== Constants.ZWSP) {
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
                             inlineElement.textContent = item.textContent;

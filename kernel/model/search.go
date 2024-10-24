@@ -1407,7 +1407,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	wheheClause := " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
 	selectStmt := cteStmt + "\nSELECT * FROM " + table + wheheClause
 	countStmt := cteStmt + "\nSELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM " + table + wheheClause
-	cteStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	selectStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	resultBlocks := sql.SelectBlocksRawStmtNoParse(selectStmt, -1)
 
 	logging.LogInfof("time cost [main search]: %v", time.Since(start))

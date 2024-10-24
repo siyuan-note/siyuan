@@ -25,11 +25,7 @@
 </p>
 
 <p align="center">
-<<<<<<< HEAD
-<a href="README_en.md">English</a>
-=======
 <a href="README_zh_CN.md">中文</a> | <a href="README_ja_JP.md">日本語</a>
->>>>>>> 071fbf060564857c9ea212592f4948cd25927778
 </p>
 
 ## 更新

@@ -1381,14 +1381,12 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 }
 
 func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	start := time.Now()
+
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
 	}
-
-	mQ := stringQuery(query)
-	bMatchStmt := "SELECT id FROM " + table + " WHERE (" + table + " MATCH '" + columnFilter() + ":(" + mQ + ")')"
-	bMatchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
 
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
@@ -1400,14 +1398,20 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 			likeFilter += " AND "
 		}
 	}
-	dMatchStmt := "SELECT root_id, GROUP_CONCAT(content) AS docContent" +
+	bMatchStmt := "SELECT id FROM " + table + " WHERE " + strings.ReplaceAll(likeFilter, "docContent LIKE ", "content LIKE ")
+	bMatchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
+	dMatchStmt := "SELECT root_id, GROUP_CONCAT(content || tag || name || alias || memo) AS docContent" +
 		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter
-	cteStmt := "WITH docs AS (" + dMatchStmt + "), blocks AS (" + bMatchStmt + ")"
-	cteStmt += "\nSELECT * FROM " + table + " WHERE id IN (SELECT id FROM blocks) OR id IN (SELECT root_id FROM docs)"
-	countStmt := cteStmt
+	cteStmt := "WITH docBlocks AS (" + dMatchStmt + "), nonDocBlocks AS (" + bMatchStmt + ")"
+	wheheClause := " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
+	selectStmt := cteStmt + "\nSELECT * FROM " + table + wheheClause
+	countStmt := cteStmt + "\nSELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM " + table + wheheClause
 	cteStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	resultBlocks := sql.SelectBlocksRawStmtNoParse(cteStmt, -1)
+	resultBlocks := sql.SelectBlocksRawStmtNoParse(selectStmt, -1)
+
+	logging.LogInfof("time cost [main search]: %v", time.Since(start))
+	now := time.Now()
 
 	// FTS 高亮
 	projections := "id, parent_id, root_id, hash, box, path, " +
@@ -1419,7 +1423,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
 		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
 		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + query + ")'"
+	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + stringQuery(query) + ")'"
 	stmt += ") AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	for i, resultBlock := range resultBlocks {
@@ -1438,12 +1442,15 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
+	logging.LogInfof("time cost [highlight search]: %v", time.Since(now))
+	now = time.Now()
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByStmt(countStmt)
+	logging.LogInfof("time cost [count search]: %v", time.Since(now))
+	logging.LogInfof("time cost [all]: %v", time.Since(start))
 	return
 }
 
 func fullTextSearchCountByStmt(stmt string) (matchedBlockCount, matchedRootCount int) {
-	stmt = "SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM (" + stmt + ")"
 	result, _ := sql.QueryNoLimit(stmt)
 	if 1 > len(result) {
 		return

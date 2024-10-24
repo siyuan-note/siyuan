@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20231110112758"
+		"updated": "20241024163243"
 	},
 	"Children": [
 		{
@@ -624,7 +624,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220503122349-eacedlu",
-				"updated": "20220503122357"
+				"updated": "20241024163243"
 			},
 			"Children": [
 				{
@@ -667,7 +667,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122349-o26mvnq",
-				"updated": "20220715105117"
+				"updated": "20241024163243"
 			},
 			"Children": [
 				{
@@ -679,7 +679,7 @@
 					},
 					"Properties": {
 						"id": "20220503122349-192fehc",
-						"updated": "20220503122616"
+						"updated": "20241024163243"
 					},
 					"Children": [
 						{
@@ -687,12 +687,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122349-ye6haas",
-								"updated": "20220503122616"
+								"updated": "20241024163243"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "When deleting the notebook, in order to ensure that cross-notebook asset references work properly, the assets under the notebook will be copied to the global assets in batches"
+									"Data": "When deleting the doc, the assets referenced by the doc will be copied to the global assets in batches to ensure the normal operation of cross-notebook asset references"
 								}
 							]
 						}

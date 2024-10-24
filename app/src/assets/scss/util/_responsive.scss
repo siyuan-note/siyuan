@@ -75,7 +75,8 @@
         height: 40%;
         overflow: auto;
         padding-bottom: 8px;
-        width: auto;
+        width: auto !important;
+        border-bottom: 1px solid var(--b3-border-color);
       }
     }
   }

@@ -226,7 +226,7 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
     <span class="fn__flex-1"></span>
 </div>`;
         headElement.nextElementSibling.innerHTML = `<div class="fn__flex history__panel" style="height: 100%">
-    <div class="history__side" style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}">
+    <div class="history__side" ${isMobile() ? '' : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDiffWidth}"`}>
         <ul class="b3-list b3-list--background">
             <li class="b3-list-item">
                 <span class="b3-list-item__toggle b3-list-item__toggle--hl">

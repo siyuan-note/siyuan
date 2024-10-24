@@ -62,7 +62,7 @@ export const openDocHistory = (options: {
     pathString: string
 }) => {
     const contentHTML = `<div class="fn__flex fn__flex-1 history__panel">
-    <ul class="b3-list b3-list--background history__side" style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}">
+    <ul class="b3-list b3-list--background history__side" ${isMobile() ? '' : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
         <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
     </ul>
     <div class="history__resize"></div>

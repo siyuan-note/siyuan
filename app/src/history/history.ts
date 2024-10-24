@@ -347,7 +347,7 @@ export const openHistory = (app: App) => {
     });
 
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
-    <div class="layout-tab-bar fn__flex" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
+    <div class="layout-tab-bar fn__flex" ${isMobile() ? "" : 'style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0"'}>
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
         <div data-type="notebook" style="min-width: 160px" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.removedNotebook}</span><span class="fn__flex-1"></span></div>
         <div data-type="repo" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.dataSnapshot}</span><span class="fn__flex-1"></span></div>
@@ -393,7 +393,7 @@ export const openHistory = (app: App) => {
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
-                <ul class="b3-list b3-list--background history__side" style="width: ${localHistory.sideWidth}">
+                <ul class="b3-list b3-list--background history__side" ${isMobile() ? '' : `style="width: ${localHistory.sideWidth}"`}>
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="history__resize"></div>

@@ -1422,8 +1422,6 @@ func execStmtTx(tx *sql.Tx, stmt string, args ...interface{}) (err error) {
 func nSort(n *ast.Node) int {
 	switch n.Type {
 	// 以下为块级元素
-	case ast.NodeDocument:
-		return 0
 	case ast.NodeHeading:
 		return 5
 	case ast.NodeParagraph:
@@ -1446,6 +1444,8 @@ func nSort(n *ast.Node) int {
 		return 30
 	case ast.NodeAttributeView:
 		return 30
+	case ast.NodeDocument:
+		return 0
 	case ast.NodeText, ast.NodeTextMark:
 		if n.IsTextMarkType("tag") {
 			return 205

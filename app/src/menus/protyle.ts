@@ -1038,9 +1038,9 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 });
                 textElements[1].value = titleElement.textContent;
                 textElements[1].addEventListener("input", (event) => {
-                    const value = (event.target as HTMLInputElement).value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "");
+                    const value = (event.target as HTMLInputElement).value;
                     imgElement.setAttribute("title", value);
-                    titleElement.textContent = value;
+                    titleElement.innerText = value;
                     mathRender(titleElement);
                 });
                 textElements[2].value = imgElement.getAttribute("alt") || "";

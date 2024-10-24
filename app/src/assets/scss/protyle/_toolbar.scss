@@ -67,6 +67,8 @@
     padding: 8px 0;
     display: flex;
     flex-direction: column;
+    min-width: 320px;
+    max-width: 50vw;
   }
 
   &-util {

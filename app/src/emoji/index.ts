@@ -93,7 +93,7 @@ export const filterEmoji = (key = "", max?: number) => {
     const customStore: IEmojiItem[] = [];
     window.siyuan.emojis.forEach((category, index) => {
         if (!key) {
-            html += `<div class="emojis__title" data-type="${index + 1}">${getEmojiTitle(index)}</div><div style="min-height:${index === 0 ? "28px" : "336px"}" class="emojis__content"${index > 1 ? ' data-index="' + index + '"' : ""}>`;
+            html += `<div class="emojis__title" data-type="${index + 1}">${getEmojiTitle(index)}</div><div style="min-height:${index === 0 ? "30px" : "300px"}" class="emojis__content"${index > 1 ? ' data-index="' + index + '"' : ""}>`;
         }
         if (category.items.length === 0 && index === 0 && !key) {
             html += `<div style="margin-left: 4px">${window.siyuan.languages.setEmojiTip}</div>`;

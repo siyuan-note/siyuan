@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-contrib/sessions/cookie"
@@ -88,6 +89,7 @@ func Serve(fastMode bool) {
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
 	serveWebDAV(ginServer)
+	serveCardDAV(ginServer)
 	serveExport(ginServer)
 	serveWidgets(ginServer)
 	servePlugins(ginServer)
@@ -616,7 +618,31 @@ func serveWebDAV(ginServer *gin.Engine) {
 	}
 
 	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
-	ginGroup.Match(WebDavMethod, "/*path", func(c *gin.Context) {
+	ginGroup.Any("/*path", func(c *gin.Context) {
+		if util.ReadOnly {
+			switch c.Request.Method {
+			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
+				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
+				return
+			}
+		}
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
+}
+
+func serveCardDAV(ginServer *gin.Engine) {
+	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
+	handler := carddav.Handler{
+		Backend: &model.CardDavBackend{},
+		Prefix:  "",
+	}
+
+	ginServer.Any("/.well-known/caldav", func(c *gin.Context) {
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
+
+	ginGroup := ginServer.Group("/carddav", model.CheckAuth, model.CheckAdminRole)
+	ginGroup.Any("/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":

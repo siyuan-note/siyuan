@@ -25,15 +25,17 @@ import (
 
 const (
 	// REF: https://developers.google.com/people/carddav#resources
-	CardDavPrincipalPath   = "/carddav"
-	CardDavHomeSetPath     = CardDavPrincipalPath + "/contacts"
-	CardDavAddressBookPath = CardDavHomeSetPath + "/default"
+	CardDavPrefixPath               = "/carddav"
+	CardDavPrincipalsPath           = CardDavPrefixPath + "/principals"
+	CardDavCurrentUserPrincipalPath = CardDavPrincipalsPath + "/main"
+	CardDavHomeSetPath              = CardDavCurrentUserPrincipalPath + "/contacts"
+	CardDavAddressBookPath          = CardDavHomeSetPath + "/default"
 )
 
 type CardDavBackend struct{}
 
 func (b *CardDavBackend) CurrentUserPrincipal(ctx context.Context) (string, error) {
-	return CardDavPrincipalPath, nil
+	return CardDavCurrentUserPrincipalPath, nil
 }
 
 func (b *CardDavBackend) AddressbookHomeSetPath(ctx context.Context) (string, error) {

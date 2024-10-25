@@ -634,14 +634,14 @@ func serveCardDAV(ginServer *gin.Engine) {
 	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
 	handler := carddav.Handler{
 		Backend: &model.CardDavBackend{},
-		Prefix:  "",
+		Prefix:  model.CardDavPrefixPath,
 	}
 
 	ginServer.Any("/.well-known/caldav", func(c *gin.Context) {
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
 
-	ginGroup := ginServer.Group("/carddav", model.CheckAuth, model.CheckAdminRole)
+	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
 	ginGroup.Any("/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {

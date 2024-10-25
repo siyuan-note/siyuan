@@ -300,7 +300,7 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// WebDAV BasicAuth Authenticate
-	if strings.HasPrefix(c.Request.RequestURI, "/webdav") {
+	if strings.HasPrefix(c.Request.RequestURI, "/webdav") || strings.HasPrefix(c.Request.RequestURI, "/carddav") {
 		c.Header("WWW-Authenticate", "Basic realm=Authorization Required")
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

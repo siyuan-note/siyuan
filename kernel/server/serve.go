@@ -48,17 +48,42 @@ import (
 	"golang.org/x/net/webdav"
 )
 
+const (
+	MethodMkcol     = "MKCOL"
+	MethodCopy      = "COPY"
+	MethodMove      = "MOVE"
+	MethodLock      = "LOCK"
+	MethodUnlock    = "UNLOCK"
+	MethodPropfind  = "PROPFIND"
+	MethodProppatch = "PROPPATCH"
+)
+
 var (
-	cookieStore  = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
-	WebDavMethod = []string{
-		"OPTIONS",
-		"GET", "HEAD",
-		"POST", "PUT",
-		"DELETE",
-		"MKCOL",
-		"COPY", "MOVE",
-		"LOCK", "UNLOCK",
-		"PROPFIND", "PROPPATCH",
+	cookieStore   = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	WebDavMethods = []string{
+		http.MethodOptions,
+		http.MethodHead,
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodDelete,
+
+		MethodMkcol,
+		MethodCopy,
+		MethodMove,
+		MethodLock,
+		MethodUnlock,
+		MethodPropfind,
+		MethodProppatch,
+	}
+	CardDavMethods = []string{
+		http.MethodOptions,
+		http.MethodHead,
+		http.MethodGet,
+		http.MethodPut,
+		http.MethodDelete,
+
+		MethodPropfind,
 	}
 )
 
@@ -618,7 +643,8 @@ func serveWebDAV(ginServer *gin.Engine) {
 	}
 
 	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
-	ginGroup.Any("/*path", func(c *gin.Context) {
+	// ginGroup.Any NOT support extension methods (PROPFIND etc.)
+	ginGroup.Match(WebDavMethods, "/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
@@ -634,15 +660,17 @@ func serveCardDAV(ginServer *gin.Engine) {
 	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
 	handler := carddav.Handler{
 		Backend: &model.CardDavBackend{},
-		Prefix:  model.CardDavPrefixPath,
+		Prefix:  model.CardDavRootPath,
 	}
 
-	ginServer.Any("/.well-known/caldav", func(c *gin.Context) {
+	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
+		logging.LogInfof("CardDAV %s: /.well-known/carddav", c.Request.Method)
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
 
 	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
-	ginGroup.Any("/*path", func(c *gin.Context) {
+	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
+		logging.LogInfof("CardDAV %s: %s", c.Request.Method, c.Request.URL.Path)
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":

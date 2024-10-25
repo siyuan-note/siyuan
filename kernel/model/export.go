@@ -218,8 +218,6 @@ func Export2Liandi(id string) (err error) {
 	assets := assetsLinkDestsInTree(tree)
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
-	avAssets := assetsLinkDestsInAttributeViewNodes(tree)
-	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
 	if err != nil {

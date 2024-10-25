@@ -1430,7 +1430,6 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		for j, block := range blocks {
 			if resultBlock.ID == block.ID {
 				resultBlocks[i] = block
-				// 减少 blocks
 				blocks = append(blocks[:j], blocks[j+1:]...)
 				break
 			}

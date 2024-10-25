@@ -362,8 +362,6 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 	assets := assetsLinkDestsInTree(tree)
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
-	avAssets := assetsLinkDestsInAttributeViewNodes(tree)
-	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if err != nil {
@@ -913,46 +911,6 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInAttributeViewNodes(tree *parse.Tree) (ret []string) {
-	// The images in the databases are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/11948
-
-	ret = []string{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeAttributeView != n.Type {
-			return ast.WalkContinue
-		}
-
-		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
-		if nil == attrView {
-			return ast.WalkContinue
-		}
-
-		for _, keyValues := range attrView.KeyValues {
-			if av.KeyTypeMAsset != keyValues.Key.Type {
-				continue
-			}
-
-			for _, value := range keyValues.Values {
-				if 1 > len(value.MAsset) {
-					continue
-				}
-
-				for _, asset := range value.MAsset {
-					dest := asset.Content
-					if !treenode.IsRelativePath([]byte(dest)) {
-						continue
-					}
-
-					ret = append(ret, strings.TrimSpace(dest))
-				}
-			}
-		}
-		return ast.WalkContinue
-	})
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	return
-}
-
 func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
 
@@ -1010,7 +968,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
-			!n.IsTextMarkType("a") && !n.IsTextMarkType("file-annotation-ref")) {
+			ast.NodeAttributeView != n.Type && !n.IsTextMarkType("a") && !n.IsTextMarkType("file-annotation-ref")) {
 			return ast.WalkContinue
 		}
 
@@ -1040,6 +998,42 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 			dest := n.TextMarkFileAnnotationRefID[:strings.LastIndexByte(n.TextMarkFileAnnotationRefID, '/')]
 			dest = strings.TrimSpace(dest)
 			ret = append(ret, dest)
+		} else if ast.NodeAttributeView == n.Type {
+			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
+			if nil == attrView {
+				return ast.WalkContinue
+			}
+
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeMAsset == keyValues.Key.Type {
+					for _, value := range keyValues.Values {
+						if 1 > len(value.MAsset) {
+							continue
+						}
+
+						for _, asset := range value.MAsset {
+							dest := asset.Content
+							if !treenode.IsRelativePath([]byte(dest)) {
+								continue
+							}
+
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				} else if av.KeyTypeURL == keyValues.Key.Type {
+					for _, value := range keyValues.Values {
+						if nil != value.URL {
+							dest := value.URL.Content
+							if !treenode.IsRelativePath([]byte(dest)) {
+								continue
+							}
+
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				}
+
+			}
 		} else {
 			if ast.NodeWidget == n.Type {
 				dataAssets := n.IALAttr("custom-data-assets")

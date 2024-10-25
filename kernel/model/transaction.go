@@ -57,6 +57,7 @@ func IsMoveOutlineHeading(transactions *[]*Transaction) bool {
 }
 
 func FlushTxQueue() {
+	time.Sleep(time.Duration(50) * time.Millisecond)
 	for 0 < len(txQueue) || isFlushing {
 		time.Sleep(10 * time.Millisecond)
 	}

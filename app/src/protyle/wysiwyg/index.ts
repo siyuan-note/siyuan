@@ -2126,76 +2126,74 @@ export class WYSIWYG {
                 event.stopPropagation();
                 event.preventDefault();
                 hideElements(["dialog", "toolbar"], protyle);
-                if (range.toString() !== "" && !event.shiftKey) {
-                    // 选择不打开引用
-                    return;
-                }
-                let refBlockId: string;
-                if (blockRefElement) {
-                    refBlockId = blockRefElement.getAttribute("data-id");
-                } else if (aElement) {
-                    refBlockId = aLink.substring(16, 38);
-                }
-                checkFold(refBlockId, (zoomIn, action, isRoot) => {
-                    // 块引用跳转后需要短暂高亮目标块 https://github.com/siyuan-note/siyuan/issues/11542
-                    if (!isRoot) {
-                        action.push(Constants.CB_GET_HL);
+                if (range.toString() === "" || event.shiftKey) {
+                    let refBlockId: string;
+                    if (blockRefElement) {
+                        refBlockId = blockRefElement.getAttribute("data-id");
+                    } else if (aElement) {
+                        refBlockId = aLink.substring(16, 38);
                     }
-                    /// #if MOBILE
-                    openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
-                    activeBlur();
-                    hideKeyboardToolbar();
-                    /// #else
-                    if (event.shiftKey) {
-                        openFileById({
-                            app: protyle.app,
-                            id: refBlockId,
-                            position: "bottom",
-                            action,
-                            zoomIn
-                        });
-                        window.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape"}));
-                    } else if (event.altKey) {
-                        openFileById({
-                            app: protyle.app,
-                            id: refBlockId,
-                            position: "right",
-                            action,
-                            zoomIn
-                        });
-                    } else if (ctrlIsPressed) {
-                        openFileById({
-                            app: protyle.app,
-                            id: refBlockId,
-                            keepCursor: true,
-                            action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
-                            zoomIn
-                        });
-                    } else {
-                        openFileById({
-                            app: protyle.app,
-                            id: refBlockId,
-                            action,
-                            zoomIn
-                        });
+                    checkFold(refBlockId, (zoomIn, action, isRoot) => {
+                        // 块引用跳转后需要短暂高亮目标块 https://github.com/siyuan-note/siyuan/issues/11542
+                        if (!isRoot) {
+                            action.push(Constants.CB_GET_HL);
+                        }
+                        /// #if MOBILE
+                        openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
+                        activeBlur();
+                        hideKeyboardToolbar();
+                        /// #else
+                        if (event.shiftKey) {
+                            openFileById({
+                                app: protyle.app,
+                                id: refBlockId,
+                                position: "bottom",
+                                action,
+                                zoomIn
+                            });
+                            window.dispatchEvent(new KeyboardEvent("keydown", {key: "Escape"}));
+                        } else if (event.altKey) {
+                            openFileById({
+                                app: protyle.app,
+                                id: refBlockId,
+                                position: "right",
+                                action,
+                                zoomIn
+                            });
+                        } else if (ctrlIsPressed) {
+                            openFileById({
+                                app: protyle.app,
+                                id: refBlockId,
+                                keepCursor: true,
+                                action: zoomIn ? [Constants.CB_GET_HL, Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
+                                zoomIn
+                            });
+                        } else {
+                            openFileById({
+                                app: protyle.app,
+                                id: refBlockId,
+                                action,
+                                zoomIn
+                            });
+                        }
+                        /// #endif
+                    });
+                    /// #if !MOBILE
+                    if (protyle.model) {
+                        // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
+                        let blockElement: HTMLElement | false;
+                        if (blockRefElement) {
+                            blockElement = hasClosestBlock(blockRefElement);
+                        } else if (aElement) {
+                            blockElement = hasClosestBlock(aElement);
+                        }
+                        if (blockElement) {
+                            pushBack(protyle, getEditorRange(this.element), blockElement);
+                        }
                     }
                     /// #endif
-                });
-                /// #if !MOBILE
-                if (protyle.model) {
-                    // 打开双链需记录到后退中 https://github.com/siyuan-note/insider/issues/801
-                    let blockElement: HTMLElement | false;
-                    if (blockRefElement) {
-                        blockElement = hasClosestBlock(blockRefElement);
-                    } else if (aElement) {
-                        blockElement = hasClosestBlock(aElement);
-                    }
-                    if (blockElement) {
-                        pushBack(protyle, getEditorRange(this.element), blockElement);
-                    }
+                    return;
                 }
-                /// #endif
-                return;
             }
             /// #if MOBILE
             // https://github.com/siyuan-note/siyuan/issues/10513

@@ -16,7 +16,7 @@ const getHTML = async (data: { rootID: string, icon: string, title: string }[], 
     data.forEach((item) => {
         if (!key || item.title.toLowerCase().includes(key.toLowerCase())) {
             tabHtml += `<li data-index="${index}" data-node-id="${item.rootID}" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
-${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true)}
+${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${escapeHtml(item.title)}</span>
 </li>`;
             index++;

@@ -122,6 +122,7 @@ export abstract class Constants {
     public static readonly LOCAL_SESSION_FIRSTLOAD = "local-session-firstload";
     public static readonly LOCAL_OUTLINE = "local-outline";
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
+    public static readonly LOCAL_IMAGES = "local-images";
 
     // dialog
     public static readonly DIALOG_OPENCARD = "dialog-opencard";
@@ -642,9 +643,6 @@ export abstract class Constants {
 <path fill="#ffdd4e" d="M15.396 8.403l11.659 15.921c0.401 0.579 0.432 1.317 0.081 1.924-0.361 0.594-1.005 0.985-1.741 0.985-0.008 0-0.017-0-0.025-0h-9.344l-0.63-18.83z"></path>
 <path fill="#ffd00f" d="M13.868 6.478c0 0.946 0.767 1.712 1.712 1.712s1.712-0.767 1.712-1.712v0c0-0.945-0.766-1.712-1.712-1.712s-1.712 0.766-1.712 1.712v0zM28.577 10.818c0 0.945 0.766 1.712 1.712 1.712s1.712-0.766 1.712-1.712v0c0-0.945-0.766-1.712-1.712-1.712s-1.712 0.766-1.712 1.712v0zM0 10.822c0 0.945 0.766 1.712 1.712 1.712s1.712-0.766 1.712-1.712v0c0-0.945-0.766-1.712-1.712-1.712s-1.712 0.766-1.712 1.712v0z"></path>
 </svg>`;
-    public static readonly SIYUAN_IMAGE_FILE: string = "1f4c4";
-    public static readonly SIYUAN_IMAGE_NOTE: string = "1f5c3";
-    public static readonly SIYUAN_IMAGE_FOLDER: string = "1f4d1";
 
     // assets
     public static readonly SIYUAN_ASSETS_IMAGE: string[] = [".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"];

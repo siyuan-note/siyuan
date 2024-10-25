@@ -1137,12 +1137,12 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 const initData = item.headElement.getAttribute("data-initdata");
                 if (item.model instanceof Editor) {
                     rootId = ` data-node-id="${item.model.editor.protyle.block.rootID}"`;
-                    icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true);
+                    icon = unicode2Emoji(item.docIcon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true);
                 } else if (initData) {
                     const initDataObj = JSON.parse(initData);
                     if (initDataObj.instance === "Editor") {
                         rootId = ` data-node-id="${initDataObj.rootId}"`;
-                        icon = unicode2Emoji(item.docIcon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true);
+                        icon = unicode2Emoji(item.docIcon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true);
                     }
                 }
                 tabHtml += `<li data-index="${index}" data-id="${item.id}"${rootId} class="b3-list-item${currentId === item.id ? " b3-list-item--focus" : ""}"${currentId === item.id ? ' data-original="true"' : ""}>${icon}<span class="b3-list-item__text">${escapeHtml(item.title)}</span></li>`;

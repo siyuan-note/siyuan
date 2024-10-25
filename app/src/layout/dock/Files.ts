@@ -710,7 +710,7 @@ export class Files extends Model {
     }
 
     private genNotebook(item: INotebook) {
-        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE)}</span>`;
+        const emojiHTML = `<span class="b3-list-item__icon b3-tooltips b3-tooltips__e" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note)}</span>`;
         if (item.closed) {
             return `<li data-type="open" data-url="${item.id}" class="b3-list-item b3-list-item--hide-action">
     <span class="b3-list-item__toggle fn__hidden">
@@ -829,8 +829,8 @@ export class Files extends Model {
                             iconElement.parentElement.classList.add("fn__hidden");
                         }
                         const emojiElement = iconElement.parentElement.nextElementSibling;
-                        if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
-                            emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                        if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
+                            emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
                         }
                     }
                     targetElement.parentElement.remove();
@@ -902,8 +902,8 @@ export class Files extends Model {
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__toggle").classList.add("fn__hidden");
                     sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__arrow").classList.remove("b3-list-item__arrow--open");
                     const emojiElement = sourceElement.parentElement.previousElementSibling.querySelector(".b3-list-item__icon");
-                    if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER)) {
-                        emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FILE);
+                    if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder)) {
+                        emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file);
                     }
                 }
                 sourceElement.parentElement.remove();
@@ -916,8 +916,8 @@ export class Files extends Model {
         if (newElement) {
             newElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
             const emojiElement = newElement.querySelector(".b3-list-item__icon");
-            if (emojiElement.innerHTML === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
-                emojiElement.innerHTML = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+            if (emojiElement.innerHTML === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
+                emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
             }
             const arrowElement = newElement.querySelector(".b3-list-item__arrow");
             if (arrowElement.classList.contains("b3-list-item__arrow--open")) {
@@ -993,8 +993,8 @@ export class Files extends Model {
         arrowElement.classList.add("b3-list-item__arrow--open");
         arrowElement.parentElement.classList.remove("fn__hidden");
         const emojiElement = liElement.querySelector(".b3-list-item__icon");
-        if (emojiElement.textContent === unicode2Emoji(Constants.SIYUAN_IMAGE_FILE)) {
-            emojiElement.textContent = unicode2Emoji(Constants.SIYUAN_IMAGE_FOLDER);
+        if (emojiElement.textContent === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
+            emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
         if (setStorage) {
@@ -1139,7 +1139,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     <span style="padding-left: ${(item.path.split("/").length - 2) * 18 + 22}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER))}</span>
+    <span class="b3-list-item__icon b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__text ariaLabel" data-position="parentE"
 aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">

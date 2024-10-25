@@ -206,7 +206,12 @@ export const getLocalStorage = (cb: () => void) => {
         defaultStorage[Constants.LOCAL_FILEPOSITION] = {}; // {id: IScrollAttr}
         defaultStorage[Constants.LOCAL_DIALOGPOSITION] = {}; // {id: IPosition}
         defaultStorage[Constants.LOCAL_HISTORY] = {
-            notebookId: "%", type: 0, operation: "all", sideWidth: "256px", sideDocWidth: "256px", sideDiffWidth: "256px",
+            notebookId: "%",
+            type: 0,
+            operation: "all",
+            sideWidth: "256px",
+            sideDocWidth: "256px",
+            sideDiffWidth: "256px",
         };
         defaultStorage[Constants.LOCAL_FLASHCARD] = {
             fullscreen: false
@@ -234,6 +239,11 @@ export const getLocalStorage = (cb: () => void) => {
         };
         defaultStorage[Constants.LOCAL_DOCINFO] = {
             id: "",
+        };
+        defaultStorage[Constants.LOCAL_IMAGES] = {
+            file: "1f4c4",
+            note: "1f5c3",
+            folder: "1f4d1"
         };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
         defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // filesPath[]
@@ -271,7 +281,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_SEARCHDATA, Constants.LOCAL_ZOOM, Constants.LOCAL_LAYOUTS, Constants.LOCAL_AI,
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
-            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS,
+            Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
             Constants.LOCAL_PLUGIN_DOCKS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {

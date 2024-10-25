@@ -172,7 +172,7 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
-${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
+${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeGreat(title)}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {

@@ -8,7 +8,7 @@ import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
-import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
@@ -582,6 +582,8 @@ ${padHTML}
             /// #else
             window.siyuan.menus.menu.popup(position);
             /// #endif
+            const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+            window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
         });
     }
 

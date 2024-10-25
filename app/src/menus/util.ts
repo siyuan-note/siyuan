@@ -125,9 +125,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         label: window.siyuan.languages.openByNewWindow,
         icon: "iconOpenWindow",
         click() {
-            ids.forEach((id) => {
-                openNewWindowById(id);
-            });
+            openNewWindowById(ids);
         }
     });
     /// #endif
@@ -170,7 +168,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
     /// #endif
 };
 
-export const copyPNGByLink = (link:string) => {
+export const copyPNGByLink = (link: string) => {
     if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(link);
         return;

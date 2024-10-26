@@ -1441,9 +1441,8 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	}
 	if 0 < len(resultBlocks) {
 		matchedRootCount = int(result[0]["docs"].(int64))
+		matchedBlockCount = matchedRootCount
 	}
-	logging.LogInfof("time cost [main search]: %v", time.Since(start))
-	now := time.Now()
 
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 	terms := strings.Join(keywords, search.TermSep)
@@ -1452,7 +1451,6 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [highlight search]: %v", time.Since(now))
 	logging.LogInfof("time cost [all]: %v", time.Since(start))
 	return
 }

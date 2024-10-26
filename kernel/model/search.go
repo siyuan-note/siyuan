@@ -1593,7 +1593,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	hPath, _ := markSearch(sqlBlock.HPath, terms, 18)
+	hPath, _ := markSearch(sqlBlock.HPath, "", 18)
 	if !strings.HasPrefix(hPath, "/") {
 		hPath = "/" + hPath
 	}

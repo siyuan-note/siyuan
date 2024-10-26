@@ -1383,79 +1383,75 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	start := time.Now()
 
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
-
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
+	contentField := "content||tag||name||alias||memo"
 	var likeFilter string
+	orderByLike := "("
 	for i, keyword := range keywords {
-		likeFilter += "docContent LIKE '%" + keyword + "%'"
+		likeFilter += "GROUP_CONCAT(" + contentField + ") LIKE '%" + keyword + "%'"
+		orderByLike += "(docContent LIKE '%" + keyword + "%')"
 		if i < len(keywords)-1 {
 			likeFilter += " AND "
+			orderByLike += " + "
 		}
 	}
-	bMatchStmt := "SELECT id FROM " + table + " WHERE " + strings.ReplaceAll(likeFilter, "docContent LIKE ", "content LIKE ")
-	bMatchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
-	dMatchStmt := "SELECT root_id, GROUP_CONCAT(content || tag || name || alias || memo) AS docContent" +
-		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter
-	cteStmt := "WITH docBlocks AS (" + dMatchStmt + "), nonDocBlocks AS (" + bMatchStmt + ")"
-	wheheClause := " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
-	selectStmt := cteStmt + "\nSELECT * FROM " + table + wheheClause
-	countStmt := cteStmt + "\nSELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM " + table + wheheClause
-	selectStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	resultBlocks := sql.SelectBlocksRawStmtNoParse(selectStmt, -1)
-
-	logging.LogInfof("time cost [main search]: %v", time.Since(start))
-	now := time.Now()
-
-	// FTS 高亮
-	projections := "id, parent_id, root_id, hash, box, path, " +
-		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
-		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
-		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
-		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
-		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
-		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
-		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
-		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + stringQuery(query) + ")'"
-	stmt += ") AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
-	for i, resultBlock := range resultBlocks {
-		for j, block := range blocks {
-			if resultBlock.ID == block.ID {
-				resultBlocks[i] = block
-				blocks = append(blocks[:j], blocks[j+1:]...)
-				break
-			}
+	orderByLike += ")"
+	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
+		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
+	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
+	pagingStmt := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
+	selectStmt := cteStmt + "\nSELECT *, " +
+		"(content || tag || name || alias || memo) AS concatContent, " +
+		"(SELECT COUNT(root_id) FROM docBlocks) AS `docs` FROM blocks" +
+		" WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" AND (id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") AND (" + likeFilter + ")))"
+	selectStmt += " " + orderBy + " LIMIT 10240000"
+	result, _ := sql.Query(selectStmt, -1)
+	var resultBlocks []*sql.Block
+	for _, row := range result {
+		b := &sql.Block{
+			ID:       row["id"].(string),
+			ParentID: row["parent_id"].(string),
+			RootID:   row["root_id"].(string),
+			Hash:     row["hash"].(string),
+			Box:      row["box"].(string),
+			Path:     row["path"].(string),
+			HPath:    row["hpath"].(string),
+			Name:     row["name"].(string),
+			Alias:    row["alias"].(string),
+			Memo:     row["memo"].(string),
+			Tag:      row["tag"].(string),
+			Content:  row["content"].(string),
+			FContent: row["fcontent"].(string),
+			Markdown: row["markdown"].(string),
+			Length:   int(row["length"].(int64)),
+			Type:     row["type"].(string),
+			SubType:  row["subtype"].(string),
+			IAL:      row["ial"].(string),
+			Sort:     int(row["sort"].(int64)),
+			Created:  row["created"].(string),
+			Updated:  row["updated"].(string),
 		}
+		resultBlocks = append(resultBlocks, b)
+	}
+	if 0 < len(resultBlocks) {
+		matchedRootCount = int(result[0]["docs"].(int64))
+		matchedBlockCount = matchedRootCount
 	}
 
-	ret = fromSQLBlocks(&resultBlocks, "", beforeLen)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	terms := strings.Join(keywords, search.TermSep)
+	ret = fromSQLBlocks(&resultBlocks, terms, beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [highlight search]: %v", time.Since(now))
-	now = time.Now()
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByStmt(countStmt)
-	logging.LogInfof("time cost [count search]: %v", time.Since(now))
 	logging.LogInfof("time cost [all]: %v", time.Since(start))
-	return
-}
-
-func fullTextSearchCountByStmt(stmt string) (matchedBlockCount, matchedRootCount int) {
-	result, _ := sql.QueryNoLimit(stmt)
-	if 1 > len(result) {
-		return
-	}
-	matchedBlockCount = int(result[0]["matches"].(int64))
-	matchedRootCount = int(result[0]["docs"].(int64))
 	return
 }
 

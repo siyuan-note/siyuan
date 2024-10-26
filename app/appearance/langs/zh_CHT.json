@@ -108,7 +108,7 @@
   "clearContext": "清空上下文",
   "cloudStoragePurge": "清理雲端儲存",
   "cloudStoragePurgeConfirm": "清理雲端儲存會徹底刪除所有未引用的快照和相關資料物件。<ul class='fn__list'><li>執行前請確保其他設備已經暫停同步</li><li>清理作業非常耗時，請確保網路穩定</li></ul>確定現在就執行嗎？",
-  "dragFill": "下拉填滿資料",
+  "dragFill": "垂直拖動以填充值",
   "switchReadonly": "唯讀模式切換",
   "original": "原值",
   "selectRelation": "請先選擇關聯列",

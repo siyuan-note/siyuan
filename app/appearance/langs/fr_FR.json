@@ -108,7 +108,7 @@
   "clearContext": "Effacer le contexte",
   "cloudStoragePurge": "Purger le stockage cloud",
   "cloudStoragePurgeConfirm": "La purge du stockage cloud supprimera complètement tous les instantanés non référencés et les objets de données associés. <ul class='fn__list'><li>Veuillez vous assurer que la synchronisation des autres appareils a été suspendue avant l'exécution</li><li>L'opération de purge prend beaucoup de temps, veuillez vous assurer que le réseau est stable</li></ul>Êtes-vous sûr de l'exécuter maintenant ?",
-  "dragFill": "Arrastra verticalmente para rellenar el valor",
+  "dragFill": "Faites glisser verticalement pour remplir les valeurs",
   "switchReadonly": "Changer de mode lecture seule",
   "original": "Originale",
   "selectRelation": "Veuillez d'abord sélectionner la colonne associée",

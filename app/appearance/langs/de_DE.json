@@ -108,7 +108,7 @@
   "clearContext": "Kontext löschen",
   "cloudStoragePurge": "Cloud-Speicher bereinigen",
   "cloudStoragePurgeConfirm": "Das Bereinigen des Cloud-Speichers löscht alle nicht referenzierten Schnappschüsse und zugehörigen Datenobjekte vollständig. <ul class='fn__list'><li>Bitte stellen Sie sicher, dass andere Geräte die Synchronisation pausiert haben, bevor Sie fortfahren</li><li>Der Bereinigungsvorgang kann sehr zeitaufwendig sein, bitte stellen Sie sicher, dass das Netzwerk stabil ist</li></ul>Sind Sie sicher, dass Sie es jetzt ausführen möchten?",
-  "dragFill": "Vertikal ziehen, um den Wert zu füllen",
+  "dragFill": "Vertikal ziehen, um Werte zu füllen",
   "switchReadonly": "In den Nur-Lesen-Modus wechseln",
   "original": "Original",
   "selectRelation": "Bitte wählen Sie zuerst die zugehörige Spalte aus",

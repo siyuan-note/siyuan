@@ -1402,15 +1402,16 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
-	pagingStmt := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
 	selectStmt := cteStmt + "\nSELECT *, " +
 		"(content || tag || name || alias || memo) AS concatContent, " +
-		"(SELECT COUNT(root_id) FROM docBlocks) AS `docs` FROM blocks" +
-		" WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" AND (id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") OR" +
-		"  (root_id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") AND (" + likeFilter + ")))"
-	selectStmt += " " + orderBy + " LIMIT 10240000"
+		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
+		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
+		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" AND (id IN (SELECT root_id FROM docBlocks) OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks) AND (" + likeFilter + ")))"
+	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1) +
+		" LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	result, _ := sql.Query(selectStmt, -1)
 	var resultBlocks []*sql.Block
 	for _, row := range result {
@@ -1451,7 +1452,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [all]: %v", time.Since(start))
+	logging.LogInfof("time cost [search]: %v", time.Since(start))
 	return
 }
 

@@ -498,27 +498,28 @@ export class WYSIWYG {
                 });
                 const dragFillCellIndex = getPositionByCellElement(lastOriginCellElement);
                 const firstCellIndex = getPositionByCellElement(nodeElement.querySelector(".av__cell--active"));
-                let moveCellElement: HTMLElement;
+                let moveAVCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     const tempCellElement = hasClosestByClassName(moveEvent.target as HTMLElement, "av__cell") as HTMLElement;
-                    if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
+                    if (moveAVCellElement && tempCellElement && tempCellElement.isSameNode(moveAVCellElement)) {
                         return;
                     }
-                    moveCellElement = tempCellElement;
-                    if (moveCellElement && moveCellElement.dataset.id) {
-                        const newIndex = getPositionByCellElement(moveCellElement);
+                    moveAVCellElement = tempCellElement;
+                    if (moveAVCellElement && moveAVCellElement.dataset.id) {
+                        const newIndex = getPositionByCellElement(moveAVCellElement);
                         nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                             if (!originCellIds.includes(item.dataset.id)) {
                                 item.classList.remove("av__cell--active");
                             }
                         });
-                        if (newIndex.celIndex !== dragFillCellIndex.celIndex || dragFillCellIndex.rowIndex >= newIndex.rowIndex) {
+                        if (newIndex.celIndex !== dragFillCellIndex.celIndex) {
                             lastCellElement = undefined;
                             return;
                         }
                         nodeElement.querySelectorAll(".av__row").forEach((rowElement: HTMLElement, index: number) => {
-                            if (index >= dragFillCellIndex.rowIndex && index <= newIndex.rowIndex) {
+                            if ((newIndex.rowIndex < firstCellIndex.rowIndex && index >= newIndex.rowIndex && index < firstCellIndex.rowIndex) ||
+                                (newIndex.rowIndex > dragFillCellIndex.rowIndex && index <= newIndex.rowIndex&& index > dragFillCellIndex.rowIndex)) {
                                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement, cellIndex: number) => {
                                     if (cellIndex >= firstCellIndex.celIndex && cellIndex <= newIndex.celIndex) {
                                         cellElement.classList.add("av__cell--active");
@@ -560,7 +561,7 @@ export class WYSIWYG {
                 });
                 avCellElement.classList.add("av__cell--select");
                 const originIndex = getPositionByCellElement(avCellElement);
-                let moveCellElement: HTMLElement;
+                let moveSelectCellElement: HTMLElement;
                 let lastCellElement: HTMLElement;
                 const nodeRect = nodeElement.getBoundingClientRect();
                 const scrollElement = nodeElement.querySelector(".av__scroll");
@@ -578,7 +579,7 @@ export class WYSIWYG {
                             protyle.contentElement.scrollTop += 5;
                         }
                     }
-                    if (moveCellElement && tempCellElement && tempCellElement.isSameNode(moveCellElement)) {
+                    if (moveSelectCellElement && tempCellElement && tempCellElement.isSameNode(moveSelectCellElement)) {
                         return;
                     }
                     if (tempCellElement && tempCellElement.dataset.id && (event.clientX !== moveEvent.clientX || event.clientY !== moveEvent.clientY)) {
@@ -596,7 +597,7 @@ export class WYSIWYG {
                                 });
                             }
                         });
-                        moveCellElement = tempCellElement;
+                        moveSelectCellElement = tempCellElement;
                     }
                 };
 

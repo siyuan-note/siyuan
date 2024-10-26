@@ -722,4 +722,8 @@ func disallowDisplayBazaarPackage(pkg *Package) bool {
 
 var packageCache = gcache.New(6*time.Hour, 30*time.Minute) // [repoURL]*Package
 
+func CleanBazaarPackageCache() {
+	packageCache.Flush()
+}
+
 var packageInstallSizeCache = gcache.New(48*time.Hour, 6*time.Hour) // [repoURL]*int64

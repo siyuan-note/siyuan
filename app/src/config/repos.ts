@@ -87,8 +87,8 @@ const renderProvider = (provider: number) => {
     <div class="fn__flex-center fn__size200">Addressing</div>
     <div class="fn__space"></div>
     <select class="b3-select fn__block" id="pathStyle">
-        <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
         <option ${window.siyuan.config.sync.s3.pathStyle ? "selected" : ""} value="true">Path-style</option>
+        <option ${window.siyuan.config.sync.s3.pathStyle ? "" : "selected"} value="false">Virtual-hosted-style</option>
     </select>
 </div>
 <div class="b3-label b3-label--inner fn__flex">

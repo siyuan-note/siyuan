@@ -1561,6 +1561,8 @@
     "245": "Data indexing was not completed after the last use. Please execute [Doc Tree - Rebuild Index]. Please use [Exit Application] in the right column panel to exit normally",
     "246": "The document title cannot contain / and has been replaced with _",
     "247": "File [%s] is larger than the maximum limit [%s], and has been ignored for uploading to the cloud",
-    "248": "The target heading is located in the container block and cannot be used as a drop point"
+    "248": "The target heading is located in the container block and cannot be used as a drop point",
+    "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
+    "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions"
   }
 }

@@ -1561,6 +1561,8 @@
     "245": "Indeksowanie danych nie zostało zakończone po ostatnim użyciu. Proszę wykonać [Drzewo dokumentów - Przebudowa indeksu]. Proszę użyć [Zamknij aplikację] w prawym panelu bocznym, aby wyjść normalnie",
     "246": "Tytuł dokumentu nie może zawierać / i został zastąpiony _",
     "247": "Plik [%s] jest większy niż maksymalne ograniczenie [%s], i został zignorowany przy przesyłaniu do chmury",
-    "248": "Docelowy nagłówek znajduje się w bloku kontenera i nie może być użyty jako punkt upuszczenia"
+    "248": "Docelowy nagłówek znajduje się w bloku kontenera i nie może być użyty jako punkt upuszczenia",
+    "249": "Z powodu błędu konfiguracji nie można uzyskać dostępu do danych. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
+    "250": "Żądanie zostało ograniczone przez przechowywanie w chmurze. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze"
   }
 }

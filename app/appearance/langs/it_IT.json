@@ -1561,6 +1561,8 @@
     "245": "L'indicizzazione dei dati non è stata completata dopo l'ultimo utilizzo. Si prega di eseguire [Albero Documenti - Ricostruisci Indice]. Si prega di utilizzare [Esci dall'applicazione] nel pannello della colonna destra per uscire normalmente",
     "246": "Il titolo del documento non può contenere / ed è stato sostituito con _",
     "247": "Il file [%s] è più grande del limite massimo [%s] ed è stato ignorato per il caricamento nel cloud",
-    "248": "L'intestazione di destinazione si trova nel blocco contenitore e non può essere utilizzata come punto di rilascio"
+    "248": "L'intestazione di destinazione si trova nel blocco contenitore e non può essere utilizzata come punto di rilascio",
+    "249": "Impossibile accedere ai dati a causa di un errore di configurazione. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
+    "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud"
   }
 }

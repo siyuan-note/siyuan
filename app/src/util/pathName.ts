@@ -243,7 +243,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
     ${unicode2Emoji(item.boxIcon || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall" style="padding:4px 0">${escapeHtml(item.hPath)}</span>
+    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}</span>
     ${countHTML}
 </li>`;
             });

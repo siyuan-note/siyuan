@@ -1386,7 +1386,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
-	contentField := "content||tag||name||alias||memo"
+	contentField := columnConcat()
 	var likeFilter string
 	orderByLike := "("
 	for i, keyword := range keywords {
@@ -1404,7 +1404,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
 	selectStmt := cteStmt + "\nSELECT *, " +
-		"(content || tag || name || alias || memo) AS concatContent, " +
+		"(" + contentField + ") AS concatContent, " +
 		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
 		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
@@ -1681,6 +1681,25 @@ func columnFilter() string {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
+	return buf.String()
+}
+
+func columnConcat() string {
+	buf := bytes.Buffer{}
+	buf.WriteString("content")
+	if Conf.Search.Name {
+		buf.WriteString("||name")
+	}
+	if Conf.Search.Alias {
+		buf.WriteString("||alias")
+	}
+	if Conf.Search.Memo {
+		buf.WriteString("||memo")
+	}
+	if Conf.Search.IAL {
+		buf.WriteString("||ial")
+	}
+	buf.WriteString("||tag")
 	return buf.String()
 }
 

@@ -435,13 +435,13 @@ func generateTypeEightSVG(color, content string) string {
 		}
 	} else {
 		switch {
-			case len([]rune(content)) == 1:
-				fontSize = 480
-			case len([]rune(content)) == 2:
-				fontSize = 300
-			default:
-				fontSize = 750 / float64(len([]rune(content)))
-	}
+		case len([]rune(content)) == 1:
+			fontSize = 480
+		case len([]rune(content)) == 2:
+			fontSize = 300
+		default:
+			fontSize = 750 / float64(len([]rune(content)))
+		}
 	}
 
 	return fmt.Sprintf(`

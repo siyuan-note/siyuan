@@ -18,7 +18,6 @@ package api
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"regexp"
 	"strings"
@@ -186,7 +185,8 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 	today := time.Now()
 	today = time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, today.Location())
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	countDown := int(math.Floor(date.Sub(today).Hours() / 24)) // 注意最大返回106751天，go的时间戳最大值
+	// countDown := int(math.Floor(date.Sub(today).Hours() / 24)) // 注意最大返回106751天，go的时间戳最大值
+	countDown := daysBetween(today, date)
 
 	return map[string]interface{}{
 		"year":      year,
@@ -199,6 +199,44 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 		"isWeekend": isWeekend,
 	}
 }
+
+func daysBetween(date1, date2 time.Time) int {
+    // 将两个日期都调整到UTC时间的0点
+    date1 = time.Date(date1.Year(), date1.Month(), date1.Day(), 0, 0, 0, 0, time.UTC)
+    date2 = time.Date(date2.Year(), date2.Month(), date2.Day(), 0, 0, 0, 0, time.UTC)
+
+    // 确保date1不晚于date2
+    swap := false
+    if date1.After(date2) {
+        date1, date2 = date2, date1
+        swap = true
+    }
+
+    // 计算天数差
+    days := 0
+    for y := date1.Year(); y < date2.Year(); y++ {
+        if isLeapYear(y) {
+            days += 366
+        } else {
+            days += 365
+        }
+    }
+
+    // 加上最后一年的天数
+    days += int(date2.YearDay() - date1.YearDay())
+
+    // 如果原始的date1晚于date2，返回负值
+    if swap {
+        return -days
+    }
+    return days
+}
+
+// 判断是否为闰年
+func isLeapYear(year int) bool {
+    return year%4 == 0 && (year%100 != 0 || year%400 == 0)
+}
+
 
 // Type 1: 显示年月日星期
 func generateTypeOneSVG(color string, lang string, dateInfo map[string]interface{}) string {
@@ -358,17 +396,16 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 	var tipText, diffDaysText string
 
 	// 设置输出字符
-	if diffDays == 0 {
+	switch {
+	case diffDays == 0:
 		switch lang {
-		case "zh_CN":
-			tipText = "今天"
-		case "zh_CHT":
+		case "zh_CN", "zh_CHT":
 			tipText = "今天"
 		default:
 			tipText = "Today"
 		}
 		diffDaysText = "--"
-	} else if diffDays > 0 {
+	case diffDays > 0:
 		switch lang {
 		case "zh_CN":
 			tipText = "还有"
@@ -378,7 +415,7 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 			tipText = "Left"
 		}
 		diffDaysText = fmt.Sprintf("%d", diffDays)
-	} else {
+	default:
 		switch lang {
 		case "zh_CN":
 			tipText = "已过"
@@ -387,26 +424,30 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 		default:
 			tipText = "Past"
 		}
-		diffDaysText = fmt.Sprintf("%d", int(math.Abs(float64(diffDays))))
+		absDiffDays := -diffDays
+		diffDaysText = fmt.Sprintf("%d", absDiffDays)
 	}
 
-	dayStr := map[string]string{
-		"zh_CN":   "天",
-		"zh_CHT":  "天",
-		"default": "days",
-	}[lang]
-	if dayStr == "" {
+	var dayStr string
+	switch lang {
+	case "zh_CN", "zh_CHT":
+		dayStr = "天"
+	default:
 		dayStr = "days"
 	}
-
-	fontSize := 240.0
-	if len(diffDaysText) >= 6 {
-		fontSize = 130
-	} else if len(diffDaysText) == 5 {
-		fontSize = 140
-	} else if len(diffDaysText) == 4 {
+	// 动态变化字体大小
+	switch {
+	case len(diffDaysText) <= 3:
+		fontSize = 240
+	case len(diffDaysText) == 4:
 		fontSize = 190
+	case len(diffDaysText) == 5:
+		fontSize = 140
+	case len(diffDaysText) >= 6:
+		fontSize = 780 / float64(len(diffDaysText))
 	}
+
+
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
         <path id="bottom" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>

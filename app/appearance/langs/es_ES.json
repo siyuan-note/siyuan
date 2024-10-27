@@ -531,6 +531,7 @@
   "syncConfGuide5": "Si la cantidad de datos es grande, la primera sincronización será lenta, espere pacientemente<br>No cambie de aplicación y mantenga la pantalla brillante mientras iOS/iPad se sincroniza",
   "copyPlainText": "Copiar texto sin formato",
   "findInDoc": "Coincide con bloques ${y} en documentos ${x}",
+  "matchDoc": "Se encontraron ${x} documentos",
   "jumpToParentNext": "Saltar al siguiente bloque del bloque principal",
   "jumpToParentPrev": "Saltar al bloque anterior del bloque principal",
   "jumpToParent": "Saltar al bloque principal",

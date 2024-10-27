@@ -221,6 +221,31 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
     scrollCenter(protyle, undefined, false, "smooth");
 };
 
+const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
+    if (protyle && protyle.app && protyle.app.plugins) {
+        for (let i = 0; i < protyle.app.plugins.length; i++) {
+            const response: { files: string[] } = await new Promise((resolve) => {
+                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                    protyle,
+                    resolve,
+                    textHTML: "",
+                    textPlain: "",
+                    siyuanHTML: "",
+                    files: localFiles
+                });
+                if (emitResult) {
+                    resolve(undefined);
+                }
+            });
+            if (response?.files) {
+                localFiles = response.files;
+            }
+        }
+    }
+    uploadLocalFiles(localFiles, protyle, true);
+    writeText("");
+}
+
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
     event.stopPropagation();
     event.preventDefault();
@@ -257,15 +282,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 localFiles.push(item.childNodes[0].nodeValue);
             });
             if (localFiles.length > 0) {
-                uploadLocalFiles(localFiles, protyle, true);
-                writeText("");
+                readLocalFile(protyle, localFiles);
                 return;
             }
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {
-                uploadLocalFiles(xmlString.data, protyle, true);
-                writeText("");
+                readLocalFile(protyle, xmlString.data);
                 return;
             }
         }

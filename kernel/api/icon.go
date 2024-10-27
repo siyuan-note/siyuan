@@ -14,7 +14,6 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 package api
 
 import (
@@ -22,8 +21,9 @@ import (
 	"math"
 	"net/http"
 	"regexp"
-	"time"
 	"strings"
+	"time"
+
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -54,34 +54,44 @@ func getColorScheme(color string) ColorScheme {
 	return colorSchemes["red"]
 }
 
-
 func getDynamicIcon(c *gin.Context) {
-	iconType := c.DefaultQuery("type","1")
+	iconType := c.DefaultQuery("type", "1")
 	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
-	locale := c.DefaultQuery("locale", util.Lang)
+	lang := c.DefaultQuery("lang", util.Lang)
 	content := c.Query("content")
+	weekdayType := c.DefaultQuery("weekdayType", "1") // 设置星期几的格式，zh_CH {1：周日，2：周天， 3：星期日，4：星期天，}, en_US {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
 
+	dateInfo := getDateInfo(date, lang, weekdayType)
 	var svg string
 	switch iconType {
 	case "1":
-		svg = generateTypeOneSVG(color, date, locale)
+		// Type 1: 显示年月日星期
+		svg = generateTypeOneSVG(color, lang, dateInfo)
 	case "2":
-		svg = generateTypeTwoSVG(color, date, locale)
+		// Type 2: 显示年月日
+		svg = generateTypeTwoSVG(color, lang, dateInfo)
 	case "3":
-		svg = generateTypeThreeSVG(color, date, locale)
+		// Type 3: 显示年月
+		svg = generateTypeThreeSVG(color, lang, dateInfo)
 	case "4":
-		svg = generateTypeFourSVG(color, date, locale)
+		// Type 4: 仅显示年
+		svg = generateTypeFourSVG(color, lang, dateInfo)
 	case "5":
-		svg = generateTypeFiveSVG(color, date, locale)
+		// Type 5: 显示周数
+		svg = generateTypeFiveSVG(color, lang, dateInfo)
 	case "6":
-		svg = generateTypeSixSVG(color, date, locale)
+		// Type 6: 仅显示星期
+		svg = generateTypeSixSVG(color, lang, weekdayType, dateInfo)
 	case "7":
-		svg = generateTypeSevenSVG(color, date, locale)
+		// Type 7: 倒数日
+		svg = generateTypeSevenSVG(color, lang, dateInfo)
 	case "8":
+		// Type 8: 文字图标
 		svg = generateTypeEightSVG(color, content)
 	default:
-		svg = generateTypeOneSVG(color, date, locale)
+		// 默认为Type 1
+		svg = generateTypeOneSVG(color, lang, dateInfo)
 	}
 
 	c.Header("Content-Type", "image/svg+xml")
@@ -90,7 +100,8 @@ func getDynamicIcon(c *gin.Context) {
 	c.String(http.StatusOK, svg)
 }
 
-func getDateInfo(dateStr string, locale string) map[string]interface{} {
+func getDateInfo(dateStr string, lang string, weekdayType string) map[string]interface{} {
+	// 设置默认值
 	var date time.Time
 	var err error
 	if dateStr == "" {
@@ -101,43 +112,75 @@ func getDateInfo(dateStr string, locale string) map[string]interface{} {
 			date = time.Now()
 		}
 	}
-
+	// 获取年月日星期
 	year := date.Year()
 	month := date.Format("Jan")
 	day := date.Day()
-	weekday := date.Weekday().String()
-	weekdayShort := date.Format("Mon")
+	var weekdayStr string
+	var weekdays []string
 
-	switch locale {
+	switch lang {
 	case "zh_CN":
 		month = date.Format("1月")
-		weekdays := []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
-		weekdaysShort := []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
-		weekday = weekdays[date.Weekday()]
-		weekdayShort = weekdaysShort[date.Weekday()]
+		switch weekdayType  {
+		case "1":
+			weekdays = []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
+		case "2":
+			weekdays = []string{"周天", "周一", "周二", "周三", "周四", "周五", "周六"}
+		case "3":
+			weekdays = []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		case "4":
+			weekdays = []string{"星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		default:
+			weekdays = []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
+		}
+		weekdayStr = weekdays[date.Weekday()]
 	case "zh_CHT":
 		month = date.Format("1月")
-		weekdays := []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
-		weekdaysShort := []string{"週日", "週一", "週二", "週三", "週四", "週五", "週六"}
-		weekday = weekdays[date.Weekday()]
-		weekdayShort = weekdaysShort[date.Weekday()]
-	case "en_US", "en_ES":
-		// 英文默认格式，无需更改
+		switch weekdayType  {
+		case "1":
+			weekdays = []string{"週日", "週一", "週二", "週三", "週四", "週五", "週六"}
+		case "2":
+			weekdays = []string{"週天", "週一", "週二", "週三", "週四", "週五", "週六"}
+		case "3":
+			weekdays = []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		case "4":
+			weekdays = []string{"星期天", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		default:
+			weekdays = []string{"週日", "週一", "週二", "週三", "週四", "週五", "週六"}
+		}
+		weekdayStr = weekdays[date.Weekday()]
+
+
 	default:
-		// 对于其他语言，可以根据需要添加本地化处理
+		// 其他语言
+		switch weekdayType  {
+		case "1":
+			weekdayStr = date.Format("Mon")
+		case "2":
+			weekdayStr = date.Format("Mon")
+			weekdayStr = strings.ToUpper(weekdayStr)
+		case "3":
+			weekdayStr = date.Format("Monday")
+		case "4":
+			weekdayStr = date.Format("Monday")
+			weekdayStr = strings.ToUpper(weekdayStr)
+		default:
+			weekdayStr = date.Format("Mon")
+		}
 	}
-
 	// Calculate week number
-	_, week := date.ISOWeek()
-	weekString := fmt.Sprintf("%dW", week)
+	_, weekNum := date.ISOWeek()
+	weekNumStr := fmt.Sprintf("%dW", weekNum)
 
-	switch locale {
+	switch lang {
 	case "zh_CN":
-		weekString = fmt.Sprintf("%d周", week)
+		weekNumStr = fmt.Sprintf("%d周", weekNum)
 	case "zh_CHT":
-		weekString = fmt.Sprintf("%d週", week)
+		weekNumStr = fmt.Sprintf("%d週", weekNum)
 	}
-
+	// 判断是否是周末
+	isWeekend := date.Weekday() == time.Saturday || date.Weekday() == time.Sunday
 	// Calculate days until today
 	today := time.Now()
 	today = time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, today.Location())
@@ -145,21 +188,20 @@ func getDateInfo(dateStr string, locale string) map[string]interface{} {
 	countDown := int(math.Floor(date.Sub(today).Hours() / 24)) // 注意最大返回106751天，go的时间戳最大值
 
 	return map[string]interface{}{
-		"year":           year,
-		"month":          month,
-		"day":            day,
-		"date":           fmt.Sprintf("%02d-%02d", date.Month(), date.Day()),
-		"weekday":        weekday,
-		"weekdayShort":   weekdayShort,
-		"week":           weekString,
-		"countDown":      countDown,
+		"year":      year,
+		"month":     month,
+		"day":       day,
+		"date":      fmt.Sprintf("%02d-%02d", date.Month(), date.Day()),
+		"weekday":   weekdayStr,
+		"week":      weekNumStr,
+		"countDown": countDown,
+		"isWeekend": isWeekend,
 	}
 }
 
 // Type 1: 显示年月日星期
-func generateTypeOneSVG(color, date, locale string) string {
+func generateTypeOneSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
@@ -174,9 +216,8 @@ func generateTypeOneSVG(color, date, locale string) string {
 }
 
 // Type 2: 显示年月日
-func generateTypeTwoSVG(color, date, locale string) string {
+func generateTypeTwoSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
@@ -190,9 +231,8 @@ func generateTypeTwoSVG(color, date, locale string) string {
 }
 
 // Type 3: 显示年月
-func generateTypeThreeSVG(color, date, locale string) string {
+func generateTypeThreeSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type3" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
@@ -213,9 +253,8 @@ func generateTypeThreeSVG(color, date, locale string) string {
 }
 
 // Type 4: 仅显示年
-func generateTypeFourSVG(color, date, locale string) string {
+func generateTypeFourSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type4" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
@@ -235,9 +274,8 @@ func generateTypeFourSVG(color, date, locale string) string {
 }
 
 // Type 5:: 显示周数
-func generateTypeFiveSVG(color, date, locale string) string {
+func generateTypeFiveSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type5" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
@@ -258,19 +296,40 @@ func generateTypeFiveSVG(color, date, locale string) string {
 }
 
 // Type 6: 仅显示星期
-func generateTypeSixSVG(color, date, locale string) string {
-	dateInfo := getDateInfo(date, locale)
-	weekday := dateInfo["weekday"].(string)
+func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo map[string]interface{}) string {
 
+	weekday := dateInfo["weekday"].(string)
+	isWeekend := dateInfo["isWeekend"].(bool)
+
+	// 如果不设置颜色，周末默认使用蓝色，工作日默认使用红色
 	var colorScheme ColorScheme
 	if color == "" {
-		if weekday == "Saturday" || weekday == "Sunday" || weekday == "星期六" || weekday == "星期日" {
+		if isWeekend {
 			colorScheme = colorSchemes["blue"]
 		} else {
 			colorScheme = colorSchemes["red"]
 		}
 	} else {
 		colorScheme = getColorScheme(color)
+	}
+	// 动态变化字体大小
+	var fontSize float64
+	switch lang{
+	case "zh_CN", "zh_CHT":
+			fontSize = 460 / float64(len([]rune(weekday)))
+	default:
+		switch weekdayType {
+		case "1":
+			fontSize = 690 / float64(len([]rune(weekday)))
+		case "2":
+			fontSize = 600 / float64(len([]rune(weekday)))
+		case "3":
+			fontSize = 720 / float64(len([]rune(weekday)))
+		case "4":
+			fontSize = 630 / float64(len([]rune(weekday)))
+		default:
+			fontSize = 750 / float64(len([]rune(weekday)))
+		}
 	}
 
 	return fmt.Sprintf(`
@@ -285,62 +344,59 @@ func generateTypeSixSVG(color, date, locale string) string {
         <circle cx="382.5" cy="113.5" r="14"/>
         <circle cx="382.5" cy="71.5" r="14"/>
     </g>
-    <text id="weekday" transform="translate(260 380)" style="fill: %s; font-size: 210px; text-anchor: middle; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
-    </svg>`, colorScheme.Primary, colorScheme.Secondary, colorScheme.Primary, dateInfo["weekdayShort"])
+    <text id="weekday" x="260px"  y="65%%" style="fill: %s; font-size: %.2fpx; text-anchor: middle; dominant-baseline:middle; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
+    </svg>`, colorScheme.Primary, colorScheme.Secondary, colorScheme.Primary, fontSize, weekday)
 }
 
 // Type7: 倒数日
-func generateTypeSevenSVG(color, date, locale string) string {
+func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interface{}) string {
 	colorScheme := getColorScheme(color)
-	dateInfo := getDateInfo(date, locale)
+
 	diffDays := dateInfo["countDown"].(int)
 
 	var tipText, diffDaysText string
-	// 定义支持的语言
-	supportedLocales := map[string]bool{
-		"zh_CN": true,
-		"zh_CHT": true,
-		"en_US": true,
-		"en_ES": true,
-	}
 
-	// 如果不是支持的语言，使用英文
-	if !supportedLocales[locale] {
-		locale = "en_US"
-	}
 	// 设置输出字符
 	if diffDays == 0 {
-		tipText = map[string]string{
-			"zh_CN": "今天",
-			"zh_CHT": "今天",
-			"en_US": "Today",
-			"en_ES": "Today",
-		}[locale]
+		switch lang {
+		case "zh_CN":
+			tipText = "今天"
+		case "zh_CHT":
+			tipText = "今天"
+		default:
+			tipText = "Today"
+		}
 		diffDaysText = "--"
 	} else if diffDays > 0 {
-		tipText = map[string]string{
-			"zh_CN": "还有",
-			"zh_CHT": "還有",
-			"en_US": "Left",
-			"en_ES": "Left",
-		}[locale]
+		switch lang {
+		case "zh_CN":
+			tipText = "还有"
+		case "zh_CHT":
+			tipText = "還有"
+		default:
+			tipText = "Left"
+		}
 		diffDaysText = fmt.Sprintf("%d", diffDays)
 	} else {
-		tipText = map[string]string{
-			"zh_CN": "已过",
-			"zh_CHT": "已過",
-			"en_US": "Past",
-			"en_ES": "Past",
-		}[locale]
+		switch lang {
+		case "zh_CN":
+			tipText = "已过"
+		case "zh_CHT":
+			tipText = "已過"
+		default:
+			tipText = "Past"
+		}
 		diffDaysText = fmt.Sprintf("%d", int(math.Abs(float64(diffDays))))
 	}
 
 	dayStr := map[string]string{
-		"zh_CN": "天",
+		"zh_CN":  "天",
 		"zh_CHT": "天",
-		"en_US": "days",
-		"en_ES": "days",
-	}[locale]
+		"default": "days",
+	}[lang]
+	if dayStr == "" {
+		dayStr = "days"
+	}
 
 	fontSize := 240.0
 	if len(diffDaysText) >= 6 {

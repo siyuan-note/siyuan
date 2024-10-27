@@ -55,6 +55,8 @@ func getColorScheme(color string) ColorScheme {
 }
 
 func getDynamicIcon(c *gin.Context) {
+	// Add internal kernel API `/api/icon/getDynamicIcon` https://github.com/siyuan-note/siyuan/pull/12939
+
 	iconType := c.DefaultQuery("type", "1")
 	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
@@ -122,7 +124,7 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 	switch lang {
 	case "zh_CN":
 		month = date.Format("1月")
-		switch weekdayType  {
+		switch weekdayType {
 		case "1":
 			weekdays = []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
 		case "2":
@@ -137,7 +139,7 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 		weekdayStr = weekdays[date.Weekday()]
 	case "zh_CHT":
 		month = date.Format("1月")
-		switch weekdayType  {
+		switch weekdayType {
 		case "1":
 			weekdays = []string{"週日", "週一", "週二", "週三", "週四", "週五", "週六"}
 		case "2":
@@ -151,10 +153,9 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 		}
 		weekdayStr = weekdays[date.Weekday()]
 
-
 	default:
 		// 其他语言
-		switch weekdayType  {
+		switch weekdayType {
 		case "1":
 			weekdayStr = date.Format("Mon")
 		case "2":
@@ -314,9 +315,9 @@ func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo 
 	}
 	// 动态变化字体大小
 	var fontSize float64
-	switch lang{
+	switch lang {
 	case "zh_CN", "zh_CHT":
-			fontSize = 460 / float64(len([]rune(weekday)))
+		fontSize = 460 / float64(len([]rune(weekday)))
 	default:
 		switch weekdayType {
 		case "1":
@@ -390,8 +391,8 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 	}
 
 	dayStr := map[string]string{
-		"zh_CN":  "天",
-		"zh_CHT": "天",
+		"zh_CN":   "天",
+		"zh_CHT":  "天",
 		"default": "days",
 	}[lang]
 	if dayStr == "" {

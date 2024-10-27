@@ -80,7 +80,7 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
 };
 
 export const getAssetName = (assetPath: string) => {
-    return assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23);
+    return assetPath.replace(/-\d{14}-\w{7}/, "").replace(pathPosix().extname(assetPath), "").replace("assets/", "");
 };
 
 export const isLocalPath = (link: string) => {

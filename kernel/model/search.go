@@ -1386,7 +1386,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
-	contentField := "content||tag||name||alias||memo"
+	contentField := columnConcat()
 	var likeFilter string
 	orderByLike := "("
 	for i, keyword := range keywords {
@@ -1402,15 +1402,16 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
-	pagingStmt := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
 	selectStmt := cteStmt + "\nSELECT *, " +
-		"(content || tag || name || alias || memo) AS concatContent, " +
-		"(SELECT COUNT(root_id) FROM docBlocks) AS `docs` FROM blocks" +
-		" WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" AND (id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") OR" +
-		"  (root_id IN (SELECT root_id FROM docBlocks" + pagingStmt + ") AND (" + likeFilter + ")))"
-	selectStmt += " " + orderBy + " LIMIT 10240000"
+		"(" + contentField + ") AS concatContent, " +
+		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
+		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
+		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" AND (id IN (SELECT root_id FROM docBlocks) OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks) AND (" + likeFilter + ")))"
+	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1) +
+		" LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	result, _ := sql.Query(selectStmt, -1)
 	var resultBlocks []*sql.Block
 	for _, row := range result {
@@ -1451,7 +1452,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [all]: %v", time.Since(start))
+	logging.LogInfof("time cost [search]: %v", time.Since(start))
 	return
 }
 
@@ -1592,7 +1593,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	hPath, _ := markSearch(sqlBlock.HPath, terms, 18)
+	hPath, _ := markSearch(sqlBlock.HPath, "", 18)
 	if !strings.HasPrefix(hPath, "/") {
 		hPath = "/" + hPath
 	}
@@ -1680,6 +1681,25 @@ func columnFilter() string {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
+	return buf.String()
+}
+
+func columnConcat() string {
+	buf := bytes.Buffer{}
+	buf.WriteString("content")
+	if Conf.Search.Name {
+		buf.WriteString("||name")
+	}
+	if Conf.Search.Alias {
+		buf.WriteString("||alias")
+	}
+	if Conf.Search.Memo {
+		buf.WriteString("||memo")
+	}
+	if Conf.Search.IAL {
+		buf.WriteString("||ial")
+	}
+	buf.WriteString("||tag")
 	return buf.String()
 }
 

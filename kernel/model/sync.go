@@ -584,6 +584,10 @@ func formatRepoErrorMsg(err error) string {
 		msg = Conf.Language(213)
 	} else if errors.Is(err, cloud.ErrCloudServiceUnavailable) {
 		msg = Conf.language(219)
+	} else if errors.Is(err, cloud.ErrCloudForbidden) {
+		msg = Conf.language(249)
+	} else if errors.Is(err, cloud.ErrCloudTooManyRequests) {
+		msg = Conf.language(250)
 	} else {
 		logging.LogErrorf("sync failed caused by network: %s", msg)
 		msgLowerCase := strings.ToLower(msg)

@@ -707,7 +707,7 @@ export const openMenuPanel = (options: {
                     const rect = target.getBoundingClientRect();
                     openEmojiPanel("", "av", {
                         x: rect.left,
-                        y: rect.bottom,
+                        y: rect.bottom + 4,
                         h: rect.height,
                         w: rect.width
                     }, (unicode) => {
@@ -772,7 +772,7 @@ export const openMenuPanel = (options: {
                     const rect = target.getBoundingClientRect();
                     openEmojiPanel("", "av", {
                         x: rect.left,
-                        y: rect.bottom,
+                        y: rect.bottom + 4,
                         h: rect.height,
                         w: rect.width
                     }, (unicode) => {

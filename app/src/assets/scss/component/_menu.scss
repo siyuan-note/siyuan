@@ -290,6 +290,20 @@
     }
   }
 
+  &__avemoji {
+    @extend .b3-list-item__icon;
+    align-self: center;
+    margin-left: -4px;
+    font-size: 14px;
+    cursor: pointer;
+
+    svg, img {
+      height: 14px;
+      width: 14px;
+      color: var(--b3-theme-on-surface);
+    }
+  }
+
   &__checked {
     width: 22px;
     height: 22px;

@@ -476,7 +476,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 1 > len(ids) {
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
-		blocks, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
+		blocks, _, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}
@@ -903,7 +903,7 @@ func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement stri
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -945,7 +945,12 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		if 2 > len(strings.Split(query, " ")) {
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		} else {
+			docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		}
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 
@@ -1324,6 +1329,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	start := time.Now()
 	query = stringQuery(query)
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
@@ -1349,20 +1355,11 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 	}
 
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter)
+	logging.LogInfof("time cost [fts]: %v", time.Since(start))
 	return
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
-		if 1 > len(ret) {
-			return
-		}
-		matchedBlockCount = int(ret[0]["matches"].(int64))
-		matchedRootCount = int(ret[0]["docs"].(int64))
-		return
-	}
-
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1403,43 +1400,17 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
+	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	selectStmt := cteStmt + "\nSELECT *, " +
 		"(" + contentField + ") AS concatContent, " +
 		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
 		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" AND (id IN (SELECT root_id FROM docBlocks) OR" +
-		"  (root_id IN (SELECT root_id FROM docBlocks) AND (" + likeFilter + ")))"
-	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1) +
-		" LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	result, _ := sql.Query(selectStmt, -1)
-	var resultBlocks []*sql.Block
-	for _, row := range result {
-		b := &sql.Block{
-			ID:       row["id"].(string),
-			ParentID: row["parent_id"].(string),
-			RootID:   row["root_id"].(string),
-			Hash:     row["hash"].(string),
-			Box:      row["box"].(string),
-			Path:     row["path"].(string),
-			HPath:    row["hpath"].(string),
-			Name:     row["name"].(string),
-			Alias:    row["alias"].(string),
-			Memo:     row["memo"].(string),
-			Tag:      row["tag"].(string),
-			Content:  row["content"].(string),
-			FContent: row["fcontent"].(string),
-			Markdown: row["markdown"].(string),
-			Length:   int(row["length"].(int64)),
-			Type:     row["type"].(string),
-			SubType:  row["subtype"].(string),
-			IAL:      row["ial"].(string),
-			Sort:     int(row["sort"].(int64)),
-			Created:  row["created"].(string),
-			Updated:  row["updated"].(string),
-		}
-		resultBlocks = append(resultBlocks, b)
-	}
+		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
+	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	result, _ := sql.QueryNoLimit(selectStmt)
+	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
 		matchedRootCount = int(result[0]["docs"].(int64))
 		matchedBlockCount = matchedRootCount
@@ -1452,7 +1423,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [search]: %v", time.Since(start))
+	logging.LogInfof("time cost [like]: %v", time.Since(start))
 	return
 }
 

@@ -429,7 +429,8 @@ func getConf(c *gin.Context) {
 
 	// REF: https://github.com/siyuan-note/siyuan/issues/11364
 	role := model.GetGinContextRole(c)
-	if model.IsReadOnlyRole(role) {
+	isPublish := model.IsReadOnlyRole(role)
+	if isPublish {
 		maskedConf.ReadOnly = true
 	}
 	if !model.IsValidRole(role, []model.Role{
@@ -439,8 +440,9 @@ func getConf(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"conf":  maskedConf,
-		"start": !util.IsUILoaded,
+		"conf":      maskedConf,
+		"start":     !util.IsUILoaded,
+		"isPublish": isPublish,
 	}
 }
 

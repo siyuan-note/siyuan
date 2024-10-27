@@ -432,7 +432,11 @@ interface ISiyuan {
     bookmarkLabel?: string[]
     blockPanels: import("../block/Panel").BlockPanel[],
     dialogs: import("../dialog").Dialog[],
-    viewer?: Viewer
+    viewer?: Viewer,
+    /**
+     * 是否在发布服务下访问
+     */
+    isPublish?: boolean;
 }
 
 interface IOperation {

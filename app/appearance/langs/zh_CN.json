@@ -531,6 +531,7 @@
   "syncConfGuide5": "如果数据量较大，第一次同步会比较慢，请耐心等待<br>iOS/iPad 端在同步时请勿切换应用并保持亮屏",
   "copyPlainText": "复制纯文本",
   "findInDoc": "${x} 个文档中匹配 ${y} 个块",
+  "matchDoc": "匹配到 ${x} 个文档",
   "jumpToParentNext": "跳转到父块的下一个块",
   "jumpToParentPrev": "跳转到父块的上一个块",
   "jumpToParent": "跳转到父块",

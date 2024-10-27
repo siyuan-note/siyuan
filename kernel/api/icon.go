@@ -25,6 +25,7 @@ import (
 	"time"
 	"strings"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type ColorScheme struct {
@@ -49,18 +50,16 @@ func getColorScheme(color string) ColorScheme {
 		return scheme
 	}
 
-
-
 	// 如果不是预定义颜色，返回默认颜色
 	return colorSchemes["red"]
 }
 
 
 func getDynamicIcon(c *gin.Context) {
-	iconType := c.Query("type")
-	color := c.Query("color")
+	iconType := c.DefaultQuery("type","1")
+	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
-	locale := c.DefaultQuery("locale", "cn")
+	locale := c.DefaultQuery("locale", util.Lang)
 	content := c.Query("content")
 
 	var svg string
@@ -109,24 +108,41 @@ func getDateInfo(dateStr string, locale string) map[string]interface{} {
 	weekday := date.Weekday().String()
 	weekdayShort := date.Format("Mon")
 
-	if locale == "cn" {
+	switch locale {
+	case "zh_CN":
 		month = date.Format("1月")
-		weekday = []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}[date.Weekday()]
-		weekdayShort = []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}[date.Weekday()]
+		weekdays := []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		weekdaysShort := []string{"周日", "周一", "周二", "周三", "周四", "周五", "周六"}
+		weekday = weekdays[date.Weekday()]
+		weekdayShort = weekdaysShort[date.Weekday()]
+	case "zh_CHT":
+		month = date.Format("1月")
+		weekdays := []string{"星期日", "星期一", "星期二", "星期三", "星期四", "星期五", "星期六"}
+		weekdaysShort := []string{"週日", "週一", "週二", "週三", "週四", "週五", "週六"}
+		weekday = weekdays[date.Weekday()]
+		weekdayShort = weekdaysShort[date.Weekday()]
+	case "en_US", "en_ES":
+		// 英文默认格式，无需更改
+	default:
+		// 对于其他语言，可以根据需要添加本地化处理
 	}
 
 	// Calculate week number
 	_, week := date.ISOWeek()
-	weekString := fmt.Sprintf("%d周", week)
-	if locale == "en" {
-		weekString = fmt.Sprintf("%dW", week)
+	weekString := fmt.Sprintf("%dW", week)
+
+	switch locale {
+	case "zh_CN":
+		weekString = fmt.Sprintf("%d周", week)
+	case "zh_CHT":
+		weekString = fmt.Sprintf("%d週", week)
 	}
 
 	// Calculate days until today
 	today := time.Now()
 	today = time.Date(today.Year(), today.Month(), today.Day(), 0, 0, 0, 0, today.Location())
 	date = time.Date(date.Year(), date.Month(), date.Day(), 0, 0, 0, 0, date.Location())
-	countDown := int(math.Floor(date.Sub(today).Hours() / 24))
+	countDown := int(math.Floor(date.Sub(today).Hours() / 24)) // 注意最大返回106751天，go的时间戳最大值
 
 	return map[string]interface{}{
 		"year":           year,
@@ -136,7 +152,7 @@ func getDateInfo(dateStr string, locale string) map[string]interface{} {
 		"weekday":        weekday,
 		"weekdayShort":   weekdayShort,
 		"week":           weekString,
-		"countDown": countDown,
+		"countDown":      countDown,
 	}
 }
 
@@ -280,18 +296,51 @@ func generateTypeSevenSVG(color, date, locale string) string {
 	diffDays := dateInfo["countDown"].(int)
 
 	var tipText, diffDaysText string
+	// 定义支持的语言
+	supportedLocales := map[string]bool{
+		"zh_CN": true,
+		"zh_CHT": true,
+		"en_US": true,
+		"en_ES": true,
+	}
+
+	// 如果不是支持的语言，使用英文
+	if !supportedLocales[locale] {
+		locale = "en_US"
+	}
+	// 设置输出字符
 	if diffDays == 0 {
-		tipText = map[string]string{"en": "Today", "cn": "今天"}[locale]
+		tipText = map[string]string{
+			"zh_CN": "今天",
+			"zh_CHT": "今天",
+			"en_US": "Today",
+			"en_ES": "Today",
+		}[locale]
 		diffDaysText = "--"
 	} else if diffDays > 0 {
-		tipText = map[string]string{"en": "Left", "cn": "还有"}[locale]
+		tipText = map[string]string{
+			"zh_CN": "还有",
+			"zh_CHT": "還有",
+			"en_US": "Left",
+			"en_ES": "Left",
+		}[locale]
 		diffDaysText = fmt.Sprintf("%d", diffDays)
 	} else {
-		tipText = map[string]string{"en": "Past", "cn": "已过"}[locale]
+		tipText = map[string]string{
+			"zh_CN": "已过",
+			"zh_CHT": "已過",
+			"en_US": "Past",
+			"en_ES": "Past",
+		}[locale]
 		diffDaysText = fmt.Sprintf("%d", int(math.Abs(float64(diffDays))))
 	}
 
-	dayStr := map[string]string{"en": "days", "cn": "天"}[locale]
+	dayStr := map[string]string{
+		"zh_CN": "天",
+		"zh_CHT": "天",
+		"en_US": "days",
+		"en_ES": "days",
+	}[locale]
 
 	fontSize := 240.0
 	if len(diffDaysText) >= 6 {
@@ -301,7 +350,6 @@ func generateTypeSevenSVG(color, date, locale string) string {
 	} else if len(diffDaysText) == 4 {
 		fontSize = 190
 	}
-
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
         <path id="bottom" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>

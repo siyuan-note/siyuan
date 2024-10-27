@@ -209,8 +209,8 @@ func generateTypeOneSVG(color string, lang string, dateInfo map[string]interface
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
     <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
-    <text transform="translate(260 392.5)" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 240px; text-anchor: middle">%d</text>
-    <text transform="translate(260 472.5)" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 64px; text-anchor: middle">%s</text>
+    <text x="50%%" y="392.5" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 240px; text-anchor: middle">%d</text>
+    <text x="50%%" y="472.5" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 64px; text-anchor: middle">%s</text>
     <text transform="translate(331.03 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%d</text>
     </svg>
     `, colorScheme.Primary, dateInfo["month"], dateInfo["day"], dateInfo["weekday"], dateInfo["year"])
@@ -225,7 +225,7 @@ func generateTypeTwoSVG(color string, lang string, dateInfo map[string]interface
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
     <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
-    <text transform="translate(260 420.5)" style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 256px;text-anchor: middle">%d</text>
+    <text x="50%%" y="420.5"  style="fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 256px;text-anchor: middle">%d</text>
     <text transform="translate(331.03 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%d</text>
     </svg>
     `, colorScheme.Primary, dateInfo["month"], dateInfo["day"], dateInfo["year"])
@@ -248,7 +248,7 @@ func generateTypeThreeSVG(color string, lang string, dateInfo map[string]interfa
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
         <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
-        <text transform="translate(260 410.5)" style="fill: #66757f;font-size: 160px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 160px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"], dateInfo["month"])
 }
@@ -269,7 +269,7 @@ func generateTypeFourSVG(color string, lang string, dateInfo map[string]interfac
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text transform="translate(260 410.5)" style="fill: #66757f;font-size: 180px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 180px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"])
 }
@@ -291,7 +291,7 @@ func generateTypeFiveSVG(color string, lang string, dateInfo map[string]interfac
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
         <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
-        <text transform="translate(260 410.5)" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"], dateInfo["week"])
 }
@@ -345,7 +345,7 @@ func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo 
         <circle cx="382.5" cy="113.5" r="14"/>
         <circle cx="382.5" cy="71.5" r="14"/>
     </g>
-    <text id="weekday" x="260px"  y="65%%" style="fill: %s; font-size: %.2fpx; text-anchor: middle; dominant-baseline:middle; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
+    <text id="weekday" x="50%%"  y="65%%" style="fill: %s; font-size: %.2fpx; text-anchor: middle; dominant-baseline:middle; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
     </svg>`, colorScheme.Primary, colorScheme.Secondary, colorScheme.Primary, fontSize, weekday)
 }
 
@@ -414,8 +414,8 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
         <text id="year" transform="translate(46.1 78.92)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 60px;">%d</text>
         <text id="day" transform="translate(43.58 148.44)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 60px;">%s</text>
         <text id="passStr" transform="translate(400 148.44)" style="fill: #fff; text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 71.18px;">%s</text>
-        <text id="diffDays" x="260" y="65%%" style="font-size: %.0fpx; fill: #66757f; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
-        <text id="dayStr" transform="translate(260 472.5)" style="font-size: 64px; text-anchor: middle; fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
+        <text id="diffDays" x="50%%" y="65%%" style="font-size: %.0fpx; fill: #66757f; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text id="dayStr" x="50%%" y="472.5" style="font-size: 64px; text-anchor: middle; fill: #66757f; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei';">%s</text>
     </svg>`, colorScheme.Primary, dateInfo["year"], dateInfo["date"], tipText, fontSize, diffDaysText, dayStr)
 }
 
@@ -451,4 +451,3 @@ func generateTypeEightSVG(color, content string) string {
     </svg>
     `, colorScheme.Primary, fontSize, content)
 }
-

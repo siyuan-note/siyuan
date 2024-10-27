@@ -1290,6 +1290,10 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFil
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
+
+	if 2 > len(strings.Split(query, " ")) {
+		return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
+	}
 	return fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
 }
 
@@ -1324,6 +1328,7 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
+	start := time.Now()
 	query = stringQuery(query)
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
@@ -1349,20 +1354,11 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 	}
 
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter)
+	logging.LogInfof("time cost [fts]: %v", time.Since(start))
 	return
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
-		if 1 > len(ret) {
-			return
-		}
-		matchedBlockCount = int(ret[0]["matches"].(int64))
-		matchedRootCount = int(ret[0]["docs"].(int64))
-		return
-	}
-
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1403,43 +1399,17 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
 	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
 	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
+	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
 	selectStmt := cteStmt + "\nSELECT *, " +
 		"(" + contentField + ") AS concatContent, " +
 		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
 		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" AND (id IN (SELECT root_id FROM docBlocks) OR" +
-		"  (root_id IN (SELECT root_id FROM docBlocks) AND (" + likeFilter + ")))"
-	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1) +
-		" LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	result, _ := sql.Query(selectStmt, -1)
-	var resultBlocks []*sql.Block
-	for _, row := range result {
-		b := &sql.Block{
-			ID:       row["id"].(string),
-			ParentID: row["parent_id"].(string),
-			RootID:   row["root_id"].(string),
-			Hash:     row["hash"].(string),
-			Box:      row["box"].(string),
-			Path:     row["path"].(string),
-			HPath:    row["hpath"].(string),
-			Name:     row["name"].(string),
-			Alias:    row["alias"].(string),
-			Memo:     row["memo"].(string),
-			Tag:      row["tag"].(string),
-			Content:  row["content"].(string),
-			FContent: row["fcontent"].(string),
-			Markdown: row["markdown"].(string),
-			Length:   int(row["length"].(int64)),
-			Type:     row["type"].(string),
-			SubType:  row["subtype"].(string),
-			IAL:      row["ial"].(string),
-			Sort:     int(row["sort"].(int64)),
-			Created:  row["created"].(string),
-			Updated:  row["updated"].(string),
-		}
-		resultBlocks = append(resultBlocks, b)
-	}
+		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
+	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	result, _ := sql.QueryNoLimit(selectStmt)
+	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
 		matchedRootCount = int(result[0]["docs"].(int64))
 		matchedBlockCount = matchedRootCount
@@ -1452,7 +1422,7 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [search]: %v", time.Since(start))
+	logging.LogInfof("time cost [like]: %v", time.Since(start))
 	return
 }
 

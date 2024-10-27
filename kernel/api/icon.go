@@ -248,7 +248,7 @@ func generateTypeThreeSVG(color string, lang string, dateInfo map[string]interfa
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
         <text transform="translate(22 146.5)" style="fill: #fff;font-size: 120px; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 160px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"], dateInfo["month"])
 }

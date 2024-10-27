@@ -1036,7 +1036,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         assetElement.querySelector(".protyle-action__drag").insertAdjacentHTML("afterend", '<span class="img__net"><svg><use xlink:href="#iconLanguage"></use></svg></span>');
                     }
                 });
-                textElements[1].value = titleElement.textContent;
+                textElements[1].value = titleElement.innerText;
                 textElements[1].addEventListener("input", (event) => {
                     const value = (event.target as HTMLInputElement).value;
                     imgElement.setAttribute("title", value);

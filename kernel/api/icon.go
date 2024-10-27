@@ -201,42 +201,41 @@ func getDateInfo(dateStr string, lang string, weekdayType string) map[string]int
 }
 
 func daysBetween(date1, date2 time.Time) int {
-    // 将两个日期都调整到UTC时间的0点
-    date1 = time.Date(date1.Year(), date1.Month(), date1.Day(), 0, 0, 0, 0, time.UTC)
-    date2 = time.Date(date2.Year(), date2.Month(), date2.Day(), 0, 0, 0, 0, time.UTC)
+	// 将两个日期都调整到UTC时间的0点
+	date1 = time.Date(date1.Year(), date1.Month(), date1.Day(), 0, 0, 0, 0, time.UTC)
+	date2 = time.Date(date2.Year(), date2.Month(), date2.Day(), 0, 0, 0, 0, time.UTC)
 
-    // 确保date1不晚于date2
-    swap := false
-    if date1.After(date2) {
-        date1, date2 = date2, date1
-        swap = true
-    }
+	// 确保date1不晚于date2
+	swap := false
+	if date1.After(date2) {
+		date1, date2 = date2, date1
+		swap = true
+	}
 
-    // 计算天数差
-    days := 0
-    for y := date1.Year(); y < date2.Year(); y++ {
-        if isLeapYear(y) {
-            days += 366
-        } else {
-            days += 365
-        }
-    }
+	// 计算天数差
+	days := 0
+	for y := date1.Year(); y < date2.Year(); y++ {
+		if isLeapYear(y) {
+			days += 366
+		} else {
+			days += 365
+		}
+	}
 
-    // 加上最后一年的天数
-    days += int(date2.YearDay() - date1.YearDay())
+	// 加上最后一年的天数
+	days += int(date2.YearDay() - date1.YearDay())
 
-    // 如果原始的date1晚于date2，返回负值
-    if swap {
-        return -days
-    }
-    return days
+	// 如果原始的date1晚于date2，返回负值
+	if swap {
+		return -days
+	}
+	return days
 }
 
 // 判断是否为闰年
 func isLeapYear(year int) bool {
-    return year%4 == 0 && (year%100 != 0 || year%400 == 0)
+	return year%4 == 0 && (year%100 != 0 || year%400 == 0)
 }
-
 
 // Type 1: 显示年月日星期
 func generateTypeOneSVG(color string, lang string, dateInfo map[string]interface{}) string {
@@ -448,7 +447,6 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 		fontSize = 780 / float64(len(diffDaysText))
 	}
 
-
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
         <path id="bottom" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
@@ -485,11 +483,23 @@ func generateTypeEightSVG(color, content string) string {
 			fontSize = 750 / float64(len([]rune(content)))
 		}
 	}
+	// 当内容为单个字符时，一些小写字母需要调整文字位置(暂时没法批量解决)
+	dy := "0%"
+	if len([]rune(content)) == 1 {
+		switch content {
+		case "g", "p", "y", "q":
+			dy = "-10%"
+		case "j":
+			dy = "-5%"
+		default:
+			dy = "0%"
+		}
+	}
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 511">
         <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
-        <text x="50%%" y="55%%" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
-    </svg>
-    `, colorScheme.Primary, fontSize, content)
+        <text x="50%%" y="55%%" dy="%s" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+	</svg>
+    `, colorScheme.Primary, dy, fontSize, content)
 }

@@ -431,15 +431,15 @@ func generateTypeEightSVG(color, content string) string {
 		case len([]rune(content)) == 1:
 			fontSize = 320
 		default:
-				fontSize = 480 / float64(len([]rune(content)))
+			fontSize = 480 / float64(len([]rune(content)))
 		}
 	} else {
-	switch {
-		case len([]rune(content)) == 1:
-			fontSize = 480
-		case len([]rune(content)) == 2:
-			fontSize = 300
-		default:
+		switch {
+			case len([]rune(content)) == 1:
+				fontSize = 480
+			case len([]rune(content)) == 2:
+				fontSize = 300
+			default:
 				fontSize = 750 / float64(len([]rune(content)))
 	}
 	}

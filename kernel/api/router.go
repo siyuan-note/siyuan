@@ -33,7 +33,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/loginAuth", model.LoginAuth)
 	ginServer.Handle("POST", "/api/system/logoutAuth", model.LogoutAuth)
 	ginServer.Handle("GET", "/api/system/getCaptcha", model.GetCaptcha)
-
+    	ginServer.Handle("GET", "/api/icon/getDynamicIcon", getDynamicIcon) // 添加动态图标路由
+	
 	// 需要鉴权
 
 	ginServer.Handle("POST", "/api/system/getEmojiConf", model.CheckAuth, getEmojiConf)

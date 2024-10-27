@@ -436,6 +436,7 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 		dayStr = "days"
 	}
 	// 动态变化字体大小
+	var fontSize float64
 	switch {
 	case len(diffDaysText) <= 3:
 		fontSize = 240

@@ -423,32 +423,32 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 func generateTypeEightSVG(color, content string) string {
 	colorScheme := getColorScheme(color)
 
+	// 动态变化字体大小
 	isChinese := regexp.MustCompile(`[\p{Han}]`).MatchString(content)
-
 	var fontSize float64
-	switch {
-	case len([]rune(content)) == 1:
-		fontSize = 320
-	case len([]rune(content)) == 2:
-		fontSize = 240
-	case len([]rune(content)) == 3:
-		fontSize = 160
-	case len([]rune(content)) == 4:
-		fontSize = 120
-	case len([]rune(content)) == 5:
-		fontSize = 95
-	default:
-		if isChinese {
-			fontSize = 480 / float64(len([]rune(content)))
-		} else {
-			fontSize = 750 / float64(len([]rune(content)))
+	if isChinese {
+		switch {
+		case len([]rune(content)) == 1:
+			fontSize = 320
+		default:
+				fontSize = 480 / float64(len([]rune(content)))
 		}
+	} else {
+	switch {
+		case len([]rune(content)) == 1:
+			fontSize = 480
+		case len([]rune(content)) == 2:
+			fontSize = 300
+		default:
+				fontSize = 750 / float64(len([]rune(content)))
+	}
 	}
 
 	return fmt.Sprintf(`
     <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 511">
         <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
-        <text x="260px" y="55%%" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
+        <text x="50%%" y="55%%" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
     </svg>
     `, colorScheme.Primary, fontSize, content)
 }
+

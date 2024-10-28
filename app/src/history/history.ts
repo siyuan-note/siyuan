@@ -397,9 +397,12 @@ export const openHistory = (app: App) => {
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="history__resize"></div>
-                <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
-                <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
-                <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+                <div class="fn__flex-column fn__flex-1">
+                    <div class="protyle-title__input ft__center"></div>
+                    <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
+                    <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
+                    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+                </div>
             </div>
         </div>
         <ul data-type="notebook" style="padding: 8px 0;" class="fn__none b3-list b3-list--background">
@@ -480,6 +483,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     const docElement = firstPanelElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
     const assetElement = firstPanelElement.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = firstPanelElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
+    const titleElement = firstPanelElement.querySelector('.protyle-title__input') as HTMLElement;
     renderDoc(firstPanelElement, 1);
     historyEditor = new Protyle(app, docElement, {
         blockId: "",
@@ -706,6 +710,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     });
                 }
+                titleElement.textContent = target.querySelector(".b3-list-item__text").textContent;
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {
                     currentItem = currentItem.querySelector(".b3-list-item--focus");
@@ -864,8 +869,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     );
                 }
-
-
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);

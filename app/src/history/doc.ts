@@ -66,8 +66,11 @@ export const openDocHistory = (options: {
         <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
     </ul>
     <div class="history__resize"></div>
-    <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
-    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="protyle-title__input ft__center"></div>
+        <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
+        <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+    </div>
 </div>`;
     const dialog = new Dialog({
         title:`<div class="block__icons">
@@ -165,6 +168,7 @@ export const openDocHistory = (options: {
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
                         }
+                        dialog.element.querySelector('.protyle-title__input').textContent = item.title;
                         isLoading = false;
                     });
                     target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

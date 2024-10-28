@@ -9,6 +9,8 @@ export const openByMobile = (uri: string) => {
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
             window.webkit.messageHandlers.openLink.postMessage(encodeURI(location.origin + "/" + uri));
+        } else if (uri.startsWith("/export/")) {
+            window.webkit.messageHandlers.openLink.postMessage(encodeURI(location.origin + uri));
         } else {
             try {
                 new URL(uri);

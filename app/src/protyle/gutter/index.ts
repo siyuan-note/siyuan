@@ -8,7 +8,7 @@ import {
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
 import {MenuItem} from "../../menus/Menu";
-import {copySubMenu, openAttr, openWechatNotify} from "../../menus/commonMenuItem";
+import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus/commonMenuItem";
 import {
     copyPlainText,
     isInAndroid,
@@ -285,6 +285,15 @@ export class Gutter {
                     }
                     blockElement.setAttribute("updated", newUpdated);
                 } else {
+                    if (!protyle.disabled && event.shiftKey) {
+                        const blockId = rowElement.querySelector('[data-dtype="block"] .av__celltext--ref')?.getAttribute("data-id")
+                        if (blockId) {
+                            fetchPost("/api/attr/getBlockAttrs", {id: blockId}, (response) => {
+                                openFileAttr(response.data, "av", protyle);
+                            });
+                            return;
+                        }
+                    }
                     avContextmenu(protyle, rowElement as HTMLElement, {
                         x: gutterRect.left,
                         y: gutterRect.bottom,
@@ -2232,7 +2241,13 @@ export class Gutter {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header")) {
                         element = rowElement;
-                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.rowTip}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
+                        let iconAriaLabel = isMac() ? window.siyuan.languages.rowTip : window.siyuan.languages.rowTip.replace("⇧", "Shift+");
+                        if (protyle.disabled) {
+                            iconAriaLabel = window.siyuan.languages.rowTip.substring(0, window.siyuan.languages.rowTip.indexOf("<br"))
+                        } else if (rowElement.querySelector('[data-dtype="block"]').getAttribute("data-detached") === "true") {
+                            iconAriaLabel = window.siyuan.languages.rowTip.substring(0, window.siyuan.languages.rowTip.lastIndexOf("<br"))
+                        }
+                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
                         if (!protyle.disabled) {
                             html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
                         }

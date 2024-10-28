@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
-import {copySubMenu} from "../../../menus/commonMenuItem";
+import {copySubMenu, openFileAttr} from "../../../menus/commonMenuItem";
 import {
     addDragFill,
     genCellValueByElement,
@@ -262,8 +262,26 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     updateHeader(rowElement);
     const keyCellElement = rowElements[0].querySelector(".av__cell[data-block-id]") as HTMLElement;
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
+        /// #if !MOBILE
         const blockId = rowElements[0].getAttribute("data-id");
-        openEditorTab(protyle.app, [blockId]);
+        const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
+        openSubmenus.push({type: "separator"})
+        openSubmenus.push({
+            icon: "iconAttr",
+            label: window.siyuan.languages.attr,
+            click: () => {
+                fetchPost("/api/attr/getBlockAttrs", {id: blockId}, (response) => {
+                    openFileAttr(response.data, "av", protyle);
+                });
+            }
+        })
+        menu.addItem({
+            id: "openBy",
+            label: window.siyuan.languages.openBy,
+            icon: "iconOpen",
+            submenu: openSubmenus,
+        });
+        /// #endif
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",

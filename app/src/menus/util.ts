@@ -33,7 +33,7 @@ export const exportAsset = (src: string) => {
     };
 };
 
-export const openEditorTab = (app: App, ids: string[], notebookId?: string, pathString?: string) => {
+export const openEditorTab = (app: App, ids: string[], notebookId?: string, pathString?: string, onlyGetMenus = false) => {
     /// #if !MOBILE
     const openSubmenus: IMenu[] = [{
         id: "insertRight",
@@ -159,6 +159,9 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         }
     });
     /// #endif
+    if (onlyGetMenus ) {
+        return openSubmenus;
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         id: "openBy",
         label: window.siyuan.languages.openBy,

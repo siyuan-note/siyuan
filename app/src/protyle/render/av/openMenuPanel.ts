@@ -1099,17 +1099,18 @@ export const openMenuPanel = (options: {
                             content: `<div class="b3-dialog__content">
     ${isTwoWay ? window.siyuan.languages.confirmRemoveRelationField.replace("${x}", menuElement.querySelector('.b3-menu__item[data-type="goSearchAV"] .b3-menu__accelerator').textContent) : window.siyuan.languages.removeCol.replace("${x}", menuElement.querySelector("input").value)}
     <div class="fn__hr--b"></div>
-    <button class="fn__block b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.delete}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--warning${isTwoWay ? "" : " fn__none"}">${window.siyuan.languages.removeButKeepRelationField}</button>
+    <button class="fn__block b3-button b3-button--remove${isTwoWay ? "" : " fn__none"}" data-action="keep-relation">${window.siyuan.languages.removeButKeepRelationField}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--info">${window.siyuan.languages.cancel}</button>
+    <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;
                             while (target && !target.isSameNode(dialog.element)) {
-                                if (target.classList.contains("b3-button--error")) {
+                                const action = target.getAttribute("data-action");
+                                if (action === "delete") {
                                     removeCol({
                                         protyle: options.protyle,
                                         data,
@@ -1124,7 +1125,7 @@ export const openMenuPanel = (options: {
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--warning")) {
+                                } else if (action === "keep-relation") {
                                     removeCol({
                                         protyle: options.protyle,
                                         data,
@@ -1139,7 +1140,7 @@ export const openMenuPanel = (options: {
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--info")) {
+                                } else if (target.classList.contains("b3-button--cancel")) {
                                     dialog.destroy();
                                     break;
                                 }

@@ -859,17 +859,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField.replace("${x}", relResponse.data.av.name)}
     <div class="fn__hr--b"></div>
-    <button class="fn__block b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.delete}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--warning">${window.siyuan.languages.removeButKeepRelationField}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="keep-relation">${window.siyuan.languages.removeButKeepRelationField}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--info">${window.siyuan.languages.cancel}</button>
+    <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;
                             while (target && !target.isSameNode(dialog.element)) {
-                                if (target.classList.contains("b3-button--error")) {
+                                const action = target.getAttribute("data-action");
+                                if (action === "delete") {
                                     removeColByMenu({
                                         protyle,
                                         colId,
@@ -883,7 +884,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--warning")) {
+                                } else if (action === "keep-relation") {
                                     removeColByMenu({
                                         protyle,
                                         colId,
@@ -897,7 +898,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--info")) {
+                                } else if (target.classList.contains("b3-button--cancel")) {
                                     dialog.destroy();
                                     break;
                                 }

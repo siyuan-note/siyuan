@@ -68,7 +68,7 @@ export const image = {
                             assetsListElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
                             image.element.querySelector(".config-assets__preview").innerHTML = "";
                         });
-                    });
+                    }, undefined, true);
                 } else if (target.classList.contains("item") && !target.classList.contains("item--focus")) {
                     image.element.querySelector(".layout-tab-bar .item--focus").classList.remove("item--focus");
                     target.classList.add("item--focus");
@@ -113,7 +113,7 @@ export const image = {
                             }
                             image.element.querySelector(".config-assets__preview").innerHTML = "";
                         });
-                    });
+                    }, undefined, true);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

@@ -301,7 +301,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                                 fetchPost("/api/system/removeWorkspaceDir", {path: item.path}, () => {
                                     confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", item.path), () => {
                                         fetchPost("/api/system/removeWorkspaceDirPhysically", {path: item.path});
-                                    });
+                                    }, undefined, true);
                                 });
                                 return;
                             }

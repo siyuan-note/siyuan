@@ -759,7 +759,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });
-                });
+                }, undefined, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;

@@ -165,7 +165,7 @@ export class Files extends Model {
                                 notebook: target.getAttribute("data-url"),
                                 callback: Constants.CB_MOUNT_REMOVE
                             });
-                        });
+                        }, undefined, true);
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();

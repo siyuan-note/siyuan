@@ -213,6 +213,9 @@ export class MenuItem {
         if (options.type === "readonly") {
             this.element.classList.add("b3-menu__item--readonly");
         }
+        if (options.icon === "iconTrashcan") {
+            this.element.classList.add("b3-menu__item--remove");
+        }
 
         if (options.element) {
             this.element.append(options.element);

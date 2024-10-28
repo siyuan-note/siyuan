@@ -177,7 +177,7 @@ export class MobileFiles extends Model {
                                 notebook: target.getAttribute("data-url"),
                                 callback: Constants.CB_MOUNT_REMOVE
                             });
-                        });
+                        }, undefined, true);
                     event.stopPropagation();
                     event.preventDefault();
                     break;

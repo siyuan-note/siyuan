@@ -289,7 +289,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 if (selectedElement) {
                     menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
                 }
-            });
+            }, undefined, true);
         }
     });
     menu.addSeparator();

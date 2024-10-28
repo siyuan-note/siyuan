@@ -118,7 +118,7 @@ export const makeCard = (app: App, ids: string[]) => {
                         }, () => {
                             target.parentElement.remove();
                         });
-                    });
+                    }, undefined, true);
                     event.stopPropagation();
                     event.preventDefault();
                     break;

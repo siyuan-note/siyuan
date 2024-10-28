@@ -31,7 +31,7 @@ export const deleteFile = (notebookId: string, pathString: string) => {
                 notebook: notebookId,
                 path: pathString
             });
-        });
+        }, undefined, true);
     });
 };
 
@@ -51,7 +51,7 @@ export const deleteFiles = (liElements: Element[]) => {
                             notebook: itemNotebookId,
                             callback: Constants.CB_MOUNT_REMOVE
                         });
-                    });
+                    }, undefined, true);
             }
         }
     } else {
@@ -73,6 +73,6 @@ export const deleteFiles = (liElements: Element[]) => {
                 fetchPost("/api/filetree/removeDocs", {
                     paths
                 });
-            });
+            }, undefined, true);
     }
 };

@@ -356,7 +356,7 @@ export const initAbout = () => {
                             genWorkspace(workspaceDirElement);
                             confirmDialog(window.siyuan.languages.deleteOpConfirm, window.siyuan.languages.removeWorkspacePhysically.replace("${x}", removePath), () => {
                                 fetchPost("/api/system/removeWorkspaceDirPhysically", {path: removePath});
-                            });
+                            }, undefined, true);
                         });
                         event.preventDefault();
                         event.stopPropagation();

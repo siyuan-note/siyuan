@@ -80,6 +80,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
         leftElement.classList.remove("fn__none");
         const textElement = leftElement.querySelector("textarea");
         const type = pathPosix().extname(response.data.content).toLowerCase();
+        const titleElement = leftElement.querySelector(".protyle-title__input");
         if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
             textElement.previousElementSibling.innerHTML = renderAssetsPreview(response.data.content);
             textElement.previousElementSibling.classList.remove("fn__none");
@@ -101,6 +102,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
             });
         }
+        titleElement.textContent = response.data.title;
         leftElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
     });
     const id2 = element.getAttribute("data-id2");
@@ -109,6 +111,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
         fetchPost("/api/repo/openRepoSnapshotDoc", {id: id2}, (response) => {
             const textElement = rightElement.querySelector("textarea");
             const type = pathPosix().extname(response.data.content).toLowerCase();
+            const titleElement = rightElement.querySelector(".protyle-title__input");
             if (Constants.SIYUAN_ASSETS_IMAGE.concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO).includes(type)) {
                 textElement.previousElementSibling.innerHTML = renderAssetsPreview(response.data.content);
                 textElement.previousElementSibling.classList.remove("fn__none");
@@ -130,6 +133,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                     action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                 });
             }
+            titleElement.textContent = response.data.title;
             rightElement.querySelector(".history__date").textContent = dayjs(response.data.updated).format("YYYY-MM-DD HH:mm");
         });
     } else {
@@ -262,12 +266,14 @@ const genHTML = (left: string, right: string, dialog: Dialog, direct: string) =>
     <div class="fn__flex-1 fn__flex" data-type="editors">
         <div class="fn__none fn__flex-1 fn__flex-column">
             <div class="history__date">${dayjs(response.data.left.created).format("YYYY-MM-DD HH:mm")}</div>
+            <div class="protyle-title__input ft__center ft__breakword">${response.data.left.title}</div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>
         </div>
         <div class="fn__none fn__flex-1 fn__flex-column" style="border-left: 1px solid var(--b3-border-color);">
-            <div class="history__date">${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
+            <div class="history__date">${response.data.right.title} ${dayjs(response.data.right.created).format("YYYY-MM-DD HH:mm")}</div>
+            <div class="protyle-title__input ft__center ft__breakword">${response.data.right.title}</div>
             <div class="ft__center"></div>
             <textarea class="history__text fn__none fn__flex-1" readonly></textarea>
             <div class="fn__flex-1"></div>

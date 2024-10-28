@@ -398,7 +398,7 @@ export const openHistory = (app: App) => {
                 </ul>
                 <div class="history__resize"></div>
                 <div class="fn__flex-column fn__flex-1">
-                    <div class="protyle-title__input ft__center"></div>
+                    <div class="protyle-title__input ft__center ft__breakword"></div>
                     <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
                     <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
                     <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>

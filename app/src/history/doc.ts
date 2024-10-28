@@ -67,7 +67,7 @@ export const openDocHistory = (options: {
     </ul>
     <div class="history__resize"></div>
     <div class="fn__flex-1 fn__flex-column">
-        <div class="protyle-title__input ft__center"></div>
+        <div class="protyle-title__input ft__center ft__breakword"></div>
         <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
         <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
     </div>

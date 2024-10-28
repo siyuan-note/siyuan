@@ -79,7 +79,7 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	return
 }
 
-func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, updated int64, err error) {
+func OpenRepoSnapshotDoc(fileID string) (title, content string, isProtyleDoc bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -110,6 +110,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
+		title = snapshotTree.Root.IALAttr("title")
 
 		if !isProtyleDoc {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
@@ -150,6 +151,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 		}
 	} else {
 		isProtyleDoc = true
+		title = path.Base(file.Path)
 		if strings.HasSuffix(file.Path, ".json") {
 			content = gulu.Str.FromBytes(data)
 		} else {

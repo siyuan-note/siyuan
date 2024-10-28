@@ -267,7 +267,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
-                        ${window.siyuan.languages.addAttr}
+                        ${window.siyuan.languages.newRow}
                     </button>
                     <span class="fn__space"></span>
                     <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">

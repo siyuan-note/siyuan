@@ -18,8 +18,10 @@ package api
 
 import (
 	"fmt"
+	"math"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 	"time"
 
@@ -33,24 +35,80 @@ type ColorScheme struct {
 }
 
 var colorSchemes = map[string]ColorScheme{
-	"red":    {"#DD2F45", "#F4BEC3"},
-	"blue":   {"#2bb7ff", "#0097e6"},
-	"yellow": {"#feca57", "#ff9f43"},
-	"green":  {"#55efc4", "#19b37a"},
-	"purple": {"#a55eea", "#8854d0"},
-	"pink":   {"#fd79a8", "#e05b8a"},
-	"orange": {"#ff7f50", "#ff6348"},
-	"grey":   {"#576574", "#222f3e"},
+	"red":    {"#d13d51", "#ba2c3f"},
+	"blue":   {"#3eb0ea", "#0097e6"},
+	"yellow": {"#eec468", "#d89b18"},
+	"green":  {"#52E0B8", "#19b37a"},
+	"purple": {"#a36cda", "#8952d5"},
+	"pink":   {"#f183aa", "#e05b8a"},
+	"orange": {"#f3865e", "#ef5e2a"},
+	"grey":   {"#576574", "#374a60"},
 }
 
 func getColorScheme(color string) ColorScheme {
+	// 去除可能的空格
+	color = strings.TrimSpace(color)
+
 	// 检查是否是预定义的颜色
 	if scheme, ok := colorSchemes[strings.ToLower(color)]; ok {
 		return scheme
 	}
+	// 支持自定义颜色
+	// 如果颜色值不以#开头，自动添加#
+	if !strings.HasPrefix(color, "#") && len(color) > 0 {
+		color = "#" + color
+	}
 
-	// 如果不是预定义颜色，返回默认颜色
+	// 检查是否是十六进制颜色值
+	hexColorPattern := `^#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$`
+	if matched, _ := regexp.MatchString(hexColorPattern, color); matched {
+		// 确保颜色值有#前缀
+		if !strings.HasPrefix(color, "#") {
+			color = "#" + color
+		}
+
+		// 如果是3位十六进制，转换为6位
+		if len(color) == 4 {
+			r := string(color[1])
+			g := string(color[2])
+			b := string(color[3])
+			color = "#" + r + r + g + g + b + b
+		}
+
+		// 生成次要颜色（将主色调变深）
+		secondary := darkenColor(color, 0.1)
+
+		return ColorScheme{
+			Primary:   color,
+			Secondary: secondary,
+		}
+	}
+
+	// 如果既不是预定义颜色也不是有效的十六进制值，返回默认颜色
 	return colorSchemes["red"]
+}
+
+func darkenColor(hexColor string, factor float64) string {
+	// 去掉#号
+	hex := hexColor[1:]
+
+	// 将十六进制转换为RGB
+	r, _ := strconv.ParseInt(hex[0:2], 16, 64)
+	g, _ := strconv.ParseInt(hex[2:4], 16, 64)
+	b, _ := strconv.ParseInt(hex[4:6], 16, 64)
+
+	// 使颜色变深
+	r = int64(float64(r) * (1 - factor))
+	g = int64(float64(g) * (1 - factor))
+	b = int64(float64(b) * (1 - factor))
+
+	// 确保值在0-255范围内
+	r = int64(math.Max(0, float64(r)))
+	g = int64(math.Max(0, float64(g)))
+	b = int64(math.Max(0, float64(b)))
+
+	// 转回十六进制
+	return fmt.Sprintf("#%02X%02X%02X", r, g, b)
 }
 
 func getDynamicIcon(c *gin.Context) {

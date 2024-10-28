@@ -1066,7 +1066,16 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		}
 
 		if ast.NodeHTMLBlock == n.Type {
-			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(n.Tokens), &html.Node{Type: html.ElementNode})
+			tokens := bytes.TrimSpace(n.Tokens)
+			if bytes.HasPrefix(tokens, []byte("<div>")) {
+				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
+			}
+			if bytes.HasSuffix(tokens, []byte("</div>")) {
+				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
+			}
+			tokens = bytes.TrimSpace(tokens)
+
+			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
 			if nil != pErr {
 				logging.LogErrorf("parse html block [%s] failed: %s", n.Tokens, pErr)
 				return ast.WalkContinue

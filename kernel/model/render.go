@@ -86,9 +86,10 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren
 		case ast.NodeImage:
-			// 标题后直接跟图片时图片的提示文本不再渲染到大纲中 https://github.com/siyuan-note/siyuan/issues/6278
-			title := n.ChildByType(ast.NodeLinkTitle)
-			title.Unlink()
+			if title := n.ChildByType(ast.NodeLinkTitle); nil != title {
+				// 标题后直接跟图片时图片的提示文本不再渲染到大纲中 https://github.com/siyuan-note/siyuan/issues/6278
+				title.Unlink()
+			}
 			dom := luteEngine.RenderNodeBlockDOM(n)
 			buf.WriteString(dom)
 			return ast.WalkSkipChildren

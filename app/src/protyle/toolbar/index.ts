@@ -1193,7 +1193,9 @@ export class Toolbar {
         protyle.app.plugins.forEach(item => {
             item.eventBus.emit("open-noneditableblock", {
                 protyle,
-                toolbar: this
+                toolbar: this,
+                blockElement: nodeElement,
+                renderElement,
             });
         });
     }

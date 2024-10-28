@@ -2276,7 +2276,11 @@ export class Gutter {
                     html = "";
                 }
                 index += 1;
-                const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${this.gutterTip}" 
+                let gutterTip = this.gutterTip;
+                if (protyle.disabled) {
+                    gutterTip = this.gutterTip.split("<br>").splice(0, 2).join("<br>")
+                }
+                const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${gutterTip}" 
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${protyle.disabled ? "" : 'draggable="true"'}></span>

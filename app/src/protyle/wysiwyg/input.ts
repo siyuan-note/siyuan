@@ -111,6 +111,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     // https://github.com/siyuan-note/siyuan/issues/9015
     if (trimStartText === "¥¥<wbr>" || trimStartText === "￥￥<wbr>") {
         editElement.innerHTML = "$$<wbr>";
+    } else if (trimStartText.indexOf("\n¥¥<wbr>") > -1 || trimStartText.indexOf("\n￥￥<wbr>") > -1) {
+        // https://ld246.com/article/1730020516427
+        editElement.innerHTML = trimStartText.replace("\n¥¥<wbr>", "\n$$$$<wbr>").replace("\n￥￥<wbr>", "\n$$$$<wbr>");
     }
     const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
     if (refElement && refElement.getAttribute("data-subtype") === "d") {

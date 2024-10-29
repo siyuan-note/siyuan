@@ -135,7 +135,7 @@
 
     /* switch */
     --b3-switch-background: #444746;
-    --b3-switch-border: #8e918f;
+    --b3-switch-border: var(--b3-theme-on-surface-light);
     --b3-switch-hover: rgba(253, 252, 251, .10);
     --b3-switch-checked: var(--b3-theme-primary);
     --b3-switch-checked-background: #a8c7fa;

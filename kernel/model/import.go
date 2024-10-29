@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"github.com/88250/lute"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -54,9 +55,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Markdown(htmlStr string) (markdown string, withMath bool, err error) {
+func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
-	luteEngine := util.NewLute()
 	tree := luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {

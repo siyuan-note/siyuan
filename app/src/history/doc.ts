@@ -62,7 +62,7 @@ export const openDocHistory = (options: {
     pathString: string
 }) => {
     const contentHTML = `<div class="fn__flex fn__flex-1 history__panel">
-    <ul class="b3-list b3-list--background history__side" ${isMobile() ? '' : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
+    <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
         <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
     </ul>
     <div class="history__resize"></div>
@@ -168,7 +168,7 @@ export const openDocHistory = (options: {
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
                         }
-                        dialog.element.querySelector('.protyle-title__input').textContent = item.title;
+                        dialog.element.querySelector(".protyle-title__input").textContent = item.title;
                         isLoading = false;
                     });
                     target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

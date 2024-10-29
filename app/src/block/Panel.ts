@@ -14,7 +14,6 @@ import {openFileById} from "../editor/util";
 import {fetchPost} from "../util/fetch";
 import {showMessage} from "../dialog/message";
 import {App} from "../index";
-import {isMobile} from "../util/functions";
 import {resize} from "../protyle/util/resize";
 
 export class BlockPanel {

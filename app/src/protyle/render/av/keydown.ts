@@ -43,7 +43,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             nodeElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
                 item.classList.remove("av__cell--select", "av__cell--active");
                 item.querySelector(".av__drag-fill")?.remove();
-            })
+            });
             selectRow(rowElement.querySelector(".av__firstcol"), "select");
             event.preventDefault();
             return true;

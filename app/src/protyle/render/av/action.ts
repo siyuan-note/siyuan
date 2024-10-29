@@ -265,7 +265,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         /// #if !MOBILE
         const blockId = rowElements[0].getAttribute("data-id");
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
-        openSubmenus.push({type: "separator"})
+        openSubmenus.push({type: "separator"});
         openSubmenus.push({
             icon: "iconAttr",
             label: window.siyuan.languages.attr,
@@ -274,7 +274,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     openFileAttr(response.data, "av", protyle);
                 });
             }
-        })
+        });
         menu.addItem({
             id: "openBy",
             label: window.siyuan.languages.openBy,

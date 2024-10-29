@@ -336,7 +336,7 @@ export class WYSIWYG {
                 const selectCellElements: HTMLTableCellElement[] = [];
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
-                html = '<table>'
+                html = "<table>";
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                     if (!item.classList.contains("fn__none") &&
                         item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
@@ -347,15 +347,15 @@ export class WYSIWYG {
                 selectCellElements.forEach((item, index) => {
                     if (index === 0 || !item.previousElementSibling ||
                         !item.previousElementSibling.isSameNode(selectCellElements[index - 1])) {
-                        html += "<tr>"
+                        html += "<tr>";
                     }
                     html += item.outerHTML;
                     if (!item.nextElementSibling || !selectCellElements[index + 1] ||
                         !item.nextElementSibling.isSameNode(selectCellElements[index + 1])) {
                         html += "</tr>";
                     }
-                })
-                html += '</table>'
+                });
+                html += "</table>";
                 textPlain = protyle.lute.HTML2Md(html);
             } else {
                 const tempElement = document.createElement("div");
@@ -1466,7 +1466,7 @@ export class WYSIWYG {
                 const selectCellElements: HTMLTableCellElement[] = [];
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
-                html = '<table>'
+                html = "<table>";
                 const oldHTML = nodeElement.outerHTML;
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
@@ -1479,7 +1479,7 @@ export class WYSIWYG {
                 selectCellElements.forEach((item, index) => {
                     if (index === 0 || !item.previousElementSibling ||
                         !item.previousElementSibling.isSameNode(selectCellElements[index - 1])) {
-                        html += "<tr>"
+                        html += "<tr>";
                     }
                     html += item.outerHTML;
                     if (!item.nextElementSibling || !selectCellElements[index + 1] ||
@@ -1487,8 +1487,8 @@ export class WYSIWYG {
                         html += "</tr>";
                     }
                     item.innerHTML = "";
-                })
-                html += '</table>'
+                });
+                html += "</table>";
                 textPlain = protyle.lute.HTML2Md(html);
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             } else {

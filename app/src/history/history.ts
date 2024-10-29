@@ -66,9 +66,9 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         opElement.querySelector('option[value="replace"]').classList.remove("fn__none");
         opElement.querySelector('option[value="outline"]').classList.remove("fn__none");
     }
-    window.siyuan.storage[Constants.LOCAL_HISTORY].notebookId = notebookElement.value
-    window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value)
-    window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value
+    window.siyuan.storage[Constants.LOCAL_HISTORY].notebookId = notebookElement.value;
+    window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value);
+    window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value;
     setStorageVal(Constants.LOCAL_HISTORY, window.siyuan.storage[Constants.LOCAL_HISTORY]);
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
@@ -393,7 +393,7 @@ export const openHistory = (app: App) => {
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
-                <ul class="b3-list b3-list--background history__side" ${isMobile() ? '' : `style="width: ${localHistory.sideWidth}"`}>
+                <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${localHistory.sideWidth}"`}>
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="history__resize"></div>
@@ -483,7 +483,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     const docElement = firstPanelElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
     const assetElement = firstPanelElement.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = firstPanelElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
-    const titleElement = firstPanelElement.querySelector('.protyle-title__input') as HTMLElement;
+    const titleElement = firstPanelElement.querySelector(".protyle-title__input") as HTMLElement;
     renderDoc(firstPanelElement, 1);
     historyEditor = new Protyle(app, docElement, {
         blockId: "",

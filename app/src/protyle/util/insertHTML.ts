@@ -224,7 +224,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     range.collapse(false);
     updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
     return true;
-}
+};
 
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值

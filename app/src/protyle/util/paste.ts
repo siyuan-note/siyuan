@@ -244,7 +244,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
     }
     uploadLocalFiles(localFiles, protyle, true);
     writeText("");
-}
+};
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
     event.stopPropagation();

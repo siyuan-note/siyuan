@@ -4,7 +4,6 @@ import {fetchPost} from "../../util/fetch";
 import {updateHotkeyTip} from "../util/compatibility";
 import {hasClosestByClassName} from "../util/hasClosest";
 import {goEnd, goHome} from "../wysiwyg/commonHotkey";
-import {isMobile} from "../../util/functions";
 import {showTooltip} from "../../dialog/tooltip";
 
 export class Scroll {

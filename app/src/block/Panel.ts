@@ -195,7 +195,7 @@ export class BlockPanel {
                     }
                     // 由于 afterCB 中高度的设定，需在之后再进行设定
                     // 49 = 16（上图标）+16（下图标）+8（padding）+9（底部距离）
-                    editor.protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(editor.protyle.contentElement.clientHeight - 49, 200)}px;${isMobile() ? "" : "right:10px"}`);
+                    editor.protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(editor.protyle.contentElement.clientHeight - 49, 200)}px;`);
                 }
             });
             this.editors.push(editor);

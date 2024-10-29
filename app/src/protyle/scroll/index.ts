@@ -17,9 +17,6 @@ export class Scroll {
     constructor(protyle: IProtyle) {
         this.parentElement = document.createElement("div");
         this.parentElement.classList.add("protyle-scroll");
-        if (!isMobile()) {
-            this.parentElement.style.right = "10px";
-        }
         this.parentElement.innerHTML = `<div class="protyle-scroll__up ariaLabel" data-position="right4top" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>

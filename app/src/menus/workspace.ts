@@ -503,6 +503,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 id: "safeQuit",
                 label: window.siyuan.languages.safeQuit,
                 icon: "iconQuit",
+                warning: true,
                 click: () => {
                     exportLayout({
                         errorExit: true,

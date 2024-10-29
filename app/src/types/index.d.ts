@@ -713,6 +713,7 @@ interface IMenu {
     index?: number
     element?: HTMLElement
     ignore?: boolean
+    warning?: boolean
 }
 
 interface IBazaarItem {

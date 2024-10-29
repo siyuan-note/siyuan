@@ -224,11 +224,12 @@
       color: var(--b3-theme-primary);
     }
 
-    &--remove:hover {
-      color: var(--b3-card-error-color);
+    &--warning:hover,
+    &--warning.b3-menu__item--current {
+      color: var(--b3-theme-error);
 
       & > .b3-menu__icon {
-        color: var(--b3-card-error-color);
+        color: var(--b3-theme-error);
       }
     }
 

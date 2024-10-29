@@ -1,4 +1,4 @@
-import {getTextStar, paste} from "../util/paste";
+import {getTextStar, paste, pasteText} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -62,7 +62,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isOnlyMeta} from "../util/compatibility";
+import {isInIOS, isOnlyMeta, readText} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -274,9 +274,10 @@ export class WYSIWYG {
             }
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
+            const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
-                !selectImgElement && !selectAVElement) {
+                !selectImgElement && !selectAVElement && !selectTableElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 countBlockWord([nodeElement.getAttribute("data-node-id")]);
                 selectElements = [nodeElement];
@@ -331,6 +332,31 @@ export class WYSIWYG {
                     textPlain = textPlain.substring(0, textPlain.length - 2);
                     html = html.substring(0, html.length - 1) + "]";
                 }
+            } else if (selectTableElement) {
+                const selectCellElements: HTMLTableCellElement[] = [];
+                const scrollLeft = nodeElement.firstElementChild.scrollLeft;
+                const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
+                html = '<table>'
+                nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                    if (!item.classList.contains("fn__none") &&
+                        item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                        item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                        selectCellElements.push(item);
+                    }
+                });
+                selectCellElements.forEach((item, index) => {
+                    if (index === 0 || !item.previousElementSibling ||
+                        !item.previousElementSibling.isSameNode(selectCellElements[index - 1])) {
+                        html += "<tr>"
+                    }
+                    html += item.outerHTML;
+                    if (!item.nextElementSibling || !selectCellElements[index + 1] ||
+                        !item.nextElementSibling.isSameNode(selectCellElements[index + 1])) {
+                        html += "</tr>";
+                    }
+                })
+                html += '</table>'
+                textPlain = protyle.lute.HTML2Md(html);
             } else {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
@@ -394,8 +420,8 @@ export class WYSIWYG {
             textPlain = textPlain || protyle.lute.BlockDOM2StdMd(html).trimEnd();
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
-            event.clipboardData.setData("text/siyuan", html);
+            event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1223,6 +1249,28 @@ export class WYSIWYG {
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "iconCopy",
+                            accelerator: "⌘C",
+                            label: window.siyuan.languages.copy,
+                            click() {
+                                if (tableBlockElement) {
+                                    focusByRange(getEditorRange(tableBlockElement));
+                                    document.execCommand("copy");
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            icon: "iconCut",
+                            accelerator: "⌘X",
+                            label: window.siyuan.languages.cut,
+                            click() {
+                                if (tableBlockElement) {
+                                    focusByRange(getEditorRange(tableBlockElement));
+                                    document.execCommand("cut");
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
                             label: window.siyuan.languages.clear,
                             icon: "iconTrashcan",
                             click() {
@@ -1238,10 +1286,28 @@ export class WYSIWYG {
                                     });
                                     tableSelectElement.removeAttribute("style");
                                     const oldHTML = tableBlockElement.outerHTML;
+                                    tableBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                                     selectCellElements.forEach(item => {
                                         item.innerHTML = "";
                                     });
                                     updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            label: window.siyuan.languages.paste,
+                            icon: "iconPaste",
+                            accelerator: "⌘V",
+                            async click() {
+                                if (document.queryCommandSupported("paste")) {
+                                    document.execCommand("paste");
+                                } else if (tableBlockElement) {
+                                    try {
+                                        const clipText = await readText();
+                                        pasteText(protyle, clipText, tableBlockElement);
+                                    } catch (e) {
+                                        console.log(e);
+                                    }
                                 }
                             }
                         }).element);
@@ -1359,9 +1425,10 @@ export class WYSIWYG {
             event.preventDefault();
             const selectImgElement = nodeElement.querySelector(".img--select");
             const selectAVElement = nodeElement.querySelector(".av__row--select, .av__cell--select");
+            const selectTableElement = nodeElement.querySelector(".table__select")?.clientWidth > 0;
             let selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
             if (selectElements.length === 0 && range.toString() === "" && !range.cloneContents().querySelector("img") &&
-                !selectImgElement && !selectAVElement) {
+                !selectImgElement && !selectAVElement && !selectTableElement) {
                 nodeElement.classList.add("protyle-wysiwyg--select");
                 selectElements = [nodeElement];
             }
@@ -1395,6 +1462,35 @@ export class WYSIWYG {
                 const cellsValue = updateCellsValue(protyle, nodeElement);
                 html = JSON.stringify(cellsValue.json);
                 textPlain = cellsValue.text;
+            } else if (selectTableElement) {
+                const selectCellElements: HTMLTableCellElement[] = [];
+                const scrollLeft = nodeElement.firstElementChild.scrollLeft;
+                const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
+                html = '<table>'
+                const oldHTML = nodeElement.outerHTML;
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                    if (!item.classList.contains("fn__none") &&
+                        item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                        item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                        selectCellElements.push(item);
+                    }
+                });
+                selectCellElements.forEach((item, index) => {
+                    if (index === 0 || !item.previousElementSibling ||
+                        !item.previousElementSibling.isSameNode(selectCellElements[index - 1])) {
+                        html += "<tr>"
+                    }
+                    html += item.outerHTML;
+                    if (!item.nextElementSibling || !selectCellElements[index + 1] ||
+                        !item.nextElementSibling.isSameNode(selectCellElements[index + 1])) {
+                        html += "</tr>";
+                    }
+                    item.innerHTML = "";
+                })
+                html += '</table>'
+                textPlain = protyle.lute.HTML2Md(html);
+                updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
                 const oldHTML = nodeElement.outerHTML;
@@ -1550,8 +1646,8 @@ export class WYSIWYG {
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
-            event.clipboardData.setData("text/siyuan", html);
+            event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
         });
 
         let beforeContextmenuRange: Range;

@@ -509,6 +509,16 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 				}
 				dataModel[rowValue.Key.Name] = contents
 			}
+		} else if av.KeyTypeBlock == v.Type {
+			dataModel[rowValue.Key.Name+"_created"] = time.Now()
+			if nil != v.Block {
+				dataModel["entryCreated"] = time.UnixMilli(v.Block.Created)
+			}
+			dataModel["entryUpdated"] = time.Now()
+			if nil != v.Block {
+				dataModel["entryUpdated"] = time.UnixMilli(v.Block.Updated)
+			}
+			dataModel[rowValue.Key.Name] = v.String(true)
 		} else {
 			dataModel[rowValue.Key.Name] = v.String(true)
 		}

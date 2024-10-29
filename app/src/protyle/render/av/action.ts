@@ -91,6 +91,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.width = "128px";
         searchElement.style.paddingLeft = "";
         searchElement.style.paddingRight = "";
+        const viewsElement = hasClosestByClassName(searchElement, "av__views");
+        if (viewsElement) {
+            viewsElement.classList.add("av__views--show")
+        }
         setTimeout(() => {
             searchElement.focus();
         }, Constants.TIMEOUT_TRANSITION);

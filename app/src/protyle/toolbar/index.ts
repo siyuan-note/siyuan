@@ -493,7 +493,9 @@ export class Toolbar {
                             hasSameTextStyle(item, nextElement, textObj)) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.textContent + nextElement.innerHTML;
-                        } else if (item.textContent !== Constants.ZWSP ||
+                        } else if (
+                            // 图片会有零宽空格，但图片不进行处理 https://github.com/siyuan-note/siyuan/issues/12840
+                            item.textContent !== Constants.ZWSP ||
                             // tag 会有零宽空格 https://github.com/siyuan-note/siyuan/issues/12922
                             (item.textContent === Constants.ZWSP && !rangeTypes.includes("img"))) {
                             const inlineElement = document.createElement("span");

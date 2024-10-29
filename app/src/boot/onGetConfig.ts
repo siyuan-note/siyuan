@@ -230,6 +230,9 @@ export const initWindow = async (app: App) => {
         });
     }
     ipcRenderer.on(Constants.SIYUAN_OPEN_FILE, (event, data) => {
+        if (!data.app) {
+            data.app = app;
+        }
         openFile(data);
     });
     ipcRenderer.on(Constants.SIYUAN_SAVE_CLOSE, (event, close) => {

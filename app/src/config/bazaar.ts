@@ -101,7 +101,7 @@ export const bazaar = {
             </div>
             <div class="fn__space"></div>
             <div class="fn__flex-1"></div>
-            <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch" style="margin: 8px 16px">
+            <input ${window.siyuan.config.bazaar.petalDisabled ? "" : " checked"} data-type="plugins-enable" type="checkbox" class="b3-switch fn__flex-center" style="margin-right: 8px">
             <div class="counter counter--bg fn__none fn__flex-center b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.total}"></div>
         </div>
         <div id="configBazaarDownloaded" class="config-bazaar__content">

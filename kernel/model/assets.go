@@ -521,17 +521,19 @@ func RemoveUnusedAssets() (ret []string) {
 	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
-		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
-			info, statErr := os.Stat(unusedAsset)
+		absPath := filepath.Join(util.DataDir, unusedAsset)
+		if filelock.IsExist(absPath) {
+			info, statErr := os.Stat(absPath)
 			if statErr == nil {
 				size += info.Size()
 			}
 
-			if err := filelock.Remove(unusedAsset); err != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
+			if err := filelock.Remove(absPath); err != nil {
+				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 			}
+			util.RemoveAssetText(unusedAsset)
 		}
-		ret = append(ret, unusedAsset)
+		ret = append(ret, absPath)
 	}
 	if 0 < len(ret) {
 		IncSync()
@@ -569,6 +571,9 @@ func RemoveUnusedAsset(p string) (ret string) {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
 	ret = absPath
+
+	util.RemoveAssetText(p)
+
 	IncSync()
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())

@@ -437,7 +437,7 @@ export class WYSIWYG {
                 // https://github.com/siyuan-note/siyuan/issues/3026
                 hideElements(["select"], protyle);
             }
-            const target = event.target as HTMLElement;
+            let target = event.target as HTMLElement;
             if (hasClosestByClassName(target, "protyle-action") ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
@@ -700,6 +700,10 @@ export class WYSIWYG {
             }
             // table cell select
             let tableBlockElement: HTMLElement | false;
+            const targetCellElemet = hasClosestByMatchTag(target, "TH") || hasClosestByMatchTag(target, "TD")
+            if (targetCellElemet) {
+                target = targetCellElemet;
+            }
             if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" || target.classList.contains("table__resize") || target.classList.contains("table__select")) {
                 tableBlockElement = hasClosestBlock(target);
                 if (tableBlockElement) {

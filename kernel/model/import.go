@@ -22,24 +22,21 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/88250/lute"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"io"
 	"io/fs"
-	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/html/atom"
@@ -765,6 +762,17 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return nil
 			}
 
+			if "" != tree.Root.ID {
+				id = tree.Root.ID
+			}
+			if "" != tree.Root.IALAttr("title") {
+				title = tree.Root.IALAttr("title")
+			}
+			updated := tree.Root.IALAttr("updated")
+			fname := path.Base(targetPath)
+			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
+			targetPaths[curRelPath] = targetPath
+
 			tree.ID = id
 			tree.Root.ID = id
 			tree.Root.SetIALAttr("id", tree.Root.ID)
@@ -841,7 +849,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return ast.WalkContinue
 			})
 
-			reassignIDUpdated(tree)
+			reassignIDUpdated(tree, id, updated)
 			importTrees = append(importTrees, tree)
 
 			hPathsIDs[tree.HPath] = tree.ID
@@ -870,6 +878,16 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
+
+		if "" != tree.Root.ID {
+			id = tree.Root.ID
+		}
+		if "" != tree.Root.IALAttr("title") {
+			title = tree.Root.IALAttr("title")
+		}
+		updated := tree.Root.IALAttr("updated")
+		fname := path.Base(targetPath)
+		targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
 
 		tree.ID = id
 		tree.Root.ID = id
@@ -937,7 +955,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			return ast.WalkContinue
 		})
 
-		reassignIDUpdated(tree)
+		reassignIDUpdated(tree, id, updated)
 		importTrees = append(importTrees, tree)
 	}
 
@@ -1120,7 +1138,7 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 	return
 }
 
-func reassignIDUpdated(tree *parse.Tree) {
+func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 	var blockCount int
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
@@ -1131,41 +1149,27 @@ func reassignIDUpdated(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
-	ids := make([]string, blockCount)
-	min, _ := strconv.ParseInt(time.Now().Add(-1*time.Duration(blockCount)*time.Second).Format("20060102150405"), 10, 64)
-	for i := 0; i < blockCount; i++ {
-		ids[i] = newID(fmt.Sprintf("%d", min))
-		min++
-	}
-
-	var i int
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
 			return ast.WalkContinue
 		}
 
-		n.ID = ids[i]
+		n.ID = ast.NewNodeID()
+		if ast.NodeDocument == n.Type && "" != rootID {
+			n.ID = rootID
+		}
+
 		n.SetIALAttr("id", n.ID)
-		n.SetIALAttr("updated", util.TimeFromID(n.ID))
-		i++
+		if "" != updated {
+			n.SetIALAttr("updated", updated)
+		} else {
+			n.SetIALAttr("updated", util.TimeFromID(n.ID))
+		}
 		return ast.WalkContinue
 	})
 	tree.ID = tree.Root.ID
 	tree.Path = path.Join(path.Dir(tree.Path), tree.ID+".sy")
 	tree.Root.SetIALAttr("id", tree.Root.ID)
-}
-
-func newID(t string) string {
-	return t + "-" + randStr(7)
-}
-
-func randStr(length int) string {
-	letter := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
-	b := make([]rune, length)
-	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
-	}
-	return string(b)
 }
 
 func domAttrValue(n *html.Node, attrName string) string {

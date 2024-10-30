@@ -1467,6 +1467,7 @@ export class WYSIWYG {
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 html = "<table>";
+                tableSelectElement.removeAttribute("style");
                 const oldHTML = nodeElement.outerHTML;
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {

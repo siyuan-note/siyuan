@@ -1434,8 +1434,9 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 
 func yfm(docIAL map[string]string) string {
 	// 导出 Markdown 文件时开头附上一些元数据 https://github.com/siyuan-note/siyuan/issues/6880
-	// 导出 Markdown 时在文档头添加 YFM 开关https://github.com/siyuan-note/siyuan/issues/7727
+
 	if !Conf.Export.MarkdownYFM {
+		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
 		return ""
 	}
 

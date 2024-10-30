@@ -2,7 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
-import {copySubMenu, openFileAttr} from "../../../menus/commonMenuItem";
+import {openFileAttr} from "../../../menus/commonMenuItem";
 import {
     addDragFill,
     genCellValueByElement,
@@ -93,7 +93,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         searchElement.style.paddingRight = "";
         const viewsElement = hasClosestByClassName(searchElement, "av__views");
         if (viewsElement) {
-            viewsElement.classList.add("av__views--show")
+            viewsElement.classList.add("av__views--show");
         }
         setTimeout(() => {
             searchElement.focus();
@@ -288,38 +288,38 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         });
         /// #endif
     }
-    let copyMenu: IMenu[] = []
+    let copyMenu: IMenu[] = [];
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") === "true") {
         copyMenu.push({
             iconHTML: "",
-            label: window.siyuan.languages['_attrView'].key,
+            label: window.siyuan.languages["_attrView"].key,
             click() {
                 writeText(rowElements[0].querySelector('.av__cell[data-dtype="block"] .av__celltext').textContent);
             }
-        })
+        });
     } else {
         copyMenu = [{
             id: "copyBlockRef",
             iconHTML: "",
             label: window.siyuan.languages.copyBlockRef,
             click: async () => {
-                let text = ""
+                let text = "";
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
-                    let content = ""
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']")
+                    let content = "";
+                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
                         const response = await fetchSyncPost("/api/block/getRefText", {id});
-                        content = `((${id} '${response.data}'))`
+                        content = `((${id} '${response.data}'))`;
                     }
                     if (ids.length > 1) {
-                        text += "* "
+                        text += "* ";
                     }
                     text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
-                        text += "\n"
+                        text += "\n";
                     }
                 }
                 writeText(text);
@@ -329,21 +329,21 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             iconHTML: "",
             label: window.siyuan.languages.copyBlockEmbed,
             click: () => {
-                let text = ""
+                let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
-                        text += "* "
+                        text += "* ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']")
+                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         text += cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        text += `{{select * from blocks where id='${id}'}}`
+                        text += `{{select * from blocks where id='${id}'}}`;
                     }
                     if (ids.length > 1 && index !== ids.length - 1) {
-                        text += "\n"
+                        text += "\n";
                     }
-                })
+                });
                 writeText(text);
             }
         }, {
@@ -351,12 +351,12 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             iconHTML: "",
             label: window.siyuan.languages.copyProtocol,
             click: () => {
-                let text = ""
+                let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
                         text += "* ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']")
+                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         text += cellElement.querySelector(".av__celltext").textContent;
                     } else {
@@ -365,7 +365,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (ids.length > 1 && index !== ids.length - 1) {
                         text += "\n";
                     }
-                })
+                });
                 writeText(text);
             }
         }, {
@@ -373,23 +373,23 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             iconHTML: "",
             label: window.siyuan.languages.copyProtocolInMd,
             click: async () => {
-                let text = ""
+                let text = "";
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
-                    let content = ""
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']")
+                    let content = "";
+                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
                         const response = await fetchSyncPost("/api/block/getRefText", {id});
-                        content = `[${response.data}](siyuan://blocks/${id})`
+                        content = `[${response.data}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
-                        text += "* "
+                        text += "* ";
                     }
-                    text += content
+                    text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
-                        text += "\n"
+                        text += "\n";
                     }
                 }
                 writeText(text);
@@ -399,24 +399,24 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             iconHTML: "",
             label: window.siyuan.languages.copyHPath,
             click: async () => {
-                let text = ""
+                let text = "";
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
-                    let content = ""
-                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']")
+                    let content = "";
+                    const cellElement = rowElements[i].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
                         const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
-                        content = response.data
+                        content = response.data;
                     }
 
                     if (ids.length > 1) {
-                        text += "* "
+                        text += "* ";
                     }
-                    text += content
+                    text += content;
                     if (ids.length > 1 && i !== ids.length - 1) {
-                        text += "\n"
+                        text += "\n";
                     }
                 }
                 writeText(text);
@@ -426,24 +426,24 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             iconHTML: "",
             label: window.siyuan.languages.copyID,
             click: () => {
-                let text = ""
+                let text = "";
                 ids.forEach((id, index) => {
                     if (ids.length > 1) {
                         text += "* ";
                     }
-                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']")
+                    const cellElement = rowElements[index].querySelector(".av__cell[data-dtype='block']");
                     if (cellElement.getAttribute("data-detached") === "true") {
                         text += cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        text += id
+                        text += id;
                     }
                     if (ids.length > 1 && index !== ids.length - 1) {
                         text += "\n";
                     }
-                })
+                });
                 writeText(text);
             }
-        }]
+        }];
     }
 
     menu.addItem({

@@ -565,7 +565,7 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
-                        const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active")
+                        const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active");
                         addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
                     }
                     return false;
@@ -701,7 +701,7 @@ export class WYSIWYG {
             }
             // table cell select
             let tableBlockElement: HTMLElement | false;
-            const targetCellElemet = hasClosestByMatchTag(target, "TH") || hasClosestByMatchTag(target, "TD")
+            const targetCellElemet = hasClosestByMatchTag(target, "TH") || hasClosestByMatchTag(target, "TD");
             if (targetCellElemet) {
                 target = targetCellElemet;
             }
@@ -790,9 +790,9 @@ export class WYSIWYG {
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) && !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if (moveTarget.classList.contains("table__select")) {
-                        moveTarget.classList.add("fn__none")
-                        const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY)
-                        moveTarget.classList.remove("fn__none")
+                        moveTarget.classList.add("fn__none");
+                        const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                        moveTarget.classList.remove("fn__none");
                         moveTarget = hasClosestByMatchTag(pointElement, "TH") || hasClosestByMatchTag(pointElement, "TD");
                     }
                     if (moveTarget && (moveTarget.tagName === "TH" || moveTarget.tagName === "TD") && (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {

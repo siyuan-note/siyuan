@@ -209,7 +209,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     const scrollLeft = blockElement.firstElementChild.scrollLeft;
     const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
     let index = 0;
-    const matchCellsElement: HTMLTableCellElement[] = []
+    const matchCellsElement: HTMLTableCellElement[] = [];
     blockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
         if (!item.classList.contains("fn__none") &&
             item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
@@ -227,7 +227,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         if (matchIndex === matchCellsElement.length - 1) {
             setLastNodeRange(item, range, false);
         }
-    })
+    });
     range.collapse(false);
     updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
     return true;

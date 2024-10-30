@@ -565,7 +565,8 @@ export class WYSIWYG {
                     documentSelf.onselect = null;
                     if (lastCellElement) {
                         dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
-                        addDragFill(lastCellElement);
+                        const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active")
+                        addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
                     }
                     return false;
                 };

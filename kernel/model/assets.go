@@ -697,7 +697,6 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	if ocrText := util.GetAssetText(oldPath); "" != ocrText {
 		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
 		util.SetAssetText(newPath, ocrText)
-		util.RemoveAssetText(oldPath)
 	}
 
 	IncSync()

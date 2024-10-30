@@ -164,10 +164,19 @@ func OcrAsset(asset string) (ret []map[string]interface{}) {
 	return
 }
 
-// https://github.com/siyuan-note/siyuan/pull/11708
 func GetAssetText(asset string) (ret string) {
+	assetsTextsLock.Lock()
 	ret = assetsTexts[asset]
+	assetsTextsLock.Unlock()
+	assetsTextsChanged.Store(true)
 	return
+}
+
+func RemoveAssetText(asset string) {
+	assetsTextsLock.Lock()
+	delete(assetsTexts, asset)
+	assetsTextsLock.Unlock()
+	assetsTextsChanged.Store(true)
 }
 
 func IsTesseractExtractable(p string) bool {

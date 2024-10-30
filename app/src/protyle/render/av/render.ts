@@ -359,7 +359,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     if (event.isComposing) {
                         return;
                     }
-                    if (searchInputElement.value) {
+                    if (searchInputElement.value || document.activeElement.isSameNode(searchInputElement)) {
                         viewsElement.classList.add("av__views--show");
                     } else {
                         viewsElement.classList.remove("av__views--show");

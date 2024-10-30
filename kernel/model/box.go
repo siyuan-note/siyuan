@@ -494,7 +494,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	return
 }
 
-func normalizeTree(tree *parse.Tree) {
+func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
@@ -573,22 +573,24 @@ func normalizeTree(tree *parse.Tree) {
 			for attrK, attrV := range attrs {
 				// Improve parsing of YAML Front Matter when importing Markdown https://github.com/siyuan-note/siyuan/issues/12962
 				if "title" == attrK {
-					tree.Root.SetIALAttr("title", fmt.Sprint(attrV))
+					yfmTitle = fmt.Sprint(attrV)
+					tree.Root.SetIALAttr("title", yfmTitle)
 					continue
 				}
 				if "date" == attrK {
 					created, parseTimeErr := dateparse.ParseIn(fmt.Sprint(attrV), time.Local)
 					if nil == parseTimeErr {
-						docID := created.Format("20060102150405") + "-" + gulu.Rand.String(7)
-						tree.Root.ID = docID
-						tree.Root.SetIALAttr("id", docID)
+						yfmRootID = created.Format("20060102150405") + "-" + gulu.Rand.String(7)
+						tree.Root.ID = yfmRootID
+						tree.Root.SetIALAttr("id", yfmRootID)
 					}
 					continue
 				}
 				if "lastmod" == attrK {
 					updated, parseTimeErr := dateparse.ParseIn(fmt.Sprint(attrV), time.Local)
 					if nil == parseTimeErr {
-						tree.Root.SetIALAttr("updated", updated.Format("20060102150405"))
+						yfmUpdated = updated.Format("20060102150405")
+						tree.Root.SetIALAttr("updated", yfmUpdated)
 					}
 					continue
 				}

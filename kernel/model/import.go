@@ -756,19 +756,19 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return io.EOF
 			}
 
-			tree = parseStdMd(data)
+			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 			if nil == tree {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
 			}
 
-			if "" != tree.Root.ID {
-				id = tree.Root.ID
+			if "" != yfmRootID {
+				id = yfmRootID
 			}
-			if "" != tree.Root.IALAttr("title") {
-				title = tree.Root.IALAttr("title")
+			if "" != yfmTitle {
+				title = yfmTitle
 			}
-			updated := tree.Root.IALAttr("updated")
+			updated := yfmUpdated
 			fname := path.Base(targetPath)
 			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
 			targetPaths[curRelPath] = targetPath
@@ -872,20 +872,20 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-		tree := parseStdMd(data)
+		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 		if nil == tree {
 			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
 			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
 
-		if "" != tree.Root.ID {
-			id = tree.Root.ID
+		if "" != yfmRootID {
+			id = yfmRootID
 		}
-		if "" != tree.Root.IALAttr("title") {
-			title = tree.Root.IALAttr("title")
+		if "" != yfmTitle {
+			title = yfmTitle
 		}
-		updated := tree.Root.IALAttr("updated")
+		updated := yfmUpdated
 		fname := path.Base(targetPath)
 		targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
 
@@ -992,14 +992,14 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	return
 }
 
-func parseStdMd(markdown []byte) (ret *parse.Tree) {
+func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
 	}
-	normalizeTree(ret)
+	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return

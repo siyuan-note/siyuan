@@ -105,19 +105,19 @@
   }
 
   &--remove {
-    color: var(--b3-card-error-color);
-    box-shadow: inset 0 0 0 .6px var(--b3-card-error-color);
+    color: var(--b3-theme-error);
+    box-shadow: inset 0 0 0 .6px var(--b3-theme-error);
     background-color: transparent;
 
     &:hover,
     &:focus {
       background-color: var(--b3-card-error-background);
-      box-shadow: inset 0 0 0 1px var(--b3-card-error-color);
+      box-shadow: inset 0 0 0 1px var(--b3-theme-error);
     }
 
     &:active {
       background-color: var(--b3-card-error-background);
-      box-shadow: inset 0 0 0 1px var(--b3-card-error-color);
+      box-shadow: inset 0 0 0 1px var(--b3-theme-error);
     }
   }
 

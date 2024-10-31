@@ -228,6 +228,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	}
 
 	tsv := string(output)
+	logging.LogInfof("tesseract [path=%s, size=%d] success", imgAbsPath, info.Size())
 
 	// 按行分割 TSV 数据
 	lines := strings.Split(tsv, "\r\n")

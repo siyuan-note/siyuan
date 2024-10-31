@@ -231,7 +231,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	logging.LogInfof("tesseract [path=%s] success [%s]", imgAbsPath, tsv)
 
 	// 按行分割 TSV 数据
-	lines := strings.Split(tsv, "\r\n")
+	lines := strings.Split(tsv, "\n")
 
 	// 解析 TSV 数据 跳过标题行，从第二行开始处理
 	for _, line := range lines[1:] {
@@ -262,7 +262,7 @@ func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
 		if text, ok := dataMap["text"]; ok {
 			// 确保 text 是字符串类型
 			if textStr, ok := text.(string); ok {
-				ret += " " + textStr
+				ret += " " + strings.ReplaceAll(textStr, "\r", "")
 			}
 		}
 	}

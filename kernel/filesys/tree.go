@@ -150,29 +150,22 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		parentAbsPath += ".sy"
 		parentPath := parentAbsPath
 		parentAbsPath = filepath.Join(util.DataDir, boxID, parentAbsPath)
-		parentData, readErr := filelock.ReadFile(parentAbsPath)
-		if nil != readErr {
-			if os.IsNotExist(readErr) {
-				// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
-				parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
-				if _, writeErr := WriteTree(parentTree); nil != writeErr {
-					logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
-				} else {
-					logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
-					treenode.UpsertBlockTree(parentTree)
-				}
+
+		parentDocIAL := DocIAL(parentAbsPath)
+		if 1 > len(parentDocIAL) {
+			// 子文档缺失父文档时自动补全 https://github.com/siyuan-note/siyuan/issues/7376
+			parentTree := treenode.NewTree(boxID, parentPath, hPathBuilder.String()+"Untitled", "Untitled")
+			if _, writeErr := WriteTree(parentTree); nil != writeErr {
+				logging.LogErrorf("rebuild parent tree [%s] failed: %s", parentAbsPath, writeErr)
 			} else {
-				logging.LogWarnf("read parent tree data [%s] failed: %s", parentAbsPath, readErr)
+				logging.LogInfof("rebuilt parent tree [%s]", parentAbsPath)
+				treenode.UpsertBlockTree(parentTree)
 			}
 			hPathBuilder.WriteString("Untitled/")
 			continue
 		}
 
-		ial := ReadDocIAL(parentData)
-		if 1 > len(ial) {
-			logging.LogWarnf("tree [%s] is corrupted", filepath.Join(boxID, p))
-		}
-		title := ial["title"]
+		title := parentDocIAL["title"]
 		if "" == title {
 			title = "Untitled"
 		}
@@ -182,6 +175,29 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
 	ret.HPath = hPathBuilder.String()
 	ret.Hash = treenode.NodeHash(ret.Root, ret, luteEngine)
+	return
+}
+
+func DocIAL(absPath string) (ret map[string]string) {
+	filelock.Lock(absPath)
+	file, err := os.Open(absPath)
+	if err != nil {
+		logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+		filelock.Unlock(absPath)
+		return nil
+	}
+
+	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
+	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
+		if field == "Properties" {
+			iter.ReadVal(&ret)
+			break
+		} else {
+			iter.Skip()
+		}
+	}
+	file.Close()
+	filelock.Unlock(absPath)
 	return
 }
 

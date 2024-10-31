@@ -228,9 +228,10 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 	}
 
 	tsv := string(output)
-	logging.LogInfof("tesseract [path=%s] success [%s]", imgAbsPath, tsv)
+	//logging.LogInfof("tesseract [path=%s] success [%s]", imgAbsPath, tsv)
 
 	// 按行分割 TSV 数据
+	tsv = strings.ReplaceAll(tsv, "\r", "")
 	lines := strings.Split(tsv, "\n")
 
 	// 解析 TSV 数据 跳过标题行，从第二行开始处理

@@ -521,17 +521,19 @@ func RemoveUnusedAssets() (ret []string) {
 	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
-		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
-			info, statErr := os.Stat(unusedAsset)
+		absPath := filepath.Join(util.DataDir, unusedAsset)
+		if filelock.IsExist(absPath) {
+			info, statErr := os.Stat(absPath)
 			if statErr == nil {
 				size += info.Size()
 			}
 
-			if err := filelock.Remove(unusedAsset); err != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
+			if err := filelock.Remove(absPath); err != nil {
+				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 			}
+			util.RemoveAssetText(unusedAsset)
 		}
-		ret = append(ret, unusedAsset)
+		ret = append(ret, absPath)
 	}
 	if 0 < len(ret) {
 		IncSync()
@@ -569,6 +571,9 @@ func RemoveUnusedAsset(p string) (ret string) {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
 	ret = absPath
+
+	util.RemoveAssetText(p)
+
 	IncSync()
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
@@ -653,6 +658,45 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
 			}
 		}
+	}
+
+	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
+	if gulu.File.IsDir(storageAvDir) {
+		entries, readErr := os.ReadDir(storageAvDir)
+		if nil != readErr {
+			logging.LogErrorf("read dir [%s] failed: %s", storageAvDir, readErr)
+			err = readErr
+			return
+		}
+
+		for _, entry := range entries {
+			if !strings.HasSuffix(entry.Name(), ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".json")) {
+				continue
+			}
+
+			data, readDataErr := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+			if nil != readDataErr {
+				logging.LogErrorf("read file [%s] failed: %s", entry.Name(), readDataErr)
+				err = readDataErr
+				return
+			}
+
+			if bytes.Contains(data, []byte(oldPath)) {
+				data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
+				if writeDataErr := filelock.WriteFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()), data); nil != writeDataErr {
+					logging.LogErrorf("write file [%s] failed: %s", entry.Name(), writeDataErr)
+					err = writeDataErr
+					return
+				}
+			}
+
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(entry.Name())))
+		}
+	}
+
+	if ocrText := util.GetAssetText(oldPath); "" != ocrText {
+		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
+		util.SetAssetText(newPath, ocrText)
 	}
 
 	IncSync()

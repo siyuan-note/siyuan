@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "Po włączeniu zostanie obsługiwana składnia kursywy i pogrubionego tekstu w formacie <code class='fn__code'>_foo_</code> i <code class='fn__code'>__foo__</code>",
   "currentNotebook": "Bieżący notes",
   "containerBlockTip1": "Włączenie bloków kontenerowych spowoduje duplikację wyników wyszukiwania",
-  "containerBlockTip2": "Włączenie bloków dokumentów obecnie wspiera tylko wyszukiwanie tytułów dokumentów",
   "copyAsPNG": "Kopiuj jako PNG",
   "unbindBlock": "Odłącz blok",
   "showTitle": "Pokaż tytuł bazy danych",

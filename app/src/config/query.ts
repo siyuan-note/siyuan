@@ -154,7 +154,7 @@ export const query = {
             <svg class="svg"><use xlink:href="#iconFile"></use></svg>
             <span class="fn__space"></span>
             <div class="fn__flex-1">
-                ${window.siyuan.languages.doc} <sup>[1] [2]</sup>
+                ${window.siyuan.languages.doc}
             </div>
             <span class="fn__space"></span>
             <input class="b3-switch" id="document" type="checkbox"${window.siyuan.config.search.document ? " checked" : ""}/>
@@ -163,7 +163,6 @@ export const query = {
     <span class="fn__space"></span>
     <div class="fn__flex-1">
         <div class="b3-label__text">[1] ${window.siyuan.languages.containerBlockTip1}</div>
-        <div class="b3-label__text">[2] ${window.siyuan.languages.containerBlockTip2}</div>
     </div>
 </div>
 <div class="b3-label">

@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "啟用後將支援 <code class='fn__code'>_foo_</code> 傾斜語法和 <code class='fn__code'>__foo__</code> 加粗語法輸入",
   "currentNotebook": "目前筆記本",
   "containerBlockTip1": "啟用容器塊後會導致搜尋結果重複",
-  "containerBlockTip2": "啟用文件塊目前僅支援搜尋文件名稱",
   "copyAsPNG": "複製為 PNG",
   "unbindBlock": "取消綁定塊",
   "showTitle": "顯示資料庫標題",

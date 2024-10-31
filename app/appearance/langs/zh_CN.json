@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "启用后将支持 <code class='fn__code'>_foo_</code> 倾斜语法和 <code class='fn__code'>__foo__</code> 加粗语法输入",
   "currentNotebook": "当前笔记本",
   "containerBlockTip1": "启用容器块后会导致搜索结果重复",
-  "containerBlockTip2": "启用文档块目前仅支持搜索文档名",
   "copyAsPNG": "复制为 PNG",
   "unbindBlock": "取消绑定块",
   "showTitle": "显示数据库标题",

@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "<code class='fn__code'>_foo_</code> 形式の斜体構文と <code class='fn__code'>__foo__</code> 形式の太字構文を有効にします",
   "currentNotebook": "現在のノートブック",
   "containerBlockTip1": "コンテナブロックを有効にすると重複した検索結果が表示されます",
-  "containerBlockTip2": "ドキュメントブロックはタイトルの検索のみをサポートしています",
   "copyAsPNG": "PNG としてコピー",
   "unbindBlock": "ブロックのバインドを解除",
   "showTitle": "データベースのタイトルを表示",

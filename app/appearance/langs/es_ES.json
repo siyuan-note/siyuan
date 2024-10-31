@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "Después de habilitar, se admitirá la sintaxis <code class='fn__code'>_foo_</code> en cursiva y <code class='fn__code'>__foo__</code> en negrita",
   "currentNotebook": "Cuaderno actual",
   "containerBlockTip1": "Habilitar bloques de contenedores generará resultados de búsqueda duplicados",
-  "containerBlockTip2": "Habilitar bloques de documentos actualmente solo admite la búsqueda de títulos de documentos",
   "copyAsPNG": "Copiar como PNG",
   "unbindBlock": "Desvincular bloque",
   "showTitle": "Mostrar título de la base de datos",

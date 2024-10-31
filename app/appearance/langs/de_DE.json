@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "Nach der Aktivierung wird die Eingabe der Inline-Unterstreichungssyntax <code class='fn__code'>_foo_</code> und <code class='fn__code'>__foo__</code> unterstützt",
   "currentNotebook": "Aktuelles Notizbuch",
   "containerBlockTip1": "Die Aktivierung von Containerblöcken führt zu doppelten Suchergebnissen.",
-  "containerBlockTip2": "Die Aktivierung von Dokumentenblöcken unterstützt derzeit nur die Suche nach Dokumenttiteln.",
   "copyAsPNG": "Als PNG kopieren",
   "unbindBlock": "Block entkoppeln",
   "showTitle": "Datenbanktitel anzeigen",

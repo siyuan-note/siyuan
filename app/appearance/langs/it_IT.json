@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "Dopo aver attivato, saranno supportate la sintassi in corsivo <code class='fn__code'>_foo_</code> e la sintassi in grassetto <code class='fn__code'>__foo__</code>",
   "currentNotebook": "Taccuino corrente",
   "containerBlockTip1": "L'abilitazione dei blocchi contenitore comporterà risultati di ricerca duplicati",
-  "containerBlockTip2": "L'abilitazione dei blocchi documento attualmente supporta solo la ricerca per titoli di documento",
   "copyAsPNG": "Copia come PNG",
   "unbindBlock": "Scollega blocco",
   "showTitle": "Mostra titolo del database",

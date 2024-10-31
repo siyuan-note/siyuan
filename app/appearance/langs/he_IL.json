@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "לאחר הפעלה, <code class='fn__code'>_foo_</code> תחביר נטוי ו <code class='fn__code'>__foo__</code> תחביר מודגש יתמוך בקלט",
   "currentNotebook": "מחברת נוכחית",
   "containerBlockTip1": "הפעלת בלוקים יחידתיים תוביל לתוצאות חיפוש כפולות",
-  "containerBlockTip2": "הפעלת בלוקי מסמכים תומכת כרגע רק בחיפוש הכותרות של המסמכים",
   "copyAsPNG": "העתק כ-PNG",
   "unbindBlock": "שחרר בלוק",
   "showTitle": "הצג כותרת מסד נתונים",

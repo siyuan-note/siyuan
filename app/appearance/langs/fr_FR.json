@@ -64,7 +64,6 @@
   "editorMarkdownInlineUnderscoreTip": "Après l'activation, la syntaxe <code class='fn__code'>_foo_</code> italique et la syntaxe <code class='fn__code'>__foo__</code> gras seront prises en charge",
   "currentNotebook": "Carnet actuel",
   "containerBlockTip1": "L'activation des blocs de conteneurs entraînera des résultats de recherche en double",
-  "containerBlockTip2": "L'activation des blocs de documents ne prend actuellement en charge que la recherche de titres de documents",
   "copyAsPNG": "Copier en tant PNG",
   "unbindBlock": "Dissocier le bloc",
   "showTitle": "Afficher le titre de la base de données",

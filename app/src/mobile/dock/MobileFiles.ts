@@ -91,7 +91,7 @@ export class MobileFiles extends Model {
     <svg data-type="sort" class="toolbar__icon${window.siyuan.config.readonly ? " fn__none" : ""}"><use xlink:href="#iconSort"></use></svg>
 </div>
 <div class="fn__flex-1"></div>
-<ul class="b3-list b3-list--background fn__flex-column" style="min-height: auto;transition: var(--b3-transition)">
+<ul class="b3-list b3-list--background fn__flex-column" style="min-height: auto;height:42px;transition: height  .2s cubic-bezier(0, 0, .2, 1) 0ms">
     <li class="b3-list-item" data-type="toggle">
         <span class="b3-list-item__toggle">
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
@@ -158,14 +158,15 @@ export class MobileFiles extends Model {
                     event.stopPropagation();
                     break;
                 } else if (type === "toggle") {
-                    if (this.closeElement.classList.contains("fn__flex-1")) {
+                    const svgElement = target.querySelector("svg")
+                    if (svgElement.classList.contains("b3-list-item__arrow--open")) {
+                        this.closeElement.style.height = "42px"
+                        svgElement.classList.remove("b3-list-item__arrow--open");
                         this.closeElement.lastElementChild.classList.add("fn__none");
-                        this.closeElement.classList.remove("fn__flex-1");
-                        target.querySelector("svg").classList.remove("b3-list-item__arrow--open");
                     } else {
+                        this.closeElement.style.height = "40%"
+                        svgElement.classList.add("b3-list-item__arrow--open");
                         this.closeElement.lastElementChild.classList.remove("fn__none");
-                        this.closeElement.classList.add("fn__flex-1");
-                        target.querySelector("svg").classList.add("b3-list-item__arrow--open");
                     }
                     event.stopPropagation();
                     event.preventDefault();

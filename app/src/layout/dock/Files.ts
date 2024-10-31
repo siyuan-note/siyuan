@@ -921,14 +921,8 @@ export class Files extends Model {
                 emojiElement.innerHTML = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
             }
             const arrowElement = newElement.querySelector(".b3-list-item__arrow");
-            if (arrowElement.classList.contains("b3-list-item__arrow--open")) {
-                arrowElement.classList.remove("b3-list-item__arrow--open");
-                if (newElement.nextElementSibling && newElement.nextElementSibling.tagName === "UL") {
-                    newElement.nextElementSibling.remove();
-                }
-                if (response.callback !== Constants.CB_MOVE_NOLIST) {
-                    this.getLeaf(newElement, response.data.toNotebook);
-                }
+            if (arrowElement.classList.contains("b3-list-item__arrow--open") && response.callback !== Constants.CB_MOVE_NOLIST) {
+                this.getLeaf(newElement, response.data.toNotebook, true);
             }
         }
     }
@@ -948,7 +942,11 @@ export class Files extends Model {
         let nextElement = liElement.nextElementSibling;
         if (nextElement && nextElement.tagName === "UL") {
             // 文件展开时，刷新
-            nextElement.remove();
+            nextElement.innerHTML = fileHTML;
+            if (typeof scrollTop === "number") {
+                this.element.scroll({top: scrollTop, behavior: "smooth"});
+            }
+            return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
         liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
@@ -1021,9 +1019,9 @@ export class Files extends Model {
         }
     }
 
-    public getLeaf(liElement: Element, notebookId: string) {
+    public getLeaf(liElement: Element, notebookId: string, focusUpdate = false) {
         const toggleElement = liElement.querySelector(".b3-list-item__arrow");
-        if (toggleElement.classList.contains("b3-list-item__arrow--open")) {
+        if (toggleElement.classList.contains("b3-list-item__arrow--open") && !focusUpdate) {
             toggleElement.classList.remove("b3-list-item__arrow--open");
             liElement.nextElementSibling?.remove();
             this.getOpenPaths();

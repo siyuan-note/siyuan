@@ -116,6 +116,7 @@ func loadThemes() {
 
 	Conf.Appearance.DarkThemes = nil
 	Conf.Appearance.LightThemes = nil
+	var daylightTheme, midnightTheme *conf.AppearanceTheme
 	for _, themeDir := range themeDirs {
 		if !util.IsDirRegularOrSymlink(themeDir) {
 			continue
@@ -151,6 +152,14 @@ func loadThemes() {
 				}
 			}
 
+			if "midnight" == name {
+				midnightTheme = t
+				continue
+			} else if "daylight" == name {
+				daylightTheme = t
+				continue
+			}
+
 			if "dark" == mode {
 				Conf.Appearance.DarkThemes = append(Conf.Appearance.DarkThemes, t)
 			} else if "light" == mode {
@@ -172,6 +181,9 @@ func loadThemes() {
 
 		go watchTheme(filepath.Join(util.ThemesPath, name))
 	}
+
+	Conf.Appearance.LightThemes = append([]*conf.AppearanceTheme{daylightTheme}, Conf.Appearance.LightThemes...)
+	Conf.Appearance.DarkThemes = append([]*conf.AppearanceTheme{midnightTheme}, Conf.Appearance.DarkThemes...)
 }
 
 func loadIcons() {

@@ -300,7 +300,7 @@ Publish parameters: --accessAuthCode=******（访问授权码）
 <details>
 <summary>宝塔面板 部署文档</summary>
 
-## 前提
+#### 前提
 - 仅适用于宝塔面板9.2.0及以上版本
 - 安装宝塔面板，前往[宝塔面板](https://www.bt.cn/new/download.html)官网，选择正式版的脚本下载安装
 

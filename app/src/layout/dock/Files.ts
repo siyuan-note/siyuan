@@ -928,11 +928,7 @@ export class Files extends Model {
     }
 
     private onLsHTML(data: { files: IFile[], box: string, path: string }, scrollTop?: number) {
-        let fileHTML = "";
-        data.files.forEach((item: IFile) => {
-            fileHTML += this.genFileHTML(item);
-        });
-        if (fileHTML === "") {
+        if (data.files.length === 0) {
             return;
         }
         const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
@@ -942,13 +938,17 @@ export class Files extends Model {
         let nextElement = liElement.nextElementSibling;
         if (nextElement && nextElement.tagName === "UL") {
             // 文件展开时，刷新
-            nextElement.innerHTML = fileHTML;
+            // TODO nextElement.innerHTML = fileHTML;
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
             }
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+        let fileHTML = "";
+        data.files.forEach((item: IFile) => {
+            fileHTML += this.genFileHTML(item);
+        });
         liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
         setTimeout(() => {

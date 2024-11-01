@@ -109,6 +109,13 @@
       }
     }
 
+    // 大纲中有图片 https://github.com/siyuan-note/siyuan/issues/12993
+    .img img {
+      height: 24px;
+      vertical-align: top;
+      margin: 2px 0;
+    }
+
     &__icon {
       svg, img {
         height: 16px;

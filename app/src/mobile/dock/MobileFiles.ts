@@ -322,12 +322,15 @@ export class MobileFiles extends Model {
         if (!init) {
             return;
         }
-        if (html === "") {
-            this.closeElement.lastElementChild.classList.remove("fn__none");
-            this.closeElement.classList.add("fn__flex-1");
-        } else {
+        const svgElement = this.closeElement.querySelector("svg")
+        if (html !== "") {
+            this.closeElement.style.height = "30px";
+            svgElement.classList.remove("b3-list-item__arrow--open");
             this.closeElement.lastElementChild.classList.add("fn__none");
-            this.closeElement.classList.remove("fn__flex-1");
+        } else {
+            this.closeElement.style.height = "40%";
+            svgElement.classList.add("b3-list-item__arrow--open");
+            this.closeElement.lastElementChild.classList.remove("fn__none");
         }
     }
 

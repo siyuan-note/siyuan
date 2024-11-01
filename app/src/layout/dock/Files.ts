@@ -16,7 +16,12 @@ import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
-import {hasClosestByAttribute, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    hasTopClosestByTag
+} from "../../protyle/util/hasClosest";
 import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
@@ -938,20 +943,31 @@ export class Files extends Model {
         if (!liElement) {
             return;
         }
+        let fileHTML = "";
+        data.files.forEach((item: IFile) => {
+            fileHTML += this.genFileHTML(item);
+        });
         let nextElement = liElement.nextElementSibling;
         if (nextElement && nextElement.tagName === "UL") {
             // 文件展开时，刷新
-            // TODO nextElement.innerHTML = fileHTML;
+            const tempElement = document.createElement("template");
+            tempElement.innerHTML = fileHTML;
+            // 保持文件夹展开状态
+            nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
+                const openLiElement = hasClosestByClassName(item, "b3-list-item")
+                if (openLiElement) {
+                    const tempOpenLiElement = tempElement.content.querySelector(`.b3-list-item[data-node-id="${openLiElement.getAttribute("data-node-id")}"]`)
+                    tempOpenLiElement.after(openLiElement.nextElementSibling);
+                    tempOpenLiElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+                }
+            });
+            nextElement.innerHTML = tempElement.innerHTML;
             if (typeof scrollTop === "number") {
                 this.element.scroll({top: scrollTop, behavior: "smooth"});
             }
             return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
-        let fileHTML = "";
-        data.files.forEach((item: IFile) => {
-            fileHTML += this.genFileHTML(item);
-        });
         liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);
         nextElement = liElement.nextElementSibling;
         setTimeout(() => {
@@ -1204,3 +1220,4 @@ aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</
         return window.siyuan.menus.menu;
     }
 }
+

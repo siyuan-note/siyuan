@@ -1,4 +1,4 @@
-import {hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
@@ -528,18 +528,33 @@ export class MobileFiles extends Model {
     }
 
     private onLsHTML(data: { files: IFile[], box: string, path: string }) {
+        if (data.files.length === 0) {
+            return;
+        }
+        const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
+        if (!liElement) {
+            return;
+        }
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
         });
-        if (fileHTML === "") {
-            return;
-        }
-        const liElement = this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${data.path}"]`);
         let nextElement = liElement.nextElementSibling;
         if (nextElement && nextElement.tagName === "UL") {
             // 文件展开时，刷新
-            nextElement.remove();
+            const tempElement = document.createElement("template");
+            tempElement.innerHTML = fileHTML;
+            // 保持文件夹展开状态
+            nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
+                const openLiElement = hasClosestByClassName(item, "b3-list-item")
+                if (openLiElement) {
+                    const tempOpenLiElement = tempElement.content.querySelector(`.b3-list-item[data-node-id="${openLiElement.getAttribute("data-node-id")}"]`)
+                    tempOpenLiElement.after(openLiElement.nextElementSibling);
+                    tempOpenLiElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
+                }
+            });
+            nextElement.innerHTML = tempElement.innerHTML;
+            return;
         }
         liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
         liElement.insertAdjacentHTML("afterend", `<ul class="file-tree__sliderDown">${fileHTML}</ul>`);

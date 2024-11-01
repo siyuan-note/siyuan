@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"io"
 	"io/fs"
-	"mime"
 	"os"
 	"path"
 	"path/filepath"
@@ -30,7 +29,6 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
-	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
@@ -73,21 +71,6 @@ func GetUniqueFilename(filePath string) string {
 		}
 		i++
 	}
-}
-
-func GetMimeTypeByExt(filePath string) (ret string) {
-	ret = mime.TypeByExtension(filepath.Ext(filePath))
-	if "" == ret {
-		m, err := mimetype.DetectFile(filePath)
-		if err != nil {
-			logging.LogErrorf("detect mime type of [%s] failed: %s", filePath, err)
-			return
-		}
-		if nil != m {
-			ret = m.String()
-		}
-	}
-	return
 }
 
 func IsSymlinkPath(absPath string) bool {

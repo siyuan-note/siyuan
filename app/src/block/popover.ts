@@ -37,6 +37,7 @@ export const initBlockPopover = (app: App) => {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
                             tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
+                            tooltipClass = "href";
                         }
                     }
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
@@ -49,6 +50,7 @@ export const initBlockPopover = (app: App) => {
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
                 tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><div class="fn__hr"></div>${aElement.getAttribute("data-name")}` : aElement.getAttribute("data-name");
+                tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
             }
@@ -76,7 +78,7 @@ export const initBlockPopover = (app: App) => {
                         } else {
                             assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div>' + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
-                        showTooltip(assetTip, aElement);
+                        showTooltip(assetTip, aElement, tooltipClass);
                     });
                     tip = "";
                 } else if (title) {

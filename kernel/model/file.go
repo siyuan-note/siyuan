@@ -37,7 +37,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -116,29 +115,9 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	}
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
-
-	filelock.Lock(filePath)
-	file, err := os.Open(filePath)
-	if err != nil {
-		logging.LogErrorf("open file [%s] failed: %s", p, err)
-		filelock.Unlock(filePath)
-		return nil
-	}
-
-	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
-	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
-		if field == "Properties" {
-			iter.ReadVal(&ret)
-			break
-		} else {
-			iter.Skip()
-		}
-	}
-	file.Close()
-	filelock.Unlock(filePath)
-
+	ret = filesys.DocIAL(filePath)
 	if 1 > len(ret) {
-		logging.LogWarnf("properties not found in file [%s]", p)
+		logging.LogWarnf("properties not found in file [%s]", filePath)
 		box.moveCorruptedData(filePath)
 		return nil
 	}

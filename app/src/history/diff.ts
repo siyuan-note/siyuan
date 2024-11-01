@@ -86,7 +86,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
             textElement.previousElementSibling.classList.remove("fn__none");
             textElement.classList.add("fn__none");
             leftElement.lastElementChild.classList.add("fn__none");
-        } else if (response.data.isProtyleDoc) {
+        } else if (response.data.displayInText) {
             textElement.value = response.data.content;
             textElement.classList.remove("fn__none");
             leftElement.lastElementChild.classList.add("fn__none");
@@ -117,7 +117,7 @@ const renderCompare = (app: App, element: HTMLElement) => {
                 textElement.previousElementSibling.classList.remove("fn__none");
                 textElement.classList.add("fn__none");
                 rightElement.lastElementChild.classList.add("fn__none");
-            } else if (response.data.isProtyleDoc) {
+            } else if (response.data.displayInText) {
                 textElement.value = response.data.content;
                 textElement.classList.remove("fn__none");
                 rightElement.lastElementChild.classList.add("fn__none");

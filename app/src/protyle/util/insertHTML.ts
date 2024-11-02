@@ -202,8 +202,8 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
 const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
-    const cellElements = tempElement.content.querySelectorAll("th, td");
-    if (cellElements.length === 0) {
+    const copyCellElements = tempElement.content.querySelectorAll("th, td");
+    if (copyCellElements.length === 0) {
         return false;
     }
     const scrollLeft = blockElement.firstElementChild.scrollLeft;
@@ -214,7 +214,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         if (!item.classList.contains("fn__none") &&
             item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
             item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-            cellElements.length > index) {
+            copyCellElements.length > index) {
             matchCellsElement.push(item);
             index++;
         }
@@ -223,7 +223,7 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
     const oldHTML = blockElement.outerHTML;
     blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
     matchCellsElement.forEach((item, matchIndex) => {
-        item.innerHTML = cellElements[matchIndex].innerHTML;
+        item.innerHTML = copyCellElements[matchIndex].innerHTML;
         if (matchIndex === matchCellsElement.length - 1) {
             setLastNodeRange(item, range, false);
         }

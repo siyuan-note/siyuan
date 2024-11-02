@@ -125,7 +125,7 @@ export const reloadSync = (
             }
         }
     });
-    if (onlyUpdateDoc) {
+    if (!onlyUpdateDoc) {
         allModels.files.forEach(item => {
             setNoteBook(() => {
                 item.init(false);

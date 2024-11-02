@@ -157,7 +157,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     }
     // 在数学公式输入框中撤销到最后一步，再继续撤销会撤销编辑器正文内容，从而出发 input 事件
     hideElements(["util"], protyle, true);
-
+    if (type === "NodeTable") {
+        blockElement.querySelector(".table__select").removeAttribute("style")
+    }
     const tempElement = document.createElement("template");
     tempElement.innerHTML = html;
     if (needRender && (

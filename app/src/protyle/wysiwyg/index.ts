@@ -788,14 +788,21 @@ export class WYSIWYG {
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
-                if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) && !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
+                if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) &&
+                    !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if (moveTarget.classList.contains("table__select")) {
                         moveTarget.classList.add("fn__none");
                         const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
                         moveTarget.classList.remove("fn__none");
                         moveTarget = hasClosestByMatchTag(pointElement, "TH") || hasClosestByMatchTag(pointElement, "TD");
                     }
-                    if (moveTarget && (moveTarget.tagName === "TH" || moveTarget.tagName === "TD") && (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {
+                    if (moveTarget && moveTarget.isSameNode(target)) {
+                        tableBlockElement.querySelector(".table__select").removeAttribute("style");
+                        moveCellElement = moveTarget;
+                        return false;
+                    }
+                    if (moveTarget && (moveTarget.tagName === "TH" || moveTarget.tagName === "TD") &&
+                        (!moveCellElement || !moveCellElement.isSameNode(moveTarget))) {
                         // @ts-ignore
                         tableBlockElement.firstElementChild.style.webkitUserModify = "read-only";
                         let width = target.offsetLeft + target.clientWidth - moveTarget.offsetLeft;

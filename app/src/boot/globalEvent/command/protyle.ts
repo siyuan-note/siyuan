@@ -1,6 +1,8 @@
 import {hasClosestBlock} from "../../../protyle/util/hasClosest";
 import {getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
 import {enterBack, zoomOut} from "../../../menus/protyle";
+import {openFileById} from "../../../editor/util";
+import {Constants} from "../../../constants";
 
 export const onlyProtyleCommand = (options: {
     command: string,
@@ -17,7 +19,16 @@ export const onlyProtyleCommand = (options: {
             topNodeElement.nextElementSibling?.classList.contains("list") && topNodeElement.previousElementSibling.classList.contains("protyle-action")) {
             topNodeElement = topNodeElement.parentElement;
         }
-        zoomOut({protyle: options.protyle, id: topNodeElement.getAttribute("data-node-id")});
+        const id = topNodeElement.getAttribute("data-node-id")
+        if (options.protyle.options.backlinkData) {
+            openFileById({
+                app: options.protyle.app,
+                id,
+                action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+            });
+        } else {
+            zoomOut({protyle: options.protyle, id});
+        }
         return true;
     }
     if (options.command === "enterBack") {

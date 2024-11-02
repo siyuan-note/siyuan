@@ -60,6 +60,7 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {processClonePHElement} from "../render/util";
+import {openFileById} from "../../editor/util";
 
 export class Gutter {
     public element: HTMLElement;
@@ -67,12 +68,15 @@ export class Gutter {
 
     constructor(protyle: IProtyle) {
         if (isMac()) {
-            this.gutterTip = window.siyuan.languages.gutterTip;
+            this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom));
         } else {
             this.gutterTip = window.siyuan.languages.gutterTip.replace("⌥→", updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom))
                 .replace("⌘↑", updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom))
                 .replace("⌥⌘A", updateHotkeyTip(window.siyuan.config.keymap.editor.general.attr.custom))
                 .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
+        }
+        if (protyle.options.backlinkData) {
+            this.gutterTip = this.gutterTip.replace(window.siyuan.languages.enter, window.siyuan.languages.openBy)
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";
@@ -305,7 +309,15 @@ export class Gutter {
                 return;
             }
             if (isOnlyMeta(event)) {
-                zoomOut({protyle, id});
+                if (protyle.options.backlinkData) {
+                    openFileById({
+                        app: protyle.app,
+                        id,
+                        action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                    });
+                } else {
+                    zoomOut({protyle, id});
+                }
             } else if (event.altKey) {
                 let foldElement: Element;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${id}"]`)).find(item => {
@@ -1693,6 +1705,19 @@ export class Gutter {
                 label: window.siyuan.languages.enterBack,
                 click: () => {
                     enterBack(protyle, id);
+                }
+            }).element);
+        } else {
+            window.siyuan.menus.menu.append(new MenuItem({
+                id: "enter",
+                accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘" + window.siyuan.languages.click)}`,
+                label: window.siyuan.languages.openBy,
+                click: () => {
+                    openFileById({
+                        app: protyle.app,
+                        id,
+                        action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                    });
                 }
             }).element);
         }

@@ -15,8 +15,8 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: {
 }[]) => {
     protyle.block.showAll = true;
     let html = "";
-    backlinkData.forEach(item => {
-        html += genBreadcrumb(item.blockPaths, false, backlinkData.length) + setBacklinkFold(item.dom, item.expand);
+    backlinkData.forEach((item, index) => {
+        html += genBreadcrumb(item.blockPaths, false, index) + setBacklinkFold(item.dom, item.expand);
     });
     protyle.wysiwyg.element.innerHTML = html;
     processRender(protyle.wysiwyg.element);
@@ -99,9 +99,9 @@ export const getBacklinkHeadingMore = (moreElement: HTMLElement) => {
     moreElement.remove();
 };
 
-export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, parentLength?: number) => {
+export const genBreadcrumb = (blockPaths: IBreadcrumb[], renderFirst: boolean, parentIndex?: number) => {
     if (1 > blockPaths.length) {
-        return `<div contenteditable="false" style="border-top: ${parentLength === 1 ? 0 : 1}px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>`;
+        return `<div contenteditable="false" style="border-top: ${parentIndex === 0 ? 0 : 1}px solid var(--b3-border-color);min-height: 0;width: 100%;" class="protyle-breadcrumb__bar"><span></span></div>`;
     }
 
     let html = "";

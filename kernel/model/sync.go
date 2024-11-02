@@ -805,7 +805,8 @@ func connectSyncWebSocket() {
 			data := result.Data.(map[string]interface{})
 			switch data["cmd"].(string) {
 			case "synced":
-				syncData(false, false)
+				// Improve data synchronization perception https://github.com/siyuan-note/siyuan/issues/13000
+				SyncDataDownload()
 			case "kernels":
 				onlineKernelsLock.Lock()
 

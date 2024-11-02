@@ -401,7 +401,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempInnerHTML, protyle, isBlock);
             }
         } else {
-            if (tempInnerHTML.indexOf("NodeHTMLBlock")) {
+            if (-1 < tempInnerHTML.indexOf("NodeHTMLBlock")) {
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }

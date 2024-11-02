@@ -1235,7 +1235,7 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 }
 
 func upsertAvBlockRel(node *ast.Node) {
-	var avIDs []string
+	var affectedAvIDs []string
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1244,13 +1244,33 @@ func upsertAvBlockRel(node *ast.Node) {
 		if ast.NodeAttributeView == n.Type {
 			avID := n.AttributeViewID
 			if changed := av.UpsertBlockRel(avID, n.ID); changed {
-				avIDs = append(avIDs, avID)
+				affectedAvIDs = append(affectedAvIDs, avID)
 			}
 		}
 		return ast.WalkContinue
 	})
-	avIDs = gulu.Str.RemoveDuplicatedElem(avIDs)
-	for _, avID := range avIDs {
+
+	updatedNodes := []*ast.Node{node}
+	var parents []*ast.Node
+	for parent := node.Parent; nil != parent && ast.NodeDocument != parent.Type; parent = parent.Parent {
+		parents = append(parents, parent)
+	}
+	updatedNodes = append(updatedNodes, parents...)
+	for _, updatedNode := range updatedNodes {
+		ast.Walk(updatedNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+			avs := n.IALAttr(av.NodeAttrNameAvs)
+			if "" == avs {
+				return ast.WalkContinue
+			}
+
+			avIDs := strings.Split(avs, ",")
+			affectedAvIDs = append(affectedAvIDs, avIDs...)
+			return ast.WalkContinue
+		})
+	}
+
+	affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
+	for _, avID := range affectedAvIDs {
 		ReloadAttrView(avID)
 	}
 }

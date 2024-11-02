@@ -803,6 +803,7 @@ export class Wnd {
         webFrame.clearCache();
         ipcRenderer.send(Constants.SIYUAN_CMD, "clearCache");
         setTabPosition();
+        setModelsHash();
         /// #endif
     };
 

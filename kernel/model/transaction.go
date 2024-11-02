@@ -1270,9 +1270,13 @@ func upsertAvBlockRel(node *ast.Node) {
 	}
 
 	affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
-	for _, avID := range affectedAvIDs {
-		ReloadAttrView(avID)
-	}
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		sql.FlushQueue()
+		for _, avID := range affectedAvIDs {
+			ReloadAttrView(avID)
+		}
+	}()
 }
 
 func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {

@@ -388,7 +388,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
-        const tempInnerHTML = tempElement.innerHTML;
+        let tempInnerHTML = tempElement.innerHTML;
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);
@@ -401,6 +401,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempInnerHTML, protyle, isBlock);
             }
         } else {
+            if (tempInnerHTML.indexOf("NodeHTMLBlock")) {
+                // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
+                tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
+            }
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         filterClipboardHint(protyle, protyle.lute.BlockDOM2StdMd(tempInnerHTML));

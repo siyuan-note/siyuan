@@ -19,6 +19,9 @@ export const renderBacklink = (protyle: IProtyle, backlinkData: {
         html += genBreadcrumb(item.blockPaths, false, index) + setBacklinkFold(item.dom, item.expand);
     });
     protyle.wysiwyg.element.innerHTML = html;
+    protyle.wysiwyg.element.querySelectorAll(".protyle-breadcrumb__bar .protyle-breadcrumb__item--active").forEach((item:HTMLElement) => {
+        item.parentElement.scrollLeft = item.offsetLeft
+    });
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
     avRender(protyle.wysiwyg.element, protyle);

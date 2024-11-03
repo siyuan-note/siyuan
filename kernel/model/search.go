@@ -1329,7 +1329,6 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	start := time.Now()
 	query = stringQuery(query)
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
@@ -1355,7 +1354,6 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 	}
 
 	matchedBlockCount, matchedRootCount = fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter)
-	logging.LogInfof("time cost [fts]: %v", time.Since(start))
 	return
 }
 

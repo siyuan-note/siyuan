@@ -27,6 +27,8 @@ export class BlockPanel {
     public y: number;
     private isBacklink: boolean;
     public editors: Protyle[] = [];
+    private observerResize: ResizeObserver;
+    private observerLoad: IntersectionObserver;
 
     // x,y 和 targetElement 二选一必传
     constructor(options: {
@@ -197,6 +199,8 @@ export class BlockPanel {
     }
 
     public destroy() {
+        this.observerResize?.disconnect();
+        this.observerLoad?.disconnect();
         window.siyuan.blockPanels.find((item, index) => {
             if (item.id === this.id) {
                 window.siyuan.blockPanels.splice(index, 1);
@@ -256,7 +260,7 @@ export class BlockPanel {
         }
         this.element.innerHTML = html;
         let resizeTimeout: number
-        const observerResize = new ResizeObserver((a, b) => {
+        this.observerResize = new ResizeObserver(() => {
             clearTimeout(resizeTimeout);
             resizeTimeout = window.setTimeout(() => {
                 this.editors.forEach(item => {
@@ -264,8 +268,8 @@ export class BlockPanel {
                 });
             }, Constants.TIMEOUT_TRANSITION)
         });
-        observerResize.observe(this.element);
-        const observer = new IntersectionObserver((e) => {
+        this.observerResize.observe(this.element);
+        this.observerLoad = new IntersectionObserver((e) => {
             e.forEach(item => {
                 if (item.isIntersecting && item.target.innerHTML === "") {
                     this.initProtyle(item.target as HTMLElement);
@@ -324,7 +328,7 @@ export class BlockPanel {
                     this.element.style.zIndex = (++window.siyuan.zIndex).toString();
                 } : undefined);
             } else {
-                observer.observe(item);
+                this.observerLoad.observe(item);
             }
         });
         if (this.targetElement) {

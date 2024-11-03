@@ -569,10 +569,6 @@ export class Graph extends Model {
                 this.graphElement.firstElementChild.classList.remove("fn__none");
                 this.graphElement.firstElementChild.firstElementChild.setAttribute("style", "width:3%");
                 const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
-                const data = {
-                    nodes: this.graphData.nodes,
-                    edges: this.graphData.links,
-                };
                 const options = {
                     autoResize: true,
                     interaction: {
@@ -609,7 +605,8 @@ export class Graph extends Model {
                         }
                     },
                     layout: {
-                        improvedLayout: false
+                        randomSeed: 0,
+                        improvedLayout: false,
                     },
                     physics: {
                         enabled: true,
@@ -628,7 +625,7 @@ export class Graph extends Model {
                         stabilization: {
                             enabled: true,
                             iterations: 256,
-                            updateInterval: 25,
+                            updateInterval: 64,
                             onlyDynamicEdges: false,
                             fit: true
                         },
@@ -637,7 +634,49 @@ export class Graph extends Model {
                         wind: {x: 0, y: 0}
                     },
                 };
+
+                const nodes = new vis.DataSet();
+                const edges = new vis.DataSet();
+                const data = {nodes, edges}
                 const network = new vis.Network(this.graphElement.lastElementChild, data, options);
+                const interval = 32
+                let batch = this.graphData.nodes.length / interval * 2;
+                if (batch < 64) {
+                    batch = 64;
+                }
+                if (batch > 256) {
+                    batch = 256;
+                }
+                let i = 0;
+                setTimeout(() => {
+                    const addNodes = () => {
+                        const intervalId = setInterval(() => {
+                            const nodes = this.graphData.nodes.slice(i, i + batch);
+                            if (nodes.length === 0) {
+                                clearInterval(intervalId);
+                                return;
+                            }
+                            network.body.data.nodes.add(nodes);
+                            i += batch;
+                        }, interval);
+                    };
+                    addNodes();
+                });
+                setTimeout(() => {
+                    let j = 0;
+                    const addEdges = () => {
+                        const intervalId = setInterval(() => {
+                            const edges = this.graphData.links.slice(j, j + batch);
+                            if (edges.length === 0) {
+                                clearInterval(intervalId);
+                                return;
+                            }
+                            network.body.data.edges.add(edges);
+                            j += batch;
+                        }, interval);
+                    };
+                    addEdges();
+                });
                 this.network = network;
                 network.on("stabilizationIterationsDone", () => {
                     network.physics.stopSimulation();
@@ -653,6 +692,7 @@ export class Graph extends Model {
                 });
                 network.on("stabilizationProgress", (data: any) => {
                     this.graphElement.firstElementChild.firstElementChild.setAttribute("style", `width:${Math.max(5, data.iterations) / data.total * 100}%`);
+                    console.log("nodes: " + this.network.body.data.nodes.length);
                 });
                 network.on("click", (params: any) => {
                     if (params.nodes.length !== 1) {

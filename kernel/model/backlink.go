@@ -210,6 +210,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type && nil != n.Parent.Parent && ast.NodeDocument != n.Parent.Parent.Type) || nil != treenode.HeadingParent(n) {
 		// 仅在多于一层时才显示面包屑，这样界面展示更加简洁
 		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
+		// Improve the backlink panel breadcrumb and block sorting https://github.com/siyuan-note/siyuan/issues/13008
 		blockPaths = buildBlockBreadcrumb(n, nil, false)
 	}
 	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand, node: n}

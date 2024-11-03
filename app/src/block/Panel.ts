@@ -135,12 +135,7 @@ export class BlockPanel {
             }
         });
         /// #if !MOBILE
-        moveResize(this.element, (type: string) => {
-            if (type !== "move") {
-                this.editors.forEach(item => {
-                    resize(item.protyle);
-                });
-            }
+        moveResize(this.element, () => {
             const pinElement = this.element.firstElementChild.querySelector('[data-type="pin"]');
             pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
             pinElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");
@@ -260,6 +255,16 @@ export class BlockPanel {
             html += '</div><div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>';
         }
         this.element.innerHTML = html;
+        let resizeTimeout: number
+        const observerResize = new ResizeObserver((a, b) => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = window.setTimeout(() => {
+                this.editors.forEach(item => {
+                    resize(item.protyle);
+                });
+            }, Constants.TIMEOUT_TRANSITION)
+        });
+        observerResize.observe(this.element);
         const observer = new IntersectionObserver((e) => {
             e.forEach(item => {
                 if (item.isIntersecting && item.target.innerHTML === "") {

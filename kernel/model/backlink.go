@@ -58,6 +58,8 @@ type Backlink struct {
 	DOM        string       `json:"dom"`
 	BlockPaths []*BlockPath `json:"blockPaths"`
 	Expand     bool         `json:"expand"`
+
+	node *ast.Node // 仅用于按文档内容顺序排序
 }
 
 func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (ret []*Backlink) {
@@ -93,12 +95,20 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
 
+	var refTree *parse.Tree
 	trees := filesys.LoadTrees(mentionBlockIDs)
 	for id, tree := range trees {
 		backlink := buildBacklink(id, tree, mentionKeywords, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
+		if nil != tree && nil == refTree {
+			refTree = tree
+		}
+	}
+
+	if 0 < len(trees) {
+		sortBacklinks(ret, refTree)
 	}
 	return
 }
@@ -139,7 +149,29 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 			ret = append(ret, backlink)
 		}
 	}
+
+	sortBacklinks(ret, refTree)
 	return
+}
+
+func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
+	contentSorts := map[string]int{}
+	sortVal := 0
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		contentSorts[n.ID] = sortVal
+		sortVal++
+		return ast.WalkContinue
+	})
+
+	sort.Slice(backlinks, func(i, j int) bool {
+		s1 := contentSorts[backlinks[i].node.ID]
+		s2 := contentSorts[backlinks[j].node.ID]
+		return s1 < s2
+	})
 }
 
 func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEngine *lute.Lute) (ret *Backlink) {
@@ -175,12 +207,13 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	blockPaths := []*BlockPath{}
-	if nil != n.Parent && ast.NodeDocument != n.Parent.Type && nil != n.Parent.Parent && ast.NodeDocument != n.Parent.Parent.Type {
+	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type && nil != n.Parent.Parent && ast.NodeDocument != n.Parent.Parent.Type) || nil != treenode.HeadingParent(n) {
 		// 仅在多于一层时才显示面包屑，这样界面展示更加简洁
 		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
+		// Improve the backlink panel breadcrumb and block sorting https://github.com/siyuan-note/siyuan/issues/13008
 		blockPaths = buildBlockBreadcrumb(n, nil, false)
 	}
-	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand}
+	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand, node: n}
 	return
 }
 

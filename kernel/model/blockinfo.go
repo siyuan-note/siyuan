@@ -507,6 +507,11 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentN
 			}
 
 			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {
+				if b.ParentIs(ast.NodeListItem) {
+					// 标题在列表下时不显示 https://github.com/siyuan-note/siyuan/issues/13008
+					continue
+				}
+
 				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes), maxNameLen)
 				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{

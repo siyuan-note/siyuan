@@ -259,14 +259,14 @@ export class BlockPanel {
             html += '</div><div class="resize__rd"></div><div class="resize__ld"></div><div class="resize__lt"></div><div class="resize__rt"></div><div class="resize__r"></div><div class="resize__d"></div><div class="resize__t"></div><div class="resize__l"></div>';
         }
         this.element.innerHTML = html;
-        let resizeTimeout: number
+        let resizeTimeout: number;
         this.observerResize = new ResizeObserver(() => {
             clearTimeout(resizeTimeout);
             resizeTimeout = window.setTimeout(() => {
                 this.editors.forEach(item => {
                     resize(item.protyle);
                 });
-            }, Constants.TIMEOUT_TRANSITION)
+            }, Constants.TIMEOUT_TRANSITION);
         });
         this.observerResize.observe(this.element);
         this.observerLoad = new IntersectionObserver((e) => {

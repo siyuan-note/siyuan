@@ -76,7 +76,7 @@ export class Gutter {
                 .replace(/⌘/g, "Ctrl+").replace(/⌥/g, "Alt+").replace(/⇧/g, "Shift+").replace(/⌃/g, "Ctrl+");
         }
         if (protyle.options.backlinkData) {
-            this.gutterTip = this.gutterTip.replace(window.siyuan.languages.enter, window.siyuan.languages.openBy)
+            this.gutterTip = this.gutterTip.replace(window.siyuan.languages.enter, window.siyuan.languages.openBy);
         }
         this.element = document.createElement("div");
         this.element.className = "protyle-gutters";

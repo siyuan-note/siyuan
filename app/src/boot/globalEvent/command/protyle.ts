@@ -19,7 +19,7 @@ export const onlyProtyleCommand = (options: {
             topNodeElement.nextElementSibling?.classList.contains("list") && topNodeElement.previousElementSibling.classList.contains("protyle-action")) {
             topNodeElement = topNodeElement.parentElement;
         }
-        const id = topNodeElement.getAttribute("data-node-id")
+        const id = topNodeElement.getAttribute("data-node-id");
         if (options.protyle.options.backlinkData) {
             openFileById({
                 app: options.protyle.app,

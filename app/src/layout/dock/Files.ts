@@ -150,13 +150,13 @@ export class Files extends Model {
                     });
                     break;
                 } else if (type === "toggle") {
-                    const svgElement = target.querySelector("svg")
+                    const svgElement = target.querySelector("svg");
                     if (svgElement.classList.contains("b3-list-item__arrow--open")) {
-                        this.closeElement.style.height = "30px"
+                        this.closeElement.style.height = "30px";
                         svgElement.classList.remove("b3-list-item__arrow--open");
                         this.closeElement.lastElementChild.classList.add("fn__none");
                     } else {
-                        this.closeElement.style.height = "40%"
+                        this.closeElement.style.height = "40%";
                         svgElement.classList.add("b3-list-item__arrow--open");
                         this.closeElement.lastElementChild.classList.remove("fn__none");
                     }
@@ -775,7 +775,7 @@ export class Files extends Model {
         if (!init) {
             return;
         }
-        const svgElement = this.closeElement.querySelector("svg")
+        const svgElement = this.closeElement.querySelector("svg");
         if (html !== "") {
             this.closeElement.style.height = "30px";
             svgElement.classList.remove("b3-list-item__arrow--open");
@@ -954,9 +954,9 @@ export class Files extends Model {
             tempElement.innerHTML = fileHTML;
             // 保持文件夹展开状态
             nextElement.querySelectorAll(":scope > .b3-list-item > .b3-list-item__toggle> .b3-list-item__arrow--open").forEach(item => {
-                const openLiElement = hasClosestByClassName(item, "b3-list-item")
+                const openLiElement = hasClosestByClassName(item, "b3-list-item");
                 if (openLiElement) {
-                    const tempOpenLiElement = tempElement.content.querySelector(`.b3-list-item[data-node-id="${openLiElement.getAttribute("data-node-id")}"]`)
+                    const tempOpenLiElement = tempElement.content.querySelector(`.b3-list-item[data-node-id="${openLiElement.getAttribute("data-node-id")}"]`);
                     tempOpenLiElement.after(openLiElement.nextElementSibling);
                     tempOpenLiElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
                 }

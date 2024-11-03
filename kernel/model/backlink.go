@@ -151,7 +151,33 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 
 	sortBacklinks(ret, refTree)
+
+	for i := len(ret) - 1; 0 < i; i-- {
+		curPaths := ret[i].BlockPaths
+		prevPaths := ret[i-1].BlockPaths
+		// 如果当前反链的面包屑和前一个反链的面包屑一致，则清空当前反链的面包屑以简化显示
+		if blockPathsEqual(curPaths, prevPaths) {
+			ret[i].BlockPaths = []*BlockPath{}
+		}
+	}
 	return
+}
+
+func blockPathsEqual(paths1, paths2 []*BlockPath) bool {
+	if len(paths1) != len(paths2) {
+		return false
+	}
+	if 2 < len(paths1) {
+		paths1 = paths1[:len(paths1)-1]
+		paths2 = paths2[:len(paths2)-1]
+	}
+
+	for i := range paths1 {
+		if paths1[i].ID != paths2[i].ID {
+			return false
+		}
+	}
+	return true
 }
 
 func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
@@ -206,12 +232,15 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	}
 
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
-	blockPaths := []*BlockPath{}
+	var blockPaths []*BlockPath
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type) || 0 != treenode.HeadingLevel(n) {
 		// 仅在多于一层时才显示面包屑，这样界面展示更加简洁
 		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
 		// Improve the backlink panel breadcrumb and block sorting https://github.com/siyuan-note/siyuan/issues/13008
 		blockPaths = buildBlockBreadcrumb(n, nil, false)
+	}
+	if 1 > len(blockPaths) {
+		blockPaths = []*BlockPath{}
 	}
 	ret = &Backlink{DOM: dom, BlockPaths: blockPaths, Expand: expand, node: n}
 	return

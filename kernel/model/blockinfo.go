@@ -420,7 +420,7 @@ func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, e
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentNodeContent bool) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentNode bool) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -481,9 +481,8 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentN
 		name = strings.ReplaceAll(name, editor.Caret, "")
 		name = util.EscapeHTML(name)
 
-		if parent == node && !displayCurrentNodeContent {
-			// 反链中不显示当前块内容 https://github.com/siyuan-note/siyuan/issues/12862#issuecomment-2426406327
-			name = ""
+		if parent == node && !displayCurrentNode {
+			add = false
 		}
 
 		if add {

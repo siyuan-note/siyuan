@@ -23,7 +23,6 @@ export class Graph extends Model {
     private network: any;
     public blockId: string; // "local" / "pin" 必填
     public rootId: string; // "local" 必填
-    private timeout: number;
     public graphData: {
         nodes: { box: string, id: string, path: string, type: string, color: IObject }[],
         links: Record<string, unknown>[],
@@ -255,8 +254,7 @@ export class Graph extends Model {
 <div class="fn__hr"></div>
 <button class="b3-button b3-button--small fn__block">${window.siyuan.languages.reset}</button>`;
         }
-        this.element.innerHTML = `
-<div class="block__icons"> 
+        this.element.innerHTML = `<div class="block__icons"> 
     <div class="block__logo">
         <svg class="block__logoicon"><use xlink:href="#icon${this.type === "global" ? "GlobalGraph" : "Graph"}"></use></svg>${this.type === "global" ? window.siyuan.languages.globalGraph : window.siyuan.languages.graphView}
     </div>
@@ -280,7 +278,7 @@ export class Graph extends Model {
 <div class="graph__panel">
     ${panelHTML}
 </div>
-<div class="fn__flex-1 graph__svg"><div class="graph__loading"><div></div></div><div style="height: 100%"></div></div>`;
+<div class="fn__flex-1 graph__svg"></div>`;
         this.graphElement = this.element.querySelector(".graph__svg");
         this.inputElement = this.element.querySelector("input");
         this.panelElement = this.element.querySelector(".graph__panel") as HTMLElement;
@@ -481,7 +479,7 @@ export class Graph extends Model {
         }
     }
 
-    public hlNode(id: string) {
+    private hlNode(id: string) {
         if (this.graphElement.clientHeight === 0 || !this.network || this.network.findNode(id).length === 0) {
             return;
         }
@@ -503,7 +501,6 @@ export class Graph extends Model {
             if (this.network) {
                 this.network.destroy();
             }
-            this.graphElement.firstElementChild.classList.add("fn__none");
             return;
         }
         // 使用颜色
@@ -556,196 +553,176 @@ export class Graph extends Model {
                 item.color = {color: rootStyle.getPropertyValue("--b3-graph-line").trim()};
             }
         });
-        clearTimeout(this.timeout);
         addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
-            this.timeout = window.setTimeout(() => {
-                if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
-                    if (this.network) {
-                        this.network.destroy();
+            if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
+                if (this.network) {
+                    this.network.destroy();
+                }
+                return;
+            }
+            const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
+            const options = {
+                autoResize: true,
+                interaction: {
+                    hover: true,
+                },
+                nodes: {
+                    borderWidth: 0,
+                    borderWidthSelected: 5,
+                    shape: "dot",
+                    font: {
+                        face: rootStyle.getPropertyValue("--b3-font-family-graph").trim(),
+                        size: 32,
+                        color: rootStyle.getPropertyValue("--b3-theme-on-background").trim(),
+                    },
+                    color: {
+                        hover: {
+                            border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
+                            background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
+                        },
+                        highlight: {
+                            border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
+                            background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
+                        },
                     }
-                    this.graphElement.firstElementChild.classList.add("fn__none");
+                },
+                edges: {
+                    width: config.d3.linkWidth,
+                    arrowStrikethrough: false,
+                    smooth: false,
+                    color: {
+                        opacity: config.d3.lineOpacity,
+                        hover: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
+                        highlight: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
+                    }
+                },
+                layout: {
+                    randomSeed: 0,
+                    improvedLayout: false,
+                },
+                physics: {
+                    enabled: true,
+                    forceAtlas2Based: {
+                        theta: 0.5,
+                        gravitationalConstant: -config.d3.collideRadius,
+                        centralGravity: config.d3.centerStrength,
+                        springConstant: config.d3.collideStrength,
+                        springLength: config.d3.linkDistance,
+                        damping: 0.4,
+                        avoidOverlap: 0.5
+                    },
+                    maxVelocity: 50,
+                    minVelocity: 0.1,
+                    solver: "forceAtlas2Based",
+                    stabilization: {
+                        enabled: true,
+                        iterations: 256,
+                        updateInterval: 64,
+                        onlyDynamicEdges: false,
+                        fit: true
+                    },
+                    timestep: 0.5,
+                    adaptiveTimestep: true,
+                    wind: {x: 0, y: 0}
+                },
+            };
+            let j = Math.max(Math.ceil(this.graphData.nodes.length * 0.1), 128);
+            const nodes = new vis.DataSet(this.graphData.nodes.slice(0, j));
+            const edges = new vis.DataSet();
+            const network = new vis.Network(this.graphElement, {nodes, edges}, options);
+            const time = 256;
+            let batch = this.graphData.nodes.length / time / 2;
+            if (batch < 64) {
+                batch = 64;
+            }
+            if (batch > 256) {
+                batch = 256;
+            }
+            let i = 0;
+            const intervalNode = setInterval(() => {
+                const nodes = this.graphData.nodes.slice(j, j + batch);
+                if (nodes.length === 0) {
+                    clearInterval(intervalNode);
                     return;
                 }
-                this.graphElement.firstElementChild.classList.remove("fn__none");
-                this.graphElement.firstElementChild.firstElementChild.setAttribute("style", "width:3%");
-                const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
-                const options = {
-                    autoResize: true,
-                    interaction: {
-                        hover: true,
-                    },
-                    nodes: {
-                        borderWidth: 0,
-                        borderWidthSelected: 5,
-                        shape: "dot",
-                        font: {
-                            face: rootStyle.getPropertyValue("--b3-font-family-graph").trim(),
-                            size: 32,
-                            color: rootStyle.getPropertyValue("--b3-theme-on-background").trim(),
-                        },
-                        color: {
-                            hover: {
-                                border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
-                                background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
-                            },
-                            highlight: {
-                                border: rootStyle.getPropertyValue("--b3-graph-hl-point").trim(),
-                                background: rootStyle.getPropertyValue("--b3-graph-hl-point").trim()
-                            },
-                        }
-                    },
-                    edges: {
-                        width: config.d3.linkWidth,
-                        arrowStrikethrough: false,
-                        smooth: false,
-                        color: {
-                            opacity: config.d3.lineOpacity,
-                            hover: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
-                            highlight: rootStyle.getPropertyValue("--b3-graph-hl-line").trim(),
-                        }
-                    },
-                    layout: {
-                        randomSeed: 0,
-                        improvedLayout: false,
-                    },
-                    physics: {
-                        enabled: true,
-                        forceAtlas2Based: {
-                            theta: 0.5,
-                            gravitationalConstant: -config.d3.collideRadius,
-                            centralGravity: config.d3.centerStrength,
-                            springConstant: config.d3.collideStrength,
-                            springLength: config.d3.linkDistance,
-                            damping: 0.4,
-                            avoidOverlap: 0.5
-                        },
-                        maxVelocity: 50,
-                        minVelocity: 0.1,
-                        solver: "forceAtlas2Based",
-                        stabilization: {
-                            enabled: true,
-                            iterations: 256,
-                            updateInterval: 64,
-                            onlyDynamicEdges: false,
-                            fit: true
-                        },
-                        timestep: 0.5,
-                        adaptiveTimestep: true,
-                        wind: {x: 0, y: 0}
-                    },
-                };
-
-                const nodes = new vis.DataSet();
-                const edges = new vis.DataSet();
-                const data = {nodes, edges}
-                const network = new vis.Network(this.graphElement.lastElementChild, data, options);
-                const interval = 32
-                let batch = this.graphData.nodes.length / interval * 2;
-                if (batch < 64) {
-                    batch = 64;
+                network.body.data.nodes.add(nodes);
+                j += batch;
+            }, time / 8);
+            const intervalId = setInterval(() => {
+                const edges = this.graphData.links.slice(i, i + batch);
+                if (edges.length === 0) {
+                    clearInterval(intervalId);
+                    network.fit({
+                        animation: true
+                    });
+                    return;
                 }
-                if (batch > 256) {
-                    batch = 256;
+                network.body.data.edges.add(edges);
+                i += batch;
+            }, time);
+            this.network = network;
+            network.on("stabilizationIterationsDone", () => {
+                network.physics.stopSimulation();
+                if (hl) {
+                    this.hlNode(this.blockId);
                 }
-                let i = 0;
+            });
+            network.on("dragEnd", () => {
                 setTimeout(() => {
-                    const addNodes = () => {
-                        const intervalId = setInterval(() => {
-                            const nodes = this.graphData.nodes.slice(i, i + batch);
-                            if (nodes.length === 0) {
-                                clearInterval(intervalId);
-                                return;
-                            }
-                            network.body.data.nodes.add(nodes);
-                            i += batch;
-                        }, interval);
-                    };
-                    addNodes();
-                });
-                setTimeout(() => {
-                    let j = 0;
-                    const addEdges = () => {
-                        const intervalId = setInterval(() => {
-                            const edges = this.graphData.links.slice(j, j + batch);
-                            if (edges.length === 0) {
-                                clearInterval(intervalId);
-                                return;
-                            }
-                            network.body.data.edges.add(edges);
-                            j += batch;
-                        }, interval);
-                    };
-                    addEdges();
-                });
-                this.network = network;
-                network.on("stabilizationIterationsDone", () => {
                     network.physics.stopSimulation();
-                    this.graphElement.firstElementChild.classList.add("fn__none");
-                    if (hl) {
-                        this.hlNode(this.blockId);
-                    }
-                });
-                network.on("dragEnd", () => {
-                    setTimeout(() => {
-                        network.physics.stopSimulation();
-                    }, 5000);
-                });
-                network.on("stabilizationProgress", (data: any) => {
-                    this.graphElement.firstElementChild.firstElementChild.setAttribute("style", `width:${Math.max(5, data.iterations) / data.total * 100}%`);
-                    console.log("nodes: " + this.network.body.data.nodes.length);
-                });
-                network.on("click", (params: any) => {
-                    if (params.nodes.length !== 1) {
-                        return;
-                    }
-                    const node = this.graphData.nodes.find((item) => item.id === params.nodes[0]);
-                    if (!node) {
-                        return;
-                    }
-                    if (-1 < node.type.indexOf("tag")) {
-                        openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed);
-                        return;
-                    }
-                    if (window.siyuan.shiftIsPressed) {
-                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                            openFileById({
-                                app: this.app,
-                                id: node.id,
-                                position: "bottom",
-                                action,
-                                zoomIn
-                            });
-                        });
-                    } else if (window.siyuan.altIsPressed) {
-                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                            openFileById({
-                                app: this.app,
-                                id: node.id,
-                                position: "right",
-                                action,
-                                zoomIn
-                            });
-                        });
-                    } else if (window.siyuan.ctrlIsPressed) {
-                        window.siyuan.blockPanels.push(new BlockPanel({
+                }, 5000);
+            });
+            network.on("click", (params: any) => {
+                if (params.nodes.length !== 1) {
+                    return;
+                }
+                const node = this.graphData.nodes.find((item) => item.id === params.nodes[0]);
+                if (!node) {
+                    return;
+                }
+                if (-1 < node.type.indexOf("tag")) {
+                    openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed);
+                    return;
+                }
+                if (window.siyuan.shiftIsPressed) {
+                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                        openFileById({
                             app: this.app,
-                            isBacklink: false,
-                            x: params.event.center.x,
-                            y: params.event.center.y,
-                            nodeIds: [node.id],
-                        }));
-                    } else {
-                        checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
-                            openFileById({
-                                app: this.app,
-                                id: node.id,
-                                action,
-                                zoomIn
-                            });
+                            id: node.id,
+                            position: "bottom",
+                            action,
+                            zoomIn
                         });
-                    }
-                });
-            }, 1000);
+                    });
+                } else if (window.siyuan.altIsPressed) {
+                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                        openFileById({
+                            app: this.app,
+                            id: node.id,
+                            position: "right",
+                            action,
+                            zoomIn
+                        });
+                    });
+                } else if (window.siyuan.ctrlIsPressed) {
+                    window.siyuan.blockPanels.push(new BlockPanel({
+                        app: this.app,
+                        isBacklink: false,
+                        x: params.event.center.x,
+                        y: params.event.center.y,
+                        nodeIds: [node.id],
+                    }));
+                } else {
+                    checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {
+                        openFileById({
+                            app: this.app,
+                            id: node.id,
+                            action,
+                            zoomIn
+                        });
+                    });
+                }
+            });
         });
     }
 }

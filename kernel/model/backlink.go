@@ -167,8 +167,8 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 
 func filterBlockPaths(blockLinks []*Backlink) {
 	for _, b := range blockLinks {
-		if 1 == len(b.BlockPaths) && "NodeDocument" == b.BlockPaths[0].Type {
-			// 如果只有根文档这一层则不显示
+		if 2 == len(b.BlockPaths) {
+			// 根下只有一层则不显示
 			b.BlockPaths = []*BlockPath{}
 		}
 	}
@@ -246,10 +246,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type) || (ast.NodeHeading != n.Type && 0 < treenode.HeadingLevel(n)) {
-		// 仅在多于一层时才显示面包屑，这样界面展示更加简洁
-		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
-		// Improve the backlink panel breadcrumb and block sorting https://github.com/siyuan-note/siyuan/issues/13008
-		blockPaths = buildBlockBreadcrumb(n, nil, false)
+		blockPaths = buildBlockBreadcrumb(n, nil)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

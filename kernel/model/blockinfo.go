@@ -416,11 +416,11 @@ func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, e
 		return
 	}
 
-	ret = buildBlockBreadcrumb(node, excludeTypes, true)
+	ret = buildBlockBreadcrumb(node, excludeTypes)
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentNode bool) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -481,8 +481,8 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentN
 		name = strings.ReplaceAll(name, editor.Caret, "")
 		name = util.EscapeHTML(name)
 
-		if parent == node && !displayCurrentNode {
-			add = false
+		if parent == node {
+			name = ""
 		}
 
 		if add {

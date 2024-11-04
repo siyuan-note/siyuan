@@ -56,7 +56,8 @@
       padding: 4px 8px;
       color: var(--b3-theme-on-surface);
       max-width: 10vw;
-      word-break: break-all;
+      white-space: break-spaces;
+      @include text-clamp(3);
     }
   }
 }

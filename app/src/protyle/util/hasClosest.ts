@@ -1,5 +1,5 @@
 export const hasClosestByTag = (element: Node, nodeName: string) => {
-    if (!element) {
+    if (!element || element.nodeType === 9) {
         return false;
     }
     if (element.nodeType === 3) {
@@ -63,7 +63,7 @@ export const hasTopClosestByAttribute = (element: Node, attr: string, value: str
 };
 
 export const hasClosestByAttribute = (element: Node, attr: string, value: string | null, top = false) => {
-    if (!element) {
+    if (!element || element.nodeType === 9) {
         return false;
     }
     if (element.nodeType === 3) {
@@ -92,7 +92,7 @@ export const hasClosestBlock = (element: Node) => {
 };
 
 export const hasClosestByMatchTag = (element: Node, nodeName: string) => {
-    if (!element) {
+    if (!element || element.nodeType === 9) {
         return false;
     }
     if (element.nodeType === 3) {
@@ -111,7 +111,7 @@ export const hasClosestByMatchTag = (element: Node, nodeName: string) => {
 };
 
 export const hasClosestByClassName = (element: Node, className: string, top = false) => {
-    if (!element) {
+    if (!element || element.nodeType === 9) {
         return false;
     }
     if (element.nodeType === 3) {

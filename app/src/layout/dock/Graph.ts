@@ -510,10 +510,8 @@ export class Graph extends Model {
             // 界面没有渲染时不能进行渲染
             return;
         }
+        this.network?.destroy();
         if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
-            if (this.network) {
-                this.network.destroy();
-            }
             return;
         }
         // 使用颜色
@@ -567,10 +565,8 @@ export class Graph extends Model {
             }
         });
         addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
+            this.network?.destroy();
             if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
-                if (this.network) {
-                    this.network.destroy();
-                }
                 return;
             }
             const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];

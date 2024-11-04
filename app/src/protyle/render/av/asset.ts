@@ -252,14 +252,16 @@ ${window.siyuan.languages.title}
             });
         }
     });
-    menu.addItem({
-        label: window.siyuan.languages.rename,
-        icon: "iconEdit",
-        click() {
-            renameAsset(linkAddress);
-            document.querySelector(".av__panel")?.remove();
-        }
-    });
+    if (linkAddress?.startsWith("assets/")) {
+        menu.addItem({
+            label: window.siyuan.languages.rename,
+            icon: "iconEdit",
+            click() {
+                renameAsset(linkAddress);
+                document.querySelector(".av__panel")?.remove();
+            }
+        });
+    }
     menu.addSeparator();
     if (type !== "file") {
         menu.addItem({

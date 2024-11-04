@@ -313,10 +313,13 @@ export class Gutter {
             }
             if (isOnlyMeta(event)) {
                 if (protyle.options.backlinkData) {
-                    openFileById({
-                        app: protyle.app,
-                        id,
-                        action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                    checkFold(id, (zoomIn, action) => {
+                        openFileById({
+                            app: protyle.app,
+                            id,
+                            action,
+                            zoomIn
+                        });
                     });
                 } else {
                     zoomOut({protyle, id});

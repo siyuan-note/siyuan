@@ -624,12 +624,12 @@ export class Graph extends Model {
                         damping: 0.4,
                         avoidOverlap: 0.5
                     },
-                    maxVelocity: 50,
-                    minVelocity: 0.1,
+                    maxVelocity: 512,
+                    minVelocity: 64,
                     solver: "forceAtlas2Based",
                     stabilization: {
                         enabled: true,
-                        iterations: 256,
+                        iterations: 64,
                         updateInterval: 64,
                         onlyDynamicEdges: false,
                         fit: false
@@ -646,11 +646,11 @@ export class Graph extends Model {
             const time = 256;
             const intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
             let batch = this.graphData.nodes.length / time / 2;
-            if (batch < 32) {
-                batch = 32;
+            if (batch < 64) {
+                batch = 64;
             }
-            if (batch > 128) {
-                batch = 128;
+            if (batch > 256) {
+                batch = 256;
             }
             let count = 0;
             const intervalNode = setInterval(() => {
@@ -666,7 +666,7 @@ export class Graph extends Model {
                 network.body.data.nodes.add(nodesAdded);
                 i += batch;
                 count++;
-                if (0 === count % (batch / 8)) {
+                if (0 === count % (batch / 128)) {
                     network.fit({animation: false});
                 }
             }, intervalNodeTime);

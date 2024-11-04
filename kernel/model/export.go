@@ -1536,6 +1536,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	refTrees := map[string]*parse.Tree{}
 	luteEngine := util.NewLute()
 	for i, p := range docPaths {
+		if !strings.HasSuffix(p, ".sy") {
+			continue
+		}
+
 		tree, err := filesys.LoadTree(boxID, p, luteEngine)
 		if err != nil {
 			continue
@@ -1622,7 +1626,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		assets = append(assets, assetsLinkDestsInTree(tree)...)
 		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
 		if "" != titleImgPath {
-			assets = append(assets, titleImgPath)
+			if util.IsAssetLinkDest([]byte(titleImgPath)) {
+				assets = append(assets, titleImgPath)
+			}
 		}
 
 		for _, asset := range assets {
@@ -1697,7 +1703,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 					for _, value := range keyValues.Values {
 						for _, asset := range value.MAsset {
-							if !treenode.IsRelativePath([]byte(asset.Content)) {
+							if !util.IsAssetLinkDest([]byte(asset.Content)) {
 								continue
 							}
 

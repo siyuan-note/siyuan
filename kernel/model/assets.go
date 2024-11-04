@@ -1001,7 +1001,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
 					dest := kv[1]
-					if "" == dest || !treenode.IsRelativePath([]byte(dest)) {
+					if "" == dest || !util.IsAssetLinkDest([]byte(dest)) {
 						continue
 					}
 					ret = append(ret, dest)
@@ -1017,21 +1017,21 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !treenode.IsRelativePath(n.Tokens) {
+			if !util.IsAssetLinkDest(n.Tokens) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref)) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
 				return ast.WalkContinue
 			}
 
@@ -1057,7 +1057,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 
 						for _, asset := range value.MAsset {
 							dest := asset.Content
-							if !treenode.IsRelativePath([]byte(dest)) {
+							if !util.IsAssetLinkDest([]byte(dest)) {
 								continue
 							}
 
@@ -1068,7 +1068,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 					for _, value := range keyValues.Values {
 						if nil != value.URL {
 							dest := value.URL.Content
-							if !treenode.IsRelativePath([]byte(dest)) {
+							if !util.IsAssetLinkDest([]byte(dest)) {
 								continue
 							}
 
@@ -1085,7 +1085,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if "" == dataAssets || !treenode.IsRelativePath([]byte(dataAssets)) {
+				if "" == dataAssets || !util.IsAssetLinkDest([]byte(dataAssets)) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)

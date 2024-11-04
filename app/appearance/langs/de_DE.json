@@ -134,6 +134,7 @@
     "inlineMath": "Inline-Formel",
     "inlineMemo": "Inline-Notiz",
     "blockRef": "Referenz-Ankertext",
+    "fileAnnotationRef": "PDF-Anmerkungsankertext",
     "kbd": "Tastatur",
     "mark": "Markierung",
     "s": "Durchgestrichen",

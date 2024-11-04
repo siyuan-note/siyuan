@@ -195,29 +195,31 @@ type CriterionTypes struct {
 }
 
 type CriterionReplaceTypes struct {
-	Text       bool `json:"text"`
-	ImgText    bool `json:"imgText"`
-	ImgTitle   bool `json:"imgTitle"`
-	ImgSrc     bool `json:"imgSrc"`
-	AText      bool `json:"aText"`
-	ATitle     bool `json:"aTitle"`
-	AHref      bool `json:"aHref"`
-	Code       bool `json:"code"`
-	Em         bool `json:"em"`
-	Strong     bool `json:"strong"`
-	InlineMath bool `json:"inlineMath"`
-	InlineMemo bool `json:"inlineMemo"`
-	Kbd        bool `json:"kbd"`
-	Mark       bool `json:"mark"`
-	S          bool `json:"s"`
-	Sub        bool `json:"sub"`
-	Sup        bool `json:"sup"`
-	Tag        bool `json:"tag"`
-	U          bool `json:"u"`
-	DocTitle   bool `json:"docTitle"`
-	CodeBlock  bool `json:"codeBlock"`
-	MathBlock  bool `json:"mathBlock"`
-	HtmlBlock  bool `json:"htmlBlock"`
+	Text              bool `json:"text"`
+	ImgText           bool `json:"imgText"`
+	ImgTitle          bool `json:"imgTitle"`
+	ImgSrc            bool `json:"imgSrc"`
+	AText             bool `json:"aText"`
+	ATitle            bool `json:"aTitle"`
+	AHref             bool `json:"aHref"`
+	Code              bool `json:"code"`
+	Em                bool `json:"em"`
+	Strong            bool `json:"strong"`
+	InlineMath        bool `json:"inlineMath"`
+	InlineMemo        bool `json:"inlineMemo"`
+	BlockRef          bool `json:"blockRef"`
+	FileAnnotationRef bool `json:"fileAnnotationRef"`
+	Kbd               bool `json:"kbd"`
+	Mark              bool `json:"mark"`
+	S                 bool `json:"s"`
+	Sub               bool `json:"sub"`
+	Sup               bool `json:"sup"`
+	Tag               bool `json:"tag"`
+	U                 bool `json:"u"`
+	DocTitle          bool `json:"docTitle"`
+	CodeBlock         bool `json:"codeBlock"`
+	MathBlock         bool `json:"mathBlock"`
+	HtmlBlock         bool `json:"htmlBlock"`
 }
 
 var criteriaLock = sync.Mutex{}

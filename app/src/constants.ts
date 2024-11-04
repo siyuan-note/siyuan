@@ -622,6 +622,7 @@ export abstract class Constants {
         "inlineMath": false,
         "inlineMemo": true,
         "blockRef": false,
+        "fileAnnotationRef": false,
         "kbd": true,
         "mark": true,
         "s": true,

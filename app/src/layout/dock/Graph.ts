@@ -505,6 +505,10 @@ export class Graph extends Model {
         this.network.selectNodes([id]);
     }
 
+    public destroy() {
+        this.network?.destroy();
+    }
+
     public onGraph(hl: boolean) {
         if (this.graphElement.clientHeight === 0) {
             // 界面没有渲染时不能进行渲染

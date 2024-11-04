@@ -534,8 +534,12 @@ export class Dock {
                 clearTimeout(this.hideResizeTimeout);
                 this.hideDock();
             }
-            if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
-                document.getElementById("drag")?.classList.remove("fn__hidden");
+            if ((type === "graph" || type === "globalGraph")) {
+                if (this.layout.element.querySelector(".fullscreen")) {
+                    document.getElementById("drag")?.classList.remove("fn__hidden");
+                }
+                const graph = this.data[type] as Graph
+                graph.destroy();
             }
             // 关闭 dock 后设置光标，初始化的时候不能设置，否则关闭文档树且多页签时会请求两次 getDoc
             if (isSaveLayout && !document.querySelector(".layout__center .layout__wnd--active")) {
@@ -752,6 +756,10 @@ export class Dock {
         }
         resizeTabs(isSaveLayout);
         this.showDock();
+        if (target.classList.contains("dock__item--active") && !hide && (type === "graph" || type === "globalGraph")) {
+            const graph = this.data[type] as Graph
+            graph.onGraph(false);
+        }
     }
 
     public add(index: number, sourceElement: Element, previousType?: string) {
@@ -794,7 +802,7 @@ export class Dock {
         saveLayout();
     }
 
-    public remove(key: TDock|string) {
+    public remove(key: TDock | string) {
         this.toggleModel(key, false, true, true);
         this.element.querySelector(`[data-type="${key}"]`).remove();
         const custom = this.data[key] as Custom;

@@ -632,37 +632,43 @@ export class Graph extends Model {
                         iterations: 256,
                         updateInterval: 64,
                         onlyDynamicEdges: false,
-                        fit: true
+                        fit: false
                     },
                     timestep: 0.5,
                     adaptiveTimestep: true,
                     wind: {x: 0, y: 0}
                 },
             };
-            let j = Math.max(Math.ceil(this.graphData.nodes.length * 0.1), 128);
-            const nodes = new vis.DataSet(this.graphData.nodes.slice(0, j));
+            let i = Math.max(Math.ceil(this.graphData.nodes.length * 0.1), 128);
+            const nodes = new vis.DataSet(this.graphData.nodes.slice(0, i));
             const edges = new vis.DataSet();
             const network = new vis.Network(this.graphElement, {nodes, edges}, options);
             const time = 256;
+            let intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
             let batch = this.graphData.nodes.length / time / 2;
-            if (batch < 64) {
-                batch = 64;
+            if (batch < 32) {
+                batch = 32;
             }
-            if (batch > 256) {
-                batch = 256;
+            if (batch > 128) {
+                batch = 128;
             }
-            let i = 0;
+            let count = 0;
             const intervalNode = setInterval(() => {
-                const nodes = this.graphData.nodes.slice(j, j + batch);
+                const nodes = this.graphData.nodes.slice(i, i + batch);
                 if (nodes.length === 0) {
                     clearInterval(intervalNode);
                     return;
                 }
                 network.body.data.nodes.add(nodes);
-                j += batch;
-            }, time / 8);
+                i += batch;
+                count++;
+                if (0 === count % (batch / 8)) {
+                    network.fit({animation: false});
+                }
+            }, intervalNodeTime);
+            let j = 0;
             const intervalId = setInterval(() => {
-                const edges = this.graphData.links.slice(i, i + batch);
+                const edges = this.graphData.links.slice(j, j + batch);
                 if (edges.length === 0) {
                     clearInterval(intervalId);
                     network.fit({
@@ -671,7 +677,7 @@ export class Graph extends Model {
                     return;
                 }
                 network.body.data.edges.add(edges);
-                i += batch;
+                j += batch;
             }, time);
             this.network = network;
             network.on("stabilizationIterationsDone", () => {
@@ -683,7 +689,7 @@ export class Graph extends Model {
             network.on("dragEnd", () => {
                 setTimeout(() => {
                     network.physics.stopSimulation();
-                }, 5000);
+                }, 3000);
             });
             network.on("click", (params: any) => {
                 if (params.nodes.length !== 1) {

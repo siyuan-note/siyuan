@@ -182,7 +182,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");
             textPlain = textPlain.replace(/__@sup@__/g, "<sup>").replace(/__@\/sup@__/g, "</sup>");
             textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
-            textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u");
+            textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
             // insertHTML 会进行内部反转义

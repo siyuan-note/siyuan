@@ -109,6 +109,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	if 0 < len(trees) {
 		sortBacklinks(ret, refTree)
+		filterBlockPaths(ret)
 	}
 	return
 }
@@ -151,6 +152,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 
 	sortBacklinks(ret, refTree)
+	filterBlockPaths(ret)
 
 	for i := len(ret) - 1; 0 < i; i-- {
 		curPaths := ret[i].BlockPaths
@@ -158,6 +160,16 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 		// 如果当前反链的面包屑和前一个反链的面包屑一致，则清空当前反链的面包屑以简化显示
 		if blockPathsEqual(curPaths, prevPaths) {
 			ret[i].BlockPaths = []*BlockPath{}
+		}
+	}
+	return
+}
+
+func filterBlockPaths(blockLinks []*Backlink) {
+	for _, b := range blockLinks {
+		if 1 == len(b.BlockPaths) && "NodeDocument" == b.BlockPaths[0].Type {
+			// 如果只有根文档这一层则不显示
+			b.BlockPaths = []*BlockPath{}
 		}
 	}
 	return

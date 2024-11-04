@@ -1098,6 +1098,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 
 	if err != nil {
 		logging.LogErrorf("parse watermark failed: %s", err)
+		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
 

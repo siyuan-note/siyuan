@@ -64,7 +64,7 @@ export const openMobileFileById = (app: App, id: string, action: TProtyleAction[
             },
             typewriterMode: true,
             preview: {
-                actions: ["mp-wechat", "zhihu"]
+                actions: ["mp-wechat", "zhihu", "yuque"]
             }
         };
         if (window.siyuan.mobile.editor) {

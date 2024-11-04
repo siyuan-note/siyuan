@@ -887,7 +887,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	if breadcrumb {
-		blockPaths = buildBlockBreadcrumb(def, nil, true)
+		blockPaths = buildBlockBreadcrumb(def, nil)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

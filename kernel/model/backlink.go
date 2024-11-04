@@ -109,6 +109,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	if 0 < len(trees) {
 		sortBacklinks(ret, refTree)
+		ret = mergeNeighborBacklinks(ret)
 		filterBlockPaths(ret)
 	}
 	return
@@ -152,6 +153,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 
 	sortBacklinks(ret, refTree)
+	ret = mergeNeighborBacklinks(ret)
 	filterBlockPaths(ret)
 
 	for i := len(ret) - 1; 0 < i; i-- {
@@ -165,10 +167,48 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	return
 }
 
+func mergeNeighborBacklinks(blockLinks []*Backlink) (ret []*Backlink) {
+	// 如果反链中的节点是相邻的，则合并
+	for i := len(blockLinks) - 1; 0 < i; i-- {
+		if isPrevious(blockLinks[i].node, blockLinks[i-1].node) {
+			blockLinks[i-1].DOM += blockLinks[i].DOM
+			blockLinks[i] = nil
+			continue
+		}
+	}
+
+	for _, b := range blockLinks {
+		if nil != b {
+			ret = append(ret, b)
+		}
+	}
+	return
+}
+
+func isPrevious(cur, prev *ast.Node) bool {
+	if nil == cur || nil == prev {
+		return false
+	}
+	if cur.Previous == prev {
+		return true
+	}
+	for prevParent := prev.Parent; nil != prevParent; prevParent = prevParent.Parent {
+		if prev.Next == cur {
+			return true
+		}
+	}
+	for curParent := cur.Parent; nil != curParent; curParent = curParent.Parent {
+		if prev.Next == curParent {
+			return true
+		}
+	}
+	return false
+}
+
 func filterBlockPaths(blockLinks []*Backlink) {
 	for _, b := range blockLinks {
-		if 1 == len(b.BlockPaths) && "NodeDocument" == b.BlockPaths[0].Type {
-			// 如果只有根文档这一层则不显示
+		if 2 == len(b.BlockPaths) {
+			// 根下只有一层则不显示
 			b.BlockPaths = []*BlockPath{}
 		}
 	}
@@ -246,10 +286,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type) || (ast.NodeHeading != n.Type && 0 < treenode.HeadingLevel(n)) {
-		// 仅在多于一层时才显示面包屑，这样界面展示更加简洁
-		// The backlink panel no longer displays breadcrumbs of the first-level blocks https://github.com/siyuan-note/siyuan/issues/12862
-		// Improve the backlink panel breadcrumb and block sorting https://github.com/siyuan-note/siyuan/issues/13008
-		blockPaths = buildBlockBreadcrumb(n, nil, false)
+		blockPaths = buildBlockBreadcrumb(n, nil)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

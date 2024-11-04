@@ -1,5 +1,5 @@
 import {Tab} from "../Tab";
-import {setPanelFocus} from "../util";
+import {getInstanceById, setPanelFocus} from "../util";
 import {getDockByType} from "../tabUtil";
 import {Model} from "../Model";
 import {Constants} from "../../constants";
@@ -7,11 +7,12 @@ import {addScript} from "../../protyle/util/addScript";
 import {BlockPanel} from "../../block/Panel";
 import {fullscreen} from "../../protyle/breadcrumb/action";
 import {fetchPost} from "../../util/fetch";
-import {isCurrentEditor, openFileById} from "../../editor/util";
+import {openFileById} from "../../editor/util";
 import {updateHotkeyTip} from "../../protyle/util/compatibility";
 import {openGlobalSearch} from "../../search/util";
 import {App} from "../../index";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {Editor} from "../../editor";
 
 declare const vis: any;
 
@@ -469,8 +470,20 @@ export class Graph extends Model {
                 if (id) {
                     this.blockId = id;
                 }
-                if (!refresh && this.type === "pin" && this.blockId && !isCurrentEditor(this.blockId)) {
-                    return;
+                if (!refresh && this.type === "pin" && this.blockId) {
+                    const isActive = Array.from(document.querySelectorAll(".fn__flex > .layout-tab-bar > .item--focus")).find(activeElement => {
+                        const tab = getInstanceById(activeElement.getAttribute("data-id"));
+                        if (tab instanceof Tab && tab.model instanceof Editor) {
+                            if (tab.model.editor.protyle.block.rootID === this.blockId ||
+                                tab.model.editor.protyle.block.parentID === this.blockId ||
+                                tab.model.editor.protyle.block.id === this.blockId) {
+                                return true;
+                            }
+                        }
+                    })
+                    if (!isActive) {
+                        return;
+                    }
                 }
                 this.graphData = response.data;
                 window.siyuan.config.graph.local = response.data.conf;

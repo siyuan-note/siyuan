@@ -650,12 +650,12 @@ export class Graph extends Model {
             }
             let count = 0;
             const intervalNode = setInterval(() => {
-                const nodes = this.graphData.nodes.slice(i, i + batch);
-                if (nodes.length === 0) {
+                const nodesAdded = this.graphData.nodes.slice(i, i + batch);
+                if (nodesAdded.length === 0) {
                     clearInterval(intervalNode);
                     return;
                 }
-                network.body.data.nodes.add(nodes);
+                network.body.data.nodes.add(nodesAdded);
                 i += batch;
                 count++;
                 if (0 === count % (batch / 8)) {
@@ -663,16 +663,16 @@ export class Graph extends Model {
                 }
             }, intervalNodeTime);
             let j = 0;
-            const intervalId = setInterval(() => {
-                const edges = this.graphData.links.slice(j, j + batch);
-                if (edges.length === 0) {
-                    clearInterval(intervalId);
+            const intervalEdge = setInterval(() => {
+                const edgesAdded = this.graphData.links.slice(j, j + batch);
+                if (edgesAdded.length === 0) {
+                    clearInterval(intervalEdge);
                     network.fit({
                         animation: true
                     });
                     return;
                 }
-                network.body.data.edges.add(edges);
+                network.body.data.edges.add(edgesAdded);
                 j += batch;
             }, time);
             this.network = network;

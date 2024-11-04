@@ -169,7 +169,7 @@ func GetNodeSrcTokens(n *ast.Node) (ret string) {
 		src := n.Tokens[index+len("src=\""):]
 		if index = bytes.Index(src, []byte("\"")); 0 < index {
 			src = src[:bytes.Index(src, []byte("\""))]
-			if !IsRelativePath(src) {
+			if !util.IsAssetLinkDest(src) {
 				return
 			}
 
@@ -180,16 +180,6 @@ func GetNodeSrcTokens(n *ast.Node) (ret string) {
 		logging.LogWarnf("src is missing the closing double quote in tree [%s] ", n.Box+n.Path)
 	}
 	return
-}
-
-func IsRelativePath(dest []byte) bool {
-	if 1 > len(dest) {
-		return false
-	}
-	if '/' == dest[0] {
-		return false
-	}
-	return !bytes.Contains(dest, []byte(":"))
 }
 
 func FirstLeafBlock(node *ast.Node) (ret *ast.Node) {

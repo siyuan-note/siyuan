@@ -654,6 +654,10 @@ export class Graph extends Model {
             }
             let count = 0;
             const intervalNode = setInterval(() => {
+                if (!network.images) {
+                    clearInterval(intervalEdge);
+                    return;
+                }
                 const nodesAdded = this.graphData.nodes.slice(i, i + batch);
                 if (nodesAdded.length === 0) {
                     clearInterval(intervalNode);
@@ -668,6 +672,10 @@ export class Graph extends Model {
             }, intervalNodeTime);
             let j = 0;
             const intervalEdge = setInterval(() => {
+                if (!network.images) {
+                    clearInterval(intervalEdge);
+                    return;
+                }
                 const edgesAdded = this.graphData.links.slice(j, j + batch);
                 if (edgesAdded.length === 0) {
                     clearInterval(intervalEdge);

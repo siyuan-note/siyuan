@@ -574,6 +574,21 @@ export class Graph extends Model {
                 return;
             }
             const config = window.siyuan.config.graph[this.type === "global" ? "global" : "local"];
+            const timestep = 32 < this.graphData.nodes.length ? 0.1 : 0.5;
+            let maxVelocity = this.graphData.nodes.length;
+            if (this.graphData.nodes.length > 1024) {
+                maxVelocity = 1024;
+            }
+            if (this.graphData.nodes.length < 50) {
+                maxVelocity = 50;
+            }
+            let minVelocity = this.graphData.nodes.length;
+            if (this.graphData.nodes.length > 64) {
+                minVelocity = 64;
+            }
+            if (this.graphData.nodes.length < 16) {
+                minVelocity = 8;
+            }
             const options = {
                 autoResize: true,
                 interaction: {
@@ -624,25 +639,34 @@ export class Graph extends Model {
                         damping: 0.4,
                         avoidOverlap: 0.5
                     },
-                    maxVelocity: 512,
-                    minVelocity: 64,
+                    maxVelocity: maxVelocity,
+                    minVelocity: minVelocity,
                     solver: "forceAtlas2Based",
                     stabilization: {
                         enabled: true,
                         iterations: 64,
                         updateInterval: 64,
                         onlyDynamicEdges: false,
-                        fit: false
+                        fit: true
                     },
-                    timestep: 0.5,
+                    timestep: timestep,
                     adaptiveTimestep: true,
                     wind: {x: 0, y: 0}
                 },
             };
             let i = Math.max(Math.ceil(this.graphData.nodes.length * 0.1), 128);
+            let j = Math.max(Math.ceil(this.graphData.links.length * 0.1), 128);
             const nodes = new vis.DataSet(this.graphData.nodes.slice(0, i));
-            const edges = new vis.DataSet();
+            const edges = new vis.DataSet(this.graphData.links.slice(0, j));
             const network = new vis.Network(this.graphElement, {nodes, edges}, options);
+            const initialScale = Math.max(0.03, 1 - 0.3 * Math.floor(this.graphData.nodes.length / 128));
+            if (1 !== initialScale) {
+                network.moveTo({
+                    position: {x: 0, y: 0},
+                    scale: initialScale,
+                    animation: false
+                })
+            }
             const time = 256;
             const intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
             let batch = this.graphData.nodes.length / time / 2;
@@ -652,7 +676,6 @@ export class Graph extends Model {
             if (batch > 256) {
                 batch = 256;
             }
-            let count = 0;
             const intervalNode = setInterval(() => {
                 if (!network.images) {
                     clearInterval(intervalEdge);
@@ -665,12 +688,7 @@ export class Graph extends Model {
                 }
                 network.body.data.nodes.add(nodesAdded);
                 i += batch;
-                count++;
-                if (0 === count % (batch / 128)) {
-                    network.fit({animation: false});
-                }
             }, intervalNodeTime);
-            let j = 0;
             const intervalEdge = setInterval(() => {
                 if (!network.images) {
                     clearInterval(intervalEdge);

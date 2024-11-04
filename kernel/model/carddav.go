@@ -54,16 +54,28 @@ var (
 		// MaxResourceSize: math.MaxInt32,
 	}
 	contacts = Contacts{
-		M: sync.Map{},
+		Loaded:        false,
+		Changed:       false,
+		Lock:          sync.Mutex{},
+		Books:         sync.Map{},
+		BooksMetaData: []*carddav.AddressBook{},
 	}
 )
 
 type Contacts struct {
-	M sync.Map // Path -> *AddressBook
+	Loaded        bool
+	Changed       bool
+	Lock          sync.Mutex // load & save
+	Books         sync.Map   // Path -> *AddressBook
+	BooksMetaData []*carddav.AddressBook
 }
 
+// reload all contacts
 func (c *Contacts) reload() error {
-	c.M.Clear()
+	c.Lock.Lock()
+	defer c.Lock.Unlock()
+
+	c.Books.Clear()
 	addressBooksMetaDataFilePath := filepath.Join(util.DataDir, "storage", strings.TrimPrefix(CardDavAddressBooksMetaDataFilePath, "/"))
 	metaData, err := os.ReadFile(addressBooksMetaDataFilePath)
 	if os.IsNotExist(err) {
@@ -73,8 +85,8 @@ func (c *Contacts) reload() error {
 			return err
 		}
 
-		addressBooksMetaData := []*carddav.AddressBook{&defaultAddressBook}
-		data, err := gulu.JSON.MarshalIndentJSON(addressBooksMetaData, "", "  ")
+		c.BooksMetaData = []*carddav.AddressBook{&defaultAddressBook}
+		data, err := gulu.JSON.MarshalIndentJSON(c.BooksMetaData, "", "  ")
 		if err != nil {
 			logging.LogErrorf("marshal address books meta data failed: %s", err)
 			return err
@@ -86,32 +98,37 @@ func (c *Contacts) reload() error {
 		}
 	} else {
 		// load meta data file
-		addressBooksMetaData := []*carddav.AddressBook{}
-		if err = gulu.JSON.UnmarshalJSON(metaData, &addressBooksMetaData); err != nil {
+		c.BooksMetaData = []*carddav.AddressBook{}
+		if err = gulu.JSON.UnmarshalJSON(metaData, &c.BooksMetaData); err != nil {
 			logging.LogErrorf("unmarshal address books meta data failed: %s", err)
 			return err
 		}
 
 		wg := &sync.WaitGroup{}
-		wg.Add(len(addressBooksMetaData))
-		for _, addressBookMetaData := range addressBooksMetaData {
+		wg.Add(len(c.BooksMetaData))
+		for _, addressBookMetaData := range c.BooksMetaData {
 			addressBook := &AddressBook{
+				Changed:   false,
 				MetaData:  addressBookMetaData,
 				Addresses: sync.Map{},
 			}
-			c.M.Store(addressBookMetaData.Path, addressBook)
+			c.Books.Store(addressBookMetaData.Path, addressBook)
 			go addressBook.load(wg)
 		}
 		wg.Wait()
 	}
+	c.Loaded = true
+	c.Changed = false
 	return nil
 }
 
 type AddressBook struct {
+	Changed   bool
 	MetaData  *carddav.AddressBook
-	Addresses sync.Map // id -> *carddav.AddressObject
+	Addresses sync.Map // id -> *AddressObject
 }
 
+// load an address book from multiple *.vcf files
 func (b *AddressBook) load(wg *sync.WaitGroup) {
 	defer wg.Done()
 	addressBookPath := filepath.Join(util.DataDir, "storage", strings.TrimPrefix(b.MetaData.Path, "/"))
@@ -130,35 +147,13 @@ func (b *AddressBook) load(wg *sync.WaitGroup) {
 
 						addressFilePath := path.Join(addressBookPath, filename)
 
-						addressFileInfo, err := entry.Info()
-						if err != nil {
-							logging.LogErrorf("get file [%s] info failed: %s", addressFilePath, err)
-							return
-						}
-
-						// read file
-						addressData, err := os.ReadFile(addressFilePath)
-						if err != nil {
-							logging.LogErrorf("read file [%s] failed: %s", addressFilePath, err)
-							return
-						}
-
-						// decode file
-						reader := bytes.NewReader(addressData)
-						decoder := vcard.NewDecoder(reader)
-						card, err := decoder.Decode()
-						if err != nil {
-							logging.LogErrorf("decode file [%s] failed: %s", addressFilePath, err)
-							return
-						}
-
 						// load data
-						address := &carddav.AddressObject{
-							Path:          b.MetaData.Path + "/" + filename,
-							ModTime:       addressFileInfo.ModTime(),
-							ContentLength: addressFileInfo.Size(),
-							ETag:          fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size()),
-							Card:          card,
+						address := &AddressObject{
+							FilePath: addressFilePath,
+							BookPath: b.MetaData.Path,
+						}
+						if err := address.load(); err != nil {
+							return
 						}
 
 						id := path.Base(filename)
@@ -170,9 +165,95 @@ func (b *AddressBook) load(wg *sync.WaitGroup) {
 	}
 }
 
-func (b *AddressBook) save(wg *sync.WaitGroup) {
+// save an address book to multiple *.vcf files
+func (b *AddressBook) save(force bool, wg *sync.WaitGroup) {
 	defer wg.Done()
-	// TODO: save addresses data to files
+
+	b.Addresses.Range(func(id any, address any) bool {
+		// id_ := id.(string)
+		address_ := address.(*AddressObject)
+		address_.save(force)
+		return true
+	})
+}
+
+type AddressObject struct {
+	Changed  bool
+	FilePath string
+	BookPath string
+	Data     *carddav.AddressObject
+}
+
+// load an address from *.vcf file
+func (o *AddressObject) load() error {
+	// get file info
+	addressFileInfo, err := os.Stat(o.FilePath)
+	if err != nil {
+		logging.LogErrorf("get file [%s] info failed: %s", o.FilePath, err)
+		return err
+	}
+
+	// read file
+	addressData, err := os.ReadFile(o.FilePath)
+	if err != nil {
+		logging.LogErrorf("read file [%s] failed: %s", o.FilePath, err)
+		return err
+	}
+
+	// decode file
+	reader := bytes.NewReader(addressData)
+	decoder := vcard.NewDecoder(reader)
+	card, err := decoder.Decode()
+	if err != nil {
+		logging.LogErrorf("decode file [%s] failed: %s", o.FilePath, err)
+		return err
+	}
+
+	// load data
+	o.Changed = false
+	o.Data = &carddav.AddressObject{
+		Path:          o.BookPath + "/" + addressFileInfo.Name(),
+		ModTime:       addressFileInfo.ModTime(),
+		ContentLength: addressFileInfo.Size(),
+		ETag:          fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size()),
+		Card:          card,
+	}
+	return nil
+}
+
+// save an address to *.vcf file
+func (o *AddressObject) save(force bool) error {
+	if force || o.Changed {
+		var addressData bytes.Buffer
+
+		// encode data
+		encoder := vcard.NewEncoder(&addressData)
+		if err := encoder.Encode(o.Data.Card); err != nil {
+			logging.LogErrorf("encode card [%s] failed: %s", o.Data.Path, err)
+			return err
+		}
+
+		// write file
+		if err := os.WriteFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
+			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
+			return err
+		}
+
+		// update file info
+		addressFileInfo, err := os.Stat(o.FilePath)
+		if err != nil {
+			logging.LogErrorf("get file [%s] info failed: %s", o.FilePath, err)
+			return err
+		}
+
+		o.Data.Path = o.BookPath + "/" + addressFileInfo.Name()
+		o.Data.ModTime = addressFileInfo.ModTime()
+		o.Data.ContentLength = addressFileInfo.Size()
+		o.Data.ETag = fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size())
+
+		o.Changed = false
+	}
+	return nil
 }
 
 type CardDavBackend struct{}

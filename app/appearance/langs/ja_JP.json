@@ -134,6 +134,7 @@
     "inlineMath": "インライン数式",
     "inlineMemo": "インラインメモ",
     "blockRef": "アンカーテキストを引用する",
+    "fileAnnotationRef": "PDF 注釈アンカーテキスト",
     "kbd": "キーボード",
     "mark": "ハイライト",
     "s": "取り消し線",

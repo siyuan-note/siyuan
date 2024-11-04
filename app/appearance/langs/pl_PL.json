@@ -134,6 +134,7 @@
     "inlineMath": "Formuła w linii",
     "inlineMemo": "Notatka w linii",
     "blockRef": "Tekst zakotwiczenia ref",
+    "fileAnnotationRef": "Odnośnik do adnotacji PDF",
     "kbd": "Klawiatura",
     "mark": "Zaznacz",
     "s": "Przekreślenie",

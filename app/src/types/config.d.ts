@@ -2139,6 +2139,10 @@ declare namespace Config {
          */
         blockRef?: boolean;
         /**
+         * Replace file annotation refs
+         */
+        fileAnnotationRef?: boolean;
+        /**
          * Replace kdb elements
          * @default true
          */

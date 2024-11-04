@@ -134,6 +134,7 @@
     "inlineMath": "Formula in linea",
     "inlineMemo": "Memo in linea",
     "blockRef": "Testo ancora di riferimento",
+    "fileAnnotationRef": "Testo di ancoraggio dell'annotazione PDF",
     "kbd": "Tastiera",
     "mark": "Evidenzia",
     "s": "Barrato",

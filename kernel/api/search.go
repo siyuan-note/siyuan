@@ -122,7 +122,7 @@ func findReplace(c *gin.Context) {
 	}
 
 	replaceTypes := map[string]bool{}
-	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, kbd, mark, s, sub, sup, tag, u
+	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, blockRef, fileAnnotationRef kbd, mark, s, sub, sup, tag, u
 	// docTitle, codeBlock, mathBlock, htmlBlock
 	if nil != arg["replaceTypes"] {
 		replaceTypesArg := arg["replaceTypes"].(map[string]interface{})

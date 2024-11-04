@@ -134,6 +134,7 @@
     "inlineMath": "מתמטיקה פנימית",
     "inlineMemo": "הערה פנימית",
     "blockRef": "טקסט עוגן ייחוס",
+    "fileAnnotationRef": "טקסט עוגן של הערת PDF",
     "kbd": "מקלדת",
     "mark": "ציון",
     "s": "קו מחיקה",

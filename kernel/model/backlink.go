@@ -109,6 +109,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	if 0 < len(trees) {
 		sortBacklinks(ret, refTree)
+		ret = mergeNeighborBacklinks(ret)
 		filterBlockPaths(ret)
 	}
 	return
@@ -152,6 +153,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 
 	sortBacklinks(ret, refTree)
+	ret = mergeNeighborBacklinks(ret)
 	filterBlockPaths(ret)
 
 	for i := len(ret) - 1; 0 < i; i-- {
@@ -163,6 +165,44 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 		}
 	}
 	return
+}
+
+func mergeNeighborBacklinks(blockLinks []*Backlink) (ret []*Backlink) {
+	// 如果反链中的节点是相邻的，则合并
+	for i := len(blockLinks) - 1; 0 < i; i-- {
+		if isPrevious(blockLinks[i].node, blockLinks[i-1].node) {
+			blockLinks[i-1].DOM += blockLinks[i].DOM
+			blockLinks[i] = nil
+			continue
+		}
+	}
+
+	for _, b := range blockLinks {
+		if nil != b {
+			ret = append(ret, b)
+		}
+	}
+	return
+}
+
+func isPrevious(cur, prev *ast.Node) bool {
+	if nil == cur || nil == prev {
+		return false
+	}
+	if cur.Previous == prev {
+		return true
+	}
+	for prevParent := prev.Parent; nil != prevParent; prevParent = prevParent.Parent {
+		if prev.Next == cur {
+			return true
+		}
+	}
+	for curParent := cur.Parent; nil != curParent; curParent = curParent.Parent {
+		if prev.Next == curParent {
+			return true
+		}
+	}
+	return false
 }
 
 func filterBlockPaths(blockLinks []*Backlink) {

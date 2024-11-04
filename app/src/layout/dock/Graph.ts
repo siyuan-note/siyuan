@@ -480,7 +480,7 @@ export class Graph extends Model {
                                 return true;
                             }
                         }
-                    })
+                    });
                     if (!isActive) {
                         return;
                     }
@@ -644,7 +644,7 @@ export class Graph extends Model {
             const edges = new vis.DataSet();
             const network = new vis.Network(this.graphElement, {nodes, edges}, options);
             const time = 256;
-            let intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
+            const intervalNodeTime = Math.max(Math.ceil(time / 8), 32);
             let batch = this.graphData.nodes.length / time / 2;
             if (batch < 32) {
                 batch = 32;

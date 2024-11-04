@@ -60,7 +60,10 @@ import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {processClonePHElement} from "../render/util";
+/// #if !MOBILE
 import {openFileById} from "../../editor/util";
+/// #endif
+import {checkFold} from "../../util/noRelyPCFunction";
 
 export class Gutter {
     public element: HTMLElement;
@@ -1708,18 +1711,23 @@ export class Gutter {
                 }
             }).element);
         } else {
+            /// #if !MOBILE
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "enter",
                 accelerator: `${updateHotkeyTip(window.siyuan.config.keymap.general.enter.custom)}/${updateHotkeyTip("⌘" + window.siyuan.languages.click)}`,
                 label: window.siyuan.languages.openBy,
                 click: () => {
-                    openFileById({
-                        app: protyle.app,
-                        id,
-                        action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+                    checkFold(id, (zoomIn, action) => {
+                        openFileById({
+                            app: protyle.app,
+                            id,
+                            action,
+                            zoomIn
+                        });
                     });
                 }
             }).element);
+            /// #endif
         }
         if (!protyle.disabled) {
             window.siyuan.menus.menu.append(new MenuItem({

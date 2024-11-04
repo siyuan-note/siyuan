@@ -1,8 +1,10 @@
 import {hasClosestBlock} from "../../../protyle/util/hasClosest";
 import {getTopAloneElement} from "../../../protyle/wysiwyg/getBlock";
 import {enterBack, zoomOut} from "../../../menus/protyle";
+/// #if !MOBILE
 import {openFileById} from "../../../editor/util";
-import {Constants} from "../../../constants";
+/// #endif
+import {checkFold} from "../../../util/noRelyPCFunction";
 
 export const onlyProtyleCommand = (options: {
     command: string,
@@ -21,11 +23,16 @@ export const onlyProtyleCommand = (options: {
         }
         const id = topNodeElement.getAttribute("data-node-id");
         if (options.protyle.options.backlinkData) {
-            openFileById({
-                app: options.protyle.app,
-                id,
-                action: [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS]
+            /// #if !MOBILE
+            checkFold(id, (zoomIn, action) => {
+                openFileById({
+                    app: options.protyle.app,
+                    id,
+                    action,
+                    zoomIn
+                });
             });
+            /// #endif
         } else {
             zoomOut({protyle: options.protyle, id});
         }

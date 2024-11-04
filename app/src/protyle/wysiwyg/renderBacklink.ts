@@ -147,4 +147,4 @@ export const improveBreadcrumbAppearance = (element: HTMLElement) => {
             item.scrollLeft = (item.lastElementChild as HTMLElement).offsetLeft - item.clientWidth + 14;
         }
     });
-}
+};

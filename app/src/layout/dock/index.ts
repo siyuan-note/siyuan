@@ -538,7 +538,7 @@ export class Dock {
                 if (this.layout.element.querySelector(".fullscreen")) {
                     document.getElementById("drag")?.classList.remove("fn__hidden");
                 }
-                const graph = this.data[type] as Graph
+                const graph = this.data[type] as Graph;
                 graph.destroy();
             }
             // 关闭 dock 后设置光标，初始化的时候不能设置，否则关闭文档树且多页签时会请求两次 getDoc
@@ -757,7 +757,7 @@ export class Dock {
         resizeTabs(isSaveLayout);
         this.showDock();
         if (target.classList.contains("dock__item--active") && !hide && (type === "graph" || type === "globalGraph")) {
-            const graph = this.data[type] as Graph
+            const graph = this.data[type] as Graph;
             graph.onGraph(false);
         }
     }

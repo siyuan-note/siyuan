@@ -665,7 +665,7 @@ export class Graph extends Model {
                     position: {x: 0, y: 0},
                     scale: initialScale,
                     animation: false
-                })
+                });
             }
             const time = 256;
             const intervalNodeTime = Math.max(Math.ceil(time / 8), 32);

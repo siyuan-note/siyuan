@@ -32,23 +32,23 @@ const getSlashItem = (value: string, icon: string, text: string, focus = "false"
 
 export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     let colorHTML = "";
-    ["var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
+    ["", "var(--b3-font-color1)", "var(--b3-font-color2)", "var(--b3-font-color3)", "var(--b3-font-color4)",
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
         "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
         "var(--b3-font-color13)"].forEach((item, index) => {
         colorHTML += `<button class="keyboard__slash-item" data-type="color">
-    <span class="keyboard__slash-icon" style="color:${item}">A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${index + 1}</span>
+    <span class="keyboard__slash-icon" ${item?`style="color:${item}"`:""}>A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item?index + 1:window.siyuan.languages.default}</span>
 </button>`;
     });
     let bgHTML = "";
-    ["var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
+    ["","var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
         "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
         "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
         "var(--b3-font-background13)"].forEach((item, index) => {
         bgHTML += `<button class="keyboard__slash-item" data-type="backgroundColor">
-    <span class="keyboard__slash-icon" style="background-color:${item}">A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${index + 1}</span>
+    <span class="keyboard__slash-icon" ${item?`style="background-color:${item}"`:""}>A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item?index + 1:window.siyuan.languages.default}</span>
 </button>`;
     });
 
@@ -73,14 +73,14 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
             switch (lastFontStatus[0]) {
                 case "color":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
-    <span class="keyboard__slash-icon" style="color:${lastFontStatus[1]}">A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${parseInt(lastFontStatus[1].replace("var(--b3-font-color", "")) + 1}</span>
+    <span class="keyboard__slash-icon" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} >A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${lastFontStatus[1] ? parseInt(lastFontStatus[1].replace("var(--b3-font-color", "")) + 1 : window.siyuan.languages.default}</span>
 </button>`;
                     break;
                 case "backgroundColor":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
-    <span class="keyboard__slash-icon" style="background-color:${lastFontStatus[1]}">A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${parseInt(lastFontStatus[1].replace("var(--b3-font-background", "")) + 1}</span>
+    <span class="keyboard__slash-icon" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""}>A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${lastFontStatus[1] ? parseInt(lastFontStatus[1].replace("var(--b3-font-background", "")) + 1 : window.siyuan.languages.default}</span>
 </button>`;
                     break;
                 case "style2":
@@ -101,10 +101,17 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
                     }
                     break;
                 case "style1":
-                    lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
+                    if (lastFontStatus[1]) {
+                        lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
     <span class="keyboard__slash-icon" style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}">A</span>
     <span class="keyboard__slash-text">${window.siyuan.languages[lastFontStatus[2].replace("var(--b3-card-", "").replace("-color)", "") + "Style"]}</span>
 </button>`;
+                    } else {
+                        lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
+    <span class="keyboard__slash-icon">A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.color} ${window.siyuan.languages.default}</span>
+</button>`;
+                    }
                     break;
                 case "clear":
                     lastColorHTML += `<button class="keyboard__slash-item" data-type="${lastFontStatus[0]}">
@@ -132,6 +139,10 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     utilElement.innerHTML = `${lastColorHTML}
 <div class="keyboard__slash-title">${window.siyuan.languages.color}</div>
 <div class="keyboard__slash-block">
+    <button class="keyboard__slash-item" data-type="style1">
+        <span class="keyboard__slash-icon">A</span>
+        <span class="keyboard__slash-text">${window.siyuan.languages.color} ${window.siyuan.languages.default}</span>
+    </button>
     <button class="keyboard__slash-item" data-type="style1">
         <span class="keyboard__slash-icon" style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);">A</span>
         <span class="keyboard__slash-text">${window.siyuan.languages.errorStyle}</span>

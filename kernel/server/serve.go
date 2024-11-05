@@ -682,13 +682,11 @@ func serveCardDAV(ginServer *gin.Engine) {
 	}
 
 	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
-		logging.LogInfof("CardDAV %s: /.well-known/carddav", c.Request.Method)
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
 
 	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
 	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
-		logging.LogInfof("CardDAV %s: %s", c.Request.Method, c.Request.URL.Path)
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":

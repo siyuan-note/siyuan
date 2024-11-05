@@ -1470,7 +1470,7 @@
     "153": "Pobrane pliki %d, fragmenty %d, odebrane bajty %s",
     "154": "Chmura może obsługiwać tylko kopię zapasową do 12 zrzutów",
     "155": "Katalog synchronizacji w chmurze został zresetowany na [główny]",
-    "156": "Autoryzacja dostępu nie powiodła się, proszę odświeżyć lub ponownie otworzyć",
+    "156": "Błąd uwierzytelniania, proszę <button onclick=\"window.location.reload()\">odśwież</button> lub otwórz ponownie",
     "157": "Klucz nie jest rozpoznawany, proszę potwierdzić, że skopiowany ciąg klucza jest poprawny",
     "158": "Indeksowanie repozytorium danych, przetwarzanie danych %s",
     "159": "Indeksowanie repozytorium danych, pobieranie najnowszego pliku %v/%v",

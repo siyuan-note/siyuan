@@ -1470,7 +1470,7 @@
     "153": "Fichiers chargés %d, morceaux %d, octets reçus %s",
     "154": "Le cloud ne peut prendre en charge que la sauvegarde jusqu'à 12 instantanés",
     "155": "Le répertoire de synchronisation du cloud a été réinitialisé sur [main]",
-    "156": "Échec de l'authentification d'accès, veuillez actualiser ou rouvrir",
+    "156": "Échec de l'authentification, veuillez <button onclick=\"window.location.reload()\">actualiser</button> ou rouvrir",
     "157": "La clé n'est pas reconnue, veuillez confirmer que la chaîne de clé copiée est correcte",
     "158": "Indexation du référentiel de données, données de marche %s",
     "159": "Indexation du référentiel de données, obtention du dernier fichier %v/%v",

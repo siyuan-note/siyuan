@@ -1470,7 +1470,7 @@
     "153": "Archivos descargados %d, fragmentos %d, bytes recibidos %s",
     "154": "La nube solo admite copias de seguridad de hasta 12 instantáneas",
     "155": "El directorio de sincronización de la nube se ha restablecido a [main]",
-    "156": "Error de autenticación de acceso; actualice o vuelva a abrir",
+    "156": "Error de autenticación, por favor <button onclick=\"window.location.reload()\">actualiza</button> o vuelve a abrir",
     "157": "No se reconoce la clave, confirme que la cadena de clave copiada es correcta",
     "158": "Indexando repositorio de datos, datos para caminar %s",
     "159": "Indexando repositorio de datos, obteniendo el último archivo %v/%v",

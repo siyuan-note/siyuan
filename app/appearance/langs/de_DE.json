@@ -1470,7 +1470,7 @@
     "153": "Heruntergeladene Dateien %d, Chunks %d, empfangene Bytes %s",
     "154": "Die Cloud kann nur bis zu 12 Momentaufnahmen unterstützen",
     "155": "Das Cloud-Synchronisationsverzeichnis wurde auf [main] zurückgesetzt",
-    "156": "Zugriffsautorisierung fehlgeschlagen, bitte aktualisieren oder erneut öffnen",
+    "156": "Authentifizierung fehlgeschlagen, bitte <button onclick=\"window.location.reload()\">aktualisieren</button> oder erneut öffnen",
     "157": "Der Schlüssel wird nicht erkannt, bitte bestätigen Sie, dass die kopierte Schlüsselzeichenfolge korrekt ist",
     "158": "Indizierung des Daten-Repositories, gehn die Daten %s",
     "159": "Indizierung des Daten-Repositorys, die neueste Datei abrufen %v/%v",

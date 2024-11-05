@@ -502,7 +502,11 @@ export class Toolbar {
                             inlineElement.setAttribute("data-type", type);
                             inlineElement.textContent = item.textContent;
                             setFontStyle(inlineElement, textObj);
-                            newNodes.push(inlineElement);
+                            if (type === "text" && !inlineElement.getAttribute("style")) {
+                                newNodes.push(item);
+                            } else {
+                                newNodes.push(inlineElement);
+                            }
                         } else {
                             newNodes.push(item);
                         }
@@ -591,7 +595,18 @@ export class Toolbar {
                         } else if (item.tagName !== "BR" && item.tagName !== "IMG") {
                             item.setAttribute("data-type", types.join(" "));
                             setFontStyle(item, textObj);
-                            newNodes.push(item);
+                            if (types.includes("text") && !item.getAttribute("style")) {
+                                if (types.length === 1) {
+                                    const tempText = document.createTextNode(item.textContent);
+                                    newNodes.push(tempText);
+                                } else {
+                                    types.splice(types.indexOf("text"), 1);
+                                    item.setAttribute("data-type", types.join(" "));
+                                    newNodes.push(item);
+                                }
+                            } else {
+                                newNodes.push(item);
+                            }
                         } else {
                             newNodes.push(item);
                         }

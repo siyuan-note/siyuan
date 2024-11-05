@@ -81,6 +81,7 @@
     max-height: 80vh;
     z-index: 4;
     box-sizing: border-box;
+    overflow: auto;
 
     &--mobile {
       top: 0;
@@ -92,19 +93,23 @@
   &-font {
     font-size: 12px;
     padding: 4px 8px;
+    max-width: 238px;
 
     &__style {
-      background-color: transparent;
-      margin-right: 4px;
+      background-color: var(--b3-theme-background);
+      margin: 4px;
       transition: var(--b3-transition);
-      padding: 0 4px;
+      padding: 0 8px;
       border-radius: var(--b3-border-radius);
-      border: 1px solid transparent;
       color: var(--b3-theme-on-background);
       white-space: nowrap;
+      font-size: 16px;
+      box-shadow: 0 0 0 1px var(--b3-theme-surface-lighter) inset;
+      border-width: 0;
+      line-height: 26px;
 
       &:hover {
-        border-color: var(--b3-theme-surface-lighter);
+        box-shadow: 0 0 0 1px var(--b3-theme-surface-lighter) inset, 0 0 0 4px var(--b3-theme-background);
       }
     }
   }

@@ -54,29 +54,34 @@ var (
 		// MaxResourceSize: math.MaxInt32,
 	}
 	contacts = Contacts{
-		Loaded:        false,
-		Changed:       false,
-		Lock:          sync.Mutex{},
-		Books:         sync.Map{},
-		BooksMetaData: []*carddav.AddressBook{},
+		loaded:        false,
+		changed:       false,
+		lock:          sync.Mutex{},
+		books:         sync.Map{},
+		booksMetaData: []*carddav.AddressBook{},
 	}
 )
 
-type Contacts struct {
-	Loaded        bool
-	Changed       bool
-	Lock          sync.Mutex // load & save
-	Books         sync.Map   // Path -> *AddressBook
-	BooksMetaData []*carddav.AddressBook
+func AddressBookPath2DirectoryPath(addressBookPath string) string {
+	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(addressBookPath, "/"))
 }
 
-// reload all contacts
-func (c *Contacts) reload() error {
-	c.Lock.Lock()
-	defer c.Lock.Unlock()
+func AddressBooksMetaDataFilePath() string {
+	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(CardDavAddressBooksMetaDataFilePath, "/"))
+}
 
-	c.Books.Clear()
-	addressBooksMetaDataFilePath := filepath.Join(util.DataDir, "storage", strings.TrimPrefix(CardDavAddressBooksMetaDataFilePath, "/"))
+type Contacts struct {
+	loaded        bool
+	changed       bool
+	lock          sync.Mutex // load & save
+	books         sync.Map   // Path -> *AddressBook
+	booksMetaData []*carddav.AddressBook
+}
+
+// load all contacts
+func (c *Contacts) load() error {
+	c.books.Clear()
+	addressBooksMetaDataFilePath := AddressBooksMetaDataFilePath()
 	metaData, err := os.ReadFile(addressBooksMetaDataFilePath)
 	if os.IsNotExist(err) {
 		// create meta data file
@@ -85,96 +90,270 @@ func (c *Contacts) reload() error {
 			return err
 		}
 
-		c.BooksMetaData = []*carddav.AddressBook{&defaultAddressBook}
-		data, err := gulu.JSON.MarshalIndentJSON(c.BooksMetaData, "", "  ")
-		if err != nil {
-			logging.LogErrorf("marshal address books meta data failed: %s", err)
-			return err
-		}
-
-		if err := os.WriteFile(addressBooksMetaDataFilePath, data, 0755); err != nil {
-			logging.LogErrorf("write file [%s] failed: %s", addressBooksMetaDataFilePath, err)
+		c.booksMetaData = []*carddav.AddressBook{&defaultAddressBook}
+		if err := c.saveAddressBooksMetaData(); err != nil {
 			return err
 		}
 	} else {
 		// load meta data file
-		c.BooksMetaData = []*carddav.AddressBook{}
-		if err = gulu.JSON.UnmarshalJSON(metaData, &c.BooksMetaData); err != nil {
+		c.booksMetaData = []*carddav.AddressBook{}
+		if err = gulu.JSON.UnmarshalJSON(metaData, &c.booksMetaData); err != nil {
 			logging.LogErrorf("unmarshal address books meta data failed: %s", err)
 			return err
 		}
 
 		wg := &sync.WaitGroup{}
-		wg.Add(len(c.BooksMetaData))
-		for _, addressBookMetaData := range c.BooksMetaData {
+		wg.Add(len(c.booksMetaData))
+		for _, addressBookMetaData := range c.booksMetaData {
 			addressBook := &AddressBook{
-				Changed:   false,
-				MetaData:  addressBookMetaData,
-				Addresses: sync.Map{},
+				Changed:       false,
+				DirectoryPath: AddressBookPath2DirectoryPath(addressBookMetaData.Path),
+				MetaData:      addressBookMetaData,
+				Addresses:     sync.Map{},
 			}
-			c.Books.Store(addressBookMetaData.Path, addressBook)
-			go addressBook.load(wg)
+			c.books.Store(addressBookMetaData.Path, addressBook)
+			go func() {
+				defer wg.Done()
+				addressBook.load()
+			}()
 		}
 		wg.Wait()
 	}
-	c.Loaded = true
-	c.Changed = false
+
+	c.loaded = true
+	c.changed = false
+	return nil
+}
+
+// save all contacts
+func (c *Contacts) save(force bool) error {
+	if force || c.changed {
+		// save address books meta data
+		if err := c.saveAddressBooksMetaData(); err != nil {
+			return err
+		}
+
+		// save all address to *.vbf files
+		wg := &sync.WaitGroup{}
+		c.books.Range(func(path any, book any) bool {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				// path_ := path.(string)
+				book_ := book.(*AddressBook)
+				book_.save(force)
+			}()
+			return true
+		})
+		wg.Wait()
+		c.changed = false
+	}
+	return nil
+}
+
+// save all contacts
+func (c *Contacts) saveAddressBooksMetaData() error {
+	data, err := gulu.JSON.MarshalIndentJSON(c.booksMetaData, "", "  ")
+	if err != nil {
+		logging.LogErrorf("marshal address books meta data failed: %s", err)
+		return err
+	}
+
+	filePath := AddressBooksMetaDataFilePath()
+	if err := os.WriteFile(filePath, data, 0755); err != nil {
+		logging.LogErrorf("write file [%s] failed: %s", filePath, err)
+		return err
+	}
+
+	return nil
+}
+
+func (c *Contacts) Load() error {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if !c.loaded {
+		return c.load()
+	}
+	return nil
+}
+
+func (c *Contacts) ListAddressBooks() (addressBooks []carddav.AddressBook, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	for _, addressBook := range contacts.booksMetaData {
+		addressBooks = append(addressBooks, *addressBook)
+	}
+	return
+}
+
+func (c *Contacts) GetAddressBook(path string) (addressBook *carddav.AddressBook, err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	if book, ok := contacts.books.Load(path); ok {
+		addressBook = book.(*AddressBook).MetaData
+	}
+	return
+}
+
+func (c *Contacts) CreateAddressBook(addressBookMetaData *carddav.AddressBook) (err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	var addressBook *AddressBook
+
+	// update map
+	if value, ok := c.books.Load(addressBookMetaData.Path); ok {
+		// update map item
+		addressBook = value.(*AddressBook)
+		addressBook.MetaData = addressBookMetaData
+	} else {
+		// insert map item
+		addressBook = &AddressBook{
+			Changed:       false,
+			DirectoryPath: AddressBookPath2DirectoryPath(addressBookMetaData.Path),
+			MetaData:      addressBookMetaData,
+			Addresses:     sync.Map{},
+		}
+		c.books.Store(addressBookMetaData.Path, addressBook)
+	}
+
+	var index = -1
+	for i, item := range c.booksMetaData {
+		if item.Path == addressBookMetaData.Path {
+			index = i
+			break
+		}
+	}
+
+	if index >= 0 {
+		// update list
+		c.booksMetaData[index] = addressBookMetaData
+	} else {
+		// insert list
+		c.booksMetaData = append(c.booksMetaData, addressBookMetaData)
+	}
+
+	// create address book directory
+	if err = os.MkdirAll(addressBook.DirectoryPath, 0755); err != nil {
+		logging.LogErrorf("create directory [%s] failed: %s", addressBook, err)
+		return
+	}
+
+	// save meta data
+	if err = c.saveAddressBooksMetaData(); err != nil {
+		return
+	}
+
+	return
+}
+
+func (c *Contacts) DeleteAddressBook(path string) (err error) {
+	c.lock.Lock()
+	defer c.lock.Unlock()
+
+	var addressBook *AddressBook
+
+	// delete map item
+	if value, loaded := c.books.LoadAndDelete(path); loaded {
+		addressBook = value.(*AddressBook)
+	}
+
+	// delete list item
+	for i, item := range c.booksMetaData {
+		if item.Path == path {
+			c.booksMetaData = append(c.booksMetaData[:i], c.booksMetaData[i+1:]...)
+			break
+		}
+	}
+
+	// remove address book directory
+	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
+		logging.LogErrorf("remove directory [%s] failed: %s", addressBook, err)
+		return
+	}
+
+	// save meta data
+	if err = c.saveAddressBooksMetaData(); err != nil {
+		return
+	}
+
 	return nil
 }
 
 type AddressBook struct {
-	Changed   bool
-	MetaData  *carddav.AddressBook
-	Addresses sync.Map // id -> *AddressObject
+	Changed       bool
+	DirectoryPath string
+	MetaData      *carddav.AddressBook
+	Addresses     sync.Map // id -> *AddressObject
 }
 
 // load an address book from multiple *.vcf files
-func (b *AddressBook) load(wg *sync.WaitGroup) {
-	defer wg.Done()
-	addressBookPath := filepath.Join(util.DataDir, "storage", strings.TrimPrefix(b.MetaData.Path, "/"))
-	entries, err := os.ReadDir(addressBookPath)
+func (b *AddressBook) load() error {
+	entries, err := os.ReadDir(b.DirectoryPath)
 	if err != nil {
-		logging.LogErrorf("read dir [%s] failed: %s", addressBookPath, err)
-	} else {
-		for _, entry := range entries {
-			if !entry.IsDir() {
-				filename := entry.Name()
-				ext := path.Ext(filename)
-				if ext == ".vcf" {
-					wg.Add(1)
-					go func() {
-						defer wg.Done()
+		logging.LogErrorf("read dir [%s] failed: %s", b.DirectoryPath, err)
+		return err
+	}
 
-						addressFilePath := path.Join(addressBookPath, filename)
+	wg := &sync.WaitGroup{}
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			filename := entry.Name()
+			ext := path.Ext(filename)
+			if ext == ".vcf" {
+				wg.Add(1)
+				go func() {
+					defer wg.Done()
 
-						// load data
-						address := &AddressObject{
-							FilePath: addressFilePath,
-							BookPath: b.MetaData.Path,
-						}
-						if err := address.load(); err != nil {
-							return
-						}
+					addressFilePath := path.Join(b.DirectoryPath, filename)
 
-						id := path.Base(filename)
-						b.Addresses.Store(id, address)
-					}()
-				}
+					// load data
+					address := &AddressObject{
+						FilePath: addressFilePath,
+						BookPath: b.MetaData.Path,
+					}
+					if err := address.load(); err != nil {
+						return
+					}
+
+					id := path.Base(filename)
+					b.Addresses.Store(id, address)
+				}()
 			}
 		}
 	}
+	wg.Wait()
+	return nil
 }
 
 // save an address book to multiple *.vcf files
-func (b *AddressBook) save(force bool, wg *sync.WaitGroup) {
-	defer wg.Done()
+func (b *AddressBook) save(force bool) error {
+	if force || b.Changed {
+		// create directory
+		if err := os.MkdirAll(b.DirectoryPath, 0755); err != nil {
+			logging.LogErrorf("create directory [%s] failed: %s", b.DirectoryPath, err)
+			return err
+		}
 
-	b.Addresses.Range(func(id any, address any) bool {
-		// id_ := id.(string)
-		address_ := address.(*AddressObject)
-		address_.save(force)
-		return true
-	})
+		wg := &sync.WaitGroup{}
+		b.Addresses.Range(func(id any, address any) bool {
+			wg.Add(1)
+			go func() {
+				defer wg.Done()
+				// id_ := id.(string)
+				address_ := address.(*AddressObject)
+				address_.save(force)
+			}()
+			return true
+		})
+		wg.Wait()
+		b.Changed = false
+	}
+
+	return nil
 }
 
 type AddressObject struct {
@@ -270,54 +449,84 @@ func (b *CardDavBackend) AddressBookHomeSetPath(ctx context.Context) (string, er
 
 func (b *CardDavBackend) ListAddressBooks(ctx context.Context) (addressBooks []carddav.AddressBook, err error) {
 	logging.LogInfof("CardDAV ListAddressBooks")
-	// TODO
-	return
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
+	return contacts.ListAddressBooks()
 }
 
 func (b *CardDavBackend) GetAddressBook(ctx context.Context, path string) (addressBook *carddav.AddressBook, err error) {
 	logging.LogInfof("CardDAV GetAddressBook")
-	// TODO
-	return
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
+	return contacts.GetAddressBook(path)
 }
 
 func (b *CardDavBackend) CreateAddressBook(ctx context.Context, addressBook *carddav.AddressBook) (err error) {
 	logging.LogInfof("CardDAV CreateAddressBook")
-	// TODO
-	return
+	if err = contacts.Load(); err != nil {
+		return
+	}
+	return contacts.CreateAddressBook(addressBook)
 }
 
 func (b *CardDavBackend) DeleteAddressBook(ctx context.Context, path string) (err error) {
 	logging.LogInfof("CardDAV DeleteAddressBook")
-	// TODO
-	return
+	if err = contacts.Load(); err != nil {
+		return
+	}
+	return contacts.DeleteAddressBook(path)
 }
 
 func (b *CardDavBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (addressObject *carddav.AddressObject, err error) {
 	logging.LogInfof("CardDAV GetAddressObject: %s", path)
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
 	// TODO
 	return
 }
 
 func (b *CardDavBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) (addressObjects []carddav.AddressObject, err error) {
 	logging.LogInfof("CardDAV ListAddressObjects")
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
 	// TODO
 	return
 }
 
 func (b *CardDavBackend) QueryAddressObjects(ctx context.Context, path string, query *carddav.AddressBookQuery) (addressObjects []carddav.AddressObject, err error) {
 	logging.LogInfof("CardDAV QueryAddressObjects: %v", query)
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
 	// TODO
 	return
 }
 
 func (b *CardDavBackend) PutAddressObject(ctx context.Context, path string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (addressObject *carddav.AddressObject, err error) {
 	logging.LogInfof("CardDAV PutAddressObject: %s", path)
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
 	// TODO
 	return
 }
 
 func (b *CardDavBackend) DeleteAddressObject(ctx context.Context, path string) (err error) {
 	logging.LogInfof("CardDAV DeleteAddressObject: %s", path)
+	if err = contacts.Load(); err != nil {
+		return
+	}
+
 	// TODO
 	return
 }

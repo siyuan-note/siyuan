@@ -109,7 +109,6 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 
 	if 0 < len(trees) {
 		sortBacklinks(ret, refTree)
-		ret = mergeNeighborBacklinks(ret)
 		filterBlockPaths(ret)
 	}
 	return
@@ -153,56 +152,8 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 
 	sortBacklinks(ret, refTree)
-	ret = mergeNeighborBacklinks(ret)
 	filterBlockPaths(ret)
-
-	for i := len(ret) - 1; 0 < i; i-- {
-		curPaths := ret[i].BlockPaths
-		prevPaths := ret[i-1].BlockPaths
-		// 如果当前反链的面包屑和前一个反链的面包屑一致，则清空当前反链的面包屑以简化显示
-		if blockPathsEqual(curPaths, prevPaths) {
-			ret[i].BlockPaths = []*BlockPath{}
-		}
-	}
 	return
-}
-
-func mergeNeighborBacklinks(blockLinks []*Backlink) (ret []*Backlink) {
-	// 如果反链中的节点是相邻的，则合并
-	for i := len(blockLinks) - 1; 0 < i; i-- {
-		if isPrevious(blockLinks[i].node, blockLinks[i-1].node) {
-			blockLinks[i-1].DOM += blockLinks[i].DOM
-			blockLinks[i] = nil
-			continue
-		}
-	}
-
-	for _, b := range blockLinks {
-		if nil != b {
-			ret = append(ret, b)
-		}
-	}
-	return
-}
-
-func isPrevious(cur, prev *ast.Node) bool {
-	if nil == cur || nil == prev {
-		return false
-	}
-	if cur.Previous == prev {
-		return true
-	}
-	for prevParent := prev.Parent; nil != prevParent; prevParent = prevParent.Parent {
-		if prev.Next == cur {
-			return true
-		}
-	}
-	for curParent := cur.Parent; nil != curParent; curParent = curParent.Parent {
-		if prev.Next == curParent {
-			return true
-		}
-	}
-	return false
 }
 
 func filterBlockPaths(blockLinks []*Backlink) {
@@ -213,23 +164,6 @@ func filterBlockPaths(blockLinks []*Backlink) {
 		}
 	}
 	return
-}
-
-func blockPathsEqual(paths1, paths2 []*BlockPath) bool {
-	if len(paths1) != len(paths2) {
-		return false
-	}
-	if 2 < len(paths1) {
-		paths1 = paths1[:len(paths1)-1]
-		paths2 = paths2[:len(paths2)-1]
-	}
-
-	for i := range paths1 {
-		if paths1[i].ID != paths2[i].ID {
-			return false
-		}
-	}
-	return true
 }
 
 func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {

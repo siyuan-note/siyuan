@@ -168,7 +168,6 @@ func GetAssetText(asset string) (ret string) {
 	assetsTextsLock.Lock()
 	ret = assetsTexts[asset]
 	assetsTextsLock.Unlock()
-	assetsTextsChanged.Store(true)
 	return
 }
 

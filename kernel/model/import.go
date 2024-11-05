@@ -1181,6 +1181,8 @@ func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 		n.SetIALAttr("id", n.ID)
 		if "" != updated {
 			n.SetIALAttr("updated", updated)
+			n.ID = updated + "-" + gulu.Rand.String(7)
+			n.SetIALAttr("id", n.ID)
 		} else {
 			n.SetIALAttr("updated", util.TimeFromID(n.ID))
 		}

@@ -1470,7 +1470,7 @@
     "153": "File scaricati %d, blocchi %d, byte ricevuti %s",
     "154": "Il cloud può supportare solo il backup fino a 12 snapshot",
     "155": "La directory di sincronizzazione cloud è stata ripristinata a [principale]",
-    "156": "Autenticazione accesso fallita, si prega di aggiornare o riaprire",
+    "156": "Autenticazione fallita, per favore <button onclick=\"window.location.reload()\">aggiorna</button> o riapri",
     "157": "La chiave non è riconosciuta, si prega di confermare che la stringa della chiave copiata sia corretta",
     "158": "Indicizzazione del repository dati, elaborando dati %s",
     "159": "Indicizzazione del repository dati, ottenendo il file più recente %v/%v",

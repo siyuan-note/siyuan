@@ -97,6 +97,9 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
         // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
+        // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
+        clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
+
         // https://github.com/siyuan-note/siyuan/issues/5446
         // A\B\C\D\
         // E
@@ -175,6 +178,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/<kbd>/g, "__@kbd@__").replace(/<\/kbd>/g, "__@/kbd@__");
             textPlain = textPlain.replace(/<u>/g, "__@u@__").replace(/<\/u>/g, "__@/u@__");
 
+            // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
+            textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
+
             // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
             textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
 
@@ -184,7 +190,22 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
             textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
+            protyle.lute.SetInlineAsterisk(true);
+            protyle.lute.SetGFMStrikethrough(true);
+            protyle.lute.SetInlineMath(true);
+            protyle.lute.SetSub(true);
+            protyle.lute.SetSup(true);
+            protyle.lute.SetTag(true);
+            protyle.lute.SetInlineUnderscore(true);
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+            protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
+            protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+            protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+            protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+            protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+            protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+            protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+
             // insertHTML 会进行内部反转义
             insertHTML(content, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);

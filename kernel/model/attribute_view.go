@@ -1715,16 +1715,16 @@ func getAvNames(avIDs string) (ret string) {
 	return
 }
 
-func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
+func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees map[string]*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
-	treeCache := map[string]*parse.Tree{}
+	trees = map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
 		if blockKeyValue.IsDetached {
 			continue
 		}
 
 		var tree *parse.Tree
-		tree = treeCache[blockKeyValue.BlockID]
+		tree = trees[blockKeyValue.BlockID]
 		if nil == tree {
 			if nil == tx {
 				tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
@@ -1735,7 +1735,7 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 		if nil == tree {
 			continue
 		}
-		treeCache[blockKeyValue.BlockID] = tree
+		trees[blockKeyValue.BlockID] = tree
 
 		node := treenode.GetNodeInTree(tree, blockKeyValue.BlockID)
 		if nil == node {
@@ -1743,9 +1743,6 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 		}
 
 		nodes = append(nodes, node)
-	}
-	for _, tree := range treeCache {
-		trees = append(trees, tree)
 	}
 	return
 }

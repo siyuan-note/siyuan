@@ -54,12 +54,23 @@ const (
 	MethodMove      = "MOVE"
 	MethodLock      = "LOCK"
 	MethodUnlock    = "UNLOCK"
-	MethodPropfind  = "PROPFIND"
-	MethodProppatch = "PROPPATCH"
+	MethodPropFind  = "PROPFIND"
+	MethodPropPatch = "PROPPATCH"
 )
 
 var (
-	cookieStore   = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	HttpMethods = []string{
+		http.MethodGet,
+		http.MethodHead,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+		http.MethodConnect,
+		http.MethodOptions,
+		http.MethodTrace,
+	}
 	WebDavMethods = []string{
 		http.MethodOptions,
 		http.MethodHead,
@@ -73,17 +84,24 @@ var (
 		MethodMove,
 		MethodLock,
 		MethodUnlock,
-		MethodPropfind,
-		MethodProppatch,
+		MethodPropFind,
+		MethodPropPatch,
 	}
 	CardDavMethods = []string{
 		http.MethodOptions,
 		http.MethodHead,
 		http.MethodGet,
+		http.MethodPost,
 		http.MethodPut,
 		http.MethodDelete,
 
-		MethodPropfind,
+		MethodMkcol,
+		// MethodCopy,
+		// MethodMove,
+		// MethodLock,
+		// MethodUnlock,
+		MethodPropFind,
+		MethodPropPatch,
 	}
 )
 
@@ -698,15 +716,32 @@ func shortReqMsg(msg []byte) []byte {
 }
 
 func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	allowMethods := strings.Join(HttpMethods, ", ")
+	allowWebDavMethods := strings.Join(WebDavMethods, ", ")
+	allowCardDavMethods := strings.Join(CardDavMethods, ", ")
 
+	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS")
 		c.Header("Access-Control-Allow-Private-Network", "true")
 
-		if c.Request.Method == "OPTIONS" {
+		if strings.HasPrefix(c.Request.RequestURI, "/webdav/") {
+			c.Header("Access-Control-Allow-Methods", allowWebDavMethods)
+			c.Next()
+			return
+		}
+
+		if strings.HasPrefix(c.Request.RequestURI, "/carddav/") {
+			c.Header("Access-Control-Allow-Methods", allowCardDavMethods)
+			c.Next()
+			return
+		}
+
+		c.Header("Access-Control-Allow-Methods", allowMethods)
+
+		switch c.Request.Method {
+		case http.MethodOptions:
 			c.Header("Access-Control-Max-Age", "600")
 			c.AbortWithStatus(204)
 			return

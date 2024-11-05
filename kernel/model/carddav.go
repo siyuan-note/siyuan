@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"path"
@@ -48,10 +49,10 @@ const (
 
 var (
 	defaultAddressBook = carddav.AddressBook{
-		Path:        CardDavDefaultAddressBookPath,
-		Name:        CardDavDefaultAddressBookName,
-		Description: "Default address book",
-		// MaxResourceSize: math.MaxInt32,
+		Path:            CardDavDefaultAddressBookPath,
+		Name:            CardDavDefaultAddressBookName,
+		Description:     "Default address book",
+		MaxResourceSize: 0,
 	}
 	contacts = Contacts{
 		loaded:        false,
@@ -60,14 +61,19 @@ var (
 		books:         sync.Map{},
 		booksMetaData: []*carddav.AddressBook{},
 	}
+	ErrorNotFound = errors.New("carddav: not found")
 )
 
 func AddressBookPath2DirectoryPath(addressBookPath string) string {
 	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(addressBookPath, "/"))
 }
 
+func HomeSetPathPath() string {
+	return filepath.Join(util.DataDir, "storage", CardDavHomeSetPath)
+}
+
 func AddressBooksMetaDataFilePath() string {
-	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(CardDavAddressBooksMetaDataFilePath, "/"))
+	return filepath.Join(util.DataDir, "storage", CardDavAddressBooksMetaDataFilePath)
 }
 
 type Contacts struct {
@@ -84,12 +90,6 @@ func (c *Contacts) load() error {
 	addressBooksMetaDataFilePath := AddressBooksMetaDataFilePath()
 	metaData, err := os.ReadFile(addressBooksMetaDataFilePath)
 	if os.IsNotExist(err) {
-		// create meta data file
-		if err = os.MkdirAll(CardDavDefaultAddressBookPath, 0755); err != nil {
-			logging.LogErrorf("make dir [%s] failed: %s", CardDavDefaultAddressBookPath, err)
-			return err
-		}
-
 		c.booksMetaData = []*carddav.AddressBook{&defaultAddressBook}
 		if err := c.saveAddressBooksMetaData(); err != nil {
 			return err
@@ -101,24 +101,24 @@ func (c *Contacts) load() error {
 			logging.LogErrorf("unmarshal address books meta data failed: %s", err)
 			return err
 		}
-
-		wg := &sync.WaitGroup{}
-		wg.Add(len(c.booksMetaData))
-		for _, addressBookMetaData := range c.booksMetaData {
-			addressBook := &AddressBook{
-				Changed:       false,
-				DirectoryPath: AddressBookPath2DirectoryPath(addressBookMetaData.Path),
-				MetaData:      addressBookMetaData,
-				Addresses:     sync.Map{},
-			}
-			c.books.Store(addressBookMetaData.Path, addressBook)
-			go func() {
-				defer wg.Done()
-				addressBook.load()
-			}()
-		}
-		wg.Wait()
 	}
+
+	wg := &sync.WaitGroup{}
+	wg.Add(len(c.booksMetaData))
+	for _, addressBookMetaData := range c.booksMetaData {
+		addressBook := &AddressBook{
+			Changed:       false,
+			DirectoryPath: AddressBookPath2DirectoryPath(addressBookMetaData.Path),
+			MetaData:      addressBookMetaData,
+			Addresses:     sync.Map{},
+		}
+		c.books.Store(addressBookMetaData.Path, addressBook)
+		go func() {
+			defer wg.Done()
+			addressBook.load()
+		}()
+	}
+	wg.Wait()
 
 	c.loaded = true
 	c.changed = false
@@ -159,6 +159,12 @@ func (c *Contacts) saveAddressBooksMetaData() error {
 		return err
 	}
 
+	dirPath := HomeSetPathPath()
+	if err := os.MkdirAll(dirPath, 0755); err != nil {
+		logging.LogErrorf("create directory [%s] failed: %s", dirPath, err)
+		return err
+	}
+
 	filePath := AddressBooksMetaDataFilePath()
 	if err := os.WriteFile(filePath, data, 0755); err != nil {
 		logging.LogErrorf("write file [%s] failed: %s", filePath, err)
@@ -194,7 +200,10 @@ func (c *Contacts) GetAddressBook(path string) (addressBook *carddav.AddressBook
 
 	if book, ok := contacts.books.Load(path); ok {
 		addressBook = book.(*AddressBook).MetaData
+		return
 	}
+
+	err = ErrorNotFound
 	return
 }
 
@@ -292,6 +301,11 @@ type AddressBook struct {
 
 // load an address book from multiple *.vcf files
 func (b *AddressBook) load() error {
+	if err := os.MkdirAll(b.DirectoryPath, 0755); err != nil {
+		logging.LogErrorf("create directory [%s] failed: %s", b.DirectoryPath, err)
+		return err
+	}
+
 	entries, err := os.ReadDir(b.DirectoryPath)
 	if err != nil {
 		logging.LogErrorf("read dir [%s] failed: %s", b.DirectoryPath, err)
@@ -412,6 +426,13 @@ func (o *AddressObject) save(force bool) error {
 			return err
 		}
 
+		// create directory
+		dirPath := path.Dir(o.FilePath)
+		if err := os.MkdirAll(dirPath, 0755); err != nil {
+			logging.LogErrorf("create directory [%s] failed: %s", dirPath, err)
+			return err
+		}
+
 		// write file
 		if err := os.WriteFile(o.FilePath, addressData.Bytes(), 0755); err != nil {
 			logging.LogErrorf("write file [%s] failed: %s", o.FilePath, err)
@@ -453,16 +474,18 @@ func (b *CardDavBackend) ListAddressBooks(ctx context.Context) (addressBooks []c
 		return
 	}
 
-	return contacts.ListAddressBooks()
+	addressBooks, err = contacts.ListAddressBooks()
+	return
 }
 
-func (b *CardDavBackend) GetAddressBook(ctx context.Context, path string) (addressBook *carddav.AddressBook, err error) {
-	logging.LogInfof("CardDAV GetAddressBook")
+func (b *CardDavBackend) GetAddressBook(ctx context.Context, bookPath string) (addressBook *carddav.AddressBook, err error) {
+	logging.LogInfof("CardDAV GetAddressBook: %s", bookPath)
 	if err = contacts.Load(); err != nil {
 		return
 	}
 
-	return contacts.GetAddressBook(path)
+	addressBook, err = contacts.GetAddressBook(bookPath)
+	return
 }
 
 func (b *CardDavBackend) CreateAddressBook(ctx context.Context, addressBook *carddav.AddressBook) (err error) {
@@ -470,19 +493,23 @@ func (b *CardDavBackend) CreateAddressBook(ctx context.Context, addressBook *car
 	if err = contacts.Load(); err != nil {
 		return
 	}
-	return contacts.CreateAddressBook(addressBook)
+
+	err = contacts.CreateAddressBook(addressBook)
+	return
 }
 
-func (b *CardDavBackend) DeleteAddressBook(ctx context.Context, path string) (err error) {
-	logging.LogInfof("CardDAV DeleteAddressBook")
+func (b *CardDavBackend) DeleteAddressBook(ctx context.Context, bookPath string) (err error) {
+	logging.LogInfof("CardDAV DeleteAddressBook: %s", bookPath)
 	if err = contacts.Load(); err != nil {
 		return
 	}
-	return contacts.DeleteAddressBook(path)
+
+	err = contacts.DeleteAddressBook(bookPath)
+	return
 }
 
-func (b *CardDavBackend) GetAddressObject(ctx context.Context, path string, req *carddav.AddressDataRequest) (addressObject *carddav.AddressObject, err error) {
-	logging.LogInfof("CardDAV GetAddressObject: %s", path)
+func (b *CardDavBackend) GetAddressObject(ctx context.Context, urlPath string, req *carddav.AddressDataRequest) (addressObject *carddav.AddressObject, err error) {
+	logging.LogInfof("CardDAV GetAddressObject: %s", urlPath)
 	if err = contacts.Load(); err != nil {
 		return
 	}
@@ -491,8 +518,8 @@ func (b *CardDavBackend) GetAddressObject(ctx context.Context, path string, req 
 	return
 }
 
-func (b *CardDavBackend) ListAddressObjects(ctx context.Context, path string, req *carddav.AddressDataRequest) (addressObjects []carddav.AddressObject, err error) {
-	logging.LogInfof("CardDAV ListAddressObjects")
+func (b *CardDavBackend) ListAddressObjects(ctx context.Context, bookPath string, req *carddav.AddressDataRequest) (addressObjects []carddav.AddressObject, err error) {
+	logging.LogInfof("CardDAV ListAddressObjects: %s", bookPath)
 	if err = contacts.Load(); err != nil {
 		return
 	}
@@ -501,8 +528,8 @@ func (b *CardDavBackend) ListAddressObjects(ctx context.Context, path string, re
 	return
 }
 
-func (b *CardDavBackend) QueryAddressObjects(ctx context.Context, path string, query *carddav.AddressBookQuery) (addressObjects []carddav.AddressObject, err error) {
-	logging.LogInfof("CardDAV QueryAddressObjects: %v", query)
+func (b *CardDavBackend) QueryAddressObjects(ctx context.Context, urlPath string, query *carddav.AddressBookQuery) (addressObjects []carddav.AddressObject, err error) {
+	logging.LogInfof("CardDAV QueryAddressObjects: %s %v", urlPath, query)
 	if err = contacts.Load(); err != nil {
 		return
 	}
@@ -511,8 +538,8 @@ func (b *CardDavBackend) QueryAddressObjects(ctx context.Context, path string, q
 	return
 }
 
-func (b *CardDavBackend) PutAddressObject(ctx context.Context, path string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (addressObject *carddav.AddressObject, err error) {
-	logging.LogInfof("CardDAV PutAddressObject: %s", path)
+func (b *CardDavBackend) PutAddressObject(ctx context.Context, urlPath string, card vcard.Card, opts *carddav.PutAddressObjectOptions) (addressObject *carddav.AddressObject, err error) {
+	logging.LogInfof("CardDAV PutAddressObject: %s %v", urlPath, card)
 	if err = contacts.Load(); err != nil {
 		return
 	}
@@ -521,8 +548,8 @@ func (b *CardDavBackend) PutAddressObject(ctx context.Context, path string, card
 	return
 }
 
-func (b *CardDavBackend) DeleteAddressObject(ctx context.Context, path string) (err error) {
-	logging.LogInfof("CardDAV DeleteAddressObject: %s", path)
+func (b *CardDavBackend) DeleteAddressObject(ctx context.Context, urlPath string) (err error) {
+	logging.LogInfof("CardDAV DeleteAddressObject: %s", urlPath)
 	if err = contacts.Load(); err != nil {
 		return
 	}

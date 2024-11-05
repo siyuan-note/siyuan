@@ -1100,6 +1100,19 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		ReloadAttrView(avID)
 	}
 
+	// 插入数据库块时需要重新绑定其中已经存在的块
+	// 比如剪切操作时，会先进行 delete 数据库解绑块，这里需要重新绑定 https://github.com/siyuan-note/siyuan/issues/13031
+	if ast.NodeAttributeView == insertedNode.Type {
+		attrView, parseErr := av.ParseAttributeView(insertedNode.AttributeViewID)
+		if nil == parseErr {
+			trees, toBindNodes := tx.getAttrViewBoundNodes(attrView)
+			for _, toBindNode := range toBindNodes {
+				t := trees[toBindNode.ID]
+				bindBlockAv0(tx, insertedNode.AttributeViewID, toBindNode, t)
+			}
+		}
+	}
+
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
 

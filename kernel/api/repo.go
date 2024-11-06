@@ -70,7 +70,7 @@ func openRepoSnapshotDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	content, isProtyleDoc, updated, err := model.OpenRepoSnapshotDoc(id)
+	title, content, displayInText, updated, err := model.OpenRepoSnapshotDoc(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -78,9 +78,10 @@ func openRepoSnapshotDoc(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"content":      content,
-		"isProtyleDoc": isProtyleDoc,
-		"updated":      updated,
+		"title":         title,
+		"content":       content,
+		"displayInText": displayInText,
+		"updated":       updated,
 	}
 }
 

@@ -422,6 +422,14 @@
   &__accelerator {
     display: none;
   }
+
+  &__item--warning {
+    color: var(--b3-theme-error);
+
+    & > .b3-menu__icon {
+      color: var(--b3-theme-error);
+    }
+  }
 }
 
 #historyContainer {
@@ -451,13 +459,6 @@
 }
 
 .protyle {
-  &-util {
-    .color__square {
-      height: 24px;
-      width: 24px;
-    }
-  }
-
   &-font {
     font-size: 14px;
   }
@@ -472,6 +473,10 @@
   // 移动端键盘弹起和点击加号需保持滚动高度一致
   &-background__img img {
     height: 200px;
+  }
+
+  &-scroll {
+    right: 0;
   }
 }
 

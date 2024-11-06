@@ -3,6 +3,7 @@
   box-sizing: border-box;
   display: flex;
   max-width: 100%;
+  margin: 4px 0 !important;
 
   &:hover .av__views .block__icon {
     opacity: 1;
@@ -98,7 +99,7 @@
     bottom: 0;
     height: 26px;
     padding: 0 5px;
-    background-color: var(--av-background);
+    background-color: var(--b3-parent-background);
     font-size: 87.5%;
   }
 
@@ -161,7 +162,7 @@
 
     &--header,
     &--footer {
-      background-color: var(--av-background);
+      background-color: var(--b3-parent-background);
     }
 
     &--footer {
@@ -177,7 +178,7 @@
       }
 
       .av__colsticky {
-        background-color: var(--av-background); // 保证盯住时无计算结果的列不被覆盖
+        background-color: var(--b3-parent-background); // 保证盯住时无计算结果的列不被覆盖
       }
 
       .av__calc {
@@ -436,7 +437,7 @@
 
     &.av__firstcol,
     & > div:not(.av__cell--select):not(.av__cell--active):not(.av__calc--ashow) {
-      background-color: var(--av-background);
+      background-color: var(--b3-parent-background);
     }
   }
 
@@ -518,7 +519,7 @@
         opacity: 1;
       }
 
-      &__item[data-type="nobg"] .b3-menu__label {
+      &__item[data-type="nobg"] {
         cursor: auto;
       }
 

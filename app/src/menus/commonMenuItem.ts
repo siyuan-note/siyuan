@@ -446,6 +446,9 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
 };
 
 export const exportMd = (id: string) => {
+    if (window.siyuan.isPublish) {
+        return;
+    }
     return new MenuItem({
         id: "export",
         label: window.siyuan.languages.export,

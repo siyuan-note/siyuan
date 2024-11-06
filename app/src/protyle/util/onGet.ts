@@ -250,7 +250,7 @@ const setHTML = (options: {
     }
 
     /// #if MOBILE
-    if (!protyle.disabled && !options.action.includes(Constants.CB_GET_ALL)) {
+    if (!protyle.disabled && !options.action.includes(Constants.CB_GET_ALL) && protyle.background) {
         protyle.background.element.classList.add("protyle-background--mobileshow");
     }
     /// #endif

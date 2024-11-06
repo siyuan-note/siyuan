@@ -123,6 +123,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	luteEngine := util.NewLute()
+	luteEngine.SetHTMLTag2TextMark(true)
 	var md string
 	var withMath bool
 	if nil != form.Value["href"] {
@@ -175,7 +176,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	if "" == md {
-		md, withMath, _ = model.HTML2Markdown(dom)
+		md, withMath, _ = model.HTML2Markdown(dom, luteEngine)
 	}
 
 	md = strings.TrimSpace(md)

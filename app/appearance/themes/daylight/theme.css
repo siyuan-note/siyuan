@@ -136,7 +136,7 @@
 
     /* switch */
     --b3-switch-background: #e1e3e1;
-    --b3-switch-border: #aeaeae;
+    --b3-switch-border: var(--b3-theme-on-surface-light);
     --b3-switch-hover: rgba(31, 31, 31, 0.06);
     --b3-switch-checked: #fff;
     --b3-switch-checked-background: var(--b3-theme-primary);
@@ -180,9 +180,10 @@
     --b3-protyle-code-background: rgba(27, 31, 35, .05);
 
     /* 所见即所得行内元素颜色 */
-    --b3-protyle-inline-strong-color: #202124;
-    --b3-protyle-inline-em-color: #202124;
-    --b3-protyle-inline-s-color: #202124;
+    --b3-protyle-inline-strong-color: inherit;
+    --b3-protyle-inline-em-color: inherit;
+    --b3-protyle-inline-u-color: inherit;
+    --b3-protyle-inline-s-color: inherit;
     --b3-protyle-inline-link-color: #4285f4;
     --b3-protyle-inline-mark-background: rgb(252, 212, 126);
     --b3-protyle-inline-mark-color: #202124;
@@ -206,11 +207,14 @@
     /* 表格 */
     --b3-table-even-background: rgba(0, 0, 0, .02);
 
-    /* 潜入块 */
-    --b3-embed-background: var(--b3-table-even-background);
+    /* 嵌入块 */
+    --b3-embed-background: transparent;
 
     /* 引述块 */
-    --b3-bq-background: var(--b3-table-even-background);
+    --b3-bq-background: transparent;
+
+    /* 父块颜色 */
+    --b3-parent-background: var(--b3-theme-background);
 }
 
 :lang(ja_JP):root {

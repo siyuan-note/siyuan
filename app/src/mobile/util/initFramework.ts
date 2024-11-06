@@ -46,7 +46,7 @@ const openDockMenu = (app: App) => {
                             }
                         }
                         custom = plugin.docks[dockId].mobileModel(document.querySelector('#sidebar [data-type="sidebar-plugin"]'));
-                        window.siyuan.mobile.docks[dockId] = custom
+                        window.siyuan.mobile.docks[dockId] = custom;
                     }
                 }
             });

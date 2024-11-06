@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -79,7 +80,7 @@ func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	return
 }
 
-func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, updated int64, err error) {
+func OpenRepoSnapshotDoc(fileID string) (title, content string, displayInText bool, updated int64, err error) {
 	if 1 > len(Conf.Repo.Key) {
 		err = errors.New(Conf.Language(26))
 		return
@@ -105,15 +106,15 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 	if strings.HasSuffix(file.Path, ".sy") {
 		luteEngine := NewLute()
 		var snapshotTree *parse.Tree
-		isProtyleDoc, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
+		displayInText, snapshotTree, err = parseTreeInSnapshot(data, luteEngine)
 		if err != nil {
 			logging.LogErrorf("parse tree from snapshot file [%s] failed", fileID)
 			return
 		}
+		title = snapshotTree.Root.IALAttr("title")
 
-		if !isProtyleDoc {
+		if !displayInText {
 			renderTree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}}
-
 			var unlinks []*ast.Node
 			ast.Walk(snapshotTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 				if !entering {
@@ -141,7 +142,7 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 		}
 
 		luteEngine.RenderOptions.ProtyleContenteditable = false
-		if isProtyleDoc {
+		if displayInText {
 			util.PushMsg(Conf.Language(36), 5000)
 			formatRenderer := render.NewFormatRenderer(snapshotTree, luteEngine.RenderOptions)
 			content = gulu.Str.FromBytes(formatRenderer.Render())
@@ -149,8 +150,12 @@ func OpenRepoSnapshotDoc(fileID string) (content string, isProtyleDoc bool, upda
 			content = luteEngine.Tree2BlockDOM(snapshotTree, luteEngine.RenderOptions)
 		}
 	} else {
-		isProtyleDoc = true
-		if strings.HasSuffix(file.Path, ".json") {
+		displayInText = true
+		title = path.Base(file.Path)
+
+		if mimeType := mime.TypeByExtension(filepath.Ext(file.Path)); strings.HasPrefix(mimeType, "text/") || strings.Contains(mimeType, "json") {
+			// 如果是文本文件，直接返回文本内容
+			// All plain text formats are supported when comparing data snapshots https://github.com/siyuan-note/siyuan/issues/12975
 			content = gulu.Str.FromBytes(data)
 		} else {
 			if strings.Contains(file.Path, "assets/") { // 剔除笔记本级或者文档级资源文件路径前缀
@@ -326,8 +331,8 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 	return
 }
 
-func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isProtyleDoc bool, tree *parse.Tree, err error) {
-	isProtyleDoc = 1024*1024*1 <= len(data)
+func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
+	isLargeDoc = 1024*1024*1 <= len(data)
 	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return

@@ -289,7 +289,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 if (selectedElement) {
                     menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll + (menuElement.querySelector(".b3-chips").clientHeight - oldChipsHeight);
                 }
-            });
+            }, undefined, true);
         }
     });
     menu.addSeparator();
@@ -297,7 +297,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         menu.addItem({
             checked: parseInt(color) === index + 1,
             iconHTML: "",
-            label: `<span class="color__square"  style="padding: 5px;margin: 2px;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
+            label: `<span class="color__square color__square--list"  style="margin: 2px 0;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
             click(element) {
                 if (element.lastElementChild.classList.contains("b3-menu__checked")) {
                     return;

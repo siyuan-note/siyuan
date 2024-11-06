@@ -66,9 +66,9 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
         opElement.querySelector('option[value="replace"]').classList.remove("fn__none");
         opElement.querySelector('option[value="outline"]').classList.remove("fn__none");
     }
-    window.siyuan.storage[Constants.LOCAL_HISTORY].notebookId = notebookElement.value
-    window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value)
-    window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value
+    window.siyuan.storage[Constants.LOCAL_HISTORY].notebookId = notebookElement.value;
+    window.siyuan.storage[Constants.LOCAL_HISTORY].type = parseInt(typeElement.value);
+    window.siyuan.storage[Constants.LOCAL_HISTORY].operation = opElement.value;
     setStorageVal(Constants.LOCAL_HISTORY, window.siyuan.storage[Constants.LOCAL_HISTORY]);
     fetchPost("/api/history/searchHistory", {
         notebook: notebookElement.value,
@@ -347,7 +347,7 @@ export const openHistory = (app: App) => {
     });
 
     const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
-    <div class="layout-tab-bar fn__flex" style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
+    <div class="layout-tab-bar fn__flex" ${isMobile() ? "" : 'style="border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0"'}>
         <div data-type="doc" class="item item--full item--focus"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.fileHistory}</span><span class="fn__flex-1"></span></div>
         <div data-type="notebook" style="min-width: 160px" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.removedNotebook}</span><span class="fn__flex-1"></span></div>
         <div data-type="repo" class="item item--full"><span class="fn__flex-1"></span><span class="item__text">${window.siyuan.languages.dataSnapshot}</span><span class="fn__flex-1"></span></div>
@@ -393,13 +393,16 @@ export const openHistory = (app: App) => {
                 </div>
             </div>
             <div class="fn__flex fn__flex-1 history__panel">
-                <ul class="b3-list b3-list--background history__side" style="width: ${localHistory.sideWidth}">
+                <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${localHistory.sideWidth}"`}>
                     <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
                 </ul>
                 <div class="history__resize"></div>
-                <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
-                <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
-                <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+                <div class="fn__flex-column fn__flex-1">
+                    <div class="protyle-title__input ft__center ft__breakword"></div>
+                    <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
+                    <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
+                    <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+                </div>
             </div>
         </div>
         <ul data-type="notebook" style="padding: 8px 0;" class="fn__none b3-list b3-list--background">
@@ -480,6 +483,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
     const docElement = firstPanelElement.querySelector('.history__text[data-type="docPanel"]') as HTMLElement;
     const assetElement = firstPanelElement.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = firstPanelElement.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
+    const titleElement = firstPanelElement.querySelector(".protyle-title__input") as HTMLElement;
     renderDoc(firstPanelElement, 1);
     historyEditor = new Protyle(app, docElement, {
         blockId: "",
@@ -706,6 +710,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     });
                 }
+                titleElement.textContent = target.querySelector(".b3-list-item__text").textContent;
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {
                     currentItem = currentItem.querySelector(".b3-list-item--focus");
@@ -754,7 +759,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     fetchPost("/api/repo/" + type, {tag}, () => {
                         renderRepo(repoElement, 1);
                     });
-                });
+                }, undefined, true);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -864,8 +869,6 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     );
                 }
-
-
             } else if ((type === "docprevious" || type === "docnext") && target.getAttribute("disabled") !== "disabled") {
                 const currentPage = parseInt(firstPanelElement.getAttribute("data-page"));
                 renderDoc(firstPanelElement, type === "docprevious" ? currentPage - 1 : currentPage + 1);

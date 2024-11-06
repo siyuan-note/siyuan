@@ -17,6 +17,7 @@ import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
 import {escapeAttr} from "../../../util/escape";
+import {renameAsset} from "../../../editor/rename";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -225,13 +226,6 @@ ${window.siyuan.languages.title}
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>`,
         });
         menu.addItem({
-            icon: "iconPreview",
-            label: window.siyuan.languages.cardPreview,
-            click() {
-                previewImage(linkAddress);
-            }
-        });
-        menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
@@ -245,7 +239,6 @@ ${window.siyuan.languages.title}
                 copyPNGByLink(linkAddress);
             }
         });
-        menu.addSeparator();
     }
     menu.addItem({
         icon: "iconTrashcan",
@@ -259,6 +252,26 @@ ${window.siyuan.languages.title}
             });
         }
     });
+    if (linkAddress?.startsWith("assets/")) {
+        menu.addItem({
+            label: window.siyuan.languages.rename,
+            icon: "iconEdit",
+            click() {
+                renameAsset(linkAddress);
+                document.querySelector(".av__panel")?.remove();
+            }
+        });
+    }
+    menu.addSeparator();
+    if (type !== "file") {
+        menu.addItem({
+            icon: "iconPreview",
+            label: window.siyuan.languages.cardPreview,
+            click() {
+                previewImage(linkAddress);
+            }
+        });
+    }
     openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, false, false);
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);

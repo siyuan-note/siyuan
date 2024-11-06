@@ -23,6 +23,7 @@ import {genImportMenu} from "../../menus/navigation";
 import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
+import {hasTopClosestByClassName} from "../util/hasClosest";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -287,5 +288,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
         /// #else
         window.siyuan.menus.menu.popup(position);
         /// #endif
+        const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+        window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     });
 };

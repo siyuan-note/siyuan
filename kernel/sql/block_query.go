@@ -457,6 +457,36 @@ func Query(stmt string, limit int) (ret []map[string]interface{}, err error) {
 	return
 }
 
+func ToBlocks(result []map[string]interface{}) (ret []*Block) {
+	for _, row := range result {
+		b := &Block{
+			ID:       row["id"].(string),
+			ParentID: row["parent_id"].(string),
+			RootID:   row["root_id"].(string),
+			Hash:     row["hash"].(string),
+			Box:      row["box"].(string),
+			Path:     row["path"].(string),
+			HPath:    row["hpath"].(string),
+			Name:     row["name"].(string),
+			Alias:    row["alias"].(string),
+			Memo:     row["memo"].(string),
+			Tag:      row["tag"].(string),
+			Content:  row["content"].(string),
+			FContent: row["fcontent"].(string),
+			Markdown: row["markdown"].(string),
+			Length:   int(row["length"].(int64)),
+			Type:     row["type"].(string),
+			SubType:  row["subtype"].(string),
+			IAL:      row["ial"].(string),
+			Sort:     int(row["sort"].(int64)),
+			Created:  row["created"].(string),
+			Updated:  row["updated"].(string),
+		}
+		ret = append(ret, b)
+	}
+	return
+}
+
 func getLimitClause(parsedStmt sqlparser.Statement, limit int) (ret *sqlparser.Limit) {
 	switch parsedStmt.(type) {
 	case *sqlparser.Select:

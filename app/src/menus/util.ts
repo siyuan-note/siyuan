@@ -33,7 +33,7 @@ export const exportAsset = (src: string) => {
     };
 };
 
-export const openEditorTab = (app: App, ids: string[], notebookId?: string, pathString?: string) => {
+export const openEditorTab = (app: App, ids: string[], notebookId?: string, pathString?: string, onlyGetMenus = false) => {
     /// #if !MOBILE
     const openSubmenus: IMenu[] = [{
         id: "insertRight",
@@ -125,9 +125,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         label: window.siyuan.languages.openByNewWindow,
         icon: "iconOpenWindow",
         click() {
-            ids.forEach((id) => {
-                openNewWindowById(id);
-            });
+            openNewWindowById(ids);
         }
     });
     /// #endif
@@ -161,6 +159,9 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         }
     });
     /// #endif
+    if (onlyGetMenus ) {
+        return openSubmenus;
+    }
     window.siyuan.menus.menu.append(new MenuItem({
         id: "openBy",
         label: window.siyuan.languages.openBy,
@@ -170,7 +171,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
     /// #endif
 };
 
-export const copyPNGByLink = (link:string) => {
+export const copyPNGByLink = (link: string) => {
     if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(link);
         return;

@@ -109,14 +109,19 @@
       }
     }
 
+    // 大纲中有图片 https://github.com/siyuan-note/siyuan/issues/12993
+    .img img {
+      height: 24px;
+      vertical-align: top;
+      margin: 2px 0;
+      width: auto !important;
+    }
+
     &__icon {
       svg, img {
-        float: left;
-        margin: 3px 0;
         height: 16px;
         width: 16px;
         color: var(--b3-theme-on-surface);
-        border-radius: var(--b3-border-radius);
       }
 
       text-align: center;
@@ -129,6 +134,8 @@
       padding: 0 4px;
       flex-shrink: 0;
       border-radius: var(--b3-border-radius);
+      display: flex;
+      align-items: center;
 
       &:hover {
         color: var(--b3-theme-on-background);

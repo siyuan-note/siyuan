@@ -6,7 +6,7 @@
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
 		"type": "doc",
-		"updated": "20241024163151"
+		"updated": "20241027164144"
 	},
 	"Children": [
 		{
@@ -272,7 +272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-5250xg7",
-				"updated": "20211228104709"
+				"updated": "20241027164144"
 			},
 			"Children": [
 				{
@@ -330,7 +330,7 @@
 			},
 			"Properties": {
 				"id": "20211226123051-1qp7a9g",
-				"updated": "20220715092951"
+				"updated": "20241027164144"
 			},
 			"Children": [
 				{
@@ -344,7 +344,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-mmn60x5",
-						"updated": "20220715092951"
+						"updated": "20241027164144"
 					},
 					"Children": [
 						{
@@ -352,23 +352,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-p8dr1dy",
-								"updated": "20220715092951"
+								"updated": "20241027164144"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具體的資料文件，比如圖片或者文件。如果資料文件是 PDF 且做過"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20211226122955-ganeraz",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "標註"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，那麼無論它是否被引用都不會計入清理"
+									"Data": "引用具體的資料文件，比如圖片或者文件"
 								}
 							]
 						}

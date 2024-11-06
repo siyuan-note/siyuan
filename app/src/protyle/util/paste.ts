@@ -97,6 +97,9 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
         // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
+        // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
+        clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
+
         // https://github.com/siyuan-note/siyuan/issues/5446
         // A\B\C\D\
         // E
@@ -175,6 +178,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/<kbd>/g, "__@kbd@__").replace(/<\/kbd>/g, "__@/kbd@__");
             textPlain = textPlain.replace(/<u>/g, "__@u@__").replace(/<\/u>/g, "__@/u@__");
 
+            // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
+            textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
+
             // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
             textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
 
@@ -182,9 +188,24 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");
             textPlain = textPlain.replace(/__@sup@__/g, "<sup>").replace(/__@\/sup@__/g, "</sup>");
             textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
-            textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u");
+            textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
+            protyle.lute.SetInlineAsterisk(true);
+            protyle.lute.SetGFMStrikethrough(true);
+            protyle.lute.SetInlineMath(true);
+            protyle.lute.SetSub(true);
+            protyle.lute.SetSup(true);
+            protyle.lute.SetTag(true);
+            protyle.lute.SetInlineUnderscore(true);
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+            protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
+            protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+            protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+            protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+            protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+            protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+            protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+
             // insertHTML 会进行内部反转义
             insertHTML(content, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);
@@ -219,6 +240,31 @@ export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Ele
     avRender(protyle.wysiwyg.element, protyle);
     filterClipboardHint(protyle, textPlain);
     scrollCenter(protyle, undefined, false, "smooth");
+};
+
+const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
+    if (protyle && protyle.app && protyle.app.plugins) {
+        for (let i = 0; i < protyle.app.plugins.length; i++) {
+            const response: { files: string[] } = await new Promise((resolve) => {
+                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                    protyle,
+                    resolve,
+                    textHTML: "",
+                    textPlain: "",
+                    siyuanHTML: "",
+                    files: localFiles
+                });
+                if (emitResult) {
+                    resolve(undefined);
+                }
+            });
+            if (response?.files) {
+                localFiles = response.files;
+            }
+        }
+    }
+    uploadLocalFiles(localFiles, protyle, true);
+    writeText("");
 };
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
@@ -257,15 +303,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 localFiles.push(item.childNodes[0].nodeValue);
             });
             if (localFiles.length > 0) {
-                uploadLocalFiles(localFiles, protyle, true);
-                writeText("");
+                readLocalFile(protyle, localFiles);
                 return;
             }
         } else {
             const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
             if (xmlString.data.length > 0) {
-                uploadLocalFiles(xmlString.data, protyle, true);
-                writeText("");
+                readLocalFile(protyle, xmlString.data);
                 return;
             }
         }
@@ -365,7 +409,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.querySelectorAll('[contenteditable="false"][spellcheck]').forEach((e) => {
             e.setAttribute("contenteditable", "true");
         });
-        const tempInnerHTML = tempElement.innerHTML;
+        let tempInnerHTML = tempElement.innerHTML;
         if (!nodeElement.classList.contains("av") && tempInnerHTML.startsWith("[[{") && tempInnerHTML.endsWith("}]]")) {
             try {
                 const json = JSON.parse(tempInnerHTML);
@@ -378,6 +422,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 insertHTML(tempInnerHTML, protyle, isBlock);
             }
         } else {
+            if (-1 < tempInnerHTML.indexOf("NodeHTMLBlock")) {
+                // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
+                tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
+            }
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         filterClipboardHint(protyle, protyle.lute.BlockDOM2StdMd(tempInnerHTML));

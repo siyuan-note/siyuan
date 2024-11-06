@@ -476,7 +476,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	if 1 > len(ids) {
 		// `Replace All` is no longer affected by pagination https://github.com/siyuan-note/siyuan/issues/8265
-		blocks, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
+		blocks, _, _, _, _ := FullTextSearchBlock(keyword, boxes, paths, types, method, orderBy, groupBy, 1, math.MaxInt)
 		for _, block := range blocks {
 			ids = append(ids, block.ID)
 		}
@@ -767,6 +767,20 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkBlockRefSubtype = "s"
 							}
 						}
+					} else if n.IsTextMarkType("file-annotation-ref") {
+						if !replaceTypes["fileAnnotationRef"] {
+							return ast.WalkContinue
+						}
+
+						if 0 == method {
+							if strings.Contains(n.TextMarkTextContent, keyword) {
+								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+							}
+						} else if 3 == method {
+							if nil != r && r.MatchString(n.TextMarkTextContent) {
+								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
+							}
+						}
 					}
 				}
 				return ast.WalkContinue
@@ -830,17 +844,19 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 				newContent = bytes.ReplaceAll(text.Tokens, []byte(keyword), []byte(replacement))
 			}
 		} else {
-			// 当搜索结果中的文本元素包含大小写混合时替换失败
-			// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
-			keywords := strings.Split(keyword, " ")
-			// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
-			if 0 < len(keywords) {
-				var lowerKeywords []string
-				for _, k := range keywords {
-					lowerKeywords = append(lowerKeywords, strings.ToLower(k))
+			if "" != strings.TrimSpace(keyword) {
+				// 当搜索结果中的文本元素包含大小写混合时替换失败
+				// Replace fails when search results contain mixed case in text elements https://github.com/siyuan-note/siyuan/issues/9171
+				keywords := strings.Split(keyword, " ")
+				// keyword 可能是 "foo Foo" 使用空格分隔的大小写命中情况，这里统一转换小写后去重
+				if 0 < len(keywords) {
+					var lowerKeywords []string
+					for _, k := range keywords {
+						lowerKeywords = append(lowerKeywords, strings.ToLower(k))
+					}
+					lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
+					keyword = strings.Join(lowerKeywords, " ")
 				}
-				lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
-				keyword = strings.Join(lowerKeywords, " ")
 			}
 
 			if bytes.Contains(bytes.ToLower(text.Tokens), []byte(keyword)) {
@@ -903,7 +919,7 @@ func replaceNodeTokens(n *ast.Node, method int, keyword string, replacement stri
 // method：0：关键字，1：查询语法，2：SQL，3：正则表达式
 // orderBy: 0：按块类型（默认），1：按创建时间升序，2：按创建时间降序，3：按更新时间升序，4：按更新时间降序，5：按内容顺序（仅在按文档分组时），6：按相关度升序，7：按相关度降序
 // groupBy：0：不分组，1：按文档分组
-func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int) {
+func FullTextSearchBlock(query string, boxes, paths []string, types map[string]bool, method, orderBy, groupBy, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount, pageCount int, docMode bool) {
 	ret = []*Block{}
 	if "" == query {
 		return
@@ -945,7 +961,12 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		} else {
+			docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		}
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
 
@@ -1299,7 +1320,12 @@ func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
-	regex := regexp.MustCompile(exp)
+	regex, err := regexp.Compile(exp)
+	if nil != err {
+		util.PushErrMsg(err.Error(), 5000)
+		return
+	}
+
 	blocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
 	if 1 > len(ret) {
@@ -1353,16 +1379,6 @@ func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter,
 }
 
 func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter string) (matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, _ := sql.QueryNoLimit("SELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM `blocks` WHERE `id` = '" + query + "'")
-		if 1 > len(ret) {
-			return
-		}
-		matchedBlockCount = int(ret[0]["matches"].(int64))
-		matchedRootCount = int(ret[0]["docs"].(int64))
-		return
-	}
-
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1383,80 +1399,50 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	start := time.Now()
 
-	table := "blocks_fts" // 大小写敏感
-	if !Conf.Search.CaseSensitive {
-		table = "blocks_fts_case_insensitive"
-	}
-
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
+	contentField := columnConcat()
 	var likeFilter string
+	orderByLike := "("
 	for i, keyword := range keywords {
-		likeFilter += "docContent LIKE '%" + keyword + "%'"
+		likeFilter += "GROUP_CONCAT(" + contentField + ") LIKE '%" + keyword + "%'"
+		orderByLike += "(docContent LIKE '%" + keyword + "%')"
 		if i < len(keywords)-1 {
 			likeFilter += " AND "
+			orderByLike += " + "
 		}
 	}
-	bMatchStmt := "SELECT id FROM " + table + " WHERE " + strings.ReplaceAll(likeFilter, "docContent LIKE ", "content LIKE ")
-	bMatchStmt += " AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter
-	dMatchStmt := "SELECT root_id, GROUP_CONCAT(content || tag || name || alias || memo) AS docContent" +
-		" FROM " + table + " WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
-		" GROUP BY root_id HAVING " + likeFilter
-	cteStmt := "WITH docBlocks AS (" + dMatchStmt + "), nonDocBlocks AS (" + bMatchStmt + ")"
-	wheheClause := " WHERE id IN (SELECT id FROM nonDocBlocks) OR id IN (SELECT root_id FROM docBlocks)"
-	selectStmt := cteStmt + "\nSELECT * FROM " + table + wheheClause
-	countStmt := cteStmt + "\nSELECT COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` FROM " + table + wheheClause
-	selectStmt += orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	resultBlocks := sql.SelectBlocksRawStmtNoParse(selectStmt, -1)
-
-	logging.LogInfof("time cost [main search]: %v", time.Since(start))
-	now := time.Now()
-
-	// FTS 高亮
-	projections := "id, parent_id, root_id, hash, box, path, " +
-		// Search result content snippet returns more text https://github.com/siyuan-note/siyuan/issues/10707
-		"snippet(" + table + ", 6, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS hpath, " +
-		"snippet(" + table + ", 7, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS name, " +
-		"snippet(" + table + ", 8, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS alias, " +
-		"snippet(" + table + ", 9, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS memo, " +
-		"snippet(" + table + ", 10, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 64) AS tag, " +
-		"snippet(" + table + ", 11, '" + search.SearchMarkLeft + "', '" + search.SearchMarkRight + "', '...', 512) AS content, " +
-		"fcontent, markdown, length, type, subtype, ial, sort, created, updated"
-	stmt := "SELECT " + projections + " FROM " + table + " WHERE (`" + table + "` MATCH '" + columnFilter() + ":(" + stringQuery(query) + ")'"
-	stmt += ") AND type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter + orderBy + " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
-	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
-	for i, resultBlock := range resultBlocks {
-		for j, block := range blocks {
-			if resultBlock.ID == block.ID {
-				resultBlocks[i] = block
-				// 减少 blocks
-				blocks = append(blocks[:j], blocks[j+1:]...)
-				break
-			}
-		}
+	orderByLike += ")"
+	dMatchStmt := "SELECT root_id, MAX(CASE WHEN type = 'd' THEN (" + contentField + ") END) AS docContent" +
+		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" GROUP BY root_id HAVING " + likeFilter + "ORDER BY " + orderByLike + " DESC, MAX(updated) DESC"
+	cteStmt := "WITH docBlocks AS (" + dMatchStmt + ")"
+	likeFilter = strings.ReplaceAll(likeFilter, "GROUP_CONCAT("+contentField+")", "concatContent")
+	limit := " LIMIT " + strconv.Itoa(pageSize) + " OFFSET " + strconv.Itoa((page-1)*pageSize)
+	selectStmt := cteStmt + "\nSELECT *, " +
+		"(" + contentField + ") AS concatContent, " +
+		"(SELECT COUNT(root_id) FROM docBlocks) AS docs, " +
+		"(CASE WHEN (root_id IN (SELECT root_id FROM docBlocks) AND (" + strings.ReplaceAll(likeFilter, "concatContent", contentField) + ")) THEN 1 ELSE 0 END) AS blockSort" +
+		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
+		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
+		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
+	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	result, _ := sql.QueryNoLimit(selectStmt)
+	resultBlocks := sql.ToBlocks(result)
+	if 0 < len(resultBlocks) {
+		matchedRootCount = int(result[0]["docs"].(int64))
+		matchedBlockCount = matchedRootCount
 	}
 
-	ret = fromSQLBlocks(&resultBlocks, "", beforeLen)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	terms := strings.Join(keywords, search.TermSep)
+	ret = fromSQLBlocks(&resultBlocks, terms, beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
 
-	logging.LogInfof("time cost [highlight search]: %v", time.Since(now))
-	now = time.Now()
-	matchedBlockCount, matchedRootCount = fullTextSearchCountByStmt(countStmt)
-	logging.LogInfof("time cost [count search]: %v", time.Since(now))
-	logging.LogInfof("time cost [all]: %v", time.Since(start))
-	return
-}
-
-func fullTextSearchCountByStmt(stmt string) (matchedBlockCount, matchedRootCount int) {
-	result, _ := sql.QueryNoLimit(stmt)
-	if 1 > len(result) {
-		return
-	}
-	matchedBlockCount = int(result[0]["matches"].(int64))
-	matchedRootCount = int(result[0]["docs"].(int64))
+	logging.LogInfof("time cost [like]: %v", time.Since(start))
 	return
 }
 
@@ -1493,7 +1479,10 @@ func highlightByRegexp(query, typeFilter, id string) (ret []string) {
 	fieldFilter := fieldRegexp(query)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += " AND root_id = '" + id + "'"
-	regex := regexp.MustCompile(query)
+	regex, _ := regexp.Compile(query)
+	if nil == regex {
+		return
+	}
 	sqlBlocks := sql.SelectBlocksRegex(stmt, regex, Conf.Search.Name, Conf.Search.Alias, Conf.Search.Memo, Conf.Search.IAL, 1, 256)
 	for _, block := range sqlBlocks {
 		keyword := gulu.Str.SubstringsBetween(block.Content, search.SearchMarkLeft, search.SearchMarkRight)
@@ -1597,7 +1586,7 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	hPath, _ := markSearch(sqlBlock.HPath, terms, 18)
+	hPath, _ := markSearch(sqlBlock.HPath, "", 18)
 	if !strings.HasPrefix(hPath, "/") {
 		hPath = "/" + hPath
 	}
@@ -1685,6 +1674,25 @@ func columnFilter() string {
 		buf.WriteString(" ial")
 	}
 	buf.WriteString(" tag}")
+	return buf.String()
+}
+
+func columnConcat() string {
+	buf := bytes.Buffer{}
+	buf.WriteString("content")
+	if Conf.Search.Name {
+		buf.WriteString("||name")
+	}
+	if Conf.Search.Alias {
+		buf.WriteString("||alias")
+	}
+	if Conf.Search.Memo {
+		buf.WriteString("||memo")
+	}
+	if Conf.Search.IAL {
+		buf.WriteString("||ial")
+	}
+	buf.WriteString("||tag")
 	return buf.String()
 }
 

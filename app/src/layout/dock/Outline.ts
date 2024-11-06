@@ -342,7 +342,7 @@ export class Outline extends Model {
         const docTitleElement = this.headerElement.nextElementSibling as HTMLElement;
         if (this.type === "pin") {
             if (ial) {
-                let iconHTML = `${unicode2Emoji(ial.icon || Constants.SIYUAN_IMAGE_FILE, "b3-list-item__graphic", true)}`;
+                let iconHTML = `${unicode2Emoji(ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file, "b3-list-item__graphic", true)}`;
                 if (ial.icon === Constants.ZWSP && docTitleElement.firstElementChild) {
                     iconHTML = docTitleElement.firstElementChild.outerHTML;
                 }

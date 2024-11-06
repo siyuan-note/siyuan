@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20241024163314"
+		"updated": "20241027164357"
 	},
 	"Children": [
 		{
@@ -305,7 +305,7 @@
 			"Properties": {
 				"ID": "20240530101000-ta4h1wk",
 				"id": "20240530101000-m2u22gy",
-				"updated": "20240530101000"
+				"updated": "20241027164357"
 			},
 			"Children": [
 				{
@@ -371,7 +371,7 @@
 			"Properties": {
 				"ID": "20240530101000-stcite3",
 				"id": "20240530101000-koz90j5",
-				"updated": "20240530101000"
+				"updated": "20241027164357"
 			},
 			"Children": [
 				{
@@ -390,32 +390,20 @@
 					"Properties": {
 						"ID": "20240530101000-lnwfvgb",
 						"id": "20240530101000-5sfnnrd",
-						"updated": "20240530101000"
+						"updated": "20241027164353"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-54snji6",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-uc93s2g",
 								"id": "20240530101000-54snji6",
-								"updated": "20240530101000"
+								"updated": "20241027164353"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "具体的なファイル (画像やファイルなど) への参照は、そのファイルが"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20240530101000-02yxu30",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "注釈付き"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " PDF であれば参照の有無に関わらずクリーンアップの対象外です。"
+									"Data": "画像やファイルなどの特定のリソース ファイルを参照する"
 								}
 							]
 						}
@@ -437,16 +425,15 @@
 					"Properties": {
 						"ID": "20240530101000-5l8f1rb",
 						"id": "20240530101000-81nggm6",
-						"updated": "20240530101000"
+						"updated": "20241027164357"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-0sjc1uk",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-3jni3h9",
 								"id": "20240530101000-0sjc1uk",
-								"updated": "20240530101000"
+								"updated": "20241027164357"
 							},
 							"Children": [
 								{
@@ -478,7 +465,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​)。参照されているアセットフォルダ内のすべてのアセットファイルは、個別に参照されているかどうかに関わらず参照済みとみなされます。"
+									"Data": "​)。参照されているアセットフォルダ内のすべてのアセットファイルは、個別に参照されているかどうかに関わらず参照済みとみなされます"
 								}
 							]
 						}
@@ -490,7 +477,6 @@
 			"ID": "20240530101000-vt936mb",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-idcgxvi",
 				"id": "20240530101000-vt936mb",
 				"updated": "20240530101000"
 			},

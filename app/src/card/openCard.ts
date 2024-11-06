@@ -448,7 +448,7 @@ export const bindCardEvent = async (options: {
                     icon: "iconOpenWindow",
                     label: window.siyuan.languages.openByNewWindow,
                     click() {
-                        const json = {
+                        const json = [{
                             "title": window.siyuan.languages.spaceRepetition,
                             "icon": "iconRiffCard",
                             "instance": "Tab",
@@ -461,7 +461,7 @@ export const bindCardEvent = async (options: {
                                     "title": options.title
                                 }
                             }
-                        };
+                        }];
                         ipcRenderer.send(Constants.SIYUAN_OPEN_WINDOW, {
                             // 需要 encode， 否则 https://github.com/siyuan-note/siyuan/issues/9343
                             url: `${window.location.protocol}//${window.location.host}/stage/build/app/window.html?v=${Constants.SIYUAN_VERSION}&json=${encodeURIComponent(JSON.stringify(json))}`

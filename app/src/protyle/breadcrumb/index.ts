@@ -8,7 +8,7 @@ import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
-import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";
@@ -31,6 +31,7 @@ import {emitOpenMenu} from "../../plugin/EventBus";
 import {isInAndroid, isIPad, isMac, updateHotkeyTip} from "../util/compatibility";
 import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
+import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -582,6 +583,8 @@ ${padHTML}
             /// #else
             window.siyuan.menus.menu.popup(position);
             /// #endif
+            const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+            window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
         });
     }
 
@@ -649,30 +652,8 @@ ${padHTML}
                     html += '<svg class="protyle-breadcrumb__arrow"><use xlink:href="#iconRight"></use></svg>';
                 }
             });
-            this.element.classList.remove("protyle-breadcrumb__bar--nowrap");
             this.element.innerHTML = html;
-            const itemElements = Array.from(this.element.querySelectorAll(".protyle-breadcrumb__text"));
-            if (itemElements.length === 0) {
-                return;
-            }
-            let jump = false;
-            while (this.element.scrollHeight > 30 && !jump && itemElements.length > 1) {
-                itemElements.find((item, index) => {
-                    if (index > 0) {
-                        if (!item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                            item.classList.add("protyle-breadcrumb__text--ellipsis");
-                            return true;
-                        }
-                        if (index === itemElements.length - 1 && item.classList.contains("protyle-breadcrumb__text--ellipsis")) {
-                            jump = true;
-                        }
-                    }
-                });
-            }
-            this.element.classList.add("protyle-breadcrumb__bar--nowrap");
-            if (this.element.lastElementChild) {
-                this.element.scrollLeft = (this.element.lastElementChild as HTMLElement).offsetLeft - this.element.clientWidth + 14;
-            }
+            improveBreadcrumbAppearance(this.element.parentElement);
         });
         /// #endif
     }

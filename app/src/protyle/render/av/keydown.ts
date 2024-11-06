@@ -40,8 +40,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             return true;
         }
         if (event.key === "Escape") {
-            selectCellElement.classList.remove("av__cell--select", "av__cell--active");
-            selectCellElement.querySelector(".av__drag-fill")?.remove();
+            nodeElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+                item.classList.remove("av__cell--select", "av__cell--active");
+                item.querySelector(".av__drag-fill")?.remove();
+            });
             selectRow(rowElement.querySelector(".av__firstcol"), "select");
             event.preventDefault();
             return true;

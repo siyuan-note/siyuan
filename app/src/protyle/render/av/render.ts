@@ -207,13 +207,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-                let avBackground = "--av-background:var(--b3-theme-background)";
-                if (e.style.backgroundColor) {
-                    avBackground = "--av-background:" + e.style.backgroundColor;
-                } else if (isInEmbedBlock(e)) {
-                    avBackground = "--av-background:var(--b3-theme-surface)";
-                }
-                e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">
+                e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
@@ -267,7 +261,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
-                        ${window.siyuan.languages.addAttr}
+                        ${window.siyuan.languages.newRow}
                     </button>
                     <span class="fn__space"></span>
                     <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
@@ -359,7 +353,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     if (event.isComposing) {
                         return;
                     }
-                    if (searchInputElement.value) {
+                    if (searchInputElement.value || document.activeElement.isSameNode(searchInputElement)) {
                         viewsElement.classList.add("av__views--show");
                     } else {
                         viewsElement.classList.remove("av__views--show");

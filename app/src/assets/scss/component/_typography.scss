@@ -105,13 +105,11 @@
     box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
   }
 
-  u {
-    text-decoration: none;
-  }
-
   u,
   span[data-type~="u"] {
+    text-decoration: none;
     border-bottom: 1px solid;
+    color: var(--b3-protyle-inline-u-color);
   }
 
   span[data-type~="inline-memo"] {
@@ -434,6 +432,8 @@
       color: var(--b3-theme-on-surface);
       word-break: break-word;
       white-space: break-spaces;
+      line-height: normal;
+      padding: 4px 0;
     }
   }
 

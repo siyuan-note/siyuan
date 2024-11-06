@@ -47,7 +47,7 @@
     --b3-scroll-color: rgba(230, 230, 230, .2);
 
     /* 列表 */
-    --b3-list-hover: var(--b3-border-color);
+    --b3-list-hover: rgba(255, 255, 255, .075);
     --b3-list-icon-hover: rgba(201, 209, 217, .1);
 
     /* 菜单 */
@@ -140,7 +140,7 @@
     --b3-switch-checked: var(--b3-theme-primary);
     --b3-switch-checked-background: #a8c7fa;
     --b3-switch-checked-hover: var(--b3-theme-primary);
-    --b3-switch-checked-hover2: rgba( 253,252,251, .10);
+    --b3-switch-checked-hover2: rgba(253, 252, 251, .10);
 
     /* 阴影 */
     --b3-point-shadow: inset 0 .5px .5px .5px rgba(255, 255, 255, .09), 0 3px 6px rgba(0, 0, 0, .04), 0 0 0 0 transparent;

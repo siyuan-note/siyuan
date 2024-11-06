@@ -467,70 +467,37 @@
     }
   }
 
-  &--select {
-    background-color: var(--b3-theme-primary-lightest) !important;
+  &--select,
+  &--hl {
+    --b3-parent-background: transparent !important;
 
-    [data-node-id][style*="background-color: var(--b3-font-background1)"] {
-      background-color: var(--b3-font-background1-rgba) !important;
+    &:after {
+      background-color: var(--b3-theme-primary-lightest);
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      content: " ";
+      left: 0;
+      top: 0;
+      border-radius: var(--b3-border-radius);
     }
 
-    [data-node-id][style*="background-color: var(--b3-font-background2)"] {
-      background-color: var(--b3-font-background2-rgba) !important;
+    .table[custom-pinthead="true"] thead,
+    .av__row--footer,
+    .av__counter,
+    .av__row--header,
+    .av__colsticky {
+      background-color: transparent !important;
     }
+  }
 
-    [data-node-id][style*="background-color: var(--b3-font-background3)"] {
-      background-color: var(--b3-font-background3-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background4)"] {
-      background-color: var(--b3-font-background4-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background5)"] {
-      background-color: var(--b3-font-background5-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background6)"] {
-      background-color: var(--b3-font-background6-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background7)"] {
-      background-color: var(--b3-font-background7-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background8)"] {
-      background-color: var(--b3-font-background8-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background9)"] {
-      background-color: var(--b3-font-background9-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background10)"] {
-      background-color: var(--b3-font-background10-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background11)"] {
-      background-color: var(--b3-font-background11-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background12)"] {
-      background-color: var(--b3-font-background12-rgba) !important;
-    }
-
-    [data-node-id][style*="background-color: var(--b3-font-background13)"] {
-      background-color: var(--b3-font-background13-rgba) !important;
-    }
+  &--hl {
+    transition: var(--b3-background-transition);
   }
 
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;
-  }
-
-  &--hl {
-    transition: var(--b3-background-transition);
-    background-color: var(--b3-theme-primary-lightest) !important;
   }
 
   .dragover {

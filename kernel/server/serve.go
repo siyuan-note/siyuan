@@ -56,6 +56,7 @@ const (
 	MethodUnlock    = "UNLOCK"
 	MethodPropFind  = "PROPFIND"
 	MethodPropPatch = "PROPPATCH"
+	MethodReport    = "REPORT"
 )
 
 var (
@@ -102,6 +103,8 @@ var (
 		// MethodUnlock,
 		MethodPropFind,
 		MethodPropPatch,
+
+		MethodReport,
 	}
 )
 
@@ -665,7 +668,15 @@ func serveWebDAV(ginServer *gin.Engine) {
 	ginGroup.Match(WebDavMethods, "/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {
-			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
+			case http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				MethodMkcol,
+				MethodCopy,
+				MethodMove,
+				MethodLock,
+				MethodUnlock,
+				MethodPropPatch:
 				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
 				return
 			}
@@ -678,7 +689,7 @@ func serveCardDAV(ginServer *gin.Engine) {
 	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
 	handler := carddav.Handler{
 		Backend: &model.CardDavBackend{},
-		Prefix:  model.CardDavRootPath,
+		Prefix:  model.CardDavPrincipalsPath,
 	}
 
 	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
@@ -687,14 +698,24 @@ func serveCardDAV(ginServer *gin.Engine) {
 
 	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
 	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
+		// logging.LogDebugf("CardDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
 		if util.ReadOnly {
 			switch c.Request.Method {
-			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
+			case http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				MethodMkcol,
+				MethodCopy,
+				MethodMove,
+				MethodLock,
+				MethodUnlock,
+				MethodPropPatch:
 				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
 				return
 			}
 		}
 		handler.ServeHTTP(c.Writer, c.Request)
+		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})
 }
 

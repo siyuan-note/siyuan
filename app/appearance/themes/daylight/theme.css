@@ -180,9 +180,10 @@
     --b3-protyle-code-background: rgba(27, 31, 35, .05);
 
     /* 所见即所得行内元素颜色 */
-    --b3-protyle-inline-strong-color: #202124;
-    --b3-protyle-inline-em-color: #202124;
-    --b3-protyle-inline-s-color: #202124;
+    --b3-protyle-inline-strong-color: inherit;
+    --b3-protyle-inline-em-color: inherit;
+    --b3-protyle-inline-u-color: inherit;
+    --b3-protyle-inline-s-color: inherit;
     --b3-protyle-inline-link-color: #4285f4;
     --b3-protyle-inline-mark-background: rgb(252, 212, 126);
     --b3-protyle-inline-mark-color: #202124;

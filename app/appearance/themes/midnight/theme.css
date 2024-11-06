@@ -179,9 +179,10 @@
     --b3-protyle-code-background: rgba(240, 246, 252, .15);
 
     /* 所见即所得行内元素颜色 */
-    --b3-protyle-inline-strong-color: #e8eaed;
-    --b3-protyle-inline-em-color: #e8eaed;
-    --b3-protyle-inline-s-color: #e8eaed;
+    --b3-protyle-inline-strong-color: inherit;
+    --b3-protyle-inline-em-color: inherit;
+    --b3-protyle-inline-u-color: inherit;
+    --b3-protyle-inline-s-color: inherit;
     --b3-protyle-inline-link-color: #8ab4f8;
     --b3-protyle-inline-mark-background: rgba(255, 208, 0, .4);
     --b3-protyle-inline-mark-color: var(--b3-theme-on-background);

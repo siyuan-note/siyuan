@@ -420,6 +420,7 @@ table[contenteditable="true"] + .protyle-action__table {
     top: 0;
     width: 6px;
     cursor: col-resize;
+    z-index: 2;
 
     &:hover:after {
       background-color: var(--b3-theme-primary-light);

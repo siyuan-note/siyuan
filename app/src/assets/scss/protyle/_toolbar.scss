@@ -81,7 +81,6 @@
     max-height: 80vh;
     z-index: 4;
     box-sizing: border-box;
-    overflow: auto;
 
     &--mobile {
       top: 0;
@@ -93,7 +92,9 @@
   &-font {
     font-size: 12px;
     padding: 4px 8px;
-    max-width: 238px;
+    max-width: 248px;
+    overflow: auto;
+    max-height: calc(80vh - 24px);
 
     &__style {
       background-color: var(--b3-theme-background);

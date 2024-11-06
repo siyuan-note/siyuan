@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"io"
 	"os"
 	"path"
 	"path/filepath"
@@ -122,6 +123,7 @@ func ParseAddressPath(addressPath string) (addressBookPath string, addressID str
 	return
 }
 
+// AddressPropsFilter filters address properties
 func AddressPropsFilter(address *carddav.AddressObject, req *carddav.AddressDataRequest) *carddav.AddressObject {
 	var card *vcard.Card
 	card = &address.Card
@@ -147,6 +149,29 @@ func AddressPropsFilter(address *carddav.AddressObject, req *carddav.AddressData
 		ETag:          address.ETag,
 		Card:          *card,
 	}
+}
+
+func LoadCards(filePath string) (cards []*vcard.Card, err error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		logging.LogErrorf("read vCard file [%s] failed: %s", filePath, err)
+		return
+	}
+
+	decoder := vcard.NewDecoder(bytes.NewReader(data))
+	for {
+		card, err := decoder.Decode()
+		if err != nil {
+			if err == io.EOF {
+				break
+			}
+			logging.LogErrorf("decode vCard file [%s] failed: %s", filePath, err)
+			return nil, err
+		}
+		cards = append(cards, &card)
+	}
+
+	return
 }
 
 type Contacts struct {
@@ -559,19 +584,63 @@ func (b *AddressBook) load() error {
 				go func() {
 					defer wg.Done()
 
+					// load cards
 					addressFilePath := path.Join(b.DirectoryPath, filename)
-
-					// load data
-					address := &AddressObject{
-						FilePath: addressFilePath,
-						BookPath: b.MetaData.Path,
-					}
-					if err := address.load(); err != nil {
+					vCards, err := LoadCards(addressFilePath)
+					if err != nil {
 						return
 					}
 
-					id := path.Base(filename)
-					b.Addresses.Store(id, address)
+					switch len(vCards) {
+					case 0: // invalid file
+					case 1: // file contain 1 card
+						address := &AddressObject{
+							FilePath: addressFilePath,
+							BookPath: b.MetaData.Path,
+							Data: &carddav.AddressObject{
+								Card: *vCards[0],
+							},
+						}
+						if err := address.update(); err != nil {
+							return
+						}
+
+						id := path.Base(filename)
+						b.Addresses.Store(id, address)
+					default: // file contain multiple cards
+						// Create a file for each card
+						addressesWaitGroup := &sync.WaitGroup{}
+						for _, vCard := range vCards {
+							addressesWaitGroup.Add(1)
+							go func() {
+								defer addressesWaitGroup.Done()
+								filename_ := util.AssetName(filename)
+								address := &AddressObject{
+									FilePath: path.Join(b.DirectoryPath, filename_),
+									BookPath: b.MetaData.Path,
+									Data: &carddav.AddressObject{
+										Card: *vCard,
+									},
+								}
+								if err := address.save(true); err != nil {
+									return
+								}
+								if err := address.update(); err != nil {
+									return
+								}
+
+								id := path.Base(filename)
+								b.Addresses.Store(id, address)
+							}()
+						}
+
+						addressesWaitGroup.Wait()
+						// Delete original file with multiple cards
+						if err := os.Remove(addressFilePath); err != nil {
+							logging.LogErrorf("remove file [%s] failed: %s", addressFilePath, err)
+							return
+						}
+					}
 				}()
 			}
 		}

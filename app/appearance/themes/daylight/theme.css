@@ -207,11 +207,14 @@
     /* 表格 */
     --b3-table-even-background: rgba(0, 0, 0, .02);
 
-    /* 潜入块 */
-    --b3-embed-background: var(--b3-table-even-background);
+    /* 嵌入块 */
+    --b3-embed-background: transparent;
 
     /* 引述块 */
-    --b3-bq-background: var(--b3-table-even-background);
+    --b3-bq-background: transparent;
+
+    /* 父块颜色 */
+    --b3-parent-background: var(--b3-theme-background);
 }
 
 :lang(ja_JP):root {

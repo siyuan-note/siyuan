@@ -441,5 +441,6 @@ table[contenteditable="true"] + .protyle-action__table {
     background: var(--b3-theme-primary-lightest);
     position: relative;
     transition: var(--b3-transition);
+    z-index: 3;
   }
 }

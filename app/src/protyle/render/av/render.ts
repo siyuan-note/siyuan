@@ -207,13 +207,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-                let avBackground = "--av-background:var(--b3-theme-background)";
-                if (e.style.backgroundColor) {
-                    avBackground = "--av-background:" + e.style.backgroundColor;
-                } else if (isInEmbedBlock(e)) {
-                    avBackground = "--av-background:var(--b3-theme-surface)";
-                }
-                e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">
+                e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">

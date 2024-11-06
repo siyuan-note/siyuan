@@ -94,7 +94,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     e.dataset.pageSize = data.pageSize.toString();
                 }
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
                 let calcHTML = "";
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
@@ -169,7 +169,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
-                        tableHTML += '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
                     }
 
                     row.cells.forEach((cell, index) => {

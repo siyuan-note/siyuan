@@ -59,10 +59,6 @@
     --b3-tooltips-second-color: #7d7c7a;
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .3);
 
-    /* av */
-    --b3-av-hover: #2a2a2a;
-    --b3-av-background-hl: #28324e;
-
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface);
 

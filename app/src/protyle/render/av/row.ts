@@ -109,10 +109,10 @@ export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: El
     if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
         previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
     }
-    let colHTML = '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+    let colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {
-        colHTML = '<div class="av__colsticky"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+        colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         let lineNumber = "";

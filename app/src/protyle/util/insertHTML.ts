@@ -107,6 +107,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         cellValue.isDetached = true;
                         delete cellValue.block.id;
                     } else if (type === "select" || type === "mSelect") {
+                        if (type === "select" && cellValue.type === "mSelect" && cellValue.mSelect.length > 0) {
+                            cellValue.mSelect.splice(1, cellValue.mSelect.length - 1);
+                        }
                         const operations = mergeAddOption(columns.find(e => e.id === cellElement.dataset.colId), cellValue, avID);
                         doOperations.push(...operations.doOperations);
                         undoOperations.push(...operations.undoOperations);

@@ -473,6 +473,10 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 		stmt += " AND op = '" + op + "'"
 	}
 
+	if "%" != box && !ast.IsNodeIDPattern(box) {
+		box = "%"
+	}
+
 	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {
 		if HistoryTypeDocName == typ || HistoryTypeDoc == typ {
 			stmt += " AND path LIKE '%/" + box + "/%' AND path LIKE '%.sy'"

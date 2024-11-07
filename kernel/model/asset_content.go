@@ -63,6 +63,9 @@ func GetAssetContent(id, query string, queryMethod int) (ret *AssetContent) {
 			query = stringQuery(query)
 		}
 	}
+	if !ast.IsNodeIDPattern(id) {
+		return
+	}
 
 	table := "asset_contents_fts_case_insensitive"
 	filter := " id = '" + id + "'"

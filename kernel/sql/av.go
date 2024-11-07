@@ -261,12 +261,15 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					}
 					if nil != destAv {
 						blocks := map[string]*av.Value{}
-						for _, blockValue := range destAv.GetBlockKeyValues().Values {
-							blocks[blockValue.BlockID] = blockValue
-						}
-						for _, blockID := range cell.Value.Relation.BlockIDs {
-							if val := blocks[blockID]; nil != val {
-								cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, val)
+						blockValues := destAv.GetBlockKeyValues()
+						if nil != blockValues {
+							for _, blockValue := range blockValues.Values {
+								blocks[blockValue.BlockID] = blockValue
+							}
+							for _, blockID := range cell.Value.Relation.BlockIDs {
+								if val := blocks[blockID]; nil != val {
+									cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, val)
+								}
 							}
 						}
 					}

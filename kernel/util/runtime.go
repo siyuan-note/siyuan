@@ -38,6 +38,13 @@ import (
 	"github.com/siyuan-note/logging"
 )
 
+var DisabledFeatures []string
+
+func DisableFeature(feature string) {
+	DisabledFeatures = append(DisabledFeatures, feature)
+	DisabledFeatures = gulu.Str.RemoveDuplicatedElem(DisabledFeatures)
+}
+
 // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
 var UseSingleLineSave = true
 
@@ -88,6 +95,9 @@ func logBootInfo() {
 		"    * database [ver=%s]\n"+
 		"    * workspace directory [%s]",
 		Ver, runtime.GOARCH, plat, os.Getpid(), Mode, WorkingDir, ReadOnly, Container, DatabaseVer, WorkspaceDir)
+	if 0 < len(DisabledFeatures) {
+		logging.LogInfof("disabled features [%s]", strings.Join(DisabledFeatures, ", "))
+	}
 }
 
 func RandomSleep(minMills, maxMills int) {

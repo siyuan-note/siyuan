@@ -220,6 +220,7 @@ func InitConf() {
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion
+	Conf.System.DisabledFeatures = util.DisabledFeatures
 
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()

@@ -448,6 +448,13 @@ func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []
 	table := "histories_fts_case_insensitive"
 	stmt := "SELECT * FROM " + table + " WHERE "
 	stmt += buildSearchHistoryQueryFilter(query, op, box, table, typ)
+
+	_, parseErr := strconv.Atoi(created)
+	if nil != parseErr {
+		ret = []*HistoryItem{}
+		return
+	}
+
 	stmt += " AND created = '" + created + "' ORDER BY created DESC LIMIT " + fmt.Sprintf("%d", fileHistoryPageSize)
 	sqlHistories := sql.SelectHistoriesRawStmt(stmt)
 	ret = fromSQLHistories(sqlHistories)
@@ -471,6 +478,10 @@ func buildSearchHistoryQueryFilter(query, op, box, table string, typ int) (stmt 
 	}
 	if "all" != op {
 		stmt += " AND op = '" + op + "'"
+	}
+
+	if "%" != box && !ast.IsNodeIDPattern(box) {
+		box = "%"
 	}
 
 	if HistoryTypeDocName == typ || HistoryTypeDoc == typ || HistoryTypeDocID == typ {

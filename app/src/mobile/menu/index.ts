@@ -16,7 +16,7 @@ import {initAbout} from "../settings/about";
 import {getRecentDocs} from "./getRecentDocs";
 import {initEditor} from "../settings/editor";
 import {App} from "../../index";
-import {isHuawei, isInAndroid, isInIOS, isIPhone} from "../../protyle/util/compatibility";
+import {isDisabledFeature, isHuawei, isInAndroid, isInIOS, isIPhone} from "../../protyle/util/compatibility";
 import {newFile} from "../../util/newFile";
 import {afterLoadPlugin} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
@@ -45,8 +45,9 @@ export const initRightMenu = (app: App) => {
     let aiHTML = `<div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAI">
         <svg class="b3-menu__icon"><use xlink:href="#iconSparkles"></use></svg><span class="b3-menu__label">AI</span>
     </div>`;
-    if (isHuawei()) {
+    if (isHuawei() || isDisabledFeature("ai")) {
         // Access to the OpenAI API is no longer supported on Huawei devices https://github.com/siyuan-note/siyuan/issues/8192
+        // Apps in Chinese mainland app stores no longer provide AI access settings https://github.com/siyuan-note/siyuan/issues/13051
         aiHTML = "";
     }
 

@@ -373,6 +373,10 @@ export class Plugin {
         }));
     };
 
+    public updateProtyleToolbar(toolbar: Array<string | IMenuItem>) {
+        return toolbar;
+    }
+
     set protyleOptions(options: IProtyleOptions) {
         this.protyleOptionsValue = options;
     }

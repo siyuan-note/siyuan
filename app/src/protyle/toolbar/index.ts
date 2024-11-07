@@ -38,7 +38,7 @@ import {insertEmptyBlock} from "../../block/util";
 import {matchHotKey} from "../util/hotKey";
 import {hideElements} from "../ui/hideElements";
 import {electronUndo} from "../undo";
-import {previewTemplate} from "./util";
+import {previewTemplate, toolbarKeyToMenu} from "./util";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {InlineMath} from "./InlineMath";
 import {InlineMemo} from "./InlineMemo";
@@ -68,7 +68,9 @@ export class Toolbar {
         this.subElement.className = "protyle-util fn__none";
         /// #endif
         this.toolbarHeight = 29;
-
+        protyle.app.plugins.forEach(item => {
+            options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(options.toolbar));
+        });
         options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
             this.element.appendChild(itemElement);

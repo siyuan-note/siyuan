@@ -114,3 +114,7 @@ func SetTimezone(container, appDir, timezoneID string) {
 	}
 	time.Local = z
 }
+
+func DisableFeature(feature string) {
+	util.DisableFeature(feature)
+}

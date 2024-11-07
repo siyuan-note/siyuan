@@ -1521,6 +1521,10 @@ declare namespace Config {
          * The absolute path of the workspace directory
          */
         workspaceDir: string;
+        /**
+         * Disabled features.
+         */
+        disabledFeatures: string[];
     }
 
     /**

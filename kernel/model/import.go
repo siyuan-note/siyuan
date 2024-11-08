@@ -1020,6 +1020,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	}
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
+	parse.TextMarks2Inlines(ret) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }

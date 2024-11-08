@@ -302,10 +302,13 @@ func getUnusedAssets(c *gin.Context) {
 	defer c.JSON(http.StatusOK, ret)
 
 	unusedAssets := model.UnusedAssets()
+	total := len(unusedAssets)
 
 	// List only 512 unreferenced assets https://github.com/siyuan-note/siyuan/issues/13075
-	if len(unusedAssets) > 512 {
-		unusedAssets = unusedAssets[:512]
+	const maxUnusedAssets = 512
+	if total > maxUnusedAssets {
+		unusedAssets = unusedAssets[:maxUnusedAssets]
+		util.PushMsg(fmt.Sprintf(model.Conf.Language(251), total, maxUnusedAssets), 5000)
 	}
 
 	ret.Data = map[string]interface{}{

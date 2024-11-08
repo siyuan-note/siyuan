@@ -151,8 +151,7 @@ func OpenRepoSnapshotDoc(fileID string) (title, content string, displayInText bo
 		}
 	} else {
 		displayInText = true
-		title = path.Base(file.Path)
-
+		title = file.Path
 		if mimeType := mime.TypeByExtension(filepath.Ext(file.Path)); strings.HasPrefix(mimeType, "text/") || strings.Contains(mimeType, "json") {
 			// 如果是文本文件，直接返回文本内容
 			// All plain text formats are supported when comparing data snapshots https://github.com/siyuan-note/siyuan/issues/12975

@@ -159,7 +159,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         }
     });
     /// #endif
-    if (onlyGetMenus ) {
+    if (onlyGetMenus) {
         return openSubmenus;
     }
     window.siyuan.menus.menu.append(new MenuItem({

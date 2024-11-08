@@ -520,7 +520,7 @@
   "htmlBlockError": "Wykonanie następującego skryptu wpłynie na wygląd interfejsu i skrypt przestał działać",
   "fileHistory": "Historia pliku",
   "htmlBlockTip": "Tworzone są wiele bloków HTML. Aby zapobiec utracie danych, proszę używać znaczników <code class='fn__code'>&lt;div&gt;</code> do opakowania i usunięcia pustych linii",
-  "katexMacros": "Definicja makr KaTex",
+  "katexMacros": "Definicja makr KaTeX",
   "katexMacrosTip": "Proszę używać formatu obiektu JSON (<code class='fn__code'>{}</code>) do opakowania definicji makr, np. <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Rekordy działania programu są zapisywane w dzienniku systemowym. Eksportując dziennik systemowy i przesyłając go programistom, można lepiej pomóc w diagnozowaniu problemów z programem",
   "systemLog": "Dziennik systemowy",

@@ -520,7 +520,7 @@
   "htmlBlockError": "The execution of the following script will affect the interface display, and the script has stopped running",
   "fileHistory": "File history",
   "htmlBlockTip": "Multiple HTML blocks are formed. To prevent data loss, please use <code class='fn__code'>&lt;div&gt;</code> tags to wrap and remove blank lines",
-  "katexMacros": "KaTex macro definition",
+  "katexMacros": "KaTeX macro definition",
   "katexMacrosTip": "Please use JSON object format (<code class='fn__code'>{}</code>) to wrap macro definitions, eg <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Program running records are saved in the system log. By exporting the system log and sending it to developers, it can better help developers diagnose program problems",
   "systemLog": "System log",

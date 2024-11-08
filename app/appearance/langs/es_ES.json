@@ -520,7 +520,7 @@
   "htmlBlockError": "La ejecución del siguiente script afectará la visualización de la interfaz y el script ha dejado de ejecutarse",
   "fileHistory": "Historial de archivos",
   "htmlBlockTip": "Se forman varios bloques HTML. Para evitar la pérdida de datos, utilice etiquetas <code class='fn__code'>&lt;div&gt;</code> para ajustar y eliminar líneas en blanco",
-  "katexMacros": "Definición de macro de KaTex",
+  "katexMacros": "Definición de macro de KaTeX",
   "katexMacrosTip": "Utilice el formato de objeto JSON (<code class='fn__code'>{}</code>) para envolver definiciones de macro, por ejemplo, <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Los registros de ejecución del programa se guardan en el registro del sistema. Al exportar el registro del sistema y enviarlo a los desarrolladores, puede ayudarlos a diagnosticar mejor los problemas del programa",
   "systemLog": "Registro del sistema",

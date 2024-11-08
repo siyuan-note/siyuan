@@ -520,7 +520,7 @@
   "htmlBlockError": "Die Ausführung des folgenden Skripts wird die Anzeige der Oberfläche beeinträchtigen, das Skript wurde angehalten.",
   "fileHistory": "Dateihistorie",
   "htmlBlockTip": "Mehrere HTML-Blöcke werden gebildet. Um Datenverlust zu vermeiden, bitte <code class='fn__code'>&lt;div&gt;</code>-Tags zur Umwicklung verwenden und Leerzeilen entfernen.",
-  "katexMacros": "KaTex-Makrodefinition",
+  "katexMacros": "KaTeX-Makrodefinition",
   "katexMacrosTip": "Bitte verwenden Sie das JSON-Objektformat (<code class='fn__code'>{}</code>), um Makrodefinitionen einzufassen, z.B. <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Programmlaufzeithistorien sind im Systemprotokoll gespeichert. Durch den Export des Systemprotokolls und das Senden an Entwickler können Probleme besser diagnostiziert werden.",
   "systemLog": "Systemprotokoll",

@@ -520,7 +520,7 @@
   "htmlBlockError": "以下 script 執行會影響界面顯示，已經停止運行該腳本",
   "fileHistory": "文件歷史",
   "htmlBlockTip": "形成了多個 HTML 塊，為防止資料丟失請使用 <code class='fn__code'>&lt;div&gt;</code> 標籤包裹並去掉空行",
-  "katexMacros": "KaTex 宏定義",
+  "katexMacros": "KaTeX 宏定義",
   "katexMacrosTip": "請使用 JSON 對象格式（<code class='fn__code'>{}</code>）來包裹宏定義，例如 <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "系統日誌中保存了程式運行記錄，通過導出系統日誌發送給開發者可以更好地幫助開發者診斷程式問題",
   "systemLog": "系統日誌",

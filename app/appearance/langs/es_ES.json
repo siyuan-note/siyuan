@@ -1564,6 +1564,7 @@
     "247": "El archivo [%s] es más grande que el límite máximo [%s] y se ha ignorado para cargarlo en la nube",
     "248": "El rumbo de destino está ubicado en el bloque contenedor y no puede usarse como punto de entrega",
     "249": "No se puede acceder a los datos debido a un error de configuración. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
-    "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube"
+    "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
+    "251": "Total de activos no utilizados [%d], solo [%d] listados aquí"
   }
 }

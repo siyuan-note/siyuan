@@ -1564,6 +1564,7 @@
     "247": "Il file [%s] è più grande del limite massimo [%s] ed è stato ignorato per il caricamento nel cloud",
     "248": "L'intestazione di destinazione si trova nel blocco contenitore e non può essere utilizzata come punto di rilascio",
     "249": "Impossibile accedere ai dati a causa di un errore di configurazione. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
-    "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud"
+    "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
+    "251": "Totale risorse inutilizzate [%d], qui elencate solo [%d]"
   }
 }

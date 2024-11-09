@@ -1,4 +1,5 @@
 {
+  "dynamicEmoji": "動態圖標",
   "backlinkContainChildren": "反向鏈接包含子塊",
   "backlinkContainChildrenTip": "啟用後子塊將被納入到反向鏈接計算中",
   "entryNum": "條目數",

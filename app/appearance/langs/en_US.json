@@ -1,4 +1,5 @@
 {
+  "dynamicEmoji": "Dynamic icon",
   "backlinkContainChildren": "Do backlinks contain child blocks",
   "backlinkContainChildrenTip": "When enabled, child blocks will be included in the backlink calculation",
   "entryNum": "Number of entries",

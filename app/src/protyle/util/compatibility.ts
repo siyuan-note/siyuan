@@ -112,7 +112,7 @@ export const isHuawei = () => {
 
 export const isDisabledFeature = (feature: string): boolean => {
     return window.siyuan.config.system.disabledFeatures.indexOf(feature) > -1;
-}
+};
 
 export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;

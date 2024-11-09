@@ -223,12 +223,12 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.textShadow = "";
                 e.style.backgroundColor = "";
                 e.style.fontSize = "";
-                e.style.removeProperty("--b3-parent-background")
+                e.style.removeProperty("--b3-parent-background");
             } else if (type === "style1") {
                 const colorList = color.split(Constants.ZWSP);
                 e.style.backgroundColor = colorList[0];
                 e.style.color = colorList[1];
-                e.style.setProperty('--b3-parent-background', colorList[0]);
+                e.style.setProperty("--b3-parent-background", colorList[0]);
             } else if (type === "style2") {
                 e.style.webkitTextStroke = "0.2px var(--b3-theme-on-background)";
                 e.style.webkitTextFillColor = "transparent";
@@ -238,7 +238,7 @@ export const fontEvent = (protyle: IProtyle, nodeElements: Element[], type?: str
                 e.style.color = color;
             } else if (type === "backgroundColor") {
                 e.style.backgroundColor = color;
-                e.style.setProperty('--b3-parent-background', color);
+                e.style.setProperty("--b3-parent-background", color);
             } else if (type === "fontSize") {
                 e.style.fontSize = color;
             }

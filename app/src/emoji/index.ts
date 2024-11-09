@@ -201,7 +201,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         window.siyuan.menus.menu.removeScrollEvent();
     }
 
-    const dynamicURL = 'api/icon/getDynamicIcon?'
+    const dynamicURL = "api/icon/getDynamicIcon?";
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
@@ -555,35 +555,35 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 } else {
                     avCB(unicode);
                 }
-                break
+                break;
             } else if (target.getAttribute("data-type")?.startsWith("tab-")) {
                 dialogElement.querySelectorAll('.emojis__tabheader [data-type|="tab"]').forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        item.classList.add("block__icon--active")
+                        item.classList.add("block__icon--active");
                     } else {
-                        item.classList.remove("block__icon--active")
+                        item.classList.remove("block__icon--active");
                     }
-                })
-                dialogElement.querySelectorAll('.emojis__tabbody > div').forEach((item: HTMLElement) => {
+                });
+                dialogElement.querySelectorAll(".emojis__tabbody > div").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        item.classList.remove("fn__none")
+                        item.classList.remove("fn__none");
                     } else {
-                        item.classList.add("fn__none")
+                        item.classList.add("fn__none");
                     }
-                })
+                });
                 window.siyuan.storage[Constants.LOCAL_EMOJIS].currentTab = target.dataset.type.replace("tab-", "");
                 setStorageVal(Constants.LOCAL_EMOJIS, window.siyuan.storage[Constants.LOCAL_EMOJIS]);
-                break
+                break;
             } else if (target.classList.contains("color__square")) {
                 dynamicTextElements[0].value = target.getAttribute("style").replace("background-color:", "");
                 dynamicTextElements[0].style.backgroundColor = dynamicTextElements[0].value;
-                dynamicTextElements[0].dispatchEvent(new CustomEvent("input"))
+                dynamicTextElements[0].dispatchEvent(new CustomEvent("input"));
                 break;
             }
             target = target.parentElement;
         }
     });
-    const dynamicLangElements: NodeListOf<HTMLSelectElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] .b3-select')
+    const dynamicLangElements: NodeListOf<HTMLSelectElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] .b3-select');
     dynamicLangElements[0].addEventListener("change", () => {
         dialog.element.querySelectorAll(".fn__flex-wrap .emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
@@ -593,32 +593,32 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 url.delete("lang");
             }
             item.setAttribute("src", dynamicURL + url.toString());
-        })
+        });
     });
     dynamicLangElements[1].addEventListener("change", () => {
         dialog.element.querySelectorAll(".fn__flex-wrap .emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("weekdayType", dynamicLangElements[1].value);
             item.setAttribute("src", dynamicURL + url.toString());
-        })
+        });
     });
-    const dynamicDateElement = dialog.element.querySelector('[data-type="tab-dynamic"] [type="date"]') as HTMLInputElement
+    const dynamicDateElement = dialog.element.querySelector('[data-type="tab-dynamic"] [type="date"]') as HTMLInputElement;
     dynamicDateElement.addEventListener("change", () => {
         dialog.element.querySelectorAll(".fn__flex-wrap .emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("date", dynamicDateElement.value ? dayjs(dynamicDateElement.value).format("YYYY-MM-DD") : "");
             item.setAttribute("src", dynamicURL + url.toString());
-        })
+        });
     });
-    const dynamicTextElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] [type="text"]')
-    const dynamicTextImgElement = dialog.element.querySelector('.emoji__dynamic-item[data-type="text"]')
+    const dynamicTextElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] [type="text"]');
+    const dynamicTextImgElement = dialog.element.querySelector('.emoji__dynamic-item[data-type="text"]');
     dynamicTextElements[0].addEventListener("input", () => {
         dialog.element.querySelectorAll(".emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("color", dynamicTextElements[0].value);
             item.setAttribute("src", dynamicURL + url.toString());
             dynamicTextElements[0].style.backgroundColor = dynamicTextElements[0].value;
-        })
+        });
     });
     dynamicTextElements[1].addEventListener("input", () => {
         const url = new URLSearchParams(dynamicTextImgElement.getAttribute("src").replace(dynamicURL, ""));

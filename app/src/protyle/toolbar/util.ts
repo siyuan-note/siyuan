@@ -212,4 +212,4 @@ export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
         toolbarResult.push(currentMenuItem);
     });
     return toolbarResult;
-}
+};

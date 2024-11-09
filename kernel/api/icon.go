@@ -364,7 +364,7 @@ func generateTypeFourSVG(color string, lang string, dateInfo map[string]interfac
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 180px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"])
 }

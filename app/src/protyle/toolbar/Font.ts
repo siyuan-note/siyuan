@@ -89,7 +89,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                     lastColorHTML += `<button class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.color} ${lastFontStatus[1] ? "" : window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
                 case "clear":
-                    lastColorHTML += `<button style="height: 26px;display: flex;align-items: center;" data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" aria-label="${window.siyuan.languages.clearFontStyle}"><svg class="svg--mid"><use xlink:href="#iconTrashcan"></use></svg></button>`;
+                    lastColorHTML += `<button style="height: 26px;display: flex;align-items: center;padding: 0 5px;" data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" aria-label="${window.siyuan.languages.clearFontStyle}"><svg class="svg--mid"><use xlink:href="#iconTrashcan"></use></svg></button>`;
                     break;
             }
         });

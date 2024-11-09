@@ -335,7 +335,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             icon: "iconMarkdown",
             click: () => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                fetchPost("/api/export/batchExportMd", {
+                fetchPost("/api/export/exportNotebookMd", {
                     notebook: notebookId,
                     path: "/"
                 }, response => {

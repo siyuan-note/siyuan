@@ -1382,6 +1382,29 @@ func ExportStdMarkdown(id string) string {
 		Conf.Export.AddTitle, nil)
 }
 
+func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
+	block := treenode.GetBlockTree(ids[0])
+	box := Conf.Box(block.BoxID)
+	baseFolderName := path.Base(block.HPath)
+	if "." == baseFolderName {
+		baseFolderName = path.Base(block.Path)
+	}
+	var docPaths []string
+
+	bts := treenode.GetBlockTrees(ids)
+	for _, bt := range bts {
+		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+		for _, docFile := range docFiles {
+			docPaths = append(docPaths, docFile.path)
+		}
+	}
+	docPaths = util.FilterSelfChildDocs(docPaths)
+
+	zipPath = exportPandocConvertZip(false, box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
+	return
+}
+
 func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	block := treenode.GetBlockTree(id)
 	if nil == block {
@@ -1406,7 +1429,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	return
 }
 
-func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
+func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	box := Conf.Box(boxID)
 
 	var baseFolderName string

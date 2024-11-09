@@ -520,7 +520,7 @@
   "htmlBlockError": "The execution of the following script will affect the interface display, and the script has stopped running",
   "fileHistory": "File history",
   "htmlBlockTip": "Multiple HTML blocks are formed. To prevent data loss, please use <code class='fn__code'>&lt;div&gt;</code> tags to wrap and remove blank lines",
-  "katexMacros": "KaTex macro definition",
+  "katexMacros": "KaTeX macro definition",
   "katexMacrosTip": "Please use JSON object format (<code class='fn__code'>{}</code>) to wrap macro definitions, eg <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Program running records are saved in the system log. By exporting the system log and sending it to developers, it can better help developers diagnose program problems",
   "systemLog": "System log",
@@ -1564,6 +1564,7 @@
     "247": "File [%s] is larger than the maximum limit [%s], and has been ignored for uploading to the cloud",
     "248": "The target heading is located in the container block and cannot be used as a drop point",
     "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
-    "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions"
+    "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions",
+    "251": "Total unused assets [%d], only [%d] listed here"
   }
 }

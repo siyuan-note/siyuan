@@ -1020,6 +1020,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	}
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
+	parse.TextMarks2Inlines(ret) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }
@@ -1102,7 +1103,7 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHTMLBlock == n.Type {
+		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<img "))) {
 			tokens := bytes.TrimSpace(n.Tokens)
 			if bytes.HasPrefix(tokens, []byte("<div>")) {
 				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
@@ -1151,7 +1152,12 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		}
 		img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 
-		n.InsertBefore(p)
+		if nil != n.Parent && ast.NodeText == n.Type {
+			// 行级 HTML 会被解析为文本，所以这里要在父级段落前面插入，避免形成段落嵌套 https://github.com/siyuan-note/siyuan/issues/13080
+			n.Parent.InsertBefore(p)
+		} else {
+			n.InsertBefore(p)
+		}
 		n.Unlink()
 	}
 	return

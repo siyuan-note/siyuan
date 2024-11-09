@@ -520,7 +520,7 @@
   "htmlBlockError": "L'esecuzione dello script seguente influenzerà la visualizzazione dell'interfaccia e lo script ha smesso di funzionare",
   "fileHistory": "Cronologia file",
   "htmlBlockTip": "Sono stati formati più blocchi HTML. Per prevenire la perdita di dati, utilizza i tag <code class='fn__code'>&lt;div&gt;</code> per racchiudere e rimuovere le righe vuote",
-  "katexMacros": "Definizione macro KaTex",
+  "katexMacros": "Definizione macro KaTeX",
   "katexMacrosTip": "Si prega di utilizzare il formato oggetto JSON (<code class='fn__code'>{}</code>) per racchiudere le definizioni delle macro, ad esempio <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "I registri di esecuzione del programma sono salvati nel registro di sistema. Esportando il registro di sistema e inviandolo agli sviluppatori, è possibile aiutarli meglio a diagnosticare i problemi del programma",
   "systemLog": "Registro di sistema",
@@ -1564,6 +1564,7 @@
     "247": "Il file [%s] è più grande del limite massimo [%s] ed è stato ignorato per il caricamento nel cloud",
     "248": "L'intestazione di destinazione si trova nel blocco contenitore e non può essere utilizzata come punto di rilascio",
     "249": "Impossibile accedere ai dati a causa di un errore di configurazione. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
-    "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud"
+    "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
+    "251": "Totale risorse inutilizzate [%d], qui elencate solo [%d]"
   }
 }

@@ -42,23 +42,47 @@ import (
 
 type DisplayName struct {
 	Default string `json:"default"`
-	ZhCN    string `json:"zh_CN"`
+	DeDE    string `json:"de_DE"`
 	EnUS    string `json:"en_US"`
+	EsES    string `json:"es_ES"`
+	FrFR    string `json:"fr_FR"`
+	HeIL    string `json:"he_IL"`
+	ItIT    string `json:"it_IT"`
+	JaJP    string `json:"ja_JP"`
+	PlPL    string `json:"pl_PL"`
+	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
+	ZhCN    string `json:"zh_CN"`
 }
 
 type Description struct {
 	Default string `json:"default"`
-	ZhCN    string `json:"zh_CN"`
+	DeDE    string `json:"de_DE"`
 	EnUS    string `json:"en_US"`
+	EsES    string `json:"es_ES"`
+	FrFR    string `json:"fr_FR"`
+	HeIL    string `json:"he_IL"`
+	ItIT    string `json:"it_IT"`
+	JaJP    string `json:"ja_JP"`
+	PlPL    string `json:"pl_PL"`
+	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
+	ZhCN    string `json:"zh_CN"`
 }
 
 type Readme struct {
 	Default string `json:"default"`
-	ZhCN    string `json:"zh_CN"`
+	DeDE    string `json:"de_DE"`
 	EnUS    string `json:"en_US"`
+	EsES    string `json:"es_ES"`
+	FrFR    string `json:"fr_FR"`
+	HeIL    string `json:"he_IL"`
+	ItIT    string `json:"it_IT"`
+	JaJP    string `json:"ja_JP"`
+	PlPL    string `json:"pl_PL"`
+	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
+	ZhCN    string `json:"zh_CN"`
 }
 
 type Funding struct {
@@ -142,24 +166,57 @@ func getPreferredReadme(readme *Readme) string {
 
 	ret := readme.Default
 	switch util.Lang {
-	case "zh_CN":
-		if "" != readme.ZhCN {
-			ret = readme.ZhCN
-		}
-	case "zh_CHT":
-		if "" != readme.ZhCHT {
-			ret = readme.ZhCHT
-		} else if "" != readme.ZhCN {
-			ret = readme.ZhCN
+	case "de_DE":
+		if "" != readme.DeDE {
+			ret = readme.DeDE
 		}
 	case "en_US":
 		if "" != readme.EnUS {
 			ret = readme.EnUS
 		}
+	case "es_ES":
+		if "" != readme.EsES {
+			ret = readme.EsES
+		}
+	case "fr_FR":
+		if "" != readme.FrFR {
+			ret = readme.FrFR
+		}
+	case "he_IL":
+		if "" != readme.HeIL {
+			ret = readme.HeIL
+		}
+	case "it_IT":
+		if "" != readme.ItIT {
+			ret = readme.ItIT
+		}
+	case "ja_JP":
+		if "" != readme.JaJP {
+			ret = readme.JaJP
+		}
+	case "pl_PL":
+		if "" != readme.PlPL {
+			ret = readme.PlPL
+		}
+	case "ru_RU":
+		if "" != readme.RuRU {
+			ret = readme.RuRU
+		}
+	case "zh_CHT":
+		if "" != readme.ZhCHT {
+			ret = readme.ZhCHT
+		}
+	case "zh_CN":
+		if "" != readme.ZhCN {
+			ret = readme.ZhCN
+		}
 	default:
 		if "" != readme.EnUS {
 			ret = readme.EnUS
 		}
+	}
+	if "" == ret {
+		ret = "README.md"
 	}
 	return ret
 }
@@ -171,24 +228,57 @@ func GetPreferredName(pkg *Package) string {
 
 	ret := pkg.DisplayName.Default
 	switch util.Lang {
-	case "zh_CN":
-		if "" != pkg.DisplayName.ZhCN {
-			ret = pkg.DisplayName.ZhCN
-		}
-	case "zh_CHT":
-		if "" != pkg.DisplayName.ZhCHT {
-			ret = pkg.DisplayName.ZhCHT
-		} else if "" != pkg.DisplayName.ZhCN {
-			ret = pkg.DisplayName.ZhCN
+	case "de_DE":
+		if "" != pkg.DisplayName.DeDE {
+			ret = pkg.DisplayName.DeDE
 		}
 	case "en_US":
 		if "" != pkg.DisplayName.EnUS {
 			ret = pkg.DisplayName.EnUS
 		}
+	case "es_ES":
+		if "" != pkg.DisplayName.EsES {
+			ret = pkg.DisplayName.EsES
+		}
+	case "fr_FR":
+		if "" != pkg.DisplayName.FrFR {
+			ret = pkg.DisplayName.FrFR
+		}
+	case "he_IL":
+		if "" != pkg.DisplayName.HeIL {
+			ret = pkg.DisplayName.HeIL
+		}
+	case "it_IT":
+		if "" != pkg.DisplayName.ItIT {
+			ret = pkg.DisplayName.ItIT
+		}
+	case "ja_JP":
+		if "" != pkg.DisplayName.JaJP {
+			ret = pkg.DisplayName.JaJP
+		}
+	case "pl_PL":
+		if "" != pkg.DisplayName.PlPL {
+			ret = pkg.DisplayName.PlPL
+		}
+	case "ru_RU":
+		if "" != pkg.DisplayName.RuRU {
+			ret = pkg.DisplayName.RuRU
+		}
+	case "zh_CHT":
+		if "" != pkg.DisplayName.ZhCHT {
+			ret = pkg.DisplayName.ZhCHT
+		}
+	case "zh_CN":
+		if "" != pkg.DisplayName.ZhCN {
+			ret = pkg.DisplayName.ZhCN
+		}
 	default:
 		if "" != pkg.DisplayName.EnUS {
 			ret = pkg.DisplayName.EnUS
 		}
+	}
+	if "" == ret {
+		ret = pkg.Name
 	}
 	return ret
 }
@@ -200,24 +290,57 @@ func getPreferredDesc(desc *Description) string {
 
 	ret := desc.Default
 	switch util.Lang {
-	case "zh_CN":
-		if "" != desc.ZhCN {
-			ret = desc.ZhCN
-		}
-	case "zh_CHT":
-		if "" != desc.ZhCHT {
-			ret = desc.ZhCHT
-		} else if "" != desc.ZhCN {
-			ret = desc.ZhCN
+	case "de_DE":
+		if "" != desc.DeDE {
+			ret = desc.DeDE
 		}
 	case "en_US":
 		if "" != desc.EnUS {
 			ret = desc.EnUS
 		}
+	case "es_ES":
+		if "" != desc.EsES {
+			ret = desc.EsES
+		}
+	case "fr_FR":
+		if "" != desc.FrFR {
+			ret = desc.FrFR
+		}
+	case "he_IL":
+		if "" != desc.HeIL {
+			ret = desc.HeIL
+		}
+	case "it_IT":
+		if "" != desc.ItIT {
+			ret = desc.ItIT
+		}
+	case "ja_JP":
+		if "" != desc.JaJP {
+			ret = desc.JaJP
+		}
+	case "pl_PL":
+		if "" != desc.PlPL {
+			ret = desc.PlPL
+		}
+	case "ru_RU":
+		if "" != desc.RuRU {
+			ret = desc.RuRU
+		}
+	case "zh_CHT":
+		if "" != desc.ZhCHT {
+			ret = desc.ZhCHT
+		}
+	case "zh_CN":
+		if "" != desc.ZhCN {
+			ret = desc.ZhCN
+		}
 	default:
 		if "" != desc.EnUS {
 			ret = desc.EnUS
 		}
+	}
+	if "" == ret {
+		ret = desc.EnUS
 	}
 	return ret
 }

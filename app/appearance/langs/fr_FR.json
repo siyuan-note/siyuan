@@ -520,7 +520,7 @@
   "htmlBlockError": "L'exécution du script suivant affectera l'affichage de l'interface et le script a cessé de s'exécuter",
   "fileHistory": "Historique des fichiers",
   "htmlBlockTip": "Plusieurs blocs HTML sont formés. Pour éviter la perte de données, veuillez utiliser les balises <code class='fn__code'>&lt;div&gt;</code> pour envelopper et supprimer les lignes vides",
-  "katexMacros": "Définition de la macro KaTex",
+  "katexMacros": "Définition de la macro KaTeX",
   "katexMacrosTip": "Veuillez utiliser le format d'objet JSON (<code class='fn__code'>{}</code>) pour envelopper les définitions de macro, par exemple <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Les enregistrements en cours d'exécution du programme sont enregistrés dans le journal système. En exportant le journal système et en l'envoyant aux développeurs, cela peut mieux aider les développeurs à diagnostiquer les problèmes du programme",
   "systemLog": "Journal du système",
@@ -1564,6 +1564,7 @@
     "247": "Le fichier [%s] est plus grand que la limite maximale [%s] et a été ignoré pour le téléchargement vers le cloud",
     "248": "Le cap cible est situé dans le bloc conteneur et ne peut pas être utilisé comme point de dépôt",
     "249": "Impossible d'accéder aux données en raison d'une erreur de configuration. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
-    "250": "La demande a été limitée par le stockage cloud. Veuillez vérifier les paramètres et les autorisations de stockage cloud"
+    "250": "La demande a été limitée par le stockage cloud. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
+    "251": "Total des actifs inutilisés [%d], seulement [%d] listés ici"
   }
 }

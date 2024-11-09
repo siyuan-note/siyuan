@@ -520,7 +520,7 @@
   "htmlBlockError": "La ejecución del siguiente script afectará la visualización de la interfaz y el script ha dejado de ejecutarse",
   "fileHistory": "Historial de archivos",
   "htmlBlockTip": "Se forman varios bloques HTML. Para evitar la pérdida de datos, utilice etiquetas <code class='fn__code'>&lt;div&gt;</code> para ajustar y eliminar líneas en blanco",
-  "katexMacros": "Definición de macro de KaTex",
+  "katexMacros": "Definición de macro de KaTeX",
   "katexMacrosTip": "Utilice el formato de objeto JSON (<code class='fn__code'>{}</code>) para envolver definiciones de macro, por ejemplo, <code class='fn__code'>{ \"\\\\foo\": \"{x^2}\" }</code>",
   "systemLogTip": "Los registros de ejecución del programa se guardan en el registro del sistema. Al exportar el registro del sistema y enviarlo a los desarrolladores, puede ayudarlos a diagnosticar mejor los problemas del programa",
   "systemLog": "Registro del sistema",
@@ -1564,6 +1564,7 @@
     "247": "El archivo [%s] es más grande que el límite máximo [%s] y se ha ignorado para cargarlo en la nube",
     "248": "El rumbo de destino está ubicado en el bloque contenedor y no puede usarse como punto de entrega",
     "249": "No se puede acceder a los datos debido a un error de configuración. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
-    "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube"
+    "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
+    "251": "Total de activos no utilizados [%d], solo [%d] listados aquí"
   }
 }

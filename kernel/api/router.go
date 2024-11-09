@@ -277,7 +277,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/fullReindexAssetContent", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, fullReindexAssetContent)
 	ginServer.Handle("POST", "/api/asset/statAsset", model.CheckAuth, model.CheckAdminRole, statAsset)
 
-	ginServer.Handle("POST", "/api/export/batchExportMd", model.CheckAuth, model.CheckAdminRole, batchExportMd)
+	ginServer.Handle("POST", "/api/export/exportNotebookMd", model.CheckAuth, model.CheckAdminRole, exportNotebookMd)
+	ginServer.Handle("POST", "/api/export/exportMds", model.CheckAuth, model.CheckAdminRole, exportMds)
 	ginServer.Handle("POST", "/api/export/exportMd", model.CheckAuth, model.CheckAdminRole, exportMd)
 	ginServer.Handle("POST", "/api/export/exportSY", model.CheckAuth, model.CheckAdminRole, exportSY)
 	ginServer.Handle("POST", "/api/export/exportNotebookSY", model.CheckAuth, model.CheckAdminRole, exportNotebookSY)

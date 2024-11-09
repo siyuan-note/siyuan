@@ -1527,6 +1527,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			Hidden: col.Hidden,
 			Pin:    col.Pin,
 			Width:  col.Width,
+			Desc:   col.Desc,
 			Calc:   col.Calc,
 		})
 	}
@@ -1651,6 +1652,30 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 	}
 
 	view.Icon = operation.Data.(string)
+	if err = av.SaveAttributeView(attrView); err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
+func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	viewID := operation.ID
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
+	}
+
+	view.Desc = strings.TrimSpace(operation.Data.(string))
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
@@ -2247,6 +2272,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 							Hidden: column.Hidden,
 							Pin:    column.Pin,
 							Width:  column.Width,
+							Desc:   column.Desc,
 						},
 					}, view.Table.Columns[i+1:]...)...)
 					break
@@ -2408,6 +2434,31 @@ func setAttributeViewColIcon(operation *Operation) (err error) {
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID {
 			keyValues.Key.Icon = operation.Data.(string)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnDesc(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColDesc(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColDesc(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == operation.ID {
+			keyValues.Key.Desc = operation.Data.(string)
 			break
 		}
 	}
@@ -3465,6 +3516,40 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 					}
 				}
 			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColOptionDesc(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColumnOptionDesc(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColumnOptionDesc(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	key, err := attrView.GetKey(operation.ID)
+	if err != nil {
+		return
+	}
+
+	data := operation.Data.(map[string]interface{})
+	name := data["name"].(string)
+	desc := data["desc"].(string)
+
+	for i, opt := range key.Options {
+		if name == opt.Name {
+			key.Options[i].Desc = desc
+			break
 		}
 	}
 

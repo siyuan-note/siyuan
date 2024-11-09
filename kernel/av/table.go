@@ -39,6 +39,7 @@ type ViewTableColumn struct {
 	Hidden bool        `json:"hidden"`         // 是否隐藏
 	Pin    bool        `json:"pin"`            // 是否固定
 	Width  string      `json:"width"`          // 列宽度
+	Desc   string      `json:"desc,omitempty"` // 列描述
 	Calc   *ColumnCalc `json:"calc,omitempty"` // 计算
 }
 
@@ -47,6 +48,7 @@ type Table struct {
 	ID               string         `json:"id"`               // 表格布局 ID
 	Icon             string         `json:"icon"`             // 表格图标
 	Name             string         `json:"name"`             // 表格名称
+	Desc             string         `json:"desc"`             // 表格描述
 	HideAttrViewName bool           `json:"hideAttrViewName"` // 是否隐藏属性视图名称
 	Filters          []*ViewFilter  `json:"filters"`          // 过滤规则
 	Sorts            []*ViewSort    `json:"sorts"`            // 排序规则
@@ -65,6 +67,7 @@ type TableColumn struct {
 	Hidden bool        `json:"hidden"` // 是否隐藏
 	Pin    bool        `json:"pin"`    // 是否固定
 	Width  string      `json:"width"`  // 列宽度
+	Desc   string      `json:"desc"`   // 列描述
 	Calc   *ColumnCalc `json:"calc"`   // 计算
 
 	// 以下是某些列类型的特有属性

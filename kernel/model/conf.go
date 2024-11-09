@@ -221,6 +221,9 @@ func InitConf() {
 
 	util.CurrentCloudRegion = Conf.CloudRegion
 	Conf.System.DisabledFeatures = util.DisabledFeatures
+	if 1 > len(Conf.System.DisabledFeatures) {
+		Conf.System.DisabledFeatures = []string{}
+	}
 
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()

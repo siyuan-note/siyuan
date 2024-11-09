@@ -123,6 +123,7 @@ export abstract class Constants {
     public static readonly LOCAL_OUTLINE = "local-outline";
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
     public static readonly LOCAL_IMAGES = "local-images";
+    public static readonly LOCAL_EMOJIS = "local-emojis";
 
     // dialog
     public static readonly DIALOG_OPENCARD = "dialog-opencard";

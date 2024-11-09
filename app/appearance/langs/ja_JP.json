@@ -1,4 +1,5 @@
 {
+  "dynamicEmoji": "動的アイコン",
   "backlinkContainChildren": "バックリンクに子ブロックを含めるかどうか",
   "backlinkContainChildrenTip": "有効にすると、子ブロックがバックリンク計算に含まれます",
   "entryNum": "エントリ数",

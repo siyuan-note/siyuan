@@ -220,7 +220,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type) || (ast.NodeHeading != n.Type && 0 < treenode.HeadingLevel(n)) {
-		blockPaths = buildBlockBreadcrumb(n, nil)
+		blockPaths = buildBlockBreadcrumb(n, nil, false)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

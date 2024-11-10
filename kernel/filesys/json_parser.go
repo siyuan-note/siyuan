@@ -72,6 +72,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 	if nil == root.Children {
 		newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID()}
 		newPara.SetIALAttr("id", newPara.ID)
+		newPara.SetIALAttr("updated", newPara.ID[:14])
 		ret.Root.AppendChild(newPara)
 		needFix = true
 		return

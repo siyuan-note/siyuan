@@ -648,7 +648,7 @@ func dataBlockDOM(data string, luteEngine *lute.Lute) (ret string, err error) {
 	ret, tree := luteEngine.Md2BlockDOMTree(data, true)
 	if "" == ret {
 		// 使用 API 插入空字符串出现错误 https://github.com/siyuan-note/siyuan/issues/3931
-		blankParagraph := treenode.NewParagraph()
+		blankParagraph := treenode.NewParagraph("")
 		ret = luteEngine.RenderNodeBlockDOM(blankParagraph)
 	}
 

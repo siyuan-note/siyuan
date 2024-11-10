@@ -496,7 +496,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 
 func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 	if nil == tree.Root.FirstChild {
-		tree.Root.AppendChild(treenode.NewParagraph())
+		tree.Root.AppendChild(treenode.NewParagraph(""))
 	}
 
 	var unlinks []*ast.Node

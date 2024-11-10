@@ -341,9 +341,9 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	})
 	for _, n := range nodesNeedAppendChild {
 		if ast.NodeBlockquote == n.Type {
-			n.FirstChild.InsertAfter(treenode.NewParagraph())
+			n.FirstChild.InsertAfter(treenode.NewParagraph(""))
 		} else {
-			n.AppendChild(treenode.NewParagraph())
+			n.AppendChild(treenode.NewParagraph(""))
 		}
 	}
 	for _, n := range unlinks {

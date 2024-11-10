@@ -77,7 +77,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 
 		if ast.NodeListItem == n.Type && nil == n.FirstChild {
-			newNode := treenode.NewParagraph()
+			newNode := treenode.NewParagraph("")
 			n.AppendChild(newNode)
 			n.SetIALAttr("updated", util.TimeFromID(newNode.ID))
 			return ast.WalkSkipChildren
@@ -101,7 +101,7 @@ func html2BlockDOM(c *gin.Context) {
 				row := head.FirstChild
 				if nil != row.FirstChild && nil == row.FirstChild.Next {
 					cell := row.FirstChild
-					p := treenode.NewParagraph()
+					p := treenode.NewParagraph("")
 					var contents []*ast.Node
 					for c := cell.FirstChild; nil != c; c = c.Next {
 						contents = append(contents, c)

@@ -46,7 +46,7 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 		insertPoint = rootTree.Root.FirstChild
 		if nil == insertPoint {
 			// 如果文档为空，则创建一个空段落作为插入点
-			insertPoint = treenode.NewParagraph()
+			insertPoint = treenode.NewParagraph("")
 			rootTree.Root.AppendChild(insertPoint)
 		}
 	}

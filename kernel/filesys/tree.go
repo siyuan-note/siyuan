@@ -223,7 +223,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
-		newP := treenode.NewParagraph()
+		newP := treenode.NewParagraph("")
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
 		treenode.UpsertBlockTree(tree)

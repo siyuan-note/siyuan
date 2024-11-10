@@ -80,7 +80,7 @@ export const getDisplayName = (filePath: string, basename = true, removeSY = fal
 };
 
 export const getAssetName = (assetPath: string) => {
-    return assetPath.substring(7, assetPath.length - pathPosix().extname(assetPath).length - 23);
+    return pathPosix().basename(assetPath, pathPosix().extname(assetPath)).replace(/-\d{14}-\w{7}/, "");
 };
 
 export const isLocalPath = (link: string) => {
@@ -195,7 +195,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    ${unicode2Emoji(item.icon || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
+    ${unicode2Emoji(item.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
     <span class="b3-list-item__text">${escapeHtml(item.name)}</span>
     ${countHTML}
 </li></ul>`;
@@ -242,8 +242,8 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
 <span class="counter counter--right b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.flashcardCard}">${item.flashcardCount}</span>`;
                 }
                 fileHTML += `<li class="b3-list-item${fileHTML === "" ? " b3-list-item--focus" : ""}" data-path="${item.path}" data-box="${item.box}">
-    ${unicode2Emoji(item.boxIcon || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
-    <span class="b3-list-item__showall" style="padding:4px 0">${escapeHtml(item.hPath)}</span>
+    ${unicode2Emoji(item.boxIcon || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
+    <span class="b3-list-item__showall" style="padding: 4px 0">${escapeHtml(item.hPath)}</span>
     ${countHTML}
 </li>`;
             });
@@ -516,7 +516,7 @@ const getLeaf = (liElement: HTMLElement, flashcard: boolean) => {
     <span style="padding-left: ${item.path.split("/").length * 8}px" class="b3-list-item__toggle b3-list-item__toggle--hl${item.subFileCount === 0 ? " fn__hidden" : ""}">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
     </span>
-    ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? Constants.SIYUAN_IMAGE_FILE : Constants.SIYUAN_IMAGE_FOLDER), "b3-list-item__graphic", true)}
+    ${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder), "b3-list-item__graphic", true)}
     <span class="b3-list-item__text ariaLabel" data-position="parentE" aria-label="${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}">${getDisplayName(item.name, true, true)}</span>
     ${countHTML}
 </li>`;

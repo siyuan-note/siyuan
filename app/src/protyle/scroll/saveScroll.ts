@@ -51,12 +51,12 @@ export const saveScroll = (protyle: IProtyle, getObject = false) => {
 export const getDocByScroll = (options: {
     protyle: IProtyle,
     scrollAttr?: IScrollAttr,
-    mergedOptions?: IOptions,
+    mergedOptions?: IProtyleOptions,
     cb?: () => void
     focus?: boolean,
     updateReadonly?: boolean
 }) => {
-    let actions: string[] = [];
+    let actions: TProtyleAction[] = [];
     if (options.mergedOptions) {
         actions = options.mergedOptions.action;
     } else {

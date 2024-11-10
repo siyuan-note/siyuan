@@ -102,12 +102,13 @@ const (
 	KeyTypeLineNumber KeyType = "lineNumber"
 )
 
-// Key 描述了属性视图属性列的基础结构。
+// Key 描述了属性视图属性字段的基础结构。
 type Key struct {
-	ID   string  `json:"id"`   // 列 ID
-	Name string  `json:"name"` // 列名
-	Type KeyType `json:"type"` // 列类型
-	Icon string  `json:"icon"` // 列图标
+	ID   string  `json:"id"`   // 字段 ID
+	Name string  `json:"name"` // 字段名
+	Type KeyType `json:"type"` // 字段类型
+	Icon string  `json:"icon"` // 字段图标
+	Desc string  `json:"desc"` // 字段描述
 
 	// 以下是某些列类型的特有属性
 
@@ -154,8 +155,8 @@ type Date struct {
 }
 
 type Rollup struct {
-	RelationKeyID string      `json:"relationKeyID"` // 关联列 ID
-	KeyID         string      `json:"keyID"`         // 目标列 ID
+	RelationKeyID string      `json:"relationKeyID"` // 关联字段 ID
+	KeyID         string      `json:"keyID"`         // 目标字段 ID
 	Calc          *RollupCalc `json:"calc"`          // 计算方式
 }
 
@@ -171,8 +172,9 @@ type Relation struct {
 }
 
 type SelectOption struct {
-	Name  string `json:"name"`
-	Color string `json:"color"`
+	Name  string `json:"name"`  // 选项名称
+	Color string `json:"color"` // 选项颜色
+	Desc  string `json:"desc"`  // 选项描述
 }
 
 // View 描述了视图的结构。
@@ -181,6 +183,7 @@ type View struct {
 	Icon             string `json:"icon"`             // 视图图标
 	Name             string `json:"name"`             // 视图名称
 	HideAttrViewName bool   `json:"hideAttrViewName"` // 是否隐藏属性视图名称
+	Desc             string `json:"desc"`             // 视图描述
 
 	LayoutType LayoutType   `json:"type"`            // 当前布局类型
 	Table      *LayoutTable `json:"table,omitempty"` // 表格布局

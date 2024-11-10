@@ -6,7 +6,7 @@
 .protyle-scroll {
   --b3-dynamicscroll-width: 200px;
   position: absolute;
-  right: 0;
+  right: 10px;
   top: 30px;
   width: 16px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
@@ -121,6 +121,7 @@
   box-sizing: border-box;
   min-height: 30px;
   z-index: 1;
+  font-size: 14px;
 
   .block__icon {
     opacity: 1;
@@ -419,6 +420,7 @@ table[contenteditable="true"] + .protyle-action__table {
     top: 0;
     width: 6px;
     cursor: col-resize;
+    z-index: 2;
 
     &:hover:after {
       background-color: var(--b3-theme-primary-light);
@@ -440,5 +442,6 @@ table[contenteditable="true"] + .protyle-action__table {
     background: var(--b3-theme-primary-lightest);
     position: relative;
     transition: var(--b3-transition);
+    z-index: 3;
   }
 }

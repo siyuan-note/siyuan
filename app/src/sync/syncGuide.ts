@@ -61,7 +61,7 @@ export const bindSyncCloudListEvent = (cloudPanelElement: Element, cb?: () => vo
                                 window.siyuan.config.sync.cloudName = response.data;
                                 getSyncCloudList(cloudPanelElement, true, cb);
                             });
-                        });
+                        }, undefined, true);
                         break;
                     case "selectCloud":
                         cloudPanelElement.innerHTML = '<img style="margin: 0 auto;display: block;width: 64px;height: 100%" src="/stage/loading-pure.svg">';

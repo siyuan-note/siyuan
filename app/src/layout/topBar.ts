@@ -54,7 +54,7 @@ export const initBar = (app: App) => {
 <div id="barMode" class="toolbar__item ariaLabel${window.siyuan.config.readonly ? " fn__none" : ""}" aria-label="${window.siyuan.languages.appearanceMode}">
     <svg><use xlink:href="#icon${window.siyuan.config.appearance.modeOS ? "Mode" : (window.siyuan.config.appearance.mode === 0 ? "Light" : "Dark")}"></use></svg>
 </div>
-<div id="barExit" class="toolbar__item ariaLabel${(isInIOS() || isInAndroid()) ? "" : " fn__none"}" aria-label="${window.siyuan.languages.safeQuit}">
+<div id="barExit" class="ft__error toolbar__item ariaLabel${(isInIOS() || isInAndroid()) ? "" : " fn__none"}" aria-label="${window.siyuan.languages.safeQuit}">
     <svg><use xlink:href="#iconQuit"></use></svg>
 </div>
 <div id="barMore" class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.more}">

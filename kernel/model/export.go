@@ -218,8 +218,6 @@ func Export2Liandi(id string) (err error) {
 	assets := assetsLinkDestsInTree(tree)
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
-	avAssets := assetsLinkDestsInAttributeViewNodes(tree)
-	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
 	if err != nil {
@@ -478,7 +476,7 @@ func ExportData() (zipPath string, err error) {
 }
 
 func exportData(exportFolder string) (zipPath string, err error) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	logging.LogInfof("exporting data...")
 
@@ -521,7 +519,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 }
 
 func ExportResources(resourcePaths []string, mainName string) (exportFilePath string, err error) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	// 用于导出的临时文件夹完整路径
 	exportFolderPath := filepath.Join(util.TempDir, "export", mainName)
@@ -1100,6 +1098,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 
 	if err != nil {
 		logging.LogErrorf("parse watermark failed: %s", err)
+		util.PushErrMsg(err.Error(), 7000)
 		return
 	}
 
@@ -1383,6 +1382,29 @@ func ExportStdMarkdown(id string) string {
 		Conf.Export.AddTitle, nil)
 }
 
+func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
+	block := treenode.GetBlockTree(ids[0])
+	box := Conf.Box(block.BoxID)
+	baseFolderName := path.Base(block.HPath)
+	if "." == baseFolderName {
+		baseFolderName = path.Base(block.Path)
+	}
+	var docPaths []string
+
+	bts := treenode.GetBlockTrees(ids)
+	for _, bt := range bts {
+		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
+		for _, docFile := range docFiles {
+			docPaths = append(docPaths, docFile.path)
+		}
+	}
+	docPaths = util.FilterSelfChildDocs(docPaths)
+
+	zipPath = exportPandocConvertZip(false, box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
+	return
+}
+
 func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	block := treenode.GetBlockTree(id)
 	if nil == block {
@@ -1407,7 +1429,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	return
 }
 
-func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
+func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	box := Conf.Box(boxID)
 
 	var baseFolderName string
@@ -1436,8 +1458,9 @@ func BatchExportMarkdown(boxID, folderPath string) (zipPath string) {
 
 func yfm(docIAL map[string]string) string {
 	// 导出 Markdown 文件时开头附上一些元数据 https://github.com/siyuan-note/siyuan/issues/6880
-	// 导出 Markdown 时在文档头添加 YFM 开关https://github.com/siyuan-note/siyuan/issues/7727
+
 	if !Conf.Export.MarkdownYFM {
+		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
 		return ""
 	}
 
@@ -1537,6 +1560,10 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	refTrees := map[string]*parse.Tree{}
 	luteEngine := util.NewLute()
 	for i, p := range docPaths {
+		if !strings.HasSuffix(p, ".sy") {
+			continue
+		}
+
 		tree, err := filesys.LoadTree(boxID, p, luteEngine)
 		if err != nil {
 			continue
@@ -1623,7 +1650,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 		assets = append(assets, assetsLinkDestsInTree(tree)...)
 		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
 		if "" != titleImgPath {
-			assets = append(assets, titleImgPath)
+			if util.IsAssetLinkDest([]byte(titleImgPath)) {
+				assets = append(assets, titleImgPath)
+			}
 		}
 
 		for _, asset := range assets {
@@ -1698,7 +1727,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				case av.KeyTypeMAsset: // 导出资源文件列 https://github.com/siyuan-note/siyuan/issues/9919
 					for _, value := range keyValues.Values {
 						for _, asset := range value.MAsset {
-							if !treenode.IsRelativePath([]byte(asset.Content)) {
+							if !util.IsAssetLinkDest([]byte(asset.Content)) {
 								continue
 							}
 

@@ -161,7 +161,7 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
         <svg class="ft__on-surface svg fn__flex-center"><use xlink:href="#iconFile"></use></svg>
         <span class="fn__space"></span>
         <div class="fn__flex-1 fn__flex-center">
-            ${window.siyuan.languages.doc} <sup>[1] [2]</sup>
+            ${window.siyuan.languages.doc}
         </div>
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" data-type="document" type="checkbox"${config.types.document ? " checked" : ""}>
@@ -169,7 +169,6 @@ export const filterMenu = (config: Config.IUILayoutTabSearchConfig, cb: () => vo
     <span class="fn__space"></span>
     <div class="fn__flex-1">
         <div class="b3-label__text">[1] ${window.siyuan.languages.containerBlockTip1}</div>
-        <div class="b3-label__text">[2] ${window.siyuan.languages.containerBlockTip2}</div>
     </div>    
 </div>
 <div class="b3-dialog__action">

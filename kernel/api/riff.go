@@ -325,7 +325,7 @@ func removeRiffCards(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	if "" != deckID {
 		deck := model.Decks[deckID]
@@ -363,7 +363,7 @@ func addRiffCards(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	deck := model.Decks[deckID]
 	ret.Data = deckData(deck)

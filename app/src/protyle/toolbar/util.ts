@@ -95,3 +95,121 @@ export const removeInlineType = (inlineElement: HTMLElement, type: string, range
         }
     }
 };
+
+export const toolbarKeyToMenu = (toolbar: Array<string | IMenuItem>) => {
+    const toolbarItem: IMenuItem [] = [{
+        name: "block-ref",
+        hotkey: window.siyuan.config.keymap.editor.insert.ref.custom,
+        lang: "ref",
+        icon: "iconRef",
+        tipPosition: "ne",
+    }, {
+        name: "a",
+        hotkey: window.siyuan.config.keymap.editor.insert.link.custom,
+        lang: "link",
+        icon: "iconLink",
+        tipPosition: "n",
+    }, {
+        name: "strong",
+        lang: "bold",
+        hotkey: window.siyuan.config.keymap.editor.insert.bold.custom,
+        icon: "iconBold",
+        tipPosition: "n",
+    }, {
+        name: "em",
+        lang: "italic",
+        hotkey: window.siyuan.config.keymap.editor.insert.italic.custom,
+        icon: "iconItalic",
+        tipPosition: "n",
+    }, {
+        name: "u",
+        lang: "underline",
+        hotkey: window.siyuan.config.keymap.editor.insert.underline.custom,
+        icon: "iconUnderline",
+        tipPosition: "n",
+    }, {
+        name: "s",
+        lang: "strike",
+        hotkey: window.siyuan.config.keymap.editor.insert.strike.custom,
+        icon: "iconStrike",
+        tipPosition: "n",
+    }, {
+        name: "mark",
+        lang: "mark",
+        hotkey: window.siyuan.config.keymap.editor.insert.mark.custom,
+        icon: "iconMark",
+        tipPosition: "n",
+    }, {
+        name: "sup",
+        lang: "sup",
+        hotkey: window.siyuan.config.keymap.editor.insert.sup.custom,
+        icon: "iconSup",
+        tipPosition: "n",
+    }, {
+        name: "sub",
+        lang: "sub",
+        hotkey: window.siyuan.config.keymap.editor.insert.sub.custom,
+        icon: "iconSub",
+        tipPosition: "n",
+    }, {
+        name: "kbd",
+        lang: "kbd",
+        hotkey: window.siyuan.config.keymap.editor.insert.kbd.custom,
+        icon: "iconKeymap",
+        tipPosition: "n",
+    }, {
+        name: "tag",
+        lang: "tag",
+        hotkey: window.siyuan.config.keymap.editor.insert.tag.custom,
+        icon: "iconTags",
+        tipPosition: "n",
+    }, {
+        name: "code",
+        lang: "inline-code",
+        hotkey: window.siyuan.config.keymap.editor.insert["inline-code"].custom,
+        icon: "iconInlineCode",
+        tipPosition: "n",
+    }, {
+        name: "inline-math",
+        lang: "inline-math",
+        hotkey: window.siyuan.config.keymap.editor.insert["inline-math"].custom,
+        icon: "iconMath",
+        tipPosition: "n",
+    }, {
+        name: "inline-memo",
+        lang: "memo",
+        hotkey: window.siyuan.config.keymap.editor.insert.memo.custom,
+        icon: "iconM",
+        tipPosition: "n",
+    }, {
+        name: "text",
+        lang: "appearance",
+        hotkey: window.siyuan.config.keymap.editor.insert.appearance.custom,
+        icon: "iconFont",
+        tipPosition: "n",
+    }, {
+        name: "clear",
+        lang: "clearInline",
+        hotkey: window.siyuan.config.keymap.editor.insert.clearInline.custom,
+        icon: "iconClear",
+        tipPosition: "n",
+    }, {
+        name: "|",
+    }];
+    const toolbarResult: IMenuItem[] = [];
+    toolbar.forEach((menuItem: IMenuItem) => {
+        let currentMenuItem = menuItem;
+        toolbarItem.find((defaultMenuItem: IMenuItem) => {
+            if (typeof menuItem === "string" && defaultMenuItem.name === menuItem) {
+                currentMenuItem = defaultMenuItem;
+                return true;
+            }
+            if (typeof menuItem === "object" && defaultMenuItem.name === menuItem.name) {
+                currentMenuItem = Object.assign({}, defaultMenuItem, menuItem);
+                return true;
+            }
+        });
+        toolbarResult.push(currentMenuItem);
+    });
+    return toolbarResult;
+};

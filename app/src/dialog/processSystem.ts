@@ -71,7 +71,7 @@ export const reloadSync = (
         }
     }
     setNoteBook(() => {
-        window.siyuan.mobile.files.init(false);
+        window.siyuan.mobile.docks.file.init(false);
     });
     /// #else
     const allModels = getAllModels();
@@ -125,7 +125,7 @@ export const reloadSync = (
             }
         }
     });
-    if (onlyUpdateDoc) {
+    if (!onlyUpdateDoc) {
         allModels.files.forEach(item => {
             setNoteBook(() => {
                 item.init(false);
@@ -215,7 +215,7 @@ export const setDefRefCount = (data: {
 
     let liElement;
     /// #if MOBILE
-    liElement = window.siyuan.mobile.files.element.querySelector(`li[data-node-id="${data.rootID}"]`);
+    liElement = window.siyuan.mobile.docks.file.element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #else
     liElement = (getDockByType("file").data.file as Files).element.querySelector(`li[data-node-id="${data.rootID}"]`);
     /// #endif

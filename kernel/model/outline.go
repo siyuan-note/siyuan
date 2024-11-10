@@ -17,10 +17,8 @@
 package model
 
 import (
-	"github.com/88250/lute/html"
-	"time"
-
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -209,8 +207,7 @@ func (tx *Transaction) doMoveOutlineHeading(operation *Operation) (ret *TxErr) {
 }
 
 func Outline(rootID string, preview bool) (ret []*Path, err error) {
-	time.Sleep(util.FrontendQueueInterval)
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	ret = []*Path{}
 	tree, _ := LoadTreeByBlockID(rootID)

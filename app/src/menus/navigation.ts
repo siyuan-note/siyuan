@@ -190,7 +190,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 liElement.parentElement.setAttribute("data-sortmode", sort.toString());
                 let files;
                 /// #if MOBILE
-                files = window.siyuan.mobile.files;
+                files = window.siyuan.mobile.docks.file;
                 /// #else
                 files = (getDockByType("file").data["file"] as Files);
                 /// #endif
@@ -335,7 +335,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             icon: "iconMarkdown",
             click: () => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                fetchPost("/api/export/batchExportMd", {
+                fetchPost("/api/export/exportNotebookMd", {
                     notebook: notebookId,
                     path: "/"
                 }, response => {
@@ -671,7 +671,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
     const reloadDocTree = () => {
         let files;
         /// #if MOBILE
-        files = window.siyuan.mobile.files;
+        files = window.siyuan.mobile.docks.file;
         /// #else
         files = (getDockByType("file").data["file"] as Files);
         /// #endif

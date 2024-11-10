@@ -1,7 +1,7 @@
 type TPluginDockPosition = "LeftTop" | "LeftBottom" | "RightTop" | "RightBottom" | "BottomLeft" | "BottomRight"
 type TDockPosition = "Left" | "Right" | "Bottom"
 type TWS = "main" | "filetree" | "protyle"
-type TEditorMode = "preview" | "wysiwyg"
+type TDock = "file" | "outline" | "inbox" | "bookmark" | "tag" | "graph" | "globalGraph" | "backlink"
 type TOperation =
     "insert"
     | "update"
@@ -64,7 +64,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "closed-notebook" |
     "paste" |
     "input-search" |
-    "loaded-protyle" | "loaded-protyle-dynamic" | "loaded-protyle-static" |
+    "loaded-protyle-dynamic" | "loaded-protyle-static" |
     "switch-protyle" |
     "destroy-protyle" |
     "lock-screen" |
@@ -317,7 +317,7 @@ interface IBackStack {
         notebookId: string
     },
     scrollTop?: number,
-    callback?: string[],
+    callback?: TProtyleAction[],
     position?: {
         start: number,
         end: number
@@ -376,7 +376,14 @@ interface ISiyuan {
     mobile?: {
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
-        files?: import("../mobile/dock/MobileFiles").MobileFiles
+        docks?: {
+            outline: import("../mobile/dock/MobileOutline").MobileOutline | null,
+            file: import("../mobile/dock/MobileFiles").MobileFiles | null,
+            bookmark: import("../mobile/dock/MobileBookmarks").MobileBookmarks | null,
+            tag: import("../mobile/dock/MobileTags").MobileTags | null,
+            backlink: import("../mobile/dock/MobileBacklinks").MobileBacklinks | null,
+            inbox: import("../layout/dock/Inbox").Inbox | null,
+        } & { [key: string]: import("../layout/Model").Model | any };
     },
     user?: {
         userId: string
@@ -425,18 +432,11 @@ interface ISiyuan {
     bookmarkLabel?: string[]
     blockPanels: import("../block/Panel").BlockPanel[],
     dialogs: import("../dialog").Dialog[],
-    viewer?: Viewer
-}
-
-interface IScrollAttr {
-    rootId: string,
-    startId: string,
-    endId: string
-    scrollTop: number,
-    focusId?: string,
-    focusStart?: number
-    focusEnd?: number
-    zoomInId?: string
+    viewer?: Viewer,
+    /**
+     * 是否在发布服务下访问
+     */
+    isPublish?: boolean;
 }
 
 interface IOperation {
@@ -555,7 +555,7 @@ interface IOpenFileOptions {
     position?: string, // file 或者 asset，打开位置
     page?: number | string, // asset
     mode?: TEditorMode // file
-    action?: string[]
+    action?: TProtyleAction[]
     keepCursor?: boolean // file，是否跳转到新 tab 上
     zoomIn?: boolean // 是否缩放
     removeCurrentTab?: boolean // 在当前页签打开时需移除原有页签
@@ -713,6 +713,7 @@ interface IMenu {
     index?: number
     element?: HTMLElement
     ignore?: boolean
+    warning?: boolean
 }
 
 interface IBazaarItem {

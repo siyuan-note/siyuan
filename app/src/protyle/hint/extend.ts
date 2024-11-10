@@ -295,27 +295,27 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         filter: ["信息样式", "xinxiyangshi", "xxys", "info style"],
         id: "infoStyle",
         value: `style${Constants.ZWSP}color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);" class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.infoStyle}</span></div>`,
     }, {
         filter: ["成功样式", "chenggongyangshi", "cgys", "success style"],
         id: "successStyle",
         value: `style${Constants.ZWSP}color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);" class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.successStyle}</span></div>`,
     }, {
         filter: ["警告样式", "jinggaoyangshi", "jgys", "warning style"],
         id: "warningStyle",
         value: `style${Constants.ZWSP}color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.warningStyle}</span></div>`,
     }, {
         filter: ["错误样式", "cuowuyangshi", "cwys", "error style"],
         id: "errorStyle",
         value: `style${Constants.ZWSP}color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);`,
-        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);" class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.errorStyle}</span></div>`,
     }, {
         filter: ["清除样式", "qingchuyangshi", "qcys", "remove style"],
         id: "clearFontStyle",
         value: `style${Constants.ZWSP}`,
-        html: `<div class="b3-list-item__first"><div class="color__square">A</div><span class="b3-list-item__text">${window.siyuan.languages.clearFontStyle}</span></div>`,
+        html: `<div class="b3-list-item__first"><div class="color__square color__square--list">A</div><span class="b3-list-item__text">${window.siyuan.languages.clearFontStyle}</span></div>`,
     }, {
         value: "",
         id: "separator_6",

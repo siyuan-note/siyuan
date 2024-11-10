@@ -87,8 +87,8 @@ export const getEditHTML = (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
-    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}"></span>
+    <span class="b3-menu__avemoji" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg style="width: 14px;height: 14px"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
+    <input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}" style="margin: 4px 0">
 </button>
 <button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" ? "disabled" : ""}>
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
@@ -100,8 +100,8 @@ export const getEditHTML = (options: {
     if (["mSelect", "select"].includes(colData.type)) {
         html += `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <svg class="b3-menu__icon" style=""><use xlink:href="#iconAdd"></use></svg>
-    <span class="b3-menu__label" style="padding: 4px;display: flex"><input data-type="addOption" class="b3-text-field fn__block fn__size200" type="text" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.addAttr}"></span>
+    <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
+    <input data-type="addOption" class="b3-text-field fn__block" type="text" placeholder="${window.siyuan.languages.enterKey} ${window.siyuan.languages.addAttr}" style="margin: 4px 0">
 </button>`;
         if (!colData.options) {
             colData.options = [];
@@ -598,17 +598,17 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         focusBlock(blockElement);
     });
     menu.addItem({
-        iconHTML: `<span style="align-self: center;margin-right: 8px;width: 14px;" class="block__icon block__icon--show">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
+        iconHTML: `<span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
         type: "readonly",
         label: `<input style="margin: 4px 0" class="b3-text-field fn__block fn__size200" type="text" value="${oldValue}">`,
         bind(element) {
-            const iconElement = element.querySelector(".block__icon") as HTMLElement;
+            const iconElement = element.querySelector(".b3-menu__avemoji") as HTMLElement;
             iconElement.setAttribute("data-icon", cellElement.dataset.icon);
             iconElement.addEventListener("click", (event) => {
                 const rect = iconElement.getBoundingClientRect();
                 openEmojiPanel("", "av", {
                     x: rect.left,
-                    y: rect.bottom,
+                    y: rect.bottom + 4,
                     h: rect.height,
                     w: rect.width
                 }, (unicode) => {
@@ -624,7 +624,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         data: cellElement.dataset.icon,
                     }]);
                     iconElement.setAttribute("data-icon", unicode);
-                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
+                    iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                 });
                 event.preventDefault();
@@ -859,17 +859,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             content: `<div class="b3-dialog__content">
     ${window.siyuan.languages.confirmRemoveRelationField.replace("${x}", relResponse.data.av.name)}
     <div class="fn__hr--b"></div>
-    <button class="fn__block b3-button b3-button--error">${window.siyuan.languages.delete}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.delete}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--warning">${window.siyuan.languages.removeButKeepRelationField}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="keep-relation">${window.siyuan.languages.removeButKeepRelationField}</button>
     <div class="fn__hr"></div>
-    <button class="fn__block b3-button b3-button--info">${window.siyuan.languages.cancel}</button>
+    <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;
                             while (target && !target.isSameNode(dialog.element)) {
-                                if (target.classList.contains("b3-button--error")) {
+                                const action = target.getAttribute("data-action");
+                                if (action === "delete") {
                                     removeColByMenu({
                                         protyle,
                                         colId,
@@ -883,7 +884,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--warning")) {
+                                } else if (action === "keep-relation") {
                                     removeColByMenu({
                                         protyle,
                                         colId,
@@ -897,7 +898,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--info")) {
+                                } else if (target.classList.contains("b3-button--cancel")) {
                                     dialog.destroy();
                                     break;
                                 }

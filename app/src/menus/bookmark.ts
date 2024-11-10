@@ -85,7 +85,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
                     } else {
                         fetchPost("/api/bookmark/removeBookmark", {bookmark: bookmarkText});
                     }
-                });
+                }, undefined, true);
             }
         }).element);
     }

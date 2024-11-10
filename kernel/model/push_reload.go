@@ -92,8 +92,8 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 		"hSize":        humanize.BytesCustomCeil(size, 2),
 		"mtime":        mTime.Unix(),
 		"ctime":        cTime.Unix(),
-		"hMtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
-		"hCtime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
+		"hMtime":       mTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(mTime, Conf.Lang),
+		"hCtime":       cTime.Format("2006-01-02 15:04:05") + ", " + util.HumanizeTime(cTime, Conf.Lang),
 		"subFileCount": subFileCount,
 	}
 

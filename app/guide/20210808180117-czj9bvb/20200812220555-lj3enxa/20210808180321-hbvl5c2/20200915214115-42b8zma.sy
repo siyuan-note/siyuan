@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20231110112936"
+		"updated": "20241027164443"
 	},
 	"Children": [
 		{
@@ -276,7 +276,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210115222011-bzsftun"
+				"id": "20210115222011-bzsftun",
+				"updated": "20241027164443"
 			},
 			"Children": [
 				{
@@ -344,7 +345,7 @@
 			},
 			"Properties": {
 				"id": "20210115222514-tqfsawm",
-				"updated": "20220711121929"
+				"updated": "20241027164024"
 			},
 			"Children": [
 				{
@@ -362,7 +363,7 @@
 					},
 					"Properties": {
 						"id": "20210115222515-47r5lop",
-						"updated": "20220711121929"
+						"updated": "20241027164024"
 					},
 					"Children": [
 						{
@@ -370,20 +371,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210204172443-a8xpkb9",
-								"updated": "20220711121929"
+								"updated": "20241027164024"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具体的资源文件，比如图片或者文件。如果资源文件是 PDF 且做过"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "标注"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，那么无论它是否被引用都不会计入清理"
+									"Data": "引用具体的资源文件，比如图片或者文件"
 								}
 							]
 						}
@@ -448,7 +441,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210115223610-ffnxstf",
-				"updated": "20220711122042"
+				"updated": "20241027164443"
 			},
 			"Children": [
 				{
@@ -462,7 +455,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -471,19 +464,14 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 中可以一键"
+					"Data": "​ 中可以一键清理未引用资源，如果需要找回被误删的文件，请通过"
 				},
 				{
-					"Type": "NodeText",
-					"Data": "清理未引用资源"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "，如果需要找回被误删的文件，请通过"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "回滚"
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20210104090742-hjfornp",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "回滚"
 				},
 				{
 					"Type": "NodeText",
@@ -626,7 +614,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210615102657-kampx8a",
-				"updated": "20220503121605"
+				"updated": "20241024163136"
 			},
 			"Children": [
 				{
@@ -669,7 +657,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503121213-afjyt05",
-				"updated": "20220715105016"
+				"updated": "20241024163136"
 			},
 			"Children": [
 				{
@@ -681,7 +669,7 @@
 					},
 					"Properties": {
 						"id": "20220503121214-haxyvyt",
-						"updated": "20220503121401"
+						"updated": "20241024163136"
 					},
 					"Children": [
 						{
@@ -689,20 +677,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503121214-cmqtvby",
-								"updated": "20220503121401"
+								"updated": "20241024163136"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "删除该笔记本时，为保证跨笔记本资源文件引用正常工作，该笔记本下的资源文件会被批量复制到全局 "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "assets"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 中"
+									"Data": "删除该笔记时，为保证跨笔记本资源文件引用正常工作，该笔记引用的资源文件会被批量复制到全局 assets 中"
 								}
 							]
 						}

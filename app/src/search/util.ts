@@ -1367,8 +1367,12 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                     nextElement.setAttribute("disabled", "disabled");
                 }
                 onSearch(response.data.blocks, edit, element, config);
+                let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
+                if (response.data.docMode) {
+                    text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
+                }
                 searchResultElement.innerHTML = `${config.page}/${response.data.pageCount || 1}<span class="fn__space"></span>
-<span class="ft__on-surface">${window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount)}</span>`;
+<span class="ft__on-surface">${text}</span>`;
                 loadingElement.classList.add("fn__none");
                 searchResultElement.setAttribute("data-pagecount", response.data.pageCount || 1);
             });
@@ -1400,7 +1404,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">
     <svg class="b3-list-item__arrow b3-list-item__arrow--open"><use xlink:href="#iconRight"></use></svg>
 </span>
-${unicode2Emoji(getNotebookIcon(item.box) || Constants.SIYUAN_IMAGE_NOTE, "b3-list-item__graphic", true)}
+${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
 </div><div>`;
             item.children.forEach((childItem, childIndex) => {

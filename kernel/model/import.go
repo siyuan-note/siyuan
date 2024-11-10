@@ -27,18 +27,16 @@ import (
 	"image/png"
 	"io"
 	"io/fs"
-	"math/rand"
 	"os"
 	"path"
 	"path/filepath"
 	"regexp"
 	"runtime/debug"
 	"sort"
-	"strconv"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/html/atom"
@@ -54,9 +52,8 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func HTML2Markdown(htmlStr string) (markdown string, withMath bool, err error) {
+func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
-	luteEngine := util.NewLute()
 	tree := luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -363,6 +360,25 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
 	}
 
+	// 清理一些冗余的数据
+	avDir := filepath.Join(util.DataDir, "storage", "av")
+	for _, tree := range trees {
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			ial := parse.IAL2Map(n.KramdownIAL)
+			avIDs := strings.Split(ial[av.NodeAttrNameAvs], ",")
+			for _, avID := range avIDs {
+				if !filelock.IsExist(filepath.Join(avDir, avID+".json")) {
+					n.RemoveIALAttr(av.NodeAttrNameAvs)
+				}
+			}
+			return ast.WalkContinue
+		})
+	}
+
 	// 写回 .sy
 	for _, tree := range trees {
 		util.PushEndlessProgress(Conf.language(73) + " " + fmt.Sprintf(Conf.language(70), tree.Root.IALAttr("title")))
@@ -660,7 +676,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	lockSync()
 	defer unlockSync()
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	var baseHPath, baseTargetPath, boxLocalPath string
 	if "/" == toPath {
@@ -759,11 +775,22 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return io.EOF
 			}
 
-			tree = parseStdMd(data)
+			tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 			if nil == tree {
 				logging.LogErrorf("parse tree [%s] failed", currentPath)
 				return nil
 			}
+
+			if "" != yfmRootID {
+				id = yfmRootID
+			}
+			if "" != yfmTitle {
+				title = yfmTitle
+			}
+			updated := yfmUpdated
+			fname := path.Base(targetPath)
+			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
+			targetPaths[curRelPath] = targetPath
 
 			tree.ID = id
 			tree.Root.ID = id
@@ -841,7 +868,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return ast.WalkContinue
 			})
 
-			reassignIDUpdated(tree)
+			reassignIDUpdated(tree, id, updated)
 			importTrees = append(importTrees, tree)
 
 			hPathsIDs[tree.HPath] = tree.ID
@@ -864,12 +891,22 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-		tree := parseStdMd(data)
+		tree, yfmRootID, yfmTitle, yfmUpdated := parseStdMd(data)
 		if nil == tree {
 			msg := fmt.Sprintf("parse tree [%s] failed", localPath)
 			logging.LogErrorf(msg)
 			return errors.New(msg)
 		}
+
+		if "" != yfmRootID {
+			id = yfmRootID
+		}
+		if "" != yfmTitle {
+			title = yfmTitle
+		}
+		updated := yfmUpdated
+		fname := path.Base(targetPath)
+		targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
 
 		tree.ID = id
 		tree.Root.ID = id
@@ -937,7 +974,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			return ast.WalkContinue
 		})
 
-		reassignIDUpdated(tree)
+		reassignIDUpdated(tree, id, updated)
 		importTrees = append(importTrees, tree)
 	}
 
@@ -974,15 +1011,16 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	return
 }
 
-func parseStdMd(markdown []byte) (ret *parse.Tree) {
+func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdated string) {
 	luteEngine := util.NewStdLute()
 	luteEngine.SetYamlFrontMatter(true) // 解析 YAML Front Matter https://github.com/siyuan-note/siyuan/issues/10878
 	ret = parse.Parse("", markdown, luteEngine.ParseOptions)
 	if nil == ret {
 		return
 	}
-	normalizeTree(ret)
+	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
 	imgHtmlBlock2InlineImg(ret)
+	parse.TextMarks2Inlines(ret) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
 }
@@ -1065,8 +1103,17 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 			return ast.WalkContinue
 		}
 
-		if ast.NodeHTMLBlock == n.Type {
-			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(n.Tokens), &html.Node{Type: html.ElementNode})
+		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<img "))) {
+			tokens := bytes.TrimSpace(n.Tokens)
+			if bytes.HasPrefix(tokens, []byte("<div>")) {
+				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
+			}
+			if bytes.HasSuffix(tokens, []byte("</div>")) {
+				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
+			}
+			tokens = bytes.TrimSpace(tokens)
+
+			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
 			if nil != pErr {
 				logging.LogErrorf("parse html block [%s] failed: %s", n.Tokens, pErr)
 				return ast.WalkContinue
@@ -1105,13 +1152,18 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		}
 		img.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 
-		n.InsertBefore(p)
+		if nil != n.Parent && ast.NodeText == n.Type {
+			// 行级 HTML 会被解析为文本，所以这里要在父级段落前面插入，避免形成段落嵌套 https://github.com/siyuan-note/siyuan/issues/13080
+			n.Parent.InsertBefore(p)
+		} else {
+			n.InsertBefore(p)
+		}
 		n.Unlink()
 	}
 	return
 }
 
-func reassignIDUpdated(tree *parse.Tree) {
+func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 	var blockCount int
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
@@ -1122,41 +1174,29 @@ func reassignIDUpdated(tree *parse.Tree) {
 		return ast.WalkContinue
 	})
 
-	ids := make([]string, blockCount)
-	min, _ := strconv.ParseInt(time.Now().Add(-1*time.Duration(blockCount)*time.Second).Format("20060102150405"), 10, 64)
-	for i := 0; i < blockCount; i++ {
-		ids[i] = newID(fmt.Sprintf("%d", min))
-		min++
-	}
-
-	var i int
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
 			return ast.WalkContinue
 		}
 
-		n.ID = ids[i]
+		n.ID = ast.NewNodeID()
+		if ast.NodeDocument == n.Type && "" != rootID {
+			n.ID = rootID
+		}
+
 		n.SetIALAttr("id", n.ID)
-		n.SetIALAttr("updated", util.TimeFromID(n.ID))
-		i++
+		if "" != updated {
+			n.SetIALAttr("updated", updated)
+			n.ID = updated + "-" + gulu.Rand.String(7)
+			n.SetIALAttr("id", n.ID)
+		} else {
+			n.SetIALAttr("updated", util.TimeFromID(n.ID))
+		}
 		return ast.WalkContinue
 	})
 	tree.ID = tree.Root.ID
 	tree.Path = path.Join(path.Dir(tree.Path), tree.ID+".sy")
 	tree.Root.SetIALAttr("id", tree.Root.ID)
-}
-
-func newID(t string) string {
-	return t + "-" + randStr(7)
-}
-
-func randStr(length int) string {
-	letter := []rune("abcdefghijklmnopqrstuvwxyz0123456789")
-	b := make([]rune, length)
-	for i := range b {
-		b[i] = letter[rand.Intn(len(letter))]
-	}
-	return string(b)
 }
 
 func domAttrValue(n *html.Node, attrName string) string {

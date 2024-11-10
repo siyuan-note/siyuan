@@ -206,7 +206,7 @@ type Tag struct {
 type Tags []*Tag
 
 func BuildTags() (ret *Tags) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 	sql.FlushQueue()
 
 	ret = &Tags{}

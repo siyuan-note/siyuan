@@ -19,7 +19,7 @@ export const getCurrentEditor = () => {
     return window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
 };
 
-export const openMobileFileById = (app: App, id: string, action = [Constants.CB_GET_HL]) => {
+export const openMobileFileById = (app: App, id: string, action: TProtyleAction[] = [Constants.CB_GET_HL]) => {
     window.siyuan.storage[Constants.LOCAL_DOCINFO] = {id};
     setStorageVal(Constants.LOCAL_DOCINFO, window.siyuan.storage[Constants.LOCAL_DOCINFO]);
     const avPanelElement = document.querySelector(".av__panel");
@@ -52,7 +52,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
             showMessage(data.msg);
             return;
         }
-        const protyleOptions: IOptions = {
+        const protyleOptions: IProtyleOptions = {
             blockId: id,
             rootId: data.data.rootID,
             action,
@@ -64,7 +64,7 @@ export const openMobileFileById = (app: App, id: string, action = [Constants.CB_
             },
             typewriterMode: true,
             preview: {
-                actions: ["mp-wechat", "zhihu"]
+                actions: ["mp-wechat", "zhihu", "yuque"]
             }
         };
         if (window.siyuan.mobile.editor) {

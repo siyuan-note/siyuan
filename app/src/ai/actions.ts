@@ -35,7 +35,7 @@ const editDialog = (customName: string, customMemo: string) => {
     <textarea class="b3-text-field fn__block" placeholder="${window.siyuan.languages.aiCustomAction}"></textarea>
 </div>
 <div class="b3-dialog__action">
-    <button class="b3-button b3-button--error">${window.siyuan.languages.delete}</button><div class="fn__space"></div>
+    <button class="b3-button b3-button--remove">${window.siyuan.languages.delete}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
 </div>`,

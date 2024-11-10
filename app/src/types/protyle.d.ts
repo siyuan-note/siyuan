@@ -16,7 +16,26 @@ type TTurnIntoOneSub = "row" | "col"
 
 type TTurnInto = "Blocks2Ps" | "Blocks2Hs"
 
+type TEditorMode = "preview" | "wysiwyg"
+
 type ILuteRenderCallback = (node: ILuteNode, entering: boolean) => [string, number];
+
+type TProtyleAction = "cb-get-append" | // 向下滚动加载
+    "cb-get-before" | // 向上滚动加载
+    "cb-get-unchangeid" | // 上下滚动，定位时不修改 blockid
+    "cb-get-hl" | // 高亮
+    "cb-get-focus" | // 光标定位
+    "cb-get-focusfirst" | // 动态定位到第一个块
+    "cb-get-setid" | // 重置 blockid
+    "cb-get-all" | // 获取所有块
+    "cb-get-backlink" | // 悬浮窗为传递型需展示上下文
+    "cb-get-unundo" | // 不需要记录历史
+    "cb-get-scroll" | // 滚动到指定位置，用于直接打开文档，必有 rootID
+    "cb-get-context" | // 包含上下文
+    "cb-get-rootscroll" | // 如果为 rootID 就滚动到指定位置，必有 rootID
+    "cb-get-html" | // 直接渲染，不需要再 /api/block/getDocInfo，否则搜索表格无法定位
+    "cb-get-history" | // 历史渲染
+    "cb-get-opennew"  // 编辑器只读后新建文件需为临时解锁状态 & https://github.com/siyuan-note/siyuan/issues/12197
 
 /** @link https://ld246.com/article/1588412297062 */
 interface ILuteRender {
@@ -257,6 +276,10 @@ declare class Lute {
     public BlockDOM2InlineBlockDOM(html: string): string;
 
     public BlockDOM2HTML(html: string): string;
+
+    public HTML2Md(html: string): string;
+
+    public HTML2BlockDOM(html: string): string;
 }
 
 declare const webkitAudioContext: {
@@ -311,6 +334,17 @@ interface IUpload {
 
     /** 图片地址上传后的回调  */
     linkToImgCallback?(responseText: string): void;
+}
+
+interface IScrollAttr {
+    rootId: string,
+    startId: string,
+    endId: string
+    scrollTop: number,
+    focusId?: string,
+    focusStart?: number
+    focusEnd?: number
+    zoomInId?: string
 }
 
 /** @link https://ld246.com/article/1549638745630#options-toolbar */
@@ -398,7 +432,7 @@ interface IHint {
 }
 
 /** @link https://ld246.com/article/1549638745630#options */
-interface IOptions {
+interface IProtyleOptions {
     history?: {
         created?: string
         snapshot?: string
@@ -408,9 +442,9 @@ interface IOptions {
         dom: string
         expand: boolean
     }[],
-    action?: string[],
+    action?: TProtyleAction[],
     mode?: TEditorMode,
-    blockId: string
+    blockId?: string
     rootId?: string
     key?: string
     defId?: string
@@ -468,7 +502,7 @@ interface IProtyle {
         showAll?: boolean
         mode?: number
         blockCount?: number
-        action?: string[]
+        action?: TProtyleAction[]
     },
     disabled: boolean,
     selectElement?: HTMLElement,
@@ -484,7 +518,7 @@ interface IProtyle {
     title?: import("../protyle/header/Title").Title,
     background?: import("../protyle/header/background").Background,
     contentElement?: HTMLElement,
-    options: IOptions;
+    options: IProtyleOptions;
     lute?: Lute;
     toolbar?: import("../protyle/toolbar").Toolbar,
     preview?: import("../protyle/preview").Preview;

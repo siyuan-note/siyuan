@@ -362,8 +362,6 @@ func UploadAssets2Cloud(rootID string) (count int, err error) {
 	assets := assetsLinkDestsInTree(tree)
 	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
 	assets = append(assets, embedAssets...)
-	avAssets := assetsLinkDestsInAttributeViewNodes(tree)
-	assets = append(assets, avAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if err != nil {
@@ -523,17 +521,19 @@ func RemoveUnusedAssets() (ret []string) {
 	sql.BatchRemoveAssetsQueue(hashes)
 
 	for _, unusedAsset := range unusedAssets {
-		if unusedAsset = filepath.Join(util.DataDir, unusedAsset); filelock.IsExist(unusedAsset) {
-			info, statErr := os.Stat(unusedAsset)
+		absPath := filepath.Join(util.DataDir, unusedAsset)
+		if filelock.IsExist(absPath) {
+			info, statErr := os.Stat(absPath)
 			if statErr == nil {
 				size += info.Size()
 			}
 
-			if err := filelock.Remove(unusedAsset); err != nil {
-				logging.LogErrorf("remove unused asset [%s] failed: %s", unusedAsset, err)
+			if err := filelock.Remove(absPath); err != nil {
+				logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 			}
+			util.RemoveAssetText(unusedAsset)
 		}
-		ret = append(ret, unusedAsset)
+		ret = append(ret, absPath)
 	}
 	if 0 < len(ret) {
 		IncSync()
@@ -571,6 +571,9 @@ func RemoveUnusedAsset(p string) (ret string) {
 		logging.LogErrorf("remove unused asset [%s] failed: %s", absPath, err)
 	}
 	ret = absPath
+
+	util.RemoveAssetText(p)
+
 	IncSync()
 
 	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
@@ -655,6 +658,45 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 				util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
 			}
 		}
+	}
+
+	storageAvDir := filepath.Join(util.DataDir, "storage", "av")
+	if gulu.File.IsDir(storageAvDir) {
+		entries, readErr := os.ReadDir(storageAvDir)
+		if nil != readErr {
+			logging.LogErrorf("read dir [%s] failed: %s", storageAvDir, readErr)
+			err = readErr
+			return
+		}
+
+		for _, entry := range entries {
+			if !strings.HasSuffix(entry.Name(), ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(entry.Name(), ".json")) {
+				continue
+			}
+
+			data, readDataErr := filelock.ReadFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()))
+			if nil != readDataErr {
+				logging.LogErrorf("read file [%s] failed: %s", entry.Name(), readDataErr)
+				err = readDataErr
+				return
+			}
+
+			if bytes.Contains(data, []byte(oldPath)) {
+				data = bytes.ReplaceAll(data, []byte(oldPath), []byte(newPath))
+				if writeDataErr := filelock.WriteFile(filepath.Join(util.DataDir, "storage", "av", entry.Name()), data); nil != writeDataErr {
+					logging.LogErrorf("write file [%s] failed: %s", entry.Name(), writeDataErr)
+					err = writeDataErr
+					return
+				}
+			}
+
+			util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(entry.Name())))
+		}
+	}
+
+	if ocrText := util.GetAssetText(oldPath); "" != ocrText {
+		// 图片重命名后 ocr-texts.json 需要更新 https://github.com/siyuan-note/siyuan/issues/12974
+		util.SetAssetText(newPath, ocrText)
 	}
 
 	IncSync()
@@ -913,46 +955,6 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInAttributeViewNodes(tree *parse.Tree) (ret []string) {
-	// The images in the databases are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/11948
-
-	ret = []string{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeAttributeView != n.Type {
-			return ast.WalkContinue
-		}
-
-		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
-		if nil == attrView {
-			return ast.WalkContinue
-		}
-
-		for _, keyValues := range attrView.KeyValues {
-			if av.KeyTypeMAsset != keyValues.Key.Type {
-				continue
-			}
-
-			for _, value := range keyValues.Values {
-				if 1 > len(value.MAsset) {
-					continue
-				}
-
-				for _, asset := range value.MAsset {
-					dest := asset.Content
-					if !treenode.IsRelativePath([]byte(dest)) {
-						continue
-					}
-
-					ret = append(ret, strings.TrimSpace(dest))
-				}
-			}
-		}
-		return ast.WalkContinue
-	})
-	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	return
-}
-
 func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
 
@@ -999,7 +1001,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 				k := kv[0]
 				if strings.HasPrefix(k, "custom-data-assets") {
 					dest := kv[1]
-					if "" == dest || !treenode.IsRelativePath([]byte(dest)) {
+					if "" == dest || !util.IsAssetLinkDest([]byte(dest)) {
 						continue
 					}
 					ret = append(ret, dest)
@@ -1010,26 +1012,26 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 		// 修改以下代码时需要同时修改 database 构造行级元素实现，增加必要的类型
 		if !entering || (ast.NodeLinkDest != n.Type && ast.NodeHTMLBlock != n.Type && ast.NodeInlineHTML != n.Type &&
 			ast.NodeIFrame != n.Type && ast.NodeWidget != n.Type && ast.NodeAudio != n.Type && ast.NodeVideo != n.Type &&
-			!n.IsTextMarkType("a") && !n.IsTextMarkType("file-annotation-ref")) {
+			ast.NodeAttributeView != n.Type && !n.IsTextMarkType("a") && !n.IsTextMarkType("file-annotation-ref")) {
 			return ast.WalkContinue
 		}
 
 		if ast.NodeLinkDest == n.Type {
-			if !treenode.IsRelativePath(n.Tokens) {
+			if !util.IsAssetLinkDest(n.Tokens) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(string(n.Tokens))
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("a") {
-			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkAHref)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkAHref)) {
 				return ast.WalkContinue
 			}
 
 			dest := strings.TrimSpace(n.TextMarkAHref)
 			ret = append(ret, dest)
 		} else if n.IsTextMarkType("file-annotation-ref") {
-			if !treenode.IsRelativePath(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
+			if !util.IsAssetLinkDest(gulu.Str.ToBytes(n.TextMarkFileAnnotationRefID)) {
 				return ast.WalkContinue
 			}
 
@@ -1040,6 +1042,42 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 			dest := n.TextMarkFileAnnotationRefID[:strings.LastIndexByte(n.TextMarkFileAnnotationRefID, '/')]
 			dest = strings.TrimSpace(dest)
 			ret = append(ret, dest)
+		} else if ast.NodeAttributeView == n.Type {
+			attrView, _ := av.ParseAttributeView(n.AttributeViewID)
+			if nil == attrView {
+				return ast.WalkContinue
+			}
+
+			for _, keyValues := range attrView.KeyValues {
+				if av.KeyTypeMAsset == keyValues.Key.Type {
+					for _, value := range keyValues.Values {
+						if 1 > len(value.MAsset) {
+							continue
+						}
+
+						for _, asset := range value.MAsset {
+							dest := asset.Content
+							if !util.IsAssetLinkDest([]byte(dest)) {
+								continue
+							}
+
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				} else if av.KeyTypeURL == keyValues.Key.Type {
+					for _, value := range keyValues.Values {
+						if nil != value.URL {
+							dest := value.URL.Content
+							if !util.IsAssetLinkDest([]byte(dest)) {
+								continue
+							}
+
+							ret = append(ret, strings.TrimSpace(dest))
+						}
+					}
+				}
+
+			}
 		} else {
 			if ast.NodeWidget == n.Type {
 				dataAssets := n.IALAttr("custom-data-assets")
@@ -1047,7 +1085,7 @@ func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
 					// 兼容两种属性名 custom-data-assets 和 data-assets https://github.com/siyuan-note/siyuan/issues/4122#issuecomment-1154796568
 					dataAssets = n.IALAttr("data-assets")
 				}
-				if "" == dataAssets || !treenode.IsRelativePath([]byte(dataAssets)) {
+				if "" == dataAssets || !util.IsAssetLinkDest([]byte(dataAssets)) {
 					return ast.WalkContinue
 				}
 				ret = append(ret, dataAssets)

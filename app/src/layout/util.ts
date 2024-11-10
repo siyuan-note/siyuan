@@ -819,6 +819,8 @@ export const addResize = (obj: Layout | Wnd) => {
             const previousElement = resizeElement.previousElementSibling as HTMLElement;
             nextElement.style.overflow = "auto"; // 拖动时 layout__resize 会出现 https://github.com/siyuan-note/siyuan/issues/6221
             previousElement.style.overflow = "auto";
+            nextElement.style.transition = "none";
+            previousElement.style.transition = "none";
             if (!nextElement.nextElementSibling || nextElement.nextElementSibling.classList.contains("layout__dockresize")) {
                 setSize(nextElement, direction);
             } else {
@@ -886,6 +888,8 @@ export const addResize = (obj: Layout | Wnd) => {
                 }
                 nextElement.style.overflow = "";
                 previousElement.style.overflow = "";
+                nextElement.style.transition = "";
+                previousElement.style.transition = "";
             };
         });
     };

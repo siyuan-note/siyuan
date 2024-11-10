@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
@@ -94,7 +94,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     e.dataset.pageSize = data.pageSize.toString();
                 }
                 // header
-                let tableHTML = '<div class="av__row av__row--header"><div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                let tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
                 let calcHTML = "";
                 let pinIndex = -1;
                 let pinMaxIndex = -1;
@@ -169,7 +169,7 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use x
                     if (pinIndex > -1) {
                         tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
                     } else {
-                        tableHTML += '<div class="av__firstcol av__colsticky"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+                        tableHTML += '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
                     }
 
                     row.cells.forEach((cell, index) => {
@@ -207,13 +207,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-                let avBackground = "--av-background:var(--b3-theme-background)";
-                if (e.style.backgroundColor) {
-                    avBackground = "--av-background:" + e.style.backgroundColor;
-                } else if (isInEmbedBlock(e)) {
-                    avBackground = "--av-background:var(--b3-theme-surface)";
-                }
-                e.firstElementChild.outerHTML = `<div class="av__container" style="${avBackground}">
+                e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
@@ -267,7 +261,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
-                        ${window.siyuan.languages.addAttr}
+                        ${window.siyuan.languages.newRow}
                     </button>
                     <span class="fn__space"></span>
                     <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
@@ -359,7 +353,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     if (event.isComposing) {
                         return;
                     }
-                    if (searchInputElement.value) {
+                    if (searchInputElement.value || document.activeElement.isSameNode(searchInputElement)) {
                         viewsElement.classList.add("av__views--show");
                     } else {
                         viewsElement.classList.remove("av__views--show");

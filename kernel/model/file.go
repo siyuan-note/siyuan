@@ -37,7 +37,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
-	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -116,29 +115,9 @@ func (box *Box) docIAL(p string) (ret map[string]string) {
 	}
 
 	filePath := filepath.Join(util.DataDir, box.ID, p)
-
-	filelock.Lock(filePath)
-	file, err := os.Open(filePath)
-	if err != nil {
-		logging.LogErrorf("open file [%s] failed: %s", p, err)
-		filelock.Unlock(filePath)
-		return nil
-	}
-
-	iter := jsoniter.Parse(jsoniter.ConfigCompatibleWithStandardLibrary, file, 512)
-	for field := iter.ReadObject(); field != ""; field = iter.ReadObject() {
-		if field == "Properties" {
-			iter.ReadVal(&ret)
-			break
-		} else {
-			iter.Skip()
-		}
-	}
-	file.Close()
-	filelock.Unlock(filePath)
-
+	ret = filesys.DocIAL(filePath)
 	if 1 > len(ret) {
-		logging.LogWarnf("properties not found in file [%s]", p)
+		logging.LogWarnf("properties not found in file [%s]", filePath)
 		box.moveCorruptedData(filePath)
 		return nil
 	}
@@ -504,7 +483,7 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 }
 
 func StatTree(id string) (ret *util.BlockStatResult) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {
@@ -614,7 +593,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	//pprof.StartCPUProfile(cpuProfile)
 	//defer pprof.StopCPUProfile()
 
-	WaitForWritingFiles() // 写入数据时阻塞，避免获取到的数据不一致
+	FlushTxQueue() // 写入数据时阻塞，避免获取到的数据不一致
 
 	inputIndex := index
 	tree, err := LoadTreeByBlockID(id)
@@ -1121,7 +1100,7 @@ func DuplicateDoc(tree *parse.Tree) {
 
 	resetTree(tree, "Duplicated", false)
 	createTreeTx(tree)
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -1170,7 +1149,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	ChangeFileTreeSort(box.ID, sorts)
 	return
 }
@@ -1185,7 +1164,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	luteEngine := util.NewLute()
 	if withMath {
 		luteEngine.SetInlineMath(true)
@@ -1206,7 +1185,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	nameValues["tags"] = tags
 	SetBlockAttrs(retID, nameValues)
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	return
 }
 
@@ -1231,7 +1210,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	if nil != existRoot {
@@ -1305,7 +1284,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 	}
 	IncSync()
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
@@ -1451,7 +1430,7 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 		defer util.PushClearProgress()
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	luteEngine := util.NewLute()
 	count := 0
 	for fromPath, fromBox := range pathsBoxes {
@@ -1635,7 +1614,7 @@ func RemoveDoc(boxID, p string) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	luteEngine := util.NewLute()
 	removeDoc(box, p, luteEngine)
 	IncSync()
@@ -1648,7 +1627,7 @@ func RemoveDocs(paths []string) {
 
 	paths = util.FilterSelfChildDocs(paths)
 	pathsBoxes := getBoxesByPaths(paths)
-	WaitForWritingFiles()
+	FlushTxQueue()
 	luteEngine := util.NewLute()
 	for p, box := range pathsBoxes {
 		removeDoc(box, p, luteEngine)
@@ -1772,7 +1751,7 @@ func RenameDoc(boxID, p, title string) (err error) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	luteEngine := util.NewLute()
 	tree, err := filesys.LoadTree(box.ID, p, luteEngine)
 	if err != nil {
@@ -1928,7 +1907,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 
 	transaction := &Transaction{DoOperations: []*Operation{{Action: "create", Data: tree}}}
 	PerformTransactions(&[]*Transaction{transaction})
-	WaitForWritingFiles()
+	FlushTxQueue()
 	return
 }
 
@@ -2000,7 +1979,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 		return
 	}
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 	box := Conf.Box(boxID)
 	sortIDs := map[string]int{}
 	max := 0

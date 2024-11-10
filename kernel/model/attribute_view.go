@@ -1527,6 +1527,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			Hidden: col.Hidden,
 			Pin:    col.Pin,
 			Width:  col.Width,
+			Desc:   col.Desc,
 			Calc:   col.Calc,
 		})
 	}
@@ -1658,6 +1659,30 @@ func (tx *Transaction) doSetAttrViewViewIcon(operation *Operation) (ret *TxErr) 
 	return
 }
 
+func (tx *Transaction) doSetAttrViewViewDesc(operation *Operation) (ret *TxErr) {
+	var err error
+	avID := operation.AvID
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+	}
+
+	viewID := operation.ID
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("get view [%s] failed: %s", viewID, err)
+		return &TxErr{code: TxErrWriteAttributeView, id: viewID}
+	}
+
+	view.Desc = strings.TrimSpace(operation.Data.(string))
+	if err = av.SaveAttributeView(attrView); err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+	}
+	return
+}
+
 func (tx *Transaction) doSetAttrViewName(operation *Operation) (ret *TxErr) {
 	err := tx.setAttributeViewName(operation)
 	if err != nil {
@@ -1715,16 +1740,16 @@ func getAvNames(avIDs string) (ret string) {
 	return
 }
 
-func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees []*parse.Tree, nodes []*ast.Node) {
+func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees map[string]*parse.Tree, nodes []*ast.Node) {
 	blockKeyValues := attrView.GetBlockKeyValues()
-	treeCache := map[string]*parse.Tree{}
+	trees = map[string]*parse.Tree{}
 	for _, blockKeyValue := range blockKeyValues.Values {
 		if blockKeyValue.IsDetached {
 			continue
 		}
 
 		var tree *parse.Tree
-		tree = treeCache[blockKeyValue.BlockID]
+		tree = trees[blockKeyValue.BlockID]
 		if nil == tree {
 			if nil == tx {
 				tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
@@ -1735,7 +1760,7 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 		if nil == tree {
 			continue
 		}
-		treeCache[blockKeyValue.BlockID] = tree
+		trees[blockKeyValue.BlockID] = tree
 
 		node := treenode.GetNodeInTree(tree, blockKeyValue.BlockID)
 		if nil == node {
@@ -1743,9 +1768,6 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 		}
 
 		nodes = append(nodes, node)
-	}
-	for _, tree := range treeCache {
-		trees = append(trees, tree)
 	}
 	return
 }
@@ -2250,6 +2272,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 							Hidden: column.Hidden,
 							Pin:    column.Pin,
 							Width:  column.Width,
+							Desc:   column.Desc,
 						},
 					}, view.Table.Columns[i+1:]...)...)
 					break
@@ -2411,6 +2434,31 @@ func setAttributeViewColIcon(operation *Operation) (err error) {
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID {
 			keyValues.Key.Icon = operation.Data.(string)
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColumnDesc(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColDesc(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColDesc(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	for _, keyValues := range attrView.KeyValues {
+		if keyValues.Key.ID == operation.ID {
+			keyValues.Key.Desc = operation.Data.(string)
 			break
 		}
 	}
@@ -2974,11 +3022,11 @@ func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
 }
 
 func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.ID, operation.Data)
+	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.Data)
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string, valueData interface{}) (val *av.Value, err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -3008,7 +3056,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 
 		for _, value := range keyValues.Values {
-			if cellID == value.ID || rowID == value.BlockID {
+			if rowID == value.BlockID {
 				val = value
 				val.Type = keyValues.Key.Type
 				break
@@ -3016,7 +3064,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID, cellID string,
 		}
 
 		if nil == val {
-			val = &av.Value{ID: cellID, KeyID: keyID, BlockID: rowID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
+			val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: rowID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break
@@ -3468,6 +3516,40 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 					}
 				}
 			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func (tx *Transaction) doSetAttrViewColOptionDesc(operation *Operation) (ret *TxErr) {
+	err := setAttributeViewColumnOptionDesc(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttributeViewColumnOptionDesc(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	key, err := attrView.GetKey(operation.ID)
+	if err != nil {
+		return
+	}
+
+	data := operation.Data.(map[string]interface{})
+	name := data["name"].(string)
+	desc := data["desc"].(string)
+
+	for i, opt := range key.Options {
+		if name == opt.Name {
+			key.Options[i].Desc = desc
+			break
 		}
 	}
 

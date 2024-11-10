@@ -46,7 +46,7 @@ const selectOpenTab = () => {
     /// #if MOBILE
     if (window.siyuan.mobile.editor?.protyle) {
         openDock("file");
-        window.siyuan.mobile.files.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
+        window.siyuan.mobile.docks.file.selectItem(window.siyuan.mobile.editor.protyle.notebookId, window.siyuan.mobile.editor.protyle.path);
     }
     /// #else
     const dockFile = getDockByType("file");
@@ -262,10 +262,10 @@ export const globalCommand = (command: string, app: App) => {
     if (command === "closeTab") {
         const activeTabElement = document.querySelector(".layout__tab--active");
         if (activeTabElement && activeTabElement.getBoundingClientRect().width > 0) {
-            let type = "";
+            let type: TDock;
             Array.from(activeTabElement.classList).find(item => {
                 if (item.startsWith("sy__")) {
-                    type = item.replace("sy__", "");
+                    type = item.replace("sy__", "") as TDock;
                     return true;
                 }
             });

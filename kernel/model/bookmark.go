@@ -158,7 +158,7 @@ func BookmarkLabels() (ret []string) {
 }
 
 func BuildBookmark() (ret *Bookmarks) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 	sql.FlushQueue()
 
 	ret = &Bookmarks{}

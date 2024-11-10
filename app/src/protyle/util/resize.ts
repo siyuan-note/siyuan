@@ -11,6 +11,9 @@ export const resize = (protyle: IProtyle) => {
     const MIN_ABS = 4;
     // 不能 clearTimeout，否则 split 时左侧无法 resize
     setTimeout(() => {
+        if (protyle.scroll && protyle.scroll.element.parentElement.getAttribute("style")) {
+            protyle.scroll.element.parentElement.setAttribute("style", `--b3-dynamicscroll-width:${Math.min(protyle.contentElement.clientHeight - 49, 200)}px`);
+        }
         if (!protyle.disabled) {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {

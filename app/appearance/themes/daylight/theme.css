@@ -17,7 +17,6 @@
     --b3-theme-on-primary: #fff;
     --b3-theme-on-secondary: #fff;
     --b3-theme-on-background: #222;
-    --b3-theme-on-background-rgba: rgb(34, 34, 34, .86);
     --b3-theme-on-surface: #5f6368;
     --b3-theme-on-surface-light: rgba(95, 99, 104, .68);
     --b3-theme-on-error: #fff;
@@ -60,10 +59,6 @@
     --b3-tooltips-second-color: #7d7c7a;
     --b3-tooltips-shadow: 0 2px 8px rgba(0, 0, 0, .1);
 
-    /* av */
-    --b3-av-hover: #e8e8e9;
-    --b3-av-background-hl: #e8eefc;
-
     /* 为空提示 */
     --b3-empty-color: var(--b3-theme-on-surface-light);
 
@@ -73,16 +68,12 @@
     /* 卡片背景 */
     --b3-card-error-color: rgb(97, 26, 21);
     --b3-card-error-background: #f5d1cf;
-    --b3-card-error-background-rgba: rgb(245, 209, 207, .86);
     --b3-card-warning-color: rgb(102, 60, 0);
     --b3-card-warning-background: #ffe8c8;
-    --b3-card-warning-background-rgba: rgb(255, 232, 200, .86);
     --b3-card-info-color: rgb(13, 60, 97);
     --b3-card-info-background: #d6eaf9;
-    --b3-card-info-background-rgba: rgb(214, 234, 249, .86);
     --b3-card-success-color: rgb(30, 70, 32);
     --b3-card-success-background: #d7eed8;
-    --b3-card-success-background-rgba: rgb(215, 238, 216, .86);
 
     /* 自定义文字 */
     --b3-font-color1: var(--b3-card-error-color);
@@ -111,19 +102,6 @@
     --b3-font-background11: #def0d9;
     --b3-font-background12: #fae3e4;
     --b3-font-background13: var(--b3-theme-on-background);
-    --b3-font-background1-rgba: var(--b3-card-error-background-rgba);
-    --b3-font-background2-rgba: var(--b3-card-warning-background-rgba);
-    --b3-font-background3-rgba: var(--b3-card-info-background-rgba);
-    --b3-font-background4-rgba: var(--b3-card-success-background-rgba);
-    --b3-font-background5-rgba: rgb(226, 227, 228, .86);
-    --b3-font-background6-rgba: rgb(172, 208, 252, .86);
-    --b3-font-background7-rgba: rgb(253, 238, 214, .86);
-    --b3-font-background8-rgba: rgb(250, 225, 207, .86);
-    --b3-font-background9-rgba: rgb(253, 213, 231, .86);
-    --b3-font-background10-rgba: rgb(230, 199, 230, .86);
-    --b3-font-background11-rgba: rgb(222, 240, 217, .86);
-    --b3-font-background12-rgba: rgb(250, 227, 228, .86);
-    --b3-font-background13-rgba: var(--b3-theme-on-background-rgba);
 
     /* 动画效果 */
     --b3-transition: all .2s cubic-bezier(0, 0, .2, 1) 0ms;
@@ -136,7 +114,7 @@
 
     /* switch */
     --b3-switch-background: #e1e3e1;
-    --b3-switch-border: #aeaeae;
+    --b3-switch-border: var(--b3-theme-on-surface-light);
     --b3-switch-hover: rgba(31, 31, 31, 0.06);
     --b3-switch-checked: #fff;
     --b3-switch-checked-background: var(--b3-theme-primary);
@@ -180,9 +158,10 @@
     --b3-protyle-code-background: rgba(27, 31, 35, .05);
 
     /* 所见即所得行内元素颜色 */
-    --b3-protyle-inline-strong-color: #202124;
-    --b3-protyle-inline-em-color: #202124;
-    --b3-protyle-inline-s-color: #202124;
+    --b3-protyle-inline-strong-color: inherit;
+    --b3-protyle-inline-em-color: inherit;
+    --b3-protyle-inline-u-color: inherit;
+    --b3-protyle-inline-s-color: inherit;
     --b3-protyle-inline-link-color: #4285f4;
     --b3-protyle-inline-mark-background: rgb(252, 212, 126);
     --b3-protyle-inline-mark-color: #202124;
@@ -206,11 +185,14 @@
     /* 表格 */
     --b3-table-even-background: rgba(0, 0, 0, .02);
 
-    /* 潜入块 */
-    --b3-embed-background: var(--b3-table-even-background);
+    /* 嵌入块 */
+    --b3-embed-background: transparent;
 
     /* 引述块 */
-    --b3-bq-background: var(--b3-table-even-background);
+    --b3-bq-background: transparent;
+
+    /* 父块颜色 */
+    --b3-parent-background: var(--b3-theme-background);
 }
 
 :lang(ja_JP):root {

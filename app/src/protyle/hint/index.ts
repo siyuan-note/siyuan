@@ -56,8 +56,6 @@ export class Hint {
     constructor(protyle: IProtyle) {
         this.element = document.createElement("div");
         this.element.setAttribute("data-close", "false");
-        // height 402 根据 .emojis max-height+8 得来
-        this.element.setAttribute("style", `width:${Math.max(protyle.element.clientWidth / 2, 320)}px;`);
         this.element.className = "protyle-hint b3-list b3-list--background fn__none";
         this.element.addEventListener("click", (event) => {
             const eventTarget = event.target as HTMLElement;
@@ -273,7 +271,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
         } else {
             this.element.classList.remove("hint--menu");
         }
-        this.element.style.width = Math.max(protyle.element.clientWidth / 2, 320) + "px";
         if (this.source === "av") {
             const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
             if (cellElement) {
@@ -373,7 +370,8 @@ ${genHintItemHTML(item)}
             }
             lazyLoadEmojiImg(panelElement);
         } else {
-            this.element.innerHTML = `<div style="padding: 0;max-height:402px" class="emojis">
+            // 402 和 .protyle-hint 保持一致，用户 /emoji
+            this.element.innerHTML = `<div style="padding: 0;max-height:402px;width:360px" class="emojis">
 <div class="emojis__panel">${filterEmoji(value, 256)}</div>
 <div class="fn__flex${value ? " fn__none" : ""}">
     ${[
@@ -399,7 +397,6 @@ ${genHintItemHTML(item)}
         if (firstEmojiElement) {
             firstEmojiElement.classList.add("emojis__item--current");
             this.element.classList.remove("fn__none");
-            this.element.style.width = Math.max(protyle.element.clientWidth / 2, 320) + "px";
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
             this.element.querySelector(".emojis__panel").scrollTop = 0;

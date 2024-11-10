@@ -811,7 +811,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         cellValue?.rollup?.contents?.forEach((item) => {
             const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item) : renderRollup(item);
             if (rollupText) {
-                text += rollupText + ", ";
+                text += rollupText + " ";
             }
         });
         if (text && text.endsWith(", ")) {
@@ -820,7 +820,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     } else if (cellValue.type === "relation") {
         cellValue?.relation?.contents?.forEach((item) => {
             if (item && item.block) {
-                text += renderRollup(item) + ", ";
+                text += renderRollup(item) + " ";
             }
         });
         if (text && text.endsWith(", ")) {

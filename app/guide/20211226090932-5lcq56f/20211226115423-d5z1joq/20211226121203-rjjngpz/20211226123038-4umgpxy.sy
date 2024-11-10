@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226123038-4umgpxy",
 		"title": "資料文件",
-		"updated": "20231110112927"
+		"type": "doc",
+		"updated": "20241027164144"
 	},
 	"Children": [
 		{
@@ -271,7 +272,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123051-5250xg7",
-				"updated": "20211228104709"
+				"updated": "20241027164144"
 			},
 			"Children": [
 				{
@@ -329,7 +330,7 @@
 			},
 			"Properties": {
 				"id": "20211226123051-1qp7a9g",
-				"updated": "20220715092951"
+				"updated": "20241027164144"
 			},
 			"Children": [
 				{
@@ -343,7 +344,7 @@
 					},
 					"Properties": {
 						"id": "20211226123051-mmn60x5",
-						"updated": "20220715092951"
+						"updated": "20241027164144"
 					},
 					"Children": [
 						{
@@ -351,23 +352,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226123051-p8dr1dy",
-								"updated": "20220715092951"
+								"updated": "20241027164144"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "引用具體的資料文件，比如圖片或者文件。如果資料文件是 PDF 且做過"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "block-ref",
-									"TextMarkBlockRefID": "20211226122955-ganeraz",
-									"TextMarkBlockRefSubtype": "s",
-									"TextMarkTextContent": "標註"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "，那麼無論它是否被引用都不會計入清理"
+									"Data": "引用具體的資料文件，比如圖片或者文件"
 								}
 							]
 						}
@@ -609,7 +599,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220503122338-a69glac",
-				"updated": "20220715092913"
+				"updated": "20241024163151"
 			},
 			"Children": [
 				{
@@ -652,7 +642,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220503122338-jmr7c2k",
-				"updated": "20220715105038"
+				"updated": "20241024163151"
 			},
 			"Children": [
 				{
@@ -664,7 +654,7 @@
 					},
 					"Properties": {
 						"id": "20220503122338-4zg71qe",
-						"updated": "20220715092936"
+						"updated": "20241024163151"
 					},
 					"Children": [
 						{
@@ -672,20 +662,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220503122338-t6apzrh",
-								"updated": "20220715092936"
+								"updated": "20241024163151"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "刪除該筆記本時，為保證跨筆記本資料文件引用正常工作，該筆記本下的資料文件會被批量複製到全域 "
-								},
-								{
-									"Type": "NodeText",
-									"Data": "assets"
-								},
-								{
-									"Type": "NodeText",
-									"Data": " 中"
+									"Data": "刪除該筆記時，為確保跨筆記本資源檔案引用正常運作，該筆記引用的資源檔案會被批次複製到全域 assets 中"
 								}
 							]
 						}

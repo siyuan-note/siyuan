@@ -7,7 +7,7 @@ import {
     focusBlock,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset,
+    getSelectionOffset, setLastNodeRange,
 } from "./selection";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
@@ -107,6 +107,9 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         cellValue.isDetached = true;
                         delete cellValue.block.id;
                     } else if (type === "select" || type === "mSelect") {
+                        if (type === "select" && cellValue.type === "mSelect" && cellValue.mSelect.length > 0) {
+                            cellValue.mSelect.splice(1, cellValue.mSelect.length - 1);
+                        }
                         const operations = mergeAddOption(columns.find(e => e.id === cellElement.dataset.colId), cellValue, avID);
                         doOperations.push(...operations.doOperations);
                         undoOperations.push(...operations.undoOperations);
@@ -199,6 +202,40 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
     });
 };
 
+const processTable = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
+    const tempElement = document.createElement("template");
+    tempElement.innerHTML = html;
+    const copyCellElements = tempElement.content.querySelectorAll("th, td");
+    if (copyCellElements.length === 0) {
+        return false;
+    }
+    const scrollLeft = blockElement.firstElementChild.scrollLeft;
+    const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
+    let index = 0;
+    const matchCellsElement: HTMLTableCellElement[] = [];
+    blockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+        if (!item.classList.contains("fn__none") &&
+            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+            copyCellElements.length > index) {
+            matchCellsElement.push(item);
+            index++;
+        }
+    });
+    tableSelectElement.removeAttribute("style");
+    const oldHTML = blockElement.outerHTML;
+    blockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    matchCellsElement.forEach((item, matchIndex) => {
+        item.innerHTML = copyCellElements[matchIndex].innerHTML;
+        if (matchIndex === matchCellsElement.length - 1) {
+            setLastNodeRange(item, range, false);
+        }
+    });
+    range.collapse(false);
+    updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
+    return true;
+};
+
 export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
                            useProtyleRange = false,
@@ -217,13 +254,13 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             isBlock = true;
         }
     }
-    let blockElement = hasClosestBlock(range.startContainer) as Element;
+    let blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
     if (!blockElement) {
         // 使用鼠标点击选则模版提示列表后 range 丢失
         if (protyle.toolbar.range) {
-            blockElement = hasClosestBlock(protyle.toolbar.range.startContainer) as Element;
+            blockElement = hasClosestBlock(protyle.toolbar.range.startContainer) as HTMLElement;
         } else {
-            blockElement = protyle.wysiwyg.element.firstElementChild as Element;
+            blockElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
         }
     }
     if (!blockElement) {
@@ -232,6 +269,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (blockElement.classList.contains("av")) {
         range.deleteContents();
         processAV(range, html, protyle, blockElement as HTMLElement);
+        return;
+    }
+    if (blockElement.classList.contains("table") && blockElement.querySelector(".table__select").clientWidth > 0 &&
+        processTable(range, html, protyle, blockElement)) {
         return;
     }
     let id = blockElement.getAttribute("data-node-id");

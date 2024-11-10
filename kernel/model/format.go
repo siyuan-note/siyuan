@@ -33,7 +33,7 @@ func AutoSpace(rootID string) (err error) {
 	util.PushProtyleLoading(rootID, Conf.Language(116))
 	defer util.PushReloadProtyle(rootID)
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	generateOpTypeHistory(tree, HistoryOpFormat)
 	luteEngine := NewLute()

@@ -7,6 +7,7 @@ import * as dayjs from "dayjs";
 import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {App} from "../index";
+import {resizeSide} from "./resizeSide";
 
 let historyEditor: Protyle;
 let isLoading = false;
@@ -60,8 +61,19 @@ export const openDocHistory = (options: {
     notebookId: string,
     pathString: string
 }) => {
-    const contentHTML = `<div class="fn__flex-column" style="height: 100%;">
-        <div class="block__icons">
+    const contentHTML = `<div class="fn__flex fn__flex-1 history__panel">
+    <ul class="b3-list b3-list--background history__side" ${isMobile() ? "" : `style="width: ${window.siyuan.storage[Constants.LOCAL_HISTORY].sideDocWidth}"`}>
+        <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
+    </ul>
+    <div class="history__resize"></div>
+    <div class="fn__flex-1 fn__flex-column">
+        <div class="protyle-title__input ft__center ft__breakword"></div>
+        <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
+        <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
+    </div>
+</div>`;
+    const dialog = new Dialog({
+        title:`<div class="block__icons">
             ${isMobile() ? "" : options.pathString}
             <span class="fn__space"></span>
             <div class="fn__flex-1"></div>
@@ -82,19 +94,11 @@ export const openDocHistory = (options: {
             <span class="fn__space"></span>
             <span>1/1</span>
             ${isMobile() ? '<span class="fn__space"></span><span data-type="close" class="block__icon block__icon--show"><svg><use xlink:href="#iconClose"></use></svg></span>' : ""}
-        </div>
-        <div class="fn__flex fn__flex-1 history__panel">
-            <ul class="b3-list b3-list--background" style="overflow:auto;">
-                <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
-            </ul>
-            <textarea class="fn__flex-1 history__text fn__none" readonly data-type="mdPanel"></textarea>
-            <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
-        </div>
-</div>`;
-    const dialog = new Dialog({
+        </div>`,
         content: contentHTML,
         width: isMobile() ? "100vw" : "90vw",
         height: isMobile() ? "100vh" : "80vh",
+        containerClassName: "b3-dialog__container--theme",
         destroyCallback() {
             historyEditor = undefined;
         }
@@ -164,6 +168,7 @@ export const openDocHistory = (options: {
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
                         }
+                        dialog.element.querySelector(".protyle-title__input").textContent = item.title;
                         isLoading = false;
                     });
                     target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
@@ -182,6 +187,7 @@ export const openDocHistory = (options: {
             target = target.parentElement;
         }
     });
+    resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideDocWidth");
 };
 
 const getHistoryPath = (target: Element, op: string, id: string, cb: (item: any) => void) => {

@@ -163,8 +163,8 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span style="padding: 5px;margin-right: 8px;width: 14px;font-size: 14px;" class="block__icon block__icon--show" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg><use xlink:href="#iconTable"></use></svg>'}</span>
-    <span class="b3-menu__label" style="padding: 4px;display: flex;"><input data-type="name" class="b3-text-field fn__block" type="text" value="${view.name}" data-value="${view.name}"></span>
+    <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
+    <input data-type="name" class="b3-text-field fn__block" type="text" value="${view.name}" data-value="${view.name}" style="margin: 4px 0">
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">

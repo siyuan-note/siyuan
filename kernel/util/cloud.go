@@ -79,6 +79,6 @@ const (
 	northAmericaAccountServer     = "https://liuyun.io"                // 流云服务地址，用于账号登录、分享发布帖子
 	northAmericaForumAssetsServer = "https://assets.liuyun.io/file/"   // 北美云端图床服务地址，用于发布文章到社区
 
-	BazaarStatServer = "http://bazaar.b3logfile.com" // 集市包统计服务地址，直接对接 Bucket 没有 CDN
-	BazaarOSSServer  = "https://oss.b3logfile.com"   // 云端对象存储地址，七牛云，仅用于读取集市包，全球 CDN
+	BazaarStatServer = "https://bazaar.b3logfile.com" // 集市包统计服务地址，七牛云，全球 CDN
+	BazaarOSSServer  = "https://oss.b3logfile.com"    // 云端对象存储地址，七牛云，仅用于读取集市包，全球 CDN
 )

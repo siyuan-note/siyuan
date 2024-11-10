@@ -34,6 +34,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
+	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -493,7 +494,7 @@ func parseKTree(kramdown []byte) (ret *parse.Tree) {
 	return
 }
 
-func normalizeTree(tree *parse.Tree) {
+func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 	if nil == tree.Root.FirstChild {
 		tree.Root.AppendChild(treenode.NewParagraph())
 	}
@@ -566,22 +567,64 @@ func normalizeTree(tree *parse.Tree) {
 			parseErr := yaml.Unmarshal(n.Tokens, &attrs)
 			if parseErr != nil {
 				logging.LogWarnf("parse YAML front matter [%s] failed: %s", n.Tokens, parseErr)
-			} else {
-				for attrK, attrV := range attrs {
-					validKeyName := true
-					for i := 0; i < len(attrK); i++ {
-						if !lex.IsASCIILetterNumHyphen(attrK[i]) {
-							validKeyName = false
-							break
+				return ast.WalkContinue
+			}
+
+			for attrK, attrV := range attrs {
+				// Improve parsing of YAML Front Matter when importing Markdown https://github.com/siyuan-note/siyuan/issues/12962
+				if "title" == attrK {
+					yfmTitle = fmt.Sprint(attrV)
+					tree.Root.SetIALAttr("title", yfmTitle)
+					continue
+				}
+				if "date" == attrK {
+					created, parseTimeErr := dateparse.ParseIn(fmt.Sprint(attrV), time.Local)
+					if nil == parseTimeErr {
+						yfmRootID = created.Format("20060102150405") + "-" + gulu.Rand.String(7)
+						tree.Root.ID = yfmRootID
+						tree.Root.SetIALAttr("id", yfmRootID)
+					}
+					continue
+				}
+				if "lastmod" == attrK {
+					updated, parseTimeErr := dateparse.ParseIn(fmt.Sprint(attrV), time.Local)
+					if nil == parseTimeErr {
+						yfmUpdated = updated.Format("20060102150405")
+						tree.Root.SetIALAttr("updated", yfmUpdated)
+					}
+					continue
+				}
+				if "tags" == attrK {
+					var tags string
+					for i, tag := range attrV.([]any) {
+						tagStr := strings.TrimSpace(tag.(string))
+						if "" == tag {
+							continue
+						}
+						tagStr = strings.TrimLeft(tagStr, "#,'\"")
+						tagStr = strings.TrimRight(tagStr, "#,'\"")
+						tags += tagStr
+						if i < len(attrV.([]any))-1 {
+							tags += ","
 						}
 					}
-					if !validKeyName {
-						logging.LogWarnf("invalid YAML key [%s] in [%s]", attrK, n.ID)
-						continue
-					}
-
-					tree.Root.SetIALAttr("custom-"+attrK, fmt.Sprint(attrV))
+					tree.Root.SetIALAttr("tags", tags)
+					continue
 				}
+
+				validKeyName := true
+				for i := 0; i < len(attrK); i++ {
+					if !lex.IsASCIILetterNumHyphen(attrK[i]) {
+						validKeyName = false
+						break
+					}
+				}
+				if !validKeyName {
+					logging.LogWarnf("invalid YAML key [%s] in [%s]", attrK, n.ID)
+					continue
+				}
+
+				tree.Root.SetIALAttr("custom-"+attrK, fmt.Sprint(attrV))
 			}
 		}
 
@@ -619,7 +662,7 @@ func fullReindex() {
 	util.PushEndlessProgress(Conf.language(35))
 	defer util.PushClearProgress()
 
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	if err := sql.InitDatabase(true); err != nil {
 		os.Exit(logging.ExitCodeReadOnlyDatabase)

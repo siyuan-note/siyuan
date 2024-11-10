@@ -122,7 +122,7 @@ func findReplace(c *gin.Context) {
 	}
 
 	replaceTypes := map[string]bool{}
-	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, kbd, mark, s, sub, sup, tag, u
+	// text, imgText, imgTitle, imgSrc, aText, aTitle, aHref, code, em, strong, inlineMath, inlineMemo, blockRef, fileAnnotationRef kbd, mark, s, sub, sup, tag, u
 	// docTitle, codeBlock, mathBlock, htmlBlock
 	if nil != arg["replaceTypes"] {
 		replaceTypesArg := arg["replaceTypes"].(map[string]interface{})
@@ -369,12 +369,13 @@ func fullTextSearchBlock(c *gin.Context) {
 	}
 
 	page, pageSize, query, paths, boxes, types, method, orderBy, groupBy := parseSearchBlockArgs(arg)
-	blocks, matchedBlockCount, matchedRootCount, pageCount := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
+	blocks, matchedBlockCount, matchedRootCount, pageCount, docMode := model.FullTextSearchBlock(query, boxes, paths, types, method, orderBy, groupBy, page, pageSize)
 	ret.Data = map[string]interface{}{
 		"blocks":            blocks,
 		"matchedBlockCount": matchedBlockCount,
 		"matchedRootCount":  matchedRootCount,
 		"pageCount":         pageCount,
+		"docMode":           docMode,
 	}
 }
 

@@ -66,7 +66,7 @@ export const switchTabByIndex = (index: number) => {
                 indexElement = activeDockIcoElement.parentElement.firstElementChild;
             }
         }
-        const type = indexElement?.getAttribute("data-type");
+        const type = indexElement?.getAttribute("data-type") as TDock;
         if (type) {
             getDockByType(type)?.toggleModel(type, true, false);
         }
@@ -142,7 +142,7 @@ export const resizeTabs = (isSaveLayout = true) => {
     }, 200);
 };
 
-export const getDockByType = (type: string) => {
+export const getDockByType = (type: TDock | string) => {
     if (!window.siyuan.layout.leftDock) {
         return undefined;
     }
@@ -253,7 +253,7 @@ export const copyTab = (app: App, tab: Tab) => {
         callback(newTab: Tab) {
             let model: Model;
             if (tab.model instanceof Editor) {
-                const newAction: string[] = [];
+                const newAction: TProtyleAction[] = [];
                 // https://github.com/siyuan-note/siyuan/issues/12132
                 tab.model.editor.protyle.block.action.forEach(item => {
                     if (item !== Constants.CB_GET_APPEND && item !== Constants.CB_GET_BEFORE && item !== Constants.CB_GET_HTML) {

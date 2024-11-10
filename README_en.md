@@ -42,6 +42,7 @@
   * [安装包](#安装包)
   * [Docker 部署](#docker-部署)
   * [Unraid 部署](#unraid-部署)
+  * [宝塔面板 部署](#宝塔面板部署)
   * [内部预览版](#内部预览版)
 * [🏘️ 社区](#️-社区)
 * [🛠️ 开发指南](#️-开发指南)
@@ -124,7 +125,13 @@
 
 ## 🌟 星标历史
 
-[![Star History Chart](https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date)](https://star-history.com/#siyuan-note/siyuan&Date)
+<a href="https://star-history.com/#siyuan-note/siyuan&Date">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
+   <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=siyuan-note/siyuan&type=Date" />
+ </picture>
+</a>
 
 ## 🗺️ 路线图
 
@@ -291,6 +298,38 @@ PUID: 1000
 PGID: 1000
 Publish parameters: --accessAuthCode=******（访问授权码）
 ```
+
+</details>
+
+### 宝塔面板部署
+
+<details>
+<summary>宝塔面板 部署文档</summary>
+
+#### 前提
+
+* 仅适用于宝塔面板9.2.0及以上版本
+* 安装宝塔面板，前往[宝塔面板](https://www.bt.cn/new/download.html)官网，选择正式版的脚本下载安装
+
+#### 部署
+
+1. 登录宝塔面板，在左侧菜单栏中点击 `Docker`
+2. 首次会提示安装 `Docker` 和 `Docker Compose` 服务，点击立即安装，若已安装请忽略
+3. 安装完成后在 `Docker-应用商店-实用工具` 中找到 `思源笔记`，点击`安装`，也可以在搜索框直接搜索
+4. 设置域名等基本信息，点击 `确定`
+   * 名称：应用名称，默认 `siyuan_随机字符`
+   * 版本选择：默认 `latest`
+   * 域名：如你需要通过域名访问，请在此处填写你的域名
+   * 允许外部访问：如你需通过 `IP+Port` 直接访问，请勾选，如你已经设置了域名，请不要勾选此处
+   * 端口：默认 `6806`，可自行修改
+   * 访问授权码：默认随机生成
+   * 内存限制：0为不限制，根据实际需要设置
+5. 提交后面板会自动进行应用初始化，大概需要`1-3`分钟，初始化完成后即可访问
+
+#### 访问思源笔记
+
+* 如果你填写了域名，请在浏览器输入域名访问
+* 如你选择了 `IP+端口`，请在浏览器地输入 `http://<宝塔面板IP>:6806` 访问
 
 </details>
 

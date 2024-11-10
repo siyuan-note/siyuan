@@ -74,7 +74,7 @@ func moveOutlineHeading(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -127,7 +127,7 @@ func appendDailyNoteBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -180,7 +180,7 @@ func prependDailyNoteBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -241,7 +241,7 @@ func unfoldBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	broadcastTransactions(transactions)
 }
@@ -301,7 +301,7 @@ func foldBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	broadcastTransactions(transactions)
 }
@@ -355,7 +355,7 @@ func moveBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -400,7 +400,7 @@ func appendBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -445,7 +445,7 @@ func prependBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -508,7 +508,7 @@ func insertBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
@@ -599,7 +599,7 @@ func updateBlock(c *gin.Context) {
 	}
 
 	model.PerformTransactions(&transactions)
-	model.WaitForWritingFiles()
+	model.FlushTxQueue()
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)

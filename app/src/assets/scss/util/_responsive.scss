@@ -71,12 +71,12 @@
     &__panel {
       flex-direction: column;
 
-      & > .b3-list,
-      & > .history__diff {
+      & > .history__side {
         height: 40%;
         overflow: auto;
         padding-bottom: 8px;
-        width: auto;
+        width: auto !important;
+        border-bottom: 1px solid var(--b3-border-color);
       }
     }
   }

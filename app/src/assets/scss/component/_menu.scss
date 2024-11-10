@@ -91,10 +91,6 @@
           margin: 0;
           max-width: none;
         }
-
-        .color__square {
-          margin: 0 16px 0 8px;
-        }
       }
 
       &__title {
@@ -224,6 +220,15 @@
       color: var(--b3-theme-primary);
     }
 
+    &--warning:hover,
+    &--warning.b3-menu__item--current {
+      color: var(--b3-theme-error);
+
+      & > .b3-menu__icon {
+        color: var(--b3-theme-error);
+      }
+    }
+
     &--current:not(.b3-menu__item--readonly) {
       background-color: var(--b3-list-hover);
 
@@ -290,6 +295,20 @@
     }
   }
 
+  &__avemoji {
+    @extend .b3-list-item__icon;
+    align-self: center;
+    margin-left: -4px;
+    font-size: 14px;
+    cursor: pointer;
+
+    svg, img {
+      height: 14px;
+      width: 14px;
+      color: var(--b3-theme-on-surface);
+    }
+  }
+
   &__checked {
     width: 22px;
     height: 22px;
@@ -344,84 +363,6 @@
       width: 20px;
       height: 20px;
       float: left;
-    }
-  }
-}
-
-.emojis {
-  word-break: break-all;
-  white-space: normal;
-  display: flex;
-  flex-direction: column;
-  padding: 8px 0;
-  height: 100%;
-  box-sizing: border-box;
-
-  &__item {
-    font-size: 24px;
-    line-height: .9em; // windows 需要这样设置
-    font-family: var(--b3-font-family-emoji);
-    text-align: center;
-    height: 28px;
-    padding: 2px 4px;
-    cursor: pointer;
-    display: inline-block;
-    transition: var(--b3-transition);
-    background-color: transparent;
-    border: 0;
-    margin: 1px;
-    overflow: hidden;
-    border-radius: var(--b3-border-radius);
-
-    img, svg {
-      height: 24px;
-      display: block;
-      width: 24px;
-    }
-
-    &--current,
-    &:hover {
-      background: var(--b3-list-hover);
-    }
-  }
-
-  &__title {
-    color: var(--b3-theme-on-surface);
-    padding: 8px 4px 4px 4px;
-  }
-
-  &__panel {
-    flex: 1;
-    overflow: auto;
-    padding: 0 8px;
-  }
-
-  &__content {
-    display: flex;
-    flex-wrap: wrap;
-  }
-
-  &__type {
-    cursor: pointer;
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    line-height: 28px;
-    transition: var(--b3-list-hover);
-    font-size: 16px;
-    background-color: transparent;
-    border: 0;
-    padding: 0;
-
-    &:hover {
-      background-color: var(--b3-theme-surface-lighter);
-    }
-
-    svg {
-      height: 16px;
-      width: 16px;
     }
   }
 }

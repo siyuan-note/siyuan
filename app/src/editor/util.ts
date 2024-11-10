@@ -41,7 +41,7 @@ export const openFileById = async (options: {
     id: string,
     position?: string,
     mode?: TEditorMode,
-    action?: string[]
+    action?: TProtyleAction[]
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean
@@ -198,8 +198,12 @@ export const openFile = async (options: IOpenFileOptions) => {
     // https://github.com/siyuan-note/siyuan/issues/7491
     if (!options.position) {
         let hasMatch = false;
-        const optionsClone = Object.assign({}, options);
-        delete optionsClone.app;    // 防止 JSON.stringify 时产生递归
+        const optionsClone: IObject = {};
+        Object.keys(options).forEach((key: keyof IOpenFileOptions) => {
+            if (key !== "app" && options[key] && typeof options[key] !== "function") {
+                optionsClone[key] = JSON.parse(JSON.stringify(options[key]));
+            }
+        });
         hasMatch = await ipcRenderer.invoke(Constants.SIYUAN_GET, {
             cmd: Constants.SIYUAN_OPEN_FILE,
             options: JSON.stringify(optionsClone),

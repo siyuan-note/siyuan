@@ -44,7 +44,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.1.10"
+	Ver       = "3.1.11"
 	IsInsider = false
 )
 
@@ -433,6 +433,9 @@ func initMime() {
 
 	// 文档数据文件
 	mime.AddExtensionType(".sy", "application/json")
+
+	mime.AddExtensionType(".md", "text/markdown")
+	mime.AddExtensionType(".markdown", "text/markdown")
 }
 
 func GetDataAssetsAbsPath() (ret string) {

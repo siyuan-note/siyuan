@@ -202,7 +202,7 @@ func resetFlashcards(deckID string, blockIDs []string) {
 	}
 
 	PerformTransactions(&transactions)
-	WaitForWritingFiles()
+	FlushTxQueue()
 }
 
 func GetFlashcardNotebooks() (ret []*Box) {

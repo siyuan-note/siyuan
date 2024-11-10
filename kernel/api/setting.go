@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/bazaar"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/server/proxy"
@@ -527,9 +528,15 @@ func setAppearance(c *gin.Context) {
 
 	model.Conf.Appearance = appearance
 	model.Conf.Lang = appearance.Lang
+	oldLang := util.Lang
 	util.Lang = model.Conf.Lang
 	model.Conf.Save()
 	model.InitAppearance()
+
+	if oldLang != util.Lang {
+		// The marketplace language does not change after switching the appearance language https://github.com/siyuan-note/siyuan/issues/12892
+		bazaar.CleanBazaarPackageCache()
+	}
 
 	ret.Data = model.Conf.Appearance
 }

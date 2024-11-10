@@ -352,7 +352,6 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     avID: item.parentElement.dataset.avId,
                     keyID: item.parentElement.dataset.colId,
                     rowID: item.parentElement.dataset.blockId,
-                    cellID: item.parentElement.dataset.id,
                     value
                 }, (setResponse) => {
                     if (type === "number") {

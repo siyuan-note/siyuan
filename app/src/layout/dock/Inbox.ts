@@ -290,7 +290,7 @@ ${data.shorthandContent}
                         } else {
                             this.remove(detailsElement.getAttribute("data-id"));
                         }
-                    });
+                    }, undefined, true);
                 }
             }).element);
         }

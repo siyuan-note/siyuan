@@ -3,7 +3,7 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
 import {Constants} from "../../constants";
-import {genBreadcrumb} from "../wysiwyg/renderBacklink";
+import {genBreadcrumb, improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {avRender} from "./av/render";
 
 export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
@@ -115,6 +115,7 @@ const renderEmbed = (blocks: {
         item.lastElementChild.insertAdjacentHTML("beforebegin", html +
             // 辅助上下移动时进行选中
             `<div style="position: absolute;">${Constants.ZWSP}</div>`);
+        improveBreadcrumbAppearance(item.querySelector(".protyle-wysiwyg__embed"));
     } else {
         item.lastElementChild.insertAdjacentHTML("beforebegin", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>
 <div style="position: absolute;">${Constants.ZWSP}</div>`);

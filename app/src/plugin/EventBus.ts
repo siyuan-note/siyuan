@@ -8,9 +8,6 @@ export class EventBus<DetailType = any> {
     }
 
     on(type: TEventBus, listener: (event: CustomEvent<DetailType>) => void) {
-        if (type ==="loaded-protyle") {
-            console.warn("0.8.8 将移除 loaded-protyle, 请使用 loaded-protyle-static 进行替代");
-        }
         this.eventTarget.addEventListener(type, listener);
     }
 

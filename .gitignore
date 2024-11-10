@@ -11,6 +11,7 @@
 app/node_modules
 app/stage/build
 app/build
+app/src/types/dist
 app/kernel*
 ios
 pprof

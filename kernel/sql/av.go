@@ -36,6 +36,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		ID:               view.ID,
 		Icon:             view.Icon,
 		Name:             view.Name,
+		Desc:             view.Desc,
 		HideAttrViewName: view.HideAttrViewName,
 		Columns:          []*av.TableColumn{},
 		Rows:             []*av.TableRow{},
@@ -78,6 +79,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,
+			Desc:         col.Desc,
 			Pin:          col.Pin,
 			Calc:         col.Calc,
 		})
@@ -261,12 +263,15 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					}
 					if nil != destAv {
 						blocks := map[string]*av.Value{}
-						for _, blockValue := range destAv.GetBlockKeyValues().Values {
-							blocks[blockValue.BlockID] = blockValue
-						}
-						for _, blockID := range cell.Value.Relation.BlockIDs {
-							if val := blocks[blockID]; nil != val {
-								cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, val)
+						blockValues := destAv.GetBlockKeyValues()
+						if nil != blockValues {
+							for _, blockValue := range blockValues.Values {
+								blocks[blockValue.BlockID] = blockValue
+							}
+							for _, blockID := range cell.Value.Relation.BlockIDs {
+								if val := blocks[blockID]; nil != val {
+									cell.Value.Relation.Contents = append(cell.Value.Relation.Contents, val)
+								}
 							}
 						}
 					}
@@ -509,6 +514,16 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 				}
 				dataModel[rowValue.Key.Name] = contents
 			}
+		} else if av.KeyTypeBlock == v.Type {
+			dataModel[rowValue.Key.Name+"_created"] = time.Now()
+			if nil != v.Block {
+				dataModel["entryCreated"] = time.UnixMilli(v.Block.Created)
+			}
+			dataModel["entryUpdated"] = time.Now()
+			if nil != v.Block {
+				dataModel["entryUpdated"] = time.UnixMilli(v.Block.Updated)
+			}
+			dataModel[rowValue.Key.Name] = v.String(true)
 		} else {
 			dataModel[rowValue.Key.Name] = v.String(true)
 		}

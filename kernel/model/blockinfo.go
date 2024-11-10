@@ -53,7 +53,7 @@ type AttrView struct {
 }
 
 func GetDocInfo(blockID string) (ret *BlockInfo) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	tree, err := LoadTreeByBlockID(blockID)
 	if err != nil {
@@ -125,7 +125,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 }
 
 func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*BlockInfo) {
-	WaitForWritingFiles()
+	FlushTxQueue()
 
 	trees := filesys.LoadTrees(blockIDs)
 	for _, blockID := range blockIDs {
@@ -416,11 +416,11 @@ func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, e
 		return
 	}
 
-	ret = buildBlockBreadcrumb(node, excludeTypes, true)
+	ret = buildBlockBreadcrumb(node, excludeTypes)
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentNodeContent bool) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -481,8 +481,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentN
 		name = strings.ReplaceAll(name, editor.Caret, "")
 		name = util.EscapeHTML(name)
 
-		if parent == node && !displayCurrentNodeContent {
-			// 反链中不显示当前块内容 https://github.com/siyuan-note/siyuan/issues/12862#issuecomment-2426406327
+		if parent == node {
 			name = ""
 		}
 
@@ -507,6 +506,11 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, displayCurrentN
 			}
 
 			if ast.NodeHeading == b.Type && headingLevel > b.HeadingLevel {
+				if b.ParentIs(ast.NodeListItem) {
+					// 标题在列表下时不显示 https://github.com/siyuan-note/siyuan/issues/13008
+					continue
+				}
+
 				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes), maxNameLen)
 				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{

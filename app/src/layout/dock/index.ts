@@ -29,7 +29,7 @@ export class Dock {
     private app: App;
     public resizeElement: HTMLElement;
     public pin = true;
-    public data: { [key: string]: Model | boolean };
+    public data: { [key in TDock | string]?: Model | boolean };
     private hideResizeTimeout: number;
 
     constructor(options: {
@@ -112,13 +112,13 @@ export class Dock {
             this.resizeElement.classList.add("fn__none");
         } else {
             activeElements.forEach(item => {
-                this.toggleModel(item.getAttribute("data-type"), true, false, false, false);
+                this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);
             });
         }
         this.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                const type = target.getAttribute("data-type");
+                const type = target.getAttribute("data-type") as TDock;
                 if (type) {
                     this.toggleModel(type, false, true);
                     event.preventDefault();
@@ -359,7 +359,7 @@ export class Dock {
                 documentSelf.onselect = null;
                 this.setSize();
                 this.element.querySelectorAll(".dock__item--active").forEach(item => {
-                    const customModel = this.data[item.getAttribute("data-type")];
+                    const customModel = this.data[item.getAttribute("data-type") as TDock];
                     if (customModel && customModel instanceof Custom && customModel.resize) {
                         customModel.resize();
                     }
@@ -491,7 +491,7 @@ export class Dock {
         this.layout.element.querySelector(".layout__tab--active")?.classList.remove("layout__tab--active");
     }
 
-    public toggleModel(type: string, show = false, close = false, hide = false, isSaveLayout = true) {
+    public toggleModel(type: TDock | string, show = false, close = false, hide = false, isSaveLayout = true) {
         if (!type) {
             return;
         }
@@ -534,8 +534,12 @@ export class Dock {
                 clearTimeout(this.hideResizeTimeout);
                 this.hideDock();
             }
-            if ((type === "graph" || type === "globalGraph") && this.layout.element.querySelector(".fullscreen")) {
-                document.getElementById("drag")?.classList.remove("fn__hidden");
+            if ((type === "graph" || type === "globalGraph")) {
+                if (this.layout.element.querySelector(".fullscreen")) {
+                    document.getElementById("drag")?.classList.remove("fn__hidden");
+                }
+                const graph = this.data[type] as Graph;
+                graph.destroy();
             }
             // 关闭 dock 后设置光标，初始化的时候不能设置，否则关闭文档树且多页签时会请求两次 getDoc
             if (isSaveLayout && !document.querySelector(".layout__center .layout__wnd--active")) {
@@ -752,12 +756,16 @@ export class Dock {
         }
         resizeTabs(isSaveLayout);
         this.showDock();
+        if (target.classList.contains("dock__item--active") && !hide && (type === "graph" || type === "globalGraph")) {
+            const graph = this.data[type] as Graph;
+            graph.onGraph(false);
+        }
     }
 
     public add(index: number, sourceElement: Element, previousType?: string) {
         sourceElement.setAttribute("data-height", "");
         sourceElement.setAttribute("data-width", "");
-        const type = sourceElement.getAttribute("data-type");
+        const type = sourceElement.getAttribute("data-type") as TDock;
         const sourceDock = getDockByType(type);
         if (sourceDock.element.querySelectorAll(".dock__item").length === 2) {
             sourceDock.element.classList.add("fn__none");
@@ -794,7 +802,7 @@ export class Dock {
         saveLayout();
     }
 
-    public remove(key: string) {
+    public remove(key: TDock | string) {
         this.toggleModel(key, false, true, true);
         this.element.querySelector(`[data-type="${key}"]`).remove();
         const custom = this.data[key] as Custom;
@@ -809,12 +817,12 @@ export class Dock {
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    item.setAttribute("data-height", (this.data[item.getAttribute("data-type")] as Model).parent.parent.element.clientHeight.toString());
+                    item.setAttribute("data-height", (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element.clientHeight.toString());
                 }
                 item.setAttribute("data-width", this.layout.element.clientWidth.toString());
             } else {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    item.setAttribute("data-width", (this.data[item.getAttribute("data-type")] as Model).parent.parent.element.clientWidth.toString());
+                    item.setAttribute("data-width", (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element.clientWidth.toString());
                 }
                 item.setAttribute("data-height", this.layout.element.clientHeight.toString());
             }

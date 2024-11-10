@@ -136,6 +136,18 @@
     background-color: var(--b3-protyle-code-background);
   }
 
+  &__kbd {
+    padding: 2px 4px;
+    font: 75% Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    line-height: 1;
+    color: var(--b3-theme-on-surface);
+    vertical-align: middle;
+    background-color: var(--b3-theme-surface);
+    border: solid 1px var(--b3-theme-surface-lighter);
+    border-radius: var(--b3-border-radius);
+    box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
+  }
+
   &__list {
     padding-left: 2em;
   }

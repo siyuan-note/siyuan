@@ -311,7 +311,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__space"></span>
             </div>
             <div>
-                <img data-type="text" class="emoji__dynamic-item" src="${dynamicURL}type=8&color=d23f31&content=SiYuan">
+                <img data-type="text" class="emoji__dynamic-item" src="${dynamicURL}type=8&color=d23f31&content=SiYuan&id=${id}">
             </div>
         </div>
     </div>

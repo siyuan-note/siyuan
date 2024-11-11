@@ -531,6 +531,37 @@ func renameDoc(c *gin.Context) {
 	return
 }
 
+func renameDocByID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	if nil == arg["id"] {
+		return
+	}
+
+	id := arg["id"].(string)
+	title := arg["title"].(string)
+
+	tree, err := model.LoadTreeByBlockID(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	err = model.RenameDoc(tree.Box, tree.Path, title)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func duplicateDoc(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -357,6 +357,31 @@
 
     * `notebook`：笔记本 ID
     * `path`：文档路径
+    * `title`：新标题
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+通过 `id` 重命名文档：
+
+* `/api/filetree/renameDocByID`
+* 参数
+
+  ```json
+  {
+    "id": "20210902210113-0avi12f",
+    "title": "文档新标题"
+  }
+  ```
+
+  * `id`：文档 ID
+  * `title`：新标题
 * 返回值
 
   ```json

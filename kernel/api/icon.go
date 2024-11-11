@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -118,7 +119,6 @@ func getDynamicIcon(c *gin.Context) {
 	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
 	lang := c.DefaultQuery("lang", util.Lang)
-	content := c.Query("content")
 	weekdayType := c.DefaultQuery("weekdayType", "1") // 设置星期几的格式，zh_CH {1：周日，2：周天， 3：星期日，4：星期天，}, en_US {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
 
 	dateInfo := getDateInfo(date, lang, weekdayType)
@@ -147,7 +147,9 @@ func getDynamicIcon(c *gin.Context) {
 		svg = generateTypeSevenSVG(color, lang, dateInfo)
 	case "8":
 		// Type 8: 文字图标
-		svg = generateTypeEightSVG(color, content)
+		content := c.Query("content")
+		id := c.Query("id")
+		svg = generateTypeEightSVG(color, content, id)
 	default:
 		// 默认为Type 1
 		svg = generateTypeOneSVG(color, lang, dateInfo)
@@ -300,7 +302,7 @@ func generateTypeOneSVG(color string, lang string, dateInfo map[string]interface
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
     <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
@@ -316,7 +318,7 @@ func generateTypeTwoSVG(color string, lang string, dateInfo map[string]interface
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
     <text transform="translate(22 146.5)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 100px;">%s</text>
@@ -331,7 +333,7 @@ func generateTypeThreeSVG(color string, lang string, dateInfo map[string]interfa
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type3" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type3" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
         <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
         <g style="fill: %s;">
@@ -353,7 +355,7 @@ func generateTypeFourSVG(color string, lang string, dateInfo map[string]interfac
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type4" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type4" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
         <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
         <g style="fill: %s;">
@@ -364,7 +366,7 @@ func generateTypeFourSVG(color string, lang string, dateInfo map[string]interfac
             <circle  cx="382.5" cy="135" r="14"/>
             <circle  cx="382.5" cy="93" r="14"/>
         </g>
-        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 180px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
+        <text x="50%%" y="410.5" style="fill: #66757f;font-size: 200px;text-anchor: middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%d</text>
     </svg>
     `, colorScheme.Primary, colorScheme.Secondary, dateInfo["year"])
 }
@@ -374,7 +376,7 @@ func generateTypeFiveSVG(color string, lang string, dateInfo map[string]interfac
 	colorScheme := getColorScheme(color)
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type5" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type5" xmlns="http://www.w3.org/2000/svg" version="1.1" viewBox="0 0 512 512">
         <path class="cls-6" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path class="cls-1" d="M39,0h434c21.5,0,39,17.5,39,39v146H0V39C0,17.5,17.5,0,39,0Z" style="fill: %s;"/>
         <g style="fill: %s;">
@@ -429,7 +431,7 @@ func generateTypeSixSVG(color string, lang string, weekdayType string, dateInfo 
 	}
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type6" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
     <path id="center" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
     <path id="top" d="M39,0h434c21.5,0,39,14,39,31.2v116.8H0V31.2C0,14,17.5,0,39,0Z" style="fill: %s;"/>
     <g id="cirle" style="fill: %s;">
@@ -506,7 +508,7 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 	}
 
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 504.5">
+    <svg id="dynamic_icon_type7" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path id="bottom" d="M512,447.5c0,32-25,57-57,57H57c-32,0-57-25-57-57V120.5c0-31,25-57,57-57h398c32,0,57,26,57,57v327Z" style="fill: #ecf2f7;"/>
         <path id="top" d="M39,0h434c21.52,0,39,17.48,39,39v146H0V39C0,17.48,17.48,0,39,0Z" style="fill: %s;"/>
         <text id="year" transform="translate(46.1 78.92)" style="fill: #fff; font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; font-size: 60px;">%d</text>
@@ -518,7 +520,7 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 }
 
 // Type 8: 文字图标
-func generateTypeEightSVG(color, content string) string {
+func generateTypeEightSVG(color, content, id string) string {
 	colorScheme := getColorScheme(color)
 
 	// 动态变化字体大小
@@ -556,8 +558,12 @@ func generateTypeEightSVG(color, content string) string {
 		}
 	}
 
+	if strings.Contains(content, ".action{") {
+		content = model.RenderDynamicIconContentTemplate(content, id)
+	}
+
 	return fmt.Sprintf(`
-    <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 511">
+    <svg id="dynamic_icon_type8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
         <path d="M39,0h434c20.97,0,38,17.03,38,38v412c0,33.11-26.89,60-60,60H60c-32.56,0-59-26.44-59-59V38C1,17.03,18.03,0,39,0Z" style="fill: %s;"/>
         <text x="50%%" y="55%%" dy="%s" style="font-size: %.2fpx; fill: #fff; text-anchor: middle; dominant-baseline:middle;font-family: -apple-system, BlinkMacSystemFont, 'Noto Sans', 'Noto Sans CJK SC', 'Microsoft YaHei'; ">%s</text>
 	</svg>

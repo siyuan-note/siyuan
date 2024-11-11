@@ -1137,7 +1137,7 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		alt := domAttrValue(htmlImg, "alt")
 		title := domAttrValue(htmlImg, "title")
 
-		p := &ast.Node{Type: ast.NodeParagraph, ID: n.ID}
+		p := treenode.NewParagraph(n.ID)
 		img := &ast.Node{Type: ast.NodeImage}
 		p.AppendChild(img)
 		img.AppendChild(&ast.Node{Type: ast.NodeBang})

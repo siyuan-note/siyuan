@@ -351,12 +351,37 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   {
     "notebook": "20210831090520-7dvbdv0",
     "path": "/20210902210113-0avi12f.sy",
-    "title": "Document new title"
+    "title": "New document title"
   }
   ```
 
     * `notebook`: Notebook ID
     * `path`: Document path
+    * `title`: New document title
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+Rename a document by `id`:
+
+* `/api/filetree/renameDocByID`
+* Parameters
+
+  ```json
+  {
+    "id": "20210902210113-0avi12f",
+    "title": "New document title"
+  }
+  ```
+
+  * `id`: Document ID
+  * `title`: New document title
 * Return value
 
   ```json

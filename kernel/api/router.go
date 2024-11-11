@@ -103,6 +103,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/createDailyNote", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDailyNote)
 	ginServer.Handle("POST", "/api/filetree/createDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createDoc)
 	ginServer.Handle("POST", "/api/filetree/renameDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameDoc)
+	ginServer.Handle("POST", "/api/filetree/renameDocByID", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameDocByID)
 	ginServer.Handle("POST", "/api/filetree/removeDoc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeDoc)
 	ginServer.Handle("POST", "/api/filetree/removeDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeDocs)
 	ginServer.Handle("POST", "/api/filetree/moveDocs", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveDocs)
@@ -277,7 +278,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/asset/fullReindexAssetContent", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, fullReindexAssetContent)
 	ginServer.Handle("POST", "/api/asset/statAsset", model.CheckAuth, model.CheckAdminRole, statAsset)
 
-	ginServer.Handle("POST", "/api/export/batchExportMd", model.CheckAuth, model.CheckAdminRole, batchExportMd)
+	ginServer.Handle("POST", "/api/export/exportNotebookMd", model.CheckAuth, model.CheckAdminRole, exportNotebookMd)
+	ginServer.Handle("POST", "/api/export/exportMds", model.CheckAuth, model.CheckAdminRole, exportMds)
 	ginServer.Handle("POST", "/api/export/exportMd", model.CheckAuth, model.CheckAdminRole, exportMd)
 	ginServer.Handle("POST", "/api/export/exportSY", model.CheckAuth, model.CheckAdminRole, exportSY)
 	ginServer.Handle("POST", "/api/export/exportNotebookSY", model.CheckAuth, model.CheckAdminRole, exportNotebookSY)

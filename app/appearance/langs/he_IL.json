@@ -1,4 +1,5 @@
 {
+  "dynamicEmoji": "אייקון דינמי",
   "backlinkContainChildren": "האם קישורים חוזרים כוללים בלוקים משניים",
   "backlinkContainChildrenTip": "לאחר ההפעלה, בלוקים משניים ייכללו בחישוב הקישורים החוזרים",
   "entryNum": "מספר ערכים",
@@ -480,7 +481,7 @@
   "floatWindowMode": "שיטת הפעלת חלון צף",
   "floatWindowModeTip": "בחר כיצד להפעיל את חלון הצף כאשר העכבר מרחף מעל אייקון הבלוק, אייקוןBreadcrumb וכדומה.",
   "floatWindowMode0": "מרחף",
-  "floatWindowMode1": "לחץ והחזק <code class='fn__code'>${hotkey}</code>+מרחף",
+  "floatWindowMode1": "לחץ והחזק ${hotkey} + מרחף",
   "floatWindowMode2": "אל תניע",
   "codeSnippet": "קטע קוד",
   "codeSnippetTip": "שפר את הממשק או הפונקציה באמצעות קטעי קוד",

@@ -216,6 +216,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewColumnPin(op)
 		case "setAttrViewColIcon":
 			ret = tx.doSetAttrViewColumnIcon(op)
+		case "setAttrViewColDesc":
+			ret = tx.doSetAttrViewColumnDesc(op)
 		case "insertAttrViewBlock":
 			ret = tx.doInsertAttrViewBlock(op)
 		case "removeAttrViewBlock":
@@ -240,6 +242,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doRemoveAttrViewColOption(op)
 		case "updateAttrViewColOption":
 			ret = tx.doUpdateAttrViewColOption(op)
+		case "setAttrViewColOptionDesc":
+			ret = tx.doSetAttrViewColOptionDesc(op)
 		case "setAttrViewColCalc":
 			ret = tx.doSetAttrViewColCalc(op)
 		case "updateAttrViewColNumberFormat":
@@ -256,6 +260,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewViewName(op)
 		case "setAttrViewViewIcon":
 			ret = tx.doSetAttrViewViewIcon(op)
+		case "setAttrViewViewDesc":
+			ret = tx.doSetAttrViewViewDesc(op)
 		case "duplicateAttrViewView":
 			ret = tx.doDuplicateAttrViewView(op)
 		case "sortAttrViewView":

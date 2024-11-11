@@ -8,15 +8,15 @@ export const openByMobile = (uri: string) => {
     }
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
-            window.webkit.messageHandlers.openLink.postMessage(encodeURI(location.origin + "/" + uri));
+            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/" + uri);
         } else if (uri.startsWith("/")) {
-            window.webkit.messageHandlers.openLink.postMessage(encodeURI(location.origin + uri));
+            window.webkit.messageHandlers.openLink.postMessage(location.origin + uri);
         } else {
             try {
                 new URL(uri);
-                window.webkit.messageHandlers.openLink.postMessage(encodeURI(uri));
+                window.webkit.messageHandlers.openLink.postMessage(uri);
             } catch (e) {
-                window.webkit.messageHandlers.openLink.postMessage(encodeURI("https://" + uri));
+                window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
             }
         }
     } else if (isInAndroid()) {
@@ -111,8 +111,8 @@ export const isHuawei = () => {
 };
 
 export const isDisabledFeature = (feature: string): boolean => {
-    return window.siyuan.config.system.disabledFeatures.indexOf(feature) > -1;
-}
+    return window.siyuan.config.system.disabledFeatures?.indexOf(feature) > -1;
+};
 
 export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
@@ -251,6 +251,9 @@ export const getLocalStorage = (cb: () => void) => {
             note: "1f5c3",
             folder: "1f4d1"
         };
+        defaultStorage[Constants.LOCAL_EMOJIS] = {
+            currentTab: "emoji"
+        };
         defaultStorage[Constants.LOCAL_FONTSTYLES] = [];
         defaultStorage[Constants.LOCAL_FILESPATHS] = [];    // filesPath[]
         defaultStorage[Constants.LOCAL_SEARCHDATA] = {
@@ -288,7 +291,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS].forEach((key) => {
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

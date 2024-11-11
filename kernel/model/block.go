@@ -395,7 +395,7 @@ func SwapBlockRef(refID, defID string, includeChildren bool) (err error) {
 	refreshUpdated(defNode)
 	refreshUpdated(refNode)
 
-	refPivot := treenode.NewParagraph()
+	refPivot := treenode.NewParagraph("")
 	refNode.InsertBefore(refPivot)
 
 	if ast.NodeListItem == defNode.Type {
@@ -887,7 +887,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	if breadcrumb {
-		blockPaths = buildBlockBreadcrumb(def, nil)
+		blockPaths = buildBlockBreadcrumb(def, nil, true)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}

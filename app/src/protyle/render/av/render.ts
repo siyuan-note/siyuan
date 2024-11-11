@@ -4,7 +4,7 @@ import {Constants} from "../../../constants";
 import {addDragFill, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
-import {hasClosestBlock, hasClosestByClassName, isInEmbedBlock} from "../../util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";

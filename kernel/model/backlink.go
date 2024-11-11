@@ -571,7 +571,8 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 			if nil != refBlock && p.FContent == refBlock.Content { // 使用内容判断是否是列表项下第一个子块
 				// 如果是列表项下第一个子块，则后续会通过列表项传递或关联处理，所以这里就不处理这个段落了
 				processedParagraphs.Add(p.ID)
-				if !strings.Contains(p.Content, keyword) && !strings.Contains(path.Base(p.HPath), keyword) {
+				if !strings.Contains(p.Content, keyword) && !strings.Contains(path.Base(p.HPath), keyword) &&
+					!strings.Contains(p.Name, keyword) && !strings.Contains(p.Alias, keyword) && !strings.Contains(p.Memo, keyword) && !strings.Contains(p.Tag, keyword) {
 					refsCount--
 					continue
 				}
@@ -587,7 +588,8 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 				}
 			}
 
-			if !strings.Contains(ref.Content, keyword) && !strings.Contains(path.Base(ref.HPath), keyword) {
+			if !strings.Contains(ref.Content, keyword) && !strings.Contains(path.Base(ref.HPath), keyword) &&
+				!strings.Contains(ref.Name, keyword) && !strings.Contains(ref.Alias, keyword) && !strings.Contains(ref.Memo, keyword) && !strings.Contains(ref.Tag, keyword) {
 				refsCount--
 				continue
 			}

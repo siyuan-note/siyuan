@@ -220,10 +220,6 @@ func InitConf() {
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion
-	Conf.System.DisabledFeatures = util.DisabledFeatures
-	if 1 > len(Conf.System.DisabledFeatures) {
-		Conf.System.DisabledFeatures = []string{}
-	}
 
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
@@ -310,6 +306,10 @@ func InitConf() {
 	if util.ContainerStd == util.Container {
 		Conf.System.ID = util.GetDeviceID()
 		Conf.System.Name = util.GetDeviceName()
+	}
+	Conf.System.DisabledFeatures = util.DisabledFeatures
+	if 1 > len(Conf.System.DisabledFeatures) {
+		Conf.System.DisabledFeatures = []string{}
 	}
 
 	if nil == Conf.Snippet {

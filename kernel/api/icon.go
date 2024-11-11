@@ -26,6 +26,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -118,7 +119,6 @@ func getDynamicIcon(c *gin.Context) {
 	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
 	lang := c.DefaultQuery("lang", util.Lang)
-	content := c.Query("content")
 	weekdayType := c.DefaultQuery("weekdayType", "1") // 设置星期几的格式，zh_CH {1：周日，2：周天， 3：星期日，4：星期天，}, en_US {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
 
 	dateInfo := getDateInfo(date, lang, weekdayType)
@@ -147,7 +147,9 @@ func getDynamicIcon(c *gin.Context) {
 		svg = generateTypeSevenSVG(color, lang, dateInfo)
 	case "8":
 		// Type 8: 文字图标
-		svg = generateTypeEightSVG(color, content)
+		content := c.Query("content")
+		id := c.Query("id")
+		svg = generateTypeEightSVG(color, content, id)
 	default:
 		// 默认为Type 1
 		svg = generateTypeOneSVG(color, lang, dateInfo)
@@ -518,7 +520,7 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 }
 
 // Type 8: 文字图标
-func generateTypeEightSVG(color, content string) string {
+func generateTypeEightSVG(color, content, id string) string {
 	colorScheme := getColorScheme(color)
 
 	// 动态变化字体大小
@@ -554,6 +556,10 @@ func generateTypeEightSVG(color, content string) string {
 		default:
 			dy = "0%"
 		}
+	}
+
+	if strings.Contains(content, ".action{") {
+		content = model.RenderDynamicIconContentTemplate(content, id)
 	}
 
 	return fmt.Sprintf(`

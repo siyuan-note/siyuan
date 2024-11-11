@@ -26,10 +26,10 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
         return "";
     }
     let emoji = "";
-    if (unicode.indexOf(".") > -1) {
-        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
-    } else if (unicode.startsWith("api/icon/getDynamicIcon")) {
+    if (unicode.startsWith("api/icon/getDynamicIcon")) {
         emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/${unicode}"/>`;
+    } else if (unicode.indexOf(".") > -1) {
+        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
     } else {
         try {
             unicode.split("-").forEach(item => {

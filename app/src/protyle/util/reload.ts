@@ -1,4 +1,4 @@
-import {addLoading} from "../ui/initUI";
+import {addLoading, removeLoading} from "../ui/initUI";
 import {fetchPost} from "../../util/fetch";
 import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
@@ -8,6 +8,7 @@ import {preventScroll} from "../scroll/preventScroll";
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!protyle.preview.element.classList.contains("fn__none")) {
         protyle.preview.render(protyle);
+        removeLoading(protyle);
         return;
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {

@@ -480,6 +480,7 @@
       left: 0;
       top: 0;
       border-radius: var(--b3-border-radius);
+      pointer-events: none;
     }
 
     .table[custom-pinthead="true"] thead,

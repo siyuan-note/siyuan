@@ -199,72 +199,6 @@ export class Toolbar {
         return types;
     }
 
-    private genItem(protyle: IProtyle, menuItem: IMenuItem) {
-        let menuItemObj;
-        switch (menuItem.name) {
-            case "strong":
-            case "em":
-            case "s":
-            case "code":
-            case "mark":
-            case "tag":
-            case "u":
-            case "sup":
-            case "clear":
-            case "sub":
-            case "kbd":
-                menuItemObj = new ToolbarItem(protyle, menuItem);
-                break;
-            case "block-ref":
-                menuItemObj = new BlockRef(protyle, menuItem);
-                break;
-            case "inline-math":
-                menuItemObj = new InlineMath(protyle, menuItem);
-                break;
-            case "inline-memo":
-                menuItemObj = new InlineMemo(protyle, menuItem);
-                break;
-            case "|":
-                menuItemObj = new Divider();
-                break;
-            case "text":
-                menuItemObj = new Font(protyle, menuItem);
-                break;
-            case "a":
-                menuItemObj = new Link(protyle, menuItem);
-                break;
-            default:
-                menuItemObj = new ToolbarItem(protyle, menuItem);
-                break;
-        }
-        if (!menuItemObj) {
-            return;
-        }
-        return menuItemObj.element;
-    }
-
-    // 合并多个 text 为一个 text
-    private mergeNode(nodes: NodeListOf<ChildNode>) {
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].nodeType !== 3 && (nodes[i] as HTMLElement).tagName === "WBR") {
-                nodes[i].remove();
-                i--;
-            }
-        }
-        for (let i = 0; i < nodes.length; i++) {
-            if (nodes[i].nodeType === 3) {
-                if (nodes[i].textContent === "") {
-                    nodes[i].remove();
-                    i--;
-                } else if (nodes[i + 1] && nodes[i + 1].nodeType === 3) {
-                    nodes[i].textContent = nodes[i].textContent + nodes[i + 1].textContent;
-                    nodes[i + 1].remove();
-                    i--;
-                }
-            }
-        }
-    }
-
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
         if (!nodeElement) {
@@ -1221,31 +1155,6 @@ export class Toolbar {
         });
     }
 
-    private updateLanguage(languageElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, oldHtml: string, selectedLang: string) {
-        languageElement.textContent = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
-        if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
-            window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
-            setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
-        }
-        const editElement = getContenteditableElement(nodeElement);
-        if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
-            nodeElement.dataset.content = editElement.textContent.trim();
-            nodeElement.dataset.subtype = languageElement.textContent;
-            nodeElement.className = "render-node";
-            nodeElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
-            processRender(nodeElement);
-        } else {
-            (editElement as HTMLElement).textContent = editElement.textContent;
-            editElement.parentElement.removeAttribute("data-render");
-            highlightRender(nodeElement);
-        }
-        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-        updateTransaction(protyle, id, nodeElement.outerHTML, oldHtml);
-        this.subElement.classList.add("fn__none");
-        focusByRange(this.range);
-        return nodeElement.outerHTML;
-    }
-
     public showCodeLanguage(protyle: IProtyle, languageElement: HTMLElement) {
         const nodeElement = hasClosestBlock(languageElement);
         if (!nodeElement) {
@@ -1692,5 +1601,96 @@ ${item.name}
         this.element.classList.add("fn__none");
         const rangePosition = getSelectionPosition(nodeElement, range);
         setPosition(this.subElement, rangePosition.left, rangePosition.top - 48, Constants.SIZE_TOOLBAR_HEIGHT);
+    }
+
+    private genItem(protyle: IProtyle, menuItem: IMenuItem) {
+        let menuItemObj;
+        switch (menuItem.name) {
+            case "strong":
+            case "em":
+            case "s":
+            case "code":
+            case "mark":
+            case "tag":
+            case "u":
+            case "sup":
+            case "clear":
+            case "sub":
+            case "kbd":
+                menuItemObj = new ToolbarItem(protyle, menuItem);
+                break;
+            case "block-ref":
+                menuItemObj = new BlockRef(protyle, menuItem);
+                break;
+            case "inline-math":
+                menuItemObj = new InlineMath(protyle, menuItem);
+                break;
+            case "inline-memo":
+                menuItemObj = new InlineMemo(protyle, menuItem);
+                break;
+            case "|":
+                menuItemObj = new Divider();
+                break;
+            case "text":
+                menuItemObj = new Font(protyle, menuItem);
+                break;
+            case "a":
+                menuItemObj = new Link(protyle, menuItem);
+                break;
+            default:
+                menuItemObj = new ToolbarItem(protyle, menuItem);
+                break;
+        }
+        if (!menuItemObj) {
+            return;
+        }
+        return menuItemObj.element;
+    }
+
+    // 合并多个 text 为一个 text
+    private mergeNode(nodes: NodeListOf<ChildNode>) {
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].nodeType !== 3 && (nodes[i] as HTMLElement).tagName === "WBR") {
+                nodes[i].remove();
+                i--;
+            }
+        }
+        for (let i = 0; i < nodes.length; i++) {
+            if (nodes[i].nodeType === 3) {
+                if (nodes[i].textContent === "") {
+                    nodes[i].remove();
+                    i--;
+                } else if (nodes[i + 1] && nodes[i + 1].nodeType === 3) {
+                    nodes[i].textContent = nodes[i].textContent + nodes[i + 1].textContent;
+                    nodes[i + 1].remove();
+                    i--;
+                }
+            }
+        }
+    }
+
+    private updateLanguage(languageElement: HTMLElement, protyle: IProtyle, id: string, nodeElement: HTMLElement, oldHtml: string, selectedLang: string) {
+        languageElement.textContent = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
+        if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
+            window.siyuan.storage[Constants.LOCAL_CODELANG] = languageElement.textContent;
+            setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);
+        }
+        const editElement = getContenteditableElement(nodeElement);
+        if (Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(languageElement.textContent)) {
+            nodeElement.dataset.content = editElement.textContent.trim();
+            nodeElement.dataset.subtype = languageElement.textContent;
+            nodeElement.className = "render-node";
+            nodeElement.innerHTML = `<div spin="1"></div><div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
+            processRender(nodeElement);
+        } else {
+            (editElement as HTMLElement).textContent = editElement.textContent;
+            editElement.parentElement.removeAttribute("data-render");
+            highlightRender(nodeElement);
+        }
+        nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+        updateTransaction(protyle, id, nodeElement.outerHTML, oldHtml);
+        this.subElement.classList.add("fn__none");
+        focusByRange(this.range);
+        return nodeElement.outerHTML;
     }
 }

@@ -88,7 +88,6 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     return plugin;
 };
 
-
 const updateDock = (dockItem: Config.IUILayoutDockTab[], index: number, plugin: Plugin, type: string) => {
     const dockKeys = Object.keys(plugin.docks);
     dockItem.forEach((tabItem: Config.IUILayoutDockTab, tabIndex: number) => {

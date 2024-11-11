@@ -58,5 +58,5 @@ extraResources:
   - from: "src/assets/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"
-  - from: "pandoc/pandoc-darwin-amd64.zip"
+  - from: "pandoc/pandoc-darwin-arm64.zip"
     to: "pandoc.zip"

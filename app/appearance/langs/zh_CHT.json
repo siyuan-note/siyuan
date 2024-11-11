@@ -481,7 +481,7 @@
   "floatWindowMode": "浮窗觸發方式",
   "floatWindowModeTip": "選擇滑鼠懸停塊引、麵包屑塊標等位置觸發浮窗的方式",
   "floatWindowMode0": "懸停",
-  "floatWindowMode1": "按住 <code class='fn__code'>${hotkey}</code>+懸停",
+  "floatWindowMode1": "按住 ${hotkey}+懸停",
   "floatWindowMode2": "不觸發浮窗",
   "codeSnippet": "代碼片段",
   "codeSnippetTip": "透過程式碼片段對介面或功能進行微調",

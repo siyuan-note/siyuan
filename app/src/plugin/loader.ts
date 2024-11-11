@@ -9,6 +9,7 @@ import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
+import { getAllEditor } from "../layout/getAll";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -85,6 +86,9 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     document.head.append(styleElement);
     afterLoadPlugin(plugin);
     saveLayout();
+    getAllEditor().forEach(editor => {
+      editor.protyle.toolbar.update(editor.protyle);
+    });
     return plugin;
 };
 

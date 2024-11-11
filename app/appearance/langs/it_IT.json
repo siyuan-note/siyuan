@@ -481,7 +481,7 @@
   "floatWindowMode": "Metodo di attivazione della finestra flottante",
   "floatWindowModeTip": "Scegli come attivare la finestra flottante quando il mouse passa sopra l'icona del blocco, l'icona del breadcrumb, ecc.",
   "floatWindowMode0": "Passa il mouse",
-  "floatWindowMode1": "Tieni premuto <code class='fn__code'>${hotkey}</code>+Passa il mouse",
+  "floatWindowMode1": "Tieni premuto ${hotkey} + Passa il mouse",
   "floatWindowMode2": "Non attivare",
   "codeSnippet": "Snippet di codice",
   "codeSnippetTip": "Affina l'interfaccia o la funzionalità tramite frammenti di codice",

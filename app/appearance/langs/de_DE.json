@@ -481,7 +481,7 @@
   "floatWindowMode": "Auslösermethode für schwebendes Fenster",
   "floatWindowModeTip": "Wählen Sie, wie das schwebende Fenster ausgelöst wird, wenn die Maus über das Blocksymbol, das Breadcrumb-Symbol usw. schwebt.",
   "floatWindowMode0": "Schweben",
-  "floatWindowMode1": "Drücken und halten Sie <code class='fn__code'>${hotkey}</code> + Schwellen",
+  "floatWindowMode1": "Drücken und halten Sie ${hotkey} + Schwellen",
   "floatWindowMode2": "Nicht auslösen",
   "codeSnippet": "Code-Schnipsel",
   "codeSnippetTip": "Feinabstimmung der Oberfläche oder Funktionalität durch Code-Schnipsel",

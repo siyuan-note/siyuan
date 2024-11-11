@@ -481,7 +481,7 @@
   "floatWindowMode": "Método de activación de ventana flotante",
   "floatWindowModeTip": "Elija cómo activar la ventana flotante cuando el mouse pasa sobre el ícono de bloque, el ícono de ruta de navegación, etc.",
   "floatWindowMode0": "Flotar",
-  "floatWindowMode1": "Presione y mantenga presionado <code class='fn__code'>${hotkey}</code>+Flotar",
+  "floatWindowMode1": "Presione y mantenga presionado ${hotkey} + Flotar",
   "floatWindowMode2": "No activar",
   "codeSnippet": "Fragmento de código",
   "codeSnippetTip": "Ajusta la interfaz o la funcionalidad mediante fragmentos de código",

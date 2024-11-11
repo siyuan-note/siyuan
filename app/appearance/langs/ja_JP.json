@@ -481,7 +481,7 @@
   "floatWindowMode": "フローティングウィンドウのトリガー方法",
   "floatWindowModeTip": "ブロックアイコンやパンくずリストアイコンなどにマウスカーソルを合わせたときにフローティングウィンドウを表示する方法を選択します",
   "floatWindowMode0": "ホバー",
-  "floatWindowMode1": "<code class='fn__code'>${hotkey}</code> を押しながらホバー",
+  "floatWindowMode1": "${hotkey} を押しながらホバー",
   "floatWindowMode2": "表示しない",
   "codeSnippet": "コードスニペット",
   "codeSnippetTip": "コードスニペットを使用してインターフェースや機能を微調整します",

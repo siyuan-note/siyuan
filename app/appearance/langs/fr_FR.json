@@ -481,7 +481,7 @@
   "floatWindowMode": "Méthode de déclenchement de fenêtre flottante",
   "floatWindowModeTip": "Choisissez comment déclencher la fenêtre flottante lorsque la souris survole l'icône de bloc, l'icône de fil d'Ariane, etc.",
   "floatWindowMode0": "Flotter",
-  "floatWindowMode1": "Appuyez et maintenez <code class='fn__code'>${hotkey}</code>+Flotter",
+  "floatWindowMode1": "Appuyez et maintenez ${hotkey} + Flotter",
   "floatWindowMode2": "Ne pas déclencher",
   "codeSnippet": "Extrait de code",
   "codeSnippetTip": "Affiner l'interface ou les fonctionnalités grâce à des extraits de code",

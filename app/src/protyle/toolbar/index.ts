@@ -77,6 +77,18 @@ export class Toolbar {
         });
     }
 
+    public update(protyle: IProtyle) {
+        this.element.innerHTML = "";
+        protyle.options.toolbar = toolbarKeyToMenu(Constants.PROTYLE_TOOLBAR);
+        protyle.app.plugins.forEach(item => {
+            protyle.options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(protyle.options.toolbar));
+        });
+        protyle.options.toolbar.forEach((menuItem: IMenuItem) => {
+            const itemElement = this.genItem(protyle, menuItem);
+            this.element.appendChild(itemElement);
+        });
+    }
+
     public render(protyle: IProtyle, range: Range, event?: KeyboardEvent) {
         this.range = range;
         let nodeElement = hasClosestBlock(range.startContainer);

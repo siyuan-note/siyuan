@@ -6,6 +6,7 @@ import {resizeTopBar} from "../layout/util";
 /// #endif
 import {Constants} from "../constants";
 import {setStorageVal} from "../protyle/util/compatibility";
+import {getAllEditor} from "../layout/getAll";
 
 export const uninstall = (app: App, name: string, isUninstall = false) => {
     app.plugins.find((plugin: Plugin, index) => {
@@ -61,6 +62,10 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            // rm protyle toolbar
+            getAllEditor().forEach(editor => {
+                editor.protyle.toolbar.update(editor.protyle);
+            });
             return true;
         }
     });

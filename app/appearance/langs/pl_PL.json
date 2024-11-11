@@ -481,7 +481,7 @@
   "floatWindowMode": "Metoda wywoływania okna pływającego",
   "floatWindowModeTip": "Wybierz, jak wywoływać pływające okno, gdy mysz znajduje się nad ikoną bloku, ikoną okruszków, itp.",
   "floatWindowMode0": "Najedź",
-  "floatWindowMode1": "Naciśnij i przytrzymaj <code class='fn__code'>${hotkey}</code>+Najedź",
+  "floatWindowMode1": "Naciśnij i przytrzymaj ${hotkey} + Najedź",
   "floatWindowMode2": "Nie wywołuj",
   "codeSnippet": "Fragment kodu",
   "codeSnippetTip": "Dostosuj interfejs lub funkcjonalność za pomocą fragmentów kodu",

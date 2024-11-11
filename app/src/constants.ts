@@ -699,6 +699,40 @@ export abstract class Constants {
     public static readonly SIYUAN_RENDER_CODE_LANGUAGES: string[] = [
         "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"
     ];
+    public static readonly PROTYLE_TOOLBAR: string[] = isMobile() ? [
+        "block-ref",
+        "a",
+        "|",
+        "text",
+        "strong",
+        "em",
+        "u",
+        "clear",
+        "|",
+        "code",
+        "tag",
+        "inline-math",
+        "inline-memo",
+    ] : [
+        "block-ref",
+        "a",
+        "|",
+        "text",
+        "strong",
+        "em",
+        "u",
+        "s",
+        "mark",
+        "sup",
+        "sub",
+        "clear",
+        "|",
+        "code",
+        "kbd",
+        "tag",
+        "inline-math",
+        "inline-memo",
+    ]
 
     // Google Analytics 事件
     public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";

@@ -481,7 +481,7 @@
   "floatWindowMode": "Floating window trigger method",
   "floatWindowModeTip": "Choose how to trigger the floating window when the mouse hovers over the block icon, breadcrumb icon, etc.",
   "floatWindowMode0": "Hover",
-  "floatWindowMode1": "Press and hold <code class='fn__code'>${hotkey}</code>+Hover",
+  "floatWindowMode1": "Press and hold ${hotkey} + Hover",
   "floatWindowMode2": "Do not trigger",
   "codeSnippet": "Code Snippet",
   "codeSnippetTip": "Fine-tune the interface or functionality through code snippets",

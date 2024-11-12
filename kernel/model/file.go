@@ -1154,7 +1154,7 @@ func CreateDocByMd(boxID, p, title, md string, sorts []string) (tree *parse.Tree
 	return
 }
 
-func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool) (retID string, err error) {
+func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bool, clippingHref string) (retID string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
@@ -1170,6 +1170,16 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 		luteEngine.SetInlineMath(true)
 	}
 	luteEngine.SetHTMLTag2TextMark(true)
+	if strings.HasPrefix(clippingHref, "https://ld246.com/article/") || strings.HasPrefix(clippingHref, "https://liuyun.io/article/") {
+		// 改进链滴剪藏 https://github.com/siyuan-note/siyuan/issues/13117
+		luteEngine.SetInlineAsterisk(true)
+		luteEngine.SetInlineUnderscore(true)
+		luteEngine.SetSup(true)
+		luteEngine.SetSub(true)
+		luteEngine.SetTag(true)
+		luteEngine.SetInlineMath(true)
+		luteEngine.SetGFMStrikethrough(true)
+	}
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)
 

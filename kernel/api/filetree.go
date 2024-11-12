@@ -742,8 +742,13 @@ func createDocWithMd(c *gin.Context) {
 	if nil != withMathArg {
 		withMath = withMathArg.(bool)
 	}
+	clippingHref := ""
+	clippingHrefArg := arg["clippingHref"]
+	if nil != clippingHrefArg {
+		clippingHref = clippingHrefArg.(string)
+	}
 
-	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath)
+	id, err := model.CreateWithMarkdown(tags, notebook, hPath, markdown, parentID, id, withMath, clippingHref)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

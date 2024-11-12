@@ -726,7 +726,7 @@ export class Graph extends Model {
                     return;
                 }
                 if (-1 < node.type.indexOf("tag")) {
-                    openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed);
+                    openGlobalSearch(this.app, `#${node.id}#`, !window.siyuan.ctrlIsPressed, {method: 0});
                     return;
                 }
                 if (window.siyuan.shiftIsPressed) {

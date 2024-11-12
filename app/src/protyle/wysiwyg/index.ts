@@ -2375,7 +2375,7 @@ export class WYSIWYG {
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
             if (tagElement && !event.altKey) {
                 /// #if !MOBILE
-                openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed);
+                openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed, {method: 0});
                 hideElements(["dialog"]);
                 /// #else
                 popSearch(protyle.app, {

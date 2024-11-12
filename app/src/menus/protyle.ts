@@ -1681,7 +1681,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconSearch",
         click() {
             /// #if !MOBILE
-            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false);
+            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false, {method: 0});
             /// #else
             popSearch(protyle.app, {
                 hasReplace: false,

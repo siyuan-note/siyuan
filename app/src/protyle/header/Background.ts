@@ -391,7 +391,7 @@ export class Background {
                     break;
                 } else if (type === "open-search") {
                     /// #if !MOBILE
-                    openGlobalSearch(protyle.app, `#${target.textContent}#`, !window.siyuan.ctrlIsPressed);
+                    openGlobalSearch(protyle.app, `#${target.textContent}#`, !window.siyuan.ctrlIsPressed, {method: 0});
                     /// #else
                     popSearch(protyle.app, {
                         hasReplace: false,

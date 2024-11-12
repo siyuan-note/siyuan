@@ -202,7 +202,7 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
 };
 
-export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
+export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
     const searchModel = getAllModels().search.find((item) => {
         item.parent.parent.switchTab(item.parent.headElement);
@@ -219,7 +219,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
             k: text,
             r: "",
             hasReplace: false,
-            method: localData.method,
+            method: searchData ? searchData.method : localData.method,
             hPath: "",
             idPath: [],
             group: localData.group,

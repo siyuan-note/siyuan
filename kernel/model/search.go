@@ -1311,7 +1311,7 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFil
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-	return fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
+	return fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -1396,9 +1396,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 	return
 }
 
-func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	start := time.Now()
-
+func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
@@ -1427,7 +1425,17 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
 		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
-	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	if strings.Contains(orderBy, "ORDER BY rank DESC") {
+		orderBy = buildOrderBy(query, 0, 0)
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort ASC, ", 1)
+	} else if strings.Contains(orderBy, "ORDER BY rank") {
+		orderBy = buildOrderBy(query, 0, 0)
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	} else if strings.Contains(orderBy, "sort ASC") {
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	} else {
+		selectStmt += " " + orderBy
+	}
 	result, _ := sql.QueryNoLimit(selectStmt)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
@@ -1441,8 +1449,6 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
-
-	logging.LogInfof("time cost [like]: %v", time.Since(start))
 	return
 }
 

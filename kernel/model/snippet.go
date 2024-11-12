@@ -108,6 +108,10 @@ func writeSnippetsConf(snippets []*conf.Snippet) (err error) {
 	}
 
 	confPath := filepath.Join(util.SnippetsPath, "conf.json")
+	oldData, _ := filelock.ReadFile(confPath)
+	if string(oldData) == string(data) {
+		return
+	}
 	err = filelock.WriteFile(confPath, data)
 	return
 }

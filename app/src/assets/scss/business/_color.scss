@@ -21,7 +21,8 @@
     margin: 0 8px 0 0;
   }
 
-  &:hover:not(.color__square--list) {
+  &:hover:not(.color__square--list),
+  &--current {
     box-shadow: 0 0 0 1px var(--b3-list-hover) inset, 0 0 0 4px var(--b3-theme-background);
   }
 }

@@ -27,7 +27,7 @@ export const unicode2Emoji = (unicode: string, className = "", needSpan = false,
     }
     let emoji = "";
     if (unicode.startsWith("api/icon/getDynamicIcon")) {
-        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/${unicode}"/>`;
+        emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="${unicode}"/>`;
     } else if (unicode.indexOf(".") > -1) {
         emoji = `<img class="${className}" ${lazy ? "data-" : ""}src="/emojis/${unicode}"/>`;
     } else {
@@ -194,7 +194,29 @@ export const addEmoji = (unicode: string) => {
     fetchPost("/api/setting/setEmoji", {emoji: window.siyuan.config.editor.emoji});
 };
 
-export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, avCB?: (emoji: string) => void) => {
+const genWeekdayOptions = (lang: string, weekdayType: string) => {
+    const dynamicWeekdayLang = {
+        "1": ["Sun", "周日", "週日"],
+        "2": ["SUN", "周天", "週天"],
+        "3": ["Sunday", "星期日", "星期日"],
+        "4": ["SUNDAY", "星期天", "星期天"],
+    };
+    let currentLang = 0
+    if (lang === "") {
+        lang = window.siyuan.config.lang;
+    }
+    if (lang === "zh_CN") {
+        currentLang = 1;
+    } else if (lang === "zh_CHT") {
+        currentLang = 2;
+    }
+    return `<option value="1" ${weekdayType === "1" ? " selected" : ""}>${dynamicWeekdayLang[1][currentLang]}</option>
+<option value="2" ${weekdayType === "2" ? " selected" : ""}>${dynamicWeekdayLang[2][currentLang]}</option>
+<option value="3" ${weekdayType === "3" ? " selected" : ""}>${dynamicWeekdayLang[3][currentLang]}</option>
+<option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`
+}
+
+export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, avCB?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
     } else {
@@ -202,6 +224,24 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     }
 
     const dynamicURL = "api/icon/getDynamicIcon?";
+    const dynamicCurrentObj: IObject = {
+        color: "#d23f31",
+        lang: "",
+        date: "",
+        weekdayType: "1",
+        type: "1",
+        content: "SiYuan",
+    };
+    if (dynamicImgElement && dynamicImgElement.getAttribute("src").startsWith(dynamicURL)) {
+        const dynamicCurrentUrl = new URLSearchParams(dynamicImgElement.getAttribute("src").replace(dynamicURL, ""));
+        dynamicCurrentObj.color = dynamicCurrentUrl.get("color") || "#d23f31";
+        dynamicCurrentObj.lang = dynamicCurrentUrl.get("lang") || "";
+        dynamicCurrentObj.date = dynamicCurrentUrl.get("date") || "";
+        dynamicCurrentObj.weekdayType = dynamicCurrentUrl.get("weekdayType") || "1";
+        dynamicCurrentObj.type = dynamicCurrentUrl.get("type") || "1";
+        dynamicCurrentObj.content = dynamicCurrentUrl.get("content") || "SiYuan";
+    }
+
     const dialog = new Dialog({
         disableAnimation: true,
         transparent: true,
@@ -249,69 +289,66 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         </div>
         <div class="fn__none" data-type="tab-dynamic">
             <div class="fn__flex emoji__dynamic-color">
-                <div class="color__square fn__pointer" style="background-color:#d23f31"></div>
-                <div class="color__square fn__pointer" style="background-color:#3575f0"></div>
-                <div class="color__square fn__pointer" style="background-color:#f3a92f"></div>
-                <div class="color__square fn__pointer" style="background-color:#65b84d"></div>
-                <div class="color__square fn__pointer" style="background-color:#e099ff"></div>
-                <div class="color__square fn__pointer" style="background-color:#ea5d97"></div>
-                <div class="color__square fn__pointer" style="background-color:#93627f"></div>
-                <div class="color__square fn__pointer" style="background-color:#5f6368"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#d23f31" ? " color__square--current" : ""}" style="background-color:#d23f31"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#3575f0" ? " color__square--current" : ""}" style="background-color:#3575f0"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#f3a92f" ? " color__square--current" : ""}" style="background-color:#f3a92f"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#65b84d" ? " color__square--current" : ""}" style="background-color:#65b84d"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#e099ff" ? " color__square--current" : ""}" style="background-color:#e099ff"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#ea5d97" ? " color__square--current" : ""}" style="background-color:#ea5d97"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#93627f" ? " color__square--current" : ""}" style="background-color:#93627f"></div>
+                <div class="color__square fn__pointer${dynamicCurrentObj.color === "#5f6368" ? " color__square--current" : ""}" style="background-color:#5f6368"></div>
                 <div class="fn__space--small"></div>
-                <input type="text" class="b3-text-field fn__flex-1 fn__flex-center" style="background-color: #d23f31;color:#fff" value="#d23f31">
+                <input type="text" class="b3-text-field fn__flex-1 fn__flex-center" style="background-color: ${dynamicCurrentObj.color};color:#fff" value="${dynamicCurrentObj.color}">
             </div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.language}</span>
+                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.language}</span>
                 <span class="fn__space--small"></span>
                 <select class="b3-select fn__flex-1">
-                    <option value="" selected>${window.siyuan.languages.themeOS}</option>
-                    <option value="en_US">English (en_US)</option>
-                    <option value="zh_CHT">繁體中文 (zh_CHT)</option>
-                    <option value="zh_CN">简体中文 (zh_CN)</option>
+                    <option value="" ${dynamicCurrentObj.lang === "" ? " selected" : ""}>${window.siyuan.languages.themeOS}</option>
+                    <option value="en_US" ${dynamicCurrentObj.lang === "en_US" ? " selected" : ""}>English (en_US)</option>
+                    <option value="zh_CHT" ${dynamicCurrentObj.lang === "zh_CHT" ? " selected" : ""}>繁體中文 (zh_CHT)</option>
+                    <option value="zh_CN" ${dynamicCurrentObj.lang === "zh_CN" ? " selected" : ""}>简体中文 (zh_CN)</option>
                 </select>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.date}</span>
+                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.date}</span>
                 <span class="fn__space--small"></span>
-                <input type="date" class="b3-text-field fn__flex-1"/>
+                <input type="date" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.format}</span>
+                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.format}</span>
                 <span class="fn__space--small"></span>
                 <select class="b3-select fn__flex-1">
-                    <option value="1" selected>周日/Sun</option>
-                    <option value="2">周天/SUN</option>
-                    <option value="3">星期日/Sunday</option>
-                    <option value="4">星期天/SUNDAY</option>
+                    ${genWeekdayOptions(dynamicCurrentObj.lang, dynamicCurrentObj.weekdayType)}
                 </select>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__flex fn__flex-wrap">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=1&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=2&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=3&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=4&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=5&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=6&color=d23f31">
-                <img class="emoji__dynamic-item" src="${dynamicURL}type=7&color=d23f31">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "1" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=1&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "2" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=2&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "3" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=3&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "4" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=4&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "5" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=5&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "6" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=6&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
+                <img class="emoji__dynamic-item${dynamicCurrentObj.type === "7" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=7&color=${encodeURIComponent(dynamicCurrentObj.color)}&date=${dynamicCurrentObj.date}&weekdayType=${dynamicCurrentObj.weekdayType}&lang=${dynamicCurrentObj.lang}">
             </div>
             <div class="fn__hr"></div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
-                <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.custom}</span>
+                <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.custom}</span>
                 <span class="fn__space--small"></span>
-                <input type="text" class="b3-text-field fn__flex-1" value="SiYuan">
+                <input type="text" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.content}">
                 <span class="fn__space"></span>
             </div>
             <div>
-                <img data-type="text" class="emoji__dynamic-item" src="${dynamicURL}type=8&color=d23f31&content=SiYuan&id=${id}">
+                <img data-type="text" class="emoji__dynamic-item${dynamicCurrentObj.type === "8" ? " emoji__dynamic-item--current" : ""}" src="${dynamicURL}type=8&color=${encodeURIComponent(dynamicCurrentObj.color)}&content=${dynamicCurrentObj.content}&id=${id}">
             </div>
         </div>
     </div>
@@ -526,11 +563,10 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 let unicode = "";
                 if (target.classList.contains("emojis__item")) {
                     unicode = target.getAttribute("data-unicode");
-                    if (type !== "av") {
-                        dialog.destroy();
-                    }
+                    dialog.destroy();
                 } else if (target.classList.contains("emoji__dynamic-item")) {
                     unicode = target.getAttribute("src");
+                    dialog.destroy();
                 } else {
                     // 随机
                     unicode = getRandomEmoji();
@@ -593,6 +629,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 url.delete("lang");
             }
             item.setAttribute("src", dynamicURL + url.toString());
+            dynamicLangElements[1].innerHTML = genWeekdayOptions(dynamicLangElements[0].value, dynamicLangElements[1].value)
         });
     });
     dynamicLangElements[1].addEventListener("change", () => {
@@ -618,6 +655,13 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             url.set("color", dynamicTextElements[0].value);
             item.setAttribute("src", dynamicURL + url.toString());
             dynamicTextElements[0].style.backgroundColor = dynamicTextElements[0].value;
+        });
+        dialog.element.querySelectorAll(".color__square").forEach((item: HTMLElement) => {
+            if (item.style.backgroundColor === dynamicTextElements[0].value) {
+                item.classList.add("color__square--current");
+            } else {
+                item.classList.remove("color__square--current");
+            }
         });
     });
     dynamicTextElements[1].addEventListener("input", () => {

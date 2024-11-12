@@ -2616,7 +2616,9 @@ export class WYSIWYG {
                         emojiElement.insertAdjacentHTML("afterend", "<wbr>");
                         const oldHTML = nodeElement.outerHTML;
                         let emojiHTML;
-                        if (unicode.indexOf(".") > -1) {
+                        if (unicode.startsWith("api/icon/getDynamicIcon")) {
+                            emojiHTML = `<img class="emoji" src="${unicode}"/>`;
+                        } else if (unicode.indexOf(".") > -1) {
                             const emojiList = unicode.split(".");
                             emojiHTML = `<img alt="${emojiList[0]}" class="emoji" src="/emojis/${unicode}" title="${emojiList[0]}">`;
                         } else {
@@ -2626,7 +2628,7 @@ export class WYSIWYG {
                         hideElements(["dialog"]);
                         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
                         focusByWbr(nodeElement, range);
-                    });
+                    }, emojiElement);
                 }
                 return;
             }

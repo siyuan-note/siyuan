@@ -147,7 +147,7 @@ export class Files extends Model {
                         y: rect.bottom,
                         h: rect.height,
                         w: rect.width,
-                    });
+                    }, undefined, target.querySelector("img"));
                     break;
                 } else if (type === "toggle") {
                     const svgElement = target.querySelector("svg");
@@ -274,14 +274,14 @@ export class Files extends Model {
                                 y: rect.bottom,
                                 h: rect.height,
                                 w: rect.width,
-                            });
+                            }, undefined, target.querySelector("img"));
                         } else {
                             openEmojiPanel(target.parentElement.parentElement.getAttribute("data-url"), "notebook", {
                                 x: rect.left,
                                 y: rect.bottom,
                                 h: rect.height,
                                 w: rect.width,
-                            });
+                            }, undefined, target.querySelector("img"));
                         }
                         break;
                     } else if (isNotCtrl(event) && target.classList.contains("b3-list-item__toggle")) {

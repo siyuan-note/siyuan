@@ -258,7 +258,7 @@ export class Background {
                         y: rect.bottom,
                         h: rect.height,
                         w: rect.width
-                    });
+                    }, undefined, target.querySelector("img"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;

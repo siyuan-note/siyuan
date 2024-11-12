@@ -724,7 +724,7 @@ export const openMenuPanel = (options: {
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : '<svg style="width: 14px;height: 14px;"><use xlink:href="#iconTable"></use></svg>';
                         target.dataset.icon = unicode;
-                    });
+                    }, target.querySelector("img"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -796,7 +796,7 @@ export const openMenuPanel = (options: {
                             updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                         }
                         target.dataset.icon = unicode;
-                    });
+                    }, target.querySelector("img"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;

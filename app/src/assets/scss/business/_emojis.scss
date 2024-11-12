@@ -30,6 +30,14 @@
       width: 73px;
       margin: 8px;
       cursor: pointer;
+      transition: var(--b3-transition);
+
+      &:hover,
+      &--current {
+        background-color: var(--b3-theme-background);
+        border-radius: var(--b3-border-radius);
+        box-shadow: 0 0 0 1px var(--b3-list-hover) inset, 0 0 0 4px var(--b3-theme-background);
+      }
     }
 
     &-color {

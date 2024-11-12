@@ -521,6 +521,10 @@ func generateTypeSevenSVG(color string, lang string, dateInfo map[string]interfa
 
 // Type 8: 文字图标
 func generateTypeEightSVG(color, content, id string) string {
+	if strings.Contains(content, ".action{") {
+		content = model.RenderDynamicIconContentTemplate(content, id)
+	}
+
 	colorScheme := getColorScheme(color)
 
 	// 动态变化字体大小
@@ -556,10 +560,6 @@ func generateTypeEightSVG(color, content, id string) string {
 		default:
 			dy = "0%"
 		}
-	}
-
-	if strings.Contains(content, ".action{") {
-		content = model.RenderDynamicIconContentTemplate(content, id)
 	}
 
 	return fmt.Sprintf(`

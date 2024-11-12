@@ -235,6 +235,9 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     if (dynamicImgElement && dynamicImgElement.getAttribute("src").startsWith(dynamicURL)) {
         const dynamicCurrentUrl = new URLSearchParams(dynamicImgElement.getAttribute("src").replace(dynamicURL, ""));
         dynamicCurrentObj.color = dynamicCurrentUrl.get("color") || "#d23f31";
+        if (!dynamicCurrentObj.color.startsWith('#')) {
+            dynamicCurrentObj.color = "#" + dynamicCurrentObj.color;
+        }
         dynamicCurrentObj.lang = dynamicCurrentUrl.get("lang") || "";
         dynamicCurrentObj.date = dynamicCurrentUrl.get("date") || "";
         dynamicCurrentObj.weekdayType = dynamicCurrentUrl.get("weekdayType") || "1";
@@ -298,7 +301,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#93627f" ? " color__square--current" : ""}" style="background-color:#93627f"></div>
                 <div class="color__square fn__pointer${dynamicCurrentObj.color === "#5f6368" ? " color__square--current" : ""}" style="background-color:#5f6368"></div>
                 <div class="fn__space--small"></div>
-                <input type="text" class="b3-text-field fn__flex-1 fn__flex-center" style="background-color: ${dynamicCurrentObj.color};color:#fff" value="${dynamicCurrentObj.color}">
+                <input type="text" class="b3-text-field fn__flex-1 fn__flex-center" value="${dynamicCurrentObj.color}">
             </div>
             <div class="fn__flex">
                 <span class="fn__space"></span>
@@ -612,7 +615,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 break;
             } else if (target.classList.contains("color__square")) {
                 dynamicTextElements[0].value = target.getAttribute("style").replace("background-color:", "");
-                dynamicTextElements[0].style.backgroundColor = dynamicTextElements[0].value;
                 dynamicTextElements[0].dispatchEvent(new CustomEvent("input"));
                 break;
             }
@@ -654,7 +656,6 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("color", dynamicTextElements[0].value);
             item.setAttribute("src", dynamicURL + url.toString());
-            dynamicTextElements[0].style.backgroundColor = dynamicTextElements[0].value;
         });
         dialog.element.querySelectorAll(".color__square").forEach((item: HTMLElement) => {
             if (item.style.backgroundColor === dynamicTextElements[0].value) {

@@ -281,8 +281,9 @@
 
       &[data-type="NodeBlockQueryEmbed"] {
         background-color: var(--b3-embed-background);
-        border-left: 1px dashed var(--b3-theme-surface-lighter);
+        border: 1px dashed var(--b3-theme-surface-lighter);
         max-width: 100%;
+        padding: 2px 4px;
 
         // https://github.com/siyuan-note/siyuan/issues/8715 & https://ld246.com/article/1689063197687 第一点无法进行以下设置
         //.protyle-attr--refcount {right: 0;}
@@ -295,10 +296,6 @@
           .code-block:hover .protyle-icon,
           .render-node:hover .protyle-icons {
             opacity: 0 !important;
-          }
-
-          & > .list {
-            margin-left: -4px;
           }
         }
 

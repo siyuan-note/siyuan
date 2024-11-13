@@ -662,10 +662,30 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         } else if (type === "mSelect") {
             // 不传入为删除
             if (typeof value === "string") {
-                value = oldValue.mSelect.concat({
-                    content: value,
-                    color: (oldValue.mSelect.length + 1).toString()
-                });
+                const newMSelectValue: IAVCellSelectValue[] = [];
+                let colorIndex = oldValue.mSelect.length;
+                // 以逗号分隔，去重，去空，去换行后做为选项
+                [...new Set(value.split(",").map(v => v.trim().replace(/\n|\r\n|\r|\u2028|\u2029/g, "")))].forEach((item) => {
+                    if (!item) {
+                        return;
+                    }
+                    let hasSameContent = false
+                    oldValue.mSelect.find((mSelectItem) => {
+                        if (mSelectItem.content === item) {
+                            hasSameContent = true
+                            return true
+                        }
+                    })
+                    if (hasSameContent) {
+                        return;
+                    }
+                    colorIndex++;
+                    newMSelectValue.push({
+                        content: item,
+                        color: colorIndex.toString()
+                    })
+                })
+                value = oldValue.mSelect.concat(newMSelectValue);
             }
         }
         const cellValue = genCellValue(type, value);

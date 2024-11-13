@@ -186,13 +186,29 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         }
 
         const text = protyle.lute.BlockDOM2Content(html);
-        const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--select"));
+        const cellsElement: HTMLElement[] = Array.from(blockElement.querySelectorAll(".av__cell--active, .av__cell--select"));
         const rowsElement = blockElement.querySelector(".av__row--select");
 
         if (rowsElement) {
             updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns, html);
         } else if (cellsElement.length > 0) {
-            updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns, html);
+            if (cellsElement.length > 1) {
+                // 选择多个单元格时，逐行填充
+                let rowIndex = 0
+                text.split("\n").find((row) => {
+                    if (!row) {
+                        return false;
+                    }
+                    if (cellsElement[rowIndex]) {
+                        updateCellsValue(protyle, blockElement as HTMLElement, row.trim(), [cellsElement[rowIndex]], columns, html);
+                        rowIndex++;
+                    } else {
+                        return true;
+                    }
+                })
+            } else {
+                updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns, html);
+            }
             document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {
             range.insertNode(document.createTextNode(text));

@@ -213,7 +213,7 @@ ${data.shorthandContent}
     </div>
     ${linkHTML}
 </div>
-<div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text">
+<div class="b3-typography b3-typography--default" style="padding: 0 8px 8px;user-select: text" data-type="textMenu">
 ${data.shorthandContent}
 </div>`;
         /// #endif

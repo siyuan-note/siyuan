@@ -124,6 +124,8 @@
     border-left: .25em solid var(--b3-theme-surface-lighter);
     background-color: var(--b3-bq-background);
     margin: 4px 0;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
   }
 
   .h1,

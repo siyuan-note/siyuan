@@ -95,6 +95,7 @@
     max-width: 248px;
     overflow: auto;
     max-height: calc(80vh - 24px);
+    scrollbar-gutter: stable;
 
     &__style {
       background-color: var(--b3-theme-background);

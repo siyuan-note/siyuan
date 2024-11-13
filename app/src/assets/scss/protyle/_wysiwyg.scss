@@ -466,8 +466,6 @@
 
   &--select,
   &--hl {
-    --b3-parent-background: transparent !important;
-
     &:after {
       background-color: var(--b3-theme-primary-lightest);
       position: absolute;
@@ -477,15 +475,8 @@
       left: 0;
       top: 0;
       border-radius: var(--b3-border-radius);
+      z-index: 3;
       pointer-events: none;
-    }
-
-    .table[custom-pinthead="true"] thead,
-    .av__row--footer,
-    .av__counter,
-    .av__row--header,
-    .av__colsticky {
-      background-color: transparent !important;
     }
   }
 

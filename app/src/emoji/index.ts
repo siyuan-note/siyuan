@@ -652,6 +652,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
     const dynamicTextElements: NodeListOf<HTMLInputElement> = dialog.element.querySelectorAll('[data-type="tab-dynamic"] [type="text"]');
     const dynamicTextImgElement = dialog.element.querySelector('.emoji__dynamic-item[data-type="text"]');
     dynamicTextElements[0].addEventListener("input", () => {
+        if (!dynamicTextElements[0].value.startsWith("#")) {
+            return;
+        }
         dialog.element.querySelectorAll(".emoji__dynamic-item").forEach(item => {
             const url = new URLSearchParams(item.getAttribute("src").replace(dynamicURL, ""));
             url.set("color", dynamicTextElements[0].value);

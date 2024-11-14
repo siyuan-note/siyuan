@@ -119,13 +119,14 @@
 
   blockquote,
   .bq {
-    padding: 4px;
+    padding-left: calc(0.25em + 4px);
     color: var(--b3-theme-on-surface);
-    border-left: .25em solid var(--b3-theme-surface-lighter);
+    box-shadow: .25em 0 0 0 var(--b3-theme-surface-lighter) inset;
     background-color: var(--b3-bq-background);
-    margin: 4px 0;
     border-top-left-radius: 0;
     border-bottom-left-radius: 0;
+    display: flex;
+    flex-direction: column;
   }
 
   .h1,

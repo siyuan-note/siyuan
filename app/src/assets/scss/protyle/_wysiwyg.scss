@@ -55,16 +55,6 @@
       }
     }
 
-    &.bq {
-      &.protyle-wysiwyg--select,
-      &.protyle-wysiwyg--hl {
-        &::after {
-          left: -0.25em;
-          width: calc(100% + 0.25em);
-        }
-      }
-    }
-
     .bq {
       .dragover {
         &__top:not(.av__row) {
@@ -94,6 +84,8 @@
     &.li {
       padding: 0;
       margin: 0;
+      display: flex;
+      flex-direction: column;
 
       &:before {
         content: "";
@@ -183,14 +175,6 @@
         padding-left: 16px;
         padding-top: 0;
         padding-bottom: 0;
-
-        &.protyle-wysiwyg--select,
-        &.protyle-wysiwyg--hl {
-          &::after {
-            left: 16px;
-            width: calc(100% - 16px);
-          }
-        }
       }
     }
 

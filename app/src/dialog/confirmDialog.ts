@@ -1,5 +1,6 @@
 import {isMobile} from "../util/functions";
 import {Dialog} from "./index";
+import {Constants} from "../constants";
 
 export const confirmDialog = (title: string, text: string,
                               confirm?: (dialog?: Dialog) => void,
@@ -33,4 +34,5 @@ export const confirmDialog = (title: string, text: string,
         }
         dialog.destroy();
     });
+    dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
 };

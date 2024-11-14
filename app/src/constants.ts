@@ -126,6 +126,7 @@ export abstract class Constants {
     public static readonly LOCAL_EMOJIS = "local-emojis";
 
     // dialog
+    public static readonly DIALOG_CONFIRM = "dialog-confirm";
     public static readonly DIALOG_OPENCARD = "dialog-opencard";
     public static readonly DIALOG_MAKECARD = "dialog-makecard";
     public static readonly DIALOG_VIEWCARDS = "dialog-viewcards";

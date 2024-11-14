@@ -876,6 +876,9 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         window.siyuan.menus.menu.remove();
+        if (document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_CONFIRM}"]`)) {
+            return;
+        }
         deleteFiles(liElements);
         return true;
     }

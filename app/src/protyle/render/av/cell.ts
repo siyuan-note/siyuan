@@ -669,13 +669,13 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                     if (!item) {
                         return;
                     }
-                    let hasSameContent = false
+                    let hasSameContent = false;
                     oldValue.mSelect.find((mSelectItem) => {
                         if (mSelectItem.content === item) {
-                            hasSameContent = true
-                            return true
+                            hasSameContent = true;
+                            return true;
                         }
-                    })
+                    });
                     if (hasSameContent) {
                         return;
                     }
@@ -683,8 +683,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                     newMSelectValue.push({
                         content: item,
                         color: colorIndex.toString()
-                    })
-                })
+                    });
+                });
                 value = oldValue.mSelect.concat(newMSelectValue);
             }
         }

@@ -194,7 +194,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         } else if (cellsElement.length > 0) {
             if (cellsElement.length > 1) {
                 // 选择多个单元格时，逐行填充
-                let rowIndex = 0
+                let rowIndex = 0;
                 text.split("\n").find((row) => {
                     if (!row) {
                         return false;
@@ -205,7 +205,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     } else {
                         return true;
                     }
-                })
+                });
             } else {
                 updateCellsValue(protyle, blockElement as HTMLElement, text, cellsElement, columns, html);
             }

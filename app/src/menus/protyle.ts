@@ -1716,9 +1716,9 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            const range = document.createRange()
+            const range = document.createRange();
             range.selectNode(tagElement);
-            focusByRange(range)
+            focusByRange(range);
             document.execCommand("copy");
         }
     }).element);
@@ -1726,9 +1726,9 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.cut,
         icon: "iconCut",
         click() {
-            const range = document.createRange()
+            const range = document.createRange();
             range.selectNode(tagElement);
-            focusByRange(range)
+            focusByRange(range);
             document.execCommand("cut");
         }
     }).element);
@@ -1780,9 +1780,9 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            const range = document.createRange()
+            const range = document.createRange();
             range.selectNode(element);
-            focusByRange(range)
+            focusByRange(range);
             document.execCommand("copy");
         }
     }).element);
@@ -1791,9 +1791,9 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
             icon: "iconCut",
             label: window.siyuan.languages.cut,
             click() {
-                const range = document.createRange()
+                const range = document.createRange();
                 range.selectNode(element);
-                focusByRange(range)
+                focusByRange(range);
                 document.execCommand("cut");
             }
         }).element);

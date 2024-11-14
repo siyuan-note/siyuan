@@ -201,7 +201,7 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
         "3": ["Sunday", "星期日", "星期日"],
         "4": ["SUNDAY", "星期天", "星期天"],
     };
-    let currentLang = 0
+    let currentLang = 0;
     if (lang === "") {
         lang = window.siyuan.config.lang;
     }
@@ -213,8 +213,8 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
     return `<option value="1" ${weekdayType === "1" ? " selected" : ""}>${dynamicWeekdayLang[1][currentLang]}</option>
 <option value="2" ${weekdayType === "2" ? " selected" : ""}>${dynamicWeekdayLang[2][currentLang]}</option>
 <option value="3" ${weekdayType === "3" ? " selected" : ""}>${dynamicWeekdayLang[3][currentLang]}</option>
-<option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`
-}
+<option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`;
+};
 
 export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, avCB?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {
@@ -235,7 +235,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     if (dynamicImgElement && dynamicImgElement.getAttribute("src").startsWith(dynamicURL)) {
         const dynamicCurrentUrl = new URLSearchParams(dynamicImgElement.getAttribute("src").replace(dynamicURL, ""));
         dynamicCurrentObj.color = dynamicCurrentUrl.get("color") || "#d23f31";
-        if (!dynamicCurrentObj.color.startsWith('#')) {
+        if (!dynamicCurrentObj.color.startsWith("#")) {
             dynamicCurrentObj.color = "#" + dynamicCurrentObj.color;
         }
         dynamicCurrentObj.lang = dynamicCurrentUrl.get("lang") || "";
@@ -631,7 +631,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 url.delete("lang");
             }
             item.setAttribute("src", dynamicURL + url.toString());
-            dynamicLangElements[1].innerHTML = genWeekdayOptions(dynamicLangElements[0].value, dynamicLangElements[1].value)
+            dynamicLangElements[1].innerHTML = genWeekdayOptions(dynamicLangElements[0].value, dynamicLangElements[1].value);
         });
     });
     dynamicLangElements[1].addEventListener("change", () => {

@@ -1,4 +1,5 @@
 {
+  "fields": "Atributo",
   "dynamicEmoji": "Icône dynamique",
   "backlinkContainChildren": "¿Los enlaces inversos contienen bloques secundarios?",
   "backlinkContainChildrenTip": "Una vez habilitado, los bloques secundarios se incluirán en el cálculo de los enlaces inversos",

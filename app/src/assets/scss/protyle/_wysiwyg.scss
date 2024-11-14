@@ -68,7 +68,7 @@
     }
 
     &.list {
-      padding-left: 0;
+      padding: 0;
 
       .dragover {
         &__top:not(.av__row) {
@@ -157,24 +157,21 @@
       }
 
       & > div:nth-child(2) {
-        margin-top: 0 !important;
+        margin-top: 0;
+      }
+
+      & > div:nth-last-child(2) {
+        margin-bottom: 0;
       }
 
       & > [data-node-id] {
-        margin-left: 34px !important;
+        margin-left: 34px;
         padding-right: 0;
 
         &.code-block {
           margin-top: 4px;
           margin-bottom: 4px;
         }
-      }
-
-      & > .list {
-        margin-left: 18px !important;
-        padding-left: 16px;
-        padding-top: 0;
-        padding-bottom: 0;
       }
     }
 

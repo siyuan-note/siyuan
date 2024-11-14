@@ -1,6 +1,6 @@
 {
   "fields": "Campi",
-  "dynamicEmoji": "動的アイコン",
+  "dynamicEmoji": "Emoji dinamica",
   "backlinkContainChildren": "I backlink contengono blocchi figli",
   "backlinkContainChildrenTip": "Dopo l'attivazione, i blocchi figli saranno inclusi nel calcolo dei backlink",
   "entryNum": "Numero di voci",

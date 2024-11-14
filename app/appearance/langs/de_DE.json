@@ -1,6 +1,6 @@
 {
   "fields": "Attribut",
-  "dynamicEmoji": "Icône dynamique",
+  "dynamicEmoji": "Dynamisches Icon",
   "backlinkContainChildren": "Enthalten Rückverweise untergeordnete Blöcke",
   "backlinkContainChildrenTip": "Wenn aktiviert, werden untergeordnete Blöcke in die Berechnung der Rückverweise einbezogen",
   "entryNum": "Anzahl der Einträge",

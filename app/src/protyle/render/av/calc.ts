@@ -148,28 +148,6 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             colId,
             avId,
             oldOperator,
-            operator: "Count values",
-            data: panelData?.data,
-            blockID,
-            target: calcElement
-        });
-        calcItem({
-            menu,
-            protyle,
-            colId,
-            avId,
-            oldOperator,
-            operator: "Count unique values",
-            data: panelData?.data,
-            blockID,
-            target: calcElement
-        });
-        calcItem({
-            menu,
-            protyle,
-            colId,
-            avId,
-            oldOperator,
             operator: "Count empty",
             data: panelData?.data,
             blockID,
@@ -182,6 +160,28 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             avId,
             oldOperator,
             operator: "Count not empty",
+            data: panelData?.data,
+            blockID,
+            target: calcElement
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Count values",
+            data: panelData?.data,
+            blockID,
+            target: calcElement
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Count unique values",
             data: panelData?.data,
             blockID,
             target: calcElement

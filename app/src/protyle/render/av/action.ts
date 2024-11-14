@@ -270,7 +270,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         /// #if !MOBILE
         const blockId = ids[0];
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
-        openSubmenus.push({type: "separator"});
+        openSubmenus.push({id: "separator_3", type: "separator"});
         openSubmenus.push({
             icon: "iconAttr",
             label: window.siyuan.languages.attr,
@@ -581,7 +581,7 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", '<span class="fn__space
         });
         menu.addItem({
             icon: "iconAttr",
-            label: window.siyuan.languages.attr,
+            label: window.siyuan.languages.fields,
             type: "submenu",
             submenu: editAttrSubmenu
         });

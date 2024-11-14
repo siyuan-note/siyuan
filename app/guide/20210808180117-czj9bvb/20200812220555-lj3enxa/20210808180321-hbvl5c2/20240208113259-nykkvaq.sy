@@ -122,7 +122,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "添加不同类型的属性"
+									"Data": "添加不同类型的字段"
 								}
 							]
 						}
@@ -150,7 +150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "添加行"
+									"Data": "添加条目"
 								}
 							]
 						},
@@ -184,7 +184,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非内容块：直接在表格中添加的行，不绑定到任何内容块"
+													"Data": "非内容块：直接在表格中添加的条目，不绑定到任何内容块"
 												}
 											]
 										}
@@ -212,7 +212,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "内容块：通过拖拽到表格添加的行，或者通过块标菜单 "
+													"Data": "内容块：通过拖拽到表格添加的条目，或者通过块标菜单 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -221,7 +221,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ 添加的行"
+													"Data": "​ 添加的条目"
 												}
 											]
 										}
@@ -436,7 +436,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "行计数"
+					"TextMarkTextContent": "条目数"
 				},
 				{
 					"Type": "NodeText",
@@ -480,7 +480,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "中介绍的语法访问、计算并渲染同一条数据中其他属性的值："
+					"Data": "中介绍的语法访问、计算并渲染同一条数据中其他字段的值："
 				}
 			]
 		},
@@ -520,11 +520,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .属性名 }"
+									"TextMarkTextContent": ".action{ .字段名 }"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 访问视图属性"
+									"Data": "​ 访问视图字段"
 								}
 							]
 						}
@@ -596,7 +596,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 属性演示了 "
+					"Data": "​ 字段演示了 "
 				},
 				{
 					"Type": "NodeTextMark",

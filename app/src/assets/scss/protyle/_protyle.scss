@@ -347,15 +347,15 @@
   margin: 34px 16px 0 24px;
   position: relative;
   font-size: 16px;
-  border-radius: var(--b3-border-radius);
   font-family: var(--b3-font-family-protyle);
+  padding-left: 2px;
 
   &:hover .protyle-title__icon {
     opacity: 1;
   }
 
   &[custom-riff-decks] {
-    box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
   }
 
   &__icon {
@@ -389,7 +389,7 @@
     font-size: 2em;
     font-weight: bold;
     line-height: 1.625;
-    padding: 0 4px;
+    padding: 0 4px 0 2px;
     white-space: break-spaces;
 
     &:empty:after {

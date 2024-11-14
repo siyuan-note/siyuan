@@ -119,12 +119,20 @@
 
   blockquote,
   .bq {
-    padding-left: calc(0.25em + 4px);
+    &:before {
+      content: '';
+      background-color: var(--b3-theme-surface-lighter);
+      width: .25em;
+      border-radius: var(--b3-border-radius);
+      position: absolute;
+      left: 2px;
+      top: 6px;
+      bottom: 6px;
+    }
+
+    padding-left: calc(0.25em + 6px);
     color: var(--b3-theme-on-surface);
-    box-shadow: .25em 0 0 0 var(--b3-theme-surface-lighter) inset;
     background-color: var(--b3-bq-background);
-    border-top-left-radius: 0;
-    border-bottom-left-radius: 0;
     display: flex;
     flex-direction: column;
   }

@@ -752,11 +752,22 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			targetPath = strings.ReplaceAll(targetPath, ".sy/", "/")
 			targetPath += ".sy"
-			targetPaths[curRelPath] = targetPath
+			if _, ok := targetPaths[curRelPath]; !ok {
+				targetPaths[curRelPath] = targetPath
+			} else {
+				targetPath = targetPaths[curRelPath]
+				id = strings.TrimSuffix(path.Base(targetPath), ".sy")
+			}
 
 			if info.IsDir() {
 				if subMdFiles := util.GetFilePathsByExts(currentPath, []string{".md", ".markdown"}); 1 > len(subMdFiles) {
 					// 如果该文件夹中不包含 Markdown 文件则不处理 https://github.com/siyuan-note/siyuan/issues/11567
+					return nil
+				}
+
+				// 如果当前文件夹路径下包含同名的 Markdown 文件，则不创建空文档 https://github.com/siyuan-note/siyuan/issues/13149
+				if gulu.File.IsExist(currentPath+".md") || gulu.File.IsExist(currentPath+".markdown") {
+					targetPaths[curRelPath+".md"] = targetPath
 					return nil
 				}
 

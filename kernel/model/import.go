@@ -366,23 +366,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
 	}
 
-	// 清理一些冗余的数据
-	avDir := filepath.Join(util.DataDir, "storage", "av")
-	for _, tree := range trees {
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			ial := parse.IAL2Map(n.KramdownIAL)
-			avIDs := strings.Split(ial[av.NodeAttrNameAvs], ",")
-			for _, avID := range avIDs {
-				if !filelock.IsExist(filepath.Join(avDir, avID+".json")) {
-					n.RemoveIALAttr(av.NodeAttrNameAvs)
+	if 1 > len(avIDs) { // 如果本次没有导入数据库，则清理掉文档中的数据库属性 https://github.com/siyuan-note/siyuan/issues/13011
+		for _, tree := range trees {
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
 				}
-			}
-			return ast.WalkContinue
-		})
+
+				n.RemoveIALAttr(av.NodeAttrNameAvs)
+				return ast.WalkContinue
+			})
+		}
 	}
 
 	// 写回 .sy

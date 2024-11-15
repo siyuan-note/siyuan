@@ -34,6 +34,11 @@ import (
 	"github.com/steambap/captcha"
 )
 
+var (
+	BasicAuthHeaderKey   = "WWW-Authenticate"
+	BasicAuthHeaderValue = "Basic realm=\"SiYuan Authorization Require\", charset=\"UTF-8\""
+)
+
 func LogoutAuth(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -300,8 +305,8 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// WebDAV BasicAuth Authenticate
-	if strings.HasPrefix(c.Request.RequestURI, "/webdav") {
-		c.Header("WWW-Authenticate", "Basic realm=Authorization Required")
+	if strings.HasPrefix(c.Request.RequestURI, "/webdav") || strings.HasPrefix(c.Request.RequestURI, "/carddav") {
+		c.Header(BasicAuthHeaderKey, BasicAuthHeaderValue)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return
 	}

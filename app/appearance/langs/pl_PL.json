@@ -1,6 +1,6 @@
 {
   "fields": "Atrybut",
-  "dynamicEmoji": "Динамическая иконка",
+  "dynamicEmoji": "Ikona dynamiczna",
   "backlinkContainChildren": "Czy linki zwrotne zawierają bloki podrzędne",
   "backlinkContainChildrenTip": "Po włączeniu bloki podrzędne zostaną uwzględnione w obliczeniach linków zwrotnych",
   "entryNum": "Количество записей",

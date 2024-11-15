@@ -27,6 +27,7 @@ import (
 	"image/png"
 	"io"
 	"io/fs"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -798,6 +799,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
+			unescapedTitle, unescapeErr := url.QueryUnescape(title)
+			if nil == unescapeErr {
+				title = unescapedTitle
+			}
+			hPath = path.Join(path.Dir(hPath), title)
 			updated := yfmUpdated
 			fname := path.Base(targetPath)
 			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
@@ -914,6 +920,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		}
 		if "" != yfmTitle {
 			title = yfmTitle
+		}
+		unescapedTitle, unescapeErr := url.QueryUnescape(title)
+		if nil == unescapeErr {
+			title = unescapedTitle
 		}
 		updated := yfmUpdated
 		fname := path.Base(targetPath)
@@ -1344,8 +1354,8 @@ func convertTags(text string) (ret string) {
 
 // buildBlockRefInText 将文本节点进行结构化处理。
 func buildBlockRefInText() {
-	lute := NewLute()
-	lute.SetHTMLTag2TextMark(true)
+	luteEngine := NewLute()
+	luteEngine.SetHTMLTag2TextMark(true)
 	for _, tree := range importTrees {
 		tree.MergeText()
 
@@ -1359,7 +1369,7 @@ func buildBlockRefInText() {
 				return ast.WalkContinue
 			}
 
-			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
+			t := parse.Inline("", n.Tokens, luteEngine.ParseOptions) // 使用行级解析
 			parse.NestedInlines2FlattedSpans(t, false)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {

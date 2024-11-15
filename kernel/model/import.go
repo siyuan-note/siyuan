@@ -54,8 +54,21 @@ import (
 )
 
 func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
+	tree, withMath := HTML2Tree(htmlStr, luteEngine)
+
+	var formatted []byte
+	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
+		renderer.ExtRendererFuncs[nodeType] = rendererFunc
+	}
+	formatted = renderer.Render()
+	markdown = gulu.Str.FromBytes(formatted)
+	return
+}
+
+func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
-	tree := luteEngine.HTML2Tree(htmlStr)
+	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -79,19 +92,11 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 
 		dest := n.TokensStr()
 		if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-			processBase64Img(n, dest, assetDirPath, err)
+			processBase64Img(n, dest, assetDirPath)
 			return ast.WalkContinue
 		}
 		return ast.WalkContinue
 	})
-
-	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
-	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
-		renderer.ExtRendererFuncs[nodeType] = rendererFunc
-	}
-	formatted = renderer.Render()
-	markdown = gulu.Str.FromBytes(formatted)
 	return
 }
 
@@ -836,7 +841,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-					processBase64Img(n, dest, assetDirPath, err)
+					processBase64Img(n, dest, assetDirPath)
 					return ast.WalkContinue
 				}
 
@@ -953,7 +958,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-				processBase64Img(n, dest, assetDirPath, err)
+				processBase64Img(n, dest, assetDirPath)
 				return ast.WalkContinue
 			}
 
@@ -1046,7 +1051,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	return
 }
 
-func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) {
+func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	base64TmpDir := filepath.Join(util.TempDir, "base64")
 	os.MkdirAll(base64TmpDir, 0755)
 
@@ -1110,7 +1115,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) 
 	tmpFile.Close()
 
 	assetTargetPath := filepath.Join(assetDirPath, name)
-	if err = filelock.Copy(tmp, assetTargetPath); err != nil {
+	if err := filelock.Copy(tmp, assetTargetPath); err != nil {
 		logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", tmp, assetTargetPath, err)
 		return
 	}

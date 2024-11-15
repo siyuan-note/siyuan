@@ -262,10 +262,23 @@ func getNodeRefText(node *ast.Node) string {
 		ret = util.EscapeHTML(ret)
 		return ret
 	}
-	return getNodeRefText0(node)
+	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 }
 
-func getNodeRefText0(node *ast.Node) string {
+func getNodeAvBlockText(node *ast.Node) string {
+	if nil == node {
+		return ""
+	}
+
+	if ret := node.IALAttr("name"); "" != ret {
+		ret = strings.TrimSpace(ret)
+		ret = util.EscapeHTML(ret)
+		return ret
+	}
+	return getNodeRefText0(node, 1024)
+}
+
+func getNodeRefText0(node *ast.Node, maxLen int) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:
 		return "Query Embed Block..."
@@ -289,8 +302,8 @@ func getNodeRefText0(node *ast.Node) string {
 		node = treenode.FirstLeafBlock(node)
 	}
 	ret := renderBlockText(node, nil)
-	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(ret) {
-		ret = gulu.Str.SubStr(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
+	if maxLen < utf8.RuneCountInString(ret) {
+		ret = gulu.Str.SubStr(ret, maxLen) + "..."
 	}
 	return ret
 }

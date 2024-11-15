@@ -1981,7 +1981,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	}
 
 	if !isDetached {
-		addingBlockContent = getNodeRefText(node)
+		addingBlockContent = getNodeAvBlockText(node)
 	}
 
 	// 检查是否重复添加相同的块
@@ -2936,7 +2936,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				if !operation.IsDetached {
 					bindBlockAv0(tx, operation.AvID, node, tree)
 					value.IsDetached = false
-					value.Block.Content = getNodeRefText(node)
+					value.Block.Content = getNodeAvBlockText(node)
 					value.UpdatedAt = now
 					err = av.SaveAttributeView(attrView)
 				}
@@ -2973,7 +2973,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				value.Block.ID = operation.NextID
 				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					value.Block.Content = getNodeRefText(node)
+					value.Block.Content = getNodeAvBlockText(node)
 				}
 			}
 

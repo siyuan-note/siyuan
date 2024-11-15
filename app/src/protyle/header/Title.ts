@@ -105,7 +105,8 @@ export class Title {
             if (event.key === "ArrowDown") {
                 const rects = getSelection().getRangeAt(0).getClientRects();
                 // https://github.com/siyuan-note/siyuan/issues/11729
-                if (this.editElement.getBoundingClientRect().bottom - rects[rects.length - 1].bottom < 25) {
+                if (rects.length === 0 // 标题为空时时
+                    || this.editElement.getBoundingClientRect().bottom - rects[rects.length - 1].bottom < 25) {
                     const noContainerElement = getNoContainerElement(protyle.wysiwyg.element.firstElementChild);
                     // https://github.com/siyuan-note/siyuan/issues/4923
                     if (noContainerElement) {

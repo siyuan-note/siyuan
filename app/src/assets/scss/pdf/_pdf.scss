@@ -139,13 +139,13 @@
   position: absolute;
   top: 30px;
   bottom: 0;
-  width: var(--b3-pdf-sidebar-width);
+  width: var(--sidebar-width);
   visibility: hidden;
   z-index: 3;
   transition-duration: 200ms;
   transition-timing-function: ease;
   transition-property: left;
-  left: calc(0px - var(--b3-pdf-sidebar-width));
+  left: calc(0px - var(--sidebar-width));
   background-color: var(--b3-theme-surface);
 }
 
@@ -208,7 +208,7 @@
 #outerContainer.sidebarOpen
 #viewerContainer:not(.pdfPresentationMode) {
   transition-property: left;
-  left: var(--b3-pdf-sidebar-width);
+  left: var(--sidebar-width);
 }
 
 #toolbarSidebar,
@@ -265,7 +265,7 @@
 }
 
 #outerContainer.sidebarOpen #loadingBar {
-  left: var(--b3-pdf-sidebar-width);
+  left: var(--sidebar-width);
 }
 
 #outerContainer.sidebarResizing #loadingBar {
@@ -475,7 +475,10 @@
 }
 
 #thumbnailView .thumbnail {
-  margin-bottom: 5px;
+  float: left;
+  width: var(--thumbnail-width);
+  height: var(--thumbnail-height);
+  margin: 0 10px 5px;
   padding: 1px;
   border: 7px solid transparent;
   border-radius: 2px;
@@ -490,12 +493,9 @@
 }
 
 .thumbnailImage {
-  border: 1px solid rgba(0, 0, 0, 0);
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3);
-  opacity: .8;
-  z-index: 99;
-  background-color: rgba(255, 255, 255, 1);
-  background-clip: content-box;
+  width: var(--thumbnail-width);
+  height: var(--thumbnail-height);
+  opacity: 0.9;
 }
 
 .thumbnailSelectionRing {

@@ -170,7 +170,7 @@
 
     /* PDF */
     --b3-pdf-selection: #779170;
-    --b3-pdf-sidebar-width: 200px;
+    --sidebar-width: 200px;
     --b3-pdf-offset: 0;
     --b3-pdf-background1: var(--b3-theme-error);
     --b3-pdf-background2: #f5822e;

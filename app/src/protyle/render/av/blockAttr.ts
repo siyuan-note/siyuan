@@ -67,7 +67,10 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "mSelect":
         case "select":
-            value.mSelect?.forEach(item => {
+            value.mSelect?.forEach((item, index) => {
+                if (value.type === "select" && index > 0) {
+                    return;
+                }
                 html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
             });
             break;

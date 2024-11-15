@@ -794,7 +794,10 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
-        cellValue?.mSelect?.forEach((item) => {
+        cellValue?.mSelect?.forEach((item, index) => {
+            if (cellValue.type === "select" && index > 0) {
+                return;
+            }
             text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
         });
     } else if (cellValue.type === "date") {

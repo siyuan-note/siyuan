@@ -23,16 +23,13 @@ import (
 	"unicode/utf8"
 
 	"github.com/88250/gulu"
-
 	"github.com/88250/lute/lex"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (pos int, marked string) {
 	if "" == keyword {
-		return -1, util.EscapeHTML(text)
+		return -1, text
 	}
-	text = util.EscapeHTML(text)
 	keywords := SplitKeyword(keyword)
 	marked = EncloseHighlighting(text, keywords, "<mark>", "</mark>", caseSensitive, false)
 

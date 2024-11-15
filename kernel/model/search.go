@@ -618,11 +618,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 						if 0 == method {
 							if strings.Contains(n.TextMarkTextContent, escapedKey) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
+								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, util.EscapeHTML(replacement))
 							}
 						} else if 3 == method {
 							if nil != escapedR && escapedR.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, replacement)
+								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, util.EscapeHTML(replacement))
 							}
 						}
 					} else if n.IsTextMarkType("a") {
@@ -1559,12 +1559,11 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
 	tag, _ := markSearch(sqlBlock.Tag, terms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
-	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
+	fContent := sqlBlock.FContent
 	block = &Block{
 		Box:      sqlBlock.Box,
 		Path:     sqlBlock.Path,

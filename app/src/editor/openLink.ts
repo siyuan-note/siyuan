@@ -31,15 +31,15 @@ export const openLink = (protyle: IProtyle, aLink: string, event?: MouseEvent, c
         ) {
             if (event && event.altKey) {
                 openAsset(protyle.app, linkAddress, pdfParams);
-            } else if (ctrlIsPressed) {
-                /// #if !BROWSER
-                openBy(linkAddress, "folder");
-                /// #else
-                openByMobile(linkAddress);
-                /// #endif
             } else if (event && event.shiftKey) {
                 /// #if !BROWSER
                 openBy(linkAddress, "app");
+                /// #else
+                openByMobile(linkAddress);
+                /// #endif
+            } else if (ctrlIsPressed) {
+                /// #if !BROWSER
+                openBy(linkAddress, "folder");
                 /// #else
                 openByMobile(linkAddress);
                 /// #endif

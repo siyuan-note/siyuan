@@ -2177,7 +2177,7 @@ export class WYSIWYG {
             if (backlinkBreadcrumbItemElement) {
                 const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
                 if (breadcrumbId) {
-                    if (ctrlIsPressed) {
+                    if (ctrlIsPressed && !event.shiftKey && !event.altKey) {
                         checkFold(breadcrumbId, (zoomIn) => {
                             openFileById({
                                 app: protyle.app,
@@ -2373,7 +2373,7 @@ export class WYSIWYG {
             }
 
             const tagElement = hasClosestByAttribute(event.target, "data-type", "tag");
-            if (tagElement && !event.altKey) {
+            if (tagElement && !event.altKey && !event.shiftKey) {
                 /// #if !MOBILE
                 openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, !ctrlIsPressed, {method: 0});
                 hideElements(["dialog"]);
@@ -2769,7 +2769,7 @@ export class WYSIWYG {
                 focusByRange(range);
             }
 
-            if (ctrlIsPressed && range.toString() === "") {
+            if (ctrlIsPressed && range.toString() === "" && !event.shiftKey && !event.altKey) {
                 let ctrlElement = hasClosestBlock(event.target);
                 if (ctrlElement) {
                     const embedBlockElement = isInEmbedBlock(ctrlElement);

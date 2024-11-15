@@ -18,6 +18,7 @@ package api
 
 import (
 	"fmt"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"math"
 	"net/http"
 	"regexp"
@@ -27,7 +28,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
-	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type ColorScheme struct {
@@ -115,11 +115,20 @@ func darkenColor(hexColor string, factor float64) string {
 func getDynamicIcon(c *gin.Context) {
 	// Add internal kernel API `/api/icon/getDynamicIcon` https://github.com/siyuan-note/siyuan/pull/12939
 
-	iconType := c.DefaultQuery("type", "1")
+	iconType := c.Query("type")
+	if "" == iconType {
+		iconType = "1"
+	}
 	color := c.Query("color") // 不要预设默认值，不然type6返回星期就没法自动设置周末颜色了
 	date := c.Query("date")
-	lang := c.DefaultQuery("lang", util.Lang)
-	weekdayType := c.DefaultQuery("weekdayType", "1") // 设置星期几的格式，zh_CH {1：周日，2：周天， 3：星期日，4：星期天，}, en_US {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
+	lang := c.Query("lang")
+	if "" == lang {
+		lang = util.Lang
+	}
+	weekdayType := c.Query("weekdayType") // 设置星期几的格式，zh_CH {1：周日，2：周天， 3：星期日，4：星期天，}, en_US {1: Mon, 2: MON，3: Monday, 4. MONDAY,}
+	if "" == weekdayType {
+		weekdayType = "1"
+	}
 
 	dateInfo := getDateInfo(date, lang, weekdayType)
 	var svg string

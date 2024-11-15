@@ -907,45 +907,45 @@ export const addResize = (obj: Layout | Wnd) => {
         const previousElement = resizeElement.previousElementSibling as HTMLElement;
         const nextElement = resizeElement.nextElementSibling as HTMLElement;
         if (previousElement && nextElement) {
-            const bigType = ["graph", "inbox", "globalGraph", "backlink"]
-            let size = 232
+            const bigType = ["graph", "inbox", "globalGraph", "backlink"];
+            let size = 232;
             nextElement.style.transition = "none";
             previousElement.style.transition = "none";
             if (resizeElement.classList.contains("layout__resize--lr")) {
                 if (previousElement.classList.contains("layout__dockl")) {
                     document.querySelectorAll("#dockLeft .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
-                            size = 320
+                            size = 320;
                         }
-                    })
-                    previousElement.style.width = size + 'px'
+                    });
+                    previousElement.style.width = size + "px";
                     window.siyuan.layout.leftDock.setSize();
                 } else if (nextElement.classList.contains("layout__dockr")) {
                     document.querySelectorAll("#dockRight .dock__item--active").forEach(item => {
                         if (bigType.includes(item.getAttribute("data-type"))) {
-                            size = 320
+                            size = 320;
                         }
-                    })
-                    nextElement.style.width = size + 'px'
+                    });
+                    nextElement.style.width = size + "px";
                     window.siyuan.layout.rightDock.setSize();
                 } else {
-                    previousElement.style.width = ''
-                    nextElement.style.width = ''
-                    previousElement.classList.add("fn__flex-1")
-                    nextElement.classList.add("fn__flex-1")
+                    previousElement.style.width = "";
+                    nextElement.style.width = "";
+                    previousElement.classList.add("fn__flex-1");
+                    nextElement.classList.add("fn__flex-1");
                     if (resizeElement.parentElement.classList.contains("layout__dockb")) {
                         window.siyuan.layout.bottomDock.setSize();
                     }
                 }
             } else {
                 if (nextElement.classList.contains("layout__dockb")) {
-                    nextElement.style.height = '232px'
+                    nextElement.style.height = "232px";
                     window.siyuan.layout.bottomDock.setSize();
                 } else {
-                    previousElement.style.height = ''
-                    nextElement.style.height = ''
-                    previousElement.classList.add("fn__flex-1")
-                    nextElement.classList.add("fn__flex-1")
+                    previousElement.style.height = "";
+                    nextElement.style.height = "";
+                    previousElement.classList.add("fn__flex-1");
+                    nextElement.classList.add("fn__flex-1");
                     if (resizeElement.parentElement.classList.contains("layout__dockl")) {
                         window.siyuan.layout.leftDock.setSize();
                     } else if (resizeElement.parentElement.classList.contains("layout__dockr")) {

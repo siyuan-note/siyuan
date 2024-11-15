@@ -817,13 +817,13 @@ export class Dock {
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element
+                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
                     item.setAttribute("data-height", dockElement.style.height ? dockElement.clientHeight.toString() : "");
                 }
                 item.setAttribute("data-width", this.layout.element.clientWidth.toString());
             } else {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element
+                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
                     item.setAttribute("data-width", dockElement.style.width ? dockElement.clientWidth.toString() : "");
                 }
                 item.setAttribute("data-height", this.layout.element.clientHeight.toString());

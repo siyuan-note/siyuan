@@ -1180,7 +1180,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // https://github.com/siyuan-note/siyuan/issues/12989
                 const cardElement = hasClosestByClassName(range.startContainer, "card__main", true);
                 if (cardElement && document.activeElement && document.activeElement.classList.contains("protyle-wysiwyg")) {
-                    (cardElement.querySelector(".card__action:not(.fn__none) button") as HTMLElement).focus()
+                    (cardElement.querySelector(".card__action:not(.fn__none) button") as HTMLElement).focus();
                     hideElements(["select"], protyle);
                 }
             } else {

@@ -35,7 +35,7 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
@@ -60,7 +60,9 @@ const (
 )
 
 var (
-	cookieStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	// 这里用的是内存存储，意味着重启后所有 session 会丢失，需要重新登录
+	sessionStore = memstore.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+
 	HttpMethods = []string{
 		http.MethodGet,
 		http.MethodHead,
@@ -122,13 +124,13 @@ func Serve(fastMode bool) {
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm"})),
 	)
 
-	cookieStore.Options(sessions.Options{
+	sessionStore.Options(sessions.Options{
 		Path:   "/",
 		Secure: util.SSL,
 		//MaxAge:   60 * 60 * 24 * 7, // 默认是 Session
 		HttpOnly: true,
 	})
-	ginServer.Use(sessions.Sessions("siyuan", cookieStore))
+	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)
@@ -524,7 +526,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 		authOk := true
 
 		if "" != model.Conf.AccessAuthCode {
-			session, err := cookieStore.Get(s.Request, "siyuan")
+			session, err := sessionStore.Get(s.Request, "siyuan")
 			if err != nil {
 				authOk = false
 				logging.LogErrorf("get cookie failed: %s", err)

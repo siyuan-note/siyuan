@@ -136,6 +136,14 @@ export const getEditorRange = (element: Element) => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element.isSameNode(range.startContainer) || element.contains(range.startContainer)) {
+            // 有时候点击编辑器头部需要矫正到第一个块中
+            if (range.toString() === "" && range.startContainer.nodeType === 1 && range.startOffset === 0 &&
+                (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
+                const focusRange = focusBlock(range.startContainer.firstChild as Element);
+                if (focusRange) {
+                    return focusRange;
+                }
+            }
             return range;
         }
     }

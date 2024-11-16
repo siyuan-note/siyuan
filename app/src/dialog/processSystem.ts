@@ -173,6 +173,9 @@ export const setDefRefCount = (data: {
 }) => {
     getAllEditor().forEach(editor => {
         if (data.rootID === data.blockID && editor.protyle.block.rootID === data.rootID) {
+            if (!editor.protyle.title) {
+                return;
+            }
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");
             const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {

@@ -203,7 +203,7 @@ export const bindCardEvent = async (options: {
     }
     options.element.setAttribute("data-key", Constants.DIALOG_OPENCARD);
     const actionElements = options.element.querySelectorAll(".card__action");
-    if (options.index === 0) {
+    if (options.index === 0 || typeof options.index === "undefined") {
         actionElements[0].firstElementChild.setAttribute("disabled", "disabled");
     } else {
         actionElements[0].firstElementChild.removeAttribute("disabled");

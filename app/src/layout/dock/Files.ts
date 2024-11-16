@@ -1,4 +1,4 @@
-import {escapeHtml} from "../../util/escape";
+import {escapeAriaLabel, escapeGreat, escapeHtml} from "../../util/escape";
 import {Tab} from "../Tab";
 import {Model} from "../Model";
 import {getInstanceById, setPanelFocus} from "../util";
@@ -42,7 +42,7 @@ export class Files extends Model {
                 if (data) {
                     switch (data.cmd) {
                         case "reloadDocInfo":
-                            this.element.querySelector(`li[data-node-id="${data.data.rootID}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data));
+                            this.element.querySelector(`li[data-node-id="${data.data.rootID}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data, false));
                             break;
                         case "moveDoc":
                             this.onMove(data);
@@ -1140,8 +1140,8 @@ export class Files extends Model {
         setStorageVal(Constants.LOCAL_FILESPATHS, filesPaths);
     }
 
-    private genDocAriaLabel(item: IFile) {
-        return `${getDisplayName(item.name, true, true)} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
+    private genDocAriaLabel(item: IFile, escape = true) {
+        return `${escape ? escapeAriaLabel(getDisplayName(item.name, true, true)) : escapeGreat(getDisplayName(item.name, true, true))} <small class='ft__on-surface'>${item.hSize}</small>${item.bookmark ? "<br>" + window.siyuan.languages.bookmark + " " + item.bookmark : ""}${item.name1 ? "<br>" + window.siyuan.languages.name + " " + item.name1 : ""}${item.alias ? "<br>" + window.siyuan.languages.alias + " " + item.alias : ""}${item.memo ? "<br>" + window.siyuan.languages.memo + " " + item.memo : ""}${item.subFileCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", item.subFileCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${item.hMtime}<br>${window.siyuan.languages.createdAt} ${item.hCtime}`;
     }
 
     private genFileHTML(item: IFile) {
@@ -1159,7 +1159,7 @@ class="b3-list-item b3-list-item--hide-action" data-path="${item.path}">
     </span>
     <span class="b3-list-item__icon b3-tooltips b3-tooltips__n popover__block" data-id="${item.id}" aria-label="${window.siyuan.languages.changeIcon}">${unicode2Emoji(item.icon || (item.subFileCount === 0 ? window.siyuan.storage[Constants.LOCAL_IMAGES].file : window.siyuan.storage[Constants.LOCAL_IMAGES].folder))}</span>
     <span class="b3-list-item__text ariaLabel" data-position="parentE"
-aria-label="${escapeHtml(ariaLabel)}">${getDisplayName(item.name, true, true)}</span>
+aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
     <span data-type="more-file" class="b3-list-item__action b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.more}">
         <svg><use xlink:href="#iconMore"></use></svg>
     </span>

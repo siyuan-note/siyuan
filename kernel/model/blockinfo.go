@@ -455,10 +455,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			continue
 		}
 		id := parent.ID
-		fc := parent.FirstChild
-		if nil != fc && ast.NodeTaskListItemMarker == fc.Type {
-			fc = fc.Next
-		}
+		fc := treenode.FirstLeafBlock(parent)
 
 		name := parent.IALAttr("name")
 		if ast.NodeDocument == parent.Type {
@@ -467,7 +464,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 			name, _ = av.GetAttributeViewName(parent.AttributeViewID)
 		} else {
 			if "" == name {
-				if ast.NodeListItem == parent.Type {
+				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
 					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes), maxNameLen)

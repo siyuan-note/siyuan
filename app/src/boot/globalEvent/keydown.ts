@@ -1371,6 +1371,11 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
 
+        // 闪卡长按 Esc 光标定位到闪卡按钮上 https://github.com/siyuan-note/siyuan/issues/12989
+        if (document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
+            return;
+        }
+
         if (window.siyuan.dialogs.length > 0) {
             window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
             return;
@@ -1404,10 +1409,6 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
 
-        // 闪卡长按 Esc 光标定位到闪卡按钮上 https://github.com/siyuan-note/siyuan/issues/12989
-        if (document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
-            return;
-        }
         // 光标在文档树等面板中，按 Esc 回到编辑器中 https://github.com/siyuan-note/siyuan/issues/4289
         if (getSelection().rangeCount > 0) {
             const range = getSelection().getRangeAt(0);

@@ -358,6 +358,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 			return
 		}
 
+		if isMovingParentIntoChild(srcNode, targetNode) {
+			return
+		}
+
 		for i := len(headingChildren) - 1; -1 < i; i-- {
 			c := headingChildren[i]
 			targetNode.InsertAfter(c)
@@ -404,6 +408,10 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 	}
 
 	if isMovingFoldHeadingIntoSelf(targetNode, headingChildren) {
+		return
+	}
+
+	if isMovingParentIntoChild(srcNode, targetNode) {
 		return
 	}
 
@@ -468,6 +476,15 @@ func isMovingFoldHeadingIntoSelf(targetNode *ast.Node, headingChildren []*ast.No
 	for _, headingChild := range headingChildren {
 		if headingChild.ID == targetNode.ID {
 			// 不能将折叠标题移动到自己下方节点的前或后 https://github.com/siyuan-note/siyuan/issues/7163
+			return true
+		}
+	}
+	return false
+}
+
+func isMovingParentIntoChild(srcNode, targetNode *ast.Node) bool {
+	for parent := targetNode.Parent; nil != parent; parent = parent.Parent {
+		if parent.ID == srcNode.ID {
 			return true
 		}
 	}

@@ -74,7 +74,7 @@ export const getContenteditableElement = (element: Element) => {
     if (editableElement && !hasClosestByAttribute(editableElement, "data-type", "NodeBlockQueryEmbed")) {
         return editableElement;
     }
-    return false;
+    return undefined;
 };
 
 export const isNotEditBlock = (element: Element) => {

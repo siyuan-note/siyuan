@@ -61,6 +61,13 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
             topSourceElement = getTopAloneElement(item);
             if (topSourceElement.isSameNode(item)) {
                 topSourceElement = undefined;
+                // 单个缩放或反链面板中的列表项拖拽到包含该列表的编辑器中会导致残留的 list
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item.getAttribute("data-node-id")}"]`)).find((targetItem: HTMLElement) => {
+                    if (!isInEmbedBlock(targetItem) && targetItem.parentElement.querySelectorAll(".li").length === 1) {
+                        topSourceElement = targetItem.parentElement;
+                        return true;
+                    }
+                });
             }
         }
         const copyId = Lute.NewNodeID();

@@ -41,6 +41,7 @@ import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
 import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
+import {getAllModels} from "../layout/getAll";
 
 export class Protyle {
 
@@ -125,15 +126,24 @@ export class Protyle {
                             }
                             break;
                         case "transactions":
-                            data.data[0].doOperations.forEach((item: IOperation) => {
-                                if (!this.protyle.preview.element.classList.contains("fn__none") &&
-                                    item.action !== "updateAttrs"   // 预览模式下点击只读
-                                ) {
-                                    this.protyle.preview.render(this.protyle);
-                                } else {
-                                    onTransaction(this.protyle, item, false);
-                                }
-                            });
+                            if (options.backlinkData) {
+                                getAllModels().backlink.find(item => {
+                                    if (item.element.contains(this.protyle.element)) {
+                                        item.refresh();
+                                        return true;
+                                    }
+                                });
+                            } else {
+                                data.data[0].doOperations.forEach((item: IOperation) => {
+                                    if (!this.protyle.preview.element.classList.contains("fn__none") &&
+                                        item.action !== "updateAttrs"   // 预览模式下点击只读
+                                    ) {
+                                        this.protyle.preview.render(this.protyle);
+                                    } else {
+                                        onTransaction(this.protyle, item, false);
+                                    }
+                                });
+                            }
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;

@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "数据快照保留天数",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "数据快照每天保留个数",
   "fields": "字段",
   "dynamicEmoji": "动态图标",
   "backlinkContainChildren": "反向链接包含子块",

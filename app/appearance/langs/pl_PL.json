@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "Dni przechowywania migawek danych",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "Liczba migawek danych dziennie",
   "fields": "Atrybut",
   "dynamicEmoji": "Ikona dynamiczna",
   "backlinkContainChildren": "Czy linki zwrotne zawierają bloki podrzędne",

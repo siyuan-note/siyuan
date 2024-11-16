@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "Срок хранения снимков данных",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "Количество снимков данных в день",
   "fields": "Атрибут",
   "dynamicEmoji": "Динамическая иконка",
   "backlinkContainChildren": "Включать ли дочерние блоки в обратные ссылки",

@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "ימי שמירת תמונות נתונים",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "מספר תמונות נתונים ביום",
   "fields": "מאפיין",
   "dynamicEmoji": "אייקון דינמי",
   "backlinkContainChildren": "האם קישורים חוזרים כוללים בלוקים משניים",

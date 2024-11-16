@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "Días de retención de instantáneas de datos",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "Número de instantáneas de datos por día",
   "fields": "Atributo",
   "dynamicEmoji": "Icono dinámico",
   "backlinkContainChildren": "¿Los enlaces inversos contienen bloques secundarios?",

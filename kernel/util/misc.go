@@ -87,6 +87,16 @@ func EscapeHTML(s string) (ret string) {
 	return
 }
 
+func UnescapeHTML(s string) (ret string) {
+	ret = s
+	if "" == strings.TrimSpace(ret) {
+		return
+	}
+
+	ret = html.UnescapeString(ret)
+	return
+}
+
 func Reverse(s string) string {
 	runes := []rune(s)
 	for i, j := 0, len(runes)-1; i < j; i, j = i+1, j-1 {

@@ -196,7 +196,7 @@ export const openFile = async (options: IOpenFileOptions) => {
 
     /// #if !BROWSER
     // https://github.com/siyuan-note/siyuan/issues/7491
-    if (!options.position) {
+    if (!options.position || (options.position === "right" && options.assetPath)) {
         let hasMatch = false;
         const optionsClone: IObject = {};
         Object.keys(options).forEach((key: keyof IOpenFileOptions) => {

@@ -22,6 +22,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/gorilla/css/scanner"
@@ -54,6 +55,10 @@ func fillThemeStyleVar(tree *parse.Tree) {
 					buf.WriteString(style)
 					buf.WriteString(": ")
 					value := themeStyles[name]
+					if strings.Contains(value, "var(") {
+						name = gulu.Str.SubStringBetween(value, "(", ")")
+						value = themeStyles[name]
+					}
 					if "" == value {
 						// 回退为变量
 						buf.WriteString("var(")

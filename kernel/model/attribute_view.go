@@ -3465,11 +3465,24 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	newName := data["newName"].(string)
 	newColor := data["newColor"].(string)
 
-	for i, opt := range key.Options {
-		if oldName == opt.Name {
-			key.Options[i].Name = newName
-			key.Options[i].Color = newColor
-			break
+	found := false
+	if oldName != newName {
+		for _, opt := range key.Options {
+			if newName == opt.Name { // 如果选项名已经存在则直接使用
+				found = true
+				newColor = opt.Color
+				break
+			}
+		}
+	}
+
+	if !found {
+		for i, opt := range key.Options {
+			if oldName == opt.Name {
+				key.Options[i].Name = newName
+				key.Options[i].Color = newColor
+				break
+			}
 		}
 	}
 

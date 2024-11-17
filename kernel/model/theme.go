@@ -55,7 +55,7 @@ func fillThemeStyleVar(tree *parse.Tree) {
 					buf.WriteString(style)
 					buf.WriteString(": ")
 					value := themeStyles[name]
-					if strings.Contains(value, "-b3-") {
+					if strings.Contains(value, "var(") {
 						name = gulu.Str.SubStringBetween(value, "(", ")")
 						value = themeStyles[name]
 					}

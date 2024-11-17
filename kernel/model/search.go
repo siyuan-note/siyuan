@@ -1502,21 +1502,20 @@ func highlightByRegexp(query, typeFilter, id string) (ret []string) {
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
 	if 0 == len(keyword) {
-		marked = text
-
-		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
+		if strings.Contains(text, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = util.EscapeHTML(text)
 			marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "<mark>")
 			marked = strings.ReplaceAll(marked, search.SearchMarkRight, "</mark>")
 			return
 		}
 
-		keywords := gulu.Str.SubstringsBetween(marked, search.SearchMarkLeft, search.SearchMarkRight)
+		keywords := gulu.Str.SubstringsBetween(text, search.SearchMarkLeft, search.SearchMarkRight)
 		keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 		keyword = strings.Join(keywords, search.TermSep)
-		marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "")
+		marked = strings.ReplaceAll(text, search.SearchMarkLeft, "")
 		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
 		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
+		marked = util.EscapeHTML(marked)
 		return
 	}
 

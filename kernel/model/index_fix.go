@@ -49,37 +49,31 @@ func checkIndex() {
 	checkIndexOnce.Do(func() {
 		logging.LogInfof("start checking index...")
 
-		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseIndex)
+		removeDuplicateDatabaseIndex()
 		sql.FlushQueue()
 
-		task.AppendTask(task.DatabaseIndexFix, resetDuplicateBlocksOnFileSys)
-
-		task.AppendTask(task.DatabaseIndexFix, fixBlockTreeByFileSys)
+		resetDuplicateBlocksOnFileSys()
 		sql.FlushQueue()
 
-		task.AppendTask(task.DatabaseIndexFix, fixDatabaseIndexByBlockTree)
+		fixBlockTreeByFileSys()
 		sql.FlushQueue()
 
-		task.AppendTask(task.DatabaseIndexFix, removeDuplicateDatabaseRefs)
+		fixDatabaseIndexByBlockTree()
+		sql.FlushQueue()
+
+		removeDuplicateDatabaseRefs()
 
 		// 后面要加任务的话记得修改推送任务栏的进度 util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
 
-		task.AppendTask(task.DatabaseIndexFix, func() {
-			util.PushStatusBar(Conf.Language(185))
-		})
 		debug.FreeOSMemory()
+		util.PushStatusBar(Conf.Language(185))
 		logging.LogInfof("finish checking index")
 	})
 }
 
-var autoFixLock = sync.Mutex{}
-
 // removeDuplicateDatabaseRefs 删除重复的数据库引用关系。
 func removeDuplicateDatabaseRefs() {
 	defer logging.Recover()
-
-	autoFixLock.Lock()
-	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 5, 5))
 	duplicatedRootIDs := sql.GetRefDuplicatedDefRootIDs()
@@ -95,9 +89,6 @@ func removeDuplicateDatabaseRefs() {
 // removeDuplicateDatabaseIndex 删除重复的数据库索引。
 func removeDuplicateDatabaseIndex() {
 	defer logging.Recover()
-
-	autoFixLock.Lock()
-	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 1, 5))
 	duplicatedRootIDs := sql.GetDuplicatedRootIDs("blocks")
@@ -141,9 +132,6 @@ func removeDuplicateDatabaseIndex() {
 // resetDuplicateBlocksOnFileSys 重置重复 ID 的块。 https://github.com/siyuan-note/siyuan/issues/7357
 func resetDuplicateBlocksOnFileSys() {
 	defer logging.Recover()
-
-	autoFixLock.Lock()
-	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 2, 5))
 	boxes := Conf.GetBoxes()
@@ -290,9 +278,6 @@ func recreateTree(tree *parse.Tree, absPath string) {
 // fixBlockTreeByFileSys 通过文件系统订正块树。
 func fixBlockTreeByFileSys() {
 	defer logging.Recover()
-
-	autoFixLock.Lock()
-	defer autoFixLock.Unlock()
 
 	util.PushStatusBar(fmt.Sprintf(Conf.Language(58), 3, 5))
 	boxes := Conf.GetOpenedBoxes()

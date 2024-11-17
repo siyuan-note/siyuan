@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "Data snapshot retention days",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "Data snapshots per day",
   "fields": "Fields",
   "dynamicEmoji": "Dynamic icon",
   "backlinkContainChildren": "Do backlinks contain child blocks",

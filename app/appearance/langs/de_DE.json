@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "Daten-Snapshot-Aufbewahrungstage",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "Daten-Snapshots pro Tag",
   "fields": "Attribut",
   "dynamicEmoji": "Dynamisches Icon",
   "backlinkContainChildren": "Enthalten Rückverweise untergeordnete Blöcke",

@@ -142,16 +142,31 @@ export const about = {
         </button>
     </div>
 </div>
-<div class="fn__flex b3-label config__item">
-    <div class="fn__flex-1">
+<div class="b3-label fn__flex"><div class="fn__block">
+    <div>
         ${window.siyuan.languages.dataRepoPurge}
-        <div class="b3-label__text">${window.siyuan.languages.dataRepoPurgeTip}</div>
     </div>
-    <div class="fn__space"></div>
-    <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
-    </button>
-</div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex config__item">
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.dataRepoPurgeTip}</div>
+        <span class="fn__space"></span>
+        <button id="purgeRepo" class="b3-button b3-button--outline fn__size200 fn__flex-center">
+            <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
+        </button>
+    </div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex config__item">
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.dataRepoAutoPurgeIndexRetentionDays}</div>
+        <span class="fn__space"></span>
+        <input class="b3-text-field fn__flex-center fn__size200" min="1" type="number" id="indexRetentionDays" value="${window.siyuan.config.repo.indexRetentionDays}">
+    </div>
+    <div class="fn__hr"></div>
+    <div class="fn__flex config__item">
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.dataRepoAutoPurgeRetentionIndexesDaily}</div>
+        <span class="fn__space"></span>
+        <input class="b3-text-field fn__flex-center fn__size200" min="1" type="number" id="retentionIndexesDaily" value="${window.siyuan.config.repo.retentionIndexesDaily}">
+    </div>
+</div></div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}
@@ -208,6 +223,18 @@ ${checkUpdateHTML}
         if (window.siyuan.config.system.isInsider) {
             about.element.querySelector("#isInsider").innerHTML = "<span class='ft__secondary'>Insider Preview</span>";
         }
+        const indexRetentionDaysElement = about.element.querySelector("#indexRetentionDays") as HTMLInputElement;
+        indexRetentionDaysElement.addEventListener("change", () => {
+            fetchPost("/api/repo/setRepoIndexRetentionDays", {days: parseInt(indexRetentionDaysElement.value)}, () => {
+                window.siyuan.config.repo.indexRetentionDays = parseInt(indexRetentionDaysElement.value);
+            });
+        });
+        const retentionIndexesDailyElement = about.element.querySelector("#retentionIndexesDaily") as HTMLInputElement;
+        retentionIndexesDailyElement.addEventListener("change", () => {
+            fetchPost("/api/repo/setRetentionIndexesDaily", {indexes: parseInt(retentionIndexesDailyElement.value)}, () => {
+                window.siyuan.config.repo.retentionIndexesDaily = parseInt(retentionIndexesDailyElement.value);
+            });
+        });
         const tokenElement = about.element.querySelector("#token") as HTMLInputElement;
         tokenElement.addEventListener("click", () => {
             tokenElement.select();

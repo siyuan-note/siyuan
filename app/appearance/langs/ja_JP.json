@@ -1,4 +1,6 @@
 {
+  "dataRepoAutoPurgeIndexRetentionDays": "データスナップショットの保持日数",
+  "dataRepoAutoPurgeRetentionIndexesDaily": "データスナップショットの毎日の保持数",
   "fields": "属性",
   "dynamicEmoji": "動的アイコン",
   "backlinkContainChildren": "バックリンクに子ブロックを含めるかどうか",

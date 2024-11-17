@@ -24,6 +24,7 @@ import (
 	"errors"
 	"fmt"
 	"math"
+	mathRand "math/rand"
 	"mime"
 	"net/http"
 	"os"
@@ -58,6 +59,107 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/studio-b12/gowebdav"
 )
+
+// AutoPurgeRepoJob 自动清理数据仓库 https://github.com/siyuan-note/siyuan/issues/13091
+func AutoPurgeRepoJob() {
+	task.AppendTaskWithTimeout(task.RepoAutoPurge, 12*time.Hour, autoPurgeRepo, true)
+}
+
+var (
+	autoPurgeRepoAfterFirstSync = false
+	lastAutoPurgeRepo           = time.Time{}
+)
+
+func autoPurgeRepo(cron bool) {
+	if cron && !autoPurgeRepoAfterFirstSync {
+		return
+	}
+	if time.Since(lastAutoPurgeRepo) < 6*time.Hour {
+		return
+	}
+
+	autoPurgeRepoAfterFirstSync = true
+	defer func() {
+		lastAutoPurgeRepo = time.Now()
+	}()
+
+	if 1 > len(Conf.Repo.Key) {
+		return
+	}
+
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	now := time.Now()
+
+	dateGroupedIndexes := map[string][]*entity.Index{} // 按照日期分组
+	// 收集指定日期内需要保留的索引
+	var date string
+	page := 1
+	for {
+		indexes, pageCount, _, err := repo.GetIndexes(page, 512)
+		if nil != err {
+			logging.LogErrorf("get data repo index logs failed: %s", err)
+			return
+		}
+		if 1 > len(indexes) {
+			break
+		}
+
+		tooOld := false
+		for _, index := range indexes {
+			if now.UnixMilli()-index.Created <= int64(Conf.Repo.IndexRetentionDays)*24*60*60*1000 {
+				date = time.UnixMilli(index.Created).Format("2006-01-02")
+				if _, ok := dateGroupedIndexes[date]; !ok {
+					dateGroupedIndexes[date] = []*entity.Index{}
+				}
+				dateGroupedIndexes[date] = append(dateGroupedIndexes[date], index)
+			} else {
+				tooOld = true
+				break
+			}
+		}
+		if tooOld {
+			break
+		}
+		page++
+		if page > pageCount {
+			break
+		}
+	}
+
+	// 筛选出每日需要保留的索引
+	var retentionIndexIDs []string
+	for _, indexes := range dateGroupedIndexes {
+		if len(indexes) <= Conf.Repo.RetentionIndexesDaily {
+			continue
+		}
+
+		keepIndexes := hashset.New()
+		keepIndexes.Add(indexes[0]) // 每天最后一个固定保留
+		// 随机保留指定数量的索引
+		for i := 0; i < Conf.Repo.RetentionIndexesDaily*7; i++ {
+			keepIndexes.Add(indexes[mathRand.Intn(len(indexes)-1)])
+			if keepIndexes.Size() >= Conf.Repo.RetentionIndexesDaily {
+				break
+			}
+		}
+
+		for _, keepIndex := range keepIndexes.Values() {
+			retentionIndexIDs = append(retentionIndexIDs, keepIndex.(*entity.Index).ID)
+		}
+	}
+
+	retentionIndexIDs = gulu.Str.RemoveDuplicatedElem(retentionIndexIDs)
+	if 1 > len(retentionIndexIDs) {
+		logging.LogInfof("no index to purge [ellapsed=%.2fs]", time.Since(now).Seconds())
+		return
+	}
+
+	_, err = repo.Purge(retentionIndexIDs...)
+}
 
 func GetRepoFile(fileID string) (ret []byte, p string, err error) {
 	if 1 > len(Conf.Repo.Key) {
@@ -1348,8 +1450,12 @@ func syncRepo(exit, byHand bool) (dataChanged bool, err error) {
 	processSyncMergeResult(exit, byHand, mergeResult, trafficStat, "a", elapsed)
 
 	if !exit {
-		// 首次数据同步执行完成后再执行索引订正 Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
-		go checkIndex()
+		go func() {
+			// 首次数据同步执行完成后再执行索引订正 Index fixing should not be performed before data synchronization https://github.com/siyuan-note/siyuan/issues/10761
+			checkIndex()
+			// 索引订正结束后执行数据仓库清理 Automatic purge for local data repo https://github.com/siyuan-note/siyuan/issues/13091
+			autoPurgeRepo(false)
+		}()
 	}
 	return
 }

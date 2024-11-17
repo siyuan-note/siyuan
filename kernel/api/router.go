@@ -390,6 +390,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/repo/diffRepoSnapshots", model.CheckAuth, model.CheckAdminRole, diffRepoSnapshots)
 	ginServer.Handle("POST", "/api/repo/openRepoSnapshotDoc", model.CheckAuth, model.CheckAdminRole, openRepoSnapshotDoc)
 	ginServer.Handle("POST", "/api/repo/getRepoFile", model.CheckAuth, model.CheckAdminRole, getRepoFile)
+	ginServer.Handle("POST", "/api/repo/setRepoIndexRetentionDays", model.CheckAuth, model.CheckAdminRole, setRepoIndexRetentionDays)
+	ginServer.Handle("POST", "/api/repo/setRetentionIndexesDaily", model.CheckAuth, model.CheckAdminRole, setRetentionIndexesDaily)
 
 	ginServer.Handle("POST", "/api/riff/createRiffDeck", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, createRiffDeck)
 	ginServer.Handle("POST", "/api/riff/renameRiffDeck", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, renameRiffDeck)

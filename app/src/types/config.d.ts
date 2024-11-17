@@ -1110,10 +1110,18 @@ declare namespace Config {
          */
         key: string;
         /**
-         * Synchronous index timing, if it exceeds this time, the user is prompted that the index
+         * Sync index timing, if it exceeds this time, the user is prompted that the index
          * performance is degraded (unit: milliseconds)
          */
         syncIndexTiming: number;
+        /**
+         * Automatic purge for local data repo index retention days
+         */
+        indexRetentionDays: number;
+        /**
+         * Automatic purge for local data repo indexes retention daily
+         */
+        retentionIndexesDaily: number;
     }
 
     /**

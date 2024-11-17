@@ -119,6 +119,7 @@ func getCurrentTasks() (ret []*Task) {
 
 const (
 	RepoCheckout                    = "task.repo.checkout"                 // 从快照中检出
+	RepoAutoPurge                   = "task.repo.autoPurge"                // 自动清理数据仓库
 	DatabaseIndexFull               = "task.database.index.full"           // 重建索引
 	DatabaseIndex                   = "task.database.index"                // 数据库索引
 	DatabaseIndexCommit             = "task.database.index.commit"         // 数据库索引提交
@@ -143,6 +144,7 @@ const (
 // uniqueActions 描述了唯一的任务，即队列中只能存在一个在执行的任务。
 var uniqueActions = []string{
 	RepoCheckout,
+	RepoAutoPurge,
 	DatabaseIndexFull,
 	DatabaseIndexCommit,
 	OCRImage,

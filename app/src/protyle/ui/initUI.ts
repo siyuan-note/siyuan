@@ -178,11 +178,8 @@ export const setPadding = (protyle: IProtyle) => {
         protyle.background.element.querySelector(".protyle-background__ia").setAttribute("style", `margin-left:${left}px;margin-right:${right}px`);
     }
     if (protyle.options.render.title) {
-        /// #if MOBILE
+        // pc 端 文档名 attr 过长和添加标签等按钮重合
         protyle.title.element.style.margin = `16px ${right}px 0 ${left}px`;
-        /// #else
-        protyle.title.element.style.margin = `5px ${right}px 0 ${left}px`;
-        /// #endif
     }
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         const editorAttrElement = document.getElementById("editorAttr");

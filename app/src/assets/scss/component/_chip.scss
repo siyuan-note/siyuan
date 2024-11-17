@@ -6,6 +6,14 @@
   .b3-chip {
     margin: 4px;
   }
+
+  &__doctag {
+    padding: 0;
+
+    .b3-chip {
+      margin: 0 8px 8px 0;
+    }
+  }
 }
 
 .b3-chip {

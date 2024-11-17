@@ -392,9 +392,19 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         if (operation.retData) {
             operation.retData.forEach((item: string) => {
-                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`).forEach(item => {
-                    item.remove();
+                let embedElement: HTMLElement | false;
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`)).find(itemElement => {
+                    embedElement = isInEmbedBlock(itemElement)
+                    if (embedElement) {
+                        return true;
+                    }
+                    itemElement.remove();
                 });
+                // 折叠嵌入块的父级
+                if (embedElement) {
+                    embedElement.removeAttribute("data-render");
+                    blockRender(protyle, embedElement);
+                }
             });
             if (protyle.wysiwyg.element.childElementCount === 0) {
                 zoomOut({

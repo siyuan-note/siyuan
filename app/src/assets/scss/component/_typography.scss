@@ -117,6 +117,10 @@
     border-bottom: 2px solid var(--b3-card-info-color);
   }
 
+  blockquote {
+    position: relative;
+  }
+
   blockquote,
   .bq {
     &:before {

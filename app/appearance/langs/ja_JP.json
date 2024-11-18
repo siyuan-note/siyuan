@@ -1,4 +1,5 @@
 {
+  "keyContent": "キーコンテンツ",
   "addDesc": "説明を追加",
   "dataRepoAutoPurgeIndexRetentionDays": "データスナップショットの保持日数",
   "dataRepoAutoPurgeRetentionIndexesDaily": "データスナップショットの毎日の保持数",

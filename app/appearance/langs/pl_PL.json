@@ -1,4 +1,5 @@
 {
+  "keyContent": "Zawartość klucza",
   "addDesc": "Dodaj opis",
   "dataRepoAutoPurgeIndexRetentionDays": "Dni przechowywania migawek danych",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Liczba migawek danych dziennie",

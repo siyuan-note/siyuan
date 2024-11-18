@@ -1,4 +1,5 @@
 {
+  "keyContent": "Schlüsselinhalt",
   "addDesc": "Beschreibung hinzufügen",
   "dataRepoAutoPurgeIndexRetentionDays": "Daten-Snapshot-Aufbewahrungstage",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Daten-Snapshots pro Tag",

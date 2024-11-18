@@ -34,10 +34,12 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+//export StartKernelFast
 func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
 	go server.Serve(true)
 }
 
+//export StartKernel
 func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
 	SetTimezone(container, appDir, timezoneID)
 	util.Mode = "prod"
@@ -69,26 +71,32 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	}()
 }
 
+//export Language
 func Language(num int) string {
 	return model.Conf.Language(num)
 }
 
+//export ShowMsg
 func ShowMsg(msg string, timeout int) {
 	util.PushMsg(msg, timeout)
 }
 
+//export IsHttpServing
 func IsHttpServing() bool {
 	return util.HttpServing
 }
 
+//export SetHttpServerPort
 func SetHttpServerPort(port int) {
 	filelock.AndroidServerPort = port
 }
 
+//export GetCurrentWorkspacePath
 func GetCurrentWorkspacePath() string {
 	return util.WorkspaceDir
 }
 
+//export GetAssetAbsPath
 func GetAssetAbsPath(asset string) (ret string) {
 	ret, err := model.GetAssetAbsPath(asset)
 	if err != nil {
@@ -98,10 +106,12 @@ func GetAssetAbsPath(asset string) (ret string) {
 	return
 }
 
+//export GetMimeTypeByExt
 func GetMimeTypeByExt(ext string) string {
 	return util.GetMimeTypeByExt(ext)
 }
 
+//export SetTimezone
 func SetTimezone(container, appDir, timezoneID string) {
 	if "ios" == container {
 		os.Setenv("ZONEINFO", filepath.Join(appDir, "app", "zoneinfo.zip"))
@@ -115,6 +125,7 @@ func SetTimezone(container, appDir, timezoneID string) {
 	time.Local = z
 }
 
+//export DisableFeature
 func DisableFeature(feature string) {
 	util.DisableFeature(feature)
 }

@@ -12,6 +12,7 @@ import {Wnd} from "../layout/Wnd";
 import {getAllWnds} from "../layout/getAll";
 import {Asset} from "../asset";
 import {writeText} from "../protyle/util/compatibility";
+import {getAssetName, pathPosix} from "../util/pathName";
 
 const closeMenu = (tab: Tab) => {
     const unmodifiedTabs: Tab[] = [];
@@ -213,7 +214,7 @@ export const initTabMenu = (app: App, tab: Tab) => {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
-                writeText(`[${model.parent.title}](${model.path})`);
+                writeText(`[${getAssetName(model.parent.title)}${pathPosix().extname(model.path)}](${model.path})`);
             }
         }).element);
     }

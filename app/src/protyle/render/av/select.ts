@@ -31,7 +31,7 @@ const filterSelectHTML = (key: string, options: {
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.desc)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -50,7 +50,7 @@ const filterSelectHTML = (key: string, options: {
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
     <span class="b3-chip" style="background-color:var(--b3-font-background${colorIndex});color:var(--b3-font-color${colorIndex})">
-        <span class="fn__ellipsis">${key}</span>
+        <span class="fn__ellipsis">${escapeHtml(key)}</span>
     </span>
 </div>
 <span class="b3-menu__accelerator">${window.siyuan.languages.enterKey}</span>
@@ -165,6 +165,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 column.options.find((item) => {
                     if (item.name === name) {
                         item.name = inputElement.value;
+                        item.desc = descElement.value;
                         return true;
                     }
                 });
@@ -241,6 +242,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 }
             })
             descElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeAriaLabel(descElement.value) : window.siyuan.languages.addDesc);
                 if (event.isComposing) {
                     return;
                 }

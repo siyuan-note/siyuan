@@ -3468,7 +3468,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	found := false
 	if oldName != newName {
 		for _, opt := range key.Options {
-			if newName == opt.Name { // 如果选项名已经存在则直接使用
+			if newName == opt.Name { // 如果选项已经存在则直接使用
 				found = true
 				newColor = opt.Color
 				break
@@ -3497,11 +3497,31 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 				continue
 			}
 
-			for i, opt := range value.MSelect {
-				if oldName == opt.Content {
-					value.MSelect[i].Content = newName
-					value.MSelect[i].Color = newColor
+			found = false
+			for _, opt := range value.MSelect {
+				if newName == opt.Content {
+					found = true
 					break
+				}
+			}
+			if found {
+				idx := -1
+				for i, opt := range value.MSelect {
+					if oldName == opt.Content {
+						idx = i
+						break
+					}
+				}
+				if 0 <= idx {
+					value.MSelect = util.RemoveElem(value.MSelect, idx)
+				}
+			} else {
+				for i, opt := range value.MSelect {
+					if oldName == opt.Content {
+						value.MSelect[i].Content = newName
+						value.MSelect[i].Color = newColor
+						break
+					}
 				}
 			}
 		}

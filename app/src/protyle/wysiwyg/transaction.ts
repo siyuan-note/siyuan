@@ -743,7 +743,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
         "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey",
-        "duplicateAttrViewKey", "setAttrViewViewDesc"].includes(operation.action)) {
+        "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc"].includes(operation.action)) {
         refreshAV(protyle, operation);
         return;
     }

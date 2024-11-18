@@ -15,6 +15,7 @@ import * as dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne} from "../../../util/functions";
 import {Dialog} from "../../../dialog";
+import {escapeAttr} from "../../../util/escape";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -575,35 +576,60 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const blockID = blockElement.getAttribute("data-node-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
+    const oldDesc = cellElement.dataset.desc;
     const menu = new Menu("av-header-cell", () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
-        if (newValue === oldValue) {
-            return;
+        if (newValue !== oldValue) {
+            transaction(protyle, [{
+                action: "updateAttrViewCol",
+                id: colId,
+                avID,
+                name: newValue,
+                type,
+            }], [{
+                action: "updateAttrViewCol",
+                id: colId,
+                avID,
+                name: oldValue,
+                type,
+            }]);
+            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
         }
-        transaction(protyle, [{
-            action: "updateAttrViewCol",
-            id: colId,
-            avID,
-            name: newValue,
-            type,
-        }], [{
-            action: "updateAttrViewCol",
-            id: colId,
-            avID,
-            name: oldValue,
-            type,
-        }]);
-        updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
+        const newDesc = menu.element.querySelector("textarea").value;
+        if (newDesc !== oldDesc) {
+            transaction(protyle, [{
+                action: "setAttrViewColDesc",
+                id: colId,
+                avID,
+                data: newDesc,
+            }], [{
+                action: "setAttrViewColDesc",
+                id: colId,
+                avID,
+                data: oldDesc,
+            }]);
+        }
         // https://github.com/siyuan-note/siyuan/issues/9862
         focusBlock(blockElement);
     });
     menu.addItem({
-        iconHTML: `<span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
+        iconHTML: '',
         type: "readonly",
-        label: `<input style="margin: 4px 0" class="b3-text-field fn__block fn__size200" type="text" value="${oldValue}">`,
+        label: `<div>
+    <div class="fn__flex">
+        <span class="b3-menu__avemoji" data-icon="${cellElement.dataset.icon}">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
+        <div class="b3-form__icona fn__size200">
+            <input class="b3-text-field b3-form__icona-input" type="text" value="${oldValue}">
+            <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? oldDesc : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+        </div>
+    </div>
+    <div class="fn__non">
+        <div class="fn__hr--small"></div>
+        <textarea style="margin-left: 22px" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+    </div>
+</div>`,
         bind(element) {
             const iconElement = element.querySelector(".b3-menu__avemoji") as HTMLElement;
-            iconElement.setAttribute("data-icon", cellElement.dataset.icon);
             iconElement.addEventListener("click", (event) => {
                 const rect = iconElement.getBoundingClientRect();
                 openEmojiPanel("", "av", {
@@ -623,14 +649,32 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         avID,
                         data: cellElement.dataset.icon,
                     }]);
-                    iconElement.setAttribute("data-icon", unicode);
+                    iconElement.dataset.icon = unicode;
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                 }, iconElement.querySelector("img"));
                 event.preventDefault();
                 event.stopPropagation();
             });
-            element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
+            const inputElement = element.querySelector("input");
+            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                    event.preventDefault();
+                }
+            });
+            const descElement = element.querySelector('textarea');
+            inputElement.nextElementSibling.addEventListener("click", () => {
+                const descPanelElement = descElement.parentElement
+                descPanelElement.classList.toggle("fn__none");
+                if (!descPanelElement.classList.contains("fn__none")) {
+                    descElement.focus();
+                }
+            })
+            descElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
                 }

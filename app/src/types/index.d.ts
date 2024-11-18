@@ -54,6 +54,7 @@ type TOperation =
     | "setAttrViewColDate"
     | "unbindAttrViewBlock"
     | "setAttrViewViewDesc"
+    | "setAttrViewColDesc"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -799,6 +800,7 @@ interface IAVColumn {
     icon: string,
     id: string,
     name: string,
+    desc: string,
     wrap: boolean,
     pin: boolean,
     hidden: boolean,

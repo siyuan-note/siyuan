@@ -6,6 +6,7 @@ import {focusBlock} from "../../util/selection";
 import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
 import {avRender} from "./render";
+import {escapeAriaLabel, escapeAttr} from "../../../util/escape";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
@@ -120,9 +121,13 @@ export const bindViewEvent = (options: {
         }
     });
     inputElement.select();
-    const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLInputElement;
+    const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     inputElement.nextElementSibling.addEventListener("click", () => {
-        descElement.parentElement.classList.toggle("fn__none");
+        const descPanelElement = descElement.parentElement
+        descPanelElement.classList.toggle("fn__none");
+        if (!descPanelElement.classList.contains("fn__none")) {
+            descElement.focus();
+        }
     })
     descElement.addEventListener("blur", () => {
         if (descElement.value !== descElement.dataset.value) {
@@ -196,14 +201,14 @@ export const getViewHTML = (data: IAV) => {
     <div>
         <div class="fn__flex">
             <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
-            <div class="b3-form__icona">
-                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" value="${view.name}" data-value="${view.name}">
-                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? view.desc : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+            <div class="b3-form__icona fn__size200">
+                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" value="${escapeAttr(view.name)}" data-value="${escapeAttr(view.name)}">
+                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
             </div>
         </div>
         <div class="fn__none">
             <div class="fn__hr--small"></div>
-            <input data-type="desc" class="b3-text-field fn__block" type="text" value="${view.desc}" data-value="${view.desc}">
+            <textarea style="margin-left: 22px" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
         </div>
     </div>
 </button>

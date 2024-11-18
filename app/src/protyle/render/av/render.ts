@@ -10,6 +10,7 @@ import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -130,11 +131,13 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
+                    tableHTML += `<div class="av__cell av__cell--header ariaLabel" data-col-id="${column.id}"  draggable="true" 
 data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
+data-desc="${escapeAttr(column.desc)}" data-position="top"
+aria-label="${escapeAriaLabel(column.name)}<br><div class='ft__on-surface'>${escapeAriaLabel(column.desc || "")}</div>"
 style="width: ${column.width || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
-    <span class="av__celltext fn__flex-1">${column.name}</span>
+    <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
     ${column.pin ? '<svg class="av__cellheadericon av__cellheadericon--pin"><use xlink:href="#iconPin"></use></svg>' : ""}
     <div class="av__widthdrag"></div>
 </div>`;
@@ -199,9 +202,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let tabHTML = "";
                 let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-id="${item.id}" data-page="${item.pageSize}" aria-label="${item.name}<br><div class='ft__on-surface'>${item.desc || ""}</div>" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div data-position="top" data-id="${item.id}" data-page="${item.pageSize}" aria-label="${escapeAriaLabel(item.name)}<br><div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
-    <span class="item__text">${item.name}</span>
+    <span class="item__text">${escapeHtml(item.name)}</span>
 </div>`;
                     if (item.id === response.data.viewID) {
                         viewData = item;

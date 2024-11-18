@@ -127,6 +127,26 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
     }
     openEditorTab(app, blockIDs);
+    window.siyuan.menus.menu.append(new MenuItem({
+        id: "export",
+        label: window.siyuan.languages.export,
+        type: "submenu",
+        icon: "iconUpload",
+        submenu: [{
+            id: "exportMarkdown",
+            label: "Markdown",
+            icon: "iconMarkdown",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost(" /api/export/exportMds", {
+                    ids: blockIDs,
+                }, response => {
+                    hideMessage(msgId);
+                    openByMobile(response.data.zip);
+                });
+            }
+        }]
+    }).element);
     if (app.plugins) {
         emitOpenMenu({
             plugins: app.plugins,

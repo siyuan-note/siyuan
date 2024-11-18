@@ -1389,10 +1389,11 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	if "." == baseFolderName {
 		baseFolderName = path.Base(block.Path)
 	}
-	var docPaths []string
 
+	var docPaths []string
 	bts := treenode.GetBlockTrees(ids)
 	for _, bt := range bts {
+		docPaths = append(docPaths, bt.Path)
 		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
 		for _, docFile := range docFiles {
 			docPaths = append(docPaths, docFile.path)

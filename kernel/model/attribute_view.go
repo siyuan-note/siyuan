@@ -3464,6 +3464,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	oldName := data["oldName"].(string)
 	newName := data["newName"].(string)
 	newColor := data["newColor"].(string)
+	newDesc := data["newDesc"].(string)
 
 	found := false
 	if oldName != newName {
@@ -3471,6 +3472,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 			if newName == opt.Name { // 如果选项已经存在则直接使用
 				found = true
 				newColor = opt.Color
+				newDesc = opt.Desc
 				break
 			}
 		}
@@ -3481,6 +3483,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 			if oldName == opt.Name {
 				key.Options[i].Name = newName
 				key.Options[i].Color = newColor
+				key.Options[i].Desc = newDesc
 				break
 			}
 		}

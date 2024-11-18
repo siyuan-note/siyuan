@@ -31,7 +31,7 @@ const filterSelectHTML = (key: string, options: {
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
-        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc)}</div>" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -211,16 +211,15 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         iconHTML: "",
         type: "readonly",
         label: `<div>
-    <div class="fn__flex">
-        <div class="b3-form__icona fn__size200">
-            <input class="b3-text-field b3-form__icona-input" type="text">
-            <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
-        </div>
+    <div class="b3-form__icona fn__block">
+        <input class="b3-text-field b3-form__icona-input" type="text">
+        <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
     </div>
     <div class="fn__none">
-        <div class="fn__hr--small"></div>
-        <textarea rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
+        <div class="fn__hr"></div>
+        <textarea rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
     </div>
+    <div class="fn__hr--small"></div>
 </div>`,
         bind(element) {
             const inputElement = element.querySelector("input")
@@ -242,13 +241,15 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 }
             })
             descElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeAriaLabel(descElement.value) : window.siyuan.languages.addDesc);
                 if (event.isComposing) {
                     return;
                 }
                 if (event.key === "Enter") {
                     menu.close();
                 }
+            });
+            descElement.addEventListener("input", () => {
+                inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeHtml(descElement.value) : window.siyuan.languages.addDesc);
             });
         }
     });

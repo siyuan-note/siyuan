@@ -93,13 +93,13 @@ func NewStdLute() (ret *lute.Lute) {
 	ret.SetGFMAutoLink(false) // 导入 Markdown 时不自动转换超链接 https://github.com/siyuan-note/siyuan/issues/7682
 	ret.SetImgPathAllowSpace(true)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true) // Formula parsing supports $ followed by numbers when importing Markdown https://github.com/siyuan-note/siyuan/issues/8362
-	ret.SetInlineAsterisk(MarkdownSettings.InlineAsterisk)
-	ret.SetInlineUnderscore(MarkdownSettings.InlineUnderscore)
-	ret.SetSup(MarkdownSettings.InlineSup)
-	ret.SetSub(MarkdownSettings.InlineSub)
-	ret.SetTag(MarkdownSettings.InlineTag)
-	ret.SetInlineMath(MarkdownSettings.InlineMath)
-	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
+	ret.SetInlineAsterisk(true)
+	ret.SetInlineUnderscore(true)
+	ret.SetSup(true)
+	ret.SetSub(true)
+	ret.SetTag(true)
+	ret.SetInlineMath(true)
+	ret.SetGFMStrikethrough(true)
 	ret.SetGFMStrikethrough1(false)
 	return
 }

@@ -199,7 +199,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let tabHTML = "";
                 let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-id="${item.id}" data-page="${item.pageSize}" class="item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div data-id="${item.id}" data-page="${item.pageSize}" aria-label="${item.name}<br><div class='ft__on-surface'>${item.desc || ""}</div>" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
     <span class="item__text">${item.name}</span>
 </div>`;

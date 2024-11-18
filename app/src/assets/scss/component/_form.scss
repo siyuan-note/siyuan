@@ -51,10 +51,11 @@
     }
   }
 
-  // repo password
+  // repo password & av description
   &__icona {
     position: relative;
     color: var(--b3-theme-on-surface);
+    line-height: normal;
 
     &-icon {
       position: absolute;

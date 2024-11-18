@@ -120,6 +120,36 @@ export const bindViewEvent = (options: {
         }
     });
     inputElement.select();
+    const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLInputElement;
+    inputElement.nextElementSibling.addEventListener("click", () => {
+        descElement.parentElement.classList.toggle("fn__none");
+    })
+    descElement.addEventListener("blur", () => {
+        if (descElement.value !== descElement.dataset.value) {
+            transaction(options.protyle, [{
+                action: "setAttrViewViewDesc",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: descElement.value
+            }], [{
+                action: "setAttrViewViewDesc",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: descElement.dataset.value
+            }]);
+            descElement.dataset.value = descElement.value;
+        }
+    });
+    descElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Enter") {
+            event.preventDefault();
+            descElement.blur();
+            options.menuElement.parentElement.remove();
+        }
+    });
     const toggleTitleElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-title"]') as HTMLInputElement;
     toggleTitleElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
@@ -163,8 +193,19 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
-    <input data-type="name" class="b3-text-field fn__block" type="text" value="${view.name}" data-value="${view.name}" style="margin: 4px 0">
+    <div>
+        <div class="fn__flex">
+            <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
+            <div class="b3-form__icona">
+                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" value="${view.name}" data-value="${view.name}">
+                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? view.desc : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+            </div>
+        </div>
+        <div class="fn__none">
+            <div class="fn__hr--small"></div>
+            <input data-type="desc" class="b3-text-field fn__block" type="text" value="${view.desc}" data-value="${view.desc}">
+        </div>
+    </div>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">

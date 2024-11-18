@@ -53,6 +53,7 @@ type TOperation =
     | "hideAttrViewName"
     | "setAttrViewColDate"
     | "unbindAttrViewBlock"
+    | "setAttrViewViewDesc"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -757,6 +758,7 @@ interface IAV {
 
 interface IAVView {
     name: string
+    desc: string
     id: string
     type: string
     icon: string

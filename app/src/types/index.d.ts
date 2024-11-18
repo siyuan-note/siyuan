@@ -815,7 +815,7 @@ interface IAVColumn {
     options?: {
         name: string,
         color: string,
-        desc: string,
+        desc?: string,
     }[],
     relation?: IAVColumnRelation,
     rollup?: IAVCellRollupValue

@@ -14,7 +14,7 @@ let cellValues: IAVCellValue[];
 const filterSelectHTML = (key: string, options: {
     name: string,
     color: string,
-    desc: string
+    desc?: string
 }[], selected: string[] = []) => {
     let html = "";
     let hasMatch = false;
@@ -28,7 +28,7 @@ const filterSelectHTML = (key: string, options: {
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" data-desc="${item.desc}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" data-desc="${item.desc||""}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">

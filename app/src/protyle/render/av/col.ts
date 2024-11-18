@@ -1711,6 +1711,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         icon: "",
         id,
         name,
+        desc: "",
         numberFormat: "",
         pin: false,
         template: "",

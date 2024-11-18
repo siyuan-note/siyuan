@@ -6,12 +6,16 @@ import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 let cellValues: IAVCellValue[];
 
-const filterSelectHTML = (key: string, options: { name: string, color: string }[], selected: string[] = []) => {
+const filterSelectHTML = (key: string, options: {
+    name: string,
+    color: string,
+    desc: string
+}[], selected: string[] = []) => {
     let html = "";
     let hasMatch = false;
     if (selected.length === 0) {
@@ -24,7 +28,7 @@ const filterSelectHTML = (key: string, options: { name: string, color: string }[
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" data-desc="${item.desc}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
@@ -128,9 +132,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     const blockID = blockElement.getAttribute("data-node-id");
     const colId = cellElements ? cellElements[0].dataset.colId : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     let name = target.parentElement.dataset.name;
+    let desc = target.parentElement.dataset.desc;
     let color = target.parentElement.dataset.color;
     const menu = new Menu("av-col-option", () => {
-        if (name === inputElement.value || !inputElement.value) {
+        if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
             return;
         }
         // 不判断重名 https://github.com/siyuan-note/siyuan/issues/11484
@@ -141,7 +146,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             data: {
                 newColor: color,
                 oldName: name,
-                newName: inputElement.value
+                newName: inputElement.value,
+                newDesc: descElement.value
             },
         }], [{
             action: "updateAttrViewColOption",
@@ -150,7 +156,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
             data: {
                 newColor: color,
                 oldName: inputElement.value,
-                newName: name
+                newName: name,
+                newDesc: desc
             },
         }]);
         data.view.columns.find(column => {
@@ -202,9 +209,37 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<input class="b3-text-field" style="margin: 4px 0" value="${name}">`,
+        label: `<div>
+    <div class="fn__flex">
+        <div class="b3-form__icona fn__size200">
+            <input class="b3-text-field b3-form__icona-input" type="text" value="${name}">
+            <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+        </div>
+    </div>
+    <div class="fn__none">
+        <div class="fn__hr--small"></div>
+        <textarea rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
+    </div>
+</div>`,
         bind(element) {
-            element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
+            const inputElement = element.querySelector("input")
+            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                }
+            });
+            const descElement = element.querySelector("textarea")
+            inputElement.nextElementSibling.addEventListener("click", () => {
+                const descPanelElement = descElement.parentElement
+                descPanelElement.classList.toggle("fn__none");
+                if (!descPanelElement.classList.contains("fn__none")) {
+                    descElement.focus();
+                }
+            })
+            descElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
                 }
@@ -246,7 +281,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 });
                 const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
                 const selectedElement = menuElement.querySelector(".b3-chips");
-                const oldChipsHeight = selectedElement?selectedElement.clientHeight:0;
+                const oldChipsHeight = selectedElement ? selectedElement.clientHeight : 0;
                 if (!cellElements) {
                     menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
                     bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
@@ -298,7 +333,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         oldName: name,
                         newName: inputElement.value,
                         oldColor: color,
-                        newColor: (index + 1).toString()
+                        newColor: (index + 1).toString(),
+                        newDesc: descElement.value
                     },
                 }], [{
                     action: "updateAttrViewColOption",
@@ -308,7 +344,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                         oldName: inputElement.value,
                         newName: name,
                         oldColor: (index + 1).toString(),
-                        newColor: color
+                        newColor: color,
+                        newDesc: descElement.value
                     },
                 }]);
 
@@ -353,6 +390,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 }
                 menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
                 name = inputElement.value;
+                desc = descElement.value;
                 color = (index + 1).toString();
                 return true;
             }
@@ -367,6 +405,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     });
     const inputElement = window.siyuan.menus.menu.element.querySelector("input");
     inputElement.select();
+    const descElement = window.siyuan.menus.menu.element.querySelector("textarea");
 };
 
 export const bindSelectEvent = (protyle: IProtyle, data: IAV, menuElement: HTMLElement, cellElements: HTMLElement[], blockElement: Element) => {

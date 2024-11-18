@@ -520,7 +520,7 @@ export class Background {
                 }, (response) => {
                     let html = "";
                     response.data.tags.forEach((item: string, index: number) => {
-                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">${escapeHtml(item)}</div>`;
+                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
                     });
                     listElement.innerHTML = html;
                 });
@@ -551,7 +551,7 @@ export class Background {
                         let searchHTML = "";
                         let hasKey = false;
                         response.data.tags.forEach((item: string) => {
-                            searchHTML += `<div class="b3-list-item b3-list-item--narrow">${escapeHtml(item)}</div>`;
+                            searchHTML += `<div class="b3-list-item b3-list-item--narrow">${item}</div>`;
                             if (item === `<mark>${response.data.k}</mark>`) {
                                 hasKey = true;
                             }

@@ -40,6 +40,7 @@
     * [Get block attributes](#Get-block-attributes)
 * [SQL](#SQL)
     * [Execute SQL query](#Execute-SQL-query)
+    * [Flush transaction](#Flush-transaction)
 * [Templates](#Templates)
     * [Render a template](#Render-a-template)
     * [Render Sprig](#Render-Sprig)
@@ -1038,6 +1039,20 @@ Rename a document by `id`:
     "data": [
       { "col": "val" }
     ]
+  }
+  ```
+
+### Flush transaction
+
+* `/api/sqlite/flushTransaction`
+* No parameters
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
   }
   ```
 

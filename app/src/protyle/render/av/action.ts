@@ -289,17 +289,17 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         });
         /// #endif
     }
-    let hasBlock = false
-    rowElements.forEach((item, i) => {
+    let hasBlock = false;
+    rowElements.forEach((item) => {
         if (item.querySelector('.av__cell[data-dtype="block"]').getAttribute("data-detached") !== "true") {
-            hasBlock = true
+            hasBlock = true;
         }
-    })
+    });
     const copyMenu: IMenu[] = [{
         iconHTML: "",
         label: window.siyuan.languages.keyContent,
         click() {
-            let text = ""
+            let text = "";
             rowElements.forEach((item, i) => {
                 if (rowElements.length > 1) {
                     text += "* ";
@@ -308,7 +308,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 if (ids.length > 1 && i !== ids.length - 1) {
                     text += "\n";
                 }
-            })
+            });
             writeText(text);
         }
     }];

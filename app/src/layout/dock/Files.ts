@@ -216,7 +216,7 @@ export class Files extends Model {
                     if (!element) {
                         document.querySelectorAll("ul.layout-tab-bar > .item--focus").forEach((item: HTMLElement, index) => {
                             if (index === 0) {
-                                element = item
+                                element = item;
                             } else if (item.dataset.activetime > element.dataset.activetime) {
                                 element = item;
                             }

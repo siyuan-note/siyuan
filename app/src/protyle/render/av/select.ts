@@ -222,7 +222,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     <div class="fn__hr--small"></div>
 </div>`,
         bind(element) {
-            const inputElement = element.querySelector("input")
+            const inputElement = element.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
@@ -232,14 +232,14 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 }
             });
             inputElement.value = name;
-            const descElement = element.querySelector("textarea")
+            const descElement = element.querySelector("textarea");
             inputElement.nextElementSibling.addEventListener("click", () => {
-                const descPanelElement = descElement.parentElement
+                const descPanelElement = descElement.parentElement;
                 descPanelElement.classList.toggle("fn__none");
                 if (!descPanelElement.classList.contains("fn__none")) {
                     descElement.focus();
                 }
-            })
+            });
             descElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;

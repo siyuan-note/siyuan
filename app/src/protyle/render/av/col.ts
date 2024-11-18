@@ -279,12 +279,12 @@ export const bindEditEvent = (options: {
     nameElement.value = colData.name;
     const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     nameElement.nextElementSibling.addEventListener("click", () => {
-        const descPanelElement = descElement.parentElement
+        const descPanelElement = descElement.parentElement;
         descPanelElement.classList.toggle("fn__none");
         if (!descPanelElement.classList.contains("fn__none")) {
             descElement.focus();
         }
-    })
+    });
     descElement.addEventListener("blur", () => {
         const newValue = descElement.value;
         if (newValue === colData.desc) {
@@ -666,7 +666,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         focusBlock(blockElement);
     });
     menu.addItem({
-        iconHTML: '',
+        iconHTML: "",
         type: "readonly",
         label: `<div class="fn__block">
     <div class="fn__flex">
@@ -720,14 +720,14 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     event.preventDefault();
                 }
             });
-            const descElement = element.querySelector('textarea');
+            const descElement = element.querySelector("textarea");
             inputElement.nextElementSibling.addEventListener("click", () => {
-                const descPanelElement = descElement.parentElement
+                const descPanelElement = descElement.parentElement;
                 descPanelElement.classList.toggle("fn__none");
                 if (!descPanelElement.classList.contains("fn__none")) {
                     descElement.focus();
                 }
-            })
+            });
             descElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;

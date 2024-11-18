@@ -124,12 +124,12 @@ export const bindViewEvent = (options: {
     inputElement.value = inputElement.dataset.value;
     const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     inputElement.nextElementSibling.addEventListener("click", () => {
-        const descPanelElement = descElement.parentElement
+        const descPanelElement = descElement.parentElement;
         descPanelElement.classList.toggle("fn__none");
         if (!descPanelElement.classList.contains("fn__none")) {
             descElement.focus();
         }
-    })
+    });
     descElement.addEventListener("blur", () => {
         if (descElement.value !== descElement.dataset.value) {
             transaction(options.protyle, [{

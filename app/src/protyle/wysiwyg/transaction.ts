@@ -394,7 +394,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             operation.retData.forEach((item: string) => {
                 let embedElement: HTMLElement | false;
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`)).find(itemElement => {
-                    embedElement = isInEmbedBlock(itemElement)
+                    embedElement = isInEmbedBlock(itemElement);
                     if (embedElement) {
                         return true;
                     }

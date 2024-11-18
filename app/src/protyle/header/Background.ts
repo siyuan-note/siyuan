@@ -494,9 +494,9 @@ export class Background {
         }
 
         if (img || icon) {
-            this.iconElement.parentElement.style.marginTop = ""
+            this.iconElement.parentElement.style.marginTop = "";
         } else {
-            this.iconElement.parentElement.style.marginTop = "8px"
+            this.iconElement.parentElement.style.marginTop = "8px";
         }
     }
 

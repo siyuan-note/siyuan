@@ -121,6 +121,7 @@ export const bindViewEvent = (options: {
         }
     });
     inputElement.select();
+    inputElement.value = inputElement.dataset.value;
     const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
     inputElement.nextElementSibling.addEventListener("click", () => {
         const descPanelElement = descElement.parentElement
@@ -202,7 +203,7 @@ export const getViewHTML = (data: IAV) => {
         <div class="fn__flex">
             <span class="b3-menu__avemoji" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
             <div class="b3-form__icona fn__size200">
-                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" value="${escapeAttr(view.name)}" data-value="${escapeAttr(view.name)}">
+                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" data-value="${escapeAttr(view.name)}">
                 <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
             </div>
         </div>

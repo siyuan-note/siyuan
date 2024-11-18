@@ -6,7 +6,7 @@ import {upDownHint} from "../../../util/upDownHint";
 import {bindEditEvent, getEditHTML} from "./col";
 import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
-import {escapeAriaLabel, escapeAttr} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 
 let cellValues: IAVCellValue[];
@@ -28,11 +28,11 @@ const filterSelectHTML = (key: string, options: {
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${item.name}" data-desc="${item.desc||""}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
-            <span class="fn__ellipsis">${item.name}</span>
+            <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
     <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
@@ -212,7 +212,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         label: `<div>
     <div class="fn__flex">
         <div class="b3-form__icona fn__size200">
-            <input class="b3-text-field b3-form__icona-input" type="text" value="${name}">
+            <input class="b3-text-field b3-form__icona-input" type="text">
             <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
         </div>
     </div>
@@ -231,6 +231,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     menu.close();
                 }
             });
+            inputElement.value = name;
             const descElement = element.querySelector("textarea")
             inputElement.nextElementSibling.addEventListener("click", () => {
                 const descPanelElement = descElement.parentElement
@@ -597,7 +598,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
     const selected: string[] = [];
     cellValues[0].mSelect?.forEach((item) => {
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items">

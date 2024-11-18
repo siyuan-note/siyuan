@@ -14,7 +14,7 @@ import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 
 const renderCellURL = (urlContent: string) => {
@@ -798,7 +798,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
             if (cellValue.type === "select" && index > 0) {
                 return;
             }
-            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;

@@ -1,4 +1,5 @@
 {
+  "addDesc": "Добавить описание",
   "dataRepoAutoPurgeIndexRetentionDays": "Срок хранения снимков данных",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Количество снимков данных в день",
   "fields": "Атрибут",

@@ -1,4 +1,5 @@
 {
+  "addDesc": "添加描述",
   "dataRepoAutoPurgeIndexRetentionDays": "數據快照保留天數",
   "dataRepoAutoPurgeRetentionIndexesDaily": "數據快照每天保留個數",
   "fields": "欄位",

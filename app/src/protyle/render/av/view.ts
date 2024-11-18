@@ -200,7 +200,7 @@ export const getViewHTML = (data: IAV) => {
 <button class="b3-menu__item" data-type="nobg">
     <div>
         <div class="fn__flex">
-            <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
+            <span class="b3-menu__avemoji" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
             <div class="b3-form__icona fn__size200">
                 <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" value="${escapeAttr(view.name)}" data-value="${escapeAttr(view.name)}">
                 <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>

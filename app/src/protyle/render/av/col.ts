@@ -617,13 +617,13 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         type: "readonly",
         label: `<div>
     <div class="fn__flex">
-        <span class="b3-menu__avemoji" data-icon="${cellElement.dataset.icon}">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
+        <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
         <div class="b3-form__icona fn__size200">
             <input class="b3-text-field b3-form__icona-input" type="text" value="${oldValue}">
             <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? oldDesc : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
         </div>
     </div>
-    <div class="fn__non">
+    <div class="fn__none">
         <div class="fn__hr--small"></div>
         <textarea style="margin-left: 22px" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
     </div>
@@ -649,7 +649,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         avID,
                         data: cellElement.dataset.icon,
                     }]);
-                    iconElement.dataset.icon = unicode;
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                 }, iconElement.querySelector("img"));

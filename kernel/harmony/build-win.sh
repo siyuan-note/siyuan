@@ -1,5 +1,6 @@
 #!/bin/bash
 
+export GOPROXY=https://goproxy.io
 export CGO_ENABLED=1
 export GOOS=android
 export GOARCH=amd64

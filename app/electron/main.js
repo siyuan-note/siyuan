@@ -320,7 +320,11 @@ const initMainWindow = () => {
     });
     remote.enable(currentWindow.webContents);
 
-    resetToCenter ? currentWindow.center() : currentWindow.setPosition(x, y);
+    if (resetToCenter) {
+        currentWindow.center();
+    } else {
+        currentWindow.setPosition(x, y);
+    }
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     // set proxy

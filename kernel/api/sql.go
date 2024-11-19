@@ -31,6 +31,7 @@ func flushTransaction(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
+	model.FlushTxQueue()
 	sql.FlushQueue()
 }
 

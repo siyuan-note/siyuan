@@ -35,17 +35,17 @@ import (
 )
 
 //export StartKernelFast
-func StartKernelFast(container, appDir, workspaceBaseDir, localIPs string) {
+func StartKernelFast(container, appDir, workspaceBaseDir, localIPs *C.char) {
 	go server.Serve(true)
 }
 
 //export StartKernel
-func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer string) {
-	SetTimezone(container, appDir, timezoneID)
+func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang, osVer *C.char) {
+	SetTimezone(C.GoString(container), C.GoString(appDir), C.GoString(timezoneID))
 	util.Mode = "prod"
-	util.MobileOSVer = osVer
-	util.LocalIPs = strings.Split(localIPs, ",")
-	util.BootMobile(container, appDir, workspaceBaseDir, lang)
+	util.MobileOSVer = C.GoString(osVer)
+	util.LocalIPs = strings.Split(C.GoString(localIPs), ",")
+	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()
 	go server.Serve(false)

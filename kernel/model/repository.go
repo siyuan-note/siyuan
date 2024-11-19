@@ -130,10 +130,14 @@ func autoPurgeRepo(cron bool) {
 		}
 	}
 
+	todayDate := now.Format("2006-01-02")
 	// 筛选出每日需要保留的索引
 	var retentionIndexIDs []string
-	for _, indexes := range dateGroupedIndexes {
-		if len(indexes) <= Conf.Repo.RetentionIndexesDaily {
+	for date, indexes := range dateGroupedIndexes {
+		if len(indexes) <= Conf.Repo.RetentionIndexesDaily || todayDate == date {
+			for _, index := range indexes {
+				retentionIndexIDs = append(retentionIndexIDs, index.ID)
+			}
 			continue
 		}
 
@@ -153,7 +157,7 @@ func autoPurgeRepo(cron bool) {
 	}
 
 	retentionIndexIDs = gulu.Str.RemoveDuplicatedElem(retentionIndexIDs)
-	if 16 > len(retentionIndexIDs) {
+	if 3 > len(retentionIndexIDs) {
 		logging.LogInfof("no index to purge [ellapsed=%.2fs]", time.Since(now).Seconds())
 		return
 	}

@@ -418,7 +418,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "delete") {
-        if (updateElements.length > 0) {
+        if (updateElements.length > 0 || !isUndo) {
             deleteBlock(updateElements, operation.id, protyle, isUndo);
         } else if (isUndo) {
             zoomOut({

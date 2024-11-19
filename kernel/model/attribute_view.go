@@ -3461,13 +3461,16 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 
 	data := operation.Data.(map[string]interface{})
 
-	oldName := data["oldName"].(string)
-	newName := data["newName"].(string)
+	rename := false
+	oldName := strings.TrimSpace(data["oldName"].(string))
+	newName := strings.TrimSpace(data["newName"].(string))
+	newDesc := strings.TrimSpace(data["newDesc"].(string))
 	newColor := data["newColor"].(string)
-	newDesc := data["newDesc"].(string)
 
 	found := false
 	if oldName != newName {
+		rename = true
+
 		for _, opt := range key.Options {
 			if newName == opt.Name { // 如果选项已经存在则直接使用
 				found = true
@@ -3507,7 +3510,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 					break
 				}
 			}
-			if found {
+			if found && rename {
 				idx := -1
 				for i, opt := range value.MSelect {
 					if oldName == opt.Content {

@@ -370,7 +370,6 @@ export const JSONToCenter = (
             child.headElement.setAttribute("data-init-active", "true");
         }
         (layout as Wnd).addTab(child, false, false, json.activeTime);
-        (layout as Wnd).showHeading();
     } else if (json.instance === "Editor" && json.blockId) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab) {
             (layout as Tab).headElement.classList.add("item--unupdate");
@@ -506,6 +505,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
             }
             const tab = getInstanceById(item.getAttribute("data-id")) as Tab;
             tab.parent.switchTab(item, false, false, true, false);
+            tab.parent.showHeading();
         });
         if (latestTabHeaderElement) {
             setPanelFocus(latestTabHeaderElement.parentElement.parentElement.parentElement, false);

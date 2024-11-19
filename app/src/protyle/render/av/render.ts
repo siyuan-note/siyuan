@@ -267,7 +267,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         <span>${window.siyuan.languages.newRow}</span>
                     </button>
                     <span class="fn__space"></span>
-                    <button class="b3-button data-type="av-load-more"${data.rowCount > data.rows.length ? "" : " fn__none"}">
+                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
                         <svg><use xlink:href="#iconArrowDown"></use></svg>
                         <span>${window.siyuan.languages.loadMore}</span>
                         <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>

@@ -153,7 +153,7 @@ func autoPurgeRepo(cron bool) {
 	}
 
 	retentionIndexIDs = gulu.Str.RemoveDuplicatedElem(retentionIndexIDs)
-	if 1 > len(retentionIndexIDs) {
+	if 16 > len(retentionIndexIDs) {
 		logging.LogInfof("no index to purge [ellapsed=%.2fs]", time.Since(now).Seconds())
 		return
 	}

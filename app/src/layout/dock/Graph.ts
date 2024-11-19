@@ -579,8 +579,8 @@ export class Graph extends Model {
             if (this.graphData.nodes.length > 1024) {
                 maxVelocity = 1024;
             }
-            if (this.graphData.nodes.length < 50) {
-                maxVelocity = 50;
+            if (this.graphData.nodes.length < 256) {
+                maxVelocity = 256;
             }
             let minVelocity = this.graphData.nodes.length;
             if (this.graphData.nodes.length > 64) {

@@ -208,6 +208,17 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             blockID,
             target: calcElement
         });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Percent unique values",
+            data: panelData?.data,
+            blockID,
+            target: calcElement
+        });
     } else {
         calcItem({
             menu,
@@ -427,6 +438,9 @@ export const getCalcValue = (column: IAVColumn) => {
         case "Percent not empty":
             value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentNotEmpty}`;
             break;
+        case "Percent unique values":
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentUniqueValues}`;
+            break;
         case "Sum":
             value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultSum}`;
             break;
@@ -486,6 +500,8 @@ export const getNameByOperator = (operator: string, isRollup: boolean) => {
             return window.siyuan.languages.calcOperatorPercentEmpty;
         case "Percent not empty":
             return window.siyuan.languages.calcOperatorPercentNotEmpty;
+        case "Percent unique values":
+            return window.siyuan.languages.calcOperatorPercentUniqueValues;
         case "Checked":
             return window.siyuan.languages.checked;
         case "Unchecked":

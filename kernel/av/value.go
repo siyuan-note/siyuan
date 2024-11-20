@@ -730,6 +730,18 @@ func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
 		if 0 < len(r.Contents) {
 			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countNonEmpty)/float64(len(r.Contents)), NumberFormatPercent)}}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, v := range r.Contents {
+			if _, ok := uniqueValues[v.String(true)]; !ok {
+				uniqueValues[v.String(true)] = true
+				countUniqueValues++
+			}
+		}
+		if 0 < len(r.Contents) {
+			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(r.Contents)), NumberFormatPercent)}}
+		}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, v := range r.Contents {

@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/88250/lute/render"
 	"strconv"
 	"strings"
 	"time"
@@ -617,7 +618,7 @@ func GetBlockDOM(id string) (ret string) {
 	return
 }
 
-func GetBlockKramdown(id string) (ret string) {
+func GetBlockKramdown(id, mode string) (ret string) {
 	if "" == id {
 		return
 	}
@@ -633,7 +634,13 @@ func GetBlockKramdown(id string) (ret string) {
 	root.AppendChild(node.Next) // IAL
 	root.PrependChild(node)
 	luteEngine := NewLute()
-	ret = treenode.ExportNodeStdMd(root, luteEngine)
+	if "md" == mode {
+		ret = treenode.ExportNodeStdMd(root, luteEngine)
+	} else {
+		tree.Root = root
+		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+		ret = string(formatRenderer.Render())
+	}
 	return
 }
 

@@ -56,7 +56,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20241120031619-9de3833dc8e6
+	github.com/siyuan-note/dejavu v0.0.0-20241120170449-12bce3fc2a58
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20240724034355-d1ed7bf21d04
@@ -91,7 +91,7 @@ require (
 	github.com/andybalholm/cascadia v1.3.2 // indirect
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef // indirect
 	github.com/aws/aws-sdk-go v1.55.5 // indirect
-	github.com/bytedance/sonic v1.12.2 // indirect
+	github.com/bytedance/sonic v1.12.4 // indirect
 	github.com/bytedance/sonic/loader v0.2.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.5.0 // indirect

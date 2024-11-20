@@ -52,7 +52,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length > 0) {
+            if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
             copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocolMd")
@@ -67,7 +67,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length > 0) {
+            if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
             copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "id")
@@ -81,7 +81,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length > 0) {
+            if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
             copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocol")
@@ -96,7 +96,7 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
         if (nodeElement) {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length > 0) {
+            if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
             copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "blockEmbed")

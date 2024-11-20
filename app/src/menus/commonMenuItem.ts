@@ -371,16 +371,27 @@ export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?:
     });
 };
 
-export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
+export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element) => {
     return [{
         id: "copyBlockRef",
         iconHTML: "",
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
         label: window.siyuan.languages.copyBlockRef,
-        click: () => {
-            fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`((${id} '${response.data}'))`);
-            });
+        click: async () => {
+            let text = "";
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                const response = await fetchSyncPost("/api/block/getRefText", {id});
+                const content = `((${id} '${response.data}'))`;
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += content;
+                if (ids.length > 1 && i !== ids.length - 1) {
+                    text += "\n";
+                }
+            }
+            writeText(text);
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -391,7 +402,17 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyBlockEmbed,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
         click: () => {
-            writeText(`{{select * from blocks where id='${id}'}}`);
+            let text = "";
+            ids.forEach((id, index) => {
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += `{{select * from blocks where id='${id}'}}`;
+                if (ids.length > 1 && index !== ids.length - 1) {
+                    text += "\n";
+                }
+            });
+            writeText(text);
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -402,7 +423,17 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyProtocol,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
         click: () => {
-            writeText(`siyuan://blocks/${id}`);
+            let text = "";
+            ids.forEach((id, index) => {
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += `siyuan://blocks/${id}`;
+                if (ids.length > 1 && index !== ids.length - 1) {
+                    text += "\n";
+                }
+            });
+            writeText(text);
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -412,10 +443,21 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         iconHTML: "",
         label: window.siyuan.languages.copyProtocolInMd,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
-        click: () => {
-            fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`[${response.data}](siyuan://blocks/${id})`);
-            });
+        click: async () => {
+            let text = "";
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                const response = await fetchSyncPost("/api/block/getRefText", {id});
+                const content = `[${response.data}](siyuan://blocks/${id})`;
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += content;
+                if (ids.length > 1 && i !== ids.length - 1) {
+                    text += "\n";
+                }
+            }
+            writeText(text);
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -425,12 +467,21 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click: () => {
-            fetchPost("/api/filetree/getHPathByID", {
-                id
-            }, (response) => {
-                writeText(response.data);
-            });
+        click: async () => {
+            let text = "";
+            for (let i = 0; i < ids.length; i++) {
+                const id = ids[i];
+                const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
+                const content = response.data;
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += content;
+                if (ids.length > 1 && i !== ids.length - 1) {
+                    text += "\n";
+                }
+            }
+            writeText(text);
         }
     }, {
         id: "copyID",
@@ -438,7 +489,17 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyID,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
         click: () => {
-            writeText(id);
+            let text = "";
+            ids.forEach((id, index) => {
+                if (ids.length > 1) {
+                    text += "* ";
+                }
+                text += id;
+                if (ids.length > 1 && index !== ids.length - 1) {
+                    text += "\n";
+                }
+            });
+            writeText(text);
             if (focusElement) {
                 focusBlock(focusElement);
             }

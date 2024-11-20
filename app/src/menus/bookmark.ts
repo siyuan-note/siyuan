@@ -60,7 +60,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: copySubMenu(element.getAttribute("data-node-id"), false)
+            submenu: copySubMenu([element.getAttribute("data-node-id")], false)
         }).element);
     }
 

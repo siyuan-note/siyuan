@@ -1260,7 +1260,7 @@ export class Gutter {
             }).element);
         }
 
-        const copyMenu = (copySubMenu(id, true, nodeElement) as IMenu[]).concat([{
+        const copyMenu = (copySubMenu([id], true, nodeElement) as IMenu[]).concat([{
             id: "copyPlainText",
             iconHTML: "",
             label: window.siyuan.languages.copyPlainText,

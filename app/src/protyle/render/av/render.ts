@@ -264,14 +264,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
-                        ${window.siyuan.languages.newRow}
+                        <span>${window.siyuan.languages.newRow}</span>
                     </button>
                     <span class="fn__space"></span>
-                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
-                        <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
-                        <span data-type="av-load-more">
-                            ${window.siyuan.languages.loadMore}
-                        </span>
+                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
+                        <svg><use xlink:href="#iconArrowDown"></use></svg>
+                        <span>${window.siyuan.languages.loadMore}</span>
                         <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
                     </button>
                 </div>

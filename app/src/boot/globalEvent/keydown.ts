@@ -492,37 +492,27 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         event.stopPropagation();
         if (hasClosestByClassName(range.startContainer, "protyle-title")) {
-            fetchPost("/api/block/getRefText", {id: protyle.block.rootID}, (response) => {
-                writeText(`((${protyle.block.rootID} '${response.data}'))`);
-            });
+            copyTextByType([protyle.block.rootID], "ref");
         } else {
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 return false;
             }
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            let actionElement;
-            if (selectElements.length === 1) {
-                actionElement = selectElements[0];
-            } else {
-                const selectImgElement = nodeElement.querySelector(".img--select");
-                if (selectImgElement) {
-                    copyPNGByLink(selectImgElement.querySelector("img").getAttribute("src"));
-                    return true;
-                }
-                actionElement = nodeElement;
+            const selectImgElement = nodeElement.querySelector(".img--select");
+            if (selectImgElement) {
+                copyPNGByLink(selectImgElement.querySelector("img").getAttribute("src"));
+                return true;
             }
-            const actionElementId = actionElement.getAttribute("data-node-id");
             if (range.toString() !== "") {
                 getContentByInlineHTML(range, (content) => {
-                    writeText(`((${actionElementId} "${content.trim()}"))`);
+                    writeText(`((${nodeElement.getAttribute("data-node-id")} "${content.trim()}"))`);
                 });
             } else {
-                fetchPost("/api/block/getRefText", {id: actionElementId}, (response) => {
-                    writeText(`((${actionElementId} '${response.data}'))`);
-                });
+                const ids = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).map(item => item.getAttribute("data-node-id"));
+                copyTextByType(ids, "ref");
             }
         }
+        return true;
     }
     if (hasClosestByClassName(target, "protyle-title__input")) {
         return false;

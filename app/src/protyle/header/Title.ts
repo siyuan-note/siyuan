@@ -149,18 +149,6 @@ export class Title {
                 getEditorRange(this.editElement).selectNodeContents(this.editElement);
                 event.preventDefault();
                 event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
-                writeText(protyle.block.rootID);
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
-                writeText(`{{select * from blocks where id='${protyle.block.rootID}'}}`);
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
-                writeText(`siyuan://blocks/${protyle.block.rootID}`);
-                event.preventDefault();
-                event.stopPropagation();
             }
         });
         const iconElement = this.element.querySelector(".protyle-title__icon");

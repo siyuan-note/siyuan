@@ -614,7 +614,11 @@ func matchBacklinkKeyword(block *Block, keywords []string) bool {
 
 	for _, k := range keywords {
 		k = strings.ToLower(k)
-		if strings.Contains(strings.ToLower(block.FContent), k) ||
+		content := block.Content
+		if block.IsContainerBlock() {
+			content = block.FContent
+		}
+		if strings.Contains(strings.ToLower(content), k) ||
 			strings.Contains(strings.ToLower(path.Base(block.HPath)), k) ||
 			strings.Contains(strings.ToLower(block.Name), k) ||
 			strings.Contains(strings.ToLower(block.Alias), k) ||

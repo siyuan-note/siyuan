@@ -43,20 +43,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (!blockElement) {
         return false;
     }
-    const setPageSizeElement = hasClosestByAttribute(event.target, "data-type", "set-page-size");
-    if (setPageSizeElement) {
-        setPageSize({
-            target: event.target,
-            protyle,
-            avID: blockElement.getAttribute("data-av-id"),
-            nodeElement: blockElement
-        });
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
+
     const loadMoreElement = hasClosestByAttribute(event.target, "data-type", "av-load-more");
-    if (loadMoreElement) {
+    if (loadMoreElement && !hasClosestByAttribute(event.target, "data-type", "set-page-size")) {
         (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
         blockElement.removeAttribute("data-render");
         blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
@@ -190,6 +179,16 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             target.parentElement.classList.add("av__cell--select");
             addDragFill(target.parentElement);
             hintRef(target.previousElementSibling.textContent.trim(), protyle, "av");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "set-page-size") {
+            setPageSize({
+                target,
+                protyle,
+                avID: blockElement.getAttribute("data-av-id"),
+                nodeElement: blockElement
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;

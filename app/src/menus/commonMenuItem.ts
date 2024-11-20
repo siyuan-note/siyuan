@@ -22,6 +22,7 @@ import {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openAssetNewWindow} from "../window/openNewWindow";
 import {escapeHtml} from "../util/escape";
+import {copyTextByType} from "../protyle/toolbar/util";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -377,21 +378,8 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         iconHTML: "",
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
         label: window.siyuan.languages.copyBlockRef,
-        click: async () => {
-            let text = "";
-            for (let i = 0; i < ids.length; i++) {
-                const id = ids[i];
-                const response = await fetchSyncPost("/api/block/getRefText", {id});
-                const content = `((${id} '${response.data}'))`;
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += content;
-                if (ids.length > 1 && i !== ids.length - 1) {
-                    text += "\n";
-                }
-            }
-            writeText(text);
+        click: () => {
+            copyTextByType(ids, "ref");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -402,17 +390,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         label: window.siyuan.languages.copyBlockEmbed,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
         click: () => {
-            let text = "";
-            ids.forEach((id, index) => {
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += `{{select * from blocks where id='${id}'}}`;
-                if (ids.length > 1 && index !== ids.length - 1) {
-                    text += "\n";
-                }
-            });
-            writeText(text);
+            copyTextByType(ids, "blockEmbed");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -423,17 +401,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         label: window.siyuan.languages.copyProtocol,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
         click: () => {
-            let text = "";
-            ids.forEach((id, index) => {
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += `siyuan://blocks/${id}`;
-                if (ids.length > 1 && index !== ids.length - 1) {
-                    text += "\n";
-                }
-            });
-            writeText(text);
+            copyTextByType(ids, "protocol");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -443,21 +411,8 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         iconHTML: "",
         label: window.siyuan.languages.copyProtocolInMd,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
-        click: async () => {
-            let text = "";
-            for (let i = 0; i < ids.length; i++) {
-                const id = ids[i];
-                const response = await fetchSyncPost("/api/block/getRefText", {id});
-                const content = `[${response.data}](siyuan://blocks/${id})`;
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += content;
-                if (ids.length > 1 && i !== ids.length - 1) {
-                    text += "\n";
-                }
-            }
-            writeText(text);
+        click: () => {
+            copyTextByType(ids, "protocolMd");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -467,21 +422,11 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click: async () => {
-            let text = "";
-            for (let i = 0; i < ids.length; i++) {
-                const id = ids[i];
-                const response = await fetchSyncPost("/api/filetree/getHPathByID", {id});
-                const content = response.data;
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += content;
-                if (ids.length > 1 && i !== ids.length - 1) {
-                    text += "\n";
-                }
+        click:  () => {
+            copyTextByType(ids, "hPath");
+            if (focusElement) {
+                focusBlock(focusElement);
             }
-            writeText(text);
         }
     }, {
         id: "copyID",
@@ -489,17 +434,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         label: window.siyuan.languages.copyID,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
         click: () => {
-            let text = "";
-            ids.forEach((id, index) => {
-                if (ids.length > 1) {
-                    text += "* ";
-                }
-                text += id;
-                if (ids.length > 1 && index !== ids.length - 1) {
-                    text += "\n";
-                }
-            });
-            writeText(text);
+            copyTextByType(ids, "id");
             if (focusElement) {
                 focusBlock(focusElement);
             }

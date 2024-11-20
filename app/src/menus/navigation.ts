@@ -54,7 +54,19 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: copySubMenu(blockIDs, false)
+            submenu: copySubMenu(blockIDs).concat([{
+                id: "duplicate",
+                iconHTML: "",
+                label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
+                click() {
+                    blockIDs.forEach((id) => {
+                        fetchPost("/api/filetree/duplicateDoc", {
+                            id
+                        });
+                    });
+                }
+            }])
         }).element);
     }
 
@@ -481,7 +493,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: (copySubMenu([id], false) as IMenu[]).concat([{
+            submenu: (copySubMenu([id]) as IMenu[]).concat([{
                 id: "duplicate",
                 iconHTML: "",
                 label: window.siyuan.languages.duplicate,

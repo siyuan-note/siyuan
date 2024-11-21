@@ -19,6 +19,7 @@ import {hasClosestByClassName} from "../../protyle/util/hasClosest";
 import {App} from "../../index";
 import {Plugin} from "../../plugin";
 import {Custom} from "./Custom";
+import {recordBeforeResizeTop} from "../../protyle/util/resize";
 
 const TYPES = ["file", "outline", "inbox", "bookmark", "tag", "graph", "globalGraph", "backlink"];
 
@@ -495,6 +496,7 @@ export class Dock {
         if (!type) {
             return;
         }
+        recordBeforeResizeTop();
         const target = this.element.querySelector(`[data-type="${type}"]`) as HTMLElement;
         if (show && target.classList.contains("dock__item--active")) {
             target.classList.remove("dock__item--active", "dock__item--activefocus");
@@ -547,7 +549,7 @@ export class Dock {
                 if (currentElement) {
                     getAllTabs().find(item => {
                         if (item.id === currentElement.getAttribute("data-id")) {
-                            item.parent.switchTab(item.headElement);
+                            item.parent.switchTab(item.headElement, false, true, false);
                             return true;
                         }
                     });

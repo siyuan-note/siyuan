@@ -407,6 +407,13 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		return ast.WalkContinue
 	})
 
+	icon := tree.Root.IALAttr("icon")
+	if "" != icon {
+		// 动态图标需要反转义 https://github.com/siyuan-note/siyuan/issues/13211
+		icon = util.UnescapeHTML(icon)
+		tree.Root.SetIALAttr("icon", icon)
+	}
+
 	luteEngine := NewLute()
 	dom = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
 	return

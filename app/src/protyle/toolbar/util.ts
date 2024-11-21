@@ -244,4 +244,4 @@ export const copyTextByType = async (ids: string[],
         }
     }
     writeText(text);
-}
+};

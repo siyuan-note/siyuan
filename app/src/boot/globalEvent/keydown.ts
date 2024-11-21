@@ -588,7 +588,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         if (item.getAttribute("data-type") === "navigation-file") {
             ids.push(item.getAttribute("data-node-id"));
         }
-    })
+    });
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.spaceRepetition.custom, event) && !window.siyuan.config.readonly) {
         if (isFile) {
@@ -663,7 +663,7 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
             fetchPost("/api/filetree/duplicateDoc", {
                 id: item,
             });
-        })
+        });
         return true;
     }
 

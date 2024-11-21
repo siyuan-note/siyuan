@@ -55,9 +55,9 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocolMd")
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocolMd");
         } else {
-            copyTextByType([protyle.block.rootID], "protocolMd")
+            copyTextByType([protyle.block.rootID], "protocolMd");
         }
         event.preventDefault();
         event.stopPropagation();
@@ -70,9 +70,9 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "id")
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "id");
         } else {
-            copyTextByType([protyle.block.rootID], "id")
+            copyTextByType([protyle.block.rootID], "id");
         }
         event.preventDefault();
         event.stopPropagation();
@@ -84,9 +84,9 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocol")
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocol");
         } else {
-            copyTextByType([protyle.block.rootID], "protocol")
+            copyTextByType([protyle.block.rootID], "protocol");
         }
         event.preventDefault();
         event.stopPropagation();
@@ -99,9 +99,9 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
             if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "blockEmbed")
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "blockEmbed");
         } else {
-            copyTextByType([protyle.block.rootID], "blockEmbed")
+            copyTextByType([protyle.block.rootID], "blockEmbed");
         }
         event.preventDefault();
         event.stopPropagation();

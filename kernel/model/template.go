@@ -95,10 +95,10 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		if group.IsDir() {
 			var templateBlocks []*Block
 			templateDir := filepath.Join(templates, group.Name())
-			filelock.Walk(templateDir, func(path string, info fs.FileInfo, err error) error {
-				name := strings.ToLower(info.Name())
+			filelock.Walk(templateDir, func(path string, d fs.DirEntry, err error) error {
+				name := strings.ToLower(d.Name())
 				if strings.HasPrefix(name, ".") {
-					if info.IsDir() {
+					if d.IsDir() {
 						return filepath.SkipDir
 					}
 					return nil

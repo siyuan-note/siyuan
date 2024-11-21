@@ -56,10 +56,10 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20241120170449-12bce3fc2a58
+	github.com/siyuan-note/dejavu v0.0.0-20241121022337-e418aabe08a7
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
-	github.com/siyuan-note/filelock v0.0.0-20240724034355-d1ed7bf21d04
+	github.com/siyuan-note/filelock v0.0.0-20241121021809-1cf0626a7d64
 	github.com/siyuan-note/httpclient v0.0.0-20241113084556-839baaab03f6
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240912073907-1e89a5f8e7dc
@@ -137,7 +137,7 @@ require (
 	github.com/modern-go/reflect2 v1.0.2 // indirect
 	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
-	github.com/onsi/ginkgo/v2 v2.21.0 // indirect
+	github.com/onsi/ginkgo/v2 v2.22.0 // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
 	github.com/pelletier/go-toml/v2 v2.2.3 // indirect
 	github.com/pkg/errors v0.9.1 // indirect

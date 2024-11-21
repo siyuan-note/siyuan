@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -1461,11 +1462,11 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 
 func countSubDocs(box, p string) (ret int) {
 	p = strings.TrimSuffix(p, ".sy")
-	_ = filepath.Walk(filepath.Join(util.DataDir, box, p), func(path string, info os.FileInfo, err error) error {
+	_ = filelock.Walk(filepath.Join(util.DataDir, box, p), func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
 		}
 		if strings.HasSuffix(path, ".sy") {

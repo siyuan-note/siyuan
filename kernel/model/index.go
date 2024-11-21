@@ -82,7 +82,7 @@ func RemoveIndexes(paths []string) {
 
 func listSyFiles(dir string) (ret []string) {
 	dirPath := filepath.Join(util.DataDir, dir)
-	err := filelock.Walk(dirPath, func(path string, d fs.FileInfo, err error) error {
+	err := filelock.Walk(dirPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			logging.LogWarnf("walk dir [%s] failed: %s", dirPath, err)
 			return err

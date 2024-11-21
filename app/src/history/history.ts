@@ -459,6 +459,7 @@ export const openHistory = (app: App) => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
+        dialog.element.querySelector("input").focus();
         bindEvent(app, dialog.element, dialog);
         resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
     }

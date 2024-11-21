@@ -96,7 +96,7 @@ func RootChildIDs(rootID string) (ret []string) {
 	if !gulu.File.IsDir(subFolder) {
 		return
 	}
-	filelock.Walk(subFolder, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(subFolder, func(path string, d fs.DirEntry, err error) error {
 		if strings.HasSuffix(path, ".sy") {
 			name := filepath.Base(path)
 			id := strings.TrimSuffix(name, ".sy")

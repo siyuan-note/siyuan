@@ -673,19 +673,24 @@ var boxLatestHistoryTime = map[string]time.Time{}
 
 func (box *Box) recentModifiedDocs() (ret []string) {
 	latestHistoryTime := boxLatestHistoryTime[box.ID]
-	filelock.Walk(filepath.Join(util.DataDir, box.ID), func(path string, info fs.FileInfo, err error) error {
-		if nil == info {
+	filelock.Walk(filepath.Join(util.DataDir, box.ID), func(path string, d fs.DirEntry, err error) error {
+		if nil != err || nil == d {
 			return nil
 		}
-		if isSkipFile(info.Name()) {
-			if info.IsDir() {
+		if isSkipFile(d.Name()) {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
+		}
+
+		info, err := d.Info()
+		if nil != err {
+			return err
 		}
 
 		if info.ModTime().After(latestHistoryTime) {
@@ -817,8 +822,8 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 
 	entryPath := filepath.Join(util.HistoryDir, name)
 	var docs, assets []string
-	filelock.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(info.Name(), ".sy") {
+	filelock.Walk(entryPath, func(path string, d fs.DirEntry, err error) error {
+		if strings.HasSuffix(d.Name(), ".sy") {
 			docs = append(docs, path)
 		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
 			assets = append(assets, path)

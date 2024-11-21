@@ -118,12 +118,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	defer os.RemoveAll(unzipPath)
 
 	var syPaths []string
-	filelock.Walk(unzipPath, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(unzipPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".sy") {
+		if !d.IsDir() && strings.HasSuffix(d.Name(), ".sy") {
 			syPaths = append(syPaths, path)
 		}
 		return nil
@@ -226,14 +226,14 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	renameAvPaths := map[string]string{}
 	if gulu.File.IsExist(storageAvDir) {
 		// 重新生成数据库数据
-		filelock.Walk(storageAvDir, func(path string, info fs.FileInfo, err error) error {
-			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(info.Name(), ".json")) {
+		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
+			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}
 
 			// 重命名数据库
 			newAvID := ast.NewNodeID()
-			oldAvID := strings.TrimSuffix(info.Name(), ".json")
+			oldAvID := strings.TrimSuffix(d.Name(), ".json")
 			newPath := filepath.Join(filepath.Dir(path), newAvID+".json")
 			renameAvPaths[path] = newPath
 			avIDs[oldAvID] = newAvID
@@ -460,12 +460,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	// 重命名文件路径
 	renamePaths := map[string]string{}
-	filelock.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 
-		if info.IsDir() && ast.IsNodeIDPattern(info.Name()) {
+		if d.IsDir() && ast.IsNodeIDPattern(d.Name()) {
 			renamePaths[path] = path
 		}
 		return nil
@@ -535,8 +535,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	// 将包含的资源文件统一移动到 data/assets/ 下
 	var assetsDirs []string
-	filelock.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
-		if strings.Contains(path, "assets") && info.IsDir() {
+	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if strings.Contains(path, "assets") && d.IsDir() {
 			assetsDirs = append(assetsDirs, path)
 		}
 		return nil
@@ -570,15 +570,15 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	var treePaths []string
-	filelock.Walk(unzipRootPath, func(path string, info fs.FileInfo, err error) error {
-		if info.IsDir() {
-			if strings.HasPrefix(info.Name(), ".") {
+	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if d.IsDir() {
+			if strings.HasPrefix(d.Name(), ".") {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		if !strings.HasSuffix(info.Name(), ".sy") {
+		if !strings.HasSuffix(d.Name(), ".sy") {
 			return nil
 		}
 
@@ -699,18 +699,18 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	if gulu.File.IsDir(localPath) { // 导入文件夹
 		// 收集所有资源文件
 		assets := map[string]string{}
-		filelock.Walk(localPath, func(currentPath string, info os.FileInfo, walkErr error) error {
+		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
 			if localPath == currentPath {
 				return nil
 			}
-			if strings.HasPrefix(info.Name(), ".") {
-				if info.IsDir() {
+			if strings.HasPrefix(d.Name(), ".") {
+				if d.IsDir() {
 					return filepath.SkipDir
 				}
 				return nil
 			}
 
-			if !strings.HasSuffix(info.Name(), ".md") && !strings.HasSuffix(info.Name(), ".markdown") {
+			if !strings.HasSuffix(d.Name(), ".md") && !strings.HasSuffix(d.Name(), ".markdown") {
 				assets[currentPath] = currentPath
 				return nil
 			}
@@ -721,9 +721,9 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		assetsDone := map[string]string{}
 
 		// md 转换 sy
-		filelock.Walk(localPath, func(currentPath string, info os.FileInfo, walkErr error) error {
-			if strings.HasPrefix(info.Name(), ".") {
-				if info.IsDir() {
+		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+			if strings.HasPrefix(d.Name(), ".") {
+				if d.IsDir() {
 					return filepath.SkipDir
 				}
 				return nil
@@ -731,10 +731,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			var tree *parse.Tree
 			var ext string
-			title := info.Name()
-			if !info.IsDir() {
-				ext = path.Ext(info.Name())
-				title = strings.TrimSuffix(info.Name(), ext)
+			title := d.Name()
+			if !d.IsDir() {
+				ext = path.Ext(d.Name())
+				title = strings.TrimSuffix(d.Name(), ext)
 			}
 			id := ast.NewNodeID()
 
@@ -759,7 +759,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				id = strings.TrimSuffix(path.Base(targetPath), ".sy")
 			}
 
-			if info.IsDir() {
+			if d.IsDir() {
 				if subMdFiles := util.GetFilePathsByExts(currentPath, []string{".md", ".markdown"}); 1 > len(subMdFiles) {
 					// 如果该文件夹中不包含 Markdown 文件则不处理 https://github.com/siyuan-note/siyuan/issues/11567
 					return nil
@@ -776,7 +776,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return nil
 			}
 
-			if !strings.HasSuffix(info.Name(), ".md") && !strings.HasSuffix(info.Name(), ".markdown") {
+			if !strings.HasSuffix(d.Name(), ".md") && !strings.HasSuffix(d.Name(), ".markdown") {
 				return nil
 			}
 

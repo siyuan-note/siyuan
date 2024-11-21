@@ -408,7 +408,7 @@ export const progressStatus = (data: IWebSocketData) => {
         statusElement.style.bottom = "0";
         statusTimeout = window.setTimeout(() => {
             statusElement.style.bottom = "";
-        }, 7000);
+        }, 12000);
     } else {
         const msgElement = statusElement.querySelector(".status__msg");
         if (msgElement) {
@@ -416,7 +416,7 @@ export const progressStatus = (data: IWebSocketData) => {
             msgElement.innerHTML = data.msg;
             statusTimeout = window.setTimeout(() => {
                 msgElement.innerHTML = "";
-            }, 7000);
+            }, 12000);
         }
     }
 };

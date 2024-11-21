@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"io/fs"
 	"net"
 	"os"
 	"path"
@@ -167,7 +168,7 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 
 	baseDepth := strings.Count(filepath.ToSlash(treeAbsPath), "/")
 	depth := 1
-	filelock.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	filelock.Walk(dir, func(path string, d fs.DirEntry, err error) error {
 		p := filepath.ToSlash(path)
 		currentDepth := strings.Count(p, "/")
 		if depth < currentDepth {

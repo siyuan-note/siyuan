@@ -1285,34 +1285,63 @@ func bootSyncRepo() (err error) {
 	isBootSyncing.Store(true)
 
 	start := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
-	if err != nil {
-		autoSyncErrCount++
-		planSyncAfter(fixSyncInterval)
 
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		Conf.Sync.Stat = msg
-		Conf.Save()
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		BootSyncSucc = 1
-		isBootSyncing.Store(false)
-		return
-	}
+	waitGroup := sync.WaitGroup{}
+	var errs []error
+	waitGroup.Add(1)
+	go func() {
+		defer waitGroup.Done()
 
-	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatal) {
-		autoSyncErrCount++
-		planSyncAfter(fixSyncInterval)
+		_, _, indexErr := indexRepoBeforeCloudSync(repo)
+		if indexErr != nil {
+			errs = append(errs, indexErr)
+			autoSyncErrCount++
+			planSyncAfter(fixSyncInterval)
 
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		Conf.Sync.Stat = msg
-		Conf.Save()
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		BootSyncSucc = 1
-		isBootSyncing.Store(false)
+			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(indexErr))
+			Conf.Sync.Stat = msg
+			Conf.Save()
+			util.PushStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+			BootSyncSucc = 1
+			isBootSyncing.Store(false)
+			return
+		}
+	}()
+
+	var fetchedFiles []*entity.File
+	waitGroup.Add(1)
+	go func() {
+		defer waitGroup.Done()
+
+		syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+		cloudLatest, getErr := repo.GetCloudLatest(syncContext)
+		if nil != getErr {
+			errs = append(errs, getErr)
+			if !errors.Is(getErr, cloud.ErrCloudObjectNotFound) {
+				logging.LogErrorf("download cloud latest failed: %s", getErr)
+				return
+			}
+		}
+		fetchedFiles, getErr = repo.GetSyncCloudFiles(cloudLatest, syncContext)
+		if errors.Is(getErr, dejavu.ErrRepoFatal) {
+			errs = append(errs, getErr)
+			autoSyncErrCount++
+			planSyncAfter(fixSyncInterval)
+
+			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(getErr))
+			Conf.Sync.Stat = msg
+			Conf.Save()
+			util.PushStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+			BootSyncSucc = 1
+			isBootSyncing.Store(false)
+			return
+		}
+	}()
+	waitGroup.Wait()
+	if 0 < len(errs) {
+		err = errs[0]
 		return
 	}
 

@@ -316,13 +316,14 @@ function renderProgress(index, total) {
   progressPerc.setAttribute("data-l10n-args", JSON.stringify({ progress }));
 }
 
+/* NOTE
 window.addEventListener(
   "keydown",
   function (event) {
     // Intercept Cmd/Ctrl + P in all browsers.
     // Also intercept Cmd/Ctrl + Shift + P in Chrome and Opera
     if (
-      event.keyCode === /* P= */ 80 &&
+      event.keyCode === 80 &&
       (event.ctrlKey || event.metaKey) &&
       !event.altKey &&
       (!event.shiftKey || window.chrome || window.opera)
@@ -334,7 +335,7 @@ window.addEventListener(
     }
   },
   true
-);
+);*/
 
 if ("onbeforeprint" in window) {
   // Do not propagate before/afterprint events when they are not triggered

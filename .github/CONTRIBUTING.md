@@ -58,4 +58,10 @@ Note: In the development environment, the kernel process will not be automatical
 * `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
-For the mobile-end, please refer to the corresponding project repository.
+### Harmony
+
+Only support compilation under Linux, need to install Harmony SDK, and need to modify Go source code, please refer to https://github.com/siyuan-note/siyuan/issues/13184
+
+* `cd kernel/harmony`
+* `./build.sh` (`./build-win.sh` for Windows Emulator)
+* https://github.com/siyuan-note/siyuan-harmony

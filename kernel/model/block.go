@@ -284,7 +284,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	ret = []*Block{}
 
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
-	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
 		sqlStmt = "SELECT * FROM blocks WHERE type = 'd'"
 	}
 

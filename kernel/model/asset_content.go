@@ -765,7 +765,7 @@ func (parser *PdfAssetParser) getTextPageWorker(id int, instance pdfium.Pdfium, 
 
 // Parse will parse a PDF document using PDFium webassembly module using a worker pool
 func (parser *PdfAssetParser) Parse(absPath string) (ret *AssetParseResult) {
-	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
 		// PDF asset content searching is not supported on mobile platforms
 		return
 	}

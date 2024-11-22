@@ -269,6 +269,8 @@ func getCurrentBackend() string {
 		return "ios"
 	case util.ContainerAndroid:
 		return "android"
+	case util.ContainerHarmony:
+		return "harmony"
 	default:
 		return runtime.GOOS
 	}

@@ -32,7 +32,7 @@ import (
 var emojisWatcher *fsnotify.Watcher
 
 func WatchEmojis() {
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 		return
 	}
 

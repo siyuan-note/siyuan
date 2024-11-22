@@ -1076,7 +1076,7 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 		desc = descBuilder.String()
 		desc = desc[:len(desc)-1]
 
-		fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.311", "LXGWWenKaiLite-Regular.ttf")
+		fontPath := filepath.Join(util.AppearancePath, "fonts", "LxgwWenKai-Lite-1.501", "LXGWWenKaiLite-Regular.ttf")
 		err := api.InstallFonts([]string{fontPath})
 		if err != nil {
 			logging.LogErrorf("install font [%s] failed: %s", fontPath, err)

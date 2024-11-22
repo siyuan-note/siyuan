@@ -598,6 +598,12 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 				}
 				if "tags" == attrK {
 					var tags string
+					if str, ok := attrV.(string); ok {
+						tags = strings.TrimSpace(str)
+						tree.Root.SetIALAttr("tags", tags)
+						continue
+					}
+
 					for i, tag := range attrV.([]any) {
 						tagStr := strings.TrimSpace(tag.(string))
 						if "" == tag {

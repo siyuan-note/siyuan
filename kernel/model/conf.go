@@ -134,7 +134,7 @@ func InitConf() {
 
 	if "" != util.Lang {
 		initialized := false
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 			// 移动端以上次设置的外观语言为准
 			if "" != Conf.Lang && util.Lang != Conf.Lang {
 				util.Lang = Conf.Lang
@@ -485,7 +485,7 @@ func InitConf() {
 		// 上次未正常完成数据索引
 		go func() {
 			util.WaitForUILoaded()
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
 				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(245), 15000)
 			} else {
 				task.AppendAsyncTaskWithDelay(task.PushMsg, 2*time.Second, util.PushMsg, Conf.language(244), 15000)

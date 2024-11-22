@@ -100,7 +100,7 @@ Most features are free, even for commercial use.
 * Multi-tab, drag and drop to split screen
 * Template snippet
 * JavaScript/CSS snippet
-* Android/iOS App
+* Android/iOS/HarmonyOS App
 * Docker deployment
 * [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
 * Community marketplace
@@ -120,6 +120,7 @@ Some features are only available to paid members, for more details please refer 
 | [petal](https://github.com/siyuan-note/petal)            | Plugin API            | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/petal)          | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/petal)          |
 | [android](https://github.com/siyuan-note/siyuan-android) | Android App           | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-android) | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-android) |
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App               | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
+| [harmony](https://github.com/siyuan-note/siyuan-harmony) | HarmonyOS App         | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony) | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony) |
 | [riff](https://github.com/siyuan-note/riff)              | Spaced repetition     | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
 
 ## 🌟 Star History
@@ -346,6 +347,7 @@ SiYuan is completely open source, and contributions are welcome:
 * [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
 * [Android](https://github.com/siyuan-note/siyuan-android)
 * [iOS](https://github.com/siyuan-note/siyuan-ios)
+* [HarmonyOS](https://github.com/siyuan-note/siyuan-harmony)
 * [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).

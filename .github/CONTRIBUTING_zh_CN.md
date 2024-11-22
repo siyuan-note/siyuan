@@ -60,4 +60,10 @@ NPM 镜像：
 * `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
-移动端请参考对应项目仓库。
+### Harmony
+
+仅支持在 Linux 下编译，需要安装鸿蒙 SDK，并且需要修改 Go 源码，详情请参考 https://github.com/siyuan-note/siyuan/issues/13184
+
+* `cd kernel/harmony`
+* `./build.sh` （Windows 模拟器使用 `./build-win.sh`）
+* https://github.com/siyuan-note/siyuan-harmony

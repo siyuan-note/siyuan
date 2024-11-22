@@ -32,9 +32,10 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/cookie"
+	"github.com/gin-contrib/sessions/memstore"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
@@ -47,17 +48,65 @@ import (
 	"golang.org/x/net/webdav"
 )
 
+const (
+	MethodMkcol     = "MKCOL"
+	MethodCopy      = "COPY"
+	MethodMove      = "MOVE"
+	MethodLock      = "LOCK"
+	MethodUnlock    = "UNLOCK"
+	MethodPropFind  = "PROPFIND"
+	MethodPropPatch = "PROPPATCH"
+	MethodReport    = "REPORT"
+)
+
 var (
-	cookieStore  = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
-	WebDavMethod = []string{
-		"OPTIONS",
-		"GET", "HEAD",
-		"POST", "PUT",
-		"DELETE",
-		"MKCOL",
-		"COPY", "MOVE",
-		"LOCK", "UNLOCK",
-		"PROPFIND", "PROPPATCH",
+	// 这里用的是内存存储，意味着重启后所有 session 会丢失，需要重新登录
+	sessionStore = memstore.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+
+	HttpMethods = []string{
+		http.MethodGet,
+		http.MethodHead,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodPatch,
+		http.MethodDelete,
+		http.MethodConnect,
+		http.MethodOptions,
+		http.MethodTrace,
+	}
+	WebDavMethods = []string{
+		http.MethodOptions,
+		http.MethodHead,
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodDelete,
+
+		MethodMkcol,
+		MethodCopy,
+		MethodMove,
+		MethodLock,
+		MethodUnlock,
+		MethodPropFind,
+		MethodPropPatch,
+	}
+	CardDavMethods = []string{
+		http.MethodOptions,
+		http.MethodHead,
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodDelete,
+
+		MethodMkcol,
+		// MethodCopy,
+		// MethodMove,
+		// MethodLock,
+		// MethodUnlock,
+		MethodPropFind,
+		MethodPropPatch,
+
+		MethodReport,
 	}
 )
 
@@ -75,19 +124,20 @@ func Serve(fastMode bool) {
 		gzip.Gzip(gzip.DefaultCompression, gzip.WithExcludedExtensions([]string{".pdf", ".mp3", ".wav", ".ogg", ".mov", ".weba", ".mkv", ".mp4", ".webm"})),
 	)
 
-	cookieStore.Options(sessions.Options{
+	sessionStore.Options(sessions.Options{
 		Path:   "/",
 		Secure: util.SSL,
 		//MaxAge:   60 * 60 * 24 * 7, // 默认是 Session
 		HttpOnly: true,
 	})
-	ginServer.Use(sessions.Sessions("siyuan", cookieStore))
+	ginServer.Use(sessions.Sessions("siyuan", sessionStore))
 
 	serveDebug(ginServer)
 	serveAssets(ginServer)
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
 	serveWebDAV(ginServer)
+	serveCardDAV(ginServer)
 	serveExport(ginServer)
 	serveWidgets(ginServer)
 	servePlugins(ginServer)
@@ -476,7 +526,7 @@ func serveWebSocket(ginServer *gin.Engine) {
 		authOk := true
 
 		if "" != model.Conf.AccessAuthCode {
-			session, err := cookieStore.Get(s.Request, "siyuan")
+			session, err := sessionStore.Get(s.Request, "siyuan")
 			if err != nil {
 				authOk = false
 				logging.LogErrorf("get cookie failed: %s", err)
@@ -616,15 +666,58 @@ func serveWebDAV(ginServer *gin.Engine) {
 	}
 
 	ginGroup := ginServer.Group("/webdav", model.CheckAuth, model.CheckAdminRole)
-	ginGroup.Match(WebDavMethod, "/*path", func(c *gin.Context) {
+	// ginGroup.Any NOT support extension methods (PROPFIND etc.)
+	ginGroup.Match(WebDavMethods, "/*path", func(c *gin.Context) {
 		if util.ReadOnly {
 			switch c.Request.Method {
-			case "POST", "PUT", "DELETE", "MKCOL", "COPY", "MOVE", "LOCK", "UNLOCK", "PROPPATCH":
+			case http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				MethodMkcol,
+				MethodCopy,
+				MethodMove,
+				MethodLock,
+				MethodUnlock,
+				MethodPropPatch:
 				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
 				return
 			}
 		}
 		handler.ServeHTTP(c.Writer, c.Request)
+	})
+}
+
+func serveCardDAV(ginServer *gin.Engine) {
+	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
+	handler := carddav.Handler{
+		Backend: &model.CardDavBackend{},
+		Prefix:  model.CardDavPrincipalsPath,
+	}
+
+	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
+
+	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
+	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
+		// logging.LogDebugf("CardDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
+		if util.ReadOnly {
+			switch c.Request.Method {
+			case http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				MethodMkcol,
+				MethodCopy,
+				MethodMove,
+				MethodLock,
+				MethodUnlock,
+				MethodPropPatch:
+				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
+				return
+			}
+		}
+		handler.ServeHTTP(c.Writer, c.Request)
+		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})
 }
 
@@ -644,15 +737,32 @@ func shortReqMsg(msg []byte) []byte {
 }
 
 func corsMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
+	allowMethods := strings.Join(HttpMethods, ", ")
+	allowWebDavMethods := strings.Join(WebDavMethods, ", ")
+	allowCardDavMethods := strings.Join(CardDavMethods, ", ")
 
+	return func(c *gin.Context) {
 		c.Header("Access-Control-Allow-Origin", "*")
 		c.Header("Access-Control-Allow-Credentials", "true")
 		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
-		c.Header("Access-Control-Allow-Methods", "GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS")
 		c.Header("Access-Control-Allow-Private-Network", "true")
 
-		if c.Request.Method == "OPTIONS" {
+		if strings.HasPrefix(c.Request.RequestURI, "/webdav/") {
+			c.Header("Access-Control-Allow-Methods", allowWebDavMethods)
+			c.Next()
+			return
+		}
+
+		if strings.HasPrefix(c.Request.RequestURI, "/carddav/") {
+			c.Header("Access-Control-Allow-Methods", allowCardDavMethods)
+			c.Next()
+			return
+		}
+
+		c.Header("Access-Control-Allow-Methods", allowMethods)
+
+		switch c.Request.Method {
+		case http.MethodOptions:
 			c.Header("Access-Control-Max-Age", "600")
 			c.AbortWithStatus(204)
 			return

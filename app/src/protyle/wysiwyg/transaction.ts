@@ -392,9 +392,19 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         if (operation.retData) {
             operation.retData.forEach((item: string) => {
-                protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`).forEach(item => {
-                    item.remove();
+                let embedElement: HTMLElement | false;
+                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item}"]`)).find(itemElement => {
+                    embedElement = isInEmbedBlock(itemElement);
+                    if (embedElement) {
+                        return true;
+                    }
+                    itemElement.remove();
                 });
+                // 折叠嵌入块的父级
+                if (embedElement) {
+                    embedElement.removeAttribute("data-render");
+                    blockRender(protyle, embedElement);
+                }
             });
             if (protyle.wysiwyg.element.childElementCount === 0) {
                 zoomOut({
@@ -408,7 +418,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "delete") {
-        if (updateElements.length > 0) {
+        if (updateElements.length > 0 || !isUndo) {
             deleteBlock(updateElements, operation.id, protyle, isUndo);
         } else if (isUndo) {
             zoomOut({
@@ -732,7 +742,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
-        "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey", "duplicateAttrViewKey"].includes(operation.action)) {
+        "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey",
+        "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc"].includes(operation.action)) {
         refreshAV(protyle, operation);
         return;
     }

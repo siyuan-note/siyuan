@@ -15,6 +15,7 @@ import * as dayjs from "dayjs";
 import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne} from "../../../util/functions";
 import {Dialog} from "../../../dialog";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -87,8 +88,20 @@ export const getEditHTML = (options: {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__avemoji" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg style="width: 14px;height: 14px"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
-    <input data-type="name" class="b3-text-field fn__block" type="text" value="${colData.name}" style="margin: 4px 0">
+    <div class="fn__block">
+        <div class="fn__flex">
+            <span class="b3-menu__avemoji" data-col-type="${colData.type}" data-icon="${colData.icon}" data-type="update-icon">${colData.icon ? unicode2Emoji(colData.icon) : `<svg style="width: 14px;height: 14px"><use xlink:href="#${getColIconByType(colData.type)}"></use></svg>`}</span>
+            <div class="b3-form__icona fn__block">
+                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text">
+                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${colData.desc ? escapeAriaLabel(colData.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+            </div>
+        </div>
+        <div class="fn__none">
+            <div class="fn__hr"></div>
+            <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
+        </div>
+        <div class="fn__hr--small"></div>
+    </div>
 </button>
 <button class="b3-menu__item" data-type="goUpdateColType" ${colData.type === "block" ? "disabled" : ""}>
     <span class="b3-menu__label">${window.siyuan.languages.type}</span>
@@ -107,11 +120,11 @@ export const getEditHTML = (options: {
             colData.options = [];
         }
         colData.options.forEach(item => {
-            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${item.name}" data-color="${item.color}">
+            html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc)}" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1">
-        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
-            <span class="fn__ellipsis">${item.name}</span>
+        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc)}</div>" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+            <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
     <svg class="b3-menu__action" data-type="setColOption"><use xlink:href="#iconEdit"></use></svg>
@@ -263,6 +276,47 @@ export const bindEditEvent = (options: {
         }
     });
     nameElement.select();
+    nameElement.value = colData.name;
+    const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
+    nameElement.nextElementSibling.addEventListener("click", () => {
+        const descPanelElement = descElement.parentElement;
+        descPanelElement.classList.toggle("fn__none");
+        if (!descPanelElement.classList.contains("fn__none")) {
+            descElement.focus();
+        }
+    });
+    descElement.addEventListener("blur", () => {
+        const newValue = descElement.value;
+        if (newValue === colData.desc) {
+            return;
+        }
+        transaction(options.protyle, [{
+            action: "setAttrViewColDesc",
+            id: colId,
+            avID,
+            data: newValue,
+        }], [{
+            action: "setAttrViewColDesc",
+            id: colId,
+            avID,
+            data: colData.desc,
+        }]);
+        colData.desc = newValue;
+    });
+    descElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Escape") {
+            options.menuElement.parentElement.remove();
+        } else if (event.key === "Enter") {
+            descElement.dispatchEvent(new CustomEvent("blur"));
+            options.menuElement.parentElement.remove();
+        }
+    });
+    descElement.addEventListener("input", () => {
+        nameElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeHtml(descElement.value) : window.siyuan.languages.addDesc);
+    });
     const tplElement = options.menuElement.querySelector('[data-type="updateTemplate"]') as HTMLTextAreaElement;
     if (tplElement) {
         tplElement.addEventListener("blur", () => {
@@ -575,35 +629,61 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     const avID = blockElement.getAttribute("data-av-id");
     const blockID = blockElement.getAttribute("data-node-id");
     const oldValue = cellElement.querySelector(".av__celltext").textContent.trim();
+    const oldDesc = cellElement.dataset.desc;
     const menu = new Menu("av-header-cell", () => {
         const newValue = (menu.element.querySelector(".b3-text-field") as HTMLInputElement).value;
-        if (newValue === oldValue) {
-            return;
+        if (newValue !== oldValue) {
+            transaction(protyle, [{
+                action: "updateAttrViewCol",
+                id: colId,
+                avID,
+                name: newValue,
+                type,
+            }], [{
+                action: "updateAttrViewCol",
+                id: colId,
+                avID,
+                name: oldValue,
+                type,
+            }]);
+            updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
         }
-        transaction(protyle, [{
-            action: "updateAttrViewCol",
-            id: colId,
-            avID,
-            name: newValue,
-            type,
-        }], [{
-            action: "updateAttrViewCol",
-            id: colId,
-            avID,
-            name: oldValue,
-            type,
-        }]);
-        updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {name: newValue});
+        const newDesc = menu.element.querySelector("textarea").value;
+        if (newDesc !== oldDesc) {
+            transaction(protyle, [{
+                action: "setAttrViewColDesc",
+                id: colId,
+                avID,
+                data: newDesc,
+            }], [{
+                action: "setAttrViewColDesc",
+                id: colId,
+                avID,
+                data: oldDesc,
+            }]);
+        }
         // https://github.com/siyuan-note/siyuan/issues/9862
         focusBlock(blockElement);
     });
     menu.addItem({
-        iconHTML: `<span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>`,
+        iconHTML: "",
         type: "readonly",
-        label: `<input style="margin: 4px 0" class="b3-text-field fn__block fn__size200" type="text" value="${oldValue}">`,
+        label: `<div class="fn__block">
+    <div class="fn__flex">
+        <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
+        <div class="b3-form__icona fn__block">
+            <input class="b3-text-field b3-form__icona-input" type="text">
+            <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+        </div>
+    </div>
+    <div class="fn__none">
+        <div class="fn__hr"></div>
+        <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+    </div>
+    <div class="fn__hr--small"></div>
+</div>`,
         bind(element) {
             const iconElement = element.querySelector(".b3-menu__avemoji") as HTMLElement;
-            iconElement.setAttribute("data-icon", cellElement.dataset.icon);
             iconElement.addEventListener("click", (event) => {
                 const rect = iconElement.getBoundingClientRect();
                 openEmojiPanel("", "av", {
@@ -623,14 +703,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         avID,
                         data: cellElement.dataset.icon,
                     }]);
-                    iconElement.setAttribute("data-icon", unicode);
                     iconElement.innerHTML = unicode ? unicode2Emoji(unicode) : `<svg style="height: 14px;width: 14px"><use xlink:href="#${getColIconByType(type)}"></use></svg>`;
                     updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
-                });
+                }, iconElement.querySelector("img"));
                 event.preventDefault();
                 event.stopPropagation();
             });
-            element.querySelector("input").addEventListener("keydown", (event: KeyboardEvent) => {
+            const inputElement = element.querySelector("input");
+            inputElement.value = oldValue;
+            inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (event.isComposing) {
                     return;
                 }
@@ -638,6 +719,26 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     menu.close();
                     event.preventDefault();
                 }
+            });
+            const descElement = element.querySelector("textarea");
+            inputElement.nextElementSibling.addEventListener("click", () => {
+                const descPanelElement = descElement.parentElement;
+                descPanelElement.classList.toggle("fn__none");
+                if (!descPanelElement.classList.contains("fn__none")) {
+                    descElement.focus();
+                }
+            });
+            descElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                if (event.isComposing) {
+                    return;
+                }
+                if (event.key === "Enter") {
+                    menu.close();
+                    event.preventDefault();
+                }
+            });
+            descElement.addEventListener("input", () => {
+                inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeHtml(descElement.value) : window.siyuan.languages.addDesc);
             });
         }
     });
@@ -1668,6 +1769,7 @@ const genColDataByType = (type: TAVCol, id: string, name: string) => {
         icon: "",
         id,
         name,
+        desc: "",
         numberFormat: "",
         pin: false,
         template: "",

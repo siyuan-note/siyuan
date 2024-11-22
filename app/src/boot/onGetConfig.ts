@@ -322,7 +322,7 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                                             fs.readdir(dir, function (err, files) {
                                                 files = files.map(file => path.join(dir, file)); // a/b  a/m
                                                 Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                    fs.rmdir(dir, resolve);
+                                                    fs.rm(dir, resolve);
                                                 });
                                             });
                                         } else {

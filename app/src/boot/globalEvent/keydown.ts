@@ -876,6 +876,9 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (event.key === "Delete" || (event.key === "Backspace" && isMac())) {
         window.siyuan.menus.menu.remove();
+        if (document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_CONFIRM}"]`)) {
+            return;
+        }
         deleteFiles(liElements);
         return true;
     }
@@ -1368,6 +1371,11 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
             return;
         }
 
+        // 闪卡长按 Esc 光标定位到闪卡按钮上 https://github.com/siyuan-note/siyuan/issues/12989
+        if (document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
+            return;
+        }
+
         if (window.siyuan.dialogs.length > 0) {
             window.siyuan.dialogs[window.siyuan.dialogs.length - 1].destroy();
             return;
@@ -1402,16 +1410,12 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
 
         // 光标在文档树等面板中，按 Esc 回到编辑器中 https://github.com/siyuan-note/siyuan/issues/4289
-        let range;
         if (getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-            const protypleElement = hasClosestByClassName(range.startContainer, "protyle-content", true);
-            if (protypleElement) {
+            const range = getSelection().getRangeAt(0);
+            if (hasClosestByClassName(range.startContainer, "protyle-content", true)) {
                 focusByRange(range);
                 return;
             }
-        } else {
-            range = document.createRange();
         }
         const lastBackStack = window.siyuan.backStack[window.siyuan.backStack.length - 1];
         if (lastBackStack && lastBackStack.protyle.toolbar.range) {

@@ -1,7 +1,6 @@
 import {Constants} from "../../constants";
 import {merge} from "./merge";
 import {hintEmbed, hintRef, hintSlash, hintTag} from "../hint/extend";
-import {isMobile} from "../../util/functions";
 import {toolbarKeyToMenu} from "../toolbar/util";
 
 export class Options {
@@ -87,40 +86,7 @@ export class Options {
             },
             mode: "both",
         },
-        toolbar: isMobile() ? [
-            "block-ref",
-            "a",
-            "|",
-            "text",
-            "strong",
-            "em",
-            "u",
-            "clear",
-            "|",
-            "code",
-            "tag",
-            "inline-math",
-            "inline-memo",
-        ] : [
-            "block-ref",
-            "a",
-            "|",
-            "text",
-            "strong",
-            "em",
-            "u",
-            "s",
-            "mark",
-            "sup",
-            "sub",
-            "clear",
-            "|",
-            "code",
-            "kbd",
-            "tag",
-            "inline-math",
-            "inline-memo",
-        ],
+        toolbar: Constants.PROTYLE_TOOLBAR,
         typewriterMode: false,
         upload: {
             max: 1024 * 1024 * 1024 * 4,

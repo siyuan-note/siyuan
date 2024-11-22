@@ -195,7 +195,7 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	if "" != tagIAL && 0 < len(tags) {
 		// 带标签的文档块转换为标题块时将标签移动到标题块下方 https://github.com/siyuan-note/siyuan/issues/6550
 
-		tagPara := treenode.NewParagraph()
+		tagPara := treenode.NewParagraph("")
 		for i, tag := range tags {
 			if "" == tag {
 				continue
@@ -296,7 +296,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	}
 
 	box := Conf.Box(targetBoxID)
-	headingText := getNodeRefText0(headingNode)
+	headingText := getNodeRefText0(headingNode, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 	if strings.Contains(headingText, "/") {
 		headingText = strings.ReplaceAll(headingText, "/", "_")
 		util.PushMsg(Conf.language(246), 7000)
@@ -365,7 +365,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath string) (srcRootBlockID, 
 	headingNode.Unlink()
 	srcTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	if nil == srcTree.Root.FirstChild {
-		srcTree.Root.AppendChild(treenode.NewParagraph())
+		srcTree.Root.AppendChild(treenode.NewParagraph(""))
 	}
 	treenode.RemoveBlockTreesByRootID(srcTree.ID)
 	if err = indexWriteTreeUpsertQueue(srcTree); err != nil {

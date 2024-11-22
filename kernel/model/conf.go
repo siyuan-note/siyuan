@@ -220,10 +220,6 @@ func InitConf() {
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion
-	Conf.System.DisabledFeatures = util.DisabledFeatures
-	if 1 > len(Conf.System.DisabledFeatures) {
-		Conf.System.DisabledFeatures = []string{}
-	}
 
 	if nil == Conf.Tag {
 		Conf.Tag = conf.NewTag()
@@ -311,6 +307,10 @@ func InitConf() {
 		Conf.System.ID = util.GetDeviceID()
 		Conf.System.Name = util.GetDeviceName()
 	}
+	Conf.System.DisabledFeatures = util.DisabledFeatures
+	if 1 > len(Conf.System.DisabledFeatures) {
+		Conf.System.DisabledFeatures = []string{}
+	}
 
 	if nil == Conf.Snippet {
 		Conf.Snippet = conf.NewSnpt()
@@ -384,6 +384,12 @@ func InitConf() {
 	}
 	if 12000 > Conf.Repo.SyncIndexTiming {
 		Conf.Repo.SyncIndexTiming = 12 * 1000
+	}
+	if 1 > Conf.Repo.IndexRetentionDays {
+		Conf.Repo.IndexRetentionDays = 180
+	}
+	if 1 > Conf.Repo.RetentionIndexesDaily {
+		Conf.Repo.RetentionIndexesDaily = 2
 	}
 
 	if nil == Conf.Search {

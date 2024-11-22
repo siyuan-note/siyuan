@@ -90,9 +90,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	}
 	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
 
-	if "" != keyword {
-		mentionKeywords = append(mentionKeywords, keyword)
-	}
+	mentionKeywords = strings.Split(keyword, " ")
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
 
 	var refTree *parse.Tree
@@ -141,10 +139,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		var keywords []string
-		if "" != keyword {
-			keywords = append(keywords, keyword)
-		}
+		keywords := strings.Split(keyword, " ")
 		backlink := buildBacklink(linkRef.ID, refTree, keywords, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
@@ -220,7 +215,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 	dom := renderBlockDOMByNodes(renderNodes, luteEngine)
 	var blockPaths []*BlockPath
 	if (nil != n.Parent && ast.NodeDocument != n.Parent.Type) || (ast.NodeHeading != n.Type && 0 < treenode.HeadingLevel(n)) {
-		blockPaths = buildBlockBreadcrumb(n, nil)
+		blockPaths = buildBlockBreadcrumb(n, nil, false)
 	}
 	if 1 > len(blockPaths) {
 		blockPaths = []*BlockPath{}
@@ -571,7 +566,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 			if nil != refBlock && p.FContent == refBlock.Content { // 使用内容判断是否是列表项下第一个子块
 				// 如果是列表项下第一个子块，则后续会通过列表项传递或关联处理，所以这里就不处理这个段落了
 				processedParagraphs.Add(p.ID)
-				if !strings.Contains(p.Content, keyword) && !strings.Contains(path.Base(p.HPath), keyword) {
+				if !matchBacklinkKeyword(p, keyword) {
 					refsCount--
 					continue
 				}
@@ -587,7 +582,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 				}
 			}
 
-			if !strings.Contains(ref.Content, keyword) && !strings.Contains(path.Base(ref.HPath), keyword) {
+			if !matchBacklinkKeyword(ref, keyword) {
 				refsCount--
 				continue
 			}
@@ -598,6 +593,22 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 		}
 	}
 	return
+}
+
+func matchBacklinkKeyword(block *Block, keyword string) bool {
+	keywords := strings.Split(keyword, " ")
+	for _, k := range keywords {
+		k = strings.ToLower(k)
+		if strings.Contains(strings.ToLower(block.FContent), k) ||
+			strings.Contains(strings.ToLower(path.Base(block.HPath)), k) ||
+			strings.Contains(strings.ToLower(block.Name), k) ||
+			strings.Contains(strings.ToLower(block.Alias), k) ||
+			strings.Contains(strings.ToLower(block.Memo), k) ||
+			strings.Contains(strings.ToLower(block.Tag), k) {
+			return true
+		}
+	}
+	return false
 }
 
 func removeDuplicatedRefs(refs []*sql.Ref) (ret []*sql.Ref) {

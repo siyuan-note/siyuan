@@ -1681,7 +1681,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         icon: "iconSearch",
         click() {
             /// #if !MOBILE
-            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false);
+            openGlobalSearch(protyle.app, `#${tagElement.textContent}#`, false, {method: 0});
             /// #else
             popSearch(protyle.app, {
                 hasReplace: false,
@@ -1716,21 +1716,20 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(tagElement.outerHTML));
+            const range = document.createRange();
+            range.selectNode(tagElement);
+            focusByRange(range);
+            document.execCommand("copy");
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         label: window.siyuan.languages.cut,
         icon: "iconCut",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(tagElement.outerHTML));
-
-            const oldHTML = nodeElement.outerHTML;
-            tagElement.insertAdjacentHTML("afterend", "<wbr>");
-            tagElement.remove();
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            focusByWbr(nodeElement, protyle.toolbar.range);
+            const range = document.createRange();
+            range.selectNode(tagElement);
+            focusByRange(range);
+            document.execCommand("cut");
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
@@ -1781,7 +1780,10 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
+            const range = document.createRange();
+            range.selectNode(element);
+            focusByRange(range);
+            document.execCommand("copy");
         }
     }).element);
     if (!protyle.disabled) {
@@ -1789,13 +1791,10 @@ export const inlineMathMenu = (protyle: IProtyle, element: Element) => {
             icon: "iconCut",
             label: window.siyuan.languages.cut,
             click() {
-                writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
-
-                element.insertAdjacentHTML("afterend", "<wbr>");
-                element.remove();
-                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
-                focusByWbr(nodeElement, protyle.toolbar.range);
+                const range = document.createRange();
+                range.selectNode(element);
+                focusByRange(range);
+                document.execCommand("cut");
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

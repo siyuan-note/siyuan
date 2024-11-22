@@ -58,7 +58,12 @@ func html2BlockDOM(c *gin.Context) {
 
 	dom := arg["dom"].(string)
 	luteEngine := util.NewLute()
-	luteEngine.SetHTMLTag2TextMark(true)
+	luteEngine.SetSup(true)
+	luteEngine.SetSub(true)
+	luteEngine.SetMark(true)
+	luteEngine.SetGFMStrikethrough(true)
+	luteEngine.SetInlineAsterisk(true)
+	luteEngine.SetInlineUnderscore(true)
 	markdown, withMath, err := model.HTML2Markdown(dom, luteEngine)
 	if err != nil {
 		ret.Data = "Failed to convert"
@@ -77,7 +82,7 @@ func html2BlockDOM(c *gin.Context) {
 		}
 
 		if ast.NodeListItem == n.Type && nil == n.FirstChild {
-			newNode := treenode.NewParagraph()
+			newNode := treenode.NewParagraph("")
 			n.AppendChild(newNode)
 			n.SetIALAttr("updated", util.TimeFromID(newNode.ID))
 			return ast.WalkSkipChildren
@@ -101,7 +106,7 @@ func html2BlockDOM(c *gin.Context) {
 				row := head.FirstChild
 				if nil != row.FirstChild && nil == row.FirstChild.Next {
 					cell := row.FirstChild
-					p := treenode.NewParagraph()
+					p := treenode.NewParagraph("")
 					var contents []*ast.Node
 					for c := cell.FirstChild; nil != c; c = c.Next {
 						contents = append(contents, c)

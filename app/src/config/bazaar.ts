@@ -575,11 +575,11 @@ export const bazaar = {
 <div class="item__main">
     <div class="item__preview" style="background-image: url(${data.previewURL})"></div>
     <div class="b3-typography${data.preferredDesc ? "" : " fn__none"}">
-        <div data-type="NodeBlockquote" class="bq" data-node-id>
-            <div data-type="NodeParagraph" class="p" data-node-id>
+        <blockquote>
+            <p>
                 ${data.preferredDesc || ""}
-            </div>
-         </div>
+            </p>
+         </blockquote>
     </div>
     <div class="item__readme b3-typography b3-typography--default">
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">

@@ -202,7 +202,7 @@ const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
 };
 
-export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
+export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
     const searchModel = getAllModels().search.find((item) => {
         item.parent.parent.switchTab(item.parent.headElement);
@@ -219,7 +219,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean) => {
             k: text,
             r: "",
             hasReplace: false,
-            method: localData.method,
+            method: searchData ? searchData.method : localData.method,
             hPath: "",
             idPath: [],
             group: localData.group,
@@ -1320,9 +1320,9 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         if (rmCurrentCriteria) {
             element.querySelector("#criteria .b3-chip--current")?.classList.remove("b3-chip--current");
         }
-        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
         const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");
+        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
         const inputValue = searchInputElement.value;
         element.querySelector("#searchList").scrollTo(0, 0);
         const previousElement = element.querySelector('[data-type="previous"]');
@@ -1337,6 +1337,10 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         const searchResultElement = element.querySelector("#searchResult");
         if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
+                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
+                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] < window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
+                    return;
+                }
                 onSearch(response.data, edit, element, config);
                 loadingElement.classList.add("fn__none");
                 searchResultElement.innerHTML = "";
@@ -1358,6 +1362,10 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 orderBy: config.sort,
                 page: config.page || 1,
             }, (response) => {
+                if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
+                    window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] > window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
+                    return;
+                }
                 if (!config.page) {
                     config.page = 1;
                 }

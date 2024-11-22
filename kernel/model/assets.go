@@ -525,7 +525,12 @@ func RemoveUnusedAssets() (ret []string) {
 		if filelock.IsExist(absPath) {
 			info, statErr := os.Stat(absPath)
 			if statErr == nil {
-				size += info.Size()
+				if info.IsDir() {
+					dirSize, _ := util.SizeOfDirectory(absPath)
+					size += dirSize
+				} else {
+					size += info.Size()
+				}
 			}
 
 			if err := filelock.Remove(absPath); err != nil {

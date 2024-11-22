@@ -332,7 +332,7 @@ export class Dock {
                 } else {
                     currentNowSize = (currentSize + (x - moveEvent.clientY));
                 }
-                let minSize = 227;
+                let minSize = 232;
                 Array.from(this.layout.element.querySelectorAll(".file-tree")).find((item) => {
                     if (item.classList.contains("sy__backlink") || item.classList.contains("sy__graph")
                         || item.classList.contains("sy__globalGraph") || item.classList.contains("sy__inbox")) {
@@ -817,12 +817,14 @@ export class Dock {
         activesElement.forEach((item) => {
             if (this.position === "Left" || this.position === "Right") {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    item.setAttribute("data-height", (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element.clientHeight.toString());
+                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
+                    item.setAttribute("data-height", dockElement.style.height ? dockElement.clientHeight.toString() : "");
                 }
                 item.setAttribute("data-width", this.layout.element.clientWidth.toString());
             } else {
                 if (item.getAttribute("data-index") === "1" && activesElement.length > 1) {
-                    item.setAttribute("data-width", (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element.clientWidth.toString());
+                    const dockElement = (this.data[item.getAttribute("data-type") as TDock] as Model).parent.parent.element;
+                    item.setAttribute("data-width", dockElement.style.width ? dockElement.clientWidth.toString() : "");
                 }
                 item.setAttribute("data-height", this.layout.element.clientHeight.toString());
             }
@@ -834,9 +836,9 @@ export class Dock {
         this.element.querySelectorAll(".dock__item--active").forEach((item) => {
             let size;
             if (this.position === "Left" || this.position === "Right") {
-                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 227);
+                size = parseInt(item.getAttribute("data-width")) || (["graph", "globalGraph", "backlink"].includes(item.getAttribute("data-type")) ? 320 : 232);
             } else {
-                size = parseInt(item.getAttribute("data-height")) || 227;
+                size = parseInt(item.getAttribute("data-height")) || 232;
             }
             if (size > max) {
                 max = size;

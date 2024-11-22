@@ -465,9 +465,6 @@ export class Backlink extends Model {
         if (!this.blockId) {
             return;
         }
-        this.editors.forEach(item => {
-            item.destroy();
-        });
         const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         element.classList.add("fn__rotate");
         fetchPost("/api/ref/refreshBacklink", {

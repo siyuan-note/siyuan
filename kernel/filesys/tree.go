@@ -169,7 +169,7 @@ func LoadTreeByData(data []byte, boxID, p string, luteEngine *lute.Lute) (ret *p
 		if "" == title {
 			title = "Untitled"
 		}
-		hPathBuilder.WriteString(title)
+		hPathBuilder.WriteString(util.UnescapeHTML(title))
 		hPathBuilder.WriteString("/")
 	}
 	hPathBuilder.WriteString(ret.Root.IALAttr("title"))
@@ -223,7 +223,7 @@ func prepareWriteTree(tree *parse.Tree) (data []byte, filePath string, err error
 	luteEngine := util.NewLute() // 不关注用户的自定义解析渲染选项
 
 	if nil == tree.Root.FirstChild {
-		newP := treenode.NewParagraph()
+		newP := treenode.NewParagraph("")
 		tree.Root.AppendChild(newP)
 		tree.Root.SetIALAttr("updated", util.TimeFromID(newP.ID))
 		treenode.UpsertBlockTree(tree)
@@ -299,15 +299,5 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 			logging.LogErrorf(msg)
 		}
 	}
-	return
-}
-
-func ReadDocIAL(data []byte) (ret map[string]string) {
-	ret = map[string]string{}
-	val := jsoniter.Get(data, "Properties")
-	if nil == val || val.ValueType() == jsoniter.InvalidValue {
-		return
-	}
-	val.ToVal(&ret)
 	return
 }

@@ -28,12 +28,7 @@ export const initBlockPopover = (app: App) => {
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label");
             if (aElement.classList.contains("av__cell")) {
-                if (aElement.classList.contains("av__cell--header")) {
-                    const textElement = aElement.querySelector(".av__celltext");
-                    if (textElement.scrollWidth > textElement.clientWidth + 2) {
-                        tip = getCellText(aElement);
-                    }
-                } else {
+                if (!aElement.classList.contains("av__cell--header")) {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
                             tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));

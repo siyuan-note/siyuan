@@ -37,6 +37,7 @@ func refreshBacklink(c *gin.Context) {
 
 	id := arg["id"].(string)
 	model.RefreshBacklink(id)
+	model.FlushTxQueue()
 }
 
 func getBackmentionDoc(c *gin.Context) {

@@ -19,7 +19,9 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
             document.querySelector("#dockMoveItem")?.remove();
         } else {
             const startElement = ghostElement.parentElement.querySelector(`[data-node-id="${ghostElement.getAttribute("data-node-id")}"]`) as HTMLElement;
-            startElement ? startElement.style.opacity = "" : "";
+            if (startElement) {
+                startElement.style.opacity = "";
+            }
             ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
                 item.classList.remove("dragover__top", "dragover__bottom", "dragover");
                 item.style.opacity = "";

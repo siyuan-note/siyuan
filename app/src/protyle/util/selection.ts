@@ -136,6 +136,14 @@ export const getEditorRange = (element: Element) => {
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
         if (element.isSameNode(range.startContainer) || element.contains(range.startContainer)) {
+            // 有时候点击编辑器头部需要矫正到第一个块中
+            if (range.toString() === "" && range.startContainer.nodeType === 1 && range.startOffset === 0 &&
+                (range.startContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
+                const focusRange = focusBlock(range.startContainer.firstChild as Element);
+                if (focusRange) {
+                    return focusRange;
+                }
+            }
             return range;
         }
     }
@@ -226,10 +234,17 @@ export const getSelectionPosition = (nodeElement: Element, range?: Range) => {
         }
     } else {
         const rects = range.getClientRects(); // 由于长度过长折行，光标在行首时有多个 rects https://github.com/siyuan-note/siyuan/issues/6156
-        return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
-            left: rects[rects.length - 1].left,
-            top: rects[0].top
-        };
+        if (range.toString()) {
+            return {    // 选中多行不应遮挡第一行 https://github.com/siyuan-note/siyuan/issues/7541
+                left: rects[rects.length - 1].left,
+                top: rects[0].top
+            };
+        } else {
+            return {    // 代码块首 https://github.com/siyuan-note/siyuan/issues/13113
+                left: rects[rects.length - 1].left,
+                top: rects[rects.length - 1].top
+            };
+        }
     }
 
     return {

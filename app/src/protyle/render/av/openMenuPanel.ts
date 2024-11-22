@@ -28,7 +28,7 @@ import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updat
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";
 import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 
 export const openMenuPanel = (options: {
@@ -724,7 +724,7 @@ export const openMenuPanel = (options: {
                         }]);
                         target.innerHTML = unicode ? unicode2Emoji(unicode) : '<svg style="width: 14px;height: 14px;"><use xlink:href="#iconTable"></use></svg>';
                         target.dataset.icon = unicode;
-                    });
+                    }, target.querySelector("img"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -796,7 +796,7 @@ export const openMenuPanel = (options: {
                             updateAttrViewCellAnimation(options.blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {icon: unicode});
                         }
                         target.dataset.icon = unicode;
-                    });
+                    }, target.querySelector("img"));
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1336,7 +1336,7 @@ export const getPropertiesHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-        ${item.name || "&nbsp;"}
+        ${escapeHtml(item.name) || "&nbsp;"}
     </div>
     <svg class="b3-menu__action" data-type="showCol"><use xlink:href="#iconEye"></use></svg>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -1346,7 +1346,7 @@ export const getPropertiesHTML = (data: IAVTable) => {
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
-        ${item.name || "&nbsp;"}
+        ${escapeHtml(item.name) || "&nbsp;"}
     </div>
     <svg class="b3-menu__action${item.type === "block" ? " fn__none" : ""}" data-type="hideCol"><use xlink:href="#iconEyeoff"></use></svg>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -1372,7 +1372,7 @@ ${hideHTML}`;
     <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="go-config">
         <svg><use xlink:href="#iconLeft"></use></svg>
     </span>
-    <span class="b3-menu__label ft__center">${window.siyuan.languages.attr}</span>
+    <span class="b3-menu__label ft__center">${window.siyuan.languages.fields}</span>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">

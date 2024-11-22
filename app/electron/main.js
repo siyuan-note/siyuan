@@ -48,6 +48,9 @@ let resetWindowStateOnRestart = false;
 
 remote.initialize();
 
+app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
+fs.rmSync(app.getPath("appData") + "/" + app.name, {recursive: true}); // 删除自动创建的应用目录 https://github.com/siyuan-note/siyuan/issues/13150
+
 if (!app.requestSingleInstanceLock()) {
     app.quit();
     return;
@@ -317,7 +320,11 @@ const initMainWindow = () => {
     });
     remote.enable(currentWindow.webContents);
 
-    resetToCenter ? currentWindow.center() : currentWindow.setPosition(x, y);
+    if (resetToCenter) {
+        currentWindow.center();
+    } else {
+        currentWindow.setPosition(x, y);
+    }
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;
 
     // set proxy
@@ -621,7 +628,6 @@ const initKernel = (workspace, port, lang) => {
 };
 
 app.setAsDefaultProtocolClient("siyuan");
-app.setPath("userData", app.getPath("userData") + "-Electron"); // `~/.config` 下 Electron 相关文件夹名称改为 `SiYuan-Electron` https://github.com/siyuan-note/siyuan/issues/3349
 
 app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");

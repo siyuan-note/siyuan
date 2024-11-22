@@ -8,8 +8,10 @@ export const openByMobile = (uri: string) => {
     }
     if (isInIOS()) {
         if (uri.startsWith("assets/")) {
-            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/" + uri);
+            // iOS 16.7 之前的版本，uri 需要 encodeURIComponent
+            window.webkit.messageHandlers.openLink.postMessage(location.origin + "/assets/" + encodeURIComponent(uri.replace("assets/", "")));
         } else if (uri.startsWith("/")) {
+            // 导出 zip 返回的是已经 encode 过的，因此不能再 encode
             window.webkit.messageHandlers.openLink.postMessage(location.origin + uri);
         } else {
             try {

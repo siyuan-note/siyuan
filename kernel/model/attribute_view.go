@@ -1981,7 +1981,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	}
 
 	if !isDetached {
-		addingBlockContent = getNodeRefText(node)
+		addingBlockContent = getNodeAvBlockText(node)
 	}
 
 	// 检查是否重复添加相同的块
@@ -2936,7 +2936,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				if !operation.IsDetached {
 					bindBlockAv0(tx, operation.AvID, node, tree)
 					value.IsDetached = false
-					value.Block.Content = getNodeRefText(node)
+					value.Block.Content = getNodeAvBlockText(node)
 					value.UpdatedAt = now
 					err = av.SaveAttributeView(attrView)
 				}
@@ -2973,7 +2973,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				value.Block.ID = operation.NextID
 				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					value.Block.Content = getNodeRefText(node)
+					value.Block.Content = getNodeAvBlockText(node)
 				}
 			}
 
@@ -3461,15 +3461,34 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 
 	data := operation.Data.(map[string]interface{})
 
-	oldName := data["oldName"].(string)
-	newName := data["newName"].(string)
+	rename := false
+	oldName := strings.TrimSpace(data["oldName"].(string))
+	newName := strings.TrimSpace(data["newName"].(string))
+	newDesc := strings.TrimSpace(data["newDesc"].(string))
 	newColor := data["newColor"].(string)
 
-	for i, opt := range key.Options {
-		if oldName == opt.Name {
-			key.Options[i].Name = newName
-			key.Options[i].Color = newColor
-			break
+	found := false
+	if oldName != newName {
+		rename = true
+
+		for _, opt := range key.Options {
+			if newName == opt.Name { // 如果选项已经存在则直接使用
+				found = true
+				newColor = opt.Color
+				newDesc = opt.Desc
+				break
+			}
+		}
+	}
+
+	if !found {
+		for i, opt := range key.Options {
+			if oldName == opt.Name {
+				key.Options[i].Name = newName
+				key.Options[i].Color = newColor
+				key.Options[i].Desc = newDesc
+				break
+			}
 		}
 	}
 
@@ -3484,11 +3503,31 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 				continue
 			}
 
-			for i, opt := range value.MSelect {
-				if oldName == opt.Content {
-					value.MSelect[i].Content = newName
-					value.MSelect[i].Color = newColor
+			found = false
+			for _, opt := range value.MSelect {
+				if newName == opt.Content {
+					found = true
 					break
+				}
+			}
+			if found && rename {
+				idx := -1
+				for i, opt := range value.MSelect {
+					if oldName == opt.Content {
+						idx = i
+						break
+					}
+				}
+				if 0 <= idx {
+					value.MSelect = util.RemoveElem(value.MSelect, idx)
+				}
+			} else {
+				for i, opt := range value.MSelect {
+					if oldName == opt.Content {
+						value.MSelect[i].Content = newName
+						value.MSelect[i].Color = newColor
+						break
+					}
 				}
 			}
 		}

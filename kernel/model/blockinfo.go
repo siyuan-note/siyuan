@@ -262,10 +262,23 @@ func getNodeRefText(node *ast.Node) string {
 		ret = util.EscapeHTML(ret)
 		return ret
 	}
-	return getNodeRefText0(node)
+	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 }
 
-func getNodeRefText0(node *ast.Node) string {
+func getNodeAvBlockText(node *ast.Node) string {
+	if nil == node {
+		return ""
+	}
+
+	if ret := node.IALAttr("name"); "" != ret {
+		ret = strings.TrimSpace(ret)
+		ret = util.EscapeHTML(ret)
+		return ret
+	}
+	return getNodeRefText0(node, 1024)
+}
+
+func getNodeRefText0(node *ast.Node, maxLen int) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:
 		return "Query Embed Block..."
@@ -289,8 +302,8 @@ func getNodeRefText0(node *ast.Node) string {
 		node = treenode.FirstLeafBlock(node)
 	}
 	ret := renderBlockText(node, nil)
-	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(ret) {
-		ret = gulu.Str.SubStr(ret, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
+	if maxLen < utf8.RuneCountInString(ret) {
+		ret = gulu.Str.SubStr(ret, maxLen) + "..."
 	}
 	return ret
 }
@@ -416,11 +429,11 @@ func BuildBlockBreadcrumb(id string, excludeTypes []string) (ret []*BlockPath, e
 		return
 	}
 
-	ret = buildBlockBreadcrumb(node, excludeTypes)
+	ret = buildBlockBreadcrumb(node, excludeTypes, false)
 	return
 }
 
-func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPath) {
+func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bool) (ret []*BlockPath) {
 	ret = []*BlockPath{}
 	if nil == node {
 		return
@@ -442,10 +455,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 			continue
 		}
 		id := parent.ID
-		fc := parent.FirstChild
-		if nil != fc && ast.NodeTaskListItemMarker == fc.Type {
-			fc = fc.Next
-		}
+		fc := treenode.FirstLeafBlock(parent)
 
 		name := parent.IALAttr("name")
 		if ast.NodeDocument == parent.Type {
@@ -454,7 +464,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 			name, _ = av.GetAttributeViewName(parent.AttributeViewID)
 		} else {
 			if "" == name {
-				if ast.NodeListItem == parent.Type {
+				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
 					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
 				} else {
 					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes), maxNameLen)
@@ -468,6 +478,10 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 		add := true
 		if ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
 			add = false
+			if parent == node {
+				// https://github.com/siyuan-note/siyuan/issues/13141#issuecomment-2476789553
+				add = true
+			}
 		}
 		if ast.NodeParagraph == parent.Type && nil != parent.Parent && ast.NodeListItem == parent.Parent.Type && nil == parent.Next && (nil == parent.Previous || ast.NodeTaskListItemMarker == parent.Previous.Type) {
 			add = false
@@ -481,7 +495,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string) (ret []*BlockPa
 		name = strings.ReplaceAll(name, editor.Caret, "")
 		name = util.EscapeHTML(name)
 
-		if parent == node {
+		if !isEmbedBlock && parent == node {
 			name = ""
 		}
 

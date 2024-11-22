@@ -114,8 +114,9 @@ export const publish = {
     ) => {
         if (response.code === 0) {
             window.siyuan.config.publish = response.data.publish;
-
-            reloadAccounts && publish._renderPublishAuthAccounts(publish.element);
+            if (reloadAccounts) {
+                publish._renderPublishAuthAccounts(publish.element);
+            }
             publish._renderPublishAddressList(publish.element, response.data.port);
         } else {
             publish._renderPublishAddressList(publish.element, 0);
@@ -127,8 +128,8 @@ export const publish = {
     ) => {
         const publishAuthAccounts = element.querySelector<HTMLDivElement>("#publishAuthAccounts");
         publishAuthAccounts.innerHTML = `<ul class="fn__flex-1" style="margin-top: 16px">${
-                accounts
-                    .map((account, index) => `
+            accounts
+                .map((account, index) => `
                         <li class="b3-label--inner fn__flex" data-index="${index}">
                             <input class="b3-text-field fn__block" data-name="username" value="${account.username}" placeholder="${window.siyuan.languages.userName}">
                             <span class="fn__space"></span>
@@ -143,9 +144,9 @@ export const publish = {
                                 <svg><use xlink:href="#iconTrashcan"></use></svg>
                             </span>
                         </li>`
-                    )
-                    .join("")
-            }</ul>`;
+                )
+                .join("")
+        }</ul>`;
 
         /* account field changed */
         publishAuthAccounts
@@ -202,8 +203,8 @@ export const publish = {
                     .filter(ip => !(ip.startsWith("[") && ip.endsWith("]")))
                     .map(ip => `<li><code class="fn__code">${ip}:${port}</code></li>`)
                     .join("")
-                }${
-                    window.siyuan.config.localIPs
+            }${
+                window.siyuan.config.localIPs
                     .filter(ip => (ip.startsWith("[") && ip.endsWith("]")))
                     .map(ip => `<li><code class="fn__code">${ip}:${port}</code></li>`)
                     .join("")

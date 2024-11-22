@@ -1,6 +1,6 @@
 import {fetchPost} from "../../../util/fetch";
 import {addCol, getColIconByType} from "./col";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
@@ -67,8 +67,11 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "mSelect":
         case "select":
-            value.mSelect?.forEach(item => {
-                html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+            value.mSelect?.forEach((item, index) => {
+                if (value.type === "select" && index > 0) {
+                    return;
+                }
+                html += `<span class="b3-chip b3-chip--middle" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
             });
             break;
         case "mAsset":
@@ -153,6 +156,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
                 key: {
                     type: TAVCol,
                     name: string,
+                    desc: string,
                     icon: string,
                     id: string,
                     options?: {
@@ -179,9 +183,9 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             table.keyValues?.forEach(item => {
                 innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
     <div class="block__icon" draggable="true"><svg><use xlink:href="#iconDrag"></use></svg></div>
-    <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAttr(item.key.name)}">
+    <div class="block__logo ariaLabel fn__pointer" data-type="editCol" data-position="parentW" aria-label="${escapeAriaLabel(item.key.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.key.desc)}</div>">
         ${item.key.icon ? unicode2Emoji(item.key.icon, "block__logoicon", true) : `<svg class="block__logoicon"><use xlink:href="#${getColIconByType(item.key.type)}"></use></svg>`}
-        <span>${item.key.name}</span>
+        <span>${escapeHtml(item.key.name)}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"

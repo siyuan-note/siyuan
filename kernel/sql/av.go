@@ -79,7 +79,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			Wrap:         col.Wrap,
 			Hidden:       col.Hidden,
 			Width:        col.Width,
-			Desc:         col.Desc,
+			Desc:         key.Desc,
 			Pin:          col.Pin,
 			Calc:         col.Calc,
 		})

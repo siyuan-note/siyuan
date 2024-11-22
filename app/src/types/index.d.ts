@@ -53,6 +53,8 @@ type TOperation =
     | "hideAttrViewName"
     | "setAttrViewColDate"
     | "unbindAttrViewBlock"
+    | "setAttrViewViewDesc"
+    | "setAttrViewColDesc"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -757,6 +759,7 @@ interface IAV {
 
 interface IAVView {
     name: string
+    desc: string
     id: string
     type: string
     icon: string
@@ -797,6 +800,7 @@ interface IAVColumn {
     icon: string,
     id: string,
     name: string,
+    desc: string,
     wrap: boolean,
     pin: boolean,
     hidden: boolean,
@@ -811,6 +815,7 @@ interface IAVColumn {
     options?: {
         name: string,
         color: string,
+        desc?: string,
     }[],
     relation?: IAVColumnRelation,
     rollup?: IAVCellRollupValue

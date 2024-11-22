@@ -67,7 +67,12 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         // https://github.com/siyuan-note/siyuan/issues/12468
         if ((event.inputType === "deleteContentBackward" || event.inputType === "deleteContentForward") &&
             wbrNextElement && wbrNextElement.nodeType === 1 && wbrNextElement.tagName === "BR") {
-            wbrNextElement.remove();
+            // https://github.com/siyuan-note/siyuan/issues/13190
+            const brNextElement = hasNextSibling(wbrNextElement);
+            if (brNextElement && brNextElement.nodeType === 1 &&
+                (brNextElement as HTMLElement).getAttribute("data-type")?.indexOf("inline-math") > -1) {
+                wbrNextElement.remove();
+            }
         }
     }
     const id = blockElement.getAttribute("data-node-id");

@@ -29,6 +29,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setRepoIndexRetentionDays(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	days := int(arg["days"].(float64))
+	if 1 > days {
+		days = 180
+	}
+
+	model.Conf.Repo.IndexRetentionDays = days
+	model.Conf.Save()
+}
+
+func setRetentionIndexesDaily(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	indexes := int(arg["indexes"].(float64))
+	if 1 > indexes {
+		indexes = 180
+	}
+
+	model.Conf.Repo.RetentionIndexesDaily = indexes
+	model.Conf.Save()
+}
+
 func getRepoFile(c *gin.Context) {
 	// Add internal kernel API `/api/repo/getRepoFile` https://github.com/siyuan-note/siyuan/issues/10101
 

@@ -569,6 +569,7 @@ func renderAttributeView(c *gin.Context) {
 			"id":               v.ID,
 			"icon":             v.Icon,
 			"name":             v.Name,
+			"desc":             v.Desc,
 			"hideAttrViewName": v.HideAttrViewName,
 			"type":             v.LayoutType,
 			"pageSize":         pSize,

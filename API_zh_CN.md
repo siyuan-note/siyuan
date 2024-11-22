@@ -40,6 +40,7 @@
     * [获取块属性](#获取块属性)
 * [SQL](#SQL)
     * [执行 SQL 查询](#执行-SQL-查询)
+    * [提交事务](#提交事务)
 * [模板](#模板)
     * [渲染模板](#渲染模板)
     * [渲染 Sprig](#渲染-Sprig)
@@ -357,6 +358,31 @@
 
     * `notebook`：笔记本 ID
     * `path`：文档路径
+    * `title`：新标题
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+通过 `id` 重命名文档：
+
+* `/api/filetree/renameDocByID`
+* 参数
+
+  ```json
+  {
+    "id": "20210902210113-0avi12f",
+    "title": "文档新标题"
+  }
+  ```
+
+  * `id`：文档 ID
+  * `title`：新标题
 * 返回值
 
   ```json
@@ -1013,6 +1039,20 @@
     "data": [
       { "列": "值" }
     ]
+  }
+  ```
+  
+### 提交事务
+
+* `/api/sqlite/flushTransaction`
+* 不带参
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
   }
   ```
 

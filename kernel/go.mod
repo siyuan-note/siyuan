@@ -10,7 +10,7 @@ require (
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
 	github.com/88250/gulu v1.2.3-0.20240612035750-c9cf5f7a4d02
-	github.com/88250/lute v1.7.7-0.20241108062550-1a256f09ffc2
+	github.com/88250/lute v1.7.7-0.20241118033349-974c97da47be
 	github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
@@ -23,6 +23,8 @@ require (
 	github.com/denisbrodbeck/machineid v1.0.1
 	github.com/dgraph-io/ristretto v1.0.0
 	github.com/djherbis/times v1.6.0
+	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
+	github.com/emersion/go-webdav v0.5.1-0.20240713135526-7f8c17ad7135
 	github.com/emirpasic/gods v1.18.1
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
@@ -54,11 +56,11 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20241102043114-31885fe287b6
+	github.com/siyuan-note/dejavu v0.0.0-20241117012225-c29870b78504
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20240724034355-d1ed7bf21d04
-	github.com/siyuan-note/httpclient v0.0.0-20241101092545-63ac2e89a49d
+	github.com/siyuan-note/httpclient v0.0.0-20241113084556-839baaab03f6
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20240912073907-1e89a5f8e7dc
 	github.com/spf13/cast v1.7.0
@@ -70,9 +72,9 @@ require (
 	github.com/xuri/excelize/v2 v2.8.1
 	golang.org/x/image v0.20.0
 	golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b
-	golang.org/x/mod v0.21.0
-	golang.org/x/net v0.30.0
-	golang.org/x/text v0.19.0
+	golang.org/x/mod v0.22.0
+	golang.org/x/net v0.31.0
+	golang.org/x/text v0.20.0
 	golang.org/x/time v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -107,7 +109,7 @@ require (
 	github.com/go-resty/resty/v2 v2.14.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/pprof v0.0.0-20241029153458-d1b30febd7db // indirect
+	github.com/google/pprof v0.0.0-20241101162523-b92577c0c142 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -141,6 +143,7 @@ require (
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/power-devops/perfstat v0.0.0-20240221224432-82ca36839d55 // indirect
 	github.com/qiniu/go-sdk/v7 v7.20.2 // indirect
+	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.48.1 // indirect
 	github.com/refraction-networking/utls v1.6.7 // indirect
@@ -163,11 +166,11 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.10.0 // indirect
-	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/exp v0.0.0-20241009180824-f66d83c29e7c // indirect
-	golang.org/x/sync v0.8.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/tools v0.26.0 // indirect
+	golang.org/x/crypto v0.29.0 // indirect
+	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
+	golang.org/x/sync v0.9.0 // indirect
+	golang.org/x/sys v0.27.0 // indirect
+	golang.org/x/tools v0.27.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

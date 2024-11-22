@@ -6,6 +6,7 @@ import {focusBlock} from "../../util/selection";
 import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
 import {avRender} from "./render";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
@@ -120,6 +121,44 @@ export const bindViewEvent = (options: {
         }
     });
     inputElement.select();
+    inputElement.value = inputElement.dataset.value;
+    const descElement = options.menuElement.querySelector('.b3-text-field[data-type="desc"]') as HTMLTextAreaElement;
+    inputElement.nextElementSibling.addEventListener("click", () => {
+        const descPanelElement = descElement.parentElement;
+        descPanelElement.classList.toggle("fn__none");
+        if (!descPanelElement.classList.contains("fn__none")) {
+            descElement.focus();
+        }
+    });
+    descElement.addEventListener("blur", () => {
+        if (descElement.value !== descElement.dataset.value) {
+            transaction(options.protyle, [{
+                action: "setAttrViewViewDesc",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: descElement.value
+            }], [{
+                action: "setAttrViewViewDesc",
+                avID: options.data.id,
+                id: options.data.viewID,
+                data: descElement.dataset.value
+            }]);
+            descElement.dataset.value = descElement.value;
+        }
+    });
+    descElement.addEventListener("keydown", (event) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (event.key === "Enter") {
+            event.preventDefault();
+            descElement.blur();
+            options.menuElement.parentElement.remove();
+        }
+    });
+    descElement.addEventListener("input", () => {
+        inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeHtml(descElement.value) : window.siyuan.languages.addDesc);
+    });
     const toggleTitleElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-title"]') as HTMLInputElement;
     toggleTitleElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
@@ -163,13 +202,24 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__avemoji" data-icon="${view.icon}" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
-    <input data-type="name" class="b3-text-field fn__block" type="text" value="${view.name}" data-value="${view.name}" style="margin: 4px 0">
+    <div class="fn__block">
+        <div class="fn__flex">
+            <span class="b3-menu__avemoji" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
+            <div class="b3-form__icona fn__block">
+                <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" data-value="${escapeAttr(view.name)}">
+                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+            </div>
+        </div>
+        <div class="fn__none">
+            <div class="fn__hr"></div>
+            <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
+        </div>
+    </div>
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">
     <svg class="b3-menu__icon"></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.attr}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.fields}</span>
     <span class="b3-menu__accelerator">${view.columns.filter((item: IAVColumn) => !item.hidden).length}/${view.columns.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>

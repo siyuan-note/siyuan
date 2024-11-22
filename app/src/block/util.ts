@@ -35,6 +35,10 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
                 id,
             });
             nodeElement.lastElementChild.remove();
+            // 超级块中的 html 块需要反转义再赋值 https://github.com/siyuan-note/siyuan/issues/13155
+            nodeElement.querySelectorAll("protyle-html").forEach(item => {
+                item.setAttribute("data-content" , item.getAttribute("data-content").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
+            });
             nodeElement.outerHTML = nodeElement.innerHTML;
             return;
         }

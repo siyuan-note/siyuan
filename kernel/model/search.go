@@ -618,11 +618,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 						if 0 == method {
 							if strings.Contains(n.TextMarkTextContent, escapedKey) {
-								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, replacement)
+								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, util.EscapeHTML(replacement))
 							}
 						} else if 3 == method {
 							if nil != escapedR && escapedR.MatchString(n.TextMarkTextContent) {
-								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, replacement)
+								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, util.EscapeHTML(replacement))
 							}
 						}
 					} else if n.IsTextMarkType("a") {
@@ -1311,7 +1311,7 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFil
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
 	}
-	return fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
+	return fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
@@ -1396,9 +1396,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 	return
 }
 
-func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	start := time.Now()
-
+func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	query = strings.ReplaceAll(query, "'", "''")
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	keywords := strings.Split(query, " ")
@@ -1427,7 +1425,17 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 		" FROM blocks WHERE type IN " + typeFilter + boxFilter + pathFilter + ignoreFilter +
 		" AND (id IN (SELECT root_id FROM docBlocks " + limit + ") OR" +
 		"  (root_id IN (SELECT root_id FROM docBlocks" + limit + ") AND (" + likeFilter + ")))"
-	selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	if strings.Contains(orderBy, "ORDER BY rank DESC") {
+		orderBy = buildOrderBy(query, 0, 0)
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort ASC, ", 1)
+	} else if strings.Contains(orderBy, "ORDER BY rank") {
+		orderBy = buildOrderBy(query, 0, 0)
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	} else if strings.Contains(orderBy, "sort ASC") {
+		selectStmt += " " + strings.Replace(orderBy, "END ASC, ", "END ASC, blockSort DESC, ", 1)
+	} else {
+		selectStmt += " " + orderBy
+	}
 	result, _ := sql.QueryNoLimit(selectStmt)
 	resultBlocks := sql.ToBlocks(result)
 	if 0 < len(resultBlocks) {
@@ -1441,8 +1449,6 @@ func fullTextSearchByFTSWithRoot(query, boxFilter, pathFilter, typeFilter, ignor
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
-
-	logging.LogInfof("time cost [like]: %v", time.Since(start))
 	return
 }
 
@@ -1496,21 +1502,20 @@ func highlightByRegexp(query, typeFilter, id string) (ret []string) {
 
 func markSearch(text string, keyword string, beforeLen int) (marked string, score float64) {
 	if 0 == len(keyword) {
-		marked = text
-
-		if strings.Contains(marked, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
+		if strings.Contains(text, search.SearchMarkLeft) { // 使用 FTS snippet() 处理过高亮片段，这里简单替换后就返回
 			marked = util.EscapeHTML(text)
 			marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "<mark>")
 			marked = strings.ReplaceAll(marked, search.SearchMarkRight, "</mark>")
 			return
 		}
 
-		keywords := gulu.Str.SubstringsBetween(marked, search.SearchMarkLeft, search.SearchMarkRight)
+		keywords := gulu.Str.SubstringsBetween(text, search.SearchMarkLeft, search.SearchMarkRight)
 		keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 		keyword = strings.Join(keywords, search.TermSep)
-		marked = strings.ReplaceAll(marked, search.SearchMarkLeft, "")
+		marked = strings.ReplaceAll(text, search.SearchMarkLeft, "")
 		marked = strings.ReplaceAll(marked, search.SearchMarkRight, "")
 		_, marked = search.MarkText(marked, keyword, beforeLen, Conf.Search.CaseSensitive)
+		marked = util.EscapeHTML(marked)
 		return
 	}
 
@@ -1553,12 +1558,11 @@ func fromSQLBlock(sqlBlock *sql.Block, terms string, beforeLen int) (block *Bloc
 		}
 	}
 
-	content = util.EscapeHTML(content) // Search dialog XSS https://github.com/siyuan-note/siyuan/issues/8525
 	content, _ = markSearch(content, terms, beforeLen)
 	content = maxContent(content, 5120)
 	tag, _ := markSearch(sqlBlock.Tag, terms, beforeLen)
 	markdown := maxContent(sqlBlock.Markdown, 5120)
-	fContent := util.EscapeHTML(sqlBlock.FContent) // fContent 会用于和 content 对比，在反链计算时用于判断是否是列表项下第一个子块，所以也需要转义 https://github.com/siyuan-note/siyuan/issues/11001
+	fContent := sqlBlock.FContent
 	block = &Block{
 		Box:      sqlBlock.Box,
 		Path:     sqlBlock.Path,

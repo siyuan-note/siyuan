@@ -122,7 +122,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "新增不同類型的屬性"
+									"Data": "新增不同類型的欄位"
 								}
 							]
 						}
@@ -150,7 +150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "新增行"
+									"Data": "新增條目"
 								}
 							]
 						},
@@ -185,7 +185,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "非內容塊：直接在表格中新增的行，不綁定到任何內容塊"
+													"Data": "非內容塊：直接在表格中新增的條目，不綁定到任何內容塊"
 												}
 											]
 										}
@@ -213,7 +213,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "內容塊：透過拖曳到表格新增的行，或透過塊標選單 "
+													"Data": "內容塊：透過拖曳到表格新增的條目，或透過塊標選單 "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -222,7 +222,7 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": "​ 新增的行"
+													"Data": "​ 新增的條目"
 												}
 											]
 										}
@@ -437,7 +437,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "行計數"
+					"TextMarkTextContent": "條目數"
 				},
 				{
 					"Type": "NodeText",
@@ -481,7 +481,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "中介紹的語法存取、計算並渲染同一資料中其他屬性的值："
+					"Data": "中介紹的語法存取、計算並渲染同一資料中其他欄位的值："
 				}
 			]
 		},
@@ -521,11 +521,11 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .屬性名 }"
+									"TextMarkTextContent": ".action{ .欄位名 }"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ 存取視圖屬性"
+									"Data": "​ 存取視圖欄位"
 								}
 							]
 						}
@@ -598,7 +598,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 屬性示範了 "
+					"Data": "​ 欄位示範了 "
 				},
 				{
 					"Type": "NodeTextMark",

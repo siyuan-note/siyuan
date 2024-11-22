@@ -10,10 +10,10 @@
 
 @keyframes addCard {
   0% {
-    box-shadow: 100vw 0px 0 -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 100vw 0 0 0 var(--b3-protyle-inline-mark-background) inset;
   }
   100% {
-    box-shadow: 3px 0 0 -1px var(--b3-protyle-inline-mark-background) inset;
+    box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
   }
 }
 

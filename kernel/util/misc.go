@@ -83,21 +83,17 @@ func EscapeHTML(s string) (ret string) {
 		return
 	}
 
-	ret = strings.ReplaceAll(ret, "&amp;", "__@amp__")
-	ret = strings.ReplaceAll(ret, "&#39;", "__@39__")
-	ret = strings.ReplaceAll(ret, "&lt;", "__@lt__")
-	ret = strings.ReplaceAll(ret, "&gt;", "__@gt__")
-	ret = strings.ReplaceAll(ret, "&#34;", "__@34__")
-	ret = strings.ReplaceAll(ret, "&#13;", "__@13__")
 	ret = html.EscapeString(ret)
-	ret = strings.ReplaceAll(ret, "__@amp__", "&amp;")
-	ret = strings.ReplaceAll(ret, "__@39__", "&#39;")
-	ret = strings.ReplaceAll(ret, "__@lt__", "&lt;")
-	ret = strings.ReplaceAll(ret, "__@gt__", "&gt;")
-	ret = strings.ReplaceAll(ret, "__@34__", "&#34;")
-	ret = strings.ReplaceAll(ret, "__@13__", "&#13;")
-	ret = strings.ReplaceAll(ret, "&lt;", "&amp;lt;")
-	ret = strings.ReplaceAll(ret, "&gt;", "&amp;gt;")
+	return
+}
+
+func UnescapeHTML(s string) (ret string) {
+	ret = s
+	if "" == strings.TrimSpace(ret) {
+		return
+	}
+
+	ret = html.UnescapeString(ret)
 	return
 }
 

@@ -126,6 +126,7 @@ export abstract class Constants {
     public static readonly LOCAL_EMOJIS = "local-emojis";
 
     // dialog
+    public static readonly DIALOG_CONFIRM = "dialog-confirm";
     public static readonly DIALOG_OPENCARD = "dialog-opencard";
     public static readonly DIALOG_MAKECARD = "dialog-makecard";
     public static readonly DIALOG_VIEWCARDS = "dialog-viewcards";
@@ -698,6 +699,40 @@ export abstract class Constants {
     ];
     public static readonly SIYUAN_RENDER_CODE_LANGUAGES: string[] = [
         "abc", "plantuml", "mermaid", "flowchart", "echarts", "mindmap", "graphviz", "math"
+    ];
+    public static readonly PROTYLE_TOOLBAR: string[] = isMobile() ? [
+        "block-ref",
+        "a",
+        "|",
+        "text",
+        "strong",
+        "em",
+        "u",
+        "clear",
+        "|",
+        "code",
+        "tag",
+        "inline-math",
+        "inline-memo",
+    ] : [
+        "block-ref",
+        "a",
+        "|",
+        "text",
+        "strong",
+        "em",
+        "u",
+        "s",
+        "mark",
+        "sup",
+        "sub",
+        "clear",
+        "|",
+        "code",
+        "kbd",
+        "tag",
+        "inline-math",
+        "inline-memo",
     ];
 
     // Google Analytics 事件

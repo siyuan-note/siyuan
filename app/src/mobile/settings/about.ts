@@ -83,6 +83,12 @@ export const initAbout = () => {
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.purge}
     </button>
     <div class="b3-label__text">${window.siyuan.languages.dataRepoPurgeTip}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" style="padding-right: 64px;" id="indexRetentionDays" min="1" type="number" class="b3-text-field" value="${window.siyuan.config.repo.indexRetentionDays}">
+    <div class="b3-label__text">${window.siyuan.languages.dataRepoAutoPurgeIndexRetentionDays}</div>
+    <div class="fn__hr"></div>
+    <input class="b3-text-field fn__block" style="padding-right: 64px;" id="retentionIndexesDaily" min="1" type="number" class="b3-text-field" value="${window.siyuan.config.repo.retentionIndexesDaily}">
+    <div class="b3-label__text">${window.siyuan.languages.dataRepoAutoPurgeRetentionIndexesDaily}</div>
 </div>
 <div class="b3-label">
     ${window.siyuan.languages.systemLog}
@@ -408,6 +414,18 @@ export const initAbout = () => {
                 fetchPost("/api/system/setAPIToken", {token: tokenElement.value}, () => {
                     window.siyuan.config.api.token = tokenElement.value;
                     modelMainElement.querySelector("#tokenTip").innerHTML = window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token);
+                });
+            });
+            const indexRetentionDaysElement = modelMainElement.querySelector("#indexRetentionDays") as HTMLInputElement;
+            indexRetentionDaysElement.addEventListener("change", () => {
+                fetchPost("/api/repo/setRepoIndexRetentionDays", {days: parseInt(indexRetentionDaysElement.value)}, () => {
+                    window.siyuan.config.repo.indexRetentionDays = parseInt(indexRetentionDaysElement.value);
+                });
+            });
+            const retentionIndexesDailyElement = modelMainElement.querySelector("#retentionIndexesDaily") as HTMLInputElement;
+            retentionIndexesDailyElement.addEventListener("change", () => {
+                fetchPost("/api/repo/setRetentionIndexesDaily", {indexes: parseInt(retentionIndexesDailyElement.value)}, () => {
+                    window.siyuan.config.repo.retentionIndexesDaily = parseInt(retentionIndexesDailyElement.value);
                 });
             });
         }

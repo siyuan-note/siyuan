@@ -122,7 +122,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Add different types of attributes"
+									"Data": "Add different types of fields"
 								}
 							]
 						}
@@ -150,7 +150,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Add row"
+									"Data": "Add entry"
 								}
 							]
 						},
@@ -185,7 +185,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Non-content block: Rows added directly to the table, not bound to any content block"
+													"Data": "Non-content block: Entries added directly to the table, not bound to any content block"
 												}
 											]
 										}
@@ -213,7 +213,7 @@
 											"Children": [
 												{
 													"Type": "NodeText",
-													"Data": "Content block: Rows added by dragging to the table, or rows added through the block menu "
+													"Data": "Content block: Entries added by dragging to the table, or entries added through the block menu "
 												},
 												{
 													"Type": "NodeTextMark",
@@ -470,7 +470,7 @@
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "Templates can access, calculate and render the values of other attributes in the same piece of data through the syntax introduced in "
+					"Data": "Templates can access, calculate and render the values of other fields in the same piece of data through the syntax introduced in "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -521,7 +521,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": ".action{ .attribute }"
+									"TextMarkTextContent": ".action{ .field }"
 								},
 								{
 									"Type": "NodeText",
@@ -598,7 +598,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ attribute demonstrates the sum of "
+					"Data": "​ field demonstrates the sum of "
 				},
 				{
 					"Type": "NodeTextMark",

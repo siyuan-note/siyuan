@@ -1389,10 +1389,11 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	if "." == baseFolderName {
 		baseFolderName = path.Base(block.Path)
 	}
-	var docPaths []string
 
+	var docPaths []string
 	bts := treenode.GetBlockTrees(ids)
 	for _, bt := range bts {
+		docPaths = append(docPaths, bt.Path)
 		docFiles := box.ListFiles(strings.TrimSuffix(bt.Path, ".sy"))
 		for _, docFile := range docFiles {
 			docPaths = append(docPaths, docFile.path)
@@ -3046,7 +3047,7 @@ func getExportBlockRefLinkText(blockRef *ast.Node, blockRefTextLeft, blockRefTex
 	if "" == linkText {
 		linkText = sql.GetRefText(defID)
 	}
-	linkText = html.UnescapeHTMLStr(linkText) // 块引锚文本导出时 `&` 变为实体 `&amp;` https://github.com/siyuan-note/siyuan/issues/7659
+	linkText = util.UnescapeHTML(linkText) // 块引锚文本导出时 `&` 变为实体 `&amp;` https://github.com/siyuan-note/siyuan/issues/7659
 	if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(linkText) {
 		linkText = gulu.Str.SubStr(linkText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
 	}

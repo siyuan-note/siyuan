@@ -72,6 +72,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 	if nil == root.Children {
 		newPara := &ast.Node{Type: ast.NodeParagraph, ID: ast.NewNodeID()}
 		newPara.SetIALAttr("id", newPara.ID)
+		newPara.SetIALAttr("updated", newPara.ID[:14])
 		ret.Root.AppendChild(newPara)
 		needFix = true
 		return
@@ -85,7 +86,7 @@ func ParseJSON(jsonData []byte, options *parse.Options) (ret *parse.Tree, needFi
 
 	if nil == ret.Root.FirstChild {
 		// 如果是空文档的话挂一个空段落上去
-		newP := treenode.NewParagraph()
+		newP := treenode.NewParagraph("")
 		ret.Root.AppendChild(newP)
 		ret.Root.SetIALAttr("updated", newP.ID[:14])
 	}

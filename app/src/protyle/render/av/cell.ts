@@ -14,7 +14,7 @@ import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
 import {pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
-import {escapeAttr} from "../../../util/escape";
+import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 
 const renderCellURL = (urlContent: string) => {
@@ -662,10 +662,30 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         } else if (type === "mSelect") {
             // 不传入为删除
             if (typeof value === "string") {
-                value = oldValue.mSelect.concat({
-                    content: value,
-                    color: (oldValue.mSelect.length + 1).toString()
+                const newMSelectValue: IAVCellSelectValue[] = [];
+                let colorIndex = oldValue.mSelect.length;
+                // 以逗号分隔，去重，去空，去换行后做为选项
+                [...new Set(value.split(",").map(v => v.trim().replace(/\n|\r\n|\r|\u2028|\u2029/g, "")))].forEach((item) => {
+                    if (!item) {
+                        return;
+                    }
+                    let hasSameContent = false;
+                    oldValue.mSelect.find((mSelectItem) => {
+                        if (mSelectItem.content === item) {
+                            hasSameContent = true;
+                            return true;
+                        }
+                    });
+                    if (hasSameContent) {
+                        return;
+                    }
+                    colorIndex++;
+                    newMSelectValue.push({
+                        content: item,
+                        color: colorIndex.toString()
+                    });
                 });
+                value = oldValue.mSelect.concat(newMSelectValue);
             }
         }
         const cellValue = genCellValue(type, value);
@@ -774,8 +794,11 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
     } else if (cellValue.type === "mSelect" || cellValue.type === "select") {
-        cellValue?.mSelect?.forEach((item) => {
-            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${item.content}</span>`;
+        cellValue?.mSelect?.forEach((item, index) => {
+            if (cellValue.type === "select" && index > 0) {
+                return;
+            }
+            text += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
         });
     } else if (cellValue.type === "date") {
         const dataValue = cellValue ? cellValue.date : null;

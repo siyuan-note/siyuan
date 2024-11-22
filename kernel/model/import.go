@@ -27,6 +27,7 @@ import (
 	"image/png"
 	"io"
 	"io/fs"
+	"net/url"
 	"os"
 	"path"
 	"path/filepath"
@@ -53,8 +54,21 @@ import (
 )
 
 func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, withMath bool, err error) {
+	tree, withMath := HTML2Tree(htmlStr, luteEngine)
+
+	var formatted []byte
+	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
+		renderer.ExtRendererFuncs[nodeType] = rendererFunc
+	}
+	formatted = renderer.Render()
+	markdown = gulu.Str.FromBytes(formatted)
+	return
+}
+
+func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
 	assetDirPath := filepath.Join(util.DataDir, "assets")
-	tree := luteEngine.HTML2Tree(htmlStr)
+	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -78,19 +92,11 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 
 		dest := n.TokensStr()
 		if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-			processBase64Img(n, dest, assetDirPath, err)
+			processBase64Img(n, dest, assetDirPath)
 			return ast.WalkContinue
 		}
 		return ast.WalkContinue
 	})
-
-	var formatted []byte
-	renderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
-	for nodeType, rendererFunc := range luteEngine.HTML2MdRendererFuncs {
-		renderer.ExtRendererFuncs[nodeType] = rendererFunc
-	}
-	formatted = renderer.Render()
-	markdown = gulu.Str.FromBytes(formatted)
 	return
 }
 
@@ -360,23 +366,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		logging.LogErrorf("remove temp storage av dir failed: %s", removeErr)
 	}
 
-	// 清理一些冗余的数据
-	avDir := filepath.Join(util.DataDir, "storage", "av")
-	for _, tree := range trees {
-		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			ial := parse.IAL2Map(n.KramdownIAL)
-			avIDs := strings.Split(ial[av.NodeAttrNameAvs], ",")
-			for _, avID := range avIDs {
-				if !filelock.IsExist(filepath.Join(avDir, avID+".json")) {
-					n.RemoveIALAttr(av.NodeAttrNameAvs)
+	if 1 > len(avIDs) { // 如果本次没有导入数据库，则清理掉文档中的数据库属性 https://github.com/siyuan-note/siyuan/issues/13011
+		for _, tree := range trees {
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering || !n.IsBlock() {
+					return ast.WalkContinue
 				}
-			}
-			return ast.WalkContinue
-		})
+
+				n.RemoveIALAttr(av.NodeAttrNameAvs)
+				return ast.WalkContinue
+			})
+		}
 	}
 
 	// 写回 .sy
@@ -752,11 +752,22 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			targetPath = strings.ReplaceAll(targetPath, ".sy/", "/")
 			targetPath += ".sy"
-			targetPaths[curRelPath] = targetPath
+			if _, ok := targetPaths[curRelPath]; !ok {
+				targetPaths[curRelPath] = targetPath
+			} else {
+				targetPath = targetPaths[curRelPath]
+				id = strings.TrimSuffix(path.Base(targetPath), ".sy")
+			}
 
 			if info.IsDir() {
 				if subMdFiles := util.GetFilePathsByExts(currentPath, []string{".md", ".markdown"}); 1 > len(subMdFiles) {
 					// 如果该文件夹中不包含 Markdown 文件则不处理 https://github.com/siyuan-note/siyuan/issues/11567
+					return nil
+				}
+
+				// 如果当前文件夹路径下包含同名的 Markdown 文件，则不创建空文档 https://github.com/siyuan-note/siyuan/issues/13149
+				if gulu.File.IsExist(currentPath+".md") || gulu.File.IsExist(currentPath+".markdown") {
+					targetPaths[curRelPath+".md"] = targetPath
 					return nil
 				}
 
@@ -787,6 +798,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
+			unescapedTitle, unescapeErr := url.QueryUnescape(title)
+			if nil == unescapeErr {
+				title = unescapedTitle
+			}
+			hPath = path.Join(path.Dir(hPath), title)
 			updated := yfmUpdated
 			fname := path.Base(targetPath)
 			targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
@@ -819,7 +835,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 
 				if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-					processBase64Img(n, dest, assetDirPath, err)
+					processBase64Img(n, dest, assetDirPath)
 					return ast.WalkContinue
 				}
 
@@ -904,6 +920,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if "" != yfmTitle {
 			title = yfmTitle
 		}
+		unescapedTitle, unescapeErr := url.QueryUnescape(title)
+		if nil == unescapeErr {
+			title = unescapedTitle
+		}
 		updated := yfmUpdated
 		fname := path.Base(targetPath)
 		targetPath = strings.ReplaceAll(targetPath, fname, id+".sy")
@@ -932,7 +952,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if strings.HasPrefix(dest, "data:image") && strings.Contains(dest, ";base64,") {
-				processBase64Img(n, dest, assetDirPath, err)
+				processBase64Img(n, dest, assetDirPath)
 				return ast.WalkContinue
 			}
 
@@ -1025,7 +1045,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 	return
 }
 
-func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) {
+func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	base64TmpDir := filepath.Join(util.TempDir, "base64")
 	os.MkdirAll(base64TmpDir, 0755)
 
@@ -1089,7 +1109,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string, err error) 
 	tmpFile.Close()
 
 	assetTargetPath := filepath.Join(assetDirPath, name)
-	if err = filelock.Copy(tmp, assetTargetPath); err != nil {
+	if err := filelock.Copy(tmp, assetTargetPath); err != nil {
 		logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", tmp, assetTargetPath, err)
 		return
 	}
@@ -1137,7 +1157,7 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		alt := domAttrValue(htmlImg, "alt")
 		title := domAttrValue(htmlImg, "title")
 
-		p := &ast.Node{Type: ast.NodeParagraph, ID: n.ID}
+		p := treenode.NewParagraph(n.ID)
 		img := &ast.Node{Type: ast.NodeImage}
 		p.AppendChild(img)
 		img.AppendChild(&ast.Node{Type: ast.NodeBang})
@@ -1333,8 +1353,8 @@ func convertTags(text string) (ret string) {
 
 // buildBlockRefInText 将文本节点进行结构化处理。
 func buildBlockRefInText() {
-	lute := NewLute()
-	lute.SetHTMLTag2TextMark(true)
+	luteEngine := NewLute()
+	luteEngine.SetHTMLTag2TextMark(true)
 	for _, tree := range importTrees {
 		tree.MergeText()
 
@@ -1348,7 +1368,7 @@ func buildBlockRefInText() {
 				return ast.WalkContinue
 			}
 
-			t := parse.Inline("", n.Tokens, lute.ParseOptions) // 使用行级解析
+			t := parse.Inline("", n.Tokens, luteEngine.ParseOptions) // 使用行级解析
 			parse.NestedInlines2FlattedSpans(t, false)
 			var children []*ast.Node
 			for c := t.Root.FirstChild.FirstChild; nil != c; c = c.Next {

@@ -462,10 +462,10 @@ export class Backlink extends Model {
     }
 
     public refresh() {
-        if (!this.blockId) {
+        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
+        if (!this.blockId || element.classList.contains("fn__rotate")) {
             return;
         }
-        const element = this.element.querySelector('.block__icon[data-type="refresh"] svg');
         element.classList.add("fn__rotate");
         fetchPost("/api/ref/refreshBacklink", {
             id: this.blockId,

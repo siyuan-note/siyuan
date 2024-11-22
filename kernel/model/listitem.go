@@ -18,6 +18,7 @@ package model
 
 import (
 	"path"
+	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
@@ -26,7 +27,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID, newTargetPath string, err error) {
+func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
 	srcTree, _ := LoadTreeByBlockID(srcListItemID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
@@ -48,14 +49,33 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	toHP := path.Join("/", listItemText)
 	toFolder := "/"
 
-	if !moveToRoot {
-		toBlock := treenode.GetBlockTreeRootByPath(targetBoxID, targetPath)
-		if nil == toBlock {
+	if "" != previousPath {
+		previousDoc := treenode.GetBlockTreeRootByPath(targetBoxID, previousPath)
+		if nil == previousDoc {
 			err = ErrBlockNotFound
 			return
 		}
-		toHP = path.Join(toBlock.HPath, listItemText)
-		toFolder = path.Join(path.Dir(targetPath), toBlock.ID)
+		parentPath := path.Dir(previousPath)
+		if "/" != parentPath {
+			parentPath = strings.TrimSuffix(parentPath, "/") + ".sy"
+			parentDoc := treenode.GetBlockTreeRootByPath(targetBoxID, parentPath)
+			if nil == parentDoc {
+				err = ErrBlockNotFound
+				return
+			}
+			toHP = path.Join(parentDoc.HPath, listItemText)
+			toFolder = path.Join(path.Dir(parentPath), parentDoc.ID)
+		}
+	} else {
+		if !moveToRoot {
+			parentDoc := treenode.GetBlockTreeRootByPath(targetBoxID, targetPath)
+			if nil == parentDoc {
+				err = ErrBlockNotFound
+				return
+			}
+			toHP = path.Join(parentDoc.HPath, listItemText)
+			toFolder = path.Join(path.Dir(targetPath), parentDoc.ID)
+		}
 	}
 
 	newTargetPath = path.Join(toFolder, srcListItemID+".sy")
@@ -107,7 +127,11 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath string) (srcRootBlockID
 	newTree.Box, newTree.Path = targetBoxID, newTargetPath
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = "1"
-	box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+	if "" != previousPath {
+		box.addSort(strings.TrimSuffix(path.Base(previousPath), ".sy"), newTree.ID)
+	} else {
+		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
+	}
 	if err = indexWriteTreeUpsertQueue(newTree); err != nil {
 		return "", "", err
 	}

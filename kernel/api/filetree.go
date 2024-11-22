@@ -214,8 +214,15 @@ func heading2Doc(c *gin.Context) {
 
 	srcHeadingID := arg["srcHeadingID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
-	targetPath := arg["targetPath"].(string)
-	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath)
+	var targetPath string
+	if arg["targetPath"] != nil {
+		targetPath = arg["targetPath"].(string)
+	}
+	var previousPath string
+	if arg["previousPath"] != nil {
+		previousPath = arg["previousPath"].(string)
+	}
+	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath, previousPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -259,8 +266,15 @@ func li2Doc(c *gin.Context) {
 
 	srcListItemID := arg["srcListItemID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
-	targetPath := arg["targetPath"].(string)
-	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath)
+	var targetPath string
+	if arg["targetPath"] != nil {
+		targetPath = arg["targetPath"].(string)
+	}
+	var previousPath string
+	if arg["previousPath"] != nil {
+		previousPath = arg["previousPath"].(string)
+	}
+	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath, previousPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

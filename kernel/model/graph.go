@@ -84,10 +84,10 @@ func BuildTreeGraph(id, query string) (boxID string, nodes []*GraphNode, links [
 	var sqlBlocks []*sql.Block
 	var rootID string
 	if ast.NodeDocument == node.Type {
-		sqlBlocks = sql.GetAllChildBlocks([]string{block.ID}, stmt)
+		sqlBlocks = sql.GetAllChildBlocks([]string{block.ID}, stmt, Conf.Graph.MaxBlocks)
 		rootID = block.ID
 	} else {
-		sqlBlocks = sql.GetChildBlocks(block.ID, stmt)
+		sqlBlocks = sql.GetChildBlocks(block.ID, stmt, Conf.Graph.MaxBlocks)
 	}
 	blocks := fromSQLBlocks(&sqlBlocks, "", 0)
 	if "" != rootID {
@@ -185,7 +185,7 @@ func BuildGraph(query string) (boxID string, nodes []*GraphNode, links []*GraphL
 	}
 	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 
-	sqlBlocks := sql.GetAllChildBlocks(rootIDs, stmt)
+	sqlBlocks := sql.GetAllChildBlocks(rootIDs, stmt, Conf.Graph.MaxBlocks)
 	treeBlocks := fromSQLBlocks(&sqlBlocks, "", 0)
 	genTreeNodes(treeBlocks, &nodes, &links, false)
 	blocks = append(blocks, treeBlocks...)

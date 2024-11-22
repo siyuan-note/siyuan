@@ -41,15 +41,19 @@ export const mermaidRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
         }
         window.mermaid.initialize(config);
         if (mermaidElements[0].firstElementChild.clientWidth === 0) {
-            const hideElement = hasClosestByAttribute(mermaidElements[0], "fold", "1");
-            if (!hideElement) {
-                return;
-            }
             const observer = new MutationObserver(() => {
                 initMermaid(mermaidElements);
                 observer.disconnect();
             });
-            observer.observe(hideElement, {attributeFilter: ["fold"]});
+            const hideElement = hasClosestByAttribute(mermaidElements[0], "fold", "1");
+            if (hideElement) {
+                observer.observe(hideElement, {attributeFilter: ["fold"]});
+            } else {
+                const cardElement = hasClosestByClassName(mermaidElements[0], "card__block", true);
+                if (cardElement) {
+                    observer.observe(cardElement, {attributeFilter: ["class"]});
+                }
+            }
         } else {
             initMermaid(mermaidElements);
         }

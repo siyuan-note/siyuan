@@ -10,8 +10,8 @@ export const recordBeforeResizeTop = () => {
     getAllModels().editor.forEach((item) => {
         if (item.editor && item.editor.protyle &&
             item.element.parentElement && !item.element.classList.contains("fn__none")) {
-            item.editor.protyle.wysiwyg.element.querySelector('[data-resize-top]')?.removeAttribute("data-resize-top");
-            const contentRect = item.editor.protyle.contentElement.getBoundingClientRect()
+            item.editor.protyle.wysiwyg.element.querySelector("[data-resize-top]")?.removeAttribute("data-resize-top");
+            const contentRect = item.editor.protyle.contentElement.getBoundingClientRect();
             let topElement = document.elementFromPoint(contentRect.left + (contentRect.width / 2), contentRect.top);
             if (!topElement) {
                 topElement = document.elementFromPoint(contentRect.left + (contentRect.width / 2), contentRect.top + 17);
@@ -23,11 +23,11 @@ export const recordBeforeResizeTop = () => {
             if (!topElement) {
                 return;
             }
-            console.log(topElement)
+            console.log(topElement);
             topElement.setAttribute("data-resize-top", topElement.getBoundingClientRect().top.toString());
         }
     });
-}
+};
 
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutterOnly"], protyle);
@@ -61,7 +61,7 @@ export const resize = (protyle: IProtyle) => {
                 }
             });
         }
-        const topElement = protyle.wysiwyg.element.querySelector('[data-resize-top]');
+        const topElement = protyle.wysiwyg.element.querySelector("[data-resize-top]");
         if (topElement) {
             topElement.scrollIntoView();
             protyle.contentElement.scrollTop += topElement.getBoundingClientRect().top - parseInt(topElement.getAttribute("data-resize-top"));

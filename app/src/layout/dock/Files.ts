@@ -42,7 +42,7 @@ export class Files extends Model {
                 if (data) {
                     switch (data.cmd) {
                         case "reloadDocInfo":
-                            this.element.querySelector(`li[data-node-id="${data.data.rootID}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+                            this.updateDocInfo(data);
                             break;
                         case "moveDoc":
                             this.onMove(data);
@@ -733,6 +733,14 @@ export class Files extends Model {
         if (window.siyuan.config.openHelp) {
             // 需等待链接建立，不能放在 ongetconfig 中
             mountHelp();
+        }
+    }
+
+    private updateDocInfo(data: IWebSocketData) {
+        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`)
+        if (liElement) {
+            liElement.setAttribute("data-count", data.data.subFileCount);
+            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
         }
     }
 

@@ -223,7 +223,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
         });
     });
 
-}
+};
 
 export const bindCardEvent = async (options: {
     app: App,

@@ -2,10 +2,16 @@
   font-family: 'JetBrainsMono-Regular';
   src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
+/* 用户指定了字体时才添加 */
+@font-face {
+  font-family: "Number Glyphs Of Custom Font";
+  src: local("/* 用户设置的编辑器字体 */");
+  /* 数字 0-9 */
+  unicode-range: U+30-39;
+}
 @font-face {
   font-family: "Number Glyphs";
-  src: /* 如果设置了编辑器字体，这里应该先加载${window.siyuan.config.editor.fontFamily}，但我不懂怎么弄 */
-       local("Helvetica Neue"),
+  src: local("Helvetica Neue"),
        local("Luxi Sans"),
        local("DejaVu Sans"),
        local("Hiragino Sans GB"),
@@ -48,7 +54,7 @@
   font-variant-ligatures: no-common-ligatures;
   display: flex;
   flex-direction: column;
-  font-family: "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", var(--b3-font-family-protyle);
+  font-family: "Number Glyphs Of Custom Font", "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", var(--b3-font-family-protyle);
 
   img {
     max-width: 100%;

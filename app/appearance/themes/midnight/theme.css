@@ -24,9 +24,9 @@
     /* 字体 */
     --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", "Tahoma", "Arial", "Other Emojis", sans-serif;
     --b3-font-family-protyle: var(--b3-font-family);
-    --b3-font-family-code: "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    --b3-font-family-code: "Number Glyphs Of Custom Font", "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: mononoki;
-    --b3-font-family-emoji: "Number Glyphs", "Segoe Good Emoji", "Other Emojis";
+    --b3-font-family-emoji: "Segoe Good Emoji", "Other Emojis";
     --b3-font-family-math: KaTeX_Math;
     --b3-font-size: 14px;
 

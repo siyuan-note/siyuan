@@ -62,6 +62,7 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;
                 entrie.target.removeAttribute("data-index");
+                entrie.target.style.minHeight = "";
             }
         });
     });

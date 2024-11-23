@@ -15,7 +15,7 @@
     font-family: "SiYuan Emoji";
     src: local("Apple Color Emoji"),
          local("Twemoji Mozilla"),
-         local("Noto Color Emoji"),
+         url(../fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
          local("Android Emoji"),
          local("EmojiSymbols");
     /* SiYuan表情选择器中包含的emoji对应的Unicode */

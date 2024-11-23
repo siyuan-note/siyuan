@@ -47,7 +47,7 @@ export const scrollCenter = (protyle: IProtyle, nodeElement?: Element, top = fal
             if (blockElement.classList.contains("code-block")) {
                 const brElement = document.createElement("br");
                 range.insertNode(brElement);
-                brElement.scrollIntoView({block: "center", behavior});
+                brElement.scrollIntoView({block: "nearest", behavior});
                 brElement.remove();
                 return;
             }

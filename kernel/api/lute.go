@@ -64,6 +64,7 @@ func html2BlockDOM(c *gin.Context) {
 	luteEngine.SetGFMStrikethrough(true)
 	luteEngine.SetInlineAsterisk(true)
 	luteEngine.SetInlineUnderscore(true)
+	luteEngine.SetHTMLTag2TextMark(true)
 	markdown, withMath, err := model.HTML2Markdown(dom, luteEngine)
 	if err != nil {
 		ret.Data = "Failed to convert"

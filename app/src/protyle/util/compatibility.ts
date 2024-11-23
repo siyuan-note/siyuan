@@ -21,7 +21,7 @@ export const openByMobile = (uri: string) => {
                 window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
             }
         }
-    } else if (isInAndroid()) {
+    } else if (isInAndroid() || isInHarmony()) {
         window.JSAndroid.openExternal(uri);
     } else {
         window.open(uri);
@@ -29,7 +29,7 @@ export const openByMobile = (uri: string) => {
 };
 
 export const readText = () => {
-    if (isInAndroid()) {
+    if (isInAndroid() || isInHarmony()) {
         return window.JSAndroid.readClipboard();
     }
     return navigator.clipboard.readText();
@@ -42,7 +42,7 @@ export const writeText = (text: string) => {
     }
     try {
         // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
-        if (isInAndroid()) {
+        if (isInAndroid() || isInHarmony()) {
             window.JSAndroid.writeClipboard(text);
             return;
         }
@@ -54,7 +54,7 @@ export const writeText = (text: string) => {
     } catch (e) {
         if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
-        } else if (isInAndroid()) {
+        } else if (isInAndroid() || isInHarmony()) {
             window.JSAndroid.writeClipboard(text);
         } else {
             const textElement = document.createElement("textarea");
@@ -135,6 +135,10 @@ export const isInAndroid = () => {
 export const isInIOS = () => {
     return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers;
 };
+
+export const isInHarmony = () => {
+    return window.siyuan.config.system.container === "harmony";
+}
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {

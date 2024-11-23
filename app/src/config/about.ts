@@ -7,7 +7,7 @@ import {fetchPost} from "../util/fetch";
 import {setAccessAuthCode} from "./util/about";
 import {exportLayout} from "../layout/util";
 import {exitSiYuan, processSync} from "../dialog/processSystem";
-import {isInAndroid, isInIOS, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isIPad, isMac, openByMobile, writeText} from "../protyle/util/compatibility";
 import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
@@ -79,7 +79,7 @@ export const about = {
     <div class="fn__space"></div>
     <input class="b3-switch fn__flex-center" id="networkServe" type="checkbox"${window.siyuan.config.system.networkServe ? " checked" : ""}>
 </label>
-<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad())) ? " fn__none" : ""}">
+<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
     <div class="fn__flex">
         <div class="fn__flex-1">
             ${window.siyuan.languages.about5}
@@ -99,7 +99,7 @@ export const about = {
         <input class="b3-switch fn__flex-center" id="lockScreenMode" type="checkbox"${window.siyuan.config.system.lockScreenMode === 1 ? " checked" : ""}>
     </label>
 </div>
-<div class="b3-label config__item${(isBrowser() && !isInAndroid() && !isInIOS()) ? " fn__none" : " fn__flex"}">
+<div class="b3-label config__item${(isBrowser() && !isInAndroid() && !isInIOS() && !isInHarmony()) ? " fn__none" : " fn__flex"}">
     <div class="fn__flex-1">
        ${window.siyuan.languages.about2}
         <div class="b3-label__text">${window.siyuan.languages.about3.replace("${port}", location.port)}</div>

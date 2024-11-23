@@ -805,6 +805,7 @@
   "linkCount": "リンク数",
   "imgCount": "画像数",
   "refCount": "参照数",
+  "blockCount": "ブロック",
   "kbd": "キーボード",
   "errorStyle": "エラースタイル",
   "successStyle": "成功スタイル",

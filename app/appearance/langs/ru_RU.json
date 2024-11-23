@@ -805,6 +805,7 @@
   "linkCount": "Ссылки",
   "imgCount": "Изображения",
   "refCount": "Ссылки",
+  "blockCount": "блоки",
   "kbd": "Клавиатура",
   "errorStyle": "Стиль ошибки",
   "successStyle": "Стиль успеха",

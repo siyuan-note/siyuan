@@ -805,6 +805,7 @@
   "linkCount": "Link",
   "imgCount": "Immagini",
   "refCount": "Riferimenti",
+  "blockCount": "Blocchi",
   "kbd": "Tastiera",
   "errorStyle": "Stile Errore",
   "successStyle": "Stile Successo",

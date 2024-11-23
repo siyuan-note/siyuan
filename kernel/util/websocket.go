@@ -188,6 +188,7 @@ type BlockStatResult struct {
 	LinkCount  int `json:"linkCount"`
 	ImageCount int `json:"imageCount"`
 	RefCount   int `json:"refCount"`
+	BlockCount int `json:"blockCount"`
 }
 
 func ContextPushMsg(context map[string]interface{}, msg string) {

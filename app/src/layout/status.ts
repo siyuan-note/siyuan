@@ -194,7 +194,8 @@ export const renderStatusbarCounter = (stat: {
     wordCount: number,
     linkCount: number,
     imageCount: number,
-    refCount: number
+    refCount: number,
+    blockCount: number,
 }) => {
     if (!stat) {
         return;
@@ -209,6 +210,8 @@ export const renderStatusbarCounter = (stat: {
     }
     if (0 < stat.refCount) {
         html += `<span class="ft__on-surface">${window.siyuan.languages.refCount}</span>&nbsp;${stat.refCount}<span class="fn__space"></span>`;
+    }if (0 < stat.blockCount) {
+        html += `<span class="ft__on-surface">${window.siyuan.languages.blockCount}</span>&nbsp;${stat.blockCount}<span class="fn__space"></span>`;
     }
     document.querySelector("#status .status__counter").innerHTML = html;
 };

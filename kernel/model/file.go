@@ -480,6 +480,7 @@ func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
 		ret.ImageCount += imgCnt
 		ret.RefCount += refCnt
 	}
+	ret.BlockCount = len(ids)
 	return
 }
 
@@ -491,9 +492,18 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 		return
 	}
 
+	blockCount := 0
 	var databaseBlockNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || ast.NodeAttributeView != n.Type {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.IsBlock() {
+			blockCount++
+		}
+
+		if ast.NodeAttributeView != n.Type {
 			return ast.WalkContinue
 		}
 
@@ -585,6 +595,7 @@ func StatTree(id string) (ret *util.BlockStatResult) {
 		LinkCount:  linkCnt,
 		ImageCount: imgCnt,
 		RefCount:   refCnt,
+		BlockCount: blockCount,
 	}
 }
 

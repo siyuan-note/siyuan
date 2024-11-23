@@ -805,6 +805,7 @@
   "linkCount": "Links",
   "imgCount": "Images",
   "refCount": "Refs",
+  "blockCount": "Blocks",
   "kbd": "Keyboard",
   "errorStyle": "Error Style",
   "successStyle": "Success Style",

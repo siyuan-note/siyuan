@@ -576,7 +576,7 @@ ${padHTML}
                 iconHTML: "",
                 type: "readonly",
                 // 不能换行，否则移动端间距过大
-                label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.runeCount}</div><div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${response.data.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div>`,
+                label: `<div class="fn__flex">${window.siyuan.languages.runeCount}<span class="fn__space fn__flex-1"></span>${response.data.runeCount}</div><div class="fn__flex">${window.siyuan.languages.wordCount}<span class="fn__space fn__flex-1"></span>${response.data.wordCount}</div><div class="fn__flex">${window.siyuan.languages.linkCount}<span class="fn__space fn__flex-1"></span>${response.data.linkCount}</div><div class="fn__flex">${window.siyuan.languages.imgCount}<span class="fn__space fn__flex-1"></span>${response.data.imageCount}</div><div class="fn__flex">${window.siyuan.languages.refCount}<span class="fn__space fn__flex-1"></span>${response.data.refCount}</div><div class="fn__flex">${window.siyuan.languages.blockCount}<span class="fn__space fn__flex-1"></span>${response.data.blockCount}</div>`,
             }).element);
             /// #if MOBILE
             window.siyuan.menus.menu.fullscreen();

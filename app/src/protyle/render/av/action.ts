@@ -229,7 +229,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (target.classList.contains("av__calc")) {
-            openCalcMenu(protyle, target);
+            openCalcMenu(protyle, target, undefined, event.clientX - 64);
             event.preventDefault();
             event.stopPropagation();
             return true;

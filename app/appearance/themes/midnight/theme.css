@@ -49,7 +49,8 @@
     --b3-theme-on-error: #fff;
 
     /* 字体 */
-    --b3-font-family-text: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Microsoft Yahei", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", "EmojiSymbols";
+    --b3-font-family-text: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", "Tahoma", "Arial", var(--b3-font-family-emojis), sans-serif;
+    --b3-font-family-emojis: "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", "EmojiSymbols";
     --b3-font-family: "Number Glyphs", "Segoe Good Emoji", "SiYuan Emoji", var(--b3-font-family-text);
     --b3-font-family-protyle: var(--b3-font-family);
     --b3-font-family-code: "Number Glyphs", "Segoe Good Emoji", "SiYuan Emoji", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family-text);
@@ -222,8 +223,14 @@
     --b3-parent-background: var(--b3-theme-background);
 }
 
-:lang(ja_JP):root {
-    --b3-font-family-text: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI Symbol", "Segoe UI", sans-serif, "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", "EmojiSymbols";
+:root:lang(zh_CN) { /* Simplified Chinese */
+    --b3-font-family-text: "Helvetica Neue", "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Source Han Sans SC", "Microsoft Yahei", "Tahoma", "Arial", var(--b3-font-family-emojis), sans-serif;
+}
+:root:lang(zh_CHT) { /* Traditional Chinese */
+    --b3-font-family-text: "Helvetica Neue", "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Segoe UI", "Source Han Sans TC", "Microsoft JhengHei", "Tahoma", "Arial", var(--b3-font-family-emojis), sans-serif;
+}
+:root:lang(ja_JP) { /* Japanese */
+    --b3-font-family-text: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI Symbol", "Segoe UI", "Tahoma", "Arial", var(--b3-font-family-emojis), sans-serif;
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */

@@ -1,5 +1,6 @@
 @font-face {
     font-family: "Number Glyphs";
+         /* 如果设置了编辑器字体，这里应该先加载${window.siyuan.config.editor.fontFamily} */
     src: local("Helvetica Neue"),
          local("Luxi Sans"),
          local("DejaVu Sans"),

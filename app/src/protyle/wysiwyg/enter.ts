@@ -120,6 +120,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         editableElement.parentElement.removeAttribute("data-render");
         highlightRender(blockElement);
         updateTransaction(protyle, blockElement.getAttribute("data-node-id"), blockElement.outerHTML, oldHTML);
+        scrollCenter(protyle);
         return true;
     }
 

@@ -9,7 +9,7 @@ import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
 import {MenuItem} from "./Menu";
 import {App} from "../index";
-import {isInAndroid, openByMobile, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, openByMobile, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
 
 export const exportAsset = (src: string) => {
@@ -172,7 +172,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 };
 
 export const copyPNGByLink = (link: string) => {
-    if (isInAndroid()) {
+    if (isInAndroid() || isInHarmony()) {
         window.JSAndroid.writeImageClipboard(link);
         return;
     } else {

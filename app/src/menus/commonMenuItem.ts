@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {saveExport} from "../protyle/export";
-import {isInAndroid, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, openByMobile} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -710,7 +710,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
-        label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+        label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
             openByMobile(src);
@@ -781,7 +781,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             });
             /// #else
             submenu.push({
-                label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+                label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
                 accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click: () => {
                     openByMobile(src);
@@ -807,7 +807,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         });
         /// #else
         submenu.push({
-            label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+            label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
                 openByMobile(src);

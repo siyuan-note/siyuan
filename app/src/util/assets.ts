@@ -7,7 +7,7 @@ import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
-import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS} from "../protyle/util/compatibility";
 
 const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
     addScript(iconURL, "iconDefaultScript").then(() => {
@@ -329,7 +329,7 @@ const rgba2hex = (rgba: string) => {
 };
 
 const updateMobileTheme = (OSTheme: string) => {
-    if (isInIOS() || isInAndroid()) {
+    if (isInIOS() || isInAndroid() || isInHarmony()) {
         setTimeout(() => {
             const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;
@@ -342,7 +342,7 @@ const updateMobileTheme = (OSTheme: string) => {
             }
             if (isInIOS()) {
                 window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
-            } else if (isInAndroid()) {
+            } else if (isInAndroid() || isInHarmony()) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
             }
         }, 500); // 移动端需要加载完才可以获取到颜色

@@ -7,7 +7,7 @@ import {getOpenNotebookCount, originalPath, pathPosix, showFileInFolder} from ".
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {isInAndroid, isInIOS, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isIPad, setStorageVal, writeText} from "../protyle/util/compatibility";
 import {openCard} from "../card/openCard";
 import {openSetting} from "../config";
 import {getAllDocks} from "../layout/getAll";
@@ -317,7 +317,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 });
             });
             /// #endif
-            if (!isBrowser() || isInIOS() || isInAndroid()) {
+            if (!isBrowser() || isInIOS() || isInAndroid() || isInHarmony()) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "workspaceList",
                     label: window.siyuan.languages.workspaceList,
@@ -497,7 +497,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
             }
         }).element);
         /// #endif
-        if (isIPad() || isInAndroid() || !isBrowser()) {
+        if (isIPad() || isInAndroid() || isInHarmony() || !isBrowser()) {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_3", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "safeQuit",

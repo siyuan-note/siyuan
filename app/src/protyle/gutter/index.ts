@@ -3,7 +3,8 @@ import {
     hasClosestByClassName,
     hasClosestByMatchTag,
     hasClosestByTag,
-    hasTopClosestByClassName, isInEmbedBlock
+    hasTopClosestByClassName,
+    isInEmbedBlock
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
 import {enterBack, iframeMenu, setFold, tableMenu, videoMenu, zoomOut} from "../../menus/protyle";
@@ -12,6 +13,7 @@ import {copySubMenu, openAttr, openFileAttr, openWechatNotify} from "../../menus
 import {
     copyPlainText,
     isInAndroid,
+    isInHarmony,
     isMac,
     isOnlyMeta,
     openByMobile,
@@ -21,7 +23,8 @@ import {
 import {
     transaction,
     turnsIntoOneTransaction,
-    turnsIntoTransaction, turnsOneInto,
+    turnsIntoTransaction,
+    turnsOneInto,
     updateBatchTransaction,
     updateTransaction
 } from "../wysiwyg/transaction";
@@ -33,13 +36,7 @@ import {blockRender} from "../render/blockRender";
 import {getContenteditableElement, getTopAloneElement, isNotEditBlock} from "../wysiwyg/getBlock";
 import * as dayjs from "dayjs";
 import {fetchPost} from "../../util/fetch";
-import {
-    cancelSB,
-    genEmptyElement,
-    getLangByType,
-    insertEmptyBlock,
-    jumpToParent,
-} from "../../block/util";
+import {cancelSB, genEmptyElement, getLangByType, insertEmptyBlock, jumpToParent,} from "../../block/util";
 import {countBlockWord} from "../../layout/status";
 import {Constants} from "../../constants";
 import {mathRender} from "../render/mathRender";
@@ -1656,7 +1653,7 @@ export class Gutter {
                 label: `${window.siyuan.languages.copy} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
-                        if (isInAndroid()) {
+                        if (isInAndroid() || isInHarmony()) {
                             window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
                         } else {
                             writeText(response.data + Constants.ZWSP);
@@ -1670,7 +1667,7 @@ export class Gutter {
                 label: `${window.siyuan.languages.cut} ${window.siyuan.languages.headings1}`,
                 click() {
                     fetchPost("/api/block/getHeadingChildrenDOM", {id}, (response) => {
-                        if (isInAndroid()) {
+                        if (isInAndroid() || isInHarmony()) {
                             window.JSAndroid.writeHTMLClipboard(protyle.lute.BlockDOM2StdMd(response.data).trimEnd(), response.data + Constants.ZWSP);
                         } else {
                             writeText(response.data + Constants.ZWSP);

@@ -26,9 +26,9 @@
     /* DejaVu Sans 包含部分黑白 emoji 字形，会覆盖其他 emoji 字体的相应字形 https://github.com/siyuan-note/siyuan/issues/13213 */
     --b3-font-family-text: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", "Tahoma", "Arial", var(--b3-font-family-emojis), sans-serif;
     --b3-font-family-emojis: "Segoe UI Emoji", "Segoe UI Symbol", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji", "EmojiSymbols";
-    --b3-font-family: "Number Glyphs", "Segoe Good Emoji", "SiYuan Emoji", var(--b3-font-family-text);
+    --b3-font-family: "Number Glyphs", "Segoe Good Emoji", "Other Emojis", var(--b3-font-family-text);
     --b3-font-family-protyle: var(--b3-font-family);
-    --b3-font-family-code: "Number Glyphs", "Segoe Good Emoji", "SiYuan Emoji", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family-text);
+    --b3-font-family-code: "Number Glyphs", "Segoe Good Emoji", "Other Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family-text);
     --b3-font-family-graph: mononoki;
     --b3-font-family-emoji: var(--b3-font-family);
     --b3-font-family-math: KaTeX_Math;

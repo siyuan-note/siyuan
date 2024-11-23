@@ -179,7 +179,7 @@
 
       .av__calc {
         display: flex;
-        align-items: baseline;
+        align-items: center;
         padding: 5px;
         border-right: 1px;
         flex-direction: row-reverse;
@@ -188,6 +188,7 @@
         overflow: hidden;
         font-size: 75%;
         white-space: nowrap;
+        line-height: 1.625em;
         cursor: pointer;
 
         &[data-dtype="lineNumber"] {

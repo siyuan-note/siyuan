@@ -942,7 +942,9 @@ export class WYSIWYG {
                 if (!firstElement) {
                     return;
                 }
-                if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") || firstElement.classList.contains("sb") || firstElement.classList.contains("bq")) {
+                if (firstElement.classList.contains("protyle-wysiwyg") || firstElement.classList.contains("list") ||
+                    firstElement.classList.contains("li") || firstElement.classList.contains("sb") ||
+                    firstElement.classList.contains("bq")) {
                     firstElement = document.elementFromPoint(newLeft, newTop + 16);
                 }
                 if (!firstElement) {

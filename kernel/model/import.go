@@ -740,7 +740,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			curRelPath := filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))
 			targetPath := path.Join(baseTargetPath, id)
-			hPath := path.Join(baseHPath, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
+			hPath := path.Join(baseHPath, filepath.Base(localPath), filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
 			hPath = strings.TrimSuffix(hPath, ext)
 			if "" == curRelPath {
 				curRelPath = "/"
@@ -798,7 +798,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
-			unescapedTitle, unescapeErr := url.QueryUnescape(title)
+			unescapedTitle, unescapeErr := url.PathUnescape(title)
 			if nil == unescapeErr {
 				title = unescapedTitle
 			}
@@ -920,7 +920,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if "" != yfmTitle {
 			title = yfmTitle
 		}
-		unescapedTitle, unescapeErr := url.QueryUnescape(title)
+		unescapedTitle, unescapeErr := url.PathUnescape(title)
 		if nil == unescapeErr {
 			title = unescapedTitle
 		}

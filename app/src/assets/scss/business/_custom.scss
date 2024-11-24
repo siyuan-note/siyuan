@@ -15,8 +15,10 @@
 
     &--readonly {
       padding: 7px 8px;
+      line-height: 26px;
+      min-height: 26px;
     }
-    
+
     .av__checkbox {
       width: 16px;
       height: 26px;

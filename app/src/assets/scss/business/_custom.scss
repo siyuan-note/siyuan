@@ -71,6 +71,11 @@
         background-color: transparent;
       }
     }
+
+    & > [data-dtype]:empty:before {
+      color: var(--b3-empty-color);
+      content: attr(placeholder);
+    }
   }
 
   .b3-text-field--text {
@@ -78,13 +83,6 @@
     min-height: 34px;
     background-color: transparent;
     padding: 7px 8px;
-    
-    &:empty {
-      &:before {
-        color: var(--b3-empty-color);
-        content: attr(placeholder);
-      }
-    }  
 
     &:hover {
       background-color: var(--b3-theme-background);

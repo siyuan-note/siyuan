@@ -1,4 +1,5 @@
 {
+  "empty": "空白",
   "keyContent": "主键内容",
   "addDesc": "添加描述",
   "dataRepoAutoPurgeIndexRetentionDays": "数据快照保留天数",

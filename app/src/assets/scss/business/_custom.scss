@@ -78,6 +78,13 @@
     min-height: 34px;
     background-color: transparent;
     padding: 7px 8px;
+    
+    &:empty {
+      &:before {
+        color: var(--b3-empty-color);
+        content: attr(placeholder);
+      }
+    }  
 
     &:hover {
       background-color: var(--b3-theme-background);

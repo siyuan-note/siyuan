@@ -1,4 +1,5 @@
 {
+  "empty": "Pusty",
   "keyContent": "Zawartość klucza",
   "addDesc": "Dodaj opis",
   "dataRepoAutoPurgeIndexRetentionDays": "Dni przechowywania migawek danych",

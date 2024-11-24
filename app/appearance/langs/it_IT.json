@@ -1,4 +1,5 @@
 {
+  "empty": "Vuoto",
   "keyContent": "Contenuto della chiave",
   "addDesc": "Aggiungi descrizione",
   "dataRepoAutoPurgeIndexRetentionDays": "Giorni di conservazione degli snapshot dei dati",

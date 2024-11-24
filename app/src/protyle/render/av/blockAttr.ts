@@ -192,9 +192,8 @@ data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options))
 class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : ["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : " custom-attr__avvalue"}">${genAVValueHTML(item.values[0])}</div>
 </div>`;
             });
-            innerHTML += `<div class="fn__hr block__icons--addcolumn"></div>
-<div class="fn__flex">
-    <div class="fn__space"></div><div class="fn__space"></div>
+            innerHTML += `<div class="fn__hr></div>
+<div class="fn__flex block__icons--addcolumn"">
     <button data-type="addColumn" class="b3-button"><svg><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.newCol}</span></button>
 </div><div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;

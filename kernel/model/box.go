@@ -604,18 +604,16 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 						continue
 					}
 
-					for i, tag := range attrV.([]any) {
-						tagStr := strings.TrimSpace(tag.(string))
+					for _, tag := range attrV.([]any) {
+						tagStr := fmt.Sprintf("%v", tag)
 						if "" == tag {
 							continue
 						}
 						tagStr = strings.TrimLeft(tagStr, "#,'\"")
 						tagStr = strings.TrimRight(tagStr, "#,'\"")
-						tags += tagStr
-						if i < len(attrV.([]any))-1 {
-							tags += ","
-						}
+						tags += tagStr + ","
 					}
+					tags = strings.TrimRight(tags, ",")
 					tree.Root.SetIALAttr("tags", tags)
 					continue
 				}

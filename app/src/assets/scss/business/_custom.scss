@@ -83,6 +83,29 @@
     }
   }
 
+  .block__icons--addcolumn {
+    padding: 0 8px;
+
+    .b3-button[data-type="addColumn"] {
+      margin: 0 0 0 16px;
+      color: var(--b3-theme-on-surface);
+      background-color: rgba(0,0,0,0);
+
+      &:hover,
+      &:focus {
+        background-color: var(--b3-list-hover);
+        box-shadow: none;
+      }
+
+      svg {
+        padding: 4px;
+      }
+    }
+    span {
+      padding-right: 4px;
+    }
+  }
+
   .b3-text-field--text {
     transition: var(--b3-transition);
     min-height: 34px;

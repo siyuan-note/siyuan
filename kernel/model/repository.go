@@ -752,7 +752,7 @@ func checkoutRepo(id string) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	FlushTxQueue()
-	_, err = repo.Index("Backup before checkout", map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	_, err = repo.Index("Backup before checkout", false, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
 		util.PushClearProgress()
@@ -1074,7 +1074,7 @@ func IndexRepo(memo string) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
 	FlushTxQueue()
-	index, err := repo.Index(memo, map[string]interface{}{
+	index, err := repo.Index(memo, true, map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
 	})
 	if err != nil {
@@ -1770,9 +1770,15 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 
 	beforeIndex, _ = repo.Latest()
 	FlushTxQueue()
-	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
-		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
-	})
+
+	checkChunks := true
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
+		checkChunks = false
+	}
+
+	afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks,
+		map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return

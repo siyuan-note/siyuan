@@ -189,7 +189,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
 data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : ["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : " custom-attr__avvalue"}">
         ${genAVValueHTML(item.values[0])}
     </div>
 </div>`;
@@ -197,7 +197,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             innerHTML += `<div class="fn__hr"></div>
 <div class="fn__flex">
     <div class="fn__space"></div><div class="fn__space"></div>
-    <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
+    <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
 </div><div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 

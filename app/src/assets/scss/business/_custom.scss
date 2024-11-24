@@ -13,6 +13,10 @@
       background-color: var(--b3-theme-background);
     }
 
+    &--readonly {
+      padding: 7px 8px;
+    }
+    
     .av__checkbox {
       width: 16px;
       height: 26px;

@@ -291,7 +291,7 @@ export class Toolbar {
         )) {
             // 移除
             if (type === "clear") {
-                toolbarElement.querySelectorAll('[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="strong"]').forEach(item => {
+                toolbarElement.querySelectorAll('[data-type="strong"],[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="kbd"],[data-type="mark"],[data-type="code"]').forEach(item => {
                     item.classList.remove("protyle-toolbar__item--current");
                 });
             } else if (actionBtn) {

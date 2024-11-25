@@ -175,6 +175,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             // 光标位于引用结尾后 ctrl+b 偶尔会失效
             range = cloneRange;
             // 会导致  protyle.toolbar.range 和 range 不一致，先在有问题的地方重置一下 https://github.com/siyuan-note/siyuan/issues/10933
+            protyle.wysiwyg.preventKeyup = true;    // 搜狗输入法进入此代码记录的话，keyup 就不再记录，否则 transaction 清空后 keyup 再次记录，下一次 keydown 就不会记录 https://github.com/siyuan-note/siyuan/issues/13244
         }
 
         if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&

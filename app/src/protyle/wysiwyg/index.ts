@@ -2091,6 +2091,7 @@ export class WYSIWYG {
             ) {
                 // 搜狗输入法不走 keydown，需重新记录历史状态
                 if (range.toString() === "" &&  // windows 下回车新建块输入abc，选中 bc ctrl+m 后光标错误
+                    !this.preventKeyup &&
                     nodeElement && typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined") {
                     range.insertNode(document.createElement("wbr"));
                     protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;

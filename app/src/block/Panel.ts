@@ -337,8 +337,8 @@ export class BlockPanel {
 
         this.element.querySelector(".block__content").addEventListener("scroll", () => {
             this.editors.forEach(item => {
-                hideElements(["gutter"], item.protyle)
-            })
-        })
+                hideElements(["gutter"], item.protyle);
+            });
+        });
     }
 }

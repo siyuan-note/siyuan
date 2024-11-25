@@ -65,7 +65,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isOnlyMeta, readText} from "../util/compatibility";
+import {isInIOS, isMac, isOnlyMeta, readText} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -2007,7 +2007,8 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
-        this.element.addEventListener("compositionstart", (event) => {isComposition = true;
+        this.element.addEventListener("compositionstart", (event) => {
+            isComposition = true;
             event.stopPropagation();
         });
 
@@ -2080,14 +2081,14 @@ export class WYSIWYG {
             const range = getEditorRange(this.element).cloneRange();
             const nodeElement = hasClosestBlock(range.startContainer);
 
-            if ( event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" &&
+            if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" &&
                 event.key.indexOf("Arrow") === -1 && event.key !== "Escape" && event.key !== "Shift" &&
                 event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
                 !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey &&
-                !/^F\d{1,2}$/.test(event.key) ){
+                !/^F\d{1,2}$/.test(event.key)) {
                 // 搜狗输入法不走 keydown，需重新记录历史状态
-                if ( nodeElement &&
-                    ( typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined"||range.toString()!==""||!this.preventKeyup)) {
+                if (!isMac() && nodeElement &&
+                    (typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined" || range.toString() !== "" || !this.preventKeyup)) {
                     range.insertNode(document.createElement("wbr"));
                     protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
                     nodeElement.querySelector("wbr").remove();

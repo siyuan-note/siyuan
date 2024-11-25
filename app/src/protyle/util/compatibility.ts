@@ -148,7 +148,7 @@ export const isInIOS = () => {
 
 export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
-}
+};
 
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {

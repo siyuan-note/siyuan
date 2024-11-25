@@ -452,8 +452,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             )) {
                 isHTML = false;
             } else {
-                // 需注意 Edge 中的画选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021
+                // 需注意 Edge 中的划选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021
                 isHTML = true;
+            }
+
+            if (textPlain && "" !== textPlain.trim() && textHTML.startsWith("<span") && -1 < textHTML.indexOf("white-space: pre;")) {
+                // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265
+                isHTML = false;
             }
         }
         if (isHTML) {

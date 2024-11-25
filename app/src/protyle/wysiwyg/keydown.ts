@@ -168,11 +168,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.key !== "Escape" && event.key !== "Shift" && event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
             !isNotEditBlock(nodeElement) &&  !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey&&!/^F\d{1,2}$/.test(event.key)) {
             const cloneRange = range.cloneRange();
+            range.collapse(false);
             range.insertNode(document.createElement("wbr"));
             protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
             nodeElement.querySelector("wbr").remove();
             // 光标位于引用结尾后 ctrl+b 偶尔会失效
             range = cloneRange;
+            focusByRange(cloneRange)
+            protyle.toolbar.range = cloneRange;
             protyle.wysiwyg.preventKeyup = true;
         }
 

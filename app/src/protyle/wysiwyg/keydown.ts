@@ -166,8 +166,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 有可能输入 shift+. ，因此需要使用 event.key 来进行判断
         if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
             event.key !== "Escape" && event.key !== "Shift" && event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
-            !isNotEditBlock(nodeElement) &&
-            !/^F\d{1,2}$/.test(event.key) && typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined") {
+            !isNotEditBlock(nodeElement) && !/^F\d{1,2}$/.test(event.key)) {
             const cloneRange = range.cloneRange();
             range.insertNode(document.createElement("wbr"));
             protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;

@@ -188,7 +188,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         <span>${escapeHtml(item.key.name)}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
-data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"${["text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : ` placeholder="${window.siyuan.languages.empty}`}" 
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"${["block", "created", "updated", "text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : ` placeholder="${window.siyuan.languages.empty}`}" 
 class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : ["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : " custom-attr__avvalue"}">${genAVValueHTML(item.values[0])}</div>
 </div>`;
             });

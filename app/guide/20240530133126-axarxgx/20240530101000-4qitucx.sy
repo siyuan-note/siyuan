@@ -9,9 +9,55 @@
 		"title": "スタートガイド",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20241018102426"
+		"updated": "20241125231257"
 	},
 	"Children": [
+		{
+			"ID": "20241125231137-36q695e",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20241125231137-36q695e",
+				"updated": "20241125231257"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20241125231137-hsqrnef",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20241125231137-hsqrnef",
+						"updated": "20241125231257"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "思源ノートを閉じると、ユーザーガイドも自動的に閉じます。再度表示するには、"
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "メインメニュー"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ - "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "ユーザーガイド"
+						},
+						{
+							"Type": "NodeText",
+							"Data": "​ をクリックしてください"
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20240530101000-x3xk6o7",
 			"Type": "NodeSuperBlock",

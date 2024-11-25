@@ -21,16 +21,20 @@ export const openByMobile = (uri: string) => {
                 window.webkit.messageHandlers.openLink.postMessage("https://" + uri);
             }
         }
-    } else if (isInAndroid() || isInHarmony()) {
+    } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
+    } else if (isInHarmony()) {
+        window.JSHarmony.openExternal(uri);
     } else {
         window.open(uri);
     }
 };
 
 export const readText = () => {
-    if (isInAndroid() || isInHarmony()) {
+    if (isInAndroid()) {
         return window.JSAndroid.readClipboard();
+    } else if (isInHarmony()) {
+        return window.JSHarmony.readClipboard();
     }
     return navigator.clipboard.readText();
 };
@@ -42,8 +46,12 @@ export const writeText = (text: string) => {
     }
     try {
         // navigator.clipboard.writeText 抛出异常不进入 catch，这里需要先处理移动端复制
-        if (isInAndroid() || isInHarmony()) {
+        if (isInAndroid()) {
             window.JSAndroid.writeClipboard(text);
+            return;
+        }
+        if (isInHarmony()) {
+            window.JSHarmony.writeClipboard(text);
             return;
         }
         if (isInIOS()) {
@@ -54,8 +62,10 @@ export const writeText = (text: string) => {
     } catch (e) {
         if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
-        } else if (isInAndroid() || isInHarmony()) {
+        } else if (isInAndroid()) {
             window.JSAndroid.writeClipboard(text);
+        } else if (isInHarmony()) {
+            window.JSHarmony.writeClipboard(text);
         } else {
             const textElement = document.createElement("textarea");
             textElement.value = text;
@@ -137,7 +147,7 @@ export const isInIOS = () => {
 };
 
 export const isInHarmony = () => {
-    return window.siyuan.config.system.container === "harmony";
+    return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 }
 
 // Mac，Windows 快捷键展示

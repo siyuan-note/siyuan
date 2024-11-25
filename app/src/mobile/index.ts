@@ -34,7 +34,7 @@ class App {
     public appId: string;
 
     constructor() {
-        if (!window.webkit?.messageHandlers && !window.JSAndroid) {
+        if (!window.webkit?.messageHandlers && !window.JSAndroid && !window.JSHarmony) {
             registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
         }
         addBaseURL();

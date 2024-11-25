@@ -21,6 +21,10 @@
 			},
 			"Children": [
 				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
 					"ID": "20241125225100-s0akx3f",
 					"Type": "NodeParagraph",
 					"Properties": {
@@ -51,10 +55,6 @@
 							"Data": " ​をクリックすると、再度表示できます"
 						}
 					]
-				},
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
 				}
 			]
 		},

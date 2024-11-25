@@ -33,7 +33,7 @@
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "When you close Siyuan Notes, the User Guide will be automatically closed. You can click "
+							"Data": "When you close SiYuan Notes, the User Guide will be automatically closed. You can click "
 						},
 						{
 							"Type": "NodeTextMark",

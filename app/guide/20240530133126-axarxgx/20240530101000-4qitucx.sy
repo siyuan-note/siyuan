@@ -30,7 +30,7 @@
 					"Children": [
 						{
 							"Type": "NodeText",
-							"Data": "Siyuanを閉じると、ユーザーガイドは自動的に閉じられます。"
+							"Data": "SiYuan を閉じると、ユーザーガイドは自動的に閉じられます。"
 						},
 						{
 							"Type": "NodeTextMark",

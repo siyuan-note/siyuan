@@ -2083,7 +2083,7 @@ export class WYSIWYG {
             if ( event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" &&
                 event.key.indexOf("Arrow") === -1 && event.key !== "Escape" && event.key !== "Shift" &&
                 event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
-                !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey&&
+                !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey &&
                 !/^F\d{1,2}$/.test(event.key) ){
                 // 搜狗输入法不走 keydown，需重新记录历史状态
                 if ( nodeElement &&

@@ -4,7 +4,8 @@ import {
     hasClosestByAttribute,
     hasClosestByClassName,
     hasClosestByMatchTag,
-    hasTopClosestByClassName, isInEmbedBlock,
+    hasTopClosestByClassName,
+    isInEmbedBlock,
 } from "../util/hasClosest";
 import {
     focusBlock,
@@ -12,7 +13,8 @@ import {
     focusByWbr,
     focusSideBlock,
     getEditorRange,
-    getSelectionOffset, setFirstNodeRange,
+    getSelectionOffset,
+    setFirstNodeRange,
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
@@ -23,7 +25,8 @@ import {
     contentMenu,
     enterBack,
     fileAnnotationRefMenu,
-    imgMenu, inlineMathMenu,
+    imgMenu,
+    inlineMathMenu,
     linkMenu,
     refMenu,
     setFold,
@@ -2004,16 +2007,7 @@ export class WYSIWYG {
 
         // 输入法测试点 https://github.com/siyuan-note/siyuan/issues/3027
         let isComposition = false; // for iPhone
-        this.element.addEventListener("compositionstart", (event) => {
-            // 搜狗输入法划选输入后无 data https://github.com/siyuan-note/siyuan/issues/4672
-            const range = getEditorRange(protyle.wysiwyg.element);
-            const nodeElement = hasClosestBlock(range.startContainer);
-            if (nodeElement && typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined") {
-                range.insertNode(document.createElement("wbr"));
-                protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
-                nodeElement.querySelector("wbr").remove();
-            }
-            isComposition = true;
+        this.element.addEventListener("compositionstart", (event) => {isComposition = true;
             event.stopPropagation();
         });
 
@@ -2085,23 +2079,26 @@ export class WYSIWYG {
         this.element.addEventListener("keyup", (event) => {
             const range = getEditorRange(this.element).cloneRange();
             const nodeElement = hasClosestBlock(range.startContainer);
-            if (event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" && event.key.indexOf("Arrow") === -1 &&
-                event.key !== "Alt" && event.key !== "Shift" && event.key !== "CapsLock" && event.key !== "Escape" && event.key !== "Meta" && !/^F\d{1,2}$/.test(event.key) &&
-                (!event.isComposing || (event.isComposing && range.toString() !== "")) // https://github.com/siyuan-note/siyuan/issues/4341
-            ) {
+
+            if ( event.key !== "PageUp" && event.key !== "PageDown" && event.key !== "Home" && event.key !== "End" &&
+                event.key.indexOf("Arrow") === -1 && event.key !== "Escape" && event.key !== "Shift" &&
+                event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
+                !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey&&
+                !/^F\d{1,2}$/.test(event.key) ){
                 // 搜狗输入法不走 keydown，需重新记录历史状态
-                if (range.toString() === "" &&  // windows 下回车新建块输入abc，选中 bc ctrl+m 后光标错误
-                    (!this.preventKeyup || event.code === "Space") &&
-                    nodeElement && typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined") {
+                if ( nodeElement &&
+                    ( typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined"||range.toString()!==""||!this.preventKeyup)) {
                     range.insertNode(document.createElement("wbr"));
                     protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
                     nodeElement.querySelector("wbr").remove();
                 }
+                this.preventKeyup = false;
                 return;
             }
 
             // 需放在 lastHTMLs 后，否则 https://github.com/siyuan-note/siyuan/issues/4388
             if (this.preventKeyup) {
+                this.preventKeyup = false;
                 return;
             }
 

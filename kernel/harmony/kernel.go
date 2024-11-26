@@ -126,8 +126,8 @@ func SetTimezone(container, appDir, timezoneID string) {
 }
 
 //export DisableFeature
-func DisableFeature(feature string) {
-	util.DisableFeature(feature)
+func DisableFeature(feature *C.char) {
+	util.DisableFeature(C.GoString(feature))
 }
 
 func main() {}

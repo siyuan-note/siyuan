@@ -18,6 +18,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     }
 
     if (tooltipClass) {
+        messageElement.className = "tooltip";
         messageElement.classList.add("tooltip--" + tooltipClass);
     } else {
         messageElement.className = "tooltip";

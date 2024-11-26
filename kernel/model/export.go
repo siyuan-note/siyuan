@@ -1985,6 +1985,9 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 						if "d" != bt.Type {
 							href += "#" + defID
 						}
+						if tree.ID == bt.RootID {
+							href = "#" + defID
+						}
 					}
 					href = strings.TrimPrefix(href, currentDocDir)
 					href = util.FilterFilePath(href)

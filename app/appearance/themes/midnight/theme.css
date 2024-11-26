@@ -199,7 +199,7 @@
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */
-.protyle-action--order:after {
+.protyle-action--order::after {
     mix-blend-mode: screen;
 }
 

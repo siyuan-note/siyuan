@@ -493,6 +493,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 
 		name = strings.ReplaceAll(name, editor.Caret, "")
+		name = util.UnescapeHTML(name)
 		name = util.EscapeHTML(name)
 
 		if !isEmbedBlock && parent == node {

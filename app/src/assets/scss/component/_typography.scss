@@ -123,7 +123,7 @@
 
   blockquote,
   .bq {
-    &:before {
+    &::before {
       content: '';
       background-color: var(--b3-theme-surface-lighter);
       width: .25em;
@@ -345,7 +345,7 @@
       display: flex;
       align-items: baseline; // https://ld246.com/article/1645933216334
 
-      &:before {
+      &::before {
         content: "";
         flex: 1;
       }

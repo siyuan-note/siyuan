@@ -178,6 +178,15 @@ interface Window {
         readClipboard(): string
         getBlockURL(): string
     }
+    JSHarmony: {
+        openExternal(url: string): void
+        changeStatusBarColor(color: string, mode: number): void
+        writeClipboard(text: string): void
+        writeHTMLClipboard(text: string, html: string): void
+        writeImageClipboard(uri: string): void
+        readClipboard(): string
+        getBlockURL(): string
+    }
 
     Protyle: import("../protyle/method").default
 

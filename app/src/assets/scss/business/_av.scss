@@ -29,7 +29,7 @@
     background: var(--b3-border-color);
     border-radius: var(--b3-border-radius);
 
-    &:after {
+    &::after {
       content: " ";
       border-radius: var(--b3-border-radius);
       position: absolute;

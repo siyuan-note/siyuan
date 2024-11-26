@@ -249,7 +249,9 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
+	keywords := strings.Split(keyword, " ")
 
+	pathHitCount := map[string]int{}
 	count := 0
 	filterByExt := 0 < len(exts)
 	for _, asset := range cache.GetAssets() {
@@ -269,16 +271,24 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 
 		lowerHName := strings.ToLower(asset.HName)
 		lowerPath := strings.ToLower(asset.Path)
-		lowerKeyword := strings.ToLower(keyword)
-		hitName := strings.Contains(lowerHName, lowerKeyword)
-		hitPath := strings.Contains(lowerPath, lowerKeyword)
-		if !hitName && !hitPath {
-			continue
+		var hitNameCount, hitPathCount int
+		for _, k := range keywords {
+			lowerKeyword := strings.ToLower(k)
+			hitNameCount += strings.Count(lowerHName, lowerKeyword)
+			hitPathCount += strings.Count(lowerPath, lowerKeyword)
+			if 1 > hitNameCount && 1 > hitPathCount {
+				continue
+			}
 		}
 
+		if 1 > hitNameCount+hitPathCount {
+			continue
+		}
+		pathHitCount[asset.Path] += hitNameCount + hitPathCount
+
 		hName := asset.HName
-		if hitName {
-			_, hName = search.MarkText(asset.HName, keyword, 64, Conf.Search.CaseSensitive)
+		if 0 < hitNameCount {
+			_, hName = search.MarkText(asset.HName, strings.Join(keywords, search.TermSep), 64, Conf.Search.CaseSensitive)
 		}
 		ret = append(ret, &cache.Asset{
 			HName:   hName,
@@ -291,9 +301,15 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 		}
 	}
 
-	sort.Slice(ret, func(i, j int) bool {
-		return ret[i].Updated > ret[j].Updated
-	})
+	if 0 < len(pathHitCount) {
+		sort.Slice(ret, func(i, j int) bool {
+			return pathHitCount[ret[i].Path] > pathHitCount[ret[j].Path]
+		})
+	} else {
+		sort.Slice(ret, func(i, j int) bool {
+			return ret[i].Updated > ret[j].Updated
+		})
+	}
 	return
 }
 

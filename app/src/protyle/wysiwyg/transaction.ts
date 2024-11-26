@@ -1121,7 +1121,6 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         protyle.transactionTime - time < Constants.TIMEOUT_INPUT) {
         needDebounce = true;
     }
-    protyle.wysiwyg.lastHTMLs = {};
     if (undoOperations) {
         if (window.siyuan.config.fileTree.openFilesUseCurrentTab && protyle.model) {
             protyle.model.headElement.classList.remove("item--unupdate");

@@ -44,7 +44,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         left = parentRect.right + 8;
     } else if (position?.endsWith("parentW")) {
         // 数据库属性视图
-        top = parentRect.top + parseInt(position) || 8;
+        top = parentRect.top + (parseInt(position) || 8);
         left = parentRect.left - messageElement.clientWidth;
     }
 

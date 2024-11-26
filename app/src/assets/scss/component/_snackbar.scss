@@ -41,7 +41,7 @@
   &--error .b3-snackbar__content {
     padding-left: 47px;
 
-    &:after {
+    &::after {
       content: "❗";
       position: absolute;
       left: 16px;

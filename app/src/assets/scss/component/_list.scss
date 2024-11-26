@@ -27,7 +27,7 @@
       position: relative;
     }
 
-    .b3-list__panel:before {
+    .b3-list__panel::before {
       content: "";
       height: 100%;
       top: 0;

@@ -5,7 +5,7 @@
   user-select: auto;
   overflow-x: clip;
 
-  &--empty:empty:before {
+  &--empty:empty::before {
     color: var(--b3-empty-color);
     content: attr(placeholder);
   }
@@ -43,7 +43,7 @@
         position: relative;
         height: 26px;
 
-        &:after {
+        &::after {
           position: absolute;
           content: " ";
           height: 1px;
@@ -86,14 +86,14 @@
       display: flex;
       flex-direction: column;
 
-      &:before {
+      &::before {
         content: "";
         position: absolute;
         border-left: .5px solid var(--b3-theme-background-light);
         left: 17px;
       }
 
-      &:hover:before {
+      &:hover::before {
         border-left-color: var(--b3-scroll-color);
       }
 
@@ -111,11 +111,11 @@
       }
 
       &[fold="1"] {
-        &:before {
+        &::before {
           content: none;
         }
 
-        & > .protyle-action:after {
+        & > .protyle-action::after {
           background-color: var(--b3-list-hover);
         }
 
@@ -147,7 +147,7 @@
           padding-bottom: 0;
         }
 
-        &:after {
+        &::after {
           content: "";
           position: absolute;
           border-radius: 50%;
@@ -163,7 +163,7 @@
           position: relative;
         }
 
-        &--order:after {
+        &--order::after {
           border-radius: var(--b3-border-radius);
         }
       }
@@ -334,7 +334,7 @@
         filter: brightness(.68);
       }
 
-      &--drag > span:after {
+      &--drag > span::after {
         content: "";
         position: absolute;
         top: 0;
@@ -363,8 +363,8 @@
           box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
         }
 
-        &:before,
-        &:after {
+        &::before,
+        &::after {
           position: absolute;
           width: 4px;
           content: "";
@@ -372,7 +372,7 @@
           left: -4px;
         }
 
-        &:after {
+        &::after {
           left: 4px;
           width: 8px
         }
@@ -409,7 +409,7 @@
       }
 
       &--drag {
-        .iframe-content:after {
+        .iframe-content::after {
           content: "";
           position: absolute;
           top: 0;
@@ -433,7 +433,7 @@
         box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
         box-sizing: border-box;
 
-        &:after {
+        &::after {
           content: "";
           background-color: var(--b3-theme-surface);
           width: 32px;
@@ -449,7 +449,7 @@
         }
 
         &:hover,
-        &:hover:after {
+        &:hover::after {
           background-color: var(--b3-theme-background);
           box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
         }
@@ -459,17 +459,10 @@
 
   &--select,
   &--hl {
-    &:after {
-      background-color: var(--b3-theme-primary-lightest);
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      content: " ";
-      left: 0;
-      top: 0;
+    @extend .dragover;
+
+    &::after {
       border-radius: var(--b3-border-radius);
-      z-index: 3;
-      pointer-events: none;
     }
   }
 
@@ -515,7 +508,7 @@
     min-height: 26px !important;
   }
 
-  div[fold="1"][data-type="NodeHeading"]:before {
+  div[fold="1"][data-type="NodeHeading"]::before {
     content: "";
     height: 16px !important;
     width: 16px;
@@ -600,7 +593,7 @@
     cursor: pointer;
 
     &:hover {
-      &:after {
+      &::after {
         background-color: var(--b3-theme-background-light);
       }
 

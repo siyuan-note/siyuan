@@ -329,8 +329,8 @@ html {
     opacity: .38;
   }
 
-  .dragover__top:after,
-  .dragover__bottom:after {
+  .dragover__top::after,
+  .dragover__bottom::after {
     content: "";
     width: var(--file-toggle-width);
     height: 4px;
@@ -341,7 +341,7 @@ html {
     z-index: 1;
   }
 
-  .dragover__top:after {
+  .dragover__top::after {
     top: -3px;
     bottom: auto;
   }

@@ -2,7 +2,7 @@
   overflow-y: hidden; // https://github.com/siyuan-note/siyuan/issues/6706
 
   &__wnd--active .layout-tab-bar .item--focus {
-    &:after {
+    &::after {
       background-color: var(--b3-theme-primary);
     }
 
@@ -111,11 +111,11 @@
     position: relative;
     z-index: 4; // 需大于 #sidebarContainer https://github.com/siyuan-note/siyuan/issues/11759
 
-    &:hover:after {
+    &:hover::after {
       background-color: var(--b3-scroll-color);
     }
 
-    &:after {
+    &::after {
       content: "";
       width: 100%;
       height: .5px;
@@ -133,7 +133,7 @@
       margin: 0 -6px 0 0;
       height: auto;
 
-      &:after {
+      &::after {
         top: 0;
         width: .5px;
         left: 0;
@@ -226,7 +226,7 @@
           max-width: none;
           flex: 1;
 
-          &.item--focus:after {
+          &.item--focus::after {
             background-color: var(--b3-theme-primary);
           }
         }
@@ -268,7 +268,7 @@
           }
         }
 
-        &--focus:after {
+        &--focus::after {
           content: "";
           width: 100%;
           height: 3px;
@@ -384,12 +384,12 @@
     padding: 0;
 
     .dock__item {
-      &[data-index="0"]:after {
+      &[data-index="0"]::after {
         top: -32px;
         bottom: auto;
       }
 
-      &[data-index="1"]:after {
+      &[data-index="1"]::after {
         bottom: 100%;
       }
     }

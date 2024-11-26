@@ -1944,6 +1944,8 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		})
 	}
 
+	currentDocDir := path.Dir(tree.HPath)
+
 	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
@@ -1979,12 +1981,14 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 					var href string
 					bt := treenode.GetBlockTree(defID)
 					if nil != bt {
-						href += strings.TrimPrefix(bt.HPath, "/") + ".md"
+						href += bt.HPath + ".md"
 						if "d" != bt.Type {
 							href += "#" + defID
 						}
 					}
+					href = strings.TrimPrefix(href, currentDocDir)
 					href = util.FilterFilePath(href)
+					href = strings.TrimPrefix(href, "/")
 					blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: href}
 					blockRefLink.KramdownIAL = n.KramdownIAL
 					n.InsertBefore(blockRefLink)

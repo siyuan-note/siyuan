@@ -8,9 +8,55 @@
 		"title": "Please Start Here",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20241018102340"
+		"updated": "20241125224626"
 	},
 	"Children": [
+		{
+			"ID": "20241125224615-dwfqru1",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20241125224615-dwfqru1",
+				"updated": "20241125224626"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20241125224615-z2fevdf",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20241125224615-z2fevdf",
+						"updated": "20241125224626"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "When you close SiYuan Notes, the User Guide will be automatically closed. You can click "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "Main Menu"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " - "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "User Guide"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " to view it again"
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20210528120135-bznvpp6",
 			"Type": "NodeSuperBlock",

@@ -153,7 +153,7 @@ export class Toolbar {
         this.toolbarHeight = this.element.clientHeight;
         const y = rangePosition.top - this.toolbarHeight - 4;
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
-        setPosition(this.element, rangePosition.left - 52, Math.max(y, protyle.element.getBoundingClientRect().top));
+        setPosition(this.element, rangePosition.left - 52, Math.max(y, protyle.element.getBoundingClientRect().top + 30));
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });

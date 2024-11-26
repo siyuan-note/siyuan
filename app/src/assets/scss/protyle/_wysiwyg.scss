@@ -177,11 +177,11 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
+        column-gap: 1.5em;
 
         & > div {
-          flex: 1;
+          flex: 1 0 10%;
           box-sizing: border-box;
-          margin-right: 24px;
           min-width: 1px;
 
           &:nth-last-child(2),

@@ -69,7 +69,14 @@ export class Toolbar {
         /// #endif
         this.toolbarHeight = 29;
         protyle.app.plugins.forEach(item => {
-            options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(options.toolbar));
+            const pluginToolbar = item.updateProtyleToolbar(options.toolbar)
+            pluginToolbar.forEach(toolbarItem => {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                    return
+                }
+                toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
+            })
+            options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
@@ -81,7 +88,14 @@ export class Toolbar {
         this.element.innerHTML = "";
         protyle.options.toolbar = toolbarKeyToMenu(Constants.PROTYLE_TOOLBAR);
         protyle.app.plugins.forEach(item => {
-            protyle.options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(protyle.options.toolbar));
+            const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar)
+            pluginToolbar.forEach(toolbarItem => {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                    return
+                }
+                toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
+            })
+            protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         protyle.options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);

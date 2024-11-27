@@ -9,19 +9,12 @@
     min-height: 26px;
     flex-wrap: wrap;
 
-    &:hover {
+    &:not(.custom-attr__avvalue--readonly):hover {
       background-color: var(--b3-theme-background);
     }
 
     &--readonly {
-      padding: 7px 8px;
-      line-height: 26px;
-      min-height: 26px;
-
-      &[data-type="created"],
-      &[data-type="updated"] {
-        padding: 4px 8px;
-      }
+      cursor: default;
     }
 
     .av__checkbox {
@@ -77,33 +70,18 @@
       }
     }
 
-    [placeholder]:empty:before {
+    [placeholder]:empty::after {
       color: var(--b3-empty-color);
       content: attr(placeholder);
     }
   }
 
-  .block__icons--addcolumn {
-    padding: 0 8px;
-
-    .b3-button[data-type="addColumn"] {
-      margin: 0 0 0 16px;
-      color: var(--b3-theme-on-surface);
-      background-color: rgba(0,0,0,0);
-
-      &:hover,
-      &:focus {
-        background-color: var(--b3-list-hover);
-        box-shadow: none;
-      }
-
-      svg {
-        padding: 4px;
-      }
-
-      span {
-        padding-right: 4px;
-      }
+  .b3-button[data-type="addColumn"] {
+    margin-left: 28px;
+    svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
     }
   }
 

@@ -56,7 +56,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "block":
-            html = `<div class="fn__flex-1">${value.block.content}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.block.content}</div>`;
             break;
         case "text":
             html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.text.content}</textarea>`;
@@ -188,14 +188,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         <span>${escapeHtml(item.key.name)}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
-data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"${["block", "created", "updated", "text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : ` placeholder="${window.siyuan.languages.empty}`}" 
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : ["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : " custom-attr__avvalue"}">${genAVValueHTML(item.values[0])}</div>
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}" 
+${["text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : `placeholder="${window.siyuan.languages.empty}"`}  
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}${["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(item.values[0])}</div>
 </div>`;
             });
-            innerHTML += `<div class="fn__hr></div>
-<div class="fn__flex block__icons--addcolumn"">
-    <button data-type="addColumn" class="b3-button"><svg><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.newCol}</span></button>
-</div><div class="fn__hr--b"></div>`;
+            innerHTML += `<div class="fn__hr"></div>
+<button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
+<div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 
             if (element.innerHTML) {

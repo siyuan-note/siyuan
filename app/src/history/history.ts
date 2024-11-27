@@ -445,6 +445,7 @@ export const openHistory = (app: App) => {
             icon: "iconHistory",
             title: window.siyuan.languages.dataHistory,
             bindEvent(element) {
+                element.firstElementChild.setAttribute("style", "background-color:var(--b3-theme-background);height:100%")
                 bindEvent(app, element.firstElementChild);
             }
         });

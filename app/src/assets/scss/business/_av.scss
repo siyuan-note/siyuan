@@ -125,26 +125,28 @@
     position: relative;
     font-size: 87.5%;
 
-    &.dragover__top::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      right: 0;
-      top: -2.5px;
-      height: 4px;
-      background-color: var(--b3-theme-primary-lighter);
-      z-index: 3;
+    &.dragover__top,
+    &.dragover__bottom {
+      box-shadow: none !important;
     }
 
+    &.dragover__top::after,
     &.dragover__bottom::after {
       content: '';
       position: absolute;
       left: 0;
       right: 0;
-      bottom: -2.5px;
       height: 4px;
       background-color: var(--b3-theme-primary-lighter);
       z-index: 3;
+    }
+
+    &.dragover__top::after {
+      top: -3px;
+    }
+
+    &.dragover__bottom::after {
+      bottom: -2px;
     }
 
     &:hover [data-type="block-more"] {

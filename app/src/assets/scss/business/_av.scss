@@ -142,11 +142,11 @@
     }
 
     &.dragover__top::after {
-      top: -3px;
+      top: -2.5px;
     }
 
     &.dragover__bottom::after {
-      bottom: -2px;
+      bottom: -2.5px;
     }
 
     &:hover [data-type="block-more"] {

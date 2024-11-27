@@ -69,15 +69,15 @@ export class Toolbar {
         /// #endif
         this.toolbarHeight = 29;
         protyle.app.plugins.forEach(item => {
-            const pluginToolbar = item.updateProtyleToolbar(options.toolbar)
+            const pluginToolbar = item.updateProtyleToolbar(options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
                 if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
-                    return
+                    return;
                 }
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
-            })
+            });
             options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         options.toolbar.forEach((menuItem: IMenuItem) => {
@@ -90,15 +90,15 @@ export class Toolbar {
         this.element.innerHTML = "";
         protyle.options.toolbar = toolbarKeyToMenu(Constants.PROTYLE_TOOLBAR);
         protyle.app.plugins.forEach(item => {
-            const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar)
+            const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar);
             pluginToolbar.forEach(toolbarItem => {
                 if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
-                    return
+                    return;
                 }
                 if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
                     toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
                 }
-            })
+            });
             protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         protyle.options.toolbar.forEach((menuItem: IMenuItem) => {

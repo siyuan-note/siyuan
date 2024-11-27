@@ -56,7 +56,7 @@ export const keymap = {
             });
             item.updateProtyleToolbar([]).forEach(toolbarItem => {
                 if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
-                    return
+                    return;
                 }
                 const dockKeymap = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name];
                 const keyValue = updateHotkeyTip(dockKeymap.custom);
@@ -71,7 +71,7 @@ export const keymap = {
     <span data-type="update" class="config-keymap__key">${keyValue}</span>
     <input data-key="plugin${Constants.ZWSP}${item.name}${Constants.ZWSP}${toolbarItem.name}" data-value="${dockKeymap.custom}" data-default="${dockKeymap.default}" class="b3-text-field fn__none" value="${keyValue}" spellcheck="false">
 </label>`;
-            })
+            });
             Object.keys(item.docks).forEach(key => {
                 const dockConfig = item.docks[key].config;
                 if (!dockConfig.hotkey) {

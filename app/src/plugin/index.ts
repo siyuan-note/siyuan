@@ -79,7 +79,7 @@ export class Plugin {
 
         this.updateProtyleToolbar([]).forEach(toolbarItem => {
             if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
-                return
+                return;
             }
             if (!window.siyuan.config.keymap.plugin) {
                 window.siyuan.config.keymap.plugin = {};
@@ -96,9 +96,9 @@ export class Plugin {
                 window.siyuan.config.keymap.plugin[options.name][toolbarItem.name] = {
                     default: toolbarItem.hotkey,
                     custom: toolbarItem.hotkey,
-                }
+                };
             }
-        })
+        });
     }
 
     public onload() {

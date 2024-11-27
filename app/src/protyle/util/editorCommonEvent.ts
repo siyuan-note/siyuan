@@ -1332,7 +1332,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 addDragover(targetElement);
                 return;
             }
-            if (targetElement.getAttribute("data-type") === "NodeListItem" || fileTreeIds.indexOf("-") > -1) {
+            // 忘记为什么要限定文档树的拖拽了，先放开 https://github.com/siyuan-note/siyuan/pull/13284#issuecomment-2503853135
+            if (targetElement.getAttribute("data-type") === "NodeListItem") {
                 if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                     targetElement.classList.add("dragover__bottom");
                     addDragover(targetElement);

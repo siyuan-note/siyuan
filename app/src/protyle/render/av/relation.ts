@@ -216,7 +216,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     if (type === "empty") {
         if (id) {
             return `<button class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label">${window.siyuan.languages.newRowInRelation.replace('${x}', text).replace('${y}', id)}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.newRowInRelation.replace("${x}", text).replace("${y}", id)}</span>
 </button>`;
         }
         return `<button class="b3-menu__item">
@@ -407,7 +407,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             }
         } else {
             const blockID = target.querySelector(".popover__block").getAttribute("data-id");
-            const content = target.querySelector("b").textContent
+            const content = target.querySelector("b").textContent;
             const rowId = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "insertAttrViewBlock",

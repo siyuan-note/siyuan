@@ -22,7 +22,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
     }
     const opElement = element.querySelector('.b3-select[data-type="opselect"]') as HTMLSelectElement;
     const listElement = element.querySelector(".b3-list--background");
-    element.querySelector('.protyle-title__input').classList.add("fn__none");
+    element.querySelector(".protyle-title__input").classList.add("fn__none");
     element.querySelector('.history__text[data-type="docPanel"]').classList.add("fn__none");
     element.querySelector('.history__text[data-type="mdPanel"]').classList.add("fn__none");
     fetchPost("/api/history/searchHistory", {
@@ -36,7 +36,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         } else {
             nextElement.setAttribute("disabled", "disabled");
         }
-        const pageNumElement = element.querySelector('[data-type="jumpRepoPage"]')
+        const pageNumElement = element.querySelector('[data-type="jumpRepoPage"]');
         if (response.data.pageCount > 1) {
             pageNumElement.removeAttribute("disabled");
         } else {
@@ -134,8 +134,8 @@ export const openDocHistory = (options: {
         typewriterMode: false,
     });
     disabledProtyle(historyEditor.protyle);
-    const pageNumElement = dialog.element.querySelector('[data-type="jumpRepoPage"]')
-    const titleElement = dialog.element.querySelector(".protyle-title__input")
+    const pageNumElement = dialog.element.querySelector('[data-type="jumpRepoPage"]');
+    const titleElement = dialog.element.querySelector(".protyle-title__input");
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(dialog.element)) {
@@ -176,7 +176,7 @@ export const openDocHistory = (options: {
                             });
                         }
                         titleElement.textContent = item.title;
-                        titleElement.classList.remove("fn__none")
+                        titleElement.classList.remove("fn__none");
                         isLoading = false;
                     });
                     target.parentElement.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");

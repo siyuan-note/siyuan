@@ -78,6 +78,7 @@
 
   .b3-button[data-type="addColumn"] {
     margin-left: 28px;
+
     svg {
       width: 16px;
       height: 16px;
@@ -105,6 +106,6 @@
   }
 
   .av__row.dragover__top::after {
-    top: -2px
+    top: -1.5px;
   }
 }

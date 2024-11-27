@@ -298,6 +298,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (!isBlock &&
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
+        // 代码块需保持至少一个 \n https://github.com/siyuan-note/siyuan/pull/13271#issuecomment-2502672155
+        if (isNodeCodeBlock && getContenteditableElement(blockElement).textContent === "") {
+            html += "\n";
+        }
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
         range.collapse(false);
         range.insertNode(document.createElement("wbr"));

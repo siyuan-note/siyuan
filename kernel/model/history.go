@@ -405,7 +405,7 @@ type HistoryItem struct {
 const fileHistoryPageSize = 32
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
@@ -440,7 +440,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 }
 
 func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}

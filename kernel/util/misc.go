@@ -26,7 +26,6 @@ import (
 	"time"
 	"unicode"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/html"
 )
 
@@ -133,7 +132,7 @@ func RemoveRedundantSpace(str string) string {
 }
 
 func Convert2Float(s string) (float64, bool) {
-	s = gulu.Str.RemoveInvisible(s)
+	s = RemoveInvalid(s)
 	s = strings.ReplaceAll(s, " ", "")
 	s = strings.ReplaceAll(s, ",", "")
 	buf := bytes.Buffer{}

@@ -470,7 +470,7 @@ func CreateCloudSyncDir(name string) (err error) {
 	}
 
 	name = strings.TrimSpace(name)
-	name = gulu.Str.RemoveInvisible(name)
+	name = util.RemoveInvalid(name)
 	if !cloud.IsValidCloudDirName(name) {
 		return errors.New(Conf.Language(37))
 	}

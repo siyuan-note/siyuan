@@ -398,7 +398,7 @@ type BoxInfo struct {
 func (box *Box) GetInfo() (ret *BoxInfo) {
 	ret = &BoxInfo{
 		ID:   box.ID,
-		Name: box.Name,
+		Name: util.EscapeHTML(box.Name),
 	}
 
 	fileInfos := box.ListFiles("/")

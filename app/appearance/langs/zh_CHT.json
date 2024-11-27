@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "在 ${x} 中新建行 <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "在 ${x} 中新建條目 <b class='ft__on-surface'>${y}</b>",
   "keyContent": "主鍵內容",
   "addDesc": "添加描述",
   "dataRepoAutoPurgeIndexRetentionDays": "數據快照保留天數",

@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "Créer une nouvelle ligne dans ${x} <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "Créer une nouvelle entrée dans ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Contenu de la clé",
   "addDesc": "Ajouter une description",
   "dataRepoAutoPurgeIndexRetentionDays": "Jours de rétention des instantanés de données",

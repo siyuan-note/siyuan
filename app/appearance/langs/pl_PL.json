@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "Utwórz nowy wiersz w ${x} <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "Utwórz nowy wpis w ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Zawartość klucza",
   "addDesc": "Dodaj opis",
   "dataRepoAutoPurgeIndexRetentionDays": "Dni przechowywania migawek danych",

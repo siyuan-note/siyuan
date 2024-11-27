@@ -2009,6 +2009,15 @@ export class WYSIWYG {
         let isComposition = false; // for iPhone
         this.element.addEventListener("compositionstart", (event) => {
             isComposition = true;
+            // 微软双拼由于 focusByRange 导致无法输入文字，因此不再 keydown 中记录了，但 keyup 会记录拼音字符，因此使用 isComposition 阻止 keyup 记录。
+            // 但搜狗输入法选中后继续输入不走 keydown，isComposition 阻止了 keyup 记录，因此需在此记录。
+            const range = getEditorRange(protyle.wysiwyg.element);
+            const nodeElement = hasClosestBlock(range.startContainer);
+            if (!isMac() && nodeElement) {
+                range.insertNode(document.createElement("wbr"));
+                protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
+                nodeElement.querySelector("wbr").remove();
+            }
             event.stopPropagation();
         });
 
@@ -2086,8 +2095,10 @@ export class WYSIWYG {
                 event.key !== "Meta" && event.key !== "Alt" && event.key !== "Control" && event.key !== "CapsLock" &&
                 !event.ctrlKey && !event.shiftKey && !event.metaKey && !event.altKey &&
                 !/^F\d{1,2}$/.test(event.key)) {
-                // 搜狗输入法不走 keydown，需重新记录历史状态
+                // 搜狗输入法不走 keydown，没有选中字符后不走 compositionstart，需重新记录历史状态
                 if (!isMac() && nodeElement &&
+                    // 微软双拼 keyup 会记录拼音字符，因此在 compositionstart 记录
+                    !isComposition &&
                     (typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined" || range.toString() !== "" || !this.preventKeyup)) {
                     range.insertNode(document.createElement("wbr"));
                     protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;

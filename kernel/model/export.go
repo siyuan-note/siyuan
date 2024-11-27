@@ -1966,8 +1966,17 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
 				if ast.NodeDocument != n.Type {
 					firstLeaf := treenode.FirstLeafBlock(n)
-					if nil != firstLeaf && nil != firstLeaf.FirstChild {
-						firstLeaf.FirstChild.InsertBefore(anchorSpan)
+					if nil != firstLeaf {
+						if ast.NodeTable == firstLeaf.Type {
+							firstLeaf.InsertBefore(anchorSpan)
+							firstLeaf.InsertBefore(&ast.Node{Type: ast.NodeHardBreak})
+						} else {
+							if nil != firstLeaf.FirstChild {
+								firstLeaf.FirstChild.InsertBefore(anchorSpan)
+							} else {
+								firstLeaf.AppendChild(anchorSpan)
+							}
+						}
 					} else {
 						n.AppendChild(anchorSpan)
 					}

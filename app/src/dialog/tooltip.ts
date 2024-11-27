@@ -14,13 +14,12 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         document.body.insertAdjacentHTML("beforeend", `<div class="tooltip" id="tooltip">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
+        messageElement.className = "tooltip";
         messageElement.innerHTML = message;
     }
 
     if (tooltipClass) {
         messageElement.classList.add("tooltip--" + tooltipClass);
-    } else {
-        messageElement.className = "tooltip";
     }
 
     let left = targetRect.left;

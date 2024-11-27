@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "Создать новую строку в ${x} <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "Создать новую запись в ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Содержимое ключа",
   "addDesc": "Добавить описание",
   "dataRepoAutoPurgeIndexRetentionDays": "Срок хранения снимков данных",

@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "צור שורה חדשה ב-${x} <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "צור ערך חדש ב-${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "תוכן המפתח",
   "addDesc": "הוסף תיאור",
   "dataRepoAutoPurgeIndexRetentionDays": "ימי שמירת תמונות נתונים",

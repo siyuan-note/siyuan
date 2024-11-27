@@ -1,5 +1,5 @@
 {
-  "newRowInRelation": "Neue Zeile in ${x} erstellen <b class='ft__on-surface'>${y}</b>",
+  "newRowInRelation": "Erstellen Sie einen neuen Eintrag in ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Schlüsselinhalt",
   "addDesc": "Beschreibung hinzufügen",
   "dataRepoAutoPurgeIndexRetentionDays": "Daten-Snapshot-Aufbewahrungstage",

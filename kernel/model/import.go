@@ -67,6 +67,7 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 }
 
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
+	htmlStr = util.RemoveInvalid(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {

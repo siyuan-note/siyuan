@@ -35,7 +35,7 @@ import (
 )
 
 func CreateBox(name string) (id string, err error) {
-	name = gulu.Str.RemoveInvisible(name)
+	name = util.RemoveInvalid(name)
 	if 512 < utf8.RuneCountInString(name) {
 		// 限制笔记本名和文档名最大长度为 `512` https://github.com/siyuan-note/siyuan/issues/6299
 		err = errors.New(Conf.Language(106))

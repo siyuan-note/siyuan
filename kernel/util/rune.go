@@ -56,6 +56,12 @@ var emojiRegex = regexp.MustCompile(`/([0-9#][\x{20E3}])|` +
 
 func RemoveEmojiInvisible(text string) (ret string) {
 	ret = emojiRegex.ReplaceAllString(text, "")
-	ret = gulu.Str.RemoveInvisible(ret)
+	ret = RemoveInvalid(ret)
+	return
+}
+
+func RemoveInvalid(text string) (ret string) {
+	ret = gulu.Str.RemoveInvisible(text)
+	ret = gulu.Str.RemovePUA(text)
 	return
 }

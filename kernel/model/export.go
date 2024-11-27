@@ -609,7 +609,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	}
 
 	// Pandoc template for exporting docx https://github.com/siyuan-note/siyuan/issues/8740
-	docxTemplate := gulu.Str.RemoveInvisible(Conf.Export.DocxTemplate)
+	docxTemplate := util.RemoveInvalid(Conf.Export.DocxTemplate)
 	docxTemplate = strings.TrimSpace(docxTemplate)
 	if "" != docxTemplate {
 		if !gulu.File.IsExist(docxTemplate) {

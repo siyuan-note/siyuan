@@ -1022,7 +1022,7 @@ func TagSnapshot(id, name string) (err error) {
 	}
 
 	name = strings.TrimSpace(name)
-	name = gulu.Str.RemoveInvisible(name)
+	name = util.RemoveInvalid(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
 		return

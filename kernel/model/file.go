@@ -1936,7 +1936,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 func removeInvisibleCharsInTitle(title string) string {
 	// 不要踢掉 零宽连字符，否则有的 Emoji 会变形 https://github.com/siyuan-note/siyuan/issues/11480
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
-	title = gulu.Str.RemoveInvisible(title)
+	title = util.RemoveInvalid(title)
 	title = strings.ReplaceAll(title, "__@ZWJ@__", string(gulu.ZWJ))
 	return title
 }

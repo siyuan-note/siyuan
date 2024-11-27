@@ -20,8 +20,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     if (tooltipClass) {
         messageElement.classList.add("tooltip--" + tooltipClass);
-    } else {
-        messageElement.className = "tooltip";
     }
 
     let left = targetRect.left;

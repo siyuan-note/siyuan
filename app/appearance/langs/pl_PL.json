@@ -1,4 +1,5 @@
 {
+  "empty": "Pusty",
   "newRowInRelation": "Utwórz nowy wpis w ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Zawartość klucza",
   "addDesc": "Dodaj opis",

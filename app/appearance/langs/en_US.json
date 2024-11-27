@@ -1,4 +1,5 @@
 {
+  "empty": "Empty",
   "newRowInRelation": "Create a new entry in ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Key content",
   "addDesc": "Add description",

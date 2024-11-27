@@ -1,4 +1,5 @@
 {
+  "empty": "空白",
   "newRowInRelation": "${x} に新しい項目を作成 <b class='ft__on-surface'>${y}</b>",
   "keyContent": "キーコンテンツ",
   "addDesc": "説明を追加",

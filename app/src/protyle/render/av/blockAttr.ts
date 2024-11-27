@@ -59,10 +59,10 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<div class="fn__flex-1">${value.block.content}</div>`;
             break;
         case "text":
-            html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.text.content}</textarea>`;
             break;
         case "number":
-            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span><span class="fn__flex-center ft__on-surface b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.format}">${value.number.formattedContent}</span><span class="fn__space"></span>`;
             break;
         case "mSelect":
@@ -84,7 +84,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}'>`;
+            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}' placeholder="${window.siyuan.languages.empty}">`;
             if (value[value.type] && value[value.type].isNotEmpty) {
                 html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }
@@ -100,12 +100,12 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             }
             break;
         case "url":
-            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="${value.url.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
             break;
         case "phone":
-            html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
@@ -113,10 +113,10 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
-            html = `<div class="fn__flex-1">${value.template.content}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.template.content}</div>`;
             break;
         case "email":
-            html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
@@ -188,16 +188,13 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         <span>${escapeHtml(item.key.name)}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
-data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
-        ${genAVValueHTML(item.values[0])}
-    </div>
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"${["block", "created", "updated", "text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : ` placeholder="${window.siyuan.languages.empty}`}" 
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : ["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : " custom-attr__avvalue"}">${genAVValueHTML(item.values[0])}</div>
 </div>`;
             });
-            innerHTML += `<div class="fn__hr"></div>
-<div class="fn__flex">
-    <div class="fn__space"></div><div class="fn__space"></div>
-    <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
+            innerHTML += `<div class="fn__hr></div>
+<div class="fn__flex block__icons--addcolumn"">
+    <button data-type="addColumn" class="b3-button"><svg><use xlink:href="#iconAdd"></use></svg><span>${window.siyuan.languages.newCol}</span></button>
 </div><div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 

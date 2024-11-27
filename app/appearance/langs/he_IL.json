@@ -1,4 +1,5 @@
 {
+  "empty": "ריק",
   "newRowInRelation": "צור ערך חדש ב-${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "תוכן המפתח",
   "addDesc": "הוסף תיאור",

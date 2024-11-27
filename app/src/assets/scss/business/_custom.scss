@@ -13,6 +13,17 @@
       background-color: var(--b3-theme-background);
     }
 
+    &--readonly {
+      padding: 7px 8px;
+      line-height: 26px;
+      min-height: 26px;
+
+      &[data-type="created"],
+      &[data-type="updated"] {
+        padding: 4px 8px;
+      }
+    }
+
     .av__checkbox {
       width: 16px;
       height: 26px;
@@ -63,6 +74,35 @@
 
       &:hover {
         background-color: transparent;
+      }
+    }
+
+    [placeholder]:empty:before {
+      color: var(--b3-empty-color);
+      content: attr(placeholder);
+    }
+  }
+
+  .block__icons--addcolumn {
+    padding: 0 8px;
+
+    .b3-button[data-type="addColumn"] {
+      margin: 0 0 0 16px;
+      color: var(--b3-theme-on-surface);
+      background-color: rgba(0,0,0,0);
+
+      &:hover,
+      &:focus {
+        background-color: var(--b3-list-hover);
+        box-shadow: none;
+      }
+
+      svg {
+        padding: 4px;
+      }
+
+      span {
+        padding-right: 4px;
       }
     }
   }

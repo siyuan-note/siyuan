@@ -1,4 +1,5 @@
 {
+  "empty": "Пусто",
   "newRowInRelation": "Создать новую запись в ${x} <b class='ft__on-surface'>${y}</b>",
   "keyContent": "Содержимое ключа",
   "addDesc": "Добавить описание",

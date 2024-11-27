@@ -125,14 +125,26 @@
     position: relative;
     font-size: 87.5%;
 
-    &.dragover__bottom {
-      border-bottom-color: var(--b3-theme-primary-lighter);
+    &.dragover__top::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: -2.5px;
+      height: 4px;
+      background-color: var(--b3-theme-primary-lighter);
       z-index: 3;
     }
 
-    &.dragover__top {
+    &.dragover__bottom::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      right: 0;
+      bottom: -2.5px;
+      height: 4px;
+      background-color: var(--b3-theme-primary-lighter);
       z-index: 3;
-      box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
     }
 
     &:hover [data-type="block-more"] {

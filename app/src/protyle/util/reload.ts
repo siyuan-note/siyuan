@@ -49,6 +49,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);
+                highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
             });
         }
     } else {

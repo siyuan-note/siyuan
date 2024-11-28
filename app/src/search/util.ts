@@ -1504,6 +1504,9 @@ ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${it
 };
 
 export const highlightMark = (protyle: IProtyle, matchElements: NodeListOf<Element>) => {
+    if (matchElements.length === 0) {
+        return;
+    }
     protyle.highlight.markHL.clear();
     protyle.highlight.markHL.clear();
     protyle.highlight.ranges = [];

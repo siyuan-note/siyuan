@@ -41,12 +41,14 @@ import (
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
-	"github.com/88250/pdfcpu/pkg/api"
-	"github.com/88250/pdfcpu/pkg/font"
-	"github.com/88250/pdfcpu/pkg/pdfcpu"
 	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/emirpasic/gods/stacks/linkedliststack"
 	"github.com/imroc/req/v3"
+	"github.com/pdfcpu/pdfcpu/pkg/api"
+	"github.com/pdfcpu/pdfcpu/pkg/font"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/model"
+	"github.com/pdfcpu/pdfcpu/pkg/pdfcpu/types"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -1003,7 +1005,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 		return ast.WalkContinue
 	})
 
-	pdfcpu.ConfigPath = "disable"
+	api.DisableConfigDir()
 	font.UserFontDir = filepath.Join(util.HomeDir, ".config", "siyuan", "fonts")
 	if mkdirErr := os.MkdirAll(font.UserFontDir, 0755); nil != mkdirErr {
 		logging.LogErrorf("mkdir [%s] failed: %s", font.UserFontDir, mkdirErr)
@@ -1019,7 +1021,8 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	processPDFLinkEmbedAssets(pdfCtx, assetDests, removeAssets)
 	processPDFWatermark(pdfCtx, watermark)
 
-	pdfcpu.VersionStr = "SiYuan v" + util.Ver
+	pdfcpuVer := model.VersionStr
+	model.VersionStr = "SiYuan v" + util.Ver + " (" + pdfcpuVer + ")"
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
 		logging.LogErrorf("write pdf context failed: %s", writeErr)
 		return
@@ -1027,7 +1030,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	return
 }
 
-func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
+func processPDFWatermark(pdfCtx *model.Context, watermark bool) {
 	// Support adding the watermark on export PDF https://github.com/siyuan-note/siyuan/issues/9961
 	// https://pdfcpu.io/core/watermark
 
@@ -1085,15 +1088,15 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 
 	logging.LogInfof("add PDF watermark [mode=%s, str=%s, desc=%s]", mode, str, desc)
 
-	var wm *pdfcpu.Watermark
+	var wm *model.Watermark
 	var err error
 	switch mode {
 	case "text":
-		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParseTextWatermarkDetails(str, desc, false, types.POINTS)
 	case "image":
-		wm, err = pdfcpu.ParseImageWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParseImageWatermarkDetails(str, desc, false, types.POINTS)
 	case "pdf":
-		wm, err = pdfcpu.ParsePDFWatermarkDetails(str, desc, false, pdfcpu.POINTS)
+		wm, err = pdfcpu.ParsePDFWatermarkDetails(str, desc, false, types.POINTS)
 	}
 
 	if err != nil {
@@ -1103,15 +1106,15 @@ func processPDFWatermark(pdfCtx *pdfcpu.Context, watermark bool) {
 	}
 
 	wm.OnTop = true // Export PDF and add watermarks no longer covered by images https://github.com/siyuan-note/siyuan/issues/10818
-	err = pdfCtx.AddWatermarks(nil, wm)
+	err = pdfcpu.AddWatermarks(pdfCtx, nil, wm)
 	if err != nil {
 		logging.LogErrorf("add watermark failed: %s", err)
 		return
 	}
 }
 
-func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
-	links, err := api.ListToCLinks(pdfCtx)
+func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
+	links, err := PdfListToCLinks(pdfCtx)
 	if err != nil {
 		return
 	}
@@ -1120,7 +1123,7 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 		return links[i].Page < links[j].Page
 	})
 
-	bms := map[string]*pdfcpu.Bookmark{}
+	bms := map[string]pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
 		b := sql.GetBlock(linkID)
@@ -1130,7 +1133,7 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 		}
 		title := b.Content
 		title, _ = url.QueryUnescape(title)
-		bm := &pdfcpu.Bookmark{
+		bm := pdfcpu.Bookmark{
 			Title:    title,
 			PageFrom: link.Page,
 			AbsPos:   link.Rect.UR.Y,
@@ -1142,15 +1145,15 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 		return
 	}
 
-	var topBms []*pdfcpu.Bookmark
+	var topBms []pdfcpu.Bookmark
 	stack := linkedliststack.New()
 	for _, h := range headings {
 	L:
 		for ; ; stack.Pop() {
 			cur, ok := stack.Peek()
 			if !ok {
-				bm := bms[h.ID]
-				if nil == bm {
+				bm, ok := bms[h.ID]
+				if !ok {
 					break L
 				}
 				bm.Level = h.HeadingLevel
@@ -1159,19 +1162,19 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 				break L
 			}
 
-			tip := cur.(*pdfcpu.Bookmark)
+			tip := cur.(pdfcpu.Bookmark)
 			if tip.Level < h.HeadingLevel {
 				bm := bms[h.ID]
 				bm.Level = h.HeadingLevel
-				bm.Parent = tip
-				tip.Children = append(tip.Children, bm)
+				bm.Parent = &tip
+				tip.Kids = append(tip.Kids, bm)
 				stack.Push(bm)
 				break L
 			}
 		}
 	}
 
-	err = pdfCtx.AddBookmarks(topBms)
+	err = pdfcpu.AddBookmarks(pdfCtx, topBms, true)
 	if err != nil {
 		logging.LogErrorf("add bookmark failed: %s", err)
 		return
@@ -1180,7 +1183,7 @@ func processPDFBookmarks(pdfCtx *pdfcpu.Context, headings []*ast.Node) {
 
 // processPDFLinkEmbedAssets 处理资源文件超链接，根据 removeAssets 参数决定是否将资源文件嵌入到 PDF 中。
 // 导出 PDF 时支持将资源文件作为附件嵌入 https://github.com/siyuan-note/siyuan/issues/7414
-func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, removeAssets bool) {
+func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, removeAssets bool) {
 	var assetAbsPaths []string
 	for _, dest := range assetDests {
 		if absPath, _ := GetAssetAbsPath(dest); "" != absPath {
@@ -1192,28 +1195,28 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		return
 	}
 
-	assetLinks, otherLinks, listErr := api.ListLinks(pdfCtx)
+	assetLinks, otherLinks, listErr := PdfListLinks(pdfCtx)
 	if nil != listErr {
 		logging.LogErrorf("list asset links failed: %s", listErr)
 		return
 	}
 
-	if _, removeErr := pdfCtx.RemoveAnnotations(nil, nil, nil, false); nil != removeErr {
+	if _, removeErr := pdfcpu.RemoveAnnotations(pdfCtx, nil, nil, nil, false); nil != removeErr {
 		logging.LogWarnf("remove annotations failed: %s", removeErr)
 	}
 
-	linkMap := map[int][]pdfcpu.AnnotationRenderer{}
+	linkMap := map[int][]model.AnnotationRenderer{}
 	for _, link := range otherLinks {
 		link.URI, _ = url.PathUnescape(link.URI)
 		if 1 > len(linkMap[link.Page]) {
-			linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+			linkMap[link.Page] = []model.AnnotationRenderer{link}
 		} else {
 			linkMap[link.Page] = append(linkMap[link.Page], link)
 		}
 	}
 
-	attachmentMap := map[int][]*pdfcpu.IndirectRef{}
-	now := pdfcpu.StringLiteral(pdfcpu.DateString(time.Now()))
+	attachmentMap := map[int][]*types.IndirectRef{}
+	now := types.StringLiteral(types.DateString(time.Now()))
 	for _, link := range assetLinks {
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/export/temp/", "")
 		link.URI = strings.ReplaceAll(link.URI, "http://"+util.LocalHost+":"+util.ServerPort+"/", "") // Exporting PDF embedded asset files as attachments fails https://github.com/siyuan-note/siyuan/issues/7414#issuecomment-1704573557
@@ -1225,7 +1228,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		if !removeAssets {
 			// 不移除资源文件夹的话将超链接指向资源文件夹
 			if 1 > len(linkMap[link.Page]) {
-				linkMap[link.Page] = []pdfcpu.AnnotationRenderer{link}
+				linkMap[link.Page] = []model.AnnotationRenderer{link}
 			} else {
 				linkMap[link.Page] = append(linkMap[link.Page], link)
 			}
@@ -1247,7 +1250,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		}
 
 		fn := filepath.Base(absPath)
-		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, pdfcpu.EncodeUTF16String(fn), "attached by SiYuan", *ir)
+		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, types.EncodeUTF16String(fn), "attached by SiYuan", *ir)
 		if nil != newErr {
 			logging.LogWarnf("new file spec dict failed: %s", newErr)
 			continue
@@ -1264,22 +1267,22 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		ux := lx + link.Rect.Height()/2
 		uy := ly + link.Rect.Height()/2
 
-		d := pdfcpu.Dict(
-			map[string]pdfcpu.Object{
-				"Type":         pdfcpu.Name("Annot"),
-				"Subtype":      pdfcpu.Name("FileAttachment"),
-				"Contents":     pdfcpu.StringLiteral(""),
-				"Rect":         pdfcpu.Rect(lx, ly, ux, uy).Array(),
+		d := types.Dict(
+			map[string]types.Object{
+				"Type":         types.Name("Annot"),
+				"Subtype":      types.Name("FileAttachment"),
+				"Contents":     types.StringLiteral(""),
+				"Rect":         types.RectForWidthAndHeight(lx, ly, ux, uy).Array(),
 				"P":            link.P,
 				"M":            now,
-				"F":            pdfcpu.Integer(0),
-				"Border":       pdfcpu.NewIntegerArray(0, 0, 1),
-				"C":            pdfcpu.NewNumberArray(0.5, 0.0, 0.5),
-				"CA":           pdfcpu.Float(0.95),
+				"F":            types.Integer(0),
+				"Border":       types.NewIntegerArray(0, 0, 1),
+				"C":            types.NewNumberArray(0.5, 0.0, 0.5),
+				"CA":           types.Float(0.95),
 				"CreationDate": now,
-				"Name":         pdfcpu.Name("FileAttachment"),
+				"Name":         types.Name("FileAttachment"),
 				"FS":           *ir,
-				"NM":           pdfcpu.StringLiteral(""),
+				"NM":           types.StringLiteral(""),
 			},
 		)
 
@@ -1302,14 +1305,14 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 		}
 
 		if 1 > len(attachmentMap[link.Page]) {
-			attachmentMap[link.Page] = []*pdfcpu.IndirectRef{ann}
+			attachmentMap[link.Page] = []*types.IndirectRef{ann}
 		} else {
 			attachmentMap[link.Page] = append(attachmentMap[link.Page], ann)
 		}
 	}
 
 	if 0 < len(linkMap) {
-		if _, addErr := pdfCtx.AddAnnotationsMap(linkMap, false); nil != addErr {
+		if _, addErr := pdfcpu.AddAnnotationsMap(pdfCtx, linkMap, false); nil != addErr {
 			logging.LogErrorf("add annotations map failed: %s", addErr)
 		}
 	}
@@ -1328,7 +1331,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 			continue
 		}
 
-		array := pdfcpu.Array{}
+		array := types.Array{}
 		for _, ann := range anns {
 			array = append(array, *ann)
 		}
@@ -1340,9 +1343,9 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 			continue
 		}
 
-		ir, ok := obj.(pdfcpu.IndirectRef)
+		ir, ok := obj.(types.IndirectRef)
 		if !ok {
-			pageDict.Update("Annots", append(obj.(pdfcpu.Array), array...))
+			pageDict.Update("Annots", append(obj.(types.Array), array...))
 			pdfCtx.EnsureVersionForWriting()
 			continue
 		}
@@ -1354,7 +1357,7 @@ func processPDFLinkEmbedAssets(pdfCtx *pdfcpu.Context, assetDests []string, remo
 			continue
 		}
 
-		annots, _ := o.(pdfcpu.Array)
+		annots, _ := o.(types.Array)
 		entry, ok := pdfCtx.FindTableEntryForIndRef(&ir)
 		if !ok {
 			continue

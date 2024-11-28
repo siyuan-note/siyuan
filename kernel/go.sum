@@ -16,8 +16,8 @@ github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d h1:dexFyk3UkR4c2xpyrC
 github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d/go.mod h1:MUfzyfmbPrRDZLqxc7aPrVYveatTHRfoUa5TynPS0i8=
 github.com/88250/lute v1.7.7-0.20241127031345-f772b0ee2be8 h1:1gWOQT9m2o3E6X//wvI+bexbXgdHheN6YUZcABHMm4k=
 github.com/88250/lute v1.7.7-0.20241127031345-f772b0ee2be8/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
-github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c h1:Dl/8S9iLyPMTElnWIBxmjaLiWrkI5P4a21ivwAn5pU0=
-github.com/88250/pdfcpu v0.3.14-0.20230401044135-c7369a99720c/go.mod h1:S5YT38L/GCjVjmB4PB84PymA1qfopjEhfhTNQilLpv4=
+github.com/88250/pdfcpu v0.3.14-0.20241128120530-05a73e90be3e h1:juhQRP4rYNB1mVySivwuUaa1sIF10LQkbOmNPnCNjwA=
+github.com/88250/pdfcpu v0.3.14-0.20241128120530-05a73e90be3e/go.mod h1:fVfOloBzs2+W2VJCCbq60XIxc3yJHAZ0Gahv1oO0gyI=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1/go.mod h1:U3pckKQIgxxkmZjV5yXQjHdGxQK0o/vEZeZ6cQsxfHw=
 github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4 h1:r10k4+Lu1mDpiCKa1liAdGJUhB4BJHHJnMvtoli6Hts=
@@ -428,8 +428,8 @@ golang.org/x/crypto v0.29.0/go.mod h1:+F4F4N5hv6v38hfeYwTdx20oUvLLc+QfrE9Ax9HtgR
 golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f h1:XdNn9LlyWAhLVp6P/i8QYBW+hlyhrhei9uErw2B5GJo=
 golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f/go.mod h1:D5SMRVC3C2/4+F/DB1wZsLRnSNimn2Sp/NPsCrsv8ak=
 golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d/go.mod h1:023OzeP/+EPmXeapQh35lcL3II3LrY8Ic+EFFKVhULM=
-golang.org/x/image v0.20.0 h1:7cVCUjQwfL18gyBJOmYvptfSHS8Fb3YUDtfLIZ7Nbpw=
-golang.org/x/image v0.20.0/go.mod h1:0a88To4CYVBAHp5FXJm8o7QbUl37Vd85ply1vyD8auM=
+golang.org/x/image v0.21.0 h1:c5qV36ajHpdj4Qi0GnE0jUc/yuo33OLFaa0d+crTD5s=
+golang.org/x/image v0.21.0/go.mod h1:vUbsLavqK/W303ZroQQVKQ+Af3Yl6Uz1Ppu5J/cLz78=
 golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b h1:WX7nnnLfCEXg+FmdYZPai2XuP3VqCP1HZVMST0n9DF0=
 golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b/go.mod h1:EiXZlVfUTaAyySFVJb9rsODuiO+WXu8HrUuySb7nYFw=
 golang.org/x/mod v0.6.0-dev.0.20220419223038-86c51ed26bb4/go.mod h1:jJ57K6gSWd91VN4djpZkiMVwK6gcyfeH4XE8wZrZaV4=

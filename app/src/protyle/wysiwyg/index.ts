@@ -671,7 +671,6 @@ export class WYSIWYG {
                 const dragHeight = dragElement.clientHeight;
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
-                        dragElement.parentElement.parentElement.style.width = "";
                         dragElement.style.height = "";
                     }
                     if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
@@ -772,11 +771,11 @@ export class WYSIWYG {
             }
 
             // 多选节点
-            let x = event.clientX;
+            let clentX = event.clientX;
             if (event.clientX > mostRight) {
-                x = mostRight;
+                clentX = mostRight;
             } else if (event.clientX < mostLeft) {
-                x = mostLeft;
+                clentX = mostLeft;
             }
             const mostTop = rect.top + (protyle.options.render.breadcrumb ? protyle.breadcrumb.element.parentElement.clientHeight : 0);
 
@@ -880,7 +879,7 @@ export class WYSIWYG {
                 let newLeft = 0;
                 let newWidth = 0;
                 let newHeight = 0;
-                if (moveEvent.clientX < x) {
+                if (moveEvent.clientX < clentX) {
                     if (moveEvent.clientX < mostLeft) {
                         // 向左越界
                         newLeft = mostLeft;
@@ -888,16 +887,16 @@ export class WYSIWYG {
                         // 向左
                         newLeft = moveEvent.clientX;
                     }
-                    newWidth = x - newLeft;
+                    newWidth = clentX - newLeft;
                 } else {
                     if (moveEvent.clientX > mostRight) {
                         // 向右越界
-                        newLeft = x;
+                        newLeft = clentX;
                         newWidth = mostRight - newLeft;
                     } else {
                         // 向右
-                        newLeft = x;
-                        newWidth = moveEvent.clientX - x;
+                        newLeft = clentX;
+                        newWidth = moveEvent.clientX - clentX;
                     }
                 }
 

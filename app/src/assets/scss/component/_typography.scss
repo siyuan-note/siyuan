@@ -441,14 +441,18 @@
     }
 
     .protyle-action__title {
-      width: 100%;
-      display: block;
+      display: flex;
       font-size: 85%;
       color: var(--b3-theme-on-surface);
       word-break: break-word;
       white-space: break-spaces;
       line-height: normal;
       padding: 4px 0;
+
+      & > span {
+        flex-grow: 1;
+        width: 0;
+      }
     }
   }
 

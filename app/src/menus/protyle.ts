@@ -991,7 +991,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const imgElement = assetElement.querySelector("img");
-    const titleElement = assetElement.querySelector(".protyle-action__title") as HTMLElement;
+    const titleElement = assetElement.querySelector(".protyle-action__title span") as HTMLElement;
     const html = nodeElement.outerHTML;
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({

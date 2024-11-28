@@ -64,7 +64,7 @@ export const saveExport = (option: IExportOptions) => {
             wordDialog.destroy();
         });
     } else {
-        getExportPath(option);
+        getExportPath(option, false, true);
     }
     /// #endif
 };

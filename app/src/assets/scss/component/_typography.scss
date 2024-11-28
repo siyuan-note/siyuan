@@ -438,6 +438,10 @@
       position: relative;
       display: inline-block;
       min-width: 22px;
+
+      &[style^=width] img {
+        width: 100%;
+      }
     }
 
     .protyle-action__title {

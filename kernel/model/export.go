@@ -2038,8 +2038,20 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		treeCache := map[string]*parse.Tree{}
 		treeCache[id] = ret
 		depth := 0
-		collectFootnotesDefs(ret.ID, &refFootnotes, &treeCache, &depth)
+		collectFootnotesDefs(ret, ret.ID, &refFootnotes, &treeCache, &depth)
 	}
+
+	currentTreeNodeIDs := map[string]bool{}
+	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if "" != n.ID {
+			currentTreeNodeIDs[n.ID] = true
+		}
+		return ast.WalkContinue
+	})
 
 	var unlinks []*ast.Node
 	ast.Walk(ret.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -2054,8 +2066,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				return ast.WalkContinue
 			}
 		case ast.NodeHeading:
-			n.HeadingNormalizedID = n.IALAttr("id")
-			n.ID = n.HeadingNormalizedID
+			n.SetIALAttr("id", n.ID)
 		case ast.NodeMathBlockContent:
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
@@ -2086,12 +2097,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 
 		// 处理引用节点
-
 		defID, linkText := getExportBlockRefLinkText(n, blockRefTextLeft, blockRefTextRight)
-		defTree, _ := LoadTreeByBlockID(defID)
-		if nil == defTree {
-			return ast.WalkContinue
-		}
 
 		switch blockRefMode {
 		case 2: // 锚文本块链
@@ -2110,7 +2116,19 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 4: // 脚注
+			if currentTreeNodeIDs[defID] {
+				// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
+				n.TextMarkType = "a"
+				n.TextMarkTextContent = linkText
+				n.TextMarkAHref = "#" + defID
+				return ast.WalkContinue
+			}
+
 			refFoot := getRefAsFootnotes(defID, &refFootnotes)
+			if nil == refFoot {
+				return ast.WalkContinue
+			}
+
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
@@ -2705,7 +2723,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 	return
 }
 
-func collectFootnotesDefs(id string, refFootnotes *[]*refAsFootnotes, treeCache *map[string]*parse.Tree, depth *int) {
+func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*refAsFootnotes, treeCache *map[string]*parse.Tree, depth *int) {
 	*depth++
 	if 4096 < *depth {
 		return
@@ -2727,17 +2745,17 @@ func collectFootnotesDefs(id string, refFootnotes *[]*refAsFootnotes, treeCache 
 		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
 		return
 	}
-	collectFootnotesDefs0(node, refFootnotes, treeCache, depth)
+	collectFootnotesDefs0(currentTree, node, refFootnotes, treeCache, depth)
 	if ast.NodeHeading == node.Type {
 		children := treenode.HeadingChildren(node)
 		for _, c := range children {
-			collectFootnotesDefs0(c, refFootnotes, treeCache, depth)
+			collectFootnotesDefs0(currentTree, c, refFootnotes, treeCache, depth)
 		}
 	}
 	return
 }
 
-func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, treeCache *map[string]*parse.Tree, depth *int) {
+func collectFootnotesDefs0(currentTree *parse.Tree, node *ast.Node, refFootnotes *[]*refAsFootnotes, treeCache *map[string]*parse.Tree, depth *int) {
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -2746,6 +2764,10 @@ func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, tree
 		if treenode.IsBlockRef(n) {
 			defID, refText, _ := treenode.GetBlockRef(n)
 			if nil == getRefAsFootnotes(defID, refFootnotes) {
+				if isNodeInTree(defID, currentTree) {
+					// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
+					return ast.WalkSkipChildren
+				}
 				anchorText := refText
 				if Conf.Editor.BlockRefDynamicAnchorTextMaxLen < utf8.RuneCountInString(anchorText) {
 					anchorText = gulu.Str.SubStr(anchorText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen) + "..."
@@ -2755,13 +2777,29 @@ func collectFootnotesDefs0(node *ast.Node, refFootnotes *[]*refAsFootnotes, tree
 					refNum:        strconv.Itoa(len(*refFootnotes) + 1),
 					refAnchorText: anchorText,
 				})
-				collectFootnotesDefs(defID, refFootnotes, treeCache, depth)
+				collectFootnotesDefs(currentTree, defID, refFootnotes, treeCache, depth)
 			}
 			return ast.WalkSkipChildren
 		}
 		return ast.WalkContinue
 	})
 }
+
+func isNodeInTree(id string, tree *parse.Tree) (ret bool) {
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if n.ID == id {
+			ret = true
+			return ast.WalkStop
+		}
+		return ast.WalkContinue
+	})
+	return
+}
+
 func getRefAsFootnotes(defID string, slice *[]*refAsFootnotes) *refAsFootnotes {
 	for _, e := range *slice {
 		if e.defID == defID {

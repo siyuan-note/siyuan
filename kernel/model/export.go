@@ -2148,32 +2148,27 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	if 4 == blockRefMode { // 块引转脚注
 		unlinks = nil
-		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight); nil != footnotesDefBlock {
+		footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight)
+		if nil != footnotesDefBlock {
 			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
 			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
-			//footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
-			//for _, ref := range footnotesRefs {
-			//	ast.Walk(ref, func(n *ast.Node, entering bool) ast.WalkStatus {
-			//		if !entering {
-			//			return ast.WalkContinue
-			//		}
-			//
-			//		if treenode.IsBlockRef(n) {
-			//			refIDsInfnDefs[n.TextMarkBlockRefID] = true
-			//		}
-			//		return ast.WalkContinue
-			//	})
-			//}
-			//
-			//for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
-			//	exist := refIDsInfnDefs[footnotesDef.ID]
-			//	if !exist {
-			//		unlinks = append(unlinks, footnotesDef)
-			//	}
-			//}
-			//for _, n := range unlinks {
-			//	n.Unlink()
-			//}
+			footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
+			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
+				exist := false
+				for _, ref := range footnotesRefs {
+					if ref.FootnotesRefId == footnotesDef.FootnotesRefId {
+						exist = true
+						break
+					}
+				}
+				if !exist {
+					unlinks = append(unlinks, footnotesDef)
+				}
+			}
+
+			for _, n := range unlinks {
+				n.Unlink()
+			}
 
 			ret.Root.AppendChild(footnotesDefBlock)
 		}

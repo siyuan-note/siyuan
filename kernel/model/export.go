@@ -812,7 +812,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			link.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(" ")})
 			link.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
 			link.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
-			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte("pdf-outline://" + h.ID)})
+			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(PdfOutlineScheme + "://" + h.ID)})
 			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			h.PrependChild(link)
 		}
@@ -1198,6 +1198,10 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 	assetLinks, otherLinks, listErr := PdfListLinks(pdfCtx)
 	if nil != listErr {
 		logging.LogErrorf("list asset links failed: %s", listErr)
+		return
+	}
+
+	if 1 > len(assetLinks) {
 		return
 	}
 

@@ -42,13 +42,15 @@ func PdfListLinks(ctx *model.Context) (assets, others []model.LinkAnnotation, er
 	return
 }
 
+const PdfOutlineScheme = "pdf-outline"
+
 func PdfListToCLinks(ctx *model.Context) (ret []model.LinkAnnotation, err error) {
 	for pg, annos := range ctx.PageAnnots {
 		for k, v := range annos {
 			if model.AnnLink == k {
 				for _, va := range v.Map {
 					link := va.ContentString()
-					if strings.HasPrefix(link, "pdf-outline://") {
+					if strings.HasPrefix(link, PdfOutlineScheme+"://") {
 						l := va.(model.LinkAnnotation)
 						l.Page = pg
 						ret = append(ret, l)

@@ -10,7 +10,7 @@ require (
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
 	github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d
-	github.com/88250/lute v1.7.7-0.20241127031345-f772b0ee2be8
+	github.com/88250/lute v1.7.7-0.20241128155138-47c361d8b543
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
 	github.com/ConradIrwin/font v0.0.0-20240627033111-8567075b2bfe
@@ -179,7 +179,7 @@ replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20
 
 replace github.com/pdfcpu/pdfcpu => github.com/88250/pdfcpu v0.3.14-0.20241128123312-a688ff960d4f
 
-replace github.com/88250/lute => F:\golang\gopath\src\github.com\88250\lute
+//replace github.com/88250/lute => F:\golang\gopath\src\github.com\88250\lute
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu
 //replace github.com/siyuan-note/riff => D:\88250\riff
 //replace github.com/siyuan-note/httpclient => D:\88250\httpclient

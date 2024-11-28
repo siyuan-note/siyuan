@@ -441,7 +441,8 @@ const renderPDF = async (id: string) => {
                     const linkAddress = target.getAttribute("href");
                     if (linkAddress.startsWith("#")) {
                         // 导出预览模式点击块引转换后的脚注跳转不正确 https://github.com/siyuan-note/siyuan/issues/5700
-                        previewElement.querySelector(linkAddress).scrollIntoView();
+                        const hash = linkAddress.substring(1);
+                        previewElement.querySelector('[data-node-id="' + hash + '"], [id="' + hash + '"]').scrollIntoView();
                         event.stopPropagation();
                         event.preventDefault();
                         return;

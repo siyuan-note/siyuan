@@ -10,7 +10,7 @@ import {openFileById} from "../../editor/util";
 import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
-import {highlightMark} from "../../search/util";
+import {searchMarkRender} from "../../protyle/render/searchMarkRender";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -457,7 +457,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                highlightMark(editor.protyle, editor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                searchMarkRender(editor.protyle, editor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
                 this.editors.push(editor);
             });
         }

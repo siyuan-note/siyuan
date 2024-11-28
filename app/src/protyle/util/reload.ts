@@ -4,7 +4,7 @@ import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
-import {highlightMark} from "../../search/util";
+import {searchMarkRender} from "../render/searchMarkRender";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!protyle.preview.element.classList.contains("fn__none")) {
@@ -49,7 +49,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);
-                highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                searchMarkRender(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
             });
         }
     } else {
@@ -61,7 +61,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             updateReadonly,
             cb () {
                 if (protyle.query?.key) {
-                    highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                    searchMarkRender(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
                 }
             }
         });

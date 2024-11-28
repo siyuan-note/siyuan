@@ -1167,11 +1167,11 @@ const renderNextSearchMark = (options: {
         if (options.edit.protyle.highlight.rangeIndex >= options.edit.protyle.highlight.ranges.length) {
             options.edit.protyle.highlight.rangeIndex = 0;
         }
-        let rangeTop
+        let rangeTop;
         options.edit.protyle.highlight.ranges.forEach((item, index) => {
             if (options.edit.protyle.highlight.rangeIndex === index) {
                 options.edit.protyle.highlight.markHL.add(item);
-                rangeTop = item.getBoundingClientRect().top
+                rangeTop = item.getBoundingClientRect().top;
             } else {
                 options.edit.protyle.highlight.mark.add(item);
             }
@@ -1237,7 +1237,7 @@ export const getArticle = (options: {
                     return;
                 }
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                let matchRectTop: number
+                let matchRectTop: number;
                 if (CSS.highlights) {
                     options.edit.protyle.highlight.rangeIndex = 0;
                     highlightMark(options.edit.protyle, matchElements);
@@ -1513,8 +1513,8 @@ export const highlightMark = (protyle: IProtyle, matchElements: NodeListOf<Eleme
     matchElements.forEach((item, index) => {
         const range = new Range();
         if (item.getAttribute("data-type") === "search-mark") {
-            const contentElement = item.firstChild
-            item.replaceWith(contentElement)
+            const contentElement = item.firstChild;
+            item.replaceWith(contentElement);
             range.selectNodeContents(contentElement);
         } else {
             item.setAttribute("data-type", item.getAttribute("data-type").replace(" search-mark", "").replace("search-mark ", ""));
@@ -1525,8 +1525,8 @@ export const highlightMark = (protyle: IProtyle, matchElements: NodeListOf<Eleme
         } else {
             protyle.highlight.mark.add(range);
         }
-        protyle.highlight.ranges.push(range)
-    })
+        protyle.highlight.ranges.push(range);
+    });
     CSS.highlights.set("search-mark", protyle.highlight.mark);
     CSS.highlights.set("search-mark-hl", protyle.highlight.markHL);
-}
+};

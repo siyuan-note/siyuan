@@ -61,7 +61,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             updateReadonly,
             cb () {
                 if (protyle.query?.key) {
-                    highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll(`span[data-type~="search-mark"]`));
+                    highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
                 }
             }
         });

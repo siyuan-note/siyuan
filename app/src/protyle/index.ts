@@ -72,6 +72,12 @@ export class Protyle {
             element: id,
             options: mergedOptions,
             block: {},
+            highlight: {
+                mark: new Highlight(),
+                markHL: new Highlight(),
+                ranges: [],
+                rangeIndex: 0,
+            }
         };
 
         this.protyle.hint = new Hint(this.protyle);

@@ -4,6 +4,7 @@ import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
+import {highlightMark} from "../../search/util";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!protyle.preview.element.classList.contains("fn__none")) {
@@ -56,7 +57,12 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             protyle,
             focus,
             scrollAttr: saveScroll(protyle, true) as IScrollAttr,
-            updateReadonly
+            updateReadonly,
+            cb () {
+                if (protyle.query?.key) {
+                    highlightMark(protyle, protyle.wysiwyg.element.querySelectorAll(`span[data-type~="search-mark"]`));
+                }
+            }
         });
     }
 };

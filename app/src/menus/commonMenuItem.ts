@@ -184,6 +184,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     });
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "50vw",
+        containerClassName: "b3-dialog__container--theme",
         height: "80vh",
         content: `<div class="fn__flex-column">
     <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
@@ -234,7 +235,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">
-               <button data-action="addCustom" class="b3-button b3-button--outline">
+               <button data-action="addCustom" class="b3-button b3-button--cancel">
                    <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}
                </button>
            </div>

@@ -10,7 +10,7 @@
     flex-wrap: wrap;
 
     &:not(.custom-attr__avvalue--readonly):hover {
-      background-color: var(--b3-theme-background);
+      background-color: var(--b3-theme-surface-light);
     }
 
     &--readonly {
@@ -44,13 +44,19 @@
   .block__logo:not(.popover__block) {
     width: 160px;
     color: var(--b3-theme-on-surface);
+    border-radius: var(--b3-border-radius);
+    transition: var(--b3-background-transition);
+    min-height: 34px;
     align-self: flex-start;
-    margin-top: 5px;
 
     span {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+    }
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
     }
   }
 
@@ -84,16 +90,20 @@
       height: 16px;
       margin-right: 8px;
     }
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
+    }
   }
 
   .b3-text-field--text {
-    transition: var(--b3-transition);
+    transition: var(--b3-background-transition);
     min-height: 34px;
     background-color: transparent;
     padding: 7px 8px;
 
     &:hover {
-      background-color: var(--b3-theme-background);
+      background-color: var(--b3-theme-surface-light);
     }
   }
 

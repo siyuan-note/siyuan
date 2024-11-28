@@ -169,7 +169,7 @@ export const initAbout = () => {
         </div>
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
-    ${window.siyuan.languages.about1}
+    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
 </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {

@@ -1022,7 +1022,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	processPDFWatermark(pdfCtx, watermark)
 
 	pdfcpuVer := model.VersionStr
-	model.VersionStr = "SiYuan v" + util.Ver + " (" + pdfcpuVer + ")"
+	model.VersionStr = "SiYuan v" + util.Ver + " (pdfcpu " + pdfcpuVer + ")"
 	if writeErr := api.WriteContextFile(pdfCtx, p); nil != writeErr {
 		logging.LogErrorf("write pdf context failed: %s", writeErr)
 		return
@@ -1123,7 +1123,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		return links[i].Page < links[j].Page
 	})
 
-	bms := map[string]pdfcpu.Bookmark{}
+	bms := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
 		b := sql.GetBlock(linkID)
@@ -1133,7 +1133,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		}
 		title := b.Content
 		title, _ = url.QueryUnescape(title)
-		bm := pdfcpu.Bookmark{
+		bm := &pdfcpu.Bookmark{
 			Title:    title,
 			PageFrom: link.Page,
 			AbsPos:   link.Rect.UR.Y,
@@ -1145,7 +1145,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		return
 	}
 
-	var topBms []pdfcpu.Bookmark
+	var topBms []*pdfcpu.Bookmark
 	stack := linkedliststack.New()
 	for _, h := range headings {
 	L:
@@ -1162,11 +1162,11 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 				break L
 			}
 
-			tip := cur.(pdfcpu.Bookmark)
+			tip := cur.(*pdfcpu.Bookmark)
 			if tip.Level < h.HeadingLevel {
 				bm := bms[h.ID]
 				bm.Level = h.HeadingLevel
-				bm.Parent = &tip
+				bm.Parent = tip
 				tip.Kids = append(tip.Kids, bm)
 				stack.Push(bm)
 				break L
@@ -1250,7 +1250,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 		}
 
 		fn := filepath.Base(absPath)
-		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, types.EncodeUTF16String(fn), "attached by SiYuan", *ir)
+		fileSpecDict, newErr := pdfCtx.XRefTable.NewFileSpecDict(fn, fn, "attached by SiYuan", *ir)
 		if nil != newErr {
 			logging.LogWarnf("new file spec dict failed: %s", newErr)
 			continue
@@ -1264,15 +1264,15 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 
 		lx := link.Rect.LL.X + link.Rect.Width()
 		ly := link.Rect.LL.Y + link.Rect.Height()/2
-		ux := lx + link.Rect.Height()/2
-		uy := ly + link.Rect.Height()/2
+		w := link.Rect.Height() / 2
+		h := link.Rect.Height() / 2
 
 		d := types.Dict(
 			map[string]types.Object{
 				"Type":         types.Name("Annot"),
 				"Subtype":      types.Name("FileAttachment"),
 				"Contents":     types.StringLiteral(""),
-				"Rect":         types.RectForWidthAndHeight(lx, ly, ux, uy).Array(),
+				"Rect":         types.RectForWidthAndHeight(lx, ly, w, h).Array(),
 				"P":            link.P,
 				"M":            now,
 				"F":            types.Integer(0),

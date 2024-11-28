@@ -2154,6 +2154,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
 			footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
 			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
+				fnRefsInDef := footnotesDef.ChildrenByType(ast.NodeFootnotesRef)
+				footnotesRefs = append(footnotesRefs, fnRefsInDef...)
+			}
+
+			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
 				exist := false
 				for _, ref := range footnotesRefs {
 					if ref.FootnotesRefId == footnotesDef.FootnotesRefId {

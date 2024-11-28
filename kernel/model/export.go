@@ -2148,25 +2148,32 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 
 	if 4 == blockRefMode { // 块引转脚注
 		unlinks = nil
-		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret.Root.ID, blockRefTextLeft, blockRefTextRight); nil != footnotesDefBlock {
+		if footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight); nil != footnotesDefBlock {
 			// 如果是聚焦导出，可能存在没有使用的脚注定义块，在这里进行清理
 			// Improve focus export conversion of block refs to footnotes https://github.com/siyuan-note/siyuan/issues/10647
-			footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
-			for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
-				exist := false
-				for _, ref := range footnotesRefs {
-					if ref.FootnotesRefId == footnotesDef.FootnotesRefId {
-						exist = true
-						break
-					}
-				}
-				if !exist {
-					unlinks = append(unlinks, footnotesDef)
-				}
-			}
-			for _, n := range unlinks {
-				n.Unlink()
-			}
+			//footnotesRefs := ret.Root.ChildrenByType(ast.NodeFootnotesRef)
+			//for _, ref := range footnotesRefs {
+			//	ast.Walk(ref, func(n *ast.Node, entering bool) ast.WalkStatus {
+			//		if !entering {
+			//			return ast.WalkContinue
+			//		}
+			//
+			//		if treenode.IsBlockRef(n) {
+			//			refIDsInfnDefs[n.TextMarkBlockRefID] = true
+			//		}
+			//		return ast.WalkContinue
+			//	})
+			//}
+			//
+			//for footnotesDef := footnotesDefBlock.FirstChild; nil != footnotesDef; footnotesDef = footnotesDef.Next {
+			//	exist := refIDsInfnDefs[footnotesDef.ID]
+			//	if !exist {
+			//		unlinks = append(unlinks, footnotesDef)
+			//	}
+			//}
+			//for _, n := range unlinks {
+			//	n.Unlink()
+			//}
 
 			ret.Root.AppendChild(footnotesDefBlock)
 		}
@@ -2600,7 +2607,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	return ret
 }
 
-func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
+func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tree, currentTreeNodeIDs map[string]bool, blockRefTextLeft, blockRefTextRight string) (footnotesDefBlock *ast.Node) {
 	if 1 > len(*refFootnotes) {
 		return nil
 	}
@@ -2617,7 +2624,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {
 			nodes = append(nodes, defNode)
-			if rootID != docID {
+			if currentTree.ID != docID {
 				// 同文档块引转脚注缩略定义考虑容器块和标题块 https://github.com/siyuan-note/siyuan/issues/5917
 				children := treenode.HeadingChildren(defNode)
 				nodes = append(nodes, children...)
@@ -2648,6 +2655,16 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 						n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(blockRefTextLeft + f.refAnchorText + blockRefTextRight)})
 						n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + f.refNum), FootnotesRefId: f.refNum, FootnotesRefLabel: []byte("^" + f.refNum)})
 						unlinks = append(unlinks, n)
+					} else {
+						if isNodeInTree(defID, currentTree) {
+							if currentTreeNodeIDs[defID] {
+								// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
+								n.TextMarkType = "a"
+								n.TextMarkTextContent = blockRefTextLeft + n.TextMarkTextContent + blockRefTextRight
+								n.TextMarkAHref = "#" + defID
+								return ast.WalkSkipChildren
+							}
+						}
 					}
 					return ast.WalkSkipChildren
 				} else if ast.NodeBlockQueryEmbed == n.Type {
@@ -2698,7 +2715,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, rootID string, blockR
 				}
 
 				docID := strings.TrimSuffix(path.Base(n.Path), ".sy")
-				if rootID == docID {
+				if currentTree.ID == docID {
 					// 同文档块引转脚注缩略定义 https://github.com/siyuan-note/siyuan/issues/3299
 					if text := sql.GetRefText(n.ID); 64 < utf8.RuneCountInString(text) {
 						var unlinkChildren []*ast.Node

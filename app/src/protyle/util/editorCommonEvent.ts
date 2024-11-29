@@ -1231,8 +1231,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
-        if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1) ||
-            (!event.altKey && fileTreeIds.indexOf("-") > -1)) {
+        if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             const targetElement = hasClosestBlock(event.target);
             if (targetElement) {
                 targetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
@@ -1325,6 +1324,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 item.removeAttribute("select-start");
                 item.removeAttribute("select-end");
             });
+            // 文档树拖拽限制
+            if (fileTreeIds.indexOf("-") > -1 && !targetElement.classList.contains("av__row") &&
+                !targetElement.classList.contains("av__row--util")) {
+                if (!event.altKey) {
+                    return;
+                } else if (fileTreeIds.split(",").includes(protyle.block.rootID) && event.altKey) {
+                    return;
+                }
+            }
             if (targetElement.getAttribute("data-type") === "NodeAttributeView" && hasClosestByTag(event.target, "TD")) {
                 return;
             }
@@ -1382,9 +1390,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
+
         if (fileTreeIds.indexOf("-") > -1) {
-            if (fileTreeIds.split(",").includes(protyle.block.rootID) && !targetElement.classList.contains("av__row")) {
+            if (fileTreeIds.split(",").includes(protyle.block.rootID) && !targetElement.classList.contains("av__row") &&
+                !targetElement.classList.contains("av__row--util") && event.altKey) {
                 dragoverElement = undefined;
+                editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+                    item.removeAttribute("select-start");
+                    item.removeAttribute("select-end");
+                });
             } else {
                 dragoverElement = targetElement;
             }

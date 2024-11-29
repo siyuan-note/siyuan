@@ -22,6 +22,7 @@ import (
 	"io/fs"
 	"math"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -229,9 +230,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	srcPath := historyPath
 	var destPath, parentHPath string
-	baseName := filepath.Base(historyPath)
-	id := strings.TrimSuffix(baseName, ".sy")
-
+	id := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
@@ -334,7 +333,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 func getRollbackDockPath(boxID, historyPath string) (destPath, parentHPath string, err error) {
 	baseName := filepath.Base(historyPath)
-	parentID := strings.TrimSuffix(filepath.Base(filepath.Dir(historyPath)), ".sy")
+	parentID := path.Base(filepath.Dir(historyPath))
 	parentWorkingDoc := treenode.GetBlockTree(parentID)
 	if nil != parentWorkingDoc {
 		// 父路径如果是文档，则恢复到父路径下

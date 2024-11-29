@@ -758,7 +758,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				targetPaths[curRelPath] = targetPath
 			} else {
 				targetPath = targetPaths[curRelPath]
-				id = strings.TrimSuffix(path.Base(targetPath), ".sy")
+				id = util.GetTreeID(targetPath)
 			}
 
 			if d.IsDir() {

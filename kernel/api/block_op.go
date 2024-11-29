@@ -19,8 +19,6 @@ package api
 import (
 	"errors"
 	"net/http"
-	"path"
-	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
@@ -113,7 +111,7 @@ func appendDailyNoteBlock(c *gin.Context) {
 		return
 	}
 
-	parentID := strings.TrimSuffix(path.Base(p), ".sy")
+	parentID := util.GetTreeID(p)
 	transactions := []*model.Transaction{
 		{
 			DoOperations: []*model.Operation{
@@ -166,7 +164,7 @@ func prependDailyNoteBlock(c *gin.Context) {
 		return
 	}
 
-	parentID := strings.TrimSuffix(path.Base(p), ".sy")
+	parentID := util.GetTreeID(p)
 	transactions := []*model.Transaction{
 		{
 			DoOperations: []*model.Operation{

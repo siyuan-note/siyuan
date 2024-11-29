@@ -9,7 +9,8 @@
     min-height: 26px;
     flex-wrap: wrap;
 
-    &:not(.custom-attr__avvalue--readonly):hover {
+    &:not(.custom-attr__avvalue--readonly):hover,
+    &--active {
       background-color: var(--b3-theme-surface-light);
     }
 

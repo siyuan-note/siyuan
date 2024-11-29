@@ -9,8 +9,12 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {editAssetItem} from "./asset";
+import {dragUpload, editAssetItem} from "./asset";
 import {previewImage} from "../../preview/image";
+/// #if !BROWSER
+import {webUtils} from "electron";
+/// #endif
+import {isBrowser} from "../../../util/functions";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -221,9 +225,13 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                     ghostElement.remove();
                 });
             });
-            element.addEventListener("drop", () => {
+            element.addEventListener("drop", (event) => {
                 counter = 0;
-                window.siyuan.dragElement.style.opacity = "";
+                if (protyle.disabled) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {
                     const isBottom = targetElement.classList.contains("dragover__bottom");
@@ -248,12 +256,38 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                         }
                     }
                     targetElement.classList.remove("dragover__bottom", "dragover__top");
+                } else if (!window.siyuan.dragElement && event.dataTransfer.types[0] === "Files") {
+                    const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
+                    if (cellElement) {
+                        if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                            const files: string[] = [];
+                            for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                                files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                            }
+                            dragUpload(files, protyle, cellElement);
+                        }
+                    }
                 }
-                window.siyuan.dragElement = null;
+                if (window.siyuan.dragElement) {
+                    window.siyuan.dragElement.style.opacity = "";
+                    window.siyuan.dragElement = undefined;
+                }
             });
             element.addEventListener("dragover", (event: DragEvent) => {
                 const target = event.target as HTMLElement;
-                let targetElement = hasClosestByClassName(target, "av__row");
+                let targetElement: HTMLElement | false;
+                if (event.dataTransfer.types.includes("Files")) {
+                    element.querySelectorAll(".custom-attr__avvalue--active").forEach((item: HTMLElement) => {
+                        item.classList.remove("custom-attr__avvalue--active");
+                    });
+                    targetElement = hasClosestByClassName(target, "custom-attr__avvalue");
+                    if (targetElement && targetElement.getAttribute("data-type") === "mAsset") {
+                        targetElement.classList.add("custom-attr__avvalue--active");
+                        event.preventDefault();
+                    }
+                    return;
+                }
+                targetElement = hasClosestByClassName(target, "av__row");
                 if (!targetElement) {
                     targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 1), "av__row");
                 }

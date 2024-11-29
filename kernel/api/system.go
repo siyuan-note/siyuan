@@ -35,6 +35,15 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func getWorkspaceInfo(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	ret.Data = map[string]any{
+		"workspaceDir": util.WorkspaceDir,
+	}
+}
+
 func getNetwork(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

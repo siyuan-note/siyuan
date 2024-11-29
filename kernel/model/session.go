@@ -232,7 +232,7 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") {
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") || strings.HasPrefix(c.Request.RequestURI, "/api/system/getWorkspaceInfo") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return

@@ -209,7 +209,7 @@ export const enableLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetSup(true);
     protyle.lute.SetTag(true);
     protyle.lute.SetInlineUnderscore(true);
-}
+};
 
 export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
@@ -219,7 +219,7 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
     protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
     protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
-}
+};
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
     const range = getEditorRange(protyle.wysiwyg.element);

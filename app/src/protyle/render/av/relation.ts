@@ -378,7 +378,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (target.classList.contains("b3-menu__item")) {
         const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
-        const searchValue = menuElement.querySelector('input').value;
+        const searchValue = menuElement.querySelector("input").value;
         if (target.getAttribute("draggable")) {
             if (!separatorElement.nextElementSibling.getAttribute("data-id") && !searchValue) {
                 separatorElement.nextElementSibling.remove();

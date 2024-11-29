@@ -212,9 +212,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 if (!rowElement) {
                     return;
                 }
-                const type = getTypeByCellElement(target);
+                const cellType = getTypeByCellElement(target);
                 // TODO 点击单元格的时候， lineNumber 选中整行
-                if (type === "updated" || type === "created" || type === "lineNumber" || (type === "block" && !target.getAttribute("data-detached"))) {
+                if (cellType === "updated" || cellType === "created" || cellType === "lineNumber" || (cellType === "block" && !target.getAttribute("data-detached"))) {
                     selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                 } else {
                     scrollElement.querySelectorAll(".av__row--select").forEach(item => {

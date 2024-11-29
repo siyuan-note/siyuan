@@ -31,6 +31,7 @@ import {zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
+import {addDragFill} from "../render/av/cell";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -1179,6 +1180,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else {
                     paste(protyle, event);
                 }
+                protyle.wysiwyg.element.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+                    item.classList.remove("av__cell--select", "av__cell--active");
+                    item.querySelector(".av__drag-fill")?.remove();
+                });
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
@@ -1214,8 +1219,27 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 behavior: "smooth"
             });
         }
+        let targetElement: HTMLElement | false;
         // 设置了的话 drop 就无法监听 shift/control event.dataTransfer.dropEffect = "move";
         if (event.dataTransfer.types.includes("Files")) {
+            targetElement = hasClosestByClassName(event.target, "av__cell");
+            if (targetElement && targetElement.getAttribute("data-dtype") === "mAsset" &&
+                !targetElement.classList.contains("av__cell--header")) {
+                event.preventDefault(); // 不使用导致无法触发 drop
+                if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+                    return;
+                }
+                const blockElement = hasClosestBlock(targetElement);
+                if (blockElement) {
+                    protyle.wysiwyg.element.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
+                        item.classList.remove("av__cell--select", "av__cell--active");
+                        item.querySelector(".av__drag-fill")?.remove();
+                    });
+                    targetElement.classList.add("av__cell--select");
+                    addDragFill(targetElement);
+                    dragoverElement = targetElement;
+                }
+            }
             // 使用 event.preventDefault(); 会导致无光标 https://github.com/siyuan-note/siyuan/issues/12857
             return;
         }
@@ -1243,7 +1267,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        let targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") || hasClosestBlock(event.target);
+        targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") || hasClosestBlock(event.target);
         const point = {x: event.clientX, y: event.clientY, className: ""};
 
         // 超级块中有a，b两个段落块，移动到 ab 之间的间隙 targetElement 会变为超级块，需修正为 a

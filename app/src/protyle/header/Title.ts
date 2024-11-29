@@ -12,7 +12,7 @@ import {MenuItem} from "../../menus/Menu";
 import {openFileAttr,} from "../../menus/commonMenuItem";
 import {Constants} from "../../constants";
 import {matchHotKey} from "../util/hotKey";
-import {isMac, readText, writeText} from "../util/compatibility";
+import {isMac, readText} from "../util/compatibility";
 import * as dayjs from "dayjs";
 import {openFileById} from "../../editor/util";
 import {setTitle} from "../../dialog/processSystem";
@@ -25,6 +25,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {commonClick} from "../wysiwyg/commonClick";
 import {openTitleMenu} from "./openTitleMenu";
 import {electronUndo} from "../undo";
+import {enableLuteMarkdownSyntax, restoreLuteMarkdownSyntax} from "../util/paste";
 
 export class Title {
     public element: HTMLElement;
@@ -77,7 +78,9 @@ export class Title {
                 navigator.clipboard.readText().then(textPlain => {
                     // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
                     textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                    enableLuteMarkdownSyntax(protyle);
                     let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                    restoreLuteMarkdownSyntax(protyle);
                     // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
                     content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
                     document.execCommand("insertText", false, replaceFileName(content));
@@ -229,7 +232,9 @@ export class Title {
                 click: async () => {
                     navigator.clipboard.readText().then(textPlain => {
                         textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+                        enableLuteMarkdownSyntax(protyle);
                         let content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+                        restoreLuteMarkdownSyntax(protyle);
                         // 移除 ;;;lt;;; 和 ;;;gt;;; 转义及其包裹的内容
                         content = content.replace(/;;;lt;;;[^;]+;;;gt;;;/g, "");
                         document.execCommand("insertText", false, replaceFileName(content));

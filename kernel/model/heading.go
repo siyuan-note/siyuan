@@ -394,7 +394,7 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 	newTree.Root.SetIALAttr("updated", util.CurrentTimeSecondsStr())
 	newTree.Root.Spec = "1"
 	if "" != previousPath {
-		box.addSort(util.GetTreeID(previousPath), newTree.ID)
+		box.addSort(previousPath, newTree.ID)
 	} else {
 		box.addMinSort(path.Dir(newTargetPath), newTree.ID)
 	}

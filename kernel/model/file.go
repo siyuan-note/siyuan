@@ -2175,7 +2175,7 @@ func (box *Box) addMinSort(parentPath, id string) {
 	}
 }
 
-func (box *Box) addSort(previousID, id string) {
+func (box *Box) addSort(previousPath, id string) {
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); err != nil {
 		logging.LogErrorf("create conf dir failed: %s", err)
@@ -2196,17 +2196,25 @@ func (box *Box) addSort(previousID, id string) {
 		}
 	}
 
-	sortVal := 0
-	previousSortVal, ok := fullSortIDs[previousID]
-	if !ok {
-		sortVal++
-	} else {
-		sortVal = previousSortVal + 1
+	parentPath := path.Dir(previousPath)
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	if err != nil {
+		logging.LogErrorf("list doc tree failed: %s", err)
+		return
 	}
 
-	fullSortIDs[id] = sortVal
+	previousID := util.GetTreeID(previousPath)
+	sortVal := 0
+	for _, doc := range docs {
+		fullSortIDs[doc.ID] = sortVal
+		if doc.ID == previousID {
+			sortVal++
+			fullSortIDs[id] = sortVal
+		}
+		sortVal++
+	}
 
-	data, err := gulu.JSON.MarshalJSON(fullSortIDs)
+	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
 	if err != nil {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return

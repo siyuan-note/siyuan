@@ -99,7 +99,7 @@ export const genCardHTML = (options: {
         <div>🔮</div>
         ${window.siyuan.languages.noDueCard}
     </div>
-    <div class="fn__flex card__action${options.cardsData.cards.length === 0 ? " fn__none" : ""}">
+    <div class="fn__flex card__action fn__none">
         <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
             <svg><use xlink:href="#iconLeft"></use></svg>
             (p / q)

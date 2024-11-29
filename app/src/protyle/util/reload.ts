@@ -5,6 +5,7 @@ import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
 import {searchMarkRender} from "../render/searchMarkRender";
+import {restoreLuteMarkdownSyntax} from "./paste";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
     if (!protyle.preview.element.classList.contains("fn__none")) {
@@ -28,13 +29,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
     }
     protyle.lute.SetProtyleMarkNetImg(window.siyuan.config.editor.displayNetImgMark);
     protyle.lute.SetSpellcheck(window.siyuan.config.editor.spellcheck);
-    protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
-    protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
-    protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
-    protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
-    protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
-    protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
-    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+    restoreLuteMarkdownSyntax(protyle);
     protyle.lute.SetGFMStrikethrough1(false);
     addLoading(protyle);
     if (protyle.options.backlinkData) {

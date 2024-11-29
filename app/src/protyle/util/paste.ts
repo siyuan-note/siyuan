@@ -190,21 +190,9 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
             textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
-            protyle.lute.SetInlineAsterisk(true);
-            protyle.lute.SetGFMStrikethrough(true);
-            protyle.lute.SetInlineMath(true);
-            protyle.lute.SetSub(true);
-            protyle.lute.SetSup(true);
-            protyle.lute.SetTag(true);
-            protyle.lute.SetInlineUnderscore(true);
+            enableLuteMarkdownSyntax(protyle);
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
-            protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
-            protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
-            protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
-            protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
-            protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
-            protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
-            protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+            restoreLuteMarkdownSyntax(protyle);
 
             // insertHTML 会进行内部反转义
             insertHTML(content, protyle, false, false, true);
@@ -212,6 +200,26 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         });
     }
 };
+
+export const enableLuteMarkdownSyntax = (protyle: IProtyle) => {
+    protyle.lute.SetInlineAsterisk(true);
+    protyle.lute.SetGFMStrikethrough(true);
+    protyle.lute.SetInlineMath(true);
+    protyle.lute.SetSub(true);
+    protyle.lute.SetSup(true);
+    protyle.lute.SetTag(true);
+    protyle.lute.SetInlineUnderscore(true);
+}
+
+export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
+    protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
+    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+    protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+    protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+    protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+    protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+}
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
     const range = getEditorRange(protyle.wysiwyg.element);

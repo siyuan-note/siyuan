@@ -1,132 +1,150 @@
-import {addScript} from "../util/addScript";
-import {addStyle} from "../util/addStyle";
-import {Constants} from "../../constants";
-import {hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
-import {hasClosestBlock} from "../util/hasClosest";
-import {looseJsonParse} from "../../util/functions";
+import { addScript } from "../util/addScript";
+import { addStyle } from "../util/addStyle";
+import { Constants } from "../../constants";
+import { hasNextSibling, hasPreviousSibling } from "../wysiwyg/getBlock";
+import { hasClosestBlock } from "../util/hasClosest";
+import { looseJsonParse } from "../../util/functions";
 
-export const mathRender = (element: Element, cdn = Constants.PROTYLE_CDN, maxWidth = false) => {
-    let mathElements: Element[] = [];
-    if (element.getAttribute("data-subtype") === "math") {
-        // 编辑器内代码块编辑渲染
-        mathElements = [element];
-    } else {
-        mathElements = Array.from(element.querySelectorAll('[data-subtype="math"]'));
-    }
-    if (mathElements.length === 0) {
-        return;
-    }
-    addStyle(`${cdn}/js/katex/katex.min.css?v=0.16.9`, "protyleKatexStyle");
-    addScript(`${cdn}/js/katex/katex.min.js?v=0.16.9`, "protyleKatexScript").then(() => {
-        addScript(`${cdn}/js/katex/mhchem.min.js?v=0.16.9`, "protyleKatexMhchemScript").then(() => {
-            mathElements.forEach((mathElement: HTMLElement) => {
-                if (mathElement.getAttribute("data-render") === "true") {
-                    return;
-                }
-                mathElement.setAttribute("data-render", "true");
-                let renderElement = mathElement;
-                if (mathElement.tagName === "DIV") {
-                    renderElement = mathElement.firstElementChild as HTMLElement;
-                }
-                let macros = {};
-                try {
-                    macros = looseJsonParse(window.siyuan.config.editor.katexMacros || "{}");
-                } catch (e) {
-                    console.warn("KaTex macros is not JSON", e);
-                }
-                try {
-                    renderElement.innerHTML = window.katex.renderToString(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")), {
-                        displayMode: mathElement.tagName === "DIV",
-                        output: "html",
-                        macros,
-                        trust: true, // REF: https://katex.org/docs/supported#html
-                        strict: (errorCode) => errorCode === "unicodeTextInMathMode" ? "ignore" : "warn",
-                    });
-                    renderElement.classList.remove("ft__error");
-                    const blockElement = hasClosestBlock(mathElement);
-                    if (mathElement.tagName === "DIV") {
-                        renderElement.firstElementChild.setAttribute("contenteditable", "false");
-                        if (renderElement.childElementCount < 2) {
-                            // 不能使用 contenteditable="false"，否则光标无法移动到该块
-                            renderElement.insertAdjacentHTML("beforeend", `<span style="position: absolute;right: 0;top: 0;">${Constants.ZWSP}</span>`);
-                        }
-                        // https://github.com/siyuan-note/siyuan/issues/3541
-                        const baseElements = renderElement.querySelectorAll(".base");
-                        if (baseElements.length > 0) {
-                            baseElements[baseElements.length - 1].insertAdjacentHTML("afterend", "<span class='fn__flex-1'></span>");
-                        }
-                        // https://github.com/siyuan-note/siyuan/issues/4334
-                        const newlineElement = renderElement.querySelector(".katex-html > .newline");
-                        if (newlineElement) {
-                            newlineElement.parentElement.style.display = "block";
-                        }
-                    } else {
-                        if (blockElement && mathElement.getBoundingClientRect().width > blockElement.clientWidth) {
-                            mathElement.style.maxWidth = "100%";
-                            mathElement.style.overflowX = "auto";
-                            mathElement.style.overflowY = "hidden";
-                            mathElement.style.display = "inline-block";
-                        } else {
-                            mathElement.style.maxWidth = "";
-                            mathElement.style.overflowX = "";
-                            mathElement.style.overflowY = "";
-                            mathElement.style.display = "";
-                        }
-                        const nextSibling = hasNextSibling(mathElement) as HTMLElement;
-                        if (!nextSibling) {
-                            // 表格编辑问题 https://ld246.com/article/1629191424824
-                            if (mathElement.parentElement.tagName !== "TH" && mathElement.parentElement.tagName !== "TD") {
-                                // 光标无法移动到末尾 https://github.com/siyuan-note/siyuan/issues/2112
-                                mathElement.insertAdjacentText("afterend", "\n");
-                            } else {
-                                // https://ld246.com/article/1651595975481，https://ld246.com/article/1658903123429
-                                // 随着浏览器的升级，从 beforeend 修改为 afterend
-                                mathElement.insertAdjacentText("afterend", Constants.ZWSP);
-                            }
-                        } else if (nextSibling && nextSibling.nodeType !== 3 &&
-                            (
-                                nextSibling.getAttribute("data-type")?.indexOf("inline-math") > -1 ||
-                                nextSibling.classList.contains("img")
-                            )) {
-                            // 相邻的数学公式删除或光标移动有问题
-                            mathElement.after(document.createTextNode(Constants.ZWSP));
-                        } else if (nextSibling &&
-                            !nextSibling.textContent.startsWith("\n") && // https://github.com/siyuan-note/insider/issues/1089
-                            // 输入 $a$ 后，光标移动到其他块，再点击 a 后，光标不显示 https://github.com/siyuan-note/insider/issues/1076#issuecomment-1253215515
-                            nextSibling.textContent !== Constants.ZWSP) {
-                            // 数学公式后一个字符删除多 br https://ld246.com/article/1647157880974
-                            // 数学公式后有 \n 不能再添加 &#xFEFF; https://ld246.com/article/1647329437541
-                            mathElement.insertAdjacentHTML("beforeend", "&#xFEFF;");
-                        }
-                        // 光标无法移动到段首 https://ld246.com/article/1623551823742
-                        if (mathElement.previousSibling?.textContent.endsWith("\n")) {
-                            mathElement.insertAdjacentText("beforebegin", Constants.ZWSP);
-                        } else if (!hasPreviousSibling(mathElement) && ["TH", "TD"].includes(mathElement.parentElement.tagName)) {
-                            // 单元格中只有数学公式时，光标无法移动到数学公式前
-                            mathElement.insertAdjacentText("afterbegin", Constants.ZWSP);
-                        }
-                    }
+const cache = new Map<string, string>();
 
-                    // export pdf
-                    if (maxWidth) {
-                        setTimeout(() => {
-                            if (mathElement.tagName === "DIV") {
-                                const katexElement = mathElement.querySelector(".katex-display");
-                                if (katexElement.clientWidth < katexElement.scrollWidth) {
-                                    katexElement.firstElementChild.setAttribute("style", `font-size:${katexElement.clientWidth * 100 / katexElement.scrollWidth}%`);
-                                }
-                            } else {
-                                if (blockElement && mathElement.offsetWidth > blockElement.clientWidth) {
-                                    mathElement.firstElementChild.setAttribute("style", `font-size:${blockElement.clientWidth * 100 / mathElement.offsetWidth}%`);
-                                }
-                            }
-                        });
-                    }
-                } catch (e) {
-                    renderElement.innerHTML = e.message;
-                    renderElement.classList.add("ft__error");
-                }
-            });
-        });
-    });
+export const mathRender = (
+  element: Element,
+  cdn = Constants.PROTYLE_CDN,
+  maxWidth = false
+) => {
+  let mathElements: Element[] = [];
+  if (element.getAttribute("data-subtype") === "math") {
+    // 编辑器内代码块编辑渲染
+    mathElements = [element];
+  } else {
+    mathElements = Array.from(
+      element.querySelectorAll('[data-subtype="math"]')
+    );
+  }
+  if (mathElements.length === 0) {
+    return;
+  }
+  console.time("Test Code");
+  mathElements.forEach(async (mathElement: HTMLElement, index: number) => {
+    if (mathElement.getAttribute("data-render") === "true") {
+      return;
+    }
+
+    mathElement.setAttribute("data-render", "true");
+    let renderElement = mathElement;
+
+    // 如果是 DIV 标签，渲染的目标是其第一个子元素
+    if (mathElement.tagName === "DIV") {
+      renderElement = mathElement.firstElementChild as HTMLElement;
+    }
+
+    try {
+      // 获取数学公式的内容
+      const mathContent = mathElement.getAttribute("data-content") || "";
+
+      // if (cache.has(mathContent)) {
+      //     return Promise.resolve(cache.get(mathContent)!); // 使用缓存结果
+      //   }
+      // 如果缓存中已经有该公式的结果，直接返回
+      console.time(`render${index}`);
+      let svg = "";
+      if (cache.has(mathContent)) {
+        console.log("use cache")
+        svg = cache.get(mathContent)!
+      } else {
+        const typst_content = `
+        #set page(width:auto,height:auto,margin:1mm, background:none)
+        #set text(size:12pt)
+        \$
+        ${mathContent}
+        \$`;
+        
+        // 调用 Typst 渲染 API 获取 SVG
+        svg = await fetchTypstSvg(typst_content, index);
+        cache.set(mathContent, svg);
+      }
+      console.timeEnd(`render${index}`);
+      // cache.set(mathContent, svg); // 缓存结果
+      // 替换渲染元素内容为 SVG
+      console.time(`render2-${index}`);
+      renderElement.innerHTML = svg;
+      renderElement.classList.remove("ft__error");
+
+      // 如果是块级数学公式
+      if (mathElement.tagName === "DIV") {
+        console.log("set block element  0");
+        renderElement.firstElementChild.setAttribute(
+          "contenteditable",
+          "false"
+        );
+
+        // 插入占位符，防止光标移动问题
+        if (renderElement.childElementCount < 2) {
+          renderElement.insertAdjacentHTML(
+            "beforeend",
+            `<span style="position: absolute;right: 0;top: 0;">${Constants.ZWSP}</span>`
+          );
+        }
+      } else {
+        // 行内公式的样式调整
+        const blockElement = hasClosestBlock(mathElement);
+        console.log("set block element 11");
+        mathElement.style.display = "inline-block";
+        if (
+          blockElement &&
+          mathElement.getBoundingClientRect().width > blockElement.clientWidth
+        ) {
+          console.log("set block element");
+          mathElement.style.maxWidth = "100%";
+          mathElement.style.overflowX = "auto";
+          mathElement.style.overflowY = "hidden";
+          mathElement.style.display = "inline-block";
+        } else {
+          mathElement.style.maxWidth = "";
+          mathElement.style.overflowX = "";
+          mathElement.style.overflowY = "";
+          mathElement.style.display = "";
+        }
+      }
+      console.timeEnd(`render2-${index}`);
+    } catch (e) {
+      // 处理渲染错误
+      renderElement.innerHTML = e.message;
+      renderElement.classList.add("ft__error");
+    }
+  });
+  console.timeEnd("Test Code");
+  /**
+   * 调用 Typst 渲染 HTTP API 获取 SVG
+   * @param mathContent 数学公式文本
+   * @returns 渲染的 SVG 字符串
+   */
+  async function fetchTypstSvg(
+    mathContent: string,
+    index: number
+  ): Promise<string> {
+    try {
+      console.time(`network-${index}`);
+      const response = await fetch("http://127.0.0.1:19966/typst_render", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          content: mathContent,
+          config: "",
+        }),
+      });
+      console.timeEnd(`network-${index}`);
+      if (!response.ok) {
+        throw new Error(`Typst API Error: ${response.statusText}`);
+      }
+
+      const data = await response.json();
+      return data.svg || ""; // 假设返回数据中包含 `svg` 字段
+    } catch (error) {
+      console.error("Failed to fetch SVG from Typst API:", error);
+      throw new Error("Failed to render math formula with Typst");
+    }
+  }
 };

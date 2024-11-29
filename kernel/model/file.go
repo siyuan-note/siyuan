@@ -310,7 +310,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 				}
 
 				if flashcard {
-					rootID := strings.TrimSuffix(filepath.Base(parentDocPath), ".sy")
+					rootID := util.GetTreeID(parentDocPath)
 					newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
 					if 0 < flashcardCount {
 						doc.NewFlashcardCount = newFlashcardCount
@@ -339,7 +339,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 			doc := box.docFromFileInfo(file, ial)
 
 			if flashcard {
-				rootID := strings.TrimSuffix(filepath.Base(file.path), ".sy")
+				rootID := util.GetTreeID(file.path)
 				newFlashcardCount, dueFlashcardCount, flashcardCount := countTreeFlashcard(rootID, deck, deckBlockIDs)
 				if 0 < flashcardCount {
 					doc.NewFlashcardCount = newFlashcardCount
@@ -1833,7 +1833,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 	}
 
 	baseName := strings.TrimSpace(path.Base(p))
-	if "" == strings.TrimSuffix(baseName, ".sy") {
+	if "" == util.GetTreeID(baseName) {
 		err = errors.New(Conf.Language(16))
 		return
 	}
@@ -1849,7 +1849,7 @@ func createDoc(boxID, p, title, dom string) (tree *parse.Tree, err error) {
 		return
 	}
 
-	id := strings.TrimSuffix(path.Base(p), ".sy")
+	id := util.GetTreeID(p)
 	var hPath string
 	folder := path.Dir(p)
 	if "/" != folder {
@@ -2006,7 +2006,7 @@ func ChangeFileTreeSort(boxID string, paths []string) {
 	sortIDs := map[string]int{}
 	max := 0
 	for i, p := range paths {
-		id := strings.TrimSuffix(path.Base(p), ".sy")
+		id := util.GetTreeID(p)
 		sortIDs[id] = i + 1
 		if i == len(paths)-1 {
 			max = i + 2
@@ -2175,7 +2175,7 @@ func (box *Box) addMinSort(parentPath, id string) {
 	}
 }
 
-func (box *Box) addSort(previousID, id string) {
+func (box *Box) addSort(previousPath, id string) {
 	confDir := filepath.Join(util.DataDir, box.ID, ".siyuan")
 	if err := os.MkdirAll(confDir, 0755); err != nil {
 		logging.LogErrorf("create conf dir failed: %s", err)
@@ -2196,17 +2196,25 @@ func (box *Box) addSort(previousID, id string) {
 		}
 	}
 
-	sortVal := 0
-	previousSortVal, ok := fullSortIDs[previousID]
-	if !ok {
-		sortVal++
-	} else {
-		sortVal = previousSortVal + 1
+	parentPath := path.Dir(previousPath)
+	docs, _, err := ListDocTree(box.ID, parentPath, util.SortModeUnassigned, false, false, Conf.FileTree.MaxListCount)
+	if err != nil {
+		logging.LogErrorf("list doc tree failed: %s", err)
+		return
 	}
 
-	fullSortIDs[id] = sortVal
+	previousID := util.GetTreeID(previousPath)
+	sortVal := 0
+	for _, doc := range docs {
+		fullSortIDs[doc.ID] = sortVal
+		if doc.ID == previousID {
+			sortVal++
+			fullSortIDs[id] = sortVal
+		}
+		sortVal++
+	}
 
-	data, err := gulu.JSON.MarshalJSON(fullSortIDs)
+	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
 	if err != nil {
 		logging.LogErrorf("marshal sort conf failed: %s", err)
 		return

@@ -708,7 +708,7 @@ func getBoxesByPaths(paths []string) (ret map[string]*Box) {
 	ret = map[string]*Box{}
 	var ids []string
 	for _, p := range paths {
-		ids = append(ids, strings.TrimSuffix(path.Base(p), ".sy"))
+		ids = append(ids, util.GetTreeID(p))
 	}
 
 	bts := treenode.GetBlockTrees(ids)

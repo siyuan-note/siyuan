@@ -404,7 +404,7 @@ func ExportSY(id string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 	zipPath = exportSYZip(boxID, path.Dir(rootPath), baseFolderName, docPaths)
-	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
+	name = util.GetTreeID(block.Path)
 	return
 }
 
@@ -1409,7 +1409,7 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	docPaths = util.FilterSelfChildDocs(docPaths)
 
 	zipPath = exportPandocConvertZip(false, box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
-	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
+	name = util.GetTreeID(block.Path)
 	return
 }
 
@@ -1433,7 +1433,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 	}
 
 	zipPath = exportPandocConvertZip(false, boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
-	name = strings.TrimSuffix(filepath.Base(block.Path), ".sy")
+	name = util.GetTreeID(block.Path)
 	return
 }
 
@@ -2627,7 +2627,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 			continue
 		}
 		defNode := treenode.GetNodeInTree(t, foot.defID)
-		docID := strings.TrimSuffix(path.Base(defNode.Path), ".sy")
+		docID := util.GetTreeID(defNode.Path)
 		var nodes []*ast.Node
 		if ast.NodeHeading == defNode.Type {
 			nodes = append(nodes, defNode)
@@ -2721,7 +2721,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 					return ast.WalkContinue
 				}
 
-				docID := strings.TrimSuffix(path.Base(n.Path), ".sy")
+				docID := util.GetTreeID(n.Path)
 				if currentTree.ID == docID {
 					// 同文档块引转脚注缩略定义 https://github.com/siyuan-note/siyuan/issues/3299
 					if text := sql.GetRefText(n.ID); 64 < utf8.RuneCountInString(text) {

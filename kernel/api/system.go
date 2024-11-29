@@ -41,6 +41,7 @@ func getWorkspaceInfo(c *gin.Context) {
 
 	ret.Data = map[string]any{
 		"workspaceDir": util.WorkspaceDir,
+		"siyuanVer":    util.Ver,
 	}
 }
 

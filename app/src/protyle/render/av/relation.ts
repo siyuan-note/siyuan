@@ -240,12 +240,8 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         let html = "";
         let selectHTML = "";
         const hasIds: string[] = [];
-        let selectHasShowItem = false;
         cellElement.querySelectorAll("span").forEach((item) => {
             hasIds.push(item.dataset.id);
-            if (item.textContent.indexOf(keyword) > -1) {
-                selectHasShowItem = true;
-            }
             selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
         });
         cells.forEach((item) => {
@@ -255,7 +251,8 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         });
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
-${html || genSelectItemHTML("empty", selectHasShowItem ? "" : keyword, undefined, menuElement.querySelector(".popover__block").outerHTML)}`;
+${html}
+${keyword ? genSelectItemHTML("empty", keyword, undefined, menuElement.querySelector(".popover__block").outerHTML) : (html ? "" : genSelectItemHTML("empty"))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     });
 };
@@ -381,8 +378,9 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (target.classList.contains("b3-menu__item")) {
         const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
+        const searchValue = menuElement.querySelector('input').value;
         if (target.getAttribute("draggable")) {
-            if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
+            if (!separatorElement.nextElementSibling.getAttribute("data-id") && !searchValue) {
                 separatorElement.nextElementSibling.remove();
             }
             const removeIndex = newValue.blockIDs.indexOf(targetId);
@@ -411,6 +409,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             const rowId = Lute.NewNodeID();
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
+                ignoreFillFilter: true,
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
                     id: rowId,
@@ -432,11 +431,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 },
                 isDetached: true
             });
-            separatorElement.before(target);
-            target.outerHTML = `<button data-id="${rowId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", rowId, true, content)}</button>`;
-            if (!separatorElement.nextElementSibling) {
-                separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
-            }
+            separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", rowId, true, content)}</button>`);
         }
         menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");

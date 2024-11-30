@@ -796,6 +796,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
+	blockRefMode := Conf.Export.BlockRefMode
 	var headings []*ast.Node
 	if pdf { // 导出 PDF 需要标记目录书签
 		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -816,10 +817,15 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			h.PrependChild(link)
 		}
+
+		if 5 == blockRefMode {
+			// 导出 PDF 时如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
+			blockRefMode = 4
+		}
 	}
 
 	tree = exportTree(tree, true, keepFold, true,
-		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle)

@@ -47,7 +47,7 @@ const (
 
 	CardDavAddressBooksMetaDataFilePath = CardDavHomeSetPath + "/address-books.json"
 
-	VCardFileExt = ".vcf"
+	VCardFileExt = "." + vcard.Extension // .vcf
 )
 
 type CardDavPathDepth int
@@ -63,14 +63,13 @@ const (
 
 var (
 	addressBookMaxResourceSize      int64 = 0
-	addressBookContentType                = "text/vcard"
 	addressBookSupportedAddressData       = []carddav.AddressDataType{
 		{
-			ContentType: addressBookContentType,
+			ContentType: vcard.MIMEType,
 			Version:     "3.0",
 		},
 		{
-			ContentType: addressBookContentType,
+			ContentType: vcard.MIMEType,
 			Version:     "4.0",
 		},
 	}
@@ -99,6 +98,23 @@ var (
 	ErrorAddressNotFound                 = errors.New("CardDAV: address not found")
 	ErrorAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
 )
+
+// ImportVCardFile imports a address book from a vCard file (*.vcf)
+func ImportAddressBook(addressBookPath, cardContent string) (addresses []*AddressObject, err error) {
+	// TODO: Check whether the path is valid (PathDepth: Address)
+	// TODO: Check whether the address book exists
+	// TODO: Decode the card content
+	// TODO: Save the cards to the file system
+	return
+}
+
+// ExportAddressBook exports a address book to a vCard file (*.vcf)
+func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
+	// TODO: Check whether the path is valid (PathDepth: AddressBook)
+	// TODO: Check whether the address book exists
+	// TODO: Encode the card content
+	return
+}
 
 // CardDavPath2DirectoryPath converts CardDAV path to absolute path of the file system
 func CardDavPath2DirectoryPath(cardDavPath string) string {
@@ -791,8 +807,8 @@ func (b *CardDavBackend) CurrentUserPrincipal(ctx context.Context) (string, erro
 	return CardDavUserPrincipalPath, nil
 }
 
-func (b *CardDavBackend) AddressBookHomeSetDirectoryPath(ctx context.Context) (string, error) {
-	// logging.LogDebugf("CardDAV AddressBookHomeSetDirectoryPath")
+func (b *CardDavBackend) AddressBookHomeSetPath(ctx context.Context) (string, error) {
+	// logging.LogDebugf("CardDAV AddressBookHomeSetPath")
 	return CardDavHomeSetPath, nil
 }
 

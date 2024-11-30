@@ -18,6 +18,7 @@ package model
 
 import (
 	"context"
+	"sync"
 
 	"github.com/emersion/go-ical"
 	"github.com/emersion/go-webdav/caldav"
@@ -32,7 +33,9 @@ const (
 	CalDavHomeSetPath         = CalDavUserPrincipalPath + "/calendars" // 2 resourceTypeCalendarHomeSet
 	CalDavDefaultCalendarPath = CalDavHomeSetPath + "/default"         // 3 resourceTypeCalendar
 
-	ICalendarFileExt = ".ics"
+	CalDavDefaultCalendarName = "default"
+
+	ICalendarFileExt = "." + ical.Extension // .ics
 )
 
 type CalDavPathDepth int
@@ -45,6 +48,48 @@ const (
 	calDavPathDepth_Calendar                                 // /caldav/principals/main/calendars/default
 	calDavPathDepth_Object                                   // /caldav/principals/main/calendars/default/id.ics
 )
+
+var (
+	calendarMaxResourceSize       int64 = 0
+	calendarSupportedComponentSet       = []string{"VEVENT", "VTODO"}
+
+	defaultCalendar = caldav.Calendar{
+		Path:                  CalDavDefaultCalendarPath,
+		Name:                  CalDavDefaultCalendarName,
+		Description:           "Default calendar",
+		MaxResourceSize:       calendarMaxResourceSize,
+		SupportedComponentSet: calendarSupportedComponentSet,
+	}
+	calendars = Calendars{
+		loaded:            false,
+		changed:           false,
+		lock:              sync.Mutex{},
+		calendars:         sync.Map{},
+		calendarsMetaData: []*caldav.Calendar{},
+	}
+)
+
+type Calendars struct {
+	loaded            bool
+	changed           bool
+	lock              sync.Mutex // load & save
+	calendars         sync.Map   // Path -> *Calendar
+	calendarsMetaData []*caldav.Calendar
+}
+
+type Calendar struct {
+	Changed       bool
+	DirectoryPath string
+	MetaData      *caldav.Calendar
+	Objects       sync.Map // id -> *CalendarObject
+}
+
+type CalendarObject struct {
+	Changed      bool
+	FilePath     string
+	CalendarPath string
+	Data         *caldav.CalendarObject
+}
 
 type CalDavBackend struct{}
 
@@ -70,38 +115,38 @@ func (b *CalDavBackend) ListCalendars(ctx context.Context) (calendars []caldav.C
 	return
 }
 
-func (b *CalDavBackend) GetCalendar(ctx context.Context, path string) (calendar *caldav.Calendar, err error) {
-	logging.LogDebugf("CalDAV GetCalendar -> path: %s", path)
+func (b *CalDavBackend) GetCalendar(ctx context.Context, calendarPath string) (calendar *caldav.Calendar, err error) {
+	logging.LogDebugf("CalDAV GetCalendar -> calendarPath: %s", calendarPath)
 	// TODO: get calendar
 	return
 }
 
-func (b *CalDavBackend) GetCalendarObject(ctx context.Context, path string, req *caldav.CalendarCompRequest) (calendarObjects *caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV GetCalendarObject -> path: %s, req: %#v", path, req)
+func (b *CalDavBackend) GetCalendarObject(ctx context.Context, calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects *caldav.CalendarObject, err error) {
+	logging.LogDebugf("CalDAV GetCalendarObject -> calendarPath: %s, req: %#v", calendarPath, req)
 	// TODO: get calendar object
 	return
 }
 
-func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, path string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV ListCalendarObjects -> path: %s, req: %#v", path, req)
+func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
+	logging.LogDebugf("CalDAV ListCalendarObjects -> calendarPath: %s, req: %#v", calendarPath, req)
 	// TODO: list calendar objects
 	return
 }
 
-func (b *CalDavBackend) QueryCalendarObjects(ctx context.Context, path string, query *caldav.CalendarQuery) (calendarObjects []caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV QueryCalendarObjects -> path: %s, query: %#v", path, query)
+func (b *CalDavBackend) QueryCalendarObjects(ctx context.Context, calendarPath string, query *caldav.CalendarQuery) (calendarObjects []caldav.CalendarObject, err error) {
+	logging.LogDebugf("CalDAV QueryCalendarObjects -> calendarPath: %s, query: %#v", calendarPath, query)
 	// TODO: query calendar objects
 	return
 }
 
-func (b *CalDavBackend) PutCalendarObject(ctx context.Context, path string, calendar *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (calendarObject *caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV PutCalendarObject -> path: %s, opts: %#v", path, opts)
+func (b *CalDavBackend) PutCalendarObject(ctx context.Context, calendarPath string, calendar *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (calendarObject *caldav.CalendarObject, err error) {
+	logging.LogDebugf("CalDAV PutCalendarObject -> calendarPath: %s, opts: %#v", calendarPath, opts)
 	// TODO: put calendar object
 	return
 }
 
-func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, path string) (err error) {
-	logging.LogDebugf("CalDAV DeleteCalendarObject -> path: %s", path)
+func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, calendarPath string) (err error) {
+	logging.LogDebugf("CalDAV DeleteCalendarObject -> calendarPath: %s", calendarPath)
 	// TODO: delete calendar object
 	return
 }

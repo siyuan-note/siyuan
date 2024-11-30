@@ -715,7 +715,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 	}
 
 	ginServer.Match(CalDavMethods, "/.well-known/caldav", func(c *gin.Context) {
-		logging.LogDebugf("CalDAV [/.well-known/caldav]")
+		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
 
@@ -771,6 +771,7 @@ func serveCardDAV(ginServer *gin.Engine) {
 				return
 			}
 		}
+		// TODO: Can't handle Thunderbird's PROPFIND request with prop <current-user-privilege-set/>
 		handler.ServeHTTP(c.Writer, c.Request)
 		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})

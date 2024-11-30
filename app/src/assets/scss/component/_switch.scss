@@ -70,16 +70,6 @@
       left: 17px;
     }
 
-    &:hover:not(:disabled) {
-      &::after {
-        background-color: var(--b3-switch-checked-hover);
-      }
-
-      &::before {
-        background-color: var(--b3-switch-checked-hover2);
-      }
-    }
-
     &:active:not(:disabled)::after {
       height: 14px;
       width: 14px;
@@ -95,8 +85,20 @@
     height: 10px;
     width: 10px;
   }
+}
 
-  &:hover:not(:disabled)::before {
-    display: inline-block;
+label:hover .b3-switch:not(:disabled)::before,
+.b3-switch:hover:not(:disabled)::before {
+  display: inline-block;
+}
+
+label:hover .b3-switch:checked:not(:disabled),
+.b3-switch:checked:hover:not(:disabled) {
+  &::after {
+    background-color: var(--b3-switch-checked-hover);
+  }
+
+  &::before {
+    background-color: var(--b3-switch-checked-hover2);
   }
 }

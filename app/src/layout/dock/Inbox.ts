@@ -339,11 +339,15 @@ ${data.shorthandContent}
                     id: item
                 }, (response) => {
                     this.data[response.data.oId] = response.data;
+                    let md = response.data.shorthandMd;
+                    if ("" === md && "" === response.data.shorthandContent && "" != response.data.shorthandURL) {
+                        md = "[" + response.data.shorthandTitle + "](" + response.data.shorthandURL + ")";
+                    }
                     fetchPost("/api/filetree/createDoc", {
                         notebook: toNotebook[0],
                         path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
                         title: replaceFileName(response.data.shorthandTitle),
-                        md: response.data.shorthandMd,
+                        md: md,
                     }, () => {
                         this.remove(item);
                     });

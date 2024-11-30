@@ -46,25 +46,41 @@ const (
 	CardDavDefaultAddressBookName = "default"
 
 	CardDavAddressBooksMetaDataFilePath = CardDavHomeSetPath + "/address-books.json"
+
+	VCardFileExt = ".vcf"
 )
 
-type PathDepth int
+type CardDavPathDepth int
 
 const (
-	pathDepth_Root          PathDepth = 1 + iota // /carddav
-	pathDepth_Principals                         // /carddav/principals
-	pathDepth_UserPrincipal                      // /carddav/principals/main
-	pathDepth_HomeSet                            // /carddav/principals/main/contacts
-	pathDepth_AddressBook                        // /carddav/principals/main/contacts/default
-	pathDepth_Address                            // /carddav/principals/main/contacts/default/id.vcf
+	cardDavPathDepth_Root          CardDavPathDepth = 1 + iota // /carddav
+	cardDavPathDepth_Principals                                // /carddav/principals
+	cardDavPathDepth_UserPrincipal                             // /carddav/principals/main
+	cardDavPathDepth_HomeSet                                   // /carddav/principals/main/contacts
+	cardDavPathDepth_AddressBook                               // /carddav/principals/main/contacts/default
+	cardDavPathDepth_Address                                   // /carddav/principals/main/contacts/default/id.vcf
 )
 
 var (
+	addressBookMaxResourceSize      int64 = 0
+	addressBookContentType                = "text/vcard"
+	addressBookSupportedAddressData       = []carddav.AddressDataType{
+		{
+			ContentType: addressBookContentType,
+			Version:     "3.0",
+		},
+		{
+			ContentType: addressBookContentType,
+			Version:     "4.0",
+		},
+	}
+
 	defaultAddressBook = carddav.AddressBook{
-		Path:            CardDavDefaultAddressBookPath,
-		Name:            CardDavDefaultAddressBookName,
-		Description:     "Default address book",
-		MaxResourceSize: 0,
+		Path:                 CardDavDefaultAddressBookPath,
+		Name:                 CardDavDefaultAddressBookName,
+		Description:          "Default address book",
+		MaxResourceSize:      addressBookMaxResourceSize,
+		SupportedAddressData: addressBookSupportedAddressData,
 	}
 	contacts = Contacts{
 		loaded:        false,
@@ -89,8 +105,8 @@ func CardDavPath2DirectoryPath(cardDavPath string) string {
 	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(cardDavPath, "/"))
 }
 
-// HomeSetPathPath returns the absolute path of the address book home set directory
-func HomeSetPathPath() string {
+// CardDavHomeSetDirectoryPath returns the absolute path of the address book home set directory
+func CardDavHomeSetDirectoryPath() string {
 	return CardDavPath2DirectoryPath(CardDavHomeSetPath)
 }
 
@@ -99,9 +115,9 @@ func AddressBooksMetaDataFilePath() string {
 	return CardDavPath2DirectoryPath(CardDavAddressBooksMetaDataFilePath)
 }
 
-func GetPathDepth(urlPath string) PathDepth {
+func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
 	urlPath = path.Clean(urlPath)
-	return PathDepth(len(strings.Split(urlPath, "/")) - 1)
+	return CardDavPathDepth(len(strings.Split(urlPath, "/")) - 1)
 }
 
 // ParseAddressPath parses address path to address book path and address ID
@@ -110,12 +126,12 @@ func ParseAddressPath(addressPath string) (addressBookPath string, addressID str
 	addressID = path.Base(addressFileName)
 	addressFileExt := path.Ext(addressFileName)
 
-	if GetPathDepth(addressBookPath) != pathDepth_AddressBook {
+	if GetCardDavPathDepth(addressBookPath) != cardDavPathDepth_AddressBook {
 		err = ErrorBookPathInvalid
 		return
 	}
 
-	if addressFileExt != ".vcf" {
+	if addressFileExt != VCardFileExt {
 		err = ErrorAddressFileExtensionNameInvalid
 		return
 	}
@@ -257,7 +273,7 @@ func (c *Contacts) saveAddressBooksMetaData() error {
 		return err
 	}
 
-	dirPath := HomeSetPathPath()
+	dirPath := CardDavHomeSetDirectoryPath()
 	if err := os.MkdirAll(dirPath, 0755); err != nil {
 		logging.LogErrorf("create directory [%s] failed: %s", dirPath, err)
 		return err
@@ -451,8 +467,8 @@ func (c *Contacts) QueryAddressObjects(urlPath string, query *carddav.AddressBoo
 	c.lock.Lock()
 	defer c.lock.Unlock()
 
-	switch GetPathDepth(urlPath) {
-	case pathDepth_Root, pathDepth_Principals, pathDepth_UserPrincipal, pathDepth_HomeSet:
+	switch GetCardDavPathDepth(urlPath) {
+	case cardDavPathDepth_Root, cardDavPathDepth_Principals, cardDavPathDepth_UserPrincipal, cardDavPathDepth_HomeSet:
 		c.books.Range(func(path any, book any) bool {
 			addressBook := book.(*AddressBook)
 			addressBook.Addresses.Range(func(id any, address any) bool {
@@ -461,7 +477,7 @@ func (c *Contacts) QueryAddressObjects(urlPath string, query *carddav.AddressBoo
 			})
 			return true
 		})
-	case pathDepth_AddressBook:
+	case cardDavPathDepth_AddressBook:
 		if value, ok := c.books.Load(urlPath); ok {
 			addressBook := value.(*AddressBook)
 			addressBook.Addresses.Range(func(id any, address any) bool {
@@ -469,7 +485,7 @@ func (c *Contacts) QueryAddressObjects(urlPath string, query *carddav.AddressBoo
 				return true
 			})
 		}
-	case pathDepth_Address:
+	case cardDavPathDepth_Address:
 		if _, address, _ := c.GetAddress(urlPath); address != nil {
 			addressObjects = append(addressObjects, *address.Data)
 		}
@@ -579,7 +595,7 @@ func (b *AddressBook) load() error {
 		if !entry.IsDir() {
 			filename := entry.Name()
 			ext := path.Ext(filename)
-			if ext == ".vcf" {
+			if ext == VCardFileExt {
 				wg.Add(1)
 				go func() {
 					defer wg.Done()
@@ -775,8 +791,8 @@ func (b *CardDavBackend) CurrentUserPrincipal(ctx context.Context) (string, erro
 	return CardDavUserPrincipalPath, nil
 }
 
-func (b *CardDavBackend) AddressBookHomeSetPath(ctx context.Context) (string, error) {
-	// logging.LogDebugf("CardDAV AddressBookHomeSetPath")
+func (b *CardDavBackend) AddressBookHomeSetDirectoryPath(ctx context.Context) (string, error) {
+	// logging.LogDebugf("CardDAV AddressBookHomeSetDirectoryPath")
 	return CardDavHomeSetPath, nil
 }
 

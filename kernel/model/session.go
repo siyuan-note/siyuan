@@ -305,7 +305,9 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// WebDAV BasicAuth Authenticate
-	if strings.HasPrefix(c.Request.RequestURI, "/webdav") || strings.HasPrefix(c.Request.RequestURI, "/carddav") {
+	if strings.HasPrefix(c.Request.RequestURI, "/webdav") ||
+		strings.HasPrefix(c.Request.RequestURI, "/caldav") ||
+		strings.HasPrefix(c.Request.RequestURI, "/carddav") {
 		c.Header(BasicAuthHeaderKey, BasicAuthHeaderValue)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

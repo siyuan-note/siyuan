@@ -8,9 +8,55 @@
 		"title": "请从这里开始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20241018102134"
+		"updated": "20241125224159"
 	},
 	"Children": [
+		{
+			"ID": "20241125224159-8zf3bos",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20241125224159-8zf3bos",
+				"updated": "20241125224159"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20241125224159-vcaj2bv",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20241125224159-vcaj2bv",
+						"updated": "20241125224159"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "关闭思源笔记时会自动关闭用户指南，可以点击 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "主菜单"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " - "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "用户指南"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " 再次查看"
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20210528115012-vst5lwt",
 			"Type": "NodeSuperBlock",

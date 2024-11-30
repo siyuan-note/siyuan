@@ -18,13 +18,13 @@ package model
 
 import (
 	"bytes"
-	"github.com/88250/lute/editor"
 	"regexp"
 	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
@@ -110,6 +110,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
 	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false)
 	ret = strings.TrimSpace(ret)
 	ret = strings.ReplaceAll(ret, "\n", "")
+	ret = util.UnescapeHTML(ret)
 	ret = util.EscapeHTML(ret)
 	ret = strings.TrimSpace(ret)
 	if "" == ret {

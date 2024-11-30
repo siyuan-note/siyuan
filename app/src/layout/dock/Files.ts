@@ -737,7 +737,7 @@ export class Files extends Model {
     }
 
     private updateDocInfo(data: IWebSocketData) {
-        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`)
+        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
             liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));

@@ -1,4 +1,9 @@
 .history {
+  &__action {
+    overflow: auto;
+    border-bottom: 1px solid var(--b3-border-color);
+  }
+
   &__text {
     background-color: var(--b3-theme-background);
     padding: 16px;

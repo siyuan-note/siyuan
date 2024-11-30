@@ -24,7 +24,7 @@
     align-self: center;
   }
 
-  &:after {
+  &::after {
     width: 8px;
     height: 8px;
     border-radius: 50%;
@@ -40,7 +40,7 @@
     transition: left 80ms linear, background-color 80ms linear, width 80ms linear, height 80ms linear;
   }
 
-  &:before {
+  &::before {
     z-index: 2;
     content: "";
     left: 7px;
@@ -59,28 +59,18 @@
     background-color: var(--b3-switch-checked-background);
     border-color: transparent;
 
-    &:after {
+    &::after {
       background-color: var(--b3-switch-checked);
       height: 12px;
       width: 12px;
     }
 
-    &:before,
-    &:after {
+    &::before,
+    &::after {
       left: 17px;
     }
 
-    &:hover:not(:disabled) {
-      &:after {
-        background-color: var(--b3-switch-checked-hover);
-      }
-
-      &:before {
-        background-color: var(--b3-switch-checked-hover2);
-      }
-    }
-
-    &:active:not(:disabled):after {
+    &:active:not(:disabled)::after {
       height: 14px;
       width: 14px;
     }
@@ -91,12 +81,24 @@
     cursor: auto;
   }
 
-  &:active:not(:disabled):after {
+  &:active:not(:disabled)::after {
     height: 10px;
     width: 10px;
   }
+}
 
-  &:hover:not(:disabled):before {
-    display: inline-block;
+label:hover .b3-switch:not(:disabled)::before,
+.b3-switch:hover:not(:disabled)::before {
+  display: inline-block;
+}
+
+label:hover .b3-switch:checked:not(:disabled),
+.b3-switch:checked:hover:not(:disabled) {
+  &::after {
+    background-color: var(--b3-switch-checked-hover);
+  }
+
+  &::before {
+    background-color: var(--b3-switch-checked-hover2);
   }
 }

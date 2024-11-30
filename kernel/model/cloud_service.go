@@ -566,7 +566,7 @@ func getUser(token string) (*conf.User, error) {
 
 func UseActivationcode(code string) (err error) {
 	code = strings.TrimSpace(code)
-	code = gulu.Str.RemoveInvisible(code)
+	code = util.RemoveInvalid(code)
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	resp, err := request.
@@ -590,7 +590,7 @@ func UseActivationcode(code string) (err error) {
 
 func CheckActivationcode(code string) (retCode int, msg string) {
 	code = strings.TrimSpace(code)
-	code = gulu.Str.RemoveInvisible(code)
+	code = util.RemoveInvalid(code)
 	retCode = 1
 	requestResult := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()

@@ -390,7 +390,7 @@
     padding: 0 4px 0 2px;
     white-space: break-spaces;
 
-    &:empty:after {
+    &:empty::after {
       content: attr(data-tip);
       color: var(--b3-theme-on-surface-light);
       cursor: text;
@@ -420,11 +420,11 @@ table[contenteditable="true"] + .protyle-action__table {
     cursor: col-resize;
     z-index: 2;
 
-    &:hover:after {
+    &:hover::after {
       background-color: var(--b3-theme-primary-light);
     }
 
-    &:after {
+    &::after {
       top: 0;
       width: 2px;
       left: 2px;

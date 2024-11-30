@@ -9,8 +9,12 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
-import {editAssetItem} from "./asset";
+import {dragUpload, editAssetItem} from "./asset";
 import {previewImage} from "../../preview/image";
+/// #if !BROWSER
+import {webUtils} from "electron";
+/// #endif
+import {isBrowser} from "../../../util/functions";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -56,13 +60,13 @@ export const genAVValueHTML = (value: IAVCellValue) => {
     let html = "";
     switch (value.type) {
         case "block":
-            html = `<div class="fn__flex-1">${value.block.content}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.block.content}</div>`;
             break;
         case "text":
-            html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1">${value.text.content}</textarea>`;
+            html = `<textarea style="resize: vertical" rows="${value.text.content.split("\n").length}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.text.content}</textarea>`;
             break;
         case "number":
-            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.number.isNotEmpty ? value.number.content : ""}" type="number" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span><span class="fn__flex-center ft__on-surface b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.format}">${value.number.formattedContent}</span><span class="fn__space"></span>`;
             break;
         case "mSelect":
@@ -84,7 +88,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             });
             break;
         case "date":
-            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}'>`;
+            html = `<span class="av__celltext" data-value='${JSON.stringify(value[value.type])}' placeholder="${window.siyuan.languages.empty}">`;
             if (value[value.type] && value[value.type].isNotEmpty) {
                 html += dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }
@@ -100,12 +104,12 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             }
             break;
         case "url":
-            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="${value.url.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
             break;
         case "phone":
-            html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
@@ -113,10 +117,10 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
             break;
         case "template":
-            html = `<div class="fn__flex-1">${value.template.content}</div>`;
+            html = `<div class="fn__flex-1" placeholder="${window.siyuan.languages.empty}">${value.template.content}</div>`;
             break;
         case "email":
-            html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1">
+            html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
 <a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
@@ -188,17 +192,14 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         <span>${escapeHtml(item.key.name)}</span>
     </div>
     <div data-av-id="${table.avID}" data-col-id="${item.values[0].keyID}" data-block-id="${item.values[0].blockID}" data-id="${item.values[0].id}" data-type="${item.values[0].type}" 
-data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}"
-class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}">
-        ${genAVValueHTML(item.values[0])}
-    </div>
+data-options="${item.key?.options ? escapeAttr(JSON.stringify(item.key.options)) : "[]"}" 
+${["text", "number", "date", "url", "phone", "template", "email"].includes(item.values[0].type) ? "" : `placeholder="${window.siyuan.languages.empty}"`}  
+class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes(item.values[0].type) ? "" : " custom-attr__avvalue"}${["block", "created", "updated"].includes(item.values[0].type) ? " custom-attr__avvalue--readonly" : ""}">${genAVValueHTML(item.values[0])}</div>
 </div>`;
             });
             innerHTML += `<div class="fn__hr"></div>
-<div class="fn__flex">
-    <div class="fn__space"></div><div class="fn__space"></div>
-    <button data-type="addColumn" class="b3-button b3-button--outline"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}</button>
-</div><div class="fn__hr--b"></div>`;
+<button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
+<div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 
             if (element.innerHTML) {
@@ -224,9 +225,13 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     ghostElement.remove();
                 });
             });
-            element.addEventListener("drop", () => {
+            element.addEventListener("drop", (event) => {
                 counter = 0;
-                window.siyuan.dragElement.style.opacity = "";
+                if (protyle.disabled) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const targetElement = element.querySelector(".dragover__bottom, .dragover__top") as HTMLElement;
                 if (targetElement && dragBlockElement) {
                     const isBottom = targetElement.classList.contains("dragover__bottom");
@@ -251,12 +256,38 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         }
                     }
                     targetElement.classList.remove("dragover__bottom", "dragover__top");
+                } else if (!window.siyuan.dragElement && event.dataTransfer.types[0] === "Files") {
+                    const cellElement = element.querySelector(".custom-attr__avvalue--active") as HTMLElement;
+                    if (cellElement) {
+                        if (event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                            const files: string[] = [];
+                            for (let i = 0; i < event.dataTransfer.files.length; i++) {
+                                files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
+                            }
+                            dragUpload(files, protyle, cellElement);
+                        }
+                    }
                 }
-                window.siyuan.dragElement = null;
+                if (window.siyuan.dragElement) {
+                    window.siyuan.dragElement.style.opacity = "";
+                    window.siyuan.dragElement = undefined;
+                }
             });
             element.addEventListener("dragover", (event: DragEvent) => {
                 const target = event.target as HTMLElement;
-                let targetElement = hasClosestByClassName(target, "av__row");
+                let targetElement: HTMLElement | false;
+                if (event.dataTransfer.types.includes("Files")) {
+                    element.querySelectorAll(".custom-attr__avvalue--active").forEach((item: HTMLElement) => {
+                        item.classList.remove("custom-attr__avvalue--active");
+                    });
+                    targetElement = hasClosestByClassName(target, "custom-attr__avvalue");
+                    if (targetElement && targetElement.getAttribute("data-type") === "mAsset") {
+                        targetElement.classList.add("custom-attr__avvalue--active");
+                        event.preventDefault();
+                    }
+                    return;
+                }
+                targetElement = hasClosestByClassName(target, "av__row");
                 if (!targetElement) {
                     targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 1), "av__row");
                 }

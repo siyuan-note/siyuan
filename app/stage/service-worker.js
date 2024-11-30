@@ -6,7 +6,7 @@ const INITIAL_CACHED_RESOURCES = [
     "/stage/icon-large.png",
     "/stage/icon.png",
     "/stage/loading-pure.svg",
-    "/stage/build/fonts/JetBrainsMono-Regular.woff",
+    "/stage/build/fonts/JetBrainsMono-Regular.woff2",
     "/stage/protyle/js/lute/lute.min.js",
     "/stage/protyle/js/protyle-html.js"
 ];

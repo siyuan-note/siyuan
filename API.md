@@ -416,6 +416,28 @@ Rename a document by `id`:
     "data": null
   }
   ```
+  
+Remove a document by `id`:
+
+* `/api/filetree/removeDocByID`
+* Parameters
+
+  ```json
+  {
+    "id": "20210902210113-0avi12f"
+  }
+  ```
+
+  * `id`: Document ID
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ### Move documents
 

@@ -248,7 +248,7 @@ func Tesseract(imgAbsPath string) (ret []map[string]interface{}) {
 		ret = append(ret, dataMap)
 	}
 
-	tsv = gulu.Str.RemoveInvisible(tsv)
+	tsv = RemoveInvalid(tsv)
 	tsv = RemoveRedundantSpace(tsv)
 	msg := fmt.Sprintf("OCR [%s] [%s]", html.EscapeString(info.Name()), html.EscapeString(GetOcrJsonText(ret)))
 	PushStatusBar(msg)
@@ -266,7 +266,7 @@ func GetOcrJsonText(jsonData []map[string]interface{}) (ret string) {
 			}
 		}
 	}
-	ret = gulu.Str.RemoveInvisible(ret)
+	ret = RemoveInvalid(ret)
 	ret = RemoveRedundantSpace(ret)
 	return ret
 }

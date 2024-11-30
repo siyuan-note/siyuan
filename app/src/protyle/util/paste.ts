@@ -190,27 +190,35 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
             textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
             textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
-            protyle.lute.SetInlineAsterisk(true);
-            protyle.lute.SetGFMStrikethrough(true);
-            protyle.lute.SetInlineMath(true);
-            protyle.lute.SetSub(true);
-            protyle.lute.SetSup(true);
-            protyle.lute.SetTag(true);
-            protyle.lute.SetInlineUnderscore(true);
+            enableLuteMarkdownSyntax(protyle);
             const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
-            protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
-            protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
-            protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
-            protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
-            protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
-            protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
-            protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+            restoreLuteMarkdownSyntax(protyle);
 
             // insertHTML 会进行内部反转义
             insertHTML(content, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);
         });
     }
+};
+
+export const enableLuteMarkdownSyntax = (protyle: IProtyle) => {
+    protyle.lute.SetInlineAsterisk(true);
+    protyle.lute.SetGFMStrikethrough(true);
+    protyle.lute.SetInlineMath(true);
+    protyle.lute.SetSub(true);
+    protyle.lute.SetSup(true);
+    protyle.lute.SetTag(true);
+    protyle.lute.SetInlineUnderscore(true);
+};
+
+export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
+    protyle.lute.SetInlineAsterisk(window.siyuan.config.editor.markdown.inlineAsterisk);
+    protyle.lute.SetGFMStrikethrough(window.siyuan.config.editor.markdown.inlineStrikethrough);
+    protyle.lute.SetInlineMath(window.siyuan.config.editor.markdown.inlineMath);
+    protyle.lute.SetSub(window.siyuan.config.editor.markdown.inlineSub);
+    protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
+    protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
+    protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
 };
 
 export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
@@ -452,8 +460,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             )) {
                 isHTML = false;
             } else {
-                // 需注意 Edge 中的画选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021
+                // 需注意 Edge 中的划选不应识别为图片 https://github.com/siyuan-note/siyuan/issues/7021
                 isHTML = true;
+            }
+
+            if (textPlain && "" !== textPlain.trim() && textHTML.startsWith("<span") && -1 < textHTML.indexOf("white-space: pre;")) {
+                // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265
+                isHTML = false;
             }
         }
         if (isHTML) {

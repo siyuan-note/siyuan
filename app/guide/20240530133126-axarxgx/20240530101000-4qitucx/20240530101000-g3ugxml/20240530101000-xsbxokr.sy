@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20241009230427"
+		"updated": "20241128113339"
 	},
 	"Children": [
 		{
@@ -12781,7 +12781,7 @@
 			"Properties": {
 				"ID": "20240530101000-xjv6i4l",
 				"id": "20240530101000-mifghto",
-				"updated": "20241009230427"
+				"updated": "20241128113339"
 			},
 			"Children": [
 				{
@@ -12811,7 +12811,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-4iuhg30",
-				"updated": "20241009230427"
+				"updated": "20241128113339"
 			},
 			"Children": [
 				{
@@ -13134,7 +13134,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロックを移動"
+									"Data": "ブロック参照を生成"
 								}
 							]
 						},
@@ -13173,7 +13173,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "ブロック参照を生成"
+									"Data": "ブロックを移動"
 								}
 							]
 						},

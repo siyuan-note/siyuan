@@ -8,9 +8,55 @@
 		"title": "請從這裡開始",
 		"title-img": "background-color:#556;background-image: linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(30deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(150deg, #445 12%, transparent 12.5%, transparent 87%, #445 87.5%, #445),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a),linear-gradient(60deg, #99a 25%, transparent 25.5%, transparent 75%, #99a 75%, #99a);background-size:80px 140px;background-position: 0 0, 0 0, 40px 70px, 40px 70px, 0 0, 40px 70px;",
 		"type": "doc",
-		"updated": "20241018105300"
+		"updated": "20241125224503"
 	},
 	"Children": [
+		{
+			"ID": "20241125224503-8vqkbc9",
+			"Type": "NodeBlockquote",
+			"Properties": {
+				"id": "20241125224503-8vqkbc9",
+				"updated": "20241125224503"
+			},
+			"Children": [
+				{
+					"Type": "NodeBlockquoteMarker",
+					"Data": "\u003e"
+				},
+				{
+					"ID": "20241125224503-fqq0875",
+					"Type": "NodeParagraph",
+					"Properties": {
+						"id": "20241125224503-fqq0875",
+						"updated": "20241125224503"
+					},
+					"Children": [
+						{
+							"Type": "NodeText",
+							"Data": "關閉思源筆記時會自動關閉用戶指南，可以點擊 "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "主菜單"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " - "
+						},
+						{
+							"Type": "NodeTextMark",
+							"TextMarkType": "kbd",
+							"TextMarkTextContent": "用戶指南"
+						},
+						{
+							"Type": "NodeText",
+							"Data": " ​再次查看"
+						}
+					]
+				}
+			]
+		},
 		{
 			"ID": "20211226115745-rorv31l",
 			"Type": "NodeSuperBlock",

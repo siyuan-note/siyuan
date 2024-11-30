@@ -8,6 +8,7 @@ import {updateCellsValue} from "./cell";
 import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
+import * as dayjs from "dayjs";
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {
@@ -213,6 +214,11 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
 <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>`;
     }
     if (type === "empty") {
+        if (id) {
+            return `<button class="b3-menu__item" data-type="setRelationCell">
+    <span class="b3-menu__label">${window.siyuan.languages.newRowInRelation.replace("${x}", text).replace("${y}", id)}</span>
+</button>`;
+        }
         return `<button class="b3-menu__item">
     <span class="b3-menu__label">${window.siyuan.languages.emptyContent}</span>
 </button>`;
@@ -243,9 +249,10 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || window.siyuan.languages.untitled);
             }
         });
-        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
+        menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
-${html || genSelectItemHTML("empty")}`;
+${html}
+${keyword ? genSelectItemHTML("empty", keyword, undefined, menuElement.querySelector(".popover__block").outerHTML) : (html ? "" : genSelectItemHTML("empty"))}`;
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     });
 };
@@ -273,7 +280,7 @@ export const bindRelationEvent = (options: {
                 html += genSelectItemHTML("unselect", item.block.id, item.isDetached, item.block.content || window.siyuan.languages.untitled);
             }
         });
-        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML || genSelectItemHTML("empty")}
+        options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
 <button class="b3-menu__separator"></button>
 ${html || genSelectItemHTML("empty")}`;
         const cellRect = options.cellElements[options.cellElements.length - 1].getBoundingClientRect();
@@ -340,7 +347,7 @@ export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
 };
 
 export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, target: HTMLElement, cellElements: HTMLElement[]) => {
-    const menuElement = hasClosestByClassName(target, "b3-menu__items");
+    const menuElement = hasClosestByClassName(target, "b3-menu");
     if (!menuElement) {
         return;
     }
@@ -353,7 +360,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     }
     if (!nodeElement.contains(cellElements[0])) {
         cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
-            nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`) ) as HTMLElement;
+            nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
     }
     const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
     menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
@@ -371,8 +378,9 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (target.classList.contains("b3-menu__item")) {
         const targetId = target.getAttribute("data-id");
         const separatorElement = menuElement.querySelector(".b3-menu__separator");
+        const searchValue = menuElement.querySelector("input").value;
         if (target.getAttribute("draggable")) {
-            if (!separatorElement.nextElementSibling.getAttribute("data-id")) {
+            if (!separatorElement.nextElementSibling.getAttribute("data-id") && !searchValue) {
                 separatorElement.nextElementSibling.remove();
             }
             const removeIndex = newValue.blockIDs.indexOf(targetId);
@@ -380,13 +388,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             newValue.contents.splice(removeIndex, 1);
             separatorElement.after(target);
             target.outerHTML = genSelectItemHTML("unselect", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent);
-            if (!separatorElement.previousElementSibling) {
-                separatorElement.insertAdjacentHTML("beforebegin", genSelectItemHTML("empty"));
-            }
-        } else {
-            if (!separatorElement.previousElementSibling.getAttribute("data-id")) {
-                separatorElement.previousElementSibling.remove();
-            }
+        } else if (targetId) {
             newValue.blockIDs.push(targetId);
             newValue.contents.push({
                 type: "block",
@@ -401,6 +403,35 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
+        } else {
+            const blockID = target.querySelector(".popover__block").getAttribute("data-id");
+            const content = target.querySelector("b").textContent;
+            const rowId = Lute.NewNodeID();
+            transaction(protyle, [{
+                action: "insertAttrViewBlock",
+                ignoreFillFilter: true,
+                avID: menuElement.firstElementChild.getAttribute("data-av-id"),
+                srcs: [{
+                    id: rowId,
+                    isDetached: true,
+                    content
+                }],
+                blockID,
+            }, {
+                action: "doUpdateUpdated",
+                id: blockID,
+                data: dayjs().format("YYYYMMDDHHmmss"),
+            }]);
+            newValue.blockIDs.push(rowId);
+            newValue.contents.push({
+                type: "block",
+                block: {
+                    id: rowId,
+                    content
+                },
+                isDetached: true
+            });
+            separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", rowId, true, content)}</button>`);
         }
         menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");

@@ -2,15 +2,20 @@
 
   &__avvalue {
     cursor: pointer;
-    transition: var(--b3-transition);
+    transition: var(--b3-background-transition);
     border-radius: var(--b3-border-radius);
     padding: 4px 8px;
     line-height: 26px;
     min-height: 26px;
     flex-wrap: wrap;
 
-    &:hover {
-      background-color: var(--b3-theme-background);
+    &:not(.custom-attr__avvalue--readonly):hover,
+    &--active {
+      background-color: var(--b3-theme-surface-light);
+    }
+
+    &--readonly {
+      cursor: default;
     }
 
     .av__checkbox {
@@ -40,13 +45,19 @@
   .block__logo:not(.popover__block) {
     width: 160px;
     color: var(--b3-theme-on-surface);
+    border-radius: var(--b3-border-radius);
+    transition: var(--b3-background-transition);
+    min-height: 34px;
     align-self: flex-start;
-    margin-top: 5px;
 
     span {
       text-overflow: ellipsis;
       white-space: nowrap;
       overflow: hidden;
+    }
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
     }
   }
 
@@ -65,16 +76,35 @@
         background-color: transparent;
       }
     }
+
+    [placeholder]:empty::after {
+      color: var(--b3-empty-color);
+      content: attr(placeholder);
+    }
+  }
+
+  .b3-button[data-type="addColumn"] {
+    margin-left: 28px;
+
+    svg {
+      width: 16px;
+      height: 16px;
+      margin-right: 8px;
+    }
+
+    &:hover {
+      background-color: var(--b3-theme-surface-light);
+    }
   }
 
   .b3-text-field--text {
-    transition: var(--b3-transition);
+    transition: var(--b3-background-transition);
     min-height: 34px;
     background-color: transparent;
     padding: 7px 8px;
 
     &:hover {
-      background-color: var(--b3-theme-background);
+      background-color: var(--b3-theme-surface-light);
     }
   }
 
@@ -86,7 +116,7 @@
     max-height: 24px;
   }
 
-  .dragover__top.av__row {
-    box-shadow: 0 -2px 0 var(--b3-theme-primary-lighter), inset 0 2px 0 var(--b3-theme-primary-lighter) !important;
+  .av__row.dragover__top::after {
+    top: -1.5px;
   }
 }

@@ -622,6 +622,7 @@ func ImportData(zipPath string) (err error) {
 	lockSync()
 	defer unlockSync()
 
+	logging.LogInfof("import data from [%s]", zipPath)
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
 	baseName = strings.TrimSuffix(baseName, ext)
@@ -656,6 +657,7 @@ func ImportData(zipPath string) (err error) {
 		return
 	}
 
+	logging.LogInfof("import data from [%s] done", zipPath)
 	IncSync()
 	FullReindex()
 	return

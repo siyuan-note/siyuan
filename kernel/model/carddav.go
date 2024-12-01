@@ -777,7 +777,7 @@ func (o *AddressObject) update() error {
 	o.Data.Path = PathJoinWithSlash(o.BookPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
-	o.Data.ETag = fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size())
+	o.Data.ETag = FileETag(addressFileInfo)
 
 	return nil
 }

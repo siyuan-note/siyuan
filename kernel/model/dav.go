@@ -17,9 +17,12 @@
 package model
 
 import (
+	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/emersion/go-webdav/caldav"
@@ -62,4 +65,13 @@ func SaveMetaData[T []*caldav.Calendar | []*carddav.AddressBook](metaData T, met
 	}
 
 	return nil
+}
+
+// FileETag generates an ETag for a file
+func FileETag(fileInfo fs.FileInfo) string {
+	return fmt.Sprintf(
+		"%s-%x",
+		fileInfo.ModTime().Format(time.RFC3339),
+		fileInfo.Size(),
+	)
 }

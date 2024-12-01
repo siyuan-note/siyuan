@@ -721,7 +721,7 @@ func serveCalDAV(ginServer *gin.Engine) {
 
 	ginGroup := ginServer.Group(model.CalDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
 	ginGroup.Match(CalDavMethods, "/*path", func(c *gin.Context) {
-		logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
+		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case http.MethodPost,

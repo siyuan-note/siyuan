@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"context"
 	"errors"
-	"fmt"
 	"os"
 	"path"
 	"strings"
@@ -647,7 +646,7 @@ func (o *CalendarObject) update() error {
 	o.Data.Path = PathJoinWithSlash(o.CalendarPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
-	o.Data.ETag = fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size())
+	o.Data.ETag = FileETag(addressFileInfo)
 
 	return nil
 }
@@ -655,17 +654,17 @@ func (o *CalendarObject) update() error {
 type CalDavBackend struct{}
 
 func (b *CalDavBackend) CurrentUserPrincipal(ctx context.Context) (string, error) {
-	logging.LogDebugf("CalDAV CurrentUserPrincipal")
+	// logging.LogDebugf("CalDAV CurrentUserPrincipal")
 	return CalDavUserPrincipalPath, nil
 }
 
 func (b *CalDavBackend) CalendarHomeSetPath(ctx context.Context) (string, error) {
-	logging.LogDebugf("CalDAV CalendarHomeSetPath")
+	// logging.LogDebugf("CalDAV CalendarHomeSetPath")
 	return CalDavHomeSetPath, nil
 }
 
 func (b *CalDavBackend) CreateCalendar(ctx context.Context, calendar *caldav.Calendar) (err error) {
-	logging.LogDebugf("CalDAV CreateCalendar -> calendar: %#v", calendar)
+	// logging.LogDebugf("CalDAV CreateCalendar -> calendar: %#v", calendar)
 	calendar.Path = PathCleanWithSlash(calendar.Path)
 
 	if err = calendars.Load(); err != nil {
@@ -673,23 +672,23 @@ func (b *CalDavBackend) CreateCalendar(ctx context.Context, calendar *caldav.Cal
 	}
 
 	err = calendars.CreateCalendar(calendar)
-	logging.LogDebugf("CalDAV CreateCalendar <- err: %s", err)
+	// logging.LogDebugf("CalDAV CreateCalendar <- err: %s", err)
 	return
 }
 
 func (b *CalDavBackend) ListCalendars(ctx context.Context) (calendars_ []caldav.Calendar, err error) {
-	logging.LogDebugf("CalDAV ListCalendars")
+	// logging.LogDebugf("CalDAV ListCalendars")
 	if err = calendars.Load(); err != nil {
 		return
 	}
 
 	calendars_, err = calendars.ListCalendars()
-	logging.LogDebugf("CalDAV ListCalendars <- calendars: %#v, err: %s", calendars_, err)
+	// logging.LogDebugf("CalDAV ListCalendars <- calendars: %#v, err: %s", calendars_, err)
 	return
 }
 
 func (b *CalDavBackend) GetCalendar(ctx context.Context, calendarPath string) (calendar *caldav.Calendar, err error) {
-	logging.LogDebugf("CalDAV GetCalendar -> calendarPath: %s", calendarPath)
+	// logging.LogDebugf("CalDAV GetCalendar -> calendarPath: %s", calendarPath)
 	calendarPath = PathCleanWithSlash(calendarPath)
 
 	if err = calendars.Load(); err != nil {
@@ -697,12 +696,12 @@ func (b *CalDavBackend) GetCalendar(ctx context.Context, calendarPath string) (c
 	}
 
 	calendar, err = calendars.GetCalendar(calendarPath)
-	logging.LogDebugf("CalDAV GetCalendar <- calendar: %#v, err: %s", calendar, err)
+	// logging.LogDebugf("CalDAV GetCalendar <- calendar: %#v, err: %s", calendar, err)
 	return
 }
 
 func (b *CalDavBackend) DeleteCalendar(ctx context.Context, calendarPath string) (err error) {
-	logging.LogDebugf("CalDAV DeleteCalendar -> calendarPath: %s", calendarPath)
+	// logging.LogDebugf("CalDAV DeleteCalendar -> calendarPath: %s", calendarPath)
 	calendarPath = PathCleanWithSlash(calendarPath)
 
 	if err = calendars.Load(); err != nil {
@@ -710,12 +709,12 @@ func (b *CalDavBackend) DeleteCalendar(ctx context.Context, calendarPath string)
 	}
 
 	err = calendars.DeleteCalendar(calendarPath)
-	logging.LogDebugf("CalDAV DeleteCalendar <- err: %s", err)
+	// logging.LogDebugf("CalDAV DeleteCalendar <- err: %s", err)
 	return
 }
 
 func (b *CalDavBackend) PutCalendarObject(ctx context.Context, objectPath string, calendar *ical.Calendar, opts *caldav.PutCalendarObjectOptions) (calendarObject *caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV PutCalendarObject -> objectPath: %s, opts: %#v", objectPath, opts)
+	// logging.LogDebugf("CalDAV PutCalendarObject -> objectPath: %s, opts: %#v", objectPath, opts)
 	objectPath = PathCleanWithSlash(objectPath)
 
 	if err = calendars.Load(); err != nil {
@@ -723,12 +722,12 @@ func (b *CalDavBackend) PutCalendarObject(ctx context.Context, objectPath string
 	}
 
 	calendarObject, err = calendars.PutCalendarObject(objectPath, calendar, opts)
-	logging.LogDebugf("CalDAV PutCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
+	// logging.LogDebugf("CalDAV PutCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
 	return
 }
 
 func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, calendarPath string, req *caldav.CalendarCompRequest) (calendarObjects []caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV ListCalendarObjects -> calendarPath: %s, req: %#v", calendarPath, req)
+	// logging.LogDebugf("CalDAV ListCalendarObjects -> calendarPath: %s, req: %#v", calendarPath, req)
 	calendarPath = PathCleanWithSlash(calendarPath)
 
 	if err = calendars.Load(); err != nil {
@@ -736,12 +735,12 @@ func (b *CalDavBackend) ListCalendarObjects(ctx context.Context, calendarPath st
 	}
 
 	calendarObjects, err = calendars.ListCalendarObjects(calendarPath, req)
-	logging.LogDebugf("CalDAV ListCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
+	// logging.LogDebugf("CalDAV ListCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
 	return
 }
 
 func (b *CalDavBackend) GetCalendarObject(ctx context.Context, objectPath string, req *caldav.CalendarCompRequest) (calendarObject *caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV GetCalendarObject -> objectPath: %s, req: %#v", objectPath, req)
+	// logging.LogDebugf("CalDAV GetCalendarObject -> objectPath: %s, req: %#v", objectPath, req)
 	objectPath = PathCleanWithSlash(objectPath)
 
 	if err = calendars.Load(); err != nil {
@@ -749,12 +748,12 @@ func (b *CalDavBackend) GetCalendarObject(ctx context.Context, objectPath string
 	}
 
 	calendarObject, err = calendars.GetCalendarObject(objectPath, req)
-	logging.LogDebugf("CalDAV GetCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
+	// logging.LogDebugf("CalDAV GetCalendarObject <- calendarObject: %#v, err: %s", calendarObject, err)
 	return
 }
 
 func (b *CalDavBackend) QueryCalendarObjects(ctx context.Context, calendarPath string, query *caldav.CalendarQuery) (calendarObjects []caldav.CalendarObject, err error) {
-	logging.LogDebugf("CalDAV QueryCalendarObjects -> calendarPath: %s, query: %#v", calendarPath, query)
+	// logging.LogDebugf("CalDAV QueryCalendarObjects -> calendarPath: %s, query: %#v", calendarPath, query)
 	calendarPath = PathCleanWithSlash(calendarPath)
 
 	if err = calendars.Load(); err != nil {
@@ -762,12 +761,12 @@ func (b *CalDavBackend) QueryCalendarObjects(ctx context.Context, calendarPath s
 	}
 
 	calendarObjects, err = calendars.QueryCalendarObjects(calendarPath, query)
-	logging.LogDebugf("CalDAV QueryCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
+	// logging.LogDebugf("CalDAV QueryCalendarObjects <- calendarObjects: %#v, err: %s", calendarObjects, err)
 	return
 }
 
 func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, objectPath string) (err error) {
-	logging.LogDebugf("CalDAV DeleteCalendarObject -> objectPath: %s", objectPath)
+	// logging.LogDebugf("CalDAV DeleteCalendarObject -> objectPath: %s", objectPath)
 	objectPath = PathCleanWithSlash(objectPath)
 
 	if err = calendars.Load(); err != nil {
@@ -775,6 +774,6 @@ func (b *CalDavBackend) DeleteCalendarObject(ctx context.Context, objectPath str
 	}
 
 	err = calendars.DeleteCalendarObject(objectPath)
-	logging.LogDebugf("CalDAV DeleteCalendarObject <- err: %s", err)
+	// logging.LogDebugf("CalDAV DeleteCalendarObject <- err: %s", err)
 	return
 }

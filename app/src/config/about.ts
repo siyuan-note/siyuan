@@ -142,7 +142,7 @@ export const about = {
         </button>
     </div>
 </div>
-<div class="b3-label fn__flex"><div class="fn__block">
+<div class="b3-label">
     <div>
         ${window.siyuan.languages.dataRepoPurge}
     </div>
@@ -166,7 +166,7 @@ export const about = {
         <span class="fn__space"></span>
         <input class="b3-text-field fn__flex-center fn__size200" min="1" type="number" id="retentionIndexesDaily" value="${window.siyuan.config.repo.retentionIndexesDaily}">
     </div>
-</div></div>
+</div>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
         ${window.siyuan.languages.systemLog}

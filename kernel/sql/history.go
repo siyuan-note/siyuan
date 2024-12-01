@@ -72,6 +72,9 @@ func QueryHistory(stmt string) (ret []map[string]interface{}, err error) {
 }
 
 func SelectHistoriesRawStmt(stmt string) (ret []*History) {
+	if nil == historyDB {
+		return
+	}
 	rows, err := historyDB.Query(stmt)
 	if err != nil {
 		logging.LogWarnf("sql query [%s] failed: %s", stmt, err)
@@ -100,6 +103,9 @@ func queryHistory(query string, args ...interface{}) (*sql.Rows, error) {
 	query = strings.TrimSpace(query)
 	if "" == query {
 		return nil, errors.New("statement is empty")
+	}
+	if nil == historyDB {
+		return nil, errors.New("database is nil")
 	}
 	return historyDB.Query(query, args...)
 }

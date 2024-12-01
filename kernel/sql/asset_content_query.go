@@ -185,5 +185,8 @@ func queryAssetContent(query string, args ...interface{}) (*sql.Rows, error) {
 	if "" == query {
 		return nil, errors.New("statement is empty")
 	}
+	if nil == assetContentDB {
+		return nil, errors.New("database is nil")
+	}
 	return assetContentDB.Query(query, args...)
 }

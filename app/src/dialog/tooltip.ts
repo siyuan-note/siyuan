@@ -61,6 +61,10 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
+    // 避免原本的 top 和 left 影响计算
+    messageElement.style.top = "0px";
+    messageElement.style.left = "0px";
+
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
         messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {

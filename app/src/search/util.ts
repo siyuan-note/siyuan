@@ -1183,7 +1183,7 @@ const renderNextSearchMark = (options: {
         return;
     }
     let matchElement;
-    const allMatchElements = Array.from(options.edit.protyle.wysiwyg.element.querySelectorAll(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`));
+    const allMatchElements = Array.from(options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
     allMatchElements.find((item, itemIndex) => {
         if (item.classList.contains("search-mark--hl")) {
             item.classList.remove("search-mark--hl");
@@ -1233,7 +1233,7 @@ export const getArticle = (options: {
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
-                const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
+                const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
                 if (matchElements.length === 0) {
                     return;
                 }

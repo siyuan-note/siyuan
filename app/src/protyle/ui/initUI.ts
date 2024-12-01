@@ -48,6 +48,8 @@ export const initUI = (protyle: IProtyle) => {
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);
 
+    protyle.element.append(protyle.highlight.styleElement);
+
     addLoading(protyle);
 
     setEditMode(protyle, protyle.options.mode);

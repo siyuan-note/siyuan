@@ -487,6 +487,7 @@ interface IProtyle {
         markHL: Highlight
         ranges: Range[]
         rangeIndex: 0
+        styleElement: HTMLStyleElement
     }
     getInstance: () => import("../protyle").Protyle,
     observerLoad?: ResizeObserver,

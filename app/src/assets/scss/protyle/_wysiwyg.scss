@@ -18,16 +18,6 @@
     outline: none;
   }
 
-  &::highlight(search-mark) {
-    background-color: var(--b3-protyle-inline-mark-background);
-    color: var(--b3-protyle-inline-mark-color);
-  }
-
-  &::highlight(search-mark-hl) {
-    background-color: var(--b3-theme-primary-lighter);
-    box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
-  }
-
   [data-node-id] {
     position: relative;
 

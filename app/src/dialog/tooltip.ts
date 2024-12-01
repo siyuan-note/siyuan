@@ -1,5 +1,7 @@
 import {isMobile} from "../util/functions";
 
+let hideTooltipTimeout: NodeJS.Timeout | null = null;
+
 export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {
         return;
@@ -9,6 +11,13 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         hideTooltip();
         return;
     }
+
+    // 清除 hideTooltip 的定时器
+    if (hideTooltipTimeout) {
+        clearTimeout(hideTooltipTimeout);
+        hideTooltipTimeout = null;
+    }
+
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
         document.body.insertAdjacentHTML("beforeend", `<div class="tooltip${!tooltipClass ? "" : " tooltip--" + tooltipClass}" id="tooltip">${message}</div>`);
@@ -83,8 +92,14 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 };
 
 export const hideTooltip = () => {
-    const messageElement = document.getElementById("tooltip");
-    if (messageElement) {
-        messageElement.remove();
+    if (hideTooltipTimeout) {
+        clearTimeout(hideTooltipTimeout);
     }
+    hideTooltipTimeout = setTimeout(() => {
+        const messageElement = document.getElementById("tooltip");
+        if (messageElement) {
+            messageElement.remove();
+        }
+        hideTooltipTimeout = null;
+    }, 50);
 };

@@ -11,15 +11,24 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     }
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="tooltip" id="tooltip">${message}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div class="tooltip${!tooltipClass ? "" : " tooltip--" + tooltipClass}" id="tooltip">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
-        messageElement.className = "tooltip";
-        messageElement.innerHTML = message;
-    }
+        const currentClassName = messageElement.className;
+        const currentMessage = messageElement.textContent;
 
-    if (tooltipClass) {
-        messageElement.classList.add("tooltip--" + tooltipClass);
+        let newClassName = "tooltip";
+        if (tooltipClass) {
+            newClassName += " tooltip--" + tooltipClass;
+        }
+        // 避免不必要的更新
+        if (currentClassName !== newClassName) {
+            messageElement.className = newClassName;
+        }
+        if (currentMessage !== message) {
+            // 鼠标在按钮等多层结构的元素上小幅移动时会频繁更新
+            messageElement.innerHTML = message;
+        }
     }
 
     let left = targetRect.left;

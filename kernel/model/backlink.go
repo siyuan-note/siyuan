@@ -94,7 +94,9 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	}
 	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
 
-	mentionKeywords = strings.Split(keyword, " ")
+	if "" != keyword {
+		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
+	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
 
 	var refTree *parse.Tree

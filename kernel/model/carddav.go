@@ -24,7 +24,6 @@ import (
 	"io"
 	"os"
 	"path"
-	"path/filepath"
 	"strings"
 	"sync"
 
@@ -89,14 +88,13 @@ var (
 		booksMetaData: []*carddav.AddressBook{},
 	}
 
-	ErrorNotFound    = errors.New("CardDAV: not found")
-	ErrorPathInvalid = errors.New("CardDAV: path is invalid")
+	ErrorCardDavPathInvalid = errors.New("CardDAV: path is invalid")
 
-	ErrorBookNotFound    = errors.New("CardDAV: address book not found")
-	ErrorBookPathInvalid = errors.New("CardDAV: address book path is invalid")
+	ErrorCardDavBookNotFound    = errors.New("CardDAV: address book not found")
+	ErrorCardDavBookPathInvalid = errors.New("CardDAV: address book path is invalid")
 
-	ErrorAddressNotFound                 = errors.New("CardDAV: address not found")
-	ErrorAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
+	ErrorCardDavAddressNotFound                 = errors.New("CardDAV: address not found")
+	ErrorCardDavAddressFileExtensionNameInvalid = errors.New("CardDAV: address file extension name is invalid")
 )
 
 // ImportVCardFile imports a address book from a vCard file (*.vcf)
@@ -116,19 +114,9 @@ func ExportAddressBook(addressBookPath string) (cardContent string, err error) {
 	return
 }
 
-// CardDavPath2DirectoryPath converts CardDAV path to absolute path of the file system
-func CardDavPath2DirectoryPath(cardDavPath string) string {
-	return filepath.Join(util.DataDir, "storage", strings.TrimPrefix(cardDavPath, "/"))
-}
-
-// CardDavHomeSetDirectoryPath returns the absolute path of the address book home set directory
-func CardDavHomeSetDirectoryPath() string {
-	return CardDavPath2DirectoryPath(CardDavHomeSetPath)
-}
-
 // AddressBooksMetaDataFilePath returns the absolute path of the address books meta data file
 func AddressBooksMetaDataFilePath() string {
-	return CardDavPath2DirectoryPath(CardDavAddressBooksMetaDataFilePath)
+	return DavPath2DirectoryPath(CardDavAddressBooksMetaDataFilePath)
 }
 
 func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
@@ -143,12 +131,12 @@ func ParseAddressPath(addressPath string) (addressBookPath string, addressID str
 	addressFileExt := path.Ext(addressFileName)
 
 	if GetCardDavPathDepth(addressBookPath) != cardDavPathDepth_AddressBook {
-		err = ErrorBookPathInvalid
+		err = ErrorCardDavBookPathInvalid
 		return
 	}
 
 	if addressFileExt != VCardFileExt {
-		err = ErrorAddressFileExtensionNameInvalid
+		err = ErrorCardDavAddressFileExtensionNameInvalid
 		return
 	}
 
@@ -217,9 +205,12 @@ type Contacts struct {
 // load all contacts
 func (c *Contacts) load() error {
 	c.books.Clear()
+
+	// load address books meta data
 	addressBooksMetaDataFilePath := AddressBooksMetaDataFilePath()
 	metaData, err := os.ReadFile(addressBooksMetaDataFilePath)
 	if os.IsNotExist(err) {
+		// create & save default address book
 		c.booksMetaData = []*carddav.AddressBook{&defaultAddressBook}
 		if err := c.saveAddressBooksMetaData(); err != nil {
 			return err
@@ -233,12 +224,13 @@ func (c *Contacts) load() error {
 		}
 	}
 
+	// load vCard files (*.vcf)
 	wg := &sync.WaitGroup{}
 	wg.Add(len(c.booksMetaData))
 	for _, addressBookMetaData := range c.booksMetaData {
 		addressBook := &AddressBook{
 			Changed:       false,
-			DirectoryPath: CardDavPath2DirectoryPath(addressBookMetaData.Path),
+			DirectoryPath: DavPath2DirectoryPath(addressBookMetaData.Path),
 			MetaData:      addressBookMetaData,
 			Addresses:     sync.Map{},
 		}
@@ -283,25 +275,7 @@ func (c *Contacts) save(force bool) error {
 
 // save all contacts
 func (c *Contacts) saveAddressBooksMetaData() error {
-	data, err := gulu.JSON.MarshalIndentJSON(c.booksMetaData, "", "  ")
-	if err != nil {
-		logging.LogErrorf("marshal address books meta data failed: %s", err)
-		return err
-	}
-
-	dirPath := CardDavHomeSetDirectoryPath()
-	if err := os.MkdirAll(dirPath, 0755); err != nil {
-		logging.LogErrorf("create directory [%s] failed: %s", dirPath, err)
-		return err
-	}
-
-	filePath := AddressBooksMetaDataFilePath()
-	if err := os.WriteFile(filePath, data, 0755); err != nil {
-		logging.LogErrorf("write file [%s] failed: %s", filePath, err)
-		return err
-	}
-
-	return nil
+	return SaveMetaData(c.booksMetaData, AddressBooksMetaDataFilePath())
 }
 
 func (c *Contacts) Load() error {
@@ -324,14 +298,14 @@ func (c *Contacts) GetAddress(addressPath string) (addressBook *AddressBook, add
 	if value, ok := c.books.Load(bookPath); ok {
 		addressBook = value.(*AddressBook)
 	} else {
-		err = ErrorBookNotFound
+		err = ErrorCardDavBookNotFound
 		return
 	}
 
 	if value, ok := addressBook.Addresses.Load(addressID); ok {
 		addressObject = value.(*AddressObject)
 	} else {
-		err = ErrorAddressNotFound
+		err = ErrorCardDavAddressNotFound
 		return
 	}
 
@@ -357,7 +331,7 @@ func (c *Contacts) GetAddressBook(path string) (addressBook *carddav.AddressBook
 		return
 	}
 
-	err = ErrorBookNotFound
+	err = ErrorCardDavBookNotFound
 	return
 }
 
@@ -376,7 +350,7 @@ func (c *Contacts) CreateAddressBook(addressBookMetaData *carddav.AddressBook) (
 		// insert map item
 		addressBook = &AddressBook{
 			Changed:       false,
-			DirectoryPath: CardDavPath2DirectoryPath(addressBookMetaData.Path),
+			DirectoryPath: DavPath2DirectoryPath(addressBookMetaData.Path),
 			MetaData:      addressBookMetaData,
 			Addresses:     sync.Map{},
 		}
@@ -401,7 +375,7 @@ func (c *Contacts) CreateAddressBook(addressBookMetaData *carddav.AddressBook) (
 
 	// create address book directory
 	if err = os.MkdirAll(addressBook.DirectoryPath, 0755); err != nil {
-		logging.LogErrorf("create directory [%s] failed: %s", addressBook, err)
+		logging.LogErrorf("create directory [%s] failed: %s", addressBook.DirectoryPath, err)
 		return
 	}
 
@@ -434,7 +408,7 @@ func (c *Contacts) DeleteAddressBook(path string) (err error) {
 
 	// remove address book directory
 	if err = os.RemoveAll(addressBook.DirectoryPath); err != nil {
-		logging.LogErrorf("remove directory [%s] failed: %s", addressBook, err)
+		logging.LogErrorf("remove directory [%s] failed: %s", addressBook.DirectoryPath, err)
 		return
 	}
 
@@ -467,7 +441,7 @@ func (c *Contacts) ListAddressObjects(bookPath string, req *carddav.AddressDataR
 	if value, ok := c.books.Load(bookPath); ok {
 		addressBook = value.(*AddressBook)
 	} else {
-		err = ErrorBookNotFound
+		err = ErrorCardDavBookNotFound
 		return
 	}
 
@@ -506,7 +480,7 @@ func (c *Contacts) QueryAddressObjects(urlPath string, query *carddav.AddressBoo
 			addressObjects = append(addressObjects, *address.Data)
 		}
 	default:
-		err = ErrorPathInvalid
+		err = ErrorCardDavPathInvalid
 		return
 	}
 
@@ -528,7 +502,7 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 	if value, ok := c.books.Load(bookPath); ok {
 		addressBook = value.(*AddressBook)
 	} else {
-		err = ErrorBookNotFound
+		err = ErrorCardDavBookNotFound
 		return
 	}
 
@@ -546,7 +520,7 @@ func (c *Contacts) PutAddressObject(addressPath string, card vcard.Card, opts *c
 	} else {
 		address = &AddressObject{
 			Changed:  true,
-			FilePath: CardDavPath2DirectoryPath(addressPath),
+			FilePath: DavPath2DirectoryPath(addressPath),
 			BookPath: bookPath,
 			Data: &carddav.AddressObject{
 				Card: card,
@@ -574,7 +548,7 @@ func (c *Contacts) DeleteAddressObject(addressPath string) (err error) {
 	defer c.lock.Unlock()
 
 	_, address, err := c.GetAddress(addressPath)
-	if err != nil && err != ErrorAddressNotFound {
+	if err != nil && err != ErrorCardDavAddressNotFound {
 		return
 	}
 
@@ -718,38 +692,27 @@ type AddressObject struct {
 
 // load an address from *.vcf file
 func (o *AddressObject) load() error {
-	// get file info
-	addressFileInfo, err := os.Stat(o.FilePath)
+	// load vCard file
+	cards, err := LoadCards(o.FilePath)
 	if err != nil {
-		logging.LogErrorf("get file [%s] info failed: %s", o.FilePath, err)
 		return err
 	}
-
-	// read file
-	addressData, err := os.ReadFile(o.FilePath)
-	if err != nil {
-		logging.LogErrorf("read file [%s] failed: %s", o.FilePath, err)
-		return err
+	if len(cards) != 1 {
+		return fmt.Errorf("file [%s] contains multiple cards", o.FilePath)
 	}
 
-	// decode file
-	reader := bytes.NewReader(addressData)
-	decoder := vcard.NewDecoder(reader)
-	card, err := decoder.Decode()
-	if err != nil {
-		logging.LogErrorf("decode file [%s] failed: %s", o.FilePath, err)
-		return err
-	}
-
-	// load data
-	o.Changed = false
+	// create address object
 	o.Data = &carddav.AddressObject{
-		Path:          path.Join(o.BookPath, addressFileInfo.Name()),
-		ModTime:       addressFileInfo.ModTime(),
-		ContentLength: addressFileInfo.Size(),
-		ETag:          fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size()),
-		Card:          card,
+		Card: *cards[0],
 	}
+
+	// update file info
+	err = o.update()
+	if err != nil {
+		return err
+	}
+
+	o.Changed = false
 	return nil
 }
 
@@ -785,14 +748,13 @@ func (o *AddressObject) save(force bool) error {
 
 // update file info
 func (o *AddressObject) update() error {
-	// update file info
 	addressFileInfo, err := os.Stat(o.FilePath)
 	if err != nil {
 		logging.LogErrorf("get file [%s] info failed: %s", o.FilePath, err)
 		return err
 	}
 
-	o.Data.Path = path.Join(o.BookPath, addressFileInfo.Name())
+	o.Data.Path = PathJoinWithSlash(o.BookPath, addressFileInfo.Name())
 	o.Data.ModTime = addressFileInfo.ModTime()
 	o.Data.ContentLength = addressFileInfo.Size()
 	o.Data.ETag = fmt.Sprintf("%x-%x", addressFileInfo.ModTime(), addressFileInfo.Size())

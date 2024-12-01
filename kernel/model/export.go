@@ -1129,6 +1129,7 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		return links[i].Page < links[j].Page
 	})
 
+	titles := map[string]bool{}
 	bms := map[string]*pdfcpu.Bookmark{}
 	for _, link := range links {
 		linkID := link.URI[strings.LastIndex(link.URI, "/")+1:]
@@ -1139,6 +1140,14 @@ func processPDFBookmarks(pdfCtx *model.Context, headings []*ast.Node) {
 		}
 		title := b.Content
 		title, _ = url.QueryUnescape(title)
+		for {
+			if _, ok := titles[title]; ok {
+				title += "\x01"
+			} else {
+				titles[title] = true
+				break
+			}
+		}
 		bm := &pdfcpu.Bookmark{
 			Title:    title,
 			PageFrom: link.Page,

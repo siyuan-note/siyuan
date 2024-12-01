@@ -1835,7 +1835,7 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             imgElement.style.height = label === window.siyuan.languages.default ? "" : parseInt(label) + "vh";
-            imgElement.style.width = "";
+            imgElement.parentElement.style.width = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);
         }

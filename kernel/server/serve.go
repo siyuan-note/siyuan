@@ -32,6 +32,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/emersion/go-webdav/caldav"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
@@ -49,7 +50,7 @@ import (
 )
 
 const (
-	MethodMkcol     = "MKCOL"
+	MethodMkCol     = "MKCOL"
 	MethodCopy      = "COPY"
 	MethodMove      = "MOVE"
 	MethodLock      = "LOCK"
@@ -82,13 +83,31 @@ var (
 		http.MethodPut,
 		http.MethodDelete,
 
-		MethodMkcol,
+		MethodMkCol,
 		MethodCopy,
 		MethodMove,
 		MethodLock,
 		MethodUnlock,
 		MethodPropFind,
 		MethodPropPatch,
+	}
+	CalDavMethods = []string{
+		http.MethodOptions,
+		http.MethodHead,
+		http.MethodGet,
+		http.MethodPost,
+		http.MethodPut,
+		http.MethodDelete,
+
+		MethodMkCol,
+		MethodCopy,
+		MethodMove,
+		// MethodLock,
+		// MethodUnlock,
+		MethodPropFind,
+		MethodPropPatch,
+
+		MethodReport,
 	}
 	CardDavMethods = []string{
 		http.MethodOptions,
@@ -98,9 +117,9 @@ var (
 		http.MethodPut,
 		http.MethodDelete,
 
-		MethodMkcol,
-		// MethodCopy,
-		// MethodMove,
+		MethodMkCol,
+		MethodCopy,
+		MethodMove,
 		// MethodLock,
 		// MethodUnlock,
 		MethodPropFind,
@@ -137,6 +156,7 @@ func Serve(fastMode bool) {
 	serveAppearance(ginServer)
 	serveWebSocket(ginServer)
 	serveWebDAV(ginServer)
+	serveCalDAV(ginServer)
 	serveCardDAV(ginServer)
 	serveExport(ginServer)
 	serveWidgets(ginServer)
@@ -673,7 +693,7 @@ func serveWebDAV(ginServer *gin.Engine) {
 			case http.MethodPost,
 				http.MethodPut,
 				http.MethodDelete,
-				MethodMkcol,
+				MethodMkCol,
 				MethodCopy,
 				MethodMove,
 				MethodLock,
@@ -687,26 +707,27 @@ func serveWebDAV(ginServer *gin.Engine) {
 	})
 }
 
-func serveCardDAV(ginServer *gin.Engine) {
+func serveCalDAV(ginServer *gin.Engine) {
 	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
-	handler := carddav.Handler{
-		Backend: &model.CardDavBackend{},
-		Prefix:  model.CardDavPrincipalsPath,
+	handler := caldav.Handler{
+		Backend: &model.CalDavBackend{},
+		Prefix:  model.CalDavPrincipalsPath,
 	}
 
-	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
+	ginServer.Match(CalDavMethods, "/.well-known/caldav", func(c *gin.Context) {
+		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
 		handler.ServeHTTP(c.Writer, c.Request)
 	})
 
-	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
-	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
-		// logging.LogDebugf("CardDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
+	ginGroup := ginServer.Group(model.CalDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
+	ginGroup.Match(CalDavMethods, "/*path", func(c *gin.Context) {
+		// logging.LogDebugf("CalDAV -> [%s] %s", c.Request.Method, c.Request.URL.String())
 		if util.ReadOnly {
 			switch c.Request.Method {
 			case http.MethodPost,
 				http.MethodPut,
 				http.MethodDelete,
-				MethodMkcol,
+				MethodMkCol,
 				MethodCopy,
 				MethodMove,
 				MethodLock,
@@ -716,6 +737,41 @@ func serveCardDAV(ginServer *gin.Engine) {
 				return
 			}
 		}
+		handler.ServeHTTP(c.Writer, c.Request)
+		// logging.LogDebugf("CalDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
+	})
+}
+
+func serveCardDAV(ginServer *gin.Engine) {
+	// REF: https://github.com/emersion/hydroxide/blob/master/carddav/carddav.go
+	handler := carddav.Handler{
+		Backend: &model.CardDavBackend{},
+		Prefix:  model.CardDavPrincipalsPath,
+	}
+
+	ginServer.Match(CardDavMethods, "/.well-known/carddav", func(c *gin.Context) {
+		// logging.LogDebugf("CardDAV [/.well-known/carddav]")
+		handler.ServeHTTP(c.Writer, c.Request)
+	})
+
+	ginGroup := ginServer.Group(model.CardDavPrefixPath, model.CheckAuth, model.CheckAdminRole)
+	ginGroup.Match(CardDavMethods, "/*path", func(c *gin.Context) {
+		if util.ReadOnly {
+			switch c.Request.Method {
+			case http.MethodPost,
+				http.MethodPut,
+				http.MethodDelete,
+				MethodMkCol,
+				MethodCopy,
+				MethodMove,
+				MethodLock,
+				MethodUnlock,
+				MethodPropPatch:
+				c.AbortWithError(http.StatusForbidden, fmt.Errorf(model.Conf.Language(34)))
+				return
+			}
+		}
+		// TODO: Can't handle Thunderbird's PROPFIND request with prop <current-user-privilege-set/>
 		handler.ServeHTTP(c.Writer, c.Request)
 		// logging.LogDebugf("CardDAV <- [%s] %v", c.Request.Method, c.Writer.Status())
 	})
@@ -739,6 +795,7 @@ func shortReqMsg(msg []byte) []byte {
 func corsMiddleware() gin.HandlerFunc {
 	allowMethods := strings.Join(HttpMethods, ", ")
 	allowWebDavMethods := strings.Join(WebDavMethods, ", ")
+	allowCalDavMethods := strings.Join(CalDavMethods, ", ")
 	allowCardDavMethods := strings.Join(CardDavMethods, ", ")
 
 	return func(c *gin.Context) {
@@ -747,13 +804,19 @@ func corsMiddleware() gin.HandlerFunc {
 		c.Header("Access-Control-Allow-Headers", "origin, Content-Length, Content-Type, Authorization")
 		c.Header("Access-Control-Allow-Private-Network", "true")
 
-		if strings.HasPrefix(c.Request.RequestURI, "/webdav/") {
+		if strings.HasPrefix(c.Request.RequestURI, "/webdav") {
 			c.Header("Access-Control-Allow-Methods", allowWebDavMethods)
 			c.Next()
 			return
 		}
 
-		if strings.HasPrefix(c.Request.RequestURI, "/carddav/") {
+		if strings.HasPrefix(c.Request.RequestURI, "/caldav") {
+			c.Header("Access-Control-Allow-Methods", allowCalDavMethods)
+			c.Next()
+			return
+		}
+
+		if strings.HasPrefix(c.Request.RequestURI, "/carddav") {
 			c.Header("Access-Control-Allow-Methods", allowCardDavMethods)
 			c.Next()
 			return

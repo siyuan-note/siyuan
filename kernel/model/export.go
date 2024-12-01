@@ -668,8 +668,16 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
+	blockRefMode := Conf.Export.BlockRefMode
+	if docx {
+		if 5 == blockRefMode {
+			// 导出 HTML/Word 时如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
+			blockRefMode = 4
+		}
+	}
+
 	tree = exportTree(tree, true, false, true,
-		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle)

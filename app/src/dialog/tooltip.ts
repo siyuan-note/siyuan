@@ -75,7 +75,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         if (position === "parentE") {
             messageElement.style.left = (parentRect.left - 8 - messageElement.clientWidth) + "px";
         } else {
-            messageElement.style.left = (window.innerWidth - messageElement.clientWidth) + "px";
+            messageElement.style.left = (window.innerWidth - 1 - messageElement.clientWidth) + "px";
         }
     } else {
         messageElement.style.left = Math.max(0, left) + "px";

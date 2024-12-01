@@ -2054,12 +2054,16 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	depth := 0
 	resolveEmbedR(ret.Root, blockEmbedMode, luteEngine, &[]string{}, &depth)
 
+	treeCache := map[string]*parse.Tree{}
+	treeCache[id] = ret
+	// 将块超链接转换为引用
+	depth = 0
+	blockLink2Ref(ret, ret.ID, &treeCache, &depth)
+
 	// 收集引用转脚注
 	var refFootnotes []*refAsFootnotes
 	if 4 == blockRefMode { // 块引转脚注
-		treeCache := map[string]*parse.Tree{}
-		treeCache[id] = ret
-		depth := 0
+		depth = 0
 		collectFootnotesDefs(ret, ret.ID, &refFootnotes, &treeCache, &depth)
 	}
 
@@ -2760,6 +2764,60 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 		footnotesDefBlock.AppendChild(footnotesDef)
 	}
 	return
+}
+
+func blockLink2Ref(currentTree *parse.Tree, id string, treeCache *map[string]*parse.Tree, depth *int) {
+	*depth++
+	if 4096 < *depth {
+		return
+	}
+
+	b := treenode.GetBlockTree(id)
+	if nil == b {
+		return
+	}
+	t := (*treeCache)[b.RootID]
+	if nil == t {
+		var err error
+		if t, err = LoadTreeByBlockID(b.ID); err != nil {
+			return
+		}
+		(*treeCache)[t.ID] = t
+	}
+	node := treenode.GetNodeInTree(t, b.ID)
+	if nil == node {
+		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
+		return
+	}
+	blockLink2Ref0(currentTree, node, treeCache, depth)
+	if ast.NodeHeading == node.Type {
+		children := treenode.HeadingChildren(node)
+		for _, c := range children {
+			blockLink2Ref0(currentTree, c, treeCache, depth)
+		}
+	}
+	return
+}
+
+func blockLink2Ref0(currentTree *parse.Tree, node *ast.Node, treeCache *map[string]*parse.Tree, depth *int) {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if treenode.IsBlockLink(n) {
+			n.TextMarkType = "block-ref"
+			n.TextMarkBlockRefID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+			n.TextMarkBlockRefSubtype = "s"
+
+			blockLink2Ref(currentTree, n.TextMarkBlockRefID, treeCache, depth)
+			return ast.WalkSkipChildren
+		} else if treenode.IsBlockRef(n) {
+			defID, _, _ := treenode.GetBlockRef(n)
+			blockLink2Ref(currentTree, defID, treeCache, depth)
+		}
+		return ast.WalkContinue
+	})
 }
 
 func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*refAsFootnotes, treeCache *map[string]*parse.Tree, depth *int) {

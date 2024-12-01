@@ -271,8 +271,8 @@ github.com/onsi/ginkgo/v2 v2.22.0 h1:Yed107/8DjTr0lKCNt7Dn8yQ6ybuDRQoMGrNFKzMfHg
 github.com/onsi/ginkgo/v2 v2.22.0/go.mod h1:7Du3c42kxCUegi0IImZ1wUQzMBVecgIHjR1C+NkhLQo=
 github.com/onsi/gomega v1.34.2 h1:pNCwDkzrsv7MS9kpaQvVb1aVLahQXyJ/Tv5oAZMI3i8=
 github.com/onsi/gomega v1.34.2/go.mod h1:v1xfxRgk0KIsG+QOdm7p8UosrOzPYRo60fd3B/1Dukc=
-github.com/open-spaced-repetition/go-fsrs/v3 v3.2.0 h1:lDY1dURLg5xYGbCcz9bxB7c+1v36+wZRYnSHOdQloPA=
-github.com/open-spaced-repetition/go-fsrs/v3 v3.2.0/go.mod h1:zTtQIk3kOO9kweg5zJAgbdwBXR2HBPsDN0k6AxmTpzY=
+github.com/open-spaced-repetition/go-fsrs/v3 v3.3.0 h1:4Y8oZN1oBAfS9UkUDuSk48VXjdb6BT1xD2MTFRTWTAc=
+github.com/open-spaced-repetition/go-fsrs/v3 v3.3.0/go.mod h1:zTtQIk3kOO9kweg5zJAgbdwBXR2HBPsDN0k6AxmTpzY=
 github.com/otiai10/gosseract/v2 v2.4.1 h1:G8AyBpXEeSlcq8TI85LH/pM5SXk8Djy2GEXisgyblRw=
 github.com/otiai10/gosseract/v2 v2.4.1/go.mod h1:1gNWP4Hgr2o7yqWfs6r5bZxAatjOIdqWxJLWsTsembk=
 github.com/otiai10/mint v1.6.3 h1:87qsV/aw1F5as1eH1zS/yqHY85ANKVMgkDrf9rcxbQs=
@@ -352,8 +352,8 @@ github.com/siyuan-note/httpclient v0.0.0-20241113084556-839baaab03f6 h1:IzvOUPUc
 github.com/siyuan-note/httpclient v0.0.0-20241113084556-839baaab03f6/go.mod h1:cMXV74/pjFOvH3zIwQW/SyH3gZw8YzTBbqt7dxof69k=
 github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2 h1:/2+tlOThVB86RxSLeW0JFw2ISUrH2ZFRg15ULGAUGAE=
 github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2/go.mod h1:3Osd2/nwzXZFl6ZcDE4hA0HD83Wyv1fds47nVuapyOM=
-github.com/siyuan-note/riff v0.0.0-20240912073907-1e89a5f8e7dc h1:5AFQ9sx+baB6nBHdabWwGsGf4QWrarIyocsn/DUc+Tc=
-github.com/siyuan-note/riff v0.0.0-20240912073907-1e89a5f8e7dc/go.mod h1:tS939PAGtZQNvwWf/6pC5mzFUYuo7onl9rjKUuXanCI=
+github.com/siyuan-note/riff v0.0.0-20241201090115-1c20f539f7ab h1:Fh7biQw3AfyM+eMATMiLofclsaTGlSDhvNAs3Zfb0A8=
+github.com/siyuan-note/riff v0.0.0-20241201090115-1c20f539f7ab/go.mod h1:ivCQpDD/TkQReT994Hx5cthsHAiWihKA93+4N/TmuIM=
 github.com/spf13/cast v1.7.0 h1:ntdiHjuueXFgm5nzDRdOS4yfT43P5Fnud6DH50rz/7w=
 github.com/spf13/cast v1.7.0/go.mod h1:ancEpBxwJDODSW/UG4rDrAqiKolqNNh2DX3mk86cAdo=
 github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf h1:pvbZ0lM0XWPBqUKqFU8cmavspvIl9nulOYwdy6IFRRo=

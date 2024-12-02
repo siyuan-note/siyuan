@@ -45,7 +45,6 @@ func StartKernel(container, appDir, workspaceBaseDir, timezoneID, localIPs, lang
 	util.Mode = "prod"
 	util.MobileOSVer = C.GoString(osVer)
 	util.LocalIPs = strings.Split(C.GoString(localIPs), ",")
-	filelock.Container = util.ContainerHarmony
 	util.BootMobile(C.GoString(container), C.GoString(appDir), C.GoString(workspaceBaseDir), C.GoString(lang))
 
 	model.InitConf()

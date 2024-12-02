@@ -780,6 +780,9 @@ func GetBlock(id string) (ret *Block) {
 		return
 	}
 	row := queryRow("SELECT * FROM blocks WHERE id = ?", id)
+	if nil == row {
+		return
+	}
 	ret = scanBlockRow(row)
 	if nil != ret {
 		putBlockCache(ret)

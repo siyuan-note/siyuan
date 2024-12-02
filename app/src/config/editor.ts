@@ -209,7 +209,7 @@ export const editor = {
 </div>
 <div class="b3-label">
     <div>
-        ${window.siyuan.languages.historyRetentionDays}
+        ${window.siyuan.languages.historyRetentionDaysTip}
     </div>
     <div class="fn__hr"></div>
     <div class="fn__flex config__item">
@@ -221,7 +221,7 @@ export const editor = {
     </div>
     <div class="fn__hr"></div>
     <div class="fn__flex config__item">
-        <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.historyRetentionDaysTip}</div>
+        <div class="fn__flex-center fn__flex-1 ft__on-surface">${window.siyuan.languages.historyRetentionDays}</div>
         <span class="fn__space"></span>
         <input class="b3-text-field fn__flex-center fn__size200" id="historyRetentionDays" type="number" min="0" value="${window.siyuan.config.editor.historyRetentionDays}"/>
     </div>

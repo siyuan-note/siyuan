@@ -60,7 +60,7 @@ require (
 	github.com/siyuan-note/dejavu v0.0.0-20241124021155-df73bbaf4338
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
-	github.com/siyuan-note/filelock v0.0.0-20241121021809-1cf0626a7d64
+	github.com/siyuan-note/filelock v0.0.0-20241202160444-1a99015900ff
 	github.com/siyuan-note/httpclient v0.0.0-20241113084556-839baaab03f6
 	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
 	github.com/siyuan-note/riff v0.0.0-20241201090115-1c20f539f7ab

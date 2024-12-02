@@ -105,9 +105,13 @@
     box-shadow: inset 0 -1px 0 var(--b3-theme-surface-lighter);
   }
 
+  u {
+    text-decoration: none;
+    border-bottom: 1px solid;
+  }
+
   u,
   span[data-type~="u"] {
-    text-decoration: none;
     border-bottom: 1px solid;
     color: var(--b3-protyle-inline-u-color);
   }

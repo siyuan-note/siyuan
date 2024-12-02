@@ -63,10 +63,3 @@ func putStat(tx *sql.Tx, key, value string) (err error) {
 	err = execStmtTx(tx, stmt)
 	return
 }
-
-func getStat(key string) (ret string) {
-	stmt := "SELECT value FROM stat WHERE `key` = '" + key + "'"
-	row := queryRow(stmt)
-	row.Scan(&ret)
-	return
-}

@@ -565,9 +565,15 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 }
 
 func Preview(id string) (retStdHTML string) {
+	blockRefMode := Conf.Export.BlockRefMode
+	if 5 == blockRefMode {
+		// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
+		blockRefMode = 4
+	}
+
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
-		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle)
@@ -671,7 +677,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	blockRefMode := Conf.Export.BlockRefMode
 	if docx {
 		if 5 == blockRefMode {
-			// 导出 HTML/Word 时如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
+			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
 			blockRefMode = 4
 		}
 	}
@@ -755,13 +761,12 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	luteEngine := NewLute()
-	luteEngine.SetFootnotes(true)
-	md := treenode.FormatNode(tree.Root, luteEngine)
-	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	if docx {
 		processIFrame(tree)
 	}
+
+	luteEngine := NewLute()
+	luteEngine.SetFootnotes(true)
 
 	// 自定义表情图片地址去掉开头的 /
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -827,7 +832,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 
 		if 5 == blockRefMode {
-			// 导出 PDF 时如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
+			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
 			blockRefMode = 4
 		}
 	}
@@ -864,7 +869,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		}
 	}
 
-	luteEngine := NewLute()
 	if !pdf && "" != savePath { // 导出 HTML 需要复制静态资源
 		srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
 		for _, src := range srcs {
@@ -916,6 +920,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		processIFrame(tree)
 	}
 
+	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.RenderOptions.ProtyleContenteditable = false
 	luteEngine.SetProtyleMarkNetImg(false)

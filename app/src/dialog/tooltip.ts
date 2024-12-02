@@ -50,12 +50,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         left = targetRect.right - messageElement.clientWidth;
     }
 
-    if (position?.endsWith("bottom")) {
-        top += parseInt(position.replace("right", "").replace("left", ""));
-    } else if (position?.endsWith("top")) {
-        // 编辑器动态滚动条
-        top = targetRect.top - messageElement.clientHeight;
-    } else if (position === "parentE") {
+    if (position === "parentE") {
         // file tree and outline、backlink
         top = parentRect.top;
         left = parentRect.right + 8;
@@ -63,6 +58,11 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         // 数据库属性视图
         top = parentRect.top + (parseInt(position) || 8);
         left = parentRect.left - messageElement.clientWidth;
+    } else if (position?.endsWith("bottom")) {
+        top += parseInt(position.replace("right", "").replace("left", ""));
+    } else if (position?.endsWith("top")) {
+        // 编辑器动态滚动条
+        top = targetRect.top - messageElement.clientHeight;
     }
 
     const topHeight = position === "parentE" ? top : targetRect.top;

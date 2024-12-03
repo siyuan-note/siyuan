@@ -14,7 +14,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
             // bazaar reademe
             codeElements = element.querySelectorAll("pre code");
             codeElements.forEach(item => {
-                item.parentElement.setAttribute("lineNumber", "false");
+                item.parentElement.setAttribute("linenumber", "false");
             });
         } else if (element.classList.contains("b3-typography")) {
             // preview & export html markdown
@@ -94,10 +94,12 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                         block.firstElementChild.className = "protyle-linenumber__rows";
                         block.firstElementChild.setAttribute("contenteditable", "false");
                         lineNumberRender(block);
+                        block.style.display = "";
                     } else {
                         block.firstElementChild.className = "fn__none";
                         block.firstElementChild.innerHTML = "";
                         hljsElement.style.paddingLeft = "";
+                        block.style.display = "block";
                     }
                 }
                 hljsElement.innerHTML = window.hljs.highlight(
@@ -141,7 +143,7 @@ width: ${codeElement.clientWidth}px;
 white-space:${codeElement.style.whiteSpace};
 word-break:${codeElement.style.wordBreak};
 font-variant-ligatures:${codeElement.style.fontVariantLigatures};
-box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
+max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
 
@@ -162,4 +164,16 @@ box-sizing: border-box;position: absolute;padding-top:0 !important;padding-botto
 
     lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
+    // https://github.com/siyuan-note/siyuan/issues/12726
+    if (block.scrollHeight > block.clientHeight) {
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            if (block.contains(range.startContainer)) {
+                const brElement = document.createElement("br");
+                range.insertNode(brElement);
+                brElement.scrollIntoView({block: "nearest"});
+                brElement.remove();
+            }
+        }
+    }
 };

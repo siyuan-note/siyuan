@@ -37,6 +37,10 @@ var (
 	UserAgent = "SiYuan/" + Ver
 )
 
+func GetTreeID(treePath string) string {
+	return strings.TrimSuffix(path.Base(treePath), ".sy")
+}
+
 func ShortPathForBootingDisplay(p string) string {
 	if 25 > len(p) {
 		return p

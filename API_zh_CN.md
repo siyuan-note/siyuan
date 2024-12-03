@@ -416,6 +416,28 @@
     "data": null
   }
   ```
+  
+通过 `id` 删除文档：
+
+* `/api/filetree/removeDocByID`
+* 参数
+
+  ```json
+  {
+    "id": "20210902210113-0avi12f"
+  }
+  ```
+
+  * `id`：文档 ID
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
 
 ### 移动文档
 

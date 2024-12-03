@@ -79,7 +79,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     data: IAV,
     colId: string,
     blockID: string
-}) => {
+}, x?: number) => {
     let rowElement: HTMLElement | false;
     let type;
     let colId: string;
@@ -403,7 +403,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         });
     }
     const calcRect = calcElement.getBoundingClientRect();
-    menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
+    menu.open({x: Math.max(x || 0, calcRect.left), y: calcRect.bottom, h: calcRect.height});
 };
 
 export const getCalcValue = (column: IAVColumn) => {

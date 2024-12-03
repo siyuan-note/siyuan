@@ -197,8 +197,8 @@
 }
 
 @media screen and (max-width: 520px) {
-  .b3-tooltips:before,
-  .b3-tooltips:after {
+  .b3-tooltips::before,
+  .b3-tooltips::after {
     content: none;
   }
 }

@@ -298,6 +298,7 @@ const updateInput = (html: string, protyle: IProtyle, id: string) => {
                 data: protyle.wysiwyg.lastHTMLs[id],
                 action: "update"
             });
+            protyle.wysiwyg.lastHTMLs[id] = item.outerHTML;
         } else {
             let firstElement;
             if (index === 0) {

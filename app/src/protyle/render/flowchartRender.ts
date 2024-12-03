@@ -18,7 +18,7 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     if (flowchartElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=0.0.0`, "protyleFlowchartScript").then(() => {
+    addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=1.18.0`, "protyleFlowchartScript").then(() => {
         if (flowchartElements[0].firstElementChild.clientWidth === 0) {
             const observer = new MutationObserver(() => {
                 initFlowchart(flowchartElements);

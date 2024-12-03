@@ -15,6 +15,7 @@ import {hasClosestByAttribute} from "../protyle/util/hasClosest";
 import {BlockPanel} from "../block/Panel";
 import {Setting} from "./Setting";
 import {clearOBG} from "../layout/dock/util";
+import {Constants} from "../constants";
 
 export class Plugin {
     private app: App;
@@ -74,6 +75,29 @@ export class Plugin {
         Object.defineProperty(this, "name", {
             value: options.name,
             writable: false,
+        });
+
+        this.updateProtyleToolbar([]).forEach(toolbarItem => {
+            if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                return;
+            }
+            if (!window.siyuan.config.keymap.plugin) {
+                window.siyuan.config.keymap.plugin = {};
+            }
+            if (!window.siyuan.config.keymap.plugin[options.name]) {
+                window.siyuan.config.keymap.plugin[options.name] = {
+                    [toolbarItem.name]: {
+                        default: toolbarItem.hotkey,
+                        custom: toolbarItem.hotkey,
+                    }
+                };
+            }
+            if (!window.siyuan.config.keymap.plugin[options.name][toolbarItem.name]) {
+                window.siyuan.config.keymap.plugin[options.name][toolbarItem.name] = {
+                    default: toolbarItem.hotkey,
+                    custom: toolbarItem.hotkey,
+                };
+            }
         });
     }
 

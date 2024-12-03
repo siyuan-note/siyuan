@@ -14,13 +14,12 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         document.body.insertAdjacentHTML("beforeend", `<div class="tooltip" id="tooltip">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
+        messageElement.className = "tooltip";
         messageElement.innerHTML = message;
     }
 
     if (tooltipClass) {
         messageElement.classList.add("tooltip--" + tooltipClass);
-    } else {
-        messageElement.className = "tooltip";
     }
 
     let left = targetRect.left;
@@ -44,7 +43,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         left = parentRect.right + 8;
     } else if (position?.endsWith("parentW")) {
         // 数据库属性视图
-        top = parentRect.top + parseInt(position) || 8;
+        top = parentRect.top + (parseInt(position) || 8);
         left = parentRect.left - messageElement.clientWidth;
     }
 

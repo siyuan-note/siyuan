@@ -512,9 +512,6 @@ func nodeContentByBlock(block *Block) (ret string) {
 	if ret = block.Name; "" != ret {
 		return
 	}
-	if ret = block.Memo; "" != ret {
-		return
-	}
 	ret = block.Content
 	if maxLen := 48; maxLen < utf8.RuneCountInString(ret) {
 		ret = gulu.Str.SubStr(ret, maxLen) + "..."

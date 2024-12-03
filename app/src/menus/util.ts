@@ -172,8 +172,11 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 };
 
 export const copyPNGByLink = (link: string) => {
-    if (isInAndroid() || isInHarmony()) {
+    if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(link);
+        return;
+    } else if (isInHarmony()) {
+        window.JSHarmony.writeImageClipboard(link);
         return;
     } else {
         const canvas = document.createElement("canvas");

@@ -1,4 +1,6 @@
 {
+  "empty": "空白",
+  "newRowInRelation": "在 ${x} 中新建條目 <b class='ft__on-surface'>${y}</b>",
   "keyContent": "主鍵內容",
   "addDesc": "添加描述",
   "dataRepoAutoPurgeIndexRetentionDays": "數據快照保留天數",
@@ -601,7 +603,7 @@
   "querySyntax": "查詢語法",
   "rollback": "回復",
   "custom": "自定義",
-  "feedback": "反饋",
+  "feedback": "問題反饋",
   "inbox": "收件箱",
   "turnToStatic": "靜態錨文字",
   "turnToDynamic": "動態錨文字",

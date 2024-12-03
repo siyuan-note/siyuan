@@ -94,7 +94,7 @@ func createWorkspaceDir(c *gin.Context) {
 	}
 
 	absPath := arg["path"].(string)
-	absPath = gulu.Str.RemoveInvisible(absPath)
+	absPath = util.RemoveInvalid(absPath)
 	absPath = strings.TrimSpace(absPath)
 	if isInvalidWorkspacePath(absPath) {
 		ret.Code = -1

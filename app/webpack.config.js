@@ -76,10 +76,10 @@ module.exports = (env, argv) => {
                     ],
                 },
                 {
-                    test: /\.woff$/,
+                    test: /\.woff2$/,
                     type: "asset/resource",
                     generator: {
-                        filename: "../fonts/JetBrainsMono-Regular.woff",
+                        filename: "../fonts/JetBrainsMono-Regular.woff2",
                     },
                 },
                 {

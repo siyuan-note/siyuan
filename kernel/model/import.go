@@ -67,6 +67,7 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 }
 
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
+	htmlStr = util.RemoveInvalid(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -621,6 +622,7 @@ func ImportData(zipPath string) (err error) {
 	lockSync()
 	defer unlockSync()
 
+	logging.LogInfof("import data from [%s]", zipPath)
 	baseName := filepath.Base(zipPath)
 	ext := filepath.Ext(baseName)
 	baseName = strings.TrimSuffix(baseName, ext)
@@ -655,6 +657,7 @@ func ImportData(zipPath string) (err error) {
 		return
 	}
 
+	logging.LogInfof("import data from [%s] done", zipPath)
 	IncSync()
 	FullReindex()
 	return
@@ -695,6 +698,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 	hPathsIDs := map[string]string{}
 	idPaths := map[string]string{}
+	moveIDs := map[string]string{}
 
 	if gulu.File.IsDir(localPath) { // 导入文件夹
 		// 收集所有资源文件
@@ -740,7 +744,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			curRelPath := filepath.ToSlash(strings.TrimPrefix(currentPath, localPath))
 			targetPath := path.Join(baseTargetPath, id)
-			hPath := path.Join(baseHPath, filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
+			hPath := path.Join(baseHPath, filepath.Base(localPath), filepath.ToSlash(strings.TrimPrefix(currentPath, localPath)))
 			hPath = strings.TrimSuffix(hPath, ext)
 			if "" == curRelPath {
 				curRelPath = "/"
@@ -756,7 +760,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				targetPaths[curRelPath] = targetPath
 			} else {
 				targetPath = targetPaths[curRelPath]
-				id = strings.TrimSuffix(path.Base(targetPath), ".sy")
+				id = util.GetTreeID(targetPath)
 			}
 
 			if d.IsDir() {
@@ -793,12 +797,13 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			}
 
 			if "" != yfmRootID {
+				moveIDs[id] = yfmRootID
 				id = yfmRootID
 			}
 			if "" != yfmTitle {
 				title = yfmTitle
 			}
-			unescapedTitle, unescapeErr := url.QueryUnescape(title)
+			unescapedTitle, unescapeErr := url.PathUnescape(title)
 			if nil == unescapeErr {
 				title = unescapedTitle
 			}
@@ -920,7 +925,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		if "" != yfmTitle {
 			title = yfmTitle
 		}
-		unescapedTitle, unescapeErr := url.QueryUnescape(title)
+		unescapedTitle, unescapeErr := url.PathUnescape(title)
 		if nil == unescapeErr {
 			title = unescapedTitle
 		}
@@ -999,6 +1004,13 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 	}
 
 	if 0 < len(importTrees) {
+		for id, newID := range moveIDs {
+			for _, importTree := range importTrees {
+				importTree.ID = strings.ReplaceAll(importTree.ID, id, newID)
+				importTree.Path = strings.ReplaceAll(importTree.Path, id, newID)
+			}
+		}
+
 		initSearchLinks()
 		convertWikiLinksAndTags()
 		buildBlockRefInText()
@@ -1184,16 +1196,6 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 }
 
 func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
-	var blockCount int
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering || "" == n.ID {
-			return ast.WalkContinue
-		}
-
-		blockCount++
-		return ast.WalkContinue
-	})
-
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || "" == n.ID {
 			return ast.WalkContinue
@@ -1207,8 +1209,10 @@ func reassignIDUpdated(tree *parse.Tree, rootID, updated string) {
 		n.SetIALAttr("id", n.ID)
 		if "" != updated {
 			n.SetIALAttr("updated", updated)
-			n.ID = updated + "-" + gulu.Rand.String(7)
-			n.SetIALAttr("id", n.ID)
+			if "" == rootID {
+				n.ID = updated + "-" + gulu.Rand.String(7)
+				n.SetIALAttr("id", n.ID)
+			}
 		} else {
 			n.SetIALAttr("updated", util.TimeFromID(n.ID))
 		}

@@ -19,7 +19,7 @@ echo 'Building Kernel'
 @REM the C compiler "gcc" is necessary https://sourceforge.net/projects/mingw-w64/files/mingw-w64/
 go version
 set GO111MODULE=on
-set GOPROXY=https://goproxy.io
+set GOPROXY=https://mirrors.aliyun.com/goproxy/
 set CGO_ENABLED=1
 
 cd kernel

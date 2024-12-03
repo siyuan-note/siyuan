@@ -17,7 +17,7 @@
   "exportConf": "匯出設定",
   "exportConfTip": "帳號、存取授權碼、同步、API token 和資料倉儲金鑰不會被匯出",
   "importConf": "導入設定",
-  "importConfTip": "導入後會覆蓋當設定並自動關閉應用，請手動重新啟動",
+  "importConfTip": "導入後會覆蓋當前設定並自動關閉應用，請手動重新啟動",
   "jumpToPage": "跳轉到指定頁：1 ~ ${x}",
   "pageCountAndSnapshotCount": "共 ${x} 頁，${y} 個快照",
   "pageCountAndHistoryCount": "共 ${x} 頁，${y} 個歷史紀錄",

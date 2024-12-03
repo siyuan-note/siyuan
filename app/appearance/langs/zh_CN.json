@@ -17,7 +17,7 @@
   "exportConf": "导出设置",
   "exportConfTip": "账号、访问授权码、同步、API token 和数据仓库密钥不会被导出",
   "importConf": "导入设置",
-  "importConfTip": "导入后会覆盖当设置并自动关闭应用，请手动重启",
+  "importConfTip": "导入后会覆盖当前设置并自动关闭应用，请手动重启",
   "jumpToPage": "跳转到指定页：1 ~ ${x}",
   "pageCountAndSnapshotCount": "共 ${x} 页，${y} 个快照",
   "pageCountAndHistoryCount": "共 ${x} 页，${y} 个历史版本",

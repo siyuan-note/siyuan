@@ -44,7 +44,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.1.13"
+	Ver       = "3.1.14"
 	IsInsider = false
 )
 

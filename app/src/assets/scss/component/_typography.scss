@@ -2,6 +2,12 @@
   font-family: 'JetBrainsMono-Regular';
   src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
+@font-face {
+  font-family: "Number Glyphs Of JetBrainsMono-Regular";
+  src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
+  /* 数字 0-9 */
+  unicode-range: U+30-39;
+}
 /* 用户指定了字体时才添加 */
 @font-face {
   font-family: "Number Glyphs Of Custom Font";

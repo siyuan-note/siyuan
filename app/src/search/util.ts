@@ -1161,7 +1161,7 @@ const renderNextSearchMark = (options: {
     target: Element,
 }) => {
     const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-    if (CSS.highlights) {
+    if (CSS?.highlights) {
         options.edit.protyle.highlight.markHL.clear();
         options.edit.protyle.highlight.mark.clear();
         options.edit.protyle.highlight.rangeIndex++;
@@ -1239,7 +1239,7 @@ export const getArticle = (options: {
                 }
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 let matchRectTop: number;
-                if (CSS.highlights) {
+                if (CSS?.highlights) {
                     options.edit.protyle.highlight.rangeIndex = 0;
                     searchMarkRender(options.edit.protyle, matchElements);
                     matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;

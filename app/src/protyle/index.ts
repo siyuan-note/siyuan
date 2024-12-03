@@ -73,18 +73,20 @@ export class Protyle {
             options: mergedOptions,
             block: {},
             highlight: {
-                mark: new Highlight(),
-                markHL: new Highlight(),
+                mark: CSS?.highlights ? new Highlight() : undefined,
+                markHL: CSS?.highlights ? new Highlight() : undefined,
                 ranges: [],
                 rangeIndex: 0,
                 styleElement: document.createElement("style"),
             }
         };
 
-        const styleId = genUUID();
-        this.protyle.highlight.styleElement.dataset.uuid = styleId;
-        this.protyle.highlight.styleElement.textContent = `.protyle-wysiwyg::highlight(search-mark-${styleId}) {background-color: var(--b3-protyle-inline-mark-background);color: var(--b3-protyle-inline-mark-color);}
+        if (CSS?.highlights) {
+            const styleId = genUUID();
+            this.protyle.highlight.styleElement.dataset.uuid = styleId;
+            this.protyle.highlight.styleElement.textContent = `.protyle-wysiwyg::highlight(search-mark-${styleId}) {background-color: var(--b3-protyle-inline-mark-background);color: var(--b3-protyle-inline-mark-color);}
   .protyle-wysiwyg::highlight(search-mark-hl-${styleId}) {background-color: var(--b3-theme-primary-lighter);box-shadow: 0 0 0 .5px var(--b3-theme-on-background);}`;
+        }
 
         this.protyle.hint = new Hint(this.protyle);
         if (mergedOptions.render.breadcrumb) {

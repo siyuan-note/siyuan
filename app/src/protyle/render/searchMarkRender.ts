@@ -1,5 +1,5 @@
 export const searchMarkRender = (protyle: IProtyle, matchElements: NodeListOf<Element>) => {
-    if (matchElements.length === 0) {
+    if (matchElements.length === 0 || !CSS || !CSS.highlights) {
         return;
     }
     protyle.highlight.markHL.clear();

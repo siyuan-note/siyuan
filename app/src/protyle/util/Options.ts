@@ -21,7 +21,6 @@ export class Options {
         classes: {
             preview: "",
         },
-        debugger: Constants.NODE_ENV === "development",
         hint: {
             delay: 200,
             emoji: {

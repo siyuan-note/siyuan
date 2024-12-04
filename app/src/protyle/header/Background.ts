@@ -541,7 +541,8 @@ export class Background {
                         } else {
                             this.addTags(inputElement.value, protyle);
                         }
-                        window.siyuan.menus.menu.remove();
+                        inputElement.value = "";
+                        inputElement.dispatchEvent(new  CustomEvent("input"))
                     } else if (event.key === "Escape") {
                         window.siyuan.menus.menu.remove();
                     }

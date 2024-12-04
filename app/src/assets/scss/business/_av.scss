@@ -467,6 +467,7 @@
 
     .b3-menu {
       min-width: 200px;
+      max-width: 50vw;
 
       &__item .b3-chip {
         max-width: 90vw;
@@ -506,6 +507,7 @@
 
       &__label {
         overflow: hidden;
+        @extend .fn__ellipsis;
       }
 
       &__icon.fn__grab {

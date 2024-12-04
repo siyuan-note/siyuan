@@ -132,7 +132,7 @@ func IsPathRegularDirOrSymlinkDir(path string) bool {
 }
 
 func RemoveID(name string) string {
-	ext := path.Ext(name)
+	ext := Ext(name)
 	name = strings.TrimSuffix(name, ext)
 	if 23 < len(name) {
 		if id := name[len(name)-22:]; ast.IsNodeIDPattern(id) {
@@ -142,9 +142,17 @@ func RemoveID(name string) string {
 	return name + ext
 }
 
+func Ext(name string) (ret string) {
+	ret = path.Ext(name)
+	if "." == ret {
+		ret = ""
+	}
+	return
+}
+
 func AssetName(name string) string {
 	_, id := LastID(name)
-	ext := path.Ext(name)
+	ext := Ext(name)
 	name = name[0 : len(name)-len(ext)]
 	if !ast.IsNodeIDPattern(id) {
 		id = ast.NewNodeID()
@@ -161,7 +169,7 @@ func AssetName(name string) string {
 
 func LastID(p string) (name, id string) {
 	name = path.Base(p)
-	ext := path.Ext(name)
+	ext := Ext(name)
 	id = strings.TrimSuffix(name, ext)
 	if 22 < len(id) {
 		id = id[len(id)-22:]
@@ -242,6 +250,7 @@ func FilterFileName(name string) string {
 	name = strings.ReplaceAll(name, ">", "_")
 	name = strings.ReplaceAll(name, "|", "_")
 	name = strings.TrimSpace(name)
+	name = strings.TrimSuffix(name, ".")
 	name = RemoveInvalid(name) // Remove invisible characters from file names when uploading assets https://github.com/siyuan-note/siyuan/issues/11683
 	return name
 }

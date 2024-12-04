@@ -123,7 +123,6 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
-				name = util.TruncateLenFileName(name)
 				name = "network-asset-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
@@ -205,23 +204,28 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					name = name[:strings.Index(name, "#")]
 				}
 				name, _ = url.PathUnescape(name)
-				ext := path.Ext(name)
+				name = util.FilterUploadFileName(name)
+				ext := util.Ext(name)
 				if "" == ext {
 					if mtype := mimetype.Detect(data); nil != mtype {
 						ext = mtype.Extension()
+						name += ext
 					}
+				}
+				if "" == ext && bytes.HasPrefix(data, []byte("<svg ")) && bytes.HasSuffix(data, []byte("</svg>")) {
+					ext = ".svg"
+					name += ext
 				}
 				if "" == ext {
 					contentType := resp.Header.Get("Content-Type")
 					exts, _ := mime.ExtensionsByType(contentType)
 					if 0 < len(exts) {
 						ext = exts[0]
+						name += ext
 					}
 				}
-				name = strings.TrimSuffix(name, ext)
-				name = util.FilterUploadFileName(name)
-				name = util.TruncateLenFileName(name)
-				name = "network-asset-" + name + "-" + ast.NewNodeID() + ext
+				name = util.AssetName(name)
+				name = "network-asset-" + name
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); err != nil {
 					logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
@@ -607,7 +611,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	defer util.PushClearProgress()
 
 	newName = strings.TrimSpace(newName)
-	newName = util.RemoveInvalid(newName)
+	newName = util.FilterFileName(newName)
 	if path.Base(oldPath) == newName {
 		return
 	}

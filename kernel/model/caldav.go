@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"context"
 	"errors"
+	"github.com/siyuan-note/siyuan/kernel/util"
 	"os"
 	"path"
 	"strings"
@@ -100,7 +101,7 @@ func ParseCalendarObjectPath(objectPath string) (calendarPath string, objectID s
 	calendarPath, objectFileName := path.Split(objectPath)
 	calendarPath = PathCleanWithSlash(calendarPath)
 	objectID = path.Base(objectFileName)
-	objectFileExt := path.Ext(objectFileName)
+	objectFileExt := util.Ext(objectFileName)
 
 	if GetCalDavPathDepth(calendarPath) != calDavPathDepth_Calendar {
 		err = ErrorCalDavCalendarPathInvalid
@@ -520,7 +521,7 @@ func (c *Calendar) load() error {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
-			ext := path.Ext(filename)
+			ext := util.Ext(filename)
 			if ext == ICalendarFileExt {
 				wg.Add(1)
 				go func() {

@@ -97,21 +97,21 @@ func extensionCopy(c *gin.Context) {
 			break
 		}
 
-		ext := path.Ext(fName)
-		originalExt := ext
+		fName = util.FilterUploadFileName(fName)
+		ext := util.Ext(fName)
 		if "" == ext || strings.Contains(ext, "!") {
 			// 改进浏览器剪藏扩展转换本地图片后缀 https://github.com/siyuan-note/siyuan/issues/7467
 			if mtype := mimetype.Detect(data); nil != mtype {
 				ext = mtype.Extension()
+				fName += ext
 			}
 		}
 		if "" == ext && bytes.HasPrefix(data, []byte("<svg ")) && bytes.HasSuffix(data, []byte("</svg>")) {
 			ext = ".svg"
+			fName += ext
 		}
 
-		fName = fName[0 : len(fName)-len(originalExt)]
-		fName = util.FilterUploadFileName(fName)
-		fName = fName + "-" + ast.NewNodeID() + ext
+		fName = util.AssetName(fName)
 		writePath := filepath.Join(assets, fName)
 		if err = filelock.WriteFile(writePath, data); err != nil {
 			ret.Code = -1

@@ -1356,8 +1356,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0 && selectElements[0].getAttribute("data-type") === "NodeListItem") {
-                listOutdent(protyle, Array.from(selectElements), range);
+            if (selectElements.length > 0) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                    listOutdent(protyle, Array.from(selectElements), range);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
@@ -1368,10 +1370,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
+
         if (matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0 && selectElements[0].getAttribute("data-type") === "NodeListItem") {
-                listIndent(protyle, Array.from(selectElements), range);
+            if (selectElements.length > 0) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                    listIndent(protyle, Array.from(selectElements), range);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

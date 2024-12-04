@@ -1474,9 +1474,6 @@ export class WYSIWYG {
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 html = "<table>";
-                tableSelectElement.removeAttribute("style");
-                const oldHTML = nodeElement.outerHTML;
-                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                     if (!item.classList.contains("fn__none") &&
                         item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
@@ -1484,6 +1481,9 @@ export class WYSIWYG {
                         selectCellElements.push(item);
                     }
                 });
+                tableSelectElement.removeAttribute("style");
+                const oldHTML = nodeElement.outerHTML;
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 selectCellElements.forEach((item, index) => {
                     if (index === 0 || !item.previousElementSibling ||
                         !item.previousElementSibling.isSameNode(selectCellElements[index - 1])) {

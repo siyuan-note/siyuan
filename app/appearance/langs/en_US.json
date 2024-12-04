@@ -1,7 +1,7 @@
 {
   "empty": "Empty",
   "newRowInRelation": "Create a new entry in ${x} <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "Key content",
+  "copyKeyContent": "Copy primary key text",
   "addDesc": "Add description",
   "dataRepoAutoPurgeIndexRetentionDays": "Data snapshot retention days",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Data snapshots per day",

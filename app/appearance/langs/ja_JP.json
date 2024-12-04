@@ -1,7 +1,7 @@
 {
   "empty": "空白",
   "newRowInRelation": "${x} に新しい項目を作成 <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "キーコンテンツ",
+  "copyKeyContent": "主キーのテキストをコピー",
   "addDesc": "説明を追加",
   "dataRepoAutoPurgeIndexRetentionDays": "データスナップショットの保持日数",
   "dataRepoAutoPurgeRetentionIndexesDaily": "データスナップショットの毎日の保持数",

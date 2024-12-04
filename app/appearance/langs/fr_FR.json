@@ -1,6 +1,6 @@
 {
   "newRowInRelation": "Créer une nouvelle entrée dans ${x} <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "Contenu de la clé",
+  "copyKeyContent": "Copier le texte de la clé principale",
   "addDesc": "Ajouter une description",
   "dataRepoAutoPurgeIndexRetentionDays": "Jours de rétention des instantanés de données",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Nombre d'instantanés de données par jour",

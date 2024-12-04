@@ -360,8 +360,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			ret = []*Block{}
 		}
 
-		// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
 		prependNotebookNameInHPath(ret)
+		filterSelfHPath(ret)
 		return
 	}
 
@@ -423,12 +423,25 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		newDoc = true
 	}
 
-	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
 	prependNotebookNameInHPath(ret)
+	filterSelfHPath(ret)
 	return
 }
 
+func filterSelfHPath(blocks []*Block) {
+	// 简化搜索结果列表中的文档块路径 Simplify document block paths in search results https://github.com/siyuan-note/siyuan/issues/13364
+	// 文档块不显示自己的路径（最后一层）
+
+	for _, b := range blocks {
+		if b.IsDoc() {
+			b.HPath = strings.TrimSuffix(b.HPath, path.Base(b.HPath))
+		}
+	}
+}
+
 func prependNotebookNameInHPath(blocks []*Block) {
+	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
+
 	var boxIDs []string
 	for _, b := range blocks {
 		boxIDs = append(boxIDs, b.Box)
@@ -1110,6 +1123,8 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	if 1 > len(ret) {
 		ret = []*Block{}
 	}
+
+	filterSelfHPath(ret)
 	return
 }
 

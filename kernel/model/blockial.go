@@ -216,7 +216,10 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	}
 
 	for name, value := range nameValues {
-		if "" == strings.TrimSpace(value) {
+		value = util.RemoveInvalid(value)
+		value = strings.TrimSpace(value)
+		value = strings.TrimSuffix(value, ",")
+		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {
 			node.SetIALAttr(name, value)

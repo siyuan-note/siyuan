@@ -737,7 +737,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			var ext string
 			title := d.Name()
 			if !d.IsDir() {
-				ext = path.Ext(d.Name())
+				ext = util.Ext(d.Name())
 				title = strings.TrimSuffix(d.Name(), ext)
 			}
 			id := ast.NewNodeID()

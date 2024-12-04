@@ -128,7 +128,7 @@ func GetCardDavPathDepth(urlPath string) CardDavPathDepth {
 func ParseAddressPath(addressPath string) (addressBookPath string, addressID string, err error) {
 	addressBookPath, addressFileName := path.Split(addressPath)
 	addressID = path.Base(addressFileName)
-	addressFileExt := path.Ext(addressFileName)
+	addressFileExt := util.Ext(addressFileName)
 
 	if GetCardDavPathDepth(addressBookPath) != cardDavPathDepth_AddressBook {
 		err = ErrorCardDavBookPathInvalid
@@ -604,7 +604,7 @@ func (b *AddressBook) load() error {
 	for _, entry := range entries {
 		if !entry.IsDir() {
 			filename := entry.Name()
-			ext := path.Ext(filename)
+			ext := util.Ext(filename)
 			if ext == VCardFileExt {
 				wg.Add(1)
 				go func() {

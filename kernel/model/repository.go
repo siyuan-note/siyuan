@@ -500,7 +500,7 @@ func buildSnapshots(logs []*dejavu.Log) (ret []*Snapshot) {
 
 func statTypesByPath(files []*entity.File) (ret []*TypeCount) {
 	for _, f := range files {
-		ext := path.Ext(f.Path)
+		ext := util.Ext(f.Path)
 		if "" == ext {
 			ext = "NoExt"
 		}

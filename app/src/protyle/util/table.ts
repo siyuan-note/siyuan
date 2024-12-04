@@ -7,6 +7,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
 import {hasPreviousSibling} from "../wysiwyg/getBlock";
+import * as dayjs from "dayjs";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -721,3 +722,26 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return true;
     }
 };
+
+export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement) => {
+    if (!tableBlockElement) {
+        return;
+    }
+    const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
+    const selectCellElements: HTMLTableCellElement[] = [];
+    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+        if (!item.classList.contains("fn__none") &&
+            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+            selectCellElements.push(item);
+        }
+    });
+    tableSelectElement.removeAttribute("style");
+    const oldHTML = tableBlockElement.outerHTML;
+    tableBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    selectCellElements.forEach(item => {
+        item.innerHTML = "";
+    });
+    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+}

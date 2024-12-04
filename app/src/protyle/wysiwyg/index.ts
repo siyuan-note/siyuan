@@ -69,7 +69,7 @@ import {isInIOS, isMac, isOnlyMeta, readText} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
-import {setTableAlign} from "../util/table";
+import {clearTableCell, setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -1295,25 +1295,9 @@ export class WYSIWYG {
                         window.siyuan.menus.menu.append(new MenuItem({
                             label: window.siyuan.languages.clear,
                             icon: "iconTrashcan",
+                            accelerator: "⌦",
                             click() {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    const oldHTML = tableBlockElement.outerHTML;
-                                    tableBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                                    selectCellElements.forEach(item => {
-                                        item.innerHTML = "";
-                                    });
-                                    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
-                                }
+                                clearTableCell(protyle, tableBlockElement as HTMLElement)
                             }
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({

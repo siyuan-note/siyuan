@@ -33,7 +33,7 @@ import {
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
-import {fixTable} from "../util/table";
+import {clearTableCell, fixTable} from "../util/table";
 import {
     turnsIntoOneTransaction,
     turnsIntoTransaction,
@@ -808,6 +808,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             } else if (selectText === "") {
+                if (nodeElement.classList.contains("table") && nodeElement.querySelector(".table__select").clientHeight > 0) {
+                    clearTableCell(protyle, nodeElement);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 const editElement = getContenteditableElement(nodeElement) as HTMLElement;
                 if (!editElement) {
                     nodeElement.classList.add("protyle-wysiwyg--select");

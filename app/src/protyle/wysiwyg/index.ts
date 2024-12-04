@@ -674,10 +674,11 @@ export class WYSIWYG {
                         dragElement.style.height = "";
                     }
                     if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
-                        if ((dragElement.tagName === "IMG" && !dragElement.parentElement.parentElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) {
-                            dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x)) + "px";
+                        const multiple = ((dragElement.tagName === "IMG" && !dragElement.parentElement.parentElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
+                        if (dragElement.tagName === "IMG") {
+                            dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         } else {
-                            dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * 2) + "px";
+                            dragElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         }
                     }
                     if (dragElement.tagName !== "IMG") {

@@ -1,6 +1,7 @@
 import {isMobile} from "../util/functions";
+import {Constants} from "../constants";
 
-let hideTooltipTimeout: NodeJS.Timeout | null = null;
+let hideTooltipTimeout: number
 
 export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {
@@ -13,35 +14,29 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     }
 
     // 清除 hideTooltip 的定时器
-    if (hideTooltipTimeout) {
-        clearTimeout(hideTooltipTimeout);
-        hideTooltipTimeout = null;
-    }
+    clearTimeout(hideTooltipTimeout);
 
+    const className = tooltipClass?`tooltip tooltip--${tooltipClass}`:"tooltip";
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="tooltip${!tooltipClass ? "" : " tooltip--" + tooltipClass}" id="tooltip">${message}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
-        const currentClassName = messageElement.className;
-        const currentMessage = messageElement.textContent;
-
-        let newClassName = "tooltip";
-        if (tooltipClass) {
-            newClassName += " tooltip--" + tooltipClass;
+        if (messageElement.className !== className) {
+            messageElement.className = className;
         }
-        // 避免不必要的更新
-        if (currentClassName !== newClassName) {
-            messageElement.className = newClassName;
-        }
-        if (currentMessage !== message) {
-            // 鼠标在按钮等多层结构的元素上小幅移动时会频繁更新
+        if (messageElement.innerHTML !== message) {
             messageElement.innerHTML = message;
         }
+        // 避免原本的 top 和 left 影响计算
+        messageElement.removeAttribute("style");
     }
 
     let left = targetRect.left;
     let top = targetRect.bottom;
+
+    // position: parentE; parentW; ${number}parentW; ${number}bottom;
+    // right; right${number}bottom; right${number}top; top;
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
 
@@ -92,14 +87,11 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 };
 
 export const hideTooltip = () => {
-    if (hideTooltipTimeout) {
-        clearTimeout(hideTooltipTimeout);
-    }
-    hideTooltipTimeout = setTimeout(() => {
+    clearTimeout(hideTooltipTimeout);
+    hideTooltipTimeout = window.setTimeout(() => {
         const messageElement = document.getElementById("tooltip");
         if (messageElement) {
             messageElement.remove();
         }
-        hideTooltipTimeout = null;
-    }, 50);
+    }, Constants.TIMEOUT_TRANSITION);
 };

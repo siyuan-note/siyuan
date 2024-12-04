@@ -280,7 +280,6 @@
   }
 
   .code-block:not(pre) {
-    padding: 2em 1em 1.6em;
     margin: 1em 0;
     box-sizing: border-box;
 
@@ -323,6 +322,7 @@
   }
 
   div.hljs {
+    padding: 2em 1em 1.6em;
     flex: 1;
     display: flex;
     position: relative;

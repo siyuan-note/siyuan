@@ -768,13 +768,22 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 
-	// 自定义表情图片地址去掉开头的 /
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
 		}
 		if ast.NodeEmojiImg == n.Type {
+			// 自定义表情图片地址去掉开头的 /
 			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("src=\"/emojis"), []byte("src=\"emojis"))
+		} else if ast.NodeList == n.Type {
+			if nil != n.ListData && 1 == n.ListData.Typ {
+				if 0 == n.ListData.Start {
+					n.ListData.Start = 1
+				}
+				if li := n.ChildByType(ast.NodeListItem); nil != li && nil != li.ListData {
+					n.ListData.Start = li.ListData.Num
+				}
+			}
 		}
 		return ast.WalkContinue
 	})

@@ -101,6 +101,10 @@ func (block *Block) IsContainerBlock() bool {
 	return false
 }
 
+func (block *Block) IsDoc() bool {
+	return "NodeDocument" == block.Type
+}
+
 type Path struct {
 	ID       string   `json:"id"`                 // 块 ID
 	Box      string   `json:"box"`                // 块 Box

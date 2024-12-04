@@ -425,7 +425,18 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 
 	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
 	prependNotebookNameInHPath(ret)
+	// 简化块引搜索列表中的文档块路径 Simplify document block paths in block ref search list https://github.com/siyuan-note/siyuan/issues/13364
+	// 文档块不显示自己的路径（最后一层）
+	filterSelfHPath(ret)
 	return
+}
+
+func filterSelfHPath(blocks []*Block) {
+	for _, b := range blocks {
+		if b.IsDoc() {
+			b.HPath = strings.TrimSuffix(b.HPath, path.Base(b.HPath))
+		}
+	}
 }
 
 func prependNotebookNameInHPath(blocks []*Block) {

@@ -1,4 +1,4 @@
-export const addScriptSync = (path: string, id: string) => {
+export const addScriptSync = async (path: string, id: string) => {
     if (document.getElementById(id)) {
         return false;
     }
@@ -12,6 +12,10 @@ export const addScriptSync = (path: string, id: string) => {
     scriptElement.text = xhrObj.responseText;
     scriptElement.id = id;
     document.head.appendChild(scriptElement);
+    if (typeof Lute === "undefined") {
+        // 鸿蒙系统上第一次加载会出现 Lute 未定义的情况，重新载入一次就好了，暂时没找到原因，先这样处理
+        window.location.reload();
+    }
 };
 
 export const addScript = (path: string, id: string) => {

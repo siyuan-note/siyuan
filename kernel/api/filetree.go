@@ -1061,8 +1061,14 @@ func getDoc(c *gin.Context) {
 	if nil != isBacklinkArg {
 		isBacklink = isBacklinkArg.(bool)
 	}
+	highlightArg := arg["highlight"]
+	highlight := true
+	if nil != highlightArg {
+		highlight = highlightArg.(bool)
+	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err := model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink)
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err :=
+		model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink, highlight)
 	if model.ErrBlockNotFound == err {
 		ret.Code = 3
 		return

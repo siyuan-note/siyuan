@@ -4,9 +4,8 @@ import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
-import {getAllModels} from "../layout/getAll";
 /// #endif
-import {getAllEditor} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";
@@ -250,7 +249,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
-        width: isMobile() ? "80vw" : "368px",
+        width: isMobile() ? "80vw" : "372px",
         height: "50vh",
         content: `<div class="emojis">
     <div class="emojis__tabheader">

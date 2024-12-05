@@ -298,7 +298,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     });
     const copyMenu: IMenu[] = [{
         iconHTML: "",
-        label: window.siyuan.languages.keyContent,
+        label: window.siyuan.languages.copyKeyContent,
         click() {
             let text = "";
             rowElements.forEach((item, i) => {

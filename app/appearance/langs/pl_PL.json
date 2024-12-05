@@ -1,7 +1,7 @@
 {
   "empty": "Pusty",
   "newRowInRelation": "Utwórz nowy wpis w ${x} <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "Zawartość klucza",
+  "copyKeyContent": "Skopiuj tekst klucza głównego",
   "addDesc": "Dodaj opis",
   "dataRepoAutoPurgeIndexRetentionDays": "Dni przechowywania migawek danych",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Liczba migawek danych dziennie",

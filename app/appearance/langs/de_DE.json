@@ -1,7 +1,7 @@
 {
   "empty": "Leer",
   "newRowInRelation": "Erstellen Sie einen neuen Eintrag in ${x} <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "Schlüsselinhalt",
+  "copyKeyContent": "Primärschlüsseltext kopieren",
   "addDesc": "Beschreibung hinzufügen",
   "dataRepoAutoPurgeIndexRetentionDays": "Daten-Snapshot-Aufbewahrungstage",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Daten-Snapshots pro Tag",

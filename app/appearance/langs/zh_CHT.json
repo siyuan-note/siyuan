@@ -1,7 +1,7 @@
 {
   "empty": "空白",
   "newRowInRelation": "在 ${x} 中新建條目 <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "主鍵內容",
+  "copyKeyContent": "複製主鍵文本",
   "addDesc": "添加描述",
   "dataRepoAutoPurgeIndexRetentionDays": "數據快照保留天數",
   "dataRepoAutoPurgeRetentionIndexesDaily": "數據快照每天保留個數",

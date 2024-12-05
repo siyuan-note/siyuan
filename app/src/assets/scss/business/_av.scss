@@ -507,7 +507,6 @@
 
       &__label {
         overflow: hidden;
-        @extend .fn__ellipsis;
       }
 
       &__icon.fn__grab {

@@ -20,6 +20,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/ConradIrwin/font/sfnt"
@@ -30,7 +32,20 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func GetSysFonts() (ret []string) {
+var (
+	sysFonts     []string
+	sysFontsLock = sync.Mutex{}
+)
+
+func LoadSysFonts() (ret []string) {
+	sysFontsLock.Lock()
+	defer sysFontsLock.Unlock()
+
+	if 0 < len(sysFonts) {
+		return sysFonts
+	}
+
+	start := time.Now()
 	fonts := loadFonts()
 	ret = []string{}
 	for _, font := range fonts {
@@ -39,6 +54,8 @@ func GetSysFonts() (ret []string) {
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
+	sysFonts = ret
+	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
 	return
 }
 

@@ -548,7 +548,7 @@ func setFollowSystemLockScreen(c *gin.Context) {
 func getSysFonts(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
-	ret.Data = util.GetSysFonts()
+	ret.Data = util.LoadSysFonts()
 }
 
 func version(c *gin.Context) {

@@ -7,6 +7,7 @@ import {App} from "../index";
 import {Constants} from "../constants";
 import {getCellText} from "../protyle/render/av/cell";
 import {isTouchDevice} from "../util/functions";
+import {escapeAriaLabel} from "../util/escape";
 
 let popoverTargetElement: HTMLElement;
 let notebookItemElement: HTMLElement | false;
@@ -28,7 +29,17 @@ export const initBlockPopover = (app: App) => {
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label");
             if (aElement.classList.contains("av__cell")) {
-                if (!aElement.classList.contains("av__cell--header")) {
+                if (aElement.classList.contains("av__cell--header")) {
+                    const textElement = aElement.querySelector(".av__celltext");
+                    const desc = aElement.getAttribute("data-desc")
+                    if (textElement.scrollWidth > textElement.clientWidth + 2 || desc) {
+                        if (desc) {
+                            tip = `${getCellText(aElement)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>`;
+                        } else {
+                            tip = getCellText(aElement);
+                        }
+                    }
+                } else {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
                             tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
@@ -41,6 +52,16 @@ export const initBlockPopover = (app: App) => {
                             tip = Lute.EscapeHTMLStr(getCellText(aElement));
                         }
                         aElement.style.overflow = "";
+                    }
+                }
+            } else if (aElement.parentElement.parentElement.classList.contains("av__views")) {
+                const textElement = aElement.querySelector(".item__text");
+                const desc = aElement.getAttribute("data-desc")
+                if (textElement.scrollWidth > textElement.clientWidth + 2 || desc) {
+                    if (desc) {
+                        tip = `${textElement.textContent}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>`;
+                    } else {
+                        tip = textElement.textContent;
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {

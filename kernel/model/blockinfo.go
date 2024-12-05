@@ -204,6 +204,8 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 }
 
 func GetBlockRefText(id string) string {
+	FlushTxQueue()
+
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return ErrBlockNotFound.Error()

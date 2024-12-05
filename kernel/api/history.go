@@ -145,7 +145,11 @@ func getDocHistoryContent(c *gin.Context) {
 	if nil != k {
 		keyword = k.(string)
 	}
-	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword)
+	highlight := true
+	if val, ok := arg["highlight"]; ok {
+		highlight = val.(bool)
+	}
+	id, rootID, content, isLargeDoc, err := model.GetDocHistoryContent(historyPath, keyword, highlight)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

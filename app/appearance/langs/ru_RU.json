@@ -1,7 +1,7 @@
 {
   "empty": "Пусто",
   "newRowInRelation": "Создать новую запись в ${x} <b class='ft__on-surface'>${y}</b>",
-  "keyContent": "Содержимое ключа",
+  "copyKeyContent": "Скопировать текст основного ключа",
   "addDesc": "Добавить описание",
   "dataRepoAutoPurgeIndexRetentionDays": "Срок хранения снимков данных",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Количество снимков данных в день",

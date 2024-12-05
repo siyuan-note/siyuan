@@ -66,7 +66,7 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
     }
 
     const isXScroll = Math.abs(xDiff) > Math.abs(yDiff);
-    const modelElement = hasClosestByAttribute(target, "id", "model");
+    const modelElement = hasClosestByAttribute(target, "id", "model", true);
     if (modelElement) {
         if (isXScroll && firstDirection === "toRight" && !lastClientX) {
             closeModel();

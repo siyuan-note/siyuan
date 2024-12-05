@@ -874,7 +874,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < selectedIds.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: selectedIds[i]});
-                    html += `((${selectedIds[i]} '${response.data}')) `;
+                    html += protyle.lute.Md2BlockDOM(`((${selectedIds[i]} '${response.data}'))`);
                 }
                 insertHTML(html, protyle);
             } else if (event.shiftKey) {
@@ -1085,7 +1085,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
-                    html += `((${ids[i]} '${response.data}')) `;
+                    html += protyle.lute.Md2BlockDOM(`((${ids[i]} '${response.data}'))`);
                 }
                 insertHTML(html, protyle);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {

@@ -98,7 +98,7 @@ export const getEditHTML = (options: {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
+            <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
         </div>
         <div class="fn__hr--small"></div>
     </div>
@@ -120,10 +120,11 @@ export const getEditHTML = (options: {
             colData.options = [];
         }
         colData.options.forEach(item => {
+            const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : ""
             html += `<button class="b3-menu__item${html ? "" : " b3-menu__item--current"}" draggable="true" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">
-        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+    <div class="fn__flex-1 ariaLabel" data-position="2parentW" aria-label="${airaLabel}">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -667,21 +668,19 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     });
     menu.addItem({
         iconHTML: "",
-        type: "readonly",
-        label: `<div class="fn__block">
-    <div class="fn__flex">
-        <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
-        <div class="b3-form__icona fn__block">
-            <input class="b3-text-field b3-form__icona-input" type="text">
-            <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
-        </div>
+        type: "empty",
+        label: `<div class="fn__hr"></div><div class="fn__flex">
+    <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
+    <div class="b3-form__icona fn__block">
+        <input class="b3-text-field b3-form__icona-input" type="text">
+        <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
     </div>
-    <div class="fn__none">
-        <div class="fn__hr"></div>
-        <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
-    </div>
-    <div class="fn__hr--small"></div>
-</div>`,
+</div>
+<div class="fn__none">
+    <div class="fn__hr"></div>
+    <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+</div>
+<div class="fn__hr--small"></div>`,
         bind(element) {
             const iconElement = element.querySelector(".b3-menu__avemoji") as HTMLElement;
             iconElement.addEventListener("click", (event) => {

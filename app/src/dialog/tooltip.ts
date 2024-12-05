@@ -1,8 +1,6 @@
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 
-let hideTooltipTimeout: number
-
 export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {
         return;
@@ -13,10 +11,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         return;
     }
 
-    // 清除 hideTooltip 的定时器
-    clearTimeout(hideTooltipTimeout);
-
-    const className = tooltipClass?`tooltip tooltip--${tooltipClass}`:"tooltip";
+    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
         document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);
@@ -87,11 +82,8 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 };
 
 export const hideTooltip = () => {
-    clearTimeout(hideTooltipTimeout);
-    hideTooltipTimeout = window.setTimeout(() => {
-        const messageElement = document.getElementById("tooltip");
-        if (messageElement) {
-            messageElement.remove();
-        }
-    }, Constants.TIMEOUT_TRANSITION);
+    const messageElement = document.getElementById("tooltip");
+    if (messageElement) {
+        messageElement.remove();
+    }
 };

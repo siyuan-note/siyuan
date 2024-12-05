@@ -212,7 +212,7 @@ export const getViewHTML = (data: IAV) => {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
+            <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
         </div>
     </div>
 </button>

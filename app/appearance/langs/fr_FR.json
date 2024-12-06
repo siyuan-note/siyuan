@@ -1,5 +1,4 @@
 {
-  "onlyOneDocConvert": "Vous ne pouvez convertir qu'un seul document à la fois",
   "empty": "Vide",
   "newRowInRelation": "Créer une nouvelle entrée dans ${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "Copier le texte de la clé principale",

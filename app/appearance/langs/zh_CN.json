@@ -1,5 +1,4 @@
 {
-  "onlyOneDocConvert": "每次只能转换一个文档",
   "empty": "空白",
   "newRowInRelation": "在 ${x} 中新建条目 <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "复制主键文本",

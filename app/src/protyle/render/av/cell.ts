@@ -284,23 +284,19 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     const cellRect = cellElement.getBoundingClientRect();
     if (!onlyHeight) {
         const avScrollElement = blockElement.querySelector(".av__scroll");
-        if (avScrollElement) {
-            const avScrollRect = avScrollElement.getBoundingClientRect();
-            if (avScrollRect.right < cellRect.right) {
-                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
-            } else {
-                const rowElement = hasClosestByClassName(cellElement, "av__row");
-                if (rowElement) {
-                    const stickyElement = rowElement.querySelector(".av__colsticky");
-                    if (stickyElement) {
-                        if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
-                            const stickyRight = stickyElement.getBoundingClientRect().right;
-                            if (stickyRight > cellRect.left) {
-                                avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
-                            }
-                        }
-                    } else if (avScrollRect.left > cellRect.left) {
-                        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - avScrollRect.left;
+        const rowElement = hasClosestByClassName(cellElement, "av__row");
+        if (avScrollElement && rowElement) {
+            const stickyElement = rowElement.querySelector(".av__colsticky");
+            if (!stickyElement.contains(cellElement)) { // https://github.com/siyuan-note/siyuan/issues/12162
+                const stickyRight = stickyElement.getBoundingClientRect().right;
+                const avScrollRect = avScrollElement.getBoundingClientRect();
+                if (stickyRight > cellRect.left || avScrollRect.right < cellRect.left) {
+                    avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                } else if (stickyRight < cellRect.left && avScrollRect.right < cellRect.right) {
+                    if (cellRect.width + stickyRight > avScrollRect.right) {
+                        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.left - stickyRight;
+                    } else {
+                        avScrollElement.scrollLeft = avScrollElement.scrollLeft + cellRect.right - avScrollRect.right;
                     }
                 }
             }

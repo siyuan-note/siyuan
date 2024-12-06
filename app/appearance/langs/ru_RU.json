@@ -1,4 +1,5 @@
 {
+  "onlyOneDocConvert": "Можно конвертировать только один документ за раз",
   "empty": "Пусто",
   "newRowInRelation": "Создать новую запись в ${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "Скопировать текст основного ключа",

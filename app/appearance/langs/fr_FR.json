@@ -1,4 +1,5 @@
 {
+  "empty": "Vide",
   "newRowInRelation": "Créer une nouvelle entrée dans ${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "Copier le texte de la clé principale",
   "addDesc": "Ajouter une description",

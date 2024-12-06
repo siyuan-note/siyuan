@@ -603,7 +603,20 @@ func getBlockKramdown(c *gin.Context) {
 		return
 	}
 
-	kramdown := model.GetBlockKramdown(id)
+	// md：Markdown 标记符模式，使用标记符导出
+	// textmark：文本标记模式，使用 span 标签导出
+	// https://github.com/siyuan-note/siyuan/issues/13183
+	mode := "md"
+	if modeArg := arg["mode"]; nil != modeArg {
+		mode = modeArg.(string)
+		if "md" != mode && "textmark" != mode {
+			ret.Code = -1
+			ret.Msg = "Invalid mode"
+			return
+		}
+	}
+
+	kramdown := model.GetBlockKramdown(id, mode)
 	ret.Data = map[string]string{
 		"id":       id,
 		"kramdown": kramdown,

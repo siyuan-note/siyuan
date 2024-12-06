@@ -66,37 +66,37 @@
 
 ![b3logos.jpg](https://b3logfile.com/file/2020/08/b3logos-032af045.jpg)
 
-- Content block
-  - Block-level reference and two-way links
-  - Custom attributes
-  - SQL query embed
-  - Protocol `siyuan://`
-- Editor
-  - Block-style
-  - Markdown WYSIWYG
-  - List outline
-  - Block zoom-in
-  - Million-word large document editing
-  - Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
-  - Web clipping
-  - PDF Annotation link
-- Export
-  - Block ref and embed
-  - Standard Markdown with assets
-  - PDF, Word and HTML
-  - Copy to WeChat MP, Zhihu and Yuque
-- Database
-  - Table view
-- Flashcard spaced repetition
-- AI writing and Q/A chat via OpenAI API
-- Tesseract OCR
-- Multi-tab, drag and drop to split screen
-- Template snippet
-- JavaScript/CSS snippet
-- Android/iOS App
-- Docker deployment
-- [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
-- Community marketplace
+* Content block
+  * Block-level reference and two-way links
+  * Custom attributes
+  * SQL query embed
+  * Protocol `siyuan://`
+* Editor
+  * Block-style
+  * Markdown WYSIWYG
+  * List outline
+  * Block zoom-in
+  * Million-word large document editing
+  * Mathematical formulas, charts, flowcharts, Gantt charts, timing charts, staffs, etc.
+  * Web clipping
+  * PDF Annotation link
+* Export
+  * Block ref and embed
+  * Standard Markdown with assets
+  * PDF, Word and HTML
+  * Copy to WeChat MP, Zhihu and Yuque
+* Database
+  * Table view
+* Flashcard spaced repetition
+* AI writing and Q/A chat via OpenAI API
+* Tesseract OCR 
+* Multi-tab, drag and drop to split screen
+* Template snippet
+* JavaScript/CSS snippet
+* Android/iOS/HarmonyOS App
+* Docker deployment
+* [API](https://github.com/siyuan-note/siyuan/blob/master/API.md)
+* Community marketplace
 
 部分功能需要付费会员才能使用，更多细节请参考[定价](https://b3log.org/siyuan/pricing.html)。
 
@@ -113,6 +113,7 @@
 | [petal](https://github.com/siyuan-note/petal)            | Plugin API            | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/petal)          | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/petal)          |
 | [android](https://github.com/siyuan-note/siyuan-android) | Android App           | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-android) | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-android) |
 | [ios](https://github.com/siyuan-note/siyuan-ios)         | iOS App               | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-ios)     | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-ios)     |
+| [harmony](https://github.com/siyuan-note/siyuan-harmony) | HarmonyOS App         | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/siyuan-harmony) | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/siyuan-harmony) |
 | [riff](https://github.com/siyuan-note/riff)              | Spaced repetition     | ![GitHub forks](https://img.shields.io/github/forks/siyuan-note/riff)           | ![GitHub Repo stars](https://img.shields.io/github/stars/siyuan-note/riff)           |
 
 ## 🌟 Star History
@@ -315,10 +316,11 @@ In addition, you can also consider manually exporting and importing data to achi
 
 SiYuan is completely open source, and contributions are welcome:
 
-- [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
-- [Android](https://github.com/siyuan-note/siyuan-android)
-- [iOS](https://github.com/siyuan-note/siyuan-ios)
-- [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
+* [User Interface and Kernel](https://github.com/siyuan-note/siyuan)
+* [Android](https://github.com/siyuan-note/siyuan-android)
+* [iOS](https://github.com/siyuan-note/siyuan-ios)
+* [HarmonyOS](https://github.com/siyuan-note/siyuan-harmony)
+* [Chrome Clipping Extension](https://github.com/siyuan-note/siyuan-chrome)
 
 For more details, please refer to [Development Guide](https://github.com/siyuan-note/siyuan/blob/master/.github/CONTRIBUTING.md).
 

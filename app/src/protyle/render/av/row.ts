@@ -149,7 +149,7 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
     if (avId) {
         const currentRow = previousElement.nextElementSibling;
         if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-            !blockElement.querySelector('[data-type="av-load-more"]').parentElement.classList.contains("fn__none")) {
+            !blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
             currentRow.setAttribute("data-need-update", "true");
         }
         const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;

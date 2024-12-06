@@ -63,7 +63,11 @@ type Backlink struct {
 }
 
 func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (ret []*Backlink) {
+	var keywords []string
 	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
 	ret = []*Backlink{}
 	beforeLen := 12
 	sqlBlock := sql.GetBlock(defID)
@@ -75,7 +79,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	refs := sql.QueryRefsByDefID(defID, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
+	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keywords)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := util.NewLute()
 	var mentions []*Block
@@ -90,7 +94,9 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	}
 	mentionBlockIDs = gulu.Str.RemoveDuplicatedElem(mentionBlockIDs)
 
-	mentionKeywords = strings.Split(keyword, " ")
+	if "" != keyword {
+		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
+	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
 
 	var refTree *parse.Tree
@@ -113,7 +119,12 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 }
 
 func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret []*Backlink) {
+	var keywords []string
 	keyword = strings.TrimSpace(keyword)
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
+
 	ret = []*Backlink{}
 	sqlBlock := sql.GetBlock(defID)
 	if nil == sqlBlock {
@@ -130,7 +141,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 	}
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, _ := buildLinkRefs(rootID, refs, keyword)
+	linkRefs, _, _ := buildLinkRefs(rootID, refs, keywords)
 	refTree, err := LoadTreeByBlockID(refTreeID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -139,7 +150,6 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		keywords := strings.Split(keyword, " ")
 		backlink := buildBacklink(linkRef.ID, refTree, keywords, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
@@ -276,6 +286,10 @@ func getBacklinkRenderNodes(n *ast.Node) (ret []*ast.Node, expand bool) {
 
 func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode int, containChildren bool) (boxID string, backlinks, backmentions []*Path, linkRefsCount, mentionsCount int) {
 	keyword = strings.TrimSpace(keyword)
+	var keywords []string
+	if "" != keyword {
+		keywords = strings.Split(keyword, " ")
+	}
 	mentionKeyword = strings.TrimSpace(mentionKeyword)
 	backlinks, backmentions = []*Path{}, []*Path{}
 
@@ -289,7 +303,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	refs := sql.QueryRefsByDefID(id, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keyword)
+	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keywords)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -485,7 +499,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
+func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -566,7 +580,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 			if nil != refBlock && p.FContent == refBlock.Content { // 使用内容判断是否是列表项下第一个子块
 				// 如果是列表项下第一个子块，则后续会通过列表项传递或关联处理，所以这里就不处理这个段落了
 				processedParagraphs.Add(p.ID)
-				if !matchBacklinkKeyword(p, keyword) {
+				if !matchBacklinkKeyword(p, keywords) {
 					refsCount--
 					continue
 				}
@@ -582,7 +596,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 				}
 			}
 
-			if !matchBacklinkKeyword(ref, keyword) {
+			if !matchBacklinkKeyword(ref, keywords) {
 				refsCount--
 				continue
 			}
@@ -595,11 +609,14 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keyword string) (ret []*Bl
 	return
 }
 
-func matchBacklinkKeyword(block *Block, keyword string) bool {
-	keywords := strings.Split(keyword, " ")
+func matchBacklinkKeyword(block *Block, keywords []string) bool {
+	if 1 > len(keywords) {
+		return true
+	}
+
 	for _, k := range keywords {
 		k = strings.ToLower(k)
-		if strings.Contains(strings.ToLower(block.FContent), k) ||
+		if strings.Contains(strings.ToLower(block.Content), k) ||
 			strings.Contains(strings.ToLower(path.Base(block.HPath)), k) ||
 			strings.Contains(strings.ToLower(block.Name), k) ||
 			strings.Contains(strings.ToLower(block.Alias), k) ||
@@ -826,7 +843,7 @@ func buildFullLinks(condition string) (forwardlinks, backlinks []*Block) {
 func buildDefsAndRefs(condition string) (defBlocks []*Block) {
 	defBlockMap := map[string]*Block{}
 	refBlockMap := map[string]*Block{}
-	defRefs := sql.DefRefs(condition)
+	defRefs := sql.DefRefs(condition, Conf.Graph.MaxBlocks)
 
 	// 将 sql block 转为 block
 	for _, row := range defRefs {

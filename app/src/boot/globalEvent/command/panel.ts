@@ -160,7 +160,7 @@ const filterList = (inputElement: HTMLInputElement, listElement: Element) => {
         const elementValue = element.querySelector(".b3-list-item__text").textContent.toLowerCase();
         const command = element.dataset.command;
         if (inputValue.indexOf(elementValue) > -1 || elementValue.indexOf(inputValue) > -1 ||
-            inputValue.indexOf(command) > -1 || command.indexOf(inputValue) > -1) {
+            inputValue.indexOf(command) > -1 || command?.indexOf(inputValue) > -1) {
             if (!hasFocus) {
                 element.classList.add("b3-list-item--focus");
             }

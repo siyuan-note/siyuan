@@ -232,13 +232,13 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
-		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") {
+		if strings.HasPrefix(c.Request.RequestURI, "/api/system/getNetwork") || strings.HasPrefix(c.Request.RequestURI, "/api/system/getWorkspaceInfo") {
 			c.Set(RoleContextKey, RoleAdministrator)
 			c.Next()
 			return
 		}
 		if strings.HasPrefix(c.Request.RequestURI, "/api/sync/performSync") {
-			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+			if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
 				c.Set(RoleContextKey, RoleAdministrator)
 				c.Next()
 				return
@@ -305,7 +305,9 @@ func CheckAuth(c *gin.Context) {
 	}
 
 	// WebDAV BasicAuth Authenticate
-	if strings.HasPrefix(c.Request.RequestURI, "/webdav") || strings.HasPrefix(c.Request.RequestURI, "/carddav") {
+	if strings.HasPrefix(c.Request.RequestURI, "/webdav") ||
+		strings.HasPrefix(c.Request.RequestURI, "/caldav") ||
+		strings.HasPrefix(c.Request.RequestURI, "/carddav") {
 		c.Header(BasicAuthHeaderKey, BasicAuthHeaderValue)
 		c.AbortWithStatus(http.StatusUnauthorized)
 		return

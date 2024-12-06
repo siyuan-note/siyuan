@@ -1540,9 +1540,10 @@ declare namespace Config {
      * - `docker`: Docker container
      * - `android`: Android device
      * - `ios`: iOS device
+     * - `harmony`: HarmonyOS device
      * - `std`: Desktop Electron environment
      */
-    export type TSystemContainer = "docker" | "android" | "ios" | "std";
+    export type TSystemContainer = "docker" | "android" | "ios" | "harmony" | "std";
 
     /**
      * SiYuan Network proxy configuration

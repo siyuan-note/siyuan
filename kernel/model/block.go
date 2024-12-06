@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/88250/lute/render"
 	"strconv"
 	"strings"
 	"time"
@@ -283,7 +284,7 @@ func RecentUpdatedBlocks() (ret []*Block) {
 	ret = []*Block{}
 
 	sqlStmt := "SELECT * FROM blocks WHERE type = 'p' AND length > 1"
-	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container {
+	if util.ContainerIOS == util.Container || util.ContainerAndroid == util.Container || util.ContainerHarmony == util.Container {
 		sqlStmt = "SELECT * FROM blocks WHERE type = 'd'"
 	}
 
@@ -617,7 +618,7 @@ func GetBlockDOM(id string) (ret string) {
 	return
 }
 
-func GetBlockKramdown(id string) (ret string) {
+func GetBlockKramdown(id, mode string) (ret string) {
 	if "" == id {
 		return
 	}
@@ -633,7 +634,13 @@ func GetBlockKramdown(id string) (ret string) {
 	root.AppendChild(node.Next) // IAL
 	root.PrependChild(node)
 	luteEngine := NewLute()
-	ret = treenode.ExportNodeStdMd(root, luteEngine)
+	if "md" == mode {
+		ret = treenode.ExportNodeStdMd(root, luteEngine)
+	} else {
+		tree.Root = root
+		formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
+		ret = string(formatRenderer.Render())
+	}
 	return
 }
 

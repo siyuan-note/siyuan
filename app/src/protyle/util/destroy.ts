@@ -5,6 +5,10 @@ export const destroy = (protyle: IProtyle) => {
         return;
     }
     hideElements(["util"], protyle);
+    protyle.highlight.markHL.clear();
+    protyle.highlight.mark.clear();
+    protyle.highlight.ranges = [];
+    protyle.highlight.rangeIndex = 0;
     protyle.observer?.disconnect();
     protyle.observerLoad?.disconnect();
     protyle.element.classList.remove("protyle");

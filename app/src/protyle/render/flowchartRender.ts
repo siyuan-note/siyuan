@@ -18,17 +18,21 @@ export const flowchartRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     if (flowchartElements.length === 0) {
         return;
     }
-    addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=0.0.0`, "protyleFlowchartScript").then(() => {
+    addScript(`${cdn}/js/flowchart.js/flowchart.min.js?v=1.18.0`, "protyleFlowchartScript").then(() => {
         if (flowchartElements[0].firstElementChild.clientWidth === 0) {
-            const hideElement = hasClosestByAttribute(flowchartElements[0], "fold", "1");
-            if (!hideElement) {
-                return;
-            }
             const observer = new MutationObserver(() => {
                 initFlowchart(flowchartElements);
                 observer.disconnect();
             });
-            observer.observe(hideElement, {attributeFilter: ["fold"]});
+            const hideElement = hasClosestByAttribute(flowchartElements[0], "fold", "1");
+            if (hideElement) {
+                observer.observe(hideElement, {attributeFilter: ["fold"]});
+            } else {
+                const cardElement = hasClosestByClassName(flowchartElements[0], "card__block", true);
+                if (cardElement) {
+                    observer.observe(cardElement, {attributeFilter: ["class"]});
+                }
+            }
         } else {
             initFlowchart(flowchartElements);
         }

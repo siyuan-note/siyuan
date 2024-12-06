@@ -625,6 +625,10 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkTextContent = escapedR.ReplaceAllString(n.TextMarkTextContent, util.EscapeHTML(replacement))
 							}
 						}
+
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
 							if 0 == method {
@@ -635,6 +639,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								if nil != r && r.MatchString(n.TextMarkTextContent) {
 									n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 								}
+							}
+							if "" == n.TextMarkTextContent {
+								unlinks = append(unlinks, n)
 							}
 						}
 
@@ -661,61 +668,87 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								}
 							}
 						}
-
 					} else if n.IsTextMarkType("em") {
 						if !replaceTypes["em"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "em")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("strong") {
 						if !replaceTypes["strong"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "strong")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("kbd") {
 						if !replaceTypes["kbd"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "kbd")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("mark") {
 						if !replaceTypes["mark"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "mark")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("s") {
 						if !replaceTypes["s"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "s")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("sub") {
 						if !replaceTypes["sub"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sub")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("sup") {
 						if !replaceTypes["sup"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sup")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("tag") {
 						if !replaceTypes["tag"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "tag")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "u")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("inline-math") {
 						if !replaceTypes["inlineMath"] {
 							return ast.WalkContinue
@@ -729,6 +762,10 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							if nil != r && r.MatchString(n.TextMarkInlineMathContent) {
 								n.TextMarkInlineMathContent = r.ReplaceAllString(n.TextMarkInlineMathContent, replacement)
 							}
+						}
+
+						if "" == n.TextMarkInlineMathContent {
+							unlinks = append(unlinks, n)
 						}
 					} else if n.IsTextMarkType("inline-memo") {
 						if !replaceTypes["inlineMemo"] {
@@ -744,6 +781,10 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
 							}
 						}
+
+						if "" == n.TextMarkInlineMemoContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("text") {
 						// Search and replace fails in some cases https://github.com/siyuan-note/siyuan/issues/10016
 						if !replaceTypes["text"] {
@@ -751,6 +792,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						}
 
 						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "text")
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("block-ref") {
 						if !replaceTypes["blockRef"] {
 							return ast.WalkContinue
@@ -767,6 +811,10 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 								n.TextMarkBlockRefSubtype = "s"
 							}
 						}
+
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
+						}
 					} else if n.IsTextMarkType("file-annotation-ref") {
 						if !replaceTypes["fileAnnotationRef"] {
 							return ast.WalkContinue
@@ -780,6 +828,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							if nil != r && r.MatchString(n.TextMarkTextContent) {
 								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 							}
+						}
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
 						}
 					}
 				}
@@ -1942,7 +1993,7 @@ func getRefSearchIgnoreLines() (ret []string) {
 
 func filterQueryInvisibleChars(query string) string {
 	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
-	query = gulu.Str.RemoveInvisible(query)
+	query = util.RemoveInvalid(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
 	return query
 }

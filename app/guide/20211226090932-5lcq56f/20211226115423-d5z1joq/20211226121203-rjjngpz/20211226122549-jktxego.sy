@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20241018105254"
+		"updated": "20241128113116"
 	},
 	"Children": [
 		{
@@ -12564,7 +12564,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20241009230052"
+				"updated": "20241128113116"
 			},
 			"Children": [
 				{
@@ -12584,7 +12584,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002223-xwob5s8",
-				"updated": "20241009230052"
+				"updated": "20241128113116"
 			},
 			"Children": [
 				{
@@ -12896,7 +12896,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "移動"
+									"Data": "生成塊引用"
 								}
 							]
 						},
@@ -12935,7 +12935,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "生成塊引用"
+									"Data": "移動"
 								}
 							]
 						},

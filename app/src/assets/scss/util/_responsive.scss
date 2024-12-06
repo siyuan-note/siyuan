@@ -71,6 +71,11 @@
     &__panel {
       flex-direction: column;
 
+      & > .fn__flex-column {
+        min-height: auto;
+        border-radius: var(--b3-border-radius-b);
+      }
+
       & > .history__side {
         height: 40%;
         overflow: auto;

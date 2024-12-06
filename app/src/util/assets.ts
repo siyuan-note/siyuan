@@ -7,7 +7,7 @@ import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
-import {isInAndroid, isInIOS} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS} from "../protyle/util/compatibility";
 
 const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
     addScript(iconURL, "iconDefaultScript").then(() => {
@@ -205,9 +205,9 @@ export const setInlineStyle = (set = true) => {
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:${height + 8}px;}
-.protyle-wysiwyg [data-node-id].li > .protyle-action:after {height: ${window.siyuan.config.editor.fontSize}px;width: ${window.siyuan.config.editor.fontSize}px;margin:-${window.siyuan.config.editor.fontSize / 2}px 0 0 -${window.siyuan.config.editor.fontSize / 2}px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action::after {height: ${window.siyuan.config.editor.fontSize}px;width: ${window.siyuan.config.editor.fontSize}px;margin:-${window.siyuan.config.editor.fontSize / 2}px 0 0 -${window.siyuan.config.editor.fontSize / 2}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action svg {height: ${Math.max(14, window.siyuan.config.editor.fontSize - 8)}px}
-.protyle-wysiwyg [data-node-id].li:before {height: calc(100% - ${height + 8}px);top:${(height + 8)}px}
+.protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 8}px);top:${(height + 8)}px}
 .protyle-wysiwyg [data-node-id] [spellcheck] {min-height:${height}px;}
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
@@ -329,7 +329,7 @@ const rgba2hex = (rgba: string) => {
 };
 
 const updateMobileTheme = (OSTheme: string) => {
-    if (isInIOS() || isInAndroid()) {
+    if (isInIOS() || isInAndroid() || isInHarmony()) {
         setTimeout(() => {
             const backgroundColor = rgba2hex(getComputedStyle(document.body).getPropertyValue("--b3-theme-background").trim());
             let mode = window.siyuan.config.appearance.mode;
@@ -344,6 +344,8 @@ const updateMobileTheme = (OSTheme: string) => {
                 window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
             } else if (isInAndroid()) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
+            } else if ( isInHarmony()) {
+                window.JSHarmony.changeStatusBarColor(backgroundColor, mode);
             }
         }, 500); // 移动端需要加载完才可以获取到颜色
     }

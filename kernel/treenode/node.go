@@ -103,6 +103,13 @@ func IsBlockRef(n *ast.Node) bool {
 	return ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")
 }
 
+func IsBlockLink(n *ast.Node) bool {
+	if nil == n {
+		return false
+	}
+	return ast.NodeTextMark == n.Type && n.IsTextMarkType("a") && strings.HasPrefix(n.TextMarkAHref, "siyuan://blocks/")
+}
+
 func IsFileAnnotationRef(n *ast.Node) bool {
 	if nil == n {
 		return false

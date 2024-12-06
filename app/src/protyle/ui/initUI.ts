@@ -48,6 +48,8 @@ export const initUI = (protyle: IProtyle) => {
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);
 
+    protyle.element.append(protyle.highlight.styleElement);
+
     addLoading(protyle);
 
     setEditMode(protyle, protyle.options.mode);
@@ -184,7 +186,7 @@ export const setPadding = (protyle: IProtyle) => {
     if (window.siyuan.config.editor.displayBookmarkIcon) {
         const editorAttrElement = document.getElementById("editorAttr");
         if (editorAttrElement) {
-            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips:after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
+            editorAttrElement.innerHTML = `.protyle-wysiwyg--attr .b3-tooltips::after { max-width: ${protyle.wysiwyg.element.clientWidth - left - right}px; }`;
         }
     }
     const oldWidth = protyle.wysiwyg.element.getAttribute("data-realwidth");

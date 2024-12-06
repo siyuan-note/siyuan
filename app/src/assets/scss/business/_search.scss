@@ -24,7 +24,7 @@
         margin: 0 -6px 0 0;
         height: auto;
 
-        &:after {
+        &::after {
           width: .5px;
           height: 100%;
         }
@@ -104,7 +104,7 @@
     position: relative;
     z-index: 2;
 
-    &:after {
+    &::after {
       content: "";
       display: block;
       background-color: var(--b3-theme-surface-lighter);
@@ -116,7 +116,7 @@
       height: .5px;
     }
 
-    &:hover:after {
+    &:hover::after {
       background-color: var(--b3-scroll-color);
     }
   }

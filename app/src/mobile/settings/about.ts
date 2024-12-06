@@ -4,7 +4,7 @@ import {Dialog} from "../../dialog";
 import {fetchPost} from "../../util/fetch";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {showMessage} from "../../dialog/message";
-import {isInAndroid, isInIOS, isIPad, openByMobile, writeText} from "../../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isIPad, openByMobile, writeText} from "../../protyle/util/compatibility";
 import {exitSiYuan, processSync} from "../../dialog/processSystem";
 import {pathPosix} from "../../util/pathName";
 import {openModel} from "../menu/model";
@@ -40,7 +40,7 @@ export const initAbout = () => {
         <div class="fn__hr"></div>
         <div class="b3-label__text">${window.siyuan.languages.about18}</div>
 </div>
-<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad())) ? " fn__none" : ""}">
+<div class="b3-label${(window.siyuan.config.readonly || (isBrowser() && !isInIOS() && !isInAndroid() && !isIPad() && !isInHarmony())) ? " fn__none" : ""}">
     ${window.siyuan.languages.about5}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="authCode">
@@ -136,7 +136,7 @@ export const initAbout = () => {
     </button>
     <div class="b3-label__text">${window.siyuan.languages.importConfTip}</div>
 </div>
-<div class="b3-label${(!window.siyuan.config.readonly && (isInAndroid() || isInIOS())) ? "" : " fn__none"}">
+<div class="b3-label${(!window.siyuan.config.readonly && (isInAndroid() || isInIOS() || isInHarmony())) ? "" : " fn__none"}">
     ${window.siyuan.languages.workspaceList}
     <div class="fn__hr"></div>
     <button id="openWorkspace" class="b3-button b3-button--outline fn__block">${window.siyuan.languages.openBy}...</button>
@@ -169,7 +169,7 @@ export const initAbout = () => {
         </div>
     </div>
     <div style="color:var(--b3-theme-surface);font-family: cursive;">会泽百家&nbsp;至公天下</div>
-    ${window.siyuan.languages.about1}
+    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""}
 </div>
 </div>`,
         bindEvent(modelMainElement: HTMLElement) {

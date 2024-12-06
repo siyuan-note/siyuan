@@ -386,7 +386,6 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             if (nodeElement) {
                 const newRange = focusBlock(nodeElement);
                 if (newRange) {
-                    // 需要更新 range，否则文档大纲点击导致切换页签时因为 resize 中 `保持光标位置不变` 会导致光标跳动
                     editor.editor.protyle.toolbar.range = newRange;
                 }
                 scrollCenter(editor.editor.protyle, nodeElement, true);

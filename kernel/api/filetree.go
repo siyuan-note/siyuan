@@ -214,8 +214,15 @@ func heading2Doc(c *gin.Context) {
 
 	srcHeadingID := arg["srcHeadingID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
-	targetPath := arg["targetPath"].(string)
-	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath)
+	var targetPath string
+	if arg["targetPath"] != nil {
+		targetPath = arg["targetPath"].(string)
+	}
+	var previousPath string
+	if arg["previousPath"] != nil {
+		previousPath = arg["previousPath"].(string)
+	}
+	srcRootBlockID, targetPath, err := model.Heading2Doc(srcHeadingID, targetNotebook, targetPath, previousPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -259,8 +266,15 @@ func li2Doc(c *gin.Context) {
 
 	srcListItemID := arg["srcListItemID"].(string)
 	targetNotebook := arg["targetNoteBook"].(string)
-	targetPath := arg["targetPath"].(string)
-	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath)
+	var targetPath string
+	if arg["targetPath"] != nil {
+		targetPath = arg["targetPath"].(string)
+	}
+	var previousPath string
+	if arg["previousPath"] != nil {
+		previousPath = arg["previousPath"].(string)
+	}
+	srcRootBlockID, targetPath, err := model.ListItem2Doc(srcListItemID, targetNotebook, targetPath, previousPath)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -488,6 +502,31 @@ func removeDoc(c *gin.Context) {
 	model.RemoveDoc(notebook, p)
 }
 
+func removeDocByID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
+	tree, err := model.LoadTreeByBlockID(id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
+	model.RemoveDoc(tree.Box, tree.Path)
+}
+
 func removeDocs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -544,6 +583,10 @@ func renameDocByID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	if util.InvalidIDPattern(id, ret) {
+		return
+	}
+
 	title := arg["title"].(string)
 
 	tree, err := model.LoadTreeByBlockID(id)

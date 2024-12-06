@@ -15,7 +15,7 @@ echo 'Building Kernel'
 cd kernel
 go version
 export GO111MODULE=on
-export GOPROXY=https://goproxy.io
+export GOPROXY=https://mirrors.aliyun.com/goproxy/
 export CGO_ENABLED=1
 
 echo 'Building Kernel amd64'

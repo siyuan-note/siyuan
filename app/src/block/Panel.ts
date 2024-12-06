@@ -334,5 +334,11 @@ export class BlockPanel {
         if (this.targetElement) {
             this.targetElement.style.cursor = "";
         }
+
+        this.element.querySelector(".block__content").addEventListener("scroll", () => {
+            this.editors.forEach(item => {
+                hideElements(["gutter"], item.protyle);
+            });
+        });
     }
 }

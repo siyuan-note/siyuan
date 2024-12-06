@@ -40,9 +40,6 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
     if (!fileItemElement) {
         return window.siyuan.menus.menu;
     }
-    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
-        Array.from(selectItemElements)
-    )));
     const blockIDs: string[] = [];
     selectItemElements.forEach(item => {
         const id = item.getAttribute("data-node-id");
@@ -50,6 +47,33 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
             blockIDs.push(id);
         }
     });
+
+    if (blockIDs.length > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            id: "copy",
+            label: window.siyuan.languages.copy,
+            type: "submenu",
+            icon: "iconCopy",
+            submenu: copySubMenu(blockIDs).concat([{
+                id: "duplicate",
+                iconHTML: "",
+                label: window.siyuan.languages.duplicate,
+                accelerator: window.siyuan.config.keymap.editor.general.duplicate.custom,
+                click() {
+                    blockIDs.forEach((id) => {
+                        fetchPost("/api/filetree/duplicateDoc", {
+                            id
+                        });
+                    });
+                }
+            }])
+        }).element);
+    }
+
+    window.siyuan.menus.menu.append(movePathToMenu(getTopPaths(
+        Array.from(selectItemElements)
+    )));
+
     if (blockIDs.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
             id: "addToDatabase",
@@ -469,7 +493,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
-            submenu: (copySubMenu(id, false) as IMenu[]).concat([{
+            submenu: (copySubMenu([id]) as IMenu[]).concat([{
                 id: "duplicate",
                 iconHTML: "",
                 label: window.siyuan.languages.duplicate,

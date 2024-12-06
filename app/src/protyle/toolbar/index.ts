@@ -69,7 +69,16 @@ export class Toolbar {
         /// #endif
         this.toolbarHeight = 29;
         protyle.app.plugins.forEach(item => {
-            options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(options.toolbar));
+            const pluginToolbar = item.updateProtyleToolbar(options.toolbar);
+            pluginToolbar.forEach(toolbarItem => {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                    return;
+                }
+                if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
+                    toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
+                }
+            });
+            options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
@@ -81,7 +90,16 @@ export class Toolbar {
         this.element.innerHTML = "";
         protyle.options.toolbar = toolbarKeyToMenu(Constants.PROTYLE_TOOLBAR);
         protyle.app.plugins.forEach(item => {
-            protyle.options.toolbar = toolbarKeyToMenu(item.updateProtyleToolbar(protyle.options.toolbar));
+            const pluginToolbar = item.updateProtyleToolbar(protyle.options.toolbar);
+            pluginToolbar.forEach(toolbarItem => {
+                if (typeof toolbarItem === "string" || Constants.INLINE_TYPE.concat("|").includes(toolbarItem.name) || !toolbarItem.hotkey) {
+                    return;
+                }
+                if (window.siyuan.config.keymap.plugin && window.siyuan.config.keymap.plugin[item.name] && window.siyuan.config.keymap.plugin[item.name][toolbarItem.name]) {
+                    toolbarItem.hotkey = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name].custom;
+                }
+            });
+            protyle.options.toolbar = toolbarKeyToMenu(pluginToolbar);
         });
         protyle.options.toolbar.forEach((menuItem: IMenuItem) => {
             const itemElement = this.genItem(protyle, menuItem);
@@ -153,7 +171,7 @@ export class Toolbar {
         this.toolbarHeight = this.element.clientHeight;
         const y = rangePosition.top - this.toolbarHeight - 4;
         this.element.setAttribute("data-inity", y + Constants.ZWSP + protyle.contentElement.scrollTop.toString());
-        setPosition(this.element, rangePosition.left - 52, y);
+        setPosition(this.element, rangePosition.left - 52, Math.max(y, protyle.element.getBoundingClientRect().top + 30));
         this.element.querySelectorAll(".protyle-toolbar__item--current").forEach(item => {
             item.classList.remove("protyle-toolbar__item--current");
         });
@@ -291,7 +309,7 @@ export class Toolbar {
         )) {
             // 移除
             if (type === "clear") {
-                toolbarElement.querySelectorAll('[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="strong"]').forEach(item => {
+                toolbarElement.querySelectorAll('[data-type="strong"],[data-type="em"],[data-type="u"],[data-type="s"],[data-type="mark"],[data-type="sup"],[data-type="sub"],[data-type="kbd"],[data-type="mark"],[data-type="code"]').forEach(item => {
                     item.classList.remove("protyle-toolbar__item--current");
                 });
             } else if (actionBtn) {

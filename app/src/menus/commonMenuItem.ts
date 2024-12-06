@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {saveExport} from "../protyle/export";
-import {isInAndroid, openByMobile, writeText} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, openByMobile} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -22,6 +22,7 @@ import {App} from "../index";
 import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openAssetNewWindow} from "../window/openNewWindow";
 import {escapeHtml} from "../util/escape";
+import {copyTextByType} from "../protyle/toolbar/util";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -183,6 +184,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     });
     const dialog = new Dialog({
         width: isMobile() ? "92vw" : "50vw",
+        containerClassName: "b3-dialog__container--theme",
         height: "80vh",
         content: `<div class="fn__flex-column">
     <div class="layout-tab-bar fn__flex" style="flex-shrink:0;border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0">
@@ -233,7 +235,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         <div data-type="custom" class="fn__none custom-attr">
            ${customHTML}
            <div class="b3-label">
-               <button data-action="addCustom" class="b3-button b3-button--outline">
+               <button data-action="addCustom" class="b3-button b3-button--cancel">
                    <svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.addAttr}
                </button>
            </div>
@@ -371,16 +373,14 @@ export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?:
     });
 };
 
-export const copySubMenu = (id: string, accelerator = true, focusElement?: Element) => {
+export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element) => {
     return [{
         id: "copyBlockRef",
         iconHTML: "",
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
         label: window.siyuan.languages.copyBlockRef,
         click: () => {
-            fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`((${id} '${response.data}'))`);
-            });
+            copyTextByType(ids, "ref");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -391,7 +391,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyBlockEmbed,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom : undefined,
         click: () => {
-            writeText(`{{select * from blocks where id='${id}'}}`);
+            copyTextByType(ids, "blockEmbed");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -402,7 +402,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyProtocol,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocol.custom : undefined,
         click: () => {
-            writeText(`siyuan://blocks/${id}`);
+            copyTextByType(ids, "protocol");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -413,9 +413,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyProtocolInMd,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom : undefined,
         click: () => {
-            fetchPost("/api/block/getRefText", {id}, (response) => {
-                writeText(`[${response.data}](siyuan://blocks/${id})`);
-            });
+            copyTextByType(ids, "protocolMd");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -425,12 +423,11 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click: () => {
-            fetchPost("/api/filetree/getHPathByID", {
-                id
-            }, (response) => {
-                writeText(response.data);
-            });
+        click:  () => {
+            copyTextByType(ids, "hPath");
+            if (focusElement) {
+                focusBlock(focusElement);
+            }
         }
     }, {
         id: "copyID",
@@ -438,7 +435,7 @@ export const copySubMenu = (id: string, accelerator = true, focusElement?: Eleme
         label: window.siyuan.languages.copyID,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyID.custom : undefined,
         click: () => {
-            writeText(id);
+            copyTextByType(ids, "id");
             if (focusElement) {
                 focusBlock(focusElement);
             }
@@ -714,7 +711,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
-        label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+        label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
             openByMobile(src);
@@ -785,7 +782,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             });
             /// #else
             submenu.push({
-                label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+                label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
                 accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click: () => {
                     openByMobile(src);
@@ -811,7 +808,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         });
         /// #else
         submenu.push({
-            label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+            label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
                 openByMobile(src);

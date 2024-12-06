@@ -726,7 +726,7 @@ func scanBlockRow(row *sql.Row) (ret *Block) {
 	return
 }
 
-func GetChildBlocks(parentID, condition string) (ret []*Block) {
+func GetChildBlocks(parentID, condition string, limit int) (ret []*Block) {
 	blockIDs := queryBlockChildrenIDs(parentID)
 	var params []string
 	for _, id := range blockIDs {
@@ -738,6 +738,7 @@ func GetChildBlocks(parentID, condition string) (ret []*Block) {
 	if "" != condition {
 		sqlStmt += " AND " + condition
 	}
+	sqlStmt += " LIMIT " + strconv.Itoa(limit)
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -752,12 +753,13 @@ func GetChildBlocks(parentID, condition string) (ret []*Block) {
 	return
 }
 
-func GetAllChildBlocks(rootIDs []string, condition string) (ret []*Block) {
+func GetAllChildBlocks(rootIDs []string, condition string, limit int) (ret []*Block) {
 	ret = []*Block{}
 	sqlStmt := "SELECT * FROM blocks AS ref WHERE ref.root_id IN ('" + strings.Join(rootIDs, "','") + "')"
 	if "" != condition {
 		sqlStmt += " AND " + condition
 	}
+	sqlStmt += " LIMIT " + strconv.Itoa(limit)
 	rows, err := query(sqlStmt)
 	if err != nil {
 		logging.LogErrorf("sql query [%s] failed: %s", sqlStmt, err)
@@ -778,6 +780,9 @@ func GetBlock(id string) (ret *Block) {
 		return
 	}
 	row := queryRow("SELECT * FROM blocks WHERE id = ?", id)
+	if nil == row {
+		return
+	}
 	ret = scanBlockRow(row)
 	if nil != ret {
 		putBlockCache(ret)

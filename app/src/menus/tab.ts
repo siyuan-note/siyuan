@@ -206,7 +206,7 @@ export const initTabMenu = (app: App, tab: Tab) => {
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             type: "submenu",
-            submenu: copySubMenu(rootId, false)
+            submenu: copySubMenu([rootId], false)
         }).element);
     } else if (model && model instanceof Asset) {
         window.siyuan.menus.menu.append(new MenuItem({

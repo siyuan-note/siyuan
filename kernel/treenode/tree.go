@@ -20,7 +20,6 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io/fs"
-	"path"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -61,7 +60,7 @@ func TreeRoot(node *ast.Node) *ast.Node {
 }
 
 func NewTree(boxID, p, hp, title string) *parse.Tree {
-	id := strings.TrimSuffix(path.Base(p), ".sy")
+	id := util.GetTreeID(p)
 	root := &ast.Node{Type: ast.NodeDocument, ID: id, Spec: "1", Box: boxID, Path: p}
 	root.SetIALAttr("title", title)
 	root.SetIALAttr("id", id)
@@ -96,7 +95,7 @@ func RootChildIDs(rootID string) (ret []string) {
 	if !gulu.File.IsDir(subFolder) {
 		return
 	}
-	filelock.Walk(subFolder, func(path string, info fs.FileInfo, err error) error {
+	filelock.Walk(subFolder, func(path string, d fs.DirEntry, err error) error {
 		if strings.HasSuffix(path, ".sy") {
 			name := filepath.Base(path)
 			id := strings.TrimSuffix(name, ".sy")

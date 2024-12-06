@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"fmt"
 	"io"
+	"io/fs"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -316,8 +317,8 @@ func isICloudPath(workspaceAbsPath string) (ret bool) {
 
 	// macOS 端对工作空间放置在 iCloud 路径下做检查 https://github.com/siyuan-note/siyuan/issues/7747
 	iCloudRoot := filepath.Join(HomeDir, "Library", "Mobile Documents")
-	WalkWithSymlinks(iCloudRoot, func(path string, info os.FileInfo, err error) error {
-		if !info.IsDir() {
+	WalkWithSymlinks(iCloudRoot, func(path string, d fs.DirEntry, err error) error {
+		if !d.IsDir() {
 			return nil
 		}
 

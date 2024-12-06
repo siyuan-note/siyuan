@@ -23,6 +23,8 @@ export const openByMobile = (uri: string) => {
         }
     } else if (isInAndroid()) {
         window.JSAndroid.openExternal(uri);
+    } else if (isInHarmony()) {
+        window.JSHarmony.openExternal(uri);
     } else {
         window.open(uri);
     }
@@ -31,6 +33,8 @@ export const openByMobile = (uri: string) => {
 export const readText = () => {
     if (isInAndroid()) {
         return window.JSAndroid.readClipboard();
+    } else if (isInHarmony()) {
+        return window.JSHarmony.readClipboard();
     }
     return navigator.clipboard.readText();
 };
@@ -46,6 +50,10 @@ export const writeText = (text: string) => {
             window.JSAndroid.writeClipboard(text);
             return;
         }
+        if (isInHarmony()) {
+            window.JSHarmony.writeClipboard(text);
+            return;
+        }
         if (isInIOS()) {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
             return;
@@ -56,6 +64,8 @@ export const writeText = (text: string) => {
             window.webkit.messageHandlers.setClipboard.postMessage(text);
         } else if (isInAndroid()) {
             window.JSAndroid.writeClipboard(text);
+        } else if (isInHarmony()) {
+            window.JSHarmony.writeClipboard(text);
         } else {
             const textElement = document.createElement("textarea");
             textElement.value = text;
@@ -134,6 +144,10 @@ export const isInAndroid = () => {
 
 export const isInIOS = () => {
     return window.siyuan.config.system.container === "ios" && window.webkit?.messageHandlers;
+};
+
+export const isInHarmony = () => {
+    return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };
 
 // Mac，Windows 快捷键展示

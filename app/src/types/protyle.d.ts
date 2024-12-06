@@ -482,6 +482,13 @@ interface IProtyleOptions {
 }
 
 interface IProtyle {
+    highlight: {
+        mark: Highlight
+        markHL: Highlight
+        ranges: Range[]
+        rangeIndex: 0
+        styleElement: HTMLStyleElement
+    }
     getInstance: () => import("../protyle").Protyle,
     observerLoad?: ResizeObserver,
     observer?: ResizeObserver,

@@ -752,7 +752,7 @@ func checkoutRepo(id string) {
 	// 回滚快照时默认为当前数据创建一个快照
 	// When rolling back a snapshot, a snapshot is created for the current data by default https://github.com/siyuan-note/siyuan/issues/12470
 	FlushTxQueue()
-	_, err = repo.Index("Backup before checkout", map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
+	_, err = repo.Index("Backup before checkout", false, map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress})
 	if err != nil {
 		logging.LogErrorf("index repository failed: %s", err)
 		util.PushClearProgress()
@@ -1022,7 +1022,7 @@ func TagSnapshot(id, name string) (err error) {
 	}
 
 	name = strings.TrimSpace(name)
-	name = gulu.Str.RemoveInvisible(name)
+	name = util.RemoveInvalid(name)
 	if "" == name {
 		err = errors.New(Conf.Language(142))
 		return
@@ -1074,7 +1074,7 @@ func IndexRepo(memo string) (err error) {
 	start := time.Now()
 	latest, _ := repo.Latest()
 	FlushTxQueue()
-	index, err := repo.Index(memo, map[string]interface{}{
+	index, err := repo.Index(memo, true, map[string]interface{}{
 		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBarAndProgress,
 	})
 	if err != nil {
@@ -1285,34 +1285,63 @@ func bootSyncRepo() (err error) {
 	isBootSyncing.Store(true)
 
 	start := time.Now()
-	_, _, err = indexRepoBeforeCloudSync(repo)
-	if err != nil {
-		autoSyncErrCount++
-		planSyncAfter(fixSyncInterval)
 
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		Conf.Sync.Stat = msg
-		Conf.Save()
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		BootSyncSucc = 1
-		isBootSyncing.Store(false)
-		return
-	}
+	waitGroup := sync.WaitGroup{}
+	var errs []error
+	waitGroup.Add(1)
+	go func() {
+		defer waitGroup.Done()
 
-	syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
-	fetchedFiles, err := repo.GetSyncCloudFiles(syncContext)
-	if errors.Is(err, dejavu.ErrRepoFatal) {
-		autoSyncErrCount++
-		planSyncAfter(fixSyncInterval)
+		_, _, indexErr := indexRepoBeforeCloudSync(repo)
+		if indexErr != nil {
+			errs = append(errs, indexErr)
+			autoSyncErrCount++
+			planSyncAfter(fixSyncInterval)
 
-		msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(err))
-		Conf.Sync.Stat = msg
-		Conf.Save()
-		util.PushStatusBar(msg)
-		util.PushErrMsg(msg, 0)
-		BootSyncSucc = 1
-		isBootSyncing.Store(false)
+			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(indexErr))
+			Conf.Sync.Stat = msg
+			Conf.Save()
+			util.PushStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+			BootSyncSucc = 1
+			isBootSyncing.Store(false)
+			return
+		}
+	}()
+
+	var fetchedFiles []*entity.File
+	waitGroup.Add(1)
+	go func() {
+		defer waitGroup.Done()
+
+		syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
+		cloudLatest, getErr := repo.GetCloudLatest(syncContext)
+		if nil != getErr {
+			errs = append(errs, getErr)
+			if !errors.Is(getErr, cloud.ErrCloudObjectNotFound) {
+				logging.LogErrorf("download cloud latest failed: %s", getErr)
+				return
+			}
+		}
+		fetchedFiles, getErr = repo.GetSyncCloudFiles(cloudLatest, syncContext)
+		if errors.Is(getErr, dejavu.ErrRepoFatal) {
+			errs = append(errs, getErr)
+			autoSyncErrCount++
+			planSyncAfter(fixSyncInterval)
+
+			msg := fmt.Sprintf(Conf.Language(80), formatRepoErrorMsg(getErr))
+			Conf.Sync.Stat = msg
+			Conf.Save()
+			util.PushStatusBar(msg)
+			util.PushErrMsg(msg, 0)
+			BootSyncSucc = 1
+			isBootSyncing.Store(false)
+			return
+		}
+	}()
+	waitGroup.Wait()
+	if 0 < len(errs) {
+		err = errs[0]
 		return
 	}
 
@@ -1741,9 +1770,15 @@ func indexRepoBeforeCloudSync(repo *dejavu.Repo) (beforeIndex, afterIndex *entit
 
 	beforeIndex, _ = repo.Latest()
 	FlushTxQueue()
-	afterIndex, err = repo.Index("[Sync] Cloud sync", map[string]interface{}{
-		eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar,
-	})
+
+	checkChunks := true
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		// 因为移动端私有数据空间不会存在外部操作导致分块损坏的情况，所以不需要检查分块以提升性能 https://github.com/siyuan-note/siyuan/issues/13216
+		checkChunks = false
+	}
+
+	afterIndex, err = repo.Index("[Sync] Cloud sync", checkChunks,
+		map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar})
 	if err != nil {
 		logging.LogErrorf("index data repo before cloud sync failed: %s", err)
 		return

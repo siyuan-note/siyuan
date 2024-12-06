@@ -130,6 +130,20 @@ func (table *Table) calcColTemplate(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Template && "" != row.Cells[colIndex].Value.Template.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Template.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Template.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	case CalcOperatorSum:
 		sum := 0.0
 		for _, row := range table.Rows {
@@ -276,6 +290,22 @@ func (table *Table) calcColMAsset(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MAsset && 0 < len(row.Cells[colIndex].Value.MAsset) {
+				for _, sel := range row.Cells[colIndex].Value.MAsset {
+					if _, ok := uniqueValues[sel.Content]; !ok {
+						uniqueValues[sel.Content] = true
+						countUniqueValues++
+					}
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -341,6 +371,22 @@ func (table *Table) calcColMSelect(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) {
+				for _, sel := range row.Cells[colIndex].Value.MSelect {
+					if _, ok := uniqueValues[sel.Content]; !ok {
+						uniqueValues[sel.Content] = true
+						countUniqueValues++
+					}
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -404,6 +450,20 @@ func (table *Table) calcColSelect(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.MSelect && 0 < len(row.Cells[colIndex].Value.MSelect) && nil != row.Cells[colIndex].Value.MSelect[0] && "" != row.Cells[colIndex].Value.MSelect[0].Content {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content]; !ok {
+					uniqueValues[row.Cells[colIndex].Value.MSelect[0].Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -466,6 +526,20 @@ func (table *Table) calcColDate(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[int64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Date && row.Cells[colIndex].Value.Date.IsNotEmpty {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.Date.Content]; !ok {
+					countUniqueValues++
+					uniqueValues[row.Cells[colIndex].Value.Date.Content] = true
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
@@ -580,6 +654,20 @@ func (table *Table) calcColNumber(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[float64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Number && row.Cells[colIndex].Value.Number.IsNotEmpty {
+				if !uniqueValues[row.Cells[colIndex].Value.Number.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Number.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	case CalcOperatorSum:
 		sum := 0.0
@@ -719,6 +807,20 @@ func (table *Table) calcColText(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Text && "" != row.Cells[colIndex].Value.Text.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Text.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Text.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -781,6 +883,20 @@ func (table *Table) calcColURL(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.URL && "" != row.Cells[colIndex].Value.URL.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.URL.Content] {
+					uniqueValues[row.Cells[colIndex].Value.URL.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	}
 }
@@ -845,6 +961,20 @@ func (table *Table) calcColEmail(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Email && "" != row.Cells[colIndex].Value.Email.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Email.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Email.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -907,6 +1037,20 @@ func (table *Table) calcColPhone(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Phone && "" != row.Cells[colIndex].Value.Phone.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Phone.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Phone.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	}
 }
@@ -971,6 +1115,20 @@ func (table *Table) calcColBlock(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Block && "" != row.Cells[colIndex].Value.Block.Content {
+				if !uniqueValues[row.Cells[colIndex].Value.Block.Content] {
+					uniqueValues[row.Cells[colIndex].Value.Block.Content] = true
+					countUniqueValues++
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -1033,6 +1191,20 @@ func (table *Table) calcColCreated(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[int64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Created {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.Created.Content]; !ok {
+					countUniqueValues++
+					uniqueValues[row.Cells[colIndex].Value.Created.Content] = true
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
@@ -1136,6 +1308,20 @@ func (table *Table) calcColUpdated(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[int64]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Updated && row.Cells[colIndex].Value.Updated.IsNotEmpty {
+				if _, ok := uniqueValues[row.Cells[colIndex].Value.Updated.Content]; !ok {
+					countUniqueValues++
+					uniqueValues[row.Cells[colIndex].Value.Updated.Content] = true
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	case CalcOperatorEarliest:
 		earliest := int64(0)
@@ -1285,6 +1471,22 @@ func (table *Table) calcColRelation(col *TableColumn, colIndex int) {
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Relation {
+				for _, id := range row.Cells[colIndex].Value.Relation.BlockIDs {
+					if !uniqueValues[id] {
+						uniqueValues[id] = true
+						countUniqueValues++
+					}
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
 	}
 }
 
@@ -1349,6 +1551,22 @@ func (table *Table) calcColRollup(col *TableColumn, colIndex int) {
 		}
 		if 0 < len(table.Rows) {
 			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countNotEmpty)/float64(len(table.Rows)), NumberFormatPercent)}
+		}
+	case CalcOperatorPercentUniqueValues:
+		countUniqueValues := 0
+		uniqueValues := map[string]bool{}
+		for _, row := range table.Rows {
+			if nil != row.Cells[colIndex] && nil != row.Cells[colIndex].Value && nil != row.Cells[colIndex].Value.Rollup {
+				for _, content := range row.Cells[colIndex].Value.Rollup.Contents {
+					if !uniqueValues[content.String(true)] {
+						uniqueValues[content.String(true)] = true
+						countUniqueValues++
+					}
+				}
+			}
+		}
+		if 0 < len(table.Rows) {
+			col.Calc.Result = &Value{Number: NewFormattedValueNumber(float64(countUniqueValues)/float64(len(table.Rows)), NumberFormatPercent)}
 		}
 	case CalcOperatorSum:
 		sum := 0.0

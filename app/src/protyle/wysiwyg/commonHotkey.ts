@@ -13,19 +13,9 @@ import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
 import {net2LocalAssets} from "../breadcrumb/action";
 import {processClonePHElement} from "../render/util";
+import {copyTextByType} from "../toolbar/util";
 
 export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElement?: HTMLElement) => {
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
-        fetchPost("/api/filetree/getHPathByID", {
-            id: protyle.block.rootID
-        }, (response) => {
-            writeText(response.data);
-        });
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
     if (matchHotKey(window.siyuan.config.keymap.editor.general.netImg2LocalAsset.custom, event)) {
         net2LocalAssets(protyle, "Img");
         event.preventDefault();
@@ -48,12 +38,71 @@ export const commonHotkey = (protyle: IProtyle, event: KeyboardEvent, nodeElemen
         event.stopPropagation();
         return true;
     }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyHPath.custom, event)) {
+        fetchPost("/api/filetree/getHPathByID", {
+            id: protyle.block.rootID
+        }, (response) => {
+            writeText(response.data);
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
 
     if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocolInMd.custom, event)) {
-        const id = nodeElement ? nodeElement.getAttribute("data-node-id") : protyle.block.rootID;
-        fetchPost("/api/block/getRefText", {id}, (response) => {
-            writeText(`[${response.data}](siyuan://blocks/${id})`);
-        });
+        if (nodeElement) {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements.push(nodeElement);
+            }
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocolMd");
+        } else {
+            copyTextByType([protyle.block.rootID], "protocolMd");
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyID.custom, event)) {
+        if (nodeElement) {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements.push(nodeElement);
+            }
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "id");
+        } else {
+            copyTextByType([protyle.block.rootID], "id");
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyProtocol.custom, event)) {
+        if (nodeElement) {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements.push(nodeElement);
+            }
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "protocol");
+        } else {
+            copyTextByType([protyle.block.rootID], "protocol");
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        return true;
+    }
+
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockEmbed.custom, event)) {
+        if (nodeElement) {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements.push(nodeElement);
+            }
+            copyTextByType(selectElements.map(item => item.getAttribute("data-node-id")), "blockEmbed");
+        } else {
+            copyTextByType([protyle.block.rootID], "blockEmbed");
+        }
         event.preventDefault();
         event.stopPropagation();
         return true;

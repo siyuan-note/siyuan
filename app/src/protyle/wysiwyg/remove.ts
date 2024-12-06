@@ -387,6 +387,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         // 需先移除 removeElement，否则 side 会选中 removeElement
         removeElement.remove();
         focusBlock(previousLastElement, undefined, false);
+        // https://github.com/siyuan-note/siyuan/issues/13254
+        undoOperations.splice(0, 1);
     } else {
         const previousLastEditElement = getContenteditableElement(previousLastElement);
         if (editableElement && (editableElement.textContent !== "" || editableElement.querySelector(".emoji"))) {

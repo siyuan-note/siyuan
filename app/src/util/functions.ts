@@ -2,9 +2,9 @@ export const isMobile = () => {
     return document.getElementById("sidebar") ? true : false;
 };
 
-// "windows" | "linux" | "darwin" | "docker" | "android" | "ios"
+// "windows" | "linux" | "darwin" | "docker" | "android" | "ios" | "harmony"
 export const getBackend = () => {
-    if (["docker", "ios", "android"].includes(window.siyuan.config.system.container)) {
+    if (["docker", "ios", "android", "harmony"].includes(window.siyuan.config.system.container)) {
         return window.siyuan.config.system.container;
     } else {
         return window.siyuan.config.system.os;

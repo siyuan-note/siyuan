@@ -4,6 +4,30 @@ import {hasClosestBlock} from "./hasClosest";
 import {Constants} from "../../constants";
 import {lineNumberRender} from "../render/highlightRender";
 import {stickyRow} from "../render/av/row";
+import {getAllModels} from "../../layout/getAll";
+
+export const recordBeforeResizeTop = () => {
+    getAllModels().editor.forEach((item) => {
+        if (item.editor && item.editor.protyle &&
+            item.element.parentElement && !item.element.classList.contains("fn__none")) {
+            item.editor.protyle.wysiwyg.element.querySelector("[data-resize-top]")?.removeAttribute("data-resize-top");
+            const contentRect = item.editor.protyle.contentElement.getBoundingClientRect();
+            let topElement = document.elementFromPoint(contentRect.left + (contentRect.width / 2), contentRect.top);
+            if (!topElement) {
+                topElement = document.elementFromPoint(contentRect.left + (contentRect.width / 2), contentRect.top + 17);
+            }
+            if (!topElement) {
+                return;
+            }
+            topElement = hasClosestBlock(topElement) as HTMLElement;
+            if (!topElement) {
+                return;
+            }
+            console.log(topElement);
+            topElement.setAttribute("data-resize-top", topElement.getBoundingClientRect().top.toString());
+        }
+    });
+};
 
 export const resize = (protyle: IProtyle) => {
     hideElements(["gutterOnly"], protyle);
@@ -36,23 +60,12 @@ export const resize = (protyle: IProtyle) => {
                     lineNumberRender(item.parentElement);
                 }
             });
-            // 保持光标位置不变 https://ld246.com/article/1673704873983/comment/1673765814595#comments
-            if (!protyle.disabled && protyle.toolbar.range) {
-                let rangeRect = protyle.toolbar.range.getBoundingClientRect();
-                if (rangeRect.height === 0) {
-                    const blockElement = hasClosestBlock(protyle.toolbar.range.startContainer);
-                    if (blockElement) {
-                        rangeRect = blockElement.getBoundingClientRect();
-                    }
-                }
-                if (rangeRect.height === 0) {
-                    return;
-                }
-                const protyleRect = protyle.element.getBoundingClientRect();
-                if (protyleRect.top + 30 > rangeRect.top || protyleRect.bottom < rangeRect.bottom) {
-                    protyle.toolbar.range.startContainer.parentElement.scrollIntoView(protyleRect.top > rangeRect.top);
-                }
-            }
         }
-    }, Constants.TIMEOUT_TRANSITION);   // 等待 setPadding 动画结束
+        const topElement = protyle.wysiwyg.element.querySelector("[data-resize-top]");
+        if (topElement) {
+            topElement.scrollIntoView();
+            protyle.contentElement.scrollTop += topElement.getBoundingClientRect().top - parseInt(topElement.getAttribute("data-resize-top"));
+            topElement.removeAttribute("data-resize-top");
+        }
+    }, Constants.TIMEOUT_TRANSITION + 100);   // 等待 setPadding 动画结束
 };

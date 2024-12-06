@@ -50,6 +50,7 @@ import {fullscreen} from "../protyle/breadcrumb/action";
 import {setPadding} from "../protyle/ui/initUI";
 import {setPosition} from "../util/setPosition";
 import {clearOBG} from "./dock/util";
+import {recordBeforeResizeTop} from "../protyle/util/resize";
 
 export class Wnd {
     private app: App;
@@ -722,6 +723,7 @@ export class Wnd {
                     if (["bottom", "left", "right"].includes(this.parent.type)) {
                         item.panelElement.remove();
                     } else {
+                        recordBeforeResizeTop();
                         this.remove();
                     }
                     // 关闭分屏页签后光标消失

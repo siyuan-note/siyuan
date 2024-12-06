@@ -354,7 +354,7 @@ export const openHistory = (app: App) => {
     </div>
     <div class="fn__flex-1 fn__flex" id="historyContainer">
         <div data-type="doc" class="history__repo fn__block" data-init="true">
-            <div style="overflow:auto;border-bottom: 1px solid var(--b3-border-color);">
+            <div class="history__action">
                 <div class="block__icons">
                     <span data-type="docprevious" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpHistoryPage" data-totalpage="1">1</button>
@@ -409,7 +409,7 @@ export const openHistory = (app: App) => {
             <li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>
         </ul>
         <div data-type="repo" class="fn__none history__repo">
-            <div style="overflow: auto"">
+            <div class="history__action">
                 <div class="block__icons">
                     <span data-type="previous" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.previousLabel}"><svg><use xlink:href='#iconLeft'></use></svg></span>
                     <button class="b3-button b3-button--text ft__selectnone" data-type="jumpRepoPage" data-totalpage="1">1</button>
@@ -445,6 +445,7 @@ export const openHistory = (app: App) => {
             icon: "iconHistory",
             title: window.siyuan.languages.dataHistory,
             bindEvent(element) {
+                element.firstElementChild.setAttribute("style", "background-color:var(--b3-theme-background);height:100%");
                 bindEvent(app, element.firstElementChild);
             }
         });
@@ -459,6 +460,7 @@ export const openHistory = (app: App) => {
             }
         });
         dialog.element.setAttribute("data-key", Constants.DIALOG_HISTORY);
+        dialog.element.querySelector("input").focus();
         bindEvent(app, dialog.element, dialog);
         resizeSide(dialog.element.querySelector(".history__resize"), dialog.element.querySelector(".history__side"), "sideWidth");
     }
@@ -838,9 +840,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 if (totalPage > 1) {
                     confirmDialog(
                         window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (dialog: Dialog) => {
-                            const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
+                        (confirmD) => {
+                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
                             if (inputElement.value === "") {
                                 return;
                             }
@@ -857,9 +859,9 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 if (totalPage > 1) {
                     confirmDialog(
                         window.siyuan.languages.jumpToPage.replace("${x}", totalPage),
-                        `<input style="width: 100%;" class="b3-text-field fn__flex-center" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
-                        (dialog: Dialog) => {
-                            const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+                        `<input class="b3-text-field fn__block" type="number" min="1" max="${totalPage}" value="${currentPage}">`,
+                        (confirmD) => {
+                            const inputElement = confirmD.element.querySelector(".b3-text-field") as HTMLInputElement;
                             if (inputElement.value === "") {
                                 return;
                             }

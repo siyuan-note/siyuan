@@ -107,7 +107,22 @@ type TAVFilterOperator =
     | "Is relative to today"
     | "Is true"
     | "Is false"
+
 declare module "blueimp-md5"
+
+declare class Highlight {
+    constructor(...range: Range[]);
+
+    add(range: Range): void
+
+    clear(): void
+
+    forEach(callbackfn: (value: Range, key: number) => void): void;
+}
+
+declare namespace CSS {
+    const highlights: Map<string, Highlight>;
+}
 
 interface Window {
     echarts: {
@@ -170,6 +185,15 @@ interface Window {
     }) => Promise<any>;
     JSAndroid: {
         returnDesktop(): void
+        openExternal(url: string): void
+        changeStatusBarColor(color: string, mode: number): void
+        writeClipboard(text: string): void
+        writeHTMLClipboard(text: string, html: string): void
+        writeImageClipboard(uri: string): void
+        readClipboard(): string
+        getBlockURL(): string
+    }
+    JSHarmony: {
         openExternal(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void

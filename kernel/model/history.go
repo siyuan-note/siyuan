@@ -22,6 +22,7 @@ import (
 	"io/fs"
 	"math"
 	"os"
+	"path"
 	"path/filepath"
 	"sort"
 	"strconv"
@@ -229,9 +230,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	srcPath := historyPath
 	var destPath, parentHPath string
-	baseName := filepath.Base(historyPath)
-	id := strings.TrimSuffix(baseName, ".sy")
-
+	id := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(id)
 	if nil != workingDoc {
 		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
@@ -334,7 +333,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 func getRollbackDockPath(boxID, historyPath string) (destPath, parentHPath string, err error) {
 	baseName := filepath.Base(historyPath)
-	parentID := strings.TrimSuffix(filepath.Base(filepath.Dir(historyPath)), ".sy")
+	parentID := path.Base(filepath.Dir(historyPath))
 	parentWorkingDoc := treenode.GetBlockTree(parentID)
 	if nil != parentWorkingDoc {
 		// 父路径如果是文档，则恢复到父路径下
@@ -405,7 +404,7 @@ type HistoryItem struct {
 const fileHistoryPageSize = 32
 
 func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, pageCount, totalCount int) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
@@ -440,7 +439,7 @@ func FullTextSearchHistory(query, box, op string, typ, page int) (ret []string, 
 }
 
 func FullTextSearchHistoryItems(created, query, box, op string, typ int) (ret []*HistoryItem) {
-	query = gulu.Str.RemoveInvisible(query)
+	query = util.RemoveInvalid(query)
 	if "" != query && HistoryTypeDocID != typ {
 		query = stringQuery(query)
 	}
@@ -673,19 +672,24 @@ var boxLatestHistoryTime = map[string]time.Time{}
 
 func (box *Box) recentModifiedDocs() (ret []string) {
 	latestHistoryTime := boxLatestHistoryTime[box.ID]
-	filelock.Walk(filepath.Join(util.DataDir, box.ID), func(path string, info fs.FileInfo, err error) error {
-		if nil == info {
+	filelock.Walk(filepath.Join(util.DataDir, box.ID), func(path string, d fs.DirEntry, err error) error {
+		if nil != err || nil == d {
 			return nil
 		}
-		if isSkipFile(info.Name()) {
-			if info.IsDir() {
+		if isSkipFile(d.Name()) {
+			if d.IsDir() {
 				return filepath.SkipDir
 			}
 			return nil
 		}
 
-		if info.IsDir() {
+		if d.IsDir() {
 			return nil
+		}
+
+		info, err := d.Info()
+		if nil != err {
+			return err
 		}
 
 		if info.ModTime().After(latestHistoryTime) {
@@ -817,8 +821,8 @@ func indexHistoryDir(name string, luteEngine *lute.Lute) {
 
 	entryPath := filepath.Join(util.HistoryDir, name)
 	var docs, assets []string
-	filelock.Walk(entryPath, func(path string, info os.FileInfo, err error) error {
-		if strings.HasSuffix(info.Name(), ".sy") {
+	filelock.Walk(entryPath, func(path string, d fs.DirEntry, err error) error {
+		if strings.HasSuffix(d.Name(), ".sy") {
 			docs = append(docs, path)
 		} else if strings.Contains(path, "assets"+string(os.PathSeparator)) {
 			assets = append(assets, path)

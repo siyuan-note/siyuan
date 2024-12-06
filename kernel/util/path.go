@@ -18,6 +18,7 @@ package util
 
 import (
 	"bytes"
+	"io/fs"
 	"net"
 	"os"
 	"path"
@@ -36,6 +37,10 @@ var (
 	UserAgent = "SiYuan/" + Ver
 )
 
+func GetTreeID(treePath string) string {
+	return strings.TrimSuffix(path.Base(treePath), ".sy")
+}
+
 func ShortPathForBootingDisplay(p string) string {
 	if 25 > len(p) {
 		return p
@@ -48,7 +53,7 @@ func ShortPathForBootingDisplay(p string) string {
 var LocalIPs []string
 
 func GetLocalIPs() (ret []string) {
-	if ContainerAndroid == Container {
+	if ContainerAndroid == Container || ContainerHarmony == Container {
 		// Android 上用不了 net.InterfaceAddrs() https://github.com/golang/go/issues/40569，所以前面使用启动内核传入的参数 localIPs
 		LocalIPs = append(LocalIPs, LocalHost)
 		LocalIPs = gulu.Str.RemoveDuplicatedElem(LocalIPs)
@@ -167,7 +172,7 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 
 	baseDepth := strings.Count(filepath.ToSlash(treeAbsPath), "/")
 	depth := 1
-	filelock.Walk(dir, func(path string, info os.FileInfo, err error) error {
+	filelock.Walk(dir, func(path string, d fs.DirEntry, err error) error {
 		p := filepath.ToSlash(path)
 		currentDepth := strings.Count(p, "/")
 		if depth < currentDepth {

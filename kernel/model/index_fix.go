@@ -18,6 +18,7 @@ package model
 
 import (
 	"fmt"
+	"io/fs"
 	"os"
 	"path"
 	"path/filepath"
@@ -151,22 +152,22 @@ func resetDuplicateBlocksOnFileSys() {
 
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var duplicatedTrees []*parse.Tree
-		filelock.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
-			if nil == info {
+		filelock.Walk(boxPath, func(path string, d fs.DirEntry, err error) error {
+			if err != nil || nil == d {
 				return nil
 			}
 
-			if info.IsDir() {
+			if d.IsDir() {
 				if boxPath == path {
 					// 跳过笔记本文件夹
 					return nil
 				}
 
-				if strings.HasPrefix(info.Name(), ".") {
+				if strings.HasPrefix(d.Name(), ".") {
 					return filepath.SkipDir
 				}
 
-				if !ast.IsNodeIDPattern(info.Name()) {
+				if !ast.IsNodeIDPattern(d.Name()) {
 					return nil
 				}
 				return nil
@@ -176,7 +177,7 @@ func resetDuplicateBlocksOnFileSys() {
 				return nil
 			}
 
-			if !ast.IsNodeIDPattern(strings.TrimSuffix(info.Name(), ".sy")) {
+			if !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".sy")) {
 				logging.LogWarnf("invalid .sy file name [%s]", path)
 				box.moveCorruptedData(path)
 				return nil
@@ -285,18 +286,18 @@ func fixBlockTreeByFileSys() {
 	for _, box := range boxes {
 		boxPath := filepath.Join(util.DataDir, box.ID)
 		var paths []string
-		filelock.Walk(boxPath, func(path string, info os.FileInfo, err error) error {
+		filelock.Walk(boxPath, func(path string, d fs.DirEntry, err error) error {
+			if nil != err || nil == d {
+				return nil
+			}
+
 			if boxPath == path {
 				// 跳过根路径（笔记本文件夹）
 				return nil
 			}
 
-			if nil == info {
-				return nil
-			}
-
-			if info.IsDir() {
-				if strings.HasPrefix(info.Name(), ".") {
+			if d.IsDir() {
+				if strings.HasPrefix(d.Name(), ".") {
 					return filepath.SkipDir
 				}
 				return nil

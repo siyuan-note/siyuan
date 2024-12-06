@@ -428,7 +428,7 @@ func QueryRefsByDefIDRefID(defBlockID, refBlockID string) (ret []*Ref) {
 	return
 }
 
-func DefRefs(condition string) (ret []map[*Block]*Block) {
+func DefRefs(condition string, limit int) (ret []map[*Block]*Block) {
 	ret = []map[*Block]*Block{}
 	stmt := "SELECT ref.*, r.block_id || '@' || r.def_block_id AS rel FROM blocks AS ref, refs AS r WHERE ref.id = r.block_id"
 	if "" != condition {
@@ -453,7 +453,7 @@ func DefRefs(condition string) (ret []map[*Block]*Block) {
 		refs[rel] = &ref
 	}
 
-	rows, err = query("SELECT def.* FROM blocks AS def, refs AS r WHERE def.id = r.def_block_id")
+	rows, err = query("SELECT def.* FROM blocks AS def, refs AS r WHERE def.id = r.def_block_id LIMIT ?", limit)
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return

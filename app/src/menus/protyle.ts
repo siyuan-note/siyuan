@@ -991,7 +991,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     const imgElement = assetElement.querySelector("img");
-    const titleElement = assetElement.querySelector(".protyle-action__title") as HTMLElement;
+    const titleElement = assetElement.querySelector(".protyle-action__title span") as HTMLElement;
     const html = nodeElement.outerHTML;
     if (!protyle.disabled) {
         window.siyuan.menus.menu.append(new MenuItem({
@@ -1173,7 +1173,6 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 alignImgLeft(protyle, nodeElement, [assetElement], id, html);
             }
         }).element);
-        const width = imgElement.style.width.endsWith("vw") ? parseInt(imgElement.style.width) : 0;
         let rangeElement: HTMLInputElement;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.width,
@@ -1181,7 +1180,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 iconHTML: "",
                 type: "readonly",
                 label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${imgElement.style.width.endsWith("px") ? parseInt(imgElement.style.width) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.width}"> px
+<input class="b3-text-field" style="margin: 4px 8px 4px 0" value="${imgElement.parentElement.style.width.endsWith("px") ? parseInt(imgElement.parentElement.style.width) : ""}" type="number" placeholder="${window.siyuan.languages.width}">px
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -1189,11 +1188,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeElement.value = "0";
                         rangeElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        imgElement.style.width = inputElement.value ? (inputElement.value + "px") : "";
+                        imgElement.parentElement.style.width = inputElement.value ? (inputElement.value + "px") : "";
                         imgElement.style.height = "";
                     });
                     inputElement.addEventListener("blur", () => {
-                        if (inputElement.value === imgElement.style.width.replace("px", "")) {
+                        if (inputElement.value === imgElement.parentElement.style.width.replace("px", "")) {
                             return;
                         }
                         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
@@ -1213,13 +1212,14 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.width.endsWith("px") ? imgElement.style.width : (imgElement.style.width?.replace("vw", "%") || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.parentElement.style.width ? imgElement.parentElement.style.width.replace("vw", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+    <input style="box-sizing: border-box" value="${(imgElement.parentElement.style.width.endsWith("%")||imgElement.parentElement.style.width.endsWith("vw")) ? parseInt(imgElement.parentElement.style.width) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
-                            imgElement.style.width = rangeElement.value + "vw";
+                            imgElement.parentElement.style.width = rangeElement.value + "%";
+                            imgElement.style.height = "";
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
                         });
                         rangeElement.addEventListener("change", () => {
@@ -1236,14 +1236,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             ]
         }).element);
         let rangeHeightElement: HTMLInputElement;
-        const height = imgElement.style.height.endsWith("vh") ? parseInt(imgElement.style.height) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
             label: window.siyuan.languages.height,
             submenu: [{
                 iconHTML: "",
                 type: "readonly",
                 label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${imgElement.style.height.endsWith("px") ? parseInt(imgElement.style.height) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.height}"> px
+<input class="b3-text-field" value="${imgElement.style.height.endsWith("px") ? parseInt(imgElement.style.height) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}">px
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -1252,8 +1251,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
                         imgElement.style.height = inputElement.value ? (inputElement.value + "px") : "";
-                        assetElement.style.width = "";
-                        imgElement.style.width = "";
+                        imgElement.parentElement.style.width = "";
                     });
                     inputElement.addEventListener("blur", () => {
                         if (inputElement.value === imgElement.style.height.replace("px", "")) {
@@ -1276,14 +1274,13 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 }, {
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.height.endsWith("vh") ? parseInt(imgElement.style.height) + "%" : (imgElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.height ? imgElement.style.height.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
+    <input style="box-sizing: border-box" value="${imgElement.style.height.endsWith("vh") ? parseInt(imgElement.style.height) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
 </div>`,
                     bind(element) {
                         rangeHeightElement = element.querySelector("input");
                         rangeHeightElement.addEventListener("input", () => {
-                            assetElement.style.width = "";
-                            imgElement.style.width = "";
+                            imgElement.parentElement.style.width = "";
                             imgElement.style.height = rangeHeightElement.value + "vh";
                             rangeHeightElement.parentElement.setAttribute("aria-label", `${rangeHeightElement.value}%`);
                         });
@@ -1823,11 +1820,7 @@ const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IPro
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            if (label === window.siyuan.languages.default) {
-                imgElement.style.width = "";
-            } else {
-                imgElement.style.width = label.replace("%", "vw");
-            }
+            imgElement.parentElement.style.width = label === window.siyuan.languages.default ? "" : label;
             imgElement.style.height = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);
@@ -1841,12 +1834,8 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            if (label === window.siyuan.languages.default) {
-                imgElement.style.height = "";
-            } else {
-                imgElement.style.height = parseInt(label) + "vh";
-            }
-            imgElement.style.width = "";
+            imgElement.style.height = label === window.siyuan.languages.default ? "" : parseInt(label) + "vh";
+            imgElement.parentElement.style.width = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);
         }

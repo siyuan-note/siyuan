@@ -190,6 +190,8 @@ func extensionCopy(c *gin.Context) {
 			}
 			tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 		}
+	} else {
+		tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	}
 
 	var unlinks []*ast.Node

@@ -66,8 +66,7 @@
     font-size: 16px;
   }
 
-  &--text,
-  &--cancel {
+  &--text {
     color: var(--b3-theme-primary);
     background-color: transparent;
 
@@ -85,6 +84,18 @@
 
   &--cancel {
     color: var(--b3-theme-on-surface);
+    background-color: transparent;
+
+    &:hover,
+    &:focus {
+      background-color: var(--b3-list-hover);
+      box-shadow: none;
+    }
+
+    &:active {
+      background-color: var(--b3-list-icon-hover);
+      box-shadow: none;
+    }
   }
 
   &--outline {

@@ -1,7 +1,7 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {addDragFill, renderCell} from "./cell";
+import {addDragFill, cellScrollIntoView, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
@@ -264,14 +264,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <div class="av__colsticky">
                     <button class="b3-button" data-type="av-add-bottom">
                         <svg><use xlink:href="#iconAdd"></use></svg>
-                        ${window.siyuan.languages.newRow}
+                        <span>${window.siyuan.languages.newRow}</span>
                     </button>
                     <span class="fn__space"></span>
-                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}">
-                        <svg data-type="av-load-more"><use xlink:href="#iconArrowDown"></use></svg>
-                        <span data-type="av-load-more">
-                            ${window.siyuan.languages.loadMore}
-                        </span>
+                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
+                        <svg><use xlink:href="#iconArrowDown"></use></svg>
+                        <span>${window.siyuan.languages.loadMore}</span>
                         <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
                     </button>
                 </div>
@@ -312,13 +310,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     } else if (!document.querySelector(".av__panel") && !isSearching) {
                         focusBlock(e);
                     }
+                    cellScrollIntoView(e, newCellElement);
                 }
                 selectRowIds.forEach((selectRowId, index) => {
                     const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
                     if (rowElement) {
                         rowElement.classList.add("av__row--select");
                         rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
-
                     }
 
                     if (index === selectRowIds.length - 1 && rowElement) {

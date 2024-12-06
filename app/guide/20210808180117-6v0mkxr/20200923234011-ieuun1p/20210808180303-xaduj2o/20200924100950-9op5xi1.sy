@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20241009230212"
+		"updated": "20241128113606"
 	},
 	"Children": [
 		{
@@ -12329,7 +12329,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002135-5dfw1yo",
-				"updated": "20241009230212"
+				"updated": "20241128113606"
 			},
 			"Children": [
 				{
@@ -12349,7 +12349,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20220619002135-s399g7e",
-				"updated": "20241009230212"
+				"updated": "20241128113606"
 			},
 			"Children": [
 				{
@@ -12653,7 +12653,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Move"
+									"Data": "Generate block ref"
 								}
 							]
 						},
@@ -12692,7 +12692,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "Generate block ref"
+									"Data": "Move"
 								}
 							]
 						},

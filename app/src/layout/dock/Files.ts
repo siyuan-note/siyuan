@@ -42,7 +42,7 @@ export class Files extends Model {
                 if (data) {
                     switch (data.cmd) {
                         case "reloadDocInfo":
-                            this.element.querySelector(`li[data-node-id="${data.data.rootID}"] .ariaLabel`)?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+                            this.updateDocInfo(data);
                             break;
                         case "moveDoc":
                             this.onMove(data);
@@ -483,19 +483,17 @@ export class Files extends Model {
                 }
             }
             if (gutterType) {
+                // 块标拖拽
                 const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
-                if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
-                    // 块标拖拽
-                    liElement.classList.add("dragover");
+                if (!["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
+                    event.preventDefault();
+                    return;
                 }
-                event.preventDefault();
+            } else if (liElement.classList.contains("b3-list-item--focus")) {
+                // 选中的文档不能拖拽到自己上，但允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
                 return;
             }
-            // 允许标题拖拽到文档树的选中文档上 https://github.com/siyuan-note/siyuan/issues/6552
-            if (liElement.classList.contains("b3-list-item--focus")) {
-                return;
-            }
-            let sourceOnlyRoot = true;
+            let sourceOnlyRoot = gutterType ? false : true;
             Array.from(this.element.querySelectorAll(".b3-list-item--focus")).find((item: HTMLElement) => {
                 if (item.getAttribute("data-type") === "navigation-file") {
                     sourceOnlyRoot = false;
@@ -566,24 +564,38 @@ export class Files extends Model {
                     gutterType = item.type;
                 }
             }
-            if (gutterType && newElement.classList.contains("dragover")) {
+            // 块标拖拽
+            if (gutterType) {
                 const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
                 if (["nodelistitem", "nodeheading"].includes(gutterTypes[0])) {
-                    // 块标拖拽
+                    const toDocOptions: {
+                        targetNoteBook: string;
+                        pushMode: number;
+                        srcHeadingID?: string;
+                        srcListItemID?: string;
+                        targetPath?: string;
+                        previousPath?: string;
+                    } = {
+                        targetNoteBook: toURL,
+                        pushMode: 0,
+                    };
+                    if (newElement.classList.contains("dragover")) {
+                        toDocOptions.targetPath = toPath;
+                    } else if (newElement.classList.contains("dragover__bottom")) {
+                        toDocOptions.previousPath = toPath;
+                    } else if (newElement.classList.contains("dragover__top")) {
+                        if (newElement.previousElementSibling) {
+                            toDocOptions.previousPath = newElement.previousElementSibling.getAttribute("data-path");
+                        } else {
+                            toDocOptions.targetPath = newElement.parentElement.previousElementSibling.getAttribute("data-path");
+                        }
+                    }
                     if (gutterTypes[0] === "nodeheading") {
-                        fetchPost("/api/filetree/heading2Doc", {
-                            targetNoteBook: toURL,
-                            srcHeadingID: gutterTypes[2].split(",")[0],
-                            targetPath: toPath,
-                            pushMode: 0,
-                        });
+                        toDocOptions.srcHeadingID = gutterTypes[2].split(",")[0];
+                        fetchPost("/api/filetree/heading2Doc", toDocOptions);
                     } else {
-                        fetchPost("/api/filetree/li2Doc", {
-                            pushMode: 0,
-                            srcListItemID: gutterTypes[2].split(",")[0],
-                            targetNoteBook: toURL,
-                            targetPath: toPath
-                        });
+                        toDocOptions.srcListItemID = gutterTypes[2].split(",")[0];
+                        fetchPost("/api/filetree/li2Doc", toDocOptions);
                     }
                 }
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
@@ -721,6 +733,14 @@ export class Files extends Model {
         if (window.siyuan.config.openHelp) {
             // 需等待链接建立，不能放在 ongetconfig 中
             mountHelp();
+        }
+    }
+
+    private updateDocInfo(data: IWebSocketData) {
+        const liElement = this.element.querySelector(`li[data-node-id="${data.data.rootID}"]`);
+        if (liElement) {
+            liElement.setAttribute("data-count", data.data.subFileCount);
+            liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
         }
     }
 

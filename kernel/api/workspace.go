@@ -94,7 +94,7 @@ func createWorkspaceDir(c *gin.Context) {
 	}
 
 	absPath := arg["path"].(string)
-	absPath = gulu.Str.RemoveInvisible(absPath)
+	absPath = util.RemoveInvalid(absPath)
 	absPath = strings.TrimSpace(absPath)
 	if isInvalidWorkspacePath(absPath) {
 		ret.Code = -1
@@ -195,7 +195,7 @@ func getMobileWorkspaces(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	if util.ContainerIOS != util.Container && util.ContainerAndroid != util.Container {
+	if util.ContainerIOS != util.Container && util.ContainerAndroid != util.Container && util.ContainerHarmony != util.Container {
 		return
 	}
 
@@ -315,7 +315,7 @@ func setWorkspaceDir(c *gin.Context) {
 		return
 	}
 
-	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
+	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
 		util.PushMsg(model.Conf.Language(42), 1000*15)
 		time.Sleep(time.Second * 1)
 		model.Close(false, false, 1)

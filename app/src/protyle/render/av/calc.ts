@@ -79,7 +79,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
     data: IAV,
     colId: string,
     blockID: string
-}) => {
+}, x?: number) => {
     let rowElement: HTMLElement | false;
     let type;
     let colId: string;
@@ -204,6 +204,17 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             avId,
             oldOperator,
             operator: "Percent not empty",
+            data: panelData?.data,
+            blockID,
+            target: calcElement
+        });
+        calcItem({
+            menu,
+            protyle,
+            colId,
+            avId,
+            oldOperator,
+            operator: "Percent unique values",
             data: panelData?.data,
             blockID,
             target: calcElement
@@ -392,7 +403,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         });
     }
     const calcRect = calcElement.getBoundingClientRect();
-    menu.open({x: calcRect.left, y: calcRect.bottom, h: calcRect.height});
+    menu.open({x: Math.max(x || 0, calcRect.left), y: calcRect.bottom, h: calcRect.height});
 };
 
 export const getCalcValue = (column: IAVColumn) => {
@@ -426,6 +437,9 @@ export const getCalcValue = (column: IAVColumn) => {
             break;
         case "Percent not empty":
             value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentNotEmpty}`;
+            break;
+        case "Percent unique values":
+            value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultPercentUniqueValues}`;
             break;
         case "Sum":
             value = `<span>${resultCalc.formattedContent}</span>${window.siyuan.languages.calcResultSum}`;
@@ -486,6 +500,8 @@ export const getNameByOperator = (operator: string, isRollup: boolean) => {
             return window.siyuan.languages.calcOperatorPercentEmpty;
         case "Percent not empty":
             return window.siyuan.languages.calcOperatorPercentNotEmpty;
+        case "Percent unique values":
+            return window.siyuan.languages.calcOperatorPercentUniqueValues;
         case "Checked":
             return window.siyuan.languages.checked;
         case "Unchecked":

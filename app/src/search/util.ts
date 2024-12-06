@@ -51,6 +51,7 @@ import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultType} from "./getDefault";
+import {searchMarkRender} from "../protyle/render/searchMarkRender";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -1159,8 +1160,30 @@ const renderNextSearchMark = (options: {
     edit: Protyle,
     target: Element,
 }) => {
+    const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
+    if (CSS.highlights) {
+        options.edit.protyle.highlight.markHL.clear();
+        options.edit.protyle.highlight.mark.clear();
+        options.edit.protyle.highlight.rangeIndex++;
+        if (options.edit.protyle.highlight.rangeIndex >= options.edit.protyle.highlight.ranges.length) {
+            options.edit.protyle.highlight.rangeIndex = 0;
+        }
+        let rangeTop;
+        options.edit.protyle.highlight.ranges.forEach((item, index) => {
+            if (options.edit.protyle.highlight.rangeIndex === index) {
+                options.edit.protyle.highlight.markHL.add(item);
+                rangeTop = item.getBoundingClientRect().top;
+            } else {
+                options.edit.protyle.highlight.mark.add(item);
+            }
+        });
+        if (typeof rangeTop === "number") {
+            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + rangeTop - contentRect.top - contentRect.height / 2;
+        }
+        return;
+    }
     let matchElement;
-    const allMatchElements = Array.from(options.edit.protyle.wysiwyg.element.querySelectorAll(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`));
+    const allMatchElements = Array.from(options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
     allMatchElements.find((item, itemIndex) => {
         if (item.classList.contains("search-mark--hl")) {
             item.classList.remove("search-mark--hl");
@@ -1173,7 +1196,6 @@ const renderNextSearchMark = (options: {
     }
     if (matchElement) {
         matchElement.classList.add("search-mark--hl");
-        const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
         options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElement.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     }
 };
@@ -1209,18 +1231,23 @@ export const getArticle = (options: {
                     updateReadonly: true,
                     data: getResponse,
                     protyle: options.edit.protyle,
-                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HL, Constants.CB_GET_HTML],
+                    action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
-                const matchElement = options.edit.protyle.wysiwyg.element.querySelector(`div[data-node-id="${options.id}"] span[data-type~="search-mark"]`);
-                if (matchElement) {
-                    matchElement.classList.add("search-mark--hl");
-                    const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                    const matchRectTop = matchElement.getBoundingClientRect().top;  // 需前置，否则代码高亮后会移除该元素
-                    setTimeout(() => {
-                        // 等待 scrollCenter 定位后再滚动
-                        options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
-                    });
+                const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
+                if (matchElements.length === 0) {
+                    return;
                 }
+                const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
+                let matchRectTop: number;
+                if (CSS.highlights) {
+                    options.edit.protyle.highlight.rangeIndex = 0;
+                    searchMarkRender(options.edit.protyle, matchElements);
+                    matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
+                } else {
+                    matchElements[0].classList.add("search-mark--hl");
+                    matchRectTop = matchElements[0].getBoundingClientRect().top;
+                }
+                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
             });
         });
     });

@@ -5,7 +5,7 @@
   user-select: auto;
   overflow-x: clip;
 
-  &--empty:empty:before {
+  &--empty:empty::before {
     color: var(--b3-empty-color);
     content: attr(placeholder);
   }
@@ -43,7 +43,7 @@
         position: relative;
         height: 26px;
 
-        &:after {
+        &::after {
           position: absolute;
           content: " ";
           height: 1px;
@@ -55,55 +55,55 @@
       }
     }
 
-    .bq {
-      .dragover {
-        &__top:not(.av__row) {
-          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
-        }
-
-        &__bottom:not(.av__row) {
-          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0 -1px 0 var(--b3-theme-primary-lighter) !important;
-        }
-      }
-    }
-
     &.list {
       padding: 0;
+      display: flex;
+      flex-direction: column;
 
-      .dragover {
-        &__top:not(.av__row) {
-          box-shadow: 0 -3px 0 var(--b3-theme-primary-lighter), inset 0 1px 0 var(--b3-theme-primary-lighter) !important;
-        }
+      & > .li:first-child {
+        margin-top: 0;
+      }
 
-        &__bottom:not(.av__row) {
-          box-shadow: 0 3px 0 var(--b3-theme-primary-lighter), inset 0 -1px 0 var(--b3-theme-primary-lighter) !important;
-        }
+      & > div:nth-last-child(2) {
+        margin-bottom: 0;
       }
     }
 
     &.li {
       padding: 0;
-      margin: 0;
       display: flex;
       flex-direction: column;
 
-      &:before {
+      &::before {
         content: "";
         position: absolute;
         border-left: .5px solid var(--b3-theme-background-light);
         left: 17px;
       }
 
-      &:hover:before {
+      &:hover::before {
         border-left-color: var(--b3-scroll-color);
       }
 
+      & > [data-node-id] {
+        margin-left: 34px;
+        padding-right: 0;
+      }
+
+      & > div:nth-child(2) {
+        margin-top: 0;
+      }
+
+      & > div:nth-last-child(2) {
+        margin-bottom: 0;
+      }
+
       &[fold="1"] {
-        &:before {
+        &::before {
           content: none;
         }
 
-        & > .protyle-action:after {
+        & > .protyle-action::after {
           background-color: var(--b3-list-hover);
         }
 
@@ -135,7 +135,7 @@
           padding-bottom: 0;
         }
 
-        &:after {
+        &::after {
           content: "";
           position: absolute;
           border-radius: 50%;
@@ -151,26 +151,8 @@
           position: relative;
         }
 
-        &--order:after {
+        &--order::after {
           border-radius: var(--b3-border-radius);
-        }
-      }
-
-      & > div:nth-child(2) {
-        margin-top: 0;
-      }
-
-      & > div:nth-last-child(2) {
-        margin-bottom: 0;
-      }
-
-      & > [data-node-id] {
-        margin-left: 34px;
-        padding-right: 0;
-
-        &.code-block {
-          margin-top: 4px;
-          margin-bottom: 4px;
         }
       }
     }
@@ -183,11 +165,11 @@
         display: flex;
         flex-wrap: wrap;
         justify-content: space-between;
+        column-gap: 1.5em;
 
         & > div {
-          flex: 1;
+          flex: 1 0 10%;
           box-sizing: border-box;
-          margin-right: 24px;
           min-width: 1px;
 
           &:nth-last-child(2),
@@ -280,7 +262,7 @@
 
       &[data-type="NodeBlockQueryEmbed"] {
         background-color: var(--b3-embed-background);
-        border: 1px dashed var(--b3-theme-surface-lighter);
+        border: 1px dashed var(--b3-theme-on-surface-light);
         max-width: 100%;
         padding: 2px 4px;
 
@@ -289,7 +271,7 @@
 
         & > .protyle-wysiwyg__embed {
           -webkit-user-modify: read-only;
-          border-top: 1px dashed var(--b3-theme-surface-lighter);
+          border-top: 1px dashed var(--b3-theme-on-surface-light);
           position: relative;
 
           .code-block:hover .protyle-icon,
@@ -340,7 +322,7 @@
         filter: brightness(.68);
       }
 
-      &--drag > span:after {
+      &--drag > span::after {
         content: "";
         position: absolute;
         top: 0;
@@ -369,8 +351,8 @@
           box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
         }
 
-        &:before,
-        &:after {
+        &::before,
+        &::after {
           position: absolute;
           width: 4px;
           content: "";
@@ -378,7 +360,7 @@
           left: -4px;
         }
 
-        &:after {
+        &::after {
           left: 4px;
           width: 8px
         }
@@ -415,7 +397,7 @@
       }
 
       &--drag {
-        .iframe-content:after {
+        .iframe-content::after {
           content: "";
           position: absolute;
           top: 0;
@@ -439,7 +421,7 @@
         box-shadow: 0 0 1px 1px var(--b3-theme-on-surface);
         box-sizing: border-box;
 
-        &:after {
+        &::after {
           content: "";
           background-color: var(--b3-theme-surface);
           width: 32px;
@@ -455,7 +437,7 @@
         }
 
         &:hover,
-        &:hover:after {
+        &:hover::after {
           background-color: var(--b3-theme-background);
           box-shadow: 0 0 1px 1px var(--b3-theme-on-background);
         }
@@ -465,17 +447,10 @@
 
   &--select,
   &--hl {
-    &:after {
-      background-color: var(--b3-theme-primary-lightest);
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      content: " ";
-      left: 0;
-      top: 0;
+    @extend .dragover;
+
+    &::after {
       border-radius: var(--b3-border-radius);
-      z-index: 3;
-      pointer-events: none;
     }
   }
 
@@ -489,11 +464,11 @@
   }
 
   .dragover {
-    &__top:not(.av__row) {
+    &__top {
       box-shadow: 0 -4px 0 0 var(--b3-theme-primary-lighter) !important;
     }
 
-    &__bottom:not(.av__row) {
+    &__bottom {
       box-shadow: 0 4px 0 0 var(--b3-theme-primary-lighter) !important
     }
   }
@@ -521,7 +496,7 @@
     min-height: 26px !important;
   }
 
-  div[fold="1"][data-type="NodeHeading"]:before {
+  div[fold="1"][data-type="NodeHeading"]::before {
     content: "";
     height: 16px !important;
     width: 16px;
@@ -606,7 +581,7 @@
     cursor: pointer;
 
     &:hover {
-      &:after {
+      &::after {
         background-color: var(--b3-theme-background-light);
       }
 

@@ -101,6 +101,10 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
+                    // 阻止 Linux 中键粘贴
+                    setTimeout(() => {
+                        window.getSelection().removeAllRanges();
+                    });
                     break;
                 }
                 target = target.parentElement;

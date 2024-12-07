@@ -30,5 +30,7 @@ export const searchMarkRender = (protyle: IProtyle, matchElements: NodeListOf<El
 
 
 export const searchTextMarkRender = (element: HTMLElement, k: string[]) => {
-
+    if (!CSS || !CSS.highlights) {
+        return;
+    }
 }

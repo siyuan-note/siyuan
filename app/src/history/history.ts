@@ -695,14 +695,14 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
-                        highlight: CSS && CSS.highlights,
+                        highlight: CSS && CSS.highlights ? true : false,
                         k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
                     }, (response) => {
                         if (response.data.isLargeDoc) {
                             mdElement.value = response.data.content;
                             mdElement.classList.remove("fn__none");
                             docElement.classList.add("fn__none");
-                            searchTextMarkRender(mdElement,  []);
+                            searchTextMarkRender(mdElement, []);
                         } else {
                             mdElement.classList.add("fn__none");
                             docElement.classList.remove("fn__none");
@@ -712,7 +712,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
-                            searchMarkRender(historyEditor.protyle,  historyEditor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                            searchMarkRender(historyEditor.protyle, historyEditor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
                         }
                     });
                 }

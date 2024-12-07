@@ -702,7 +702,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                             mdElement.value = response.data.content;
                             mdElement.classList.remove("fn__none");
                             docElement.classList.add("fn__none");
-                            searchTextMarkRender(mdElement, []);
+                            searchTextMarkRender(historyEditor.protyle, ["TODO"], mdElement);
                         } else {
                             mdElement.classList.add("fn__none");
                             docElement.classList.remove("fn__none");

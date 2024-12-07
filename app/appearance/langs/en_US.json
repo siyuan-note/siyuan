@@ -1,5 +1,4 @@
 {
-  "onlyOneDocConvert": "Only one document can be converted at a time",
   "empty": "Empty",
   "newRowInRelation": "Create a new entry in ${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "Copy primary key text",

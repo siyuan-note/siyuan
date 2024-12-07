@@ -1,5 +1,4 @@
 {
-  "onlyOneDocConvert": "一度に変換できるドキュメントは1つだけです",
   "empty": "空白",
   "newRowInRelation": "${x} に新しい項目を作成 <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "主キーのテキストをコピー",

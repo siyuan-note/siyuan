@@ -14,8 +14,8 @@ github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950 h1:Pa5hMiBceT
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
 github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d h1:dexFyk3UkR4c2xpyrC4Zk4L28xFbfLYAeowIW/7QYEA=
 github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d/go.mod h1:MUfzyfmbPrRDZLqxc7aPrVYveatTHRfoUa5TynPS0i8=
-github.com/88250/lute v1.7.7-0.20241204161642-8a0f920b0d68 h1:90W/4r6MrUEyseqm15ix0x8+xBiHEIDaXfWk92bn5qY=
-github.com/88250/lute v1.7.7-0.20241204161642-8a0f920b0d68/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
+github.com/88250/lute v1.7.7-0.20241206153537-408cb4f3fbab h1:TRN5UZIude8Gmks6ODC6bpT6MklMhBCDwjclpsX0YgQ=
+github.com/88250/lute v1.7.7-0.20241206153537-408cb4f3fbab/go.mod h1:VDAzL8b+oCh+e3NAlmwwLzC53ten0rZlS8NboB7ljtk=
 github.com/88250/pdfcpu v0.3.14-0.20241201033812-5a93b7586a01 h1:AcFe63RXjIh1XtX/dc4Es3U8bYKjlEkvavHd1nFBOHM=
 github.com/88250/pdfcpu v0.3.14-0.20241201033812-5a93b7586a01/go.mod h1:fVfOloBzs2+W2VJCCbq60XIxc3yJHAZ0Gahv1oO0gyI=
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQDwyyRu9yXHePYlPdHtpJfrJEUGBMH3SMBWY=
@@ -341,8 +341,8 @@ github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+D
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20241203001841-7d657c12d5dd h1:WcgF6efOjk4sAcBudgAWRAWWyzv6Hf39PVS3onfQSqU=
-github.com/siyuan-note/dejavu v0.0.0-20241203001841-7d657c12d5dd/go.mod h1:Xu51gaOy8gup2N1q9xwdYdHDqKdCMLL7GiGEno3VnMQ=
+github.com/siyuan-note/dejavu v0.0.0-20241206093814-2bd2e504b64f h1:4NOFYagREPvdf24wG8rMd8qMW0BVnbArIHq4Js6XeyA=
+github.com/siyuan-note/dejavu v0.0.0-20241206093814-2bd2e504b64f/go.mod h1:Xu51gaOy8gup2N1q9xwdYdHDqKdCMLL7GiGEno3VnMQ=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4 h1:kJaw5L/evyW6LcB9IQT8PR4ppx8JVqOFP9Ix3rfwSrc=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4/go.mod h1:UYcCCY+0wh+GmUoDOaO63j1sV5lgy7laLAk1XhEiUis=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=

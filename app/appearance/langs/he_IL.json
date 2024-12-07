@@ -1,5 +1,4 @@
 {
-  "onlyOneDocConvert": "ניתן להמיר רק מסמך אחד בכל פעם",
   "empty": "ריק",
   "newRowInRelation": "צור ערך חדש ב-${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "העתק טקסט מפתח ראשי",

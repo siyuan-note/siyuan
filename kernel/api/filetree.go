@@ -1120,7 +1120,7 @@ func getDoc(c *gin.Context) {
 		highlight = highlightArg.(bool)
 	}
 
-	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, err :=
+	blockCount, content, parentID, parent2ID, rootID, typ, eof, scroll, boxID, docPath, isBacklinkExpand, keywords, err :=
 		model.GetDoc(startID, endID, id, index, query, queryTypes, queryMethod, mode, size, isBacklink, highlight)
 	if model.ErrBlockNotFound == err {
 		ret.Code = 3
@@ -1151,6 +1151,7 @@ func getDoc(c *gin.Context) {
 		"path":             docPath,
 		"isSyncing":        isSyncing,
 		"isBacklinkExpand": isBacklinkExpand,
+		"keywords":         keywords,
 	}
 }
 

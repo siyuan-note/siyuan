@@ -266,7 +266,7 @@ func IsAssetLinkDest(dest []byte) bool {
 
 var (
 	SiYuanAssetsImage = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"}
-	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a"}
+	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a", ".flac"}
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 

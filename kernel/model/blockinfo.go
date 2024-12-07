@@ -267,17 +267,23 @@ func getNodeRefText(node *ast.Node) string {
 	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 }
 
-func getNodeAvBlockText(node *ast.Node) string {
+func getNodeAvBlockText(node *ast.Node) (ret string) {
 	if nil == node {
 		return ""
 	}
 
-	if ret := node.IALAttr("name"); "" != ret {
-		ret = strings.TrimSpace(ret)
-		ret = util.EscapeHTML(ret)
-		return ret
+	if name := node.IALAttr("name"); "" != name {
+		name = strings.TrimSpace(name)
+		name = util.EscapeHTML(name)
+		ret = name
+	} else {
+		ret = getNodeRefText0(node, 1024)
 	}
-	return getNodeRefText0(node, 1024)
+
+	//if icon := node.IALAttr("icon"); "" != icon {
+	//	ret = icon + " " + ret
+	//}
+	return
 }
 
 func getNodeRefText0(node *ast.Node, maxLen int) string {

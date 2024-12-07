@@ -712,7 +712,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
-                            searchMarkRender(historyEditor.protyle, ["TODO"]);
+                            searchMarkRender(historyEditor.protyle, ["TODO"], false);
                         }
                     });
                 }

@@ -45,7 +45,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);
-                searchMarkRender(protyle, ["TODO"]);
+                searchMarkRender(protyle, ["TODO"], false);
             });
         }
     } else {
@@ -57,7 +57,7 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             updateReadonly,
             cb() {
                 if (protyle.query?.key) {
-                    searchMarkRender(protyle, ["TODO"]);
+                    searchMarkRender(protyle, ["TODO"], true);
                 }
             }
         });

@@ -458,7 +458,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, ["TODO"]);
+                searchMarkRender(editor.protyle, ["TODO"], false);
                 this.editors.push(editor);
             });
         }

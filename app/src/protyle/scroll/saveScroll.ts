@@ -73,6 +73,7 @@ export const getDocByScroll = (options: {
             query: options.protyle.query?.key,
             queryMethod: options.protyle.query?.method,
             queryTypes: options.protyle.query?.types,
+            highlight: CSS && CSS.highlights,
         }, response => {
             if (response.code === 1) {
                 fetchPost("/api/filetree/getDoc", {
@@ -80,6 +81,7 @@ export const getDocByScroll = (options: {
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
+                    highlight: CSS && CSS.highlights,
                 }, response => {
                     onGet({
                         data: response,
@@ -111,6 +113,7 @@ export const getDocByScroll = (options: {
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,
+        highlight: CSS && CSS.highlights,
     }, response => {
         onGet({
             data: response,

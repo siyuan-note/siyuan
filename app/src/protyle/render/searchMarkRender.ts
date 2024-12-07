@@ -27,3 +27,8 @@ export const searchMarkRender = (protyle: IProtyle, matchElements: NodeListOf<El
         CSS.highlights.set("search-mark-hl-" + protyle.highlight.styleElement.dataset.uuid, protyle.highlight.markHL);
     }
 };
+
+
+export const searchTextMarkRender = (element: HTMLElement, k: string[]) => {
+
+}

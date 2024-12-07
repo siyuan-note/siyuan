@@ -1221,6 +1221,7 @@ export const getArticle = (options: {
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
+                highlight: CSS && CSS.highlights,
             }, getResponse => {
                 options.edit.protyle.query = {
                     key: options.value || null,

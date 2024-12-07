@@ -434,11 +434,12 @@ export class Backlink extends Model {
             });
             svgElement.removeAttribute("disabled");
         } else {
+            const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId,
                 highlight: !isSupportCSSHL(),
-                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value,
+                keyword,
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");
@@ -458,7 +459,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, ["TODO"], false);
+                searchMarkRender(editor.protyle, keyword.split(" "), false);
                 this.editors.push(editor);
             });
         }

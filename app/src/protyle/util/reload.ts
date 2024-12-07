@@ -37,15 +37,16 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
         const tabElement = hasClosestByClassName(protyle.element, "sy__backlink");
         if (tabElement) {
             const inputsElement = tabElement.querySelectorAll(".b3-text-field") as NodeListOf<HTMLInputElement>;
+            const keyword = isMention ? inputsElement[1].value : inputsElement[0].value
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,
                 highlight: !isSupportCSSHL(),
-                keyword: isMention ? inputsElement[1].value : inputsElement[0].value,
+                keyword,
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);
-                searchMarkRender(protyle, ["TODO"], false);
+                searchMarkRender(protyle, keyword.split(" "), false);
             });
         }
     } else {
@@ -55,9 +56,9 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             focus,
             scrollAttr: saveScroll(protyle, true) as IScrollAttr,
             updateReadonly,
-            cb() {
+            cb(keys) {
                 if (protyle.query?.key) {
-                    searchMarkRender(protyle, ["TODO"], true);
+                    searchMarkRender(protyle, keys, true);
                 }
             }
         });

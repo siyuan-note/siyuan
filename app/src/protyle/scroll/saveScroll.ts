@@ -53,7 +53,7 @@ export const getDocByScroll = (options: {
     protyle: IProtyle,
     scrollAttr?: IScrollAttr,
     mergedOptions?: IProtyleOptions,
-    cb?: () => void
+    cb?: (keys: string[]) => void
     focus?: boolean,
     updateReadonly?: boolean
 }) => {
@@ -89,7 +89,9 @@ export const getDocByScroll = (options: {
                         protyle: options.protyle,
                         action: actions,
                         scrollAttr: options.scrollAttr,
-                        afterCB: options.cb,
+                        afterCB: options.cb ? () => {
+                            options.cb(response.data.keywords);
+                        } : undefined,
                         updateReadonly: options.updateReadonly
                     });
                 });
@@ -100,7 +102,9 @@ export const getDocByScroll = (options: {
                     protyle: options.protyle,
                     action: actions,
                     scrollAttr: options.scrollAttr,
-                    afterCB: options.cb,
+                    afterCB: options.cb ? () => {
+                        options.cb(response.data.keywords);
+                    } : undefined,
                     updateReadonly: options.updateReadonly
                 });
             }
@@ -121,7 +125,9 @@ export const getDocByScroll = (options: {
             protyle: options.protyle,
             action: actions,
             scrollAttr: options.scrollAttr,
-            afterCB: options.cb,
+            afterCB: options.cb ? () => {
+                options.cb(response.data.keywords);
+            } : undefined,
             updateReadonly: options.updateReadonly
         });
     });

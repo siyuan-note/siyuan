@@ -1239,7 +1239,7 @@ export const getArticle = (options: {
                 let matchRectTop: number;
                 if (isSupportCSSHL()) {
                     options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, ["TODO", "得到"], true);
+                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, true);
                     matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
                 } else {
                     const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');

@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import {setStorageVal} from "../util/compatibility";
+import {isSupportCSSHL} from "../render/searchMarkRender";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
@@ -73,7 +74,7 @@ export const getDocByScroll = (options: {
             query: options.protyle.query?.key,
             queryMethod: options.protyle.query?.method,
             queryTypes: options.protyle.query?.types,
-            highlight: CSS && CSS.highlights ? true : false,
+            highlight: !isSupportCSSHL(),
         }, response => {
             if (response.code === 1) {
                 fetchPost("/api/filetree/getDoc", {
@@ -81,7 +82,7 @@ export const getDocByScroll = (options: {
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
-                    highlight: CSS && CSS.highlights ? true : false,
+                    highlight: !isSupportCSSHL(),
                 }, response => {
                     onGet({
                         data: response,
@@ -113,7 +114,7 @@ export const getDocByScroll = (options: {
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,
-        highlight: CSS && CSS.highlights ? true : false,
+        highlight: !isSupportCSSHL(),
     }, response => {
         onGet({
             data: response,

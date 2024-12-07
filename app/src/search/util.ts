@@ -51,7 +51,7 @@ import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultType} from "./getDefault";
-import {searchMarkRender} from "../protyle/render/searchMarkRender";
+import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 
 export const toggleReplaceHistory = (searchElement: Element) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
@@ -1161,7 +1161,7 @@ const renderNextSearchMark = (options: {
     target: Element,
 }) => {
     const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-    if (CSS?.highlights) {
+    if (isSupportCSSHL()) {
         options.edit.protyle.highlight.markHL.clear();
         options.edit.protyle.highlight.mark.clear();
         options.edit.protyle.highlight.rangeIndex++;
@@ -1221,7 +1221,7 @@ export const getArticle = (options: {
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
-                highlight:CSS && CSS.highlights ? true : false,
+                highlight: !isSupportCSSHL(),
             }, getResponse => {
                 options.edit.protyle.query = {
                     key: options.value || null,
@@ -1234,17 +1234,18 @@ export const getArticle = (options: {
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
-                const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
-                if (matchElements.length === 0) {
-                    return;
-                }
+
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 let matchRectTop: number;
-                if (CSS?.highlights) {
+                if (isSupportCSSHL()) {
                     options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, matchElements);
+                    searchMarkRender(options.edit.protyle, ["TODO"]);
                     matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
                 } else {
+                    const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
+                    if (matchElements.length === 0) {
+                        return;
+                    }
                     matchElements[0].classList.add("search-mark--hl");
                     matchRectTop = matchElements[0].getBoundingClientRect().top;
                 }

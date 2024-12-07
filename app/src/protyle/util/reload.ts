@@ -4,7 +4,7 @@ import {getDocByScroll, saveScroll} from "../scroll/saveScroll";
 import {renderBacklink} from "../wysiwyg/renderBacklink";
 import {hasClosestByClassName} from "./hasClosest";
 import {preventScroll} from "../scroll/preventScroll";
-import {searchMarkRender} from "../render/searchMarkRender";
+import {isSupportCSSHL, searchMarkRender} from "../render/searchMarkRender";
 import {restoreLuteMarkdownSyntax} from "./paste";
 
 export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?: boolean) => {
@@ -40,12 +40,12 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: protyle.element.getAttribute("data-defid"),
                 refTreeID: protyle.block.rootID,
-                highlight: CSS && CSS.highlights ? true : false,
+                highlight: !isSupportCSSHL(),
                 keyword: isMention ? inputsElement[1].value : inputsElement[0].value,
             }, response => {
                 protyle.options.backlinkData = isMention ? response.data.backmentions : response.data.backlinks;
                 renderBacklink(protyle, protyle.options.backlinkData);
-                searchMarkRender(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                searchMarkRender(protyle, ["TODO"]);
             });
         }
     } else {
@@ -55,9 +55,9 @@ export const reloadProtyle = (protyle: IProtyle, focus: boolean, updateReadonly?
             focus,
             scrollAttr: saveScroll(protyle, true) as IScrollAttr,
             updateReadonly,
-            cb () {
+            cb() {
                 if (protyle.query?.key) {
-                    searchMarkRender(protyle, protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                    searchMarkRender(protyle, ["TODO"]);
                 }
             }
         });

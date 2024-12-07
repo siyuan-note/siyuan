@@ -42,6 +42,7 @@ import {hasClosestBlock} from "./util/hasClosest";
 import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
 import {getAllModels} from "../layout/getAll";
+import {isSupportCSSHL} from "./render/searchMarkRender";
 
 export class Protyle {
 
@@ -73,15 +74,15 @@ export class Protyle {
             options: mergedOptions,
             block: {},
             highlight: {
-                mark: CSS?.highlights ? new Highlight() : undefined,
-                markHL: CSS?.highlights ? new Highlight() : undefined,
+                mark: isSupportCSSHL() ? new Highlight() : undefined,
+                markHL: isSupportCSSHL() ? new Highlight() : undefined,
                 ranges: [],
                 rangeIndex: 0,
                 styleElement: document.createElement("style"),
             }
         };
 
-        if (CSS?.highlights) {
+        if (isSupportCSSHL()) {
             const styleId = genUUID();
             this.protyle.highlight.styleElement.dataset.uuid = styleId;
             this.protyle.highlight.styleElement.textContent = `.protyle-wysiwyg::highlight(search-mark-${styleId}) {background-color: var(--b3-protyle-inline-mark-background);color: var(--b3-protyle-inline-mark-color);}

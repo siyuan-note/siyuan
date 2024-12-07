@@ -15,7 +15,7 @@ import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
 import {App} from "../index";
 import {resizeSide} from "./resizeSide";
-import {searchMarkRender, searchTextMarkRender} from "../protyle/render/searchMarkRender";
+import {isSupportCSSHL, searchMarkRender, searchTextMarkRender} from "../protyle/render/searchMarkRender";
 
 let historyEditor: Protyle;
 
@@ -695,7 +695,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                 } else if (type === "doc") {
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
-                        highlight: CSS && CSS.highlights ? true : false,
+                        highlight: !isSupportCSSHL(),
                         k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
                     }, (response) => {
                         if (response.data.isLargeDoc) {
@@ -712,7 +712,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
-                            searchMarkRender(historyEditor.protyle, historyEditor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                            searchMarkRender(historyEditor.protyle, ["TODO"]);
                         }
                     });
                 }

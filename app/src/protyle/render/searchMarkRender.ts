@@ -1,5 +1,5 @@
-export const searchMarkRender = (protyle: IProtyle, matchElements: NodeListOf<Element>) => {
-    if (matchElements.length === 0 || !CSS || !CSS.highlights) {
+export const searchMarkRender = (protyle: IProtyle, keys: string[]) => {
+    if (!isSupportCSSHL()) {
         return;
     }
     protyle.highlight.markHL.clear();
@@ -30,7 +30,11 @@ export const searchMarkRender = (protyle: IProtyle, matchElements: NodeListOf<El
 
 
 export const searchTextMarkRender = (element: HTMLElement, k: string[]) => {
-    if (!CSS || !CSS.highlights) {
+    if (!isSupportCSSHL()) {
         return;
     }
+}
+
+export const isSupportCSSHL = () => {
+    return !!(CSS && CSS.highlights);
 }

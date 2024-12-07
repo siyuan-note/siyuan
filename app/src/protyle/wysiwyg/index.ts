@@ -2150,7 +2150,7 @@ export class WYSIWYG {
 
         this.element.addEventListener("dblclick", (event: MouseEvent & { target: HTMLElement }) => {
             if (event.target.tagName === "IMG" && !event.target.classList.contains("emoji")) {
-                previewDocImage((event.target as HTMLImageElement).src, protyle.block.rootID);
+                previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                 return;
             }
         });

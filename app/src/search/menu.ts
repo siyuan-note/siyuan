@@ -289,7 +289,7 @@ const saveCriterionData = (config: Config.IUILayoutTabSearchConfig,
         const criteriaElement = element.querySelector("#criteria").firstElementChild;
         criteriaElement.classList.remove("fn__none");
         criteriaElement.querySelector(".b3-chip--current")?.classList.remove("b3-chip--current");
-        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][(criteriaElement.childElementCount) % 7]}">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
+        criteriaElement.insertAdjacentHTML("beforeend", `<div data-type="set-criteria" class="b3-chip b3-chip--current b3-chip--middle b3-chip--pointer">${criterion.name}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`);
     });
 };
 
@@ -630,7 +630,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
             if (configIsSame(item, config)) {
                 isSame = true;
             }
-            html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer b3-chip--${["secondary", "primary", "info", "success", "warning", "error", ""][index % 7]}">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+            html += `<div data-type="set-criteria" class="${isSame ? "b3-chip--current " : ""}b3-chip b3-chip--middle b3-chip--pointer">${escapeHtml(item.name)}<svg class="b3-chip__close" data-type="remove-criteria"><use xlink:href="#iconCloseRound"></use></svg></div>`;
         });
         /// #if MOBILE
         element.innerHTML = `<div class="b3-chips${html?"":" fn__none"}">

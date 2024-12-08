@@ -2224,6 +2224,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
 		}
+	} else {
+		if 4 == blockRefMode { // 脚注+锚点哈希
+			anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + id + "\"></span>")}
+			ret.Root.PrependChild(anchorSpan)
+		}
 	}
 
 	// 导出时支持导出题头图 https://github.com/siyuan-note/siyuan/issues/4372

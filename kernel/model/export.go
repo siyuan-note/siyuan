@@ -1428,7 +1428,7 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	}
 	docPaths = util.FilterSelfChildDocs(docPaths)
 
-	zipPath = exportPandocConvertZip(false, box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1452,7 +1452,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 
-	zipPath = exportPandocConvertZip(false, boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1480,7 +1480,7 @@ func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(true, boxID, baseFolderName, docPaths, "", "", ".md")
+	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -3050,7 +3050,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, docPaths []string,
+func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
@@ -3089,19 +3089,26 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 				continue
 			}
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !treenode.IsBlockRef(n) {
+				if !entering {
 					return ast.WalkContinue
 				}
 
-				defID, _, _ := treenode.GetBlockRef(n)
-				if defBt := treenode.GetBlockTree(defID); nil != defBt {
-					docPaths = append(docPaths, defBt.Path)
-					docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
+				var defID string
+				if treenode.IsBlockLink(n) {
+					defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
 
-					defBlockIDs = append(defBlockIDs, defID)
-					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+				} else if treenode.IsBlockRef(n) {
+					defID, _, _ = treenode.GetBlockRef(n)
+				}
 
-					walked[defBt.Path] = true
+				if "" != defID {
+					if defBt := treenode.GetBlockTree(defID); nil != defBt {
+						docPaths = append(docPaths, defBt.Path)
+						docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
+						defBlockIDs = append(defBlockIDs, defID)
+						defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+						walked[defBt.Path] = true
+					}
 				}
 				return ast.WalkContinue
 			})

@@ -566,11 +566,6 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 func Preview(id string) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
-	if 5 == blockRefMode {
-		// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-		blockRefMode = 4
-	}
-
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -675,13 +670,6 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	}
 
 	blockRefMode := Conf.Export.BlockRefMode
-	if docx {
-		if 5 == blockRefMode {
-			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-			blockRefMode = 4
-		}
-	}
-
 	tree = exportTree(tree, true, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
@@ -838,11 +826,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(PdfOutlineScheme + "://" + h.ID)})
 			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			h.PrependChild(link)
-		}
-
-		if 5 == blockRefMode {
-			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-			blockRefMode = 4
 		}
 	}
 
@@ -2004,7 +1987,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 			}
 		}
 
-		if 5 == blockRefMode { // 锚点哈希
+		if 4 == blockRefMode { // 脚注+锚点哈希
 			if n.IsBlock() && gulu.Str.Contains(n.ID, defBlockIDs) {
 				// 如果是定义块，则在开头处添加锚点
 				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
@@ -2082,9 +2065,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	depth = 0
 	blockLink2Ref(ret, ret.ID, &treeCache, &depth)
 
-	// 收集引用转脚注
+	// 收集引用转脚注+锚点哈希
 	var refFootnotes []*refAsFootnotes
-	if 4 == blockRefMode { // 块引转脚注
+	if 4 == blockRefMode {
 		depth = 0
 		collectFootnotesDefs(ret, ret.ID, &refFootnotes, &treeCache, &depth)
 	}
@@ -2163,7 +2146,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
-		case 4: // 脚注
+		case 4: // 脚注+锚点哈希
 			if currentTreeNodeIDs[defID] {
 				// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
 				n.TextMarkType = "a"
@@ -2180,8 +2163,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
-		case 5: // 锚点哈希
-			// 此处不做任何处理
 		}
 
 		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
@@ -2194,7 +2175,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		n.Unlink()
 	}
 
-	if 4 == blockRefMode { // 块引转脚注
+	if 4 == blockRefMode { // 脚注+锚点哈希
 		unlinks = nil
 		footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight, &treeCache)
 		if nil != footnotesDefBlock {
@@ -3085,7 +3066,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 	exportRefMode := Conf.Export.BlockRefMode
 	var defBlockIDs []string
-	if 5 == exportRefMode {
+	if 4 == exportRefMode { // 脚注+锚点哈希
 		// 导出锚点哈希，这里先记录下所有定义块的 ID
 		walked := map[string]bool{}
 		for _, p := range docPaths {

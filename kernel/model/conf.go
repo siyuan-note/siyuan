@@ -266,9 +266,10 @@ func InitConf() {
 	if nil == Conf.Export {
 		Conf.Export = conf.NewExport()
 	}
-	if 0 == Conf.Export.BlockRefMode || 1 == Conf.Export.BlockRefMode {
+	if 0 == Conf.Export.BlockRefMode || 1 == Conf.Export.BlockRefMode || 5 == Conf.Export.BlockRefMode {
 		// 废弃导出选项引用块转换为原始块和引述块 https://github.com/siyuan-note/siyuan/issues/3155
-		Conf.Export.BlockRefMode = 4 // 改为脚注
+		// 锚点哈希模式和脚注模式合并 https://github.com/siyuan-note/siyuan/issues/13331
+		Conf.Export.BlockRefMode = 4 // 改为脚注+锚点哈希
 	}
 	if "" == Conf.Export.PandocBin {
 		Conf.Export.PandocBin = util.PandocBinPath

@@ -136,6 +136,14 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
+                const filterIconElement =  inputElement.nextElementSibling
+                if (inputElement.value) {
+                    filterIconElement.classList.add("block__icon--active")
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value)
+                } else {
+                    filterIconElement.classList.remove("block__icon--active")
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter)
+                }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {

@@ -24,6 +24,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/lex"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func MarkText(text string, keyword string, beforeLen int, caseSensitive bool) (pos int, marked string) {
@@ -112,7 +113,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 	ret = text
 
 	if reg, err := regexp.Compile(re); err == nil {
-		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + s + closeMark })
+		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + util.EscapeHTML(s) + closeMark })
 	}
 
 	// 搜索结果预览包含转义符问题 Search results preview contains escape character issue https://github.com/siyuan-note/siyuan/issues/9790

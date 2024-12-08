@@ -22,9 +22,9 @@ type Export struct {
 	// 内容块引用导出模式
 	//   2：锚文本块链
 	//   3：仅锚文本
-	//   4：块引转脚注
-	//   5：锚点哈希 https://github.com/siyuan-note/siyuan/issues/10265
-	//  （0：使用原始文本，1：使用 Blockquote。0 和 1 都已经废弃 https://github.com/siyuan-note/siyuan/issues/3155）
+	//   4：块引转脚注+锚点哈希
+	//  （5：锚点哈希 https://github.com/siyuan-note/siyuan/issues/10265 已经废弃 https://github.com/siyuan-note/siyuan/issues/13331）
+	//  （0：使用原始文本，1：使用 Blockquote，都已经废弃 https://github.com/siyuan-note/siyuan/issues/3155）
 	BlockRefMode          int    `json:"blockRefMode"`
 	BlockEmbedMode        int    `json:"blockEmbedMode"`        // 内容块引用导出模式，0：使用原始文本，1：使用 Blockquote
 	BlockRefTextLeft      string `json:"blockRefTextLeft"`      // 内容块引用导出锚文本左侧符号，默认留空

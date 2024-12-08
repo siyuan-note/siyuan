@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"crypto/rand"
+	"crypto/sha1"
 	"crypto/sha256"
 	"encoding/base64"
 	"errors"
@@ -555,6 +556,7 @@ func ImportRepoKey(base64Key string) (retKey string, err error) {
 
 	Conf.Repo.Key = key
 	Conf.Save()
+	logging.LogInfof("imported repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
 	if err = os.RemoveAll(Conf.Repo.GetSaveDir()); err != nil {
 		return
@@ -669,6 +671,7 @@ func InitRepoKeyFromPassphrase(passphrase string) (err error) {
 
 	Conf.Repo.Key = key
 	Conf.Save()
+	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
 	initDataRepo()
 	return
@@ -705,6 +708,7 @@ func InitRepoKey() (err error) {
 	}
 	Conf.Repo.Key = key
 	Conf.Save()
+	logging.LogInfof("inited repo key [%x]", sha1.Sum(Conf.Repo.Key))
 
 	initDataRepo()
 	return

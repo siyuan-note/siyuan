@@ -1236,20 +1236,19 @@ export const getArticle = (options: {
                 });
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                let matchRectTop: number;
                 if (isSupportCSSHL()) {
                     options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, true);
-                    matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
+                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, true, () => {
+                        options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                    });
                 } else {
                     const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
                     if (matchElements.length === 0) {
                         return;
                     }
                     matchElements[0].classList.add("search-mark--hl");
-                    matchRectTop = matchElements[0].getBoundingClientRect().top;
+                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
                 }
-                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
             });
         });
     });

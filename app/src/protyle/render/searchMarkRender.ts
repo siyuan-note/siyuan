@@ -1,6 +1,6 @@
 import {Constants} from "../../constants";
 
-export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolean) => {
+export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolean, cb?: () => void) => {
     if (!isSupportCSSHL()) {
         return;
     }
@@ -75,6 +75,9 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
         CSS.highlights.set("search-mark-" + protyle.highlight.styleElement.dataset.uuid, protyle.highlight.mark);
         if (isHL) {
             CSS.highlights.set("search-mark-hl-" + protyle.highlight.styleElement.dataset.uuid, protyle.highlight.markHL);
+        }
+        if (cb) {
+            cb();
         }
     }, protyle.wysiwyg.element.querySelector(".hljs") ? Constants.TIMEOUT_TRANSITION : 0);
 };

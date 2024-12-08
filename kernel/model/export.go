@@ -2149,7 +2149,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 4: // 脚注+锚点哈希
 			if currentTreeNodeIDs[defID] {
 				// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
-				n.TextMarkType = "a"
+				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "block-ref", "a")
 				n.TextMarkTextContent = linkText
 				n.TextMarkAHref = "#" + defID
 				return ast.WalkContinue

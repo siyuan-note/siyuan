@@ -1066,6 +1066,9 @@ func getDoc(c *gin.Context) {
 		return
 	}
 
+	reqId := arg["reqId"]
+	ret.Data = map[string]interface{}{"reqId": reqId}
+
 	id := arg["id"].(string)
 	idx := arg["index"]
 	index := 0

@@ -102,17 +102,19 @@ export class Wnd {
                     event.stopPropagation();
                     event.preventDefault();
                     // 阻止 Linux 中键粘贴
-                    const activeElement = document.activeElement;
-                    window.addEventListener("paste", (e) => {
-                        e.preventDefault(); 
-                        e.stopPropagation();
-                    }, {
-                        capture: true,
-                        once: true
-                    });
-                    // 保持原有焦点
-                    if (activeElement instanceof HTMLElement) {
-                        activeElement.focus();
+                    if ("linux" === window.siyuan.config.system.os) {
+                        const activeElement = document.activeElement;
+                        window.addEventListener("paste", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }, {
+                            capture: true,
+                            once: true
+                        });
+                        // 保持原有焦点
+                        if (activeElement instanceof HTMLElement) {
+                            activeElement.focus();
+                        }
                     }
                     break;
                 }

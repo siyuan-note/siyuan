@@ -1200,6 +1200,8 @@ const renderNextSearchMark = (options: {
     }
 };
 
+let reqId: number
+
 export const getArticle = (options: {
     id: string,
     config?: Config.IUILayoutTabSearchConfig,
@@ -1213,6 +1215,7 @@ export const getArticle = (options: {
             id: options.id,
         }, (response) => {
             options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
+            reqId = new Date().getTime()
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
                 query: options.value || null,
@@ -1222,7 +1225,11 @@ export const getArticle = (options: {
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
+                reqId
             }, getResponse => {
+                if (reqId > response.data.reqId) {
+                    return;
+                }
                 options.edit.protyle.query = {
                     key: options.value || null,
                     method: options.config?.method || null,
@@ -1239,7 +1246,9 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     options.edit.protyle.highlight.rangeIndex = 0;
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, true, () => {
-                        options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                        if (options.edit.protyle.highlight.ranges.length > 0) {
+                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                        }
                     });
                 } else {
                     const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');

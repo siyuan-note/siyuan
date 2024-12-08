@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -391,6 +392,9 @@ func InitConf() {
 	}
 	if 1 > Conf.Repo.RetentionIndexesDaily {
 		Conf.Repo.RetentionIndexesDaily = 2
+	}
+	if 0 < len(Conf.Repo.Key) {
+		logging.LogInfof("repo key [%x]", sha1.Sum(Conf.Repo.Key))
 	}
 
 	if nil == Conf.Search {

@@ -1200,7 +1200,7 @@ const renderNextSearchMark = (options: {
     }
 };
 
-let reqId: number
+let articleId: string
 
 export const getArticle = (options: {
     id: string,
@@ -1208,14 +1208,20 @@ export const getArticle = (options: {
     edit: Protyle
     value?: string,
 }) => {
+    articleId = options.id
     checkFold(options.id, (zoomIn) => {
+        if (articleId !== options.id) {
+            return;
+        }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/block/getDocInfo", {
             id: options.id,
         }, (response) => {
+            if (articleId !== options.id) {
+                return;
+            }
             options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
-            reqId = new Date().getTime()
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
                 query: options.value || null,
@@ -1225,9 +1231,8 @@ export const getArticle = (options: {
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
-                reqId
             }, getResponse => {
-                if (reqId > response.data.reqId) {
+                if (articleId !== options.id) {
                     return;
                 }
                 options.edit.protyle.query = {

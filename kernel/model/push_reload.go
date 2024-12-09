@@ -157,7 +157,7 @@ func refreshRefCount(rootID, blockID string) {
 	for _, count := range refCounts {
 		rootRefCount += count
 	}
-	refIDs, _, _ := GetBlockRefs(blockID)
+	refIDs, _, _ := GetBlockRefs(blockID, false)
 	util.PushSetDefRefCount(rootID, blockID, refIDs, refCount, rootRefCount)
 }
 

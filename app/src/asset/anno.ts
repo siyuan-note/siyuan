@@ -393,21 +393,21 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
 };
 
 const getTextNode = (element: HTMLElement, isFirst: boolean) => {
-    const spans = element.querySelectorAll(".markedContent span")
-    let index = isFirst ? 0 : spans.length - 1
+    const spans = element.querySelectorAll(".markedContent span");
+    let index = isFirst ? 0 : spans.length - 1;
     while (spans[index]) {
         if (spans[index].textContent) {
-            break
+            break;
         } else {
             if (isFirst) {
-                index++
+                index++;
             } else {
-                index--
+                index--;
             }
         }
     }
-    return spans[index]
-}
+    return spans[index];
+};
 
 const getHightlightCoordsByRange = (pdf: any, color: string) => {
     const range = window.getSelection().getRangeAt(0);

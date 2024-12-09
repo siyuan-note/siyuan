@@ -510,7 +510,7 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
             } else {
                 const ids = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).map(item => item.getAttribute("data-node-id"));
                 if (ids.length === 0) {
-                    ids.push(nodeElement.getAttribute("data-node-id"))
+                    ids.push(nodeElement.getAttribute("data-node-id"));
                 }
                 copyTextByType(ids, "ref");
             }

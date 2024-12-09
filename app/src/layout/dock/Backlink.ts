@@ -136,13 +136,13 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
-                const filterIconElement =  inputElement.nextElementSibling
+                const filterIconElement =  inputElement.nextElementSibling;
                 if (inputElement.value) {
-                    filterIconElement.classList.add("block__icon--active")
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value)
+                    filterIconElement.classList.add("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
                 } else {
-                    filterIconElement.classList.remove("block__icon--active")
-                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter)
+                    filterIconElement.classList.remove("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
                 }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -442,7 +442,7 @@ export class Backlink extends Model {
             });
             svgElement.removeAttribute("disabled");
         } else {
-            const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value
+            const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId,

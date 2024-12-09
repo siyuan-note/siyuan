@@ -1200,7 +1200,7 @@ const renderNextSearchMark = (options: {
     }
 };
 
-let articleId: string
+let articleId: string;
 
 export const getArticle = (options: {
     id: string,
@@ -1208,7 +1208,7 @@ export const getArticle = (options: {
     edit: Protyle
     value?: string,
 }) => {
-    articleId = options.id
+    articleId = options.id;
     checkFold(options.id, (zoomIn) => {
         if (articleId !== options.id) {
             return;

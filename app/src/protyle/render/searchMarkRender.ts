@@ -19,7 +19,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
         let currentNode = treeWalker.nextNode();
         while (currentNode) {
             textNodes.push(currentNode);
-            currentSize += currentNode.textContent.length
+            currentSize += currentNode.textContent.length;
             textNodesSize.push(currentSize);
             currentNode = treeWalker.nextNode();
         }
@@ -45,9 +45,9 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
                     range.setStart(currentTextNode, startIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
 
                     while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
-                        currentNodeIndex++
+                        currentNodeIndex++;
                     }
-                    currentTextNode = textNodes[currentNodeIndex]
+                    currentTextNode = textNodes[currentNodeIndex];
                     range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
 
                     rangeIndexes.push({range, startIndex});
@@ -56,13 +56,13 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
                 }
                 startIndex = endIndex;
             }
-        })
+        });
 
         rangeIndexes.sort((b, a) => {
             if (a.startIndex > b.startIndex) {
-                return -1
+                return -1;
             } else {
-                return 0
+                return 0;
             }
         }).forEach((item, index) => {
             if (index === protyle.highlight.rangeIndex && isHL) {
@@ -84,4 +84,4 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
 
 export const isSupportCSSHL = () => {
     return !!(CSS && CSS.highlights);
-}
+};

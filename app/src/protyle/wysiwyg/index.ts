@@ -1298,7 +1298,7 @@ export class WYSIWYG {
                             icon: "iconTrashcan",
                             accelerator: "⌦",
                             click() {
-                                clearTableCell(protyle, tableBlockElement as HTMLElement)
+                                clearTableCell(protyle, tableBlockElement as HTMLElement);
                             }
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({

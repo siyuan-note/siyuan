@@ -694,7 +694,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     assetElement.classList.remove("fn__none");
                     assetElement.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
-                    const k  = (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
+                    const k  = (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                         highlight: !isSupportCSSHL(),
@@ -717,7 +717,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                         }
                     });
                 }
-                titleElement.classList.remove("fn__none")
+                titleElement.classList.remove("fn__none");
                 titleElement.textContent = target.querySelector(".b3-list-item__text").textContent;
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {

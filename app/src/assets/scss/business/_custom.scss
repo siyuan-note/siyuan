@@ -25,15 +25,21 @@
   }
 
   &__avheader {
-    border-bottom: 1px solid var(--b3-border-color);
-    padding: 8px;
-    color: var(--b3-protyle-inline-blockref-color);
-    opacity: .86;
-    transition: var(--b3-transition);
-    cursor: pointer;
+    display: flex;
+    padding: 0 8px 0 32px;
+    align-items: center;
+    min-height: 42px;
 
-    &:hover {
-      opacity: 1;
+    .block__logo {
+      color: var(--b3-protyle-inline-blockref-color);
+      opacity: .86;
+      transition: var(--b3-transition);
+      flex: 1;
+
+      &:hover {
+        cursor: pointer;
+        opacity: 1;
+      }
     }
   }
 

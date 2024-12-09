@@ -1,4 +1,5 @@
 {
+  "removeAV": "הסר ממסד הנתונים",
   "empty": "ריק",
   "newRowInRelation": "צור ערך חדש ב-${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "העתק טקסט מפתח ראשי",

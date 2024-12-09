@@ -1,4 +1,5 @@
 {
+  "removeAV": "Eliminar de la base de datos",
   "empty": "Vacío",
   "newRowInRelation": "Crear una nueva entrada en ${x} <b class='ft__on-surface'>${y}</b>",
   "copyKeyContent": "Copiar texto de la clave principal",

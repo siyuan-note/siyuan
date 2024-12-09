@@ -1402,11 +1402,39 @@ func ExportStdMarkdown(id string) string {
 	if IsSubscriber() {
 		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
 	}
+
+	var defBlockIDs []string
+	if 4 == Conf.Export.BlockRefMode { // 脚注+锚点哈希
+		// 导出锚点哈希，这里先记录下所有定义块的 ID
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			var defID string
+			if treenode.IsBlockLink(n) {
+				defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+
+			} else if treenode.IsBlockRef(n) {
+				defID, _, _ = treenode.GetBlockRef(n)
+			}
+
+			if "" != defID {
+				if defBt := treenode.GetBlockTree(defID); nil != defBt {
+					defBlockIDs = append(defBlockIDs, defID)
+					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+				}
+			}
+			return ast.WalkContinue
+		})
+	}
+	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, nil)
+		Conf.Export.AddTitle, defBlockIDs)
 }
 
 func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {

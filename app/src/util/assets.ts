@@ -344,7 +344,7 @@ const updateMobileTheme = (OSTheme: string) => {
                 window.webkit.messageHandlers.changeStatusBar.postMessage((backgroundColor || (mode === 0 ? "#fff" : "#1e1e1e")) + " " + mode);
             } else if (isInAndroid()) {
                 window.JSAndroid.changeStatusBarColor(backgroundColor, mode);
-            } else if ( isInHarmony()) {
+            } else if (isInHarmony()) {
                 window.JSHarmony.changeStatusBarColor(backgroundColor, mode);
             }
         }, 500); // 移动端需要加载完才可以获取到颜色

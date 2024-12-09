@@ -90,7 +90,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
 	buildBacklinkListItemRefs(&ret.RefIDs)
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
@@ -163,7 +163,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		if queryRefCount {
-			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
 			ret.RefCount = len(ret.RefIDs) // 填充块引计数
 		}
 

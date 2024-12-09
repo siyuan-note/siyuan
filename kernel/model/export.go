@@ -1428,7 +1428,7 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	}
 	docPaths = util.FilterSelfChildDocs(docPaths)
 
-	zipPath = exportPandocConvertZip(box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1452,7 +1452,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 
-	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1480,7 +1480,7 @@ func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "", ".md")
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -3050,7 +3050,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
+func exportPandocConvertZip(baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
@@ -3060,7 +3060,6 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 		name += "_"
 	}
 	baseFolderName = path.Join(dir, name)
-	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
 	os.RemoveAll(exportFolder)
@@ -3079,11 +3078,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 				continue
 			}
 
-			docIAL := box.docIAL(p)
-			if nil == docIAL {
-				continue
-			}
-			id := docIAL["id"]
+			id := util.GetTreeID(p)
 			tree, err := LoadTreeByBlockID(id)
 			if err != nil {
 				continue
@@ -3119,12 +3114,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 
 	luteEngine := util.NewLute()
 	for _, p := range docPaths {
-		docIAL := box.docIAL(p)
-		if nil == docIAL {
-			continue
-		}
-
-		id := docIAL["id"]
+		id := util.GetTreeID(p)
 		hPath, md := exportMarkdownContent(id, exportRefMode, defBlockIDs)
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590

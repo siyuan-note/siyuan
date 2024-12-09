@@ -101,20 +101,26 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
-                    // 阻止 Linux 中键粘贴
-                    if ("linux" === window.siyuan.config.system.os) {
-                        const activeElement = document.activeElement;
-                        window.addEventListener("paste", (e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                        }, {
-                            capture: true,
-                            once: true
+                    const activeElement = document.activeElement;
+                    const pasteHandler = (e: ClipboardEvent) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    };
+                    window.addEventListener("paste", pasteHandler, {
+                        capture: true,
+                        once: true
+                    });
+
+                    // 如果在短时间内没有 paste 事件发生,移除监听
+                    setTimeout(() => {
+                        window.removeEventListener("paste", pasteHandler, {
+                            capture: true
                         });
-                        // 保持原有焦点
-                        if (activeElement instanceof HTMLElement) {
-                            activeElement.focus();
-                        }
+                    }, 250);
+
+                    // 保持原有焦点
+                    if (activeElement instanceof HTMLElement) {
+                        activeElement.focus();
                     }
                     break;
                 }

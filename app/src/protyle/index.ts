@@ -28,7 +28,7 @@ import {setPanelFocus} from "../layout/util";
 /// #endif
 import {Title} from "./header/Title";
 import {Background} from "./header/Background";
-import {onGet, setReadonlyByConfig} from "./util/onGet";
+import {disabledProtyle, enableProtyle, onGet, setReadonlyByConfig} from "./util/onGet";
 import {reloadProtyle} from "./util/reload";
 import {renderBacklink} from "./wysiwyg/renderBacklink";
 import {setEmpty} from "../mobile/util/setEmpty";
@@ -454,5 +454,13 @@ export class Protyle {
 
     public focusBlock(element: Element, toStart = true) {
         return focusBlock(element, undefined, toStart);
+    }
+
+    public disable() {
+        disabledProtyle(this.protyle);
+    }
+
+    public enable() {
+        enableProtyle(this.protyle);
     }
 }

@@ -269,7 +269,11 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 			for _, blockValue := range blockValues.Values {
 				if blockValue.Block.ID == updatedDefNode.ID {
-					newContent := getNodeAvBlockText(updatedDefNode)
+					newIcon, newContent := getNodeAvBlockText(updatedDefNode)
+					if newIcon != blockValue.Block.Icon {
+						blockValue.Block.Icon = newIcon
+						changedAv = true
+					}
 					if newContent != blockValue.Block.Content {
 						blockValue.Block.Content = newContent
 						changedAv = true

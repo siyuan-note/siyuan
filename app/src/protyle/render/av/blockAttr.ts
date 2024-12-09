@@ -349,9 +349,9 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                 }
             });
             element.addEventListener("click", (event) => {
-                const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove")
+                const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove");
                 if (removeElement) {
-                    const blockElement = hasClosestBlock(removeElement)
+                    const blockElement = hasClosestBlock(removeElement);
                     if (blockElement) {
                         transaction(protyle, [{
                             action: "removeAttrViewBlock",
@@ -365,7 +365,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                                     item.destroy();
                                     return true;
                                 }
-                            })
+                            });
                         }
                     }
                     event.stopPropagation();

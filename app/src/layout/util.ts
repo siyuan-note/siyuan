@@ -306,7 +306,7 @@ const JSONToDock = (json: any, app: App) => {
     window.siyuan.layout.bottomDock = new Dock({position: "Bottom", data: json.bottom, app});
 };
 
-const removedTabs: Tab[] = []
+const removedTabs: Tab[] = [];
 
 export const JSONToCenter = (
     app: App,
@@ -437,7 +437,7 @@ export const JSONToCenter = (
         } else if (json.children && Object.keys(json.children).length > 0) {
             JSONToCenter(app, json.children, child);
         } else if (child instanceof Tab) {
-            removedTabs.push(child)
+            removedTabs.push(child);
         }
     }
 };
@@ -517,7 +517,7 @@ export const JSONToLayout = (app: App, isStart: boolean) => {
         // 移除没有数据的页签 https://github.com/siyuan-note/siyuan/issues/13390
         removedTabs.forEach(item => {
             item.parent.removeTab(item.id);
-        })
+        });
     }
     // 需放在 tab.parent.switchTab 后，否则当前 tab 永远为最后一个
     app.plugins.forEach(item => {

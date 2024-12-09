@@ -14,10 +14,10 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
         if (typeof hlId === "string") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id='${hlId}']`)).find(item => {
                 if (!isInEmbedBlock(item)) {
-                    hlBlockElement = item
-                    return true
+                    hlBlockElement = item;
+                    return true;
                 }
-            })
+            });
         }
 
 

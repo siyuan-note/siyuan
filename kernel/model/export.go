@@ -1990,7 +1990,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		if 4 == blockRefMode { // 脚注+锚点哈希
 			if n.IsBlock() && gulu.Str.Contains(n.ID, defBlockIDs) {
 				// 如果是定义块，则在开头处添加锚点
-				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
+				anchorSpan := treenode.NewSpanAnchor(n.ID)
 				if ast.NodeDocument != n.Type {
 					firstLeaf := treenode.FirstLeafBlock(n)
 					if nil != firstLeaf {
@@ -2226,7 +2226,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 	} else {
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + id + "\"></span>")}
+			anchorSpan := treenode.NewSpanAnchor(id)
 			ret.Root.PrependChild(anchorSpan)
 		}
 	}

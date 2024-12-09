@@ -116,3 +116,7 @@ func NewParagraph(id string) (ret *ast.Node) {
 	ret.SetIALAttr("updated", newID[:14])
 	return
 }
+
+func NewSpanAnchor(id string) (ret *ast.Node) {
+	return &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + id + "\" style=\"display: none;\"></span>")}
+}

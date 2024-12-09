@@ -91,6 +91,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	}
 
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+	buildBacklinkListItemRefs(&ret.RefIDs)
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -316,7 +317,7 @@ func getNodeRefText0(node *ast.Node, maxLen int) string {
 	return ret
 }
 
-func GetBlockRefs(defID string) (refIDs, refTexts, defIDs []string) {
+func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string) {
 	refIDs = []string{}
 	refTexts = []string{}
 	defIDs = []string{}
@@ -331,6 +332,10 @@ func GetBlockRefs(defID string) (refIDs, refTexts, defIDs []string) {
 		defIDs = sql.QueryChildDefIDsByRootDefID(defID)
 	} else {
 		defIDs = append(defIDs, defID)
+	}
+
+	if isBacklink {
+		buildBacklinkListItemRefs(&refIDs)
 	}
 	return
 }
@@ -547,4 +552,18 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 	}
 	return
+}
+
+func buildBacklinkListItemRefs(refIDs *[]string) {
+	refBts := treenode.GetBlockTrees(*refIDs)
+	for i, refID := range *refIDs {
+		if bt := refBts[refID]; nil != bt {
+			if "p" == bt.Type {
+				if parent := treenode.GetBlockTree(bt.ParentID); nil != parent && "i" == parent.Type {
+					// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
+					(*refIDs)[i] = parent.ID
+				}
+			}
+		}
+	}
 }

@@ -634,14 +634,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		}
 	}
 
-	if isBacklink { // 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-		if ast.NodeParagraph == node.Type {
-			if nil != node.Parent && ast.NodeListItem == node.Parent.Type {
-				node = node.Parent
-			}
-		}
-	}
-
 	located := false
 	isDoc := ast.NodeDocument == node.Type
 	isHeading := ast.NodeHeading == node.Type

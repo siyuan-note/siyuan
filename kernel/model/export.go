@@ -566,11 +566,6 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 func Preview(id string) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
-	if 5 == blockRefMode {
-		// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-		blockRefMode = 4
-	}
-
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
@@ -675,13 +670,6 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 	}
 
 	blockRefMode := Conf.Export.BlockRefMode
-	if docx {
-		if 5 == blockRefMode {
-			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-			blockRefMode = 4
-		}
-	}
-
 	tree = exportTree(tree, true, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
@@ -838,11 +826,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			link.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(PdfOutlineScheme + "://" + h.ID)})
 			link.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
 			h.PrependChild(link)
-		}
-
-		if 5 == blockRefMode {
-			// 如果用户设置的块引导出模式是哈希锚点（5）则将其强制设置脚注（4）https://github.com/siyuan-note/siyuan/issues/13283
-			blockRefMode = 4
 		}
 	}
 
@@ -1419,11 +1402,39 @@ func ExportStdMarkdown(id string) string {
 	if IsSubscriber() {
 		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
 	}
+
+	var defBlockIDs []string
+	if 4 == Conf.Export.BlockRefMode { // 脚注+锚点哈希
+		// 导出锚点哈希，这里先记录下所有定义块的 ID
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			var defID string
+			if treenode.IsBlockLink(n) {
+				defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+
+			} else if treenode.IsBlockRef(n) {
+				defID, _, _ = treenode.GetBlockRef(n)
+			}
+
+			if "" != defID {
+				if defBt := treenode.GetBlockTree(defID); nil != defBt {
+					defBlockIDs = append(defBlockIDs, defID)
+					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+				}
+			}
+			return ast.WalkContinue
+		})
+	}
+	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, nil)
+		Conf.Export.AddTitle, defBlockIDs)
 }
 
 func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
@@ -1445,7 +1456,7 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	}
 	docPaths = util.FilterSelfChildDocs(docPaths)
 
-	zipPath = exportPandocConvertZip(false, box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1469,7 +1480,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 
-	zipPath = exportPandocConvertZip(false, boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1497,7 +1508,7 @@ func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(true, boxID, baseFolderName, docPaths, "", "", ".md")
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -2004,10 +2015,10 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 			}
 		}
 
-		if 5 == blockRefMode { // 锚点哈希
+		if 4 == blockRefMode { // 脚注+锚点哈希
 			if n.IsBlock() && gulu.Str.Contains(n.ID, defBlockIDs) {
 				// 如果是定义块，则在开头处添加锚点
-				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
+				anchorSpan := treenode.NewSpanAnchor(n.ID)
 				if ast.NodeDocument != n.Type {
 					firstLeaf := treenode.FirstLeafBlock(n)
 					if nil != firstLeaf {
@@ -2082,9 +2093,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	depth = 0
 	blockLink2Ref(ret, ret.ID, &treeCache, &depth)
 
-	// 收集引用转脚注
+	// 收集引用转脚注+锚点哈希
 	var refFootnotes []*refAsFootnotes
-	if 4 == blockRefMode { // 块引转脚注
+	if 4 == blockRefMode {
 		depth = 0
 		collectFootnotesDefs(ret, ret.ID, &refFootnotes, &treeCache, &depth)
 	}
@@ -2163,10 +2174,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
-		case 4: // 脚注
+		case 4: // 脚注+锚点哈希
 			if currentTreeNodeIDs[defID] {
 				// 当前文档内不转换脚注，直接使用锚点哈希 https://github.com/siyuan-note/siyuan/issues/13283
-				n.TextMarkType = "a"
+				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "block-ref", "a")
 				n.TextMarkTextContent = linkText
 				n.TextMarkAHref = "#" + defID
 				return ast.WalkContinue
@@ -2180,8 +2191,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
-		case 5: // 锚点哈希
-			// 此处不做任何处理
 		}
 
 		if nil != n.Next && ast.NodeKramdownSpanIAL == n.Next.Type {
@@ -2194,7 +2203,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		n.Unlink()
 	}
 
-	if 4 == blockRefMode { // 块引转脚注
+	if 4 == blockRefMode { // 脚注+锚点哈希
 		unlinks = nil
 		footnotesDefBlock := resolveFootnotesDefs(&refFootnotes, ret, currentTreeNodeIDs, blockRefTextLeft, blockRefTextRight, &treeCache)
 		if nil != footnotesDefBlock {
@@ -2242,6 +2251,11 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			content := html.UnescapeString(root.Content)
 			title.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 			ret.Root.PrependChild(title)
+		}
+	} else {
+		if 4 == blockRefMode { // 脚注+锚点哈希
+			anchorSpan := treenode.NewSpanAnchor(id)
+			ret.Root.PrependChild(anchorSpan)
 		}
 	}
 
@@ -3064,7 +3078,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, docPaths []string,
+func exportPandocConvertZip(baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
@@ -3074,7 +3088,6 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 		name += "_"
 	}
 	baseFolderName = path.Join(dir, name)
-	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
 	os.RemoveAll(exportFolder)
@@ -3085,7 +3098,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 	exportRefMode := Conf.Export.BlockRefMode
 	var defBlockIDs []string
-	if 5 == exportRefMode {
+	if 4 == exportRefMode { // 脚注+锚点哈希
 		// 导出锚点哈希，这里先记录下所有定义块的 ID
 		walked := map[string]bool{}
 		for _, p := range docPaths {
@@ -3093,29 +3106,32 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 				continue
 			}
 
-			docIAL := box.docIAL(p)
-			if nil == docIAL {
-				continue
-			}
-			id := docIAL["id"]
+			id := util.GetTreeID(p)
 			tree, err := LoadTreeByBlockID(id)
 			if err != nil {
 				continue
 			}
 			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering || !treenode.IsBlockRef(n) {
+				if !entering {
 					return ast.WalkContinue
 				}
 
-				defID, _, _ := treenode.GetBlockRef(n)
-				if defBt := treenode.GetBlockTree(defID); nil != defBt {
-					docPaths = append(docPaths, defBt.Path)
-					docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
+				var defID string
+				if treenode.IsBlockLink(n) {
+					defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
 
-					defBlockIDs = append(defBlockIDs, defID)
-					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+				} else if treenode.IsBlockRef(n) {
+					defID, _, _ = treenode.GetBlockRef(n)
+				}
 
-					walked[defBt.Path] = true
+				if "" != defID {
+					if defBt := treenode.GetBlockTree(defID); nil != defBt {
+						docPaths = append(docPaths, defBt.Path)
+						docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
+						defBlockIDs = append(defBlockIDs, defID)
+						defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+						walked[defBt.Path] = true
+					}
 				}
 				return ast.WalkContinue
 			})
@@ -3126,12 +3142,7 @@ func exportPandocConvertZip(exportNotebook bool, boxID, baseFolderName string, d
 
 	luteEngine := util.NewLute()
 	for _, p := range docPaths {
-		docIAL := box.docIAL(p)
-		if nil == docIAL {
-			continue
-		}
-
-		id := docIAL["id"]
+		id := util.GetTreeID(p)
 		hPath, md := exportMarkdownContent(id, exportRefMode, defBlockIDs)
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590

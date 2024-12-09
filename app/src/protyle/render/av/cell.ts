@@ -385,7 +385,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         if (cellRect.bottom > contentRect.bottom) {
             height = contentRect.bottom - cellRect.top;
         }
-        const width = Math.min(Math.max(cellRect.width, 25), contentRect.width)
+        const width = Math.min(Math.max(cellRect.width, 25), contentRect.width);
         style = `style="padding-top: 6.5px;position:absolute;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;top: ${cellRect.top}px;width:${width}px;height: ${height}px"`;
     } else {
         style = `style="padding-top: 6.5px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;

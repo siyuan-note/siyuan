@@ -392,6 +392,23 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
     setPosition(utilElement, targetRect.left, targetRect.top + targetRect.height + 4);
 };
 
+const getTextNode = (element: HTMLElement, isFirst: boolean) => {
+    const spans = element.querySelectorAll(".markedContent span");
+    let index = isFirst ? 0 : spans.length - 1;
+    while (spans[index]) {
+        if (spans[index].textContent) {
+            break;
+        } else {
+            if (isFirst) {
+                index++;
+            } else {
+                index--;
+            }
+        }
+    }
+    return spans[index];
+};
+
 const getHightlightCoordsByRange = (pdf: any, color: string) => {
     const range = window.getSelection().getRangeAt(0);
     const startPageElement = hasClosestByClassName(range.startContainer, "page");
@@ -431,8 +448,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
 
     const cloneRange = range.cloneRange();
     if (startIndex !== endIndex) {
-        const startDivs = startPage.textLayer.textDivs;
-        range.setEndAfter(startDivs[startDivs.length - 1]);
+        range.setEndAfter(getTextNode(startPage.textLayer.div, false));
     }
 
     const startSelected: number[] = [];
@@ -450,8 +466,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         const endPage = pdf.pdfViewer.getPageView(endIndex);
         const endPageRect = endPage.canvas.getClientRects()[0];
         const endViewport = endPage.viewport;
-        const endDivs = endPage.textLayer.textDivs;
-        cloneRange.setStart(endDivs[0], 0);
+        cloneRange.setStart(getTextNode(endPage.textLayer.div, true), 0);
         mergeRects(cloneRange).forEach(function (r) {
             endSelected.push(
                 endViewport.convertToPdfPoint(r.left - endPageRect.x,

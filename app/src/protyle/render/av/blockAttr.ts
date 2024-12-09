@@ -15,6 +15,7 @@ import {previewImage} from "../../preview/image";
 import {webUtils} from "electron";
 /// #endif
 import {isBrowser} from "../../../util/functions";
+import {Constants} from "../../../constants";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
@@ -179,10 +180,12 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
             avID: string
             avName: string
         }) => {
-            let innerHTML = `<div class="custom-attr__avheader block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
-    <div class="fn__flex-1"></div>
-    <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
-    <div class="fn__flex-1"></div>
+            let innerHTML = `<div class="custom-attr__avheader">
+    <div class="block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
+        <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
+    </div>
+    <span class="fn__space"></span>
+    <span data-type="remove" class="block__icon block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
                 innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
@@ -199,7 +202,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
             });
             innerHTML += `<div class="fn__hr"></div>
 <button data-type="addColumn" class="b3-button b3-button--cancel"><svg><use xlink:href="#iconAdd"></use></svg>${window.siyuan.languages.newCol}</button>
-<div class="fn__hr--b"></div>`;
+<div class="fn__hr--b"></div><div class="fn__hr--b"></div>`;
             html += `<div data-av-id="${table.avID}" data-node-id="${id}" data-type="NodeAttributeView">${innerHTML}</div>`;
 
             if (element.innerHTML) {
@@ -346,6 +349,28 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                 }
             });
             element.addEventListener("click", (event) => {
+                const removeElement = hasClosestByAttribute(event.target as HTMLElement, "data-type", "remove");
+                if (removeElement) {
+                    const blockElement = hasClosestBlock(removeElement);
+                    if (blockElement) {
+                        transaction(protyle, [{
+                            action: "removeAttrViewBlock",
+                            srcIDs: [id],
+                            avID: blockElement.dataset.avId,
+                        }]);
+                        blockElement.remove();
+                        if (!element.innerHTML) {
+                            window.siyuan.dialogs.find(item => {
+                                if (item.element.getAttribute("data-key") === Constants.DIALOG_ATTR) {
+                                    item.destroy();
+                                    return true;
+                                }
+                            });
+                        }
+                    }
+                    event.stopPropagation();
+                    return;
+                }
                 openEdit(protyle, element, event);
             });
             element.addEventListener("contextmenu", (event) => {

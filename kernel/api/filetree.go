@@ -1152,6 +1152,7 @@ func getDoc(c *gin.Context) {
 		"isSyncing":        isSyncing,
 		"isBacklinkExpand": isBacklinkExpand,
 		"keywords":         keywords,
+		"reqId":            arg["reqId"],
 	}
 }
 

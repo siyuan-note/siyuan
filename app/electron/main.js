@@ -1109,7 +1109,7 @@ app.whenReady().then(() => {
             if (index === 0) {
                 globalShortcut.register(shortcut, () => {
                     let currentWorkspace;
-                    const currentWebContentsId = (latestActiveWindow && !latestActiveWindow.isDestroyed()) ? latestActiveWindow.webContents.id : undefined
+                    const currentWebContentsId = (latestActiveWindow && !latestActiveWindow.isDestroyed()) ? latestActiveWindow.webContents.id : undefined;
                     workspaces.find(workspaceItem => {
                         if ((currentWebContentsId || event.sender.id) === workspaceItem.browserWindow.webContents.id) {
                             currentWorkspace = workspaceItem;

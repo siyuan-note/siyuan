@@ -743,4 +743,4 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
         item.innerHTML = "";
     });
     updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
-}
+};

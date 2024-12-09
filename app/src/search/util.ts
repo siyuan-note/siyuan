@@ -1200,18 +1200,27 @@ const renderNextSearchMark = (options: {
     }
 };
 
+let articleId: string;
+
 export const getArticle = (options: {
     id: string,
     config?: Config.IUILayoutTabSearchConfig,
     edit: Protyle
     value?: string,
 }) => {
+    articleId = options.id;
     checkFold(options.id, (zoomIn) => {
+        if (articleId !== options.id) {
+            return;
+        }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/block/getDocInfo", {
             id: options.id,
         }, (response) => {
+            if (articleId !== options.id) {
+                return;
+            }
             options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
@@ -1223,6 +1232,9 @@ export const getArticle = (options: {
                 zoom: zoomIn,
                 highlight: !isSupportCSSHL(),
             }, getResponse => {
+                if (articleId !== options.id) {
+                    return;
+                }
                 options.edit.protyle.query = {
                     key: options.value || null,
                     method: options.config?.method || null,
@@ -1236,20 +1248,20 @@ export const getArticle = (options: {
                 });
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                let matchRectTop: number;
                 if (isSupportCSSHL()) {
-                    options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, ["TODO", "得到"], true);
-                    matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
+                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
+                        if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
+                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                        }
+                    });
                 } else {
                     const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
                     if (matchElements.length === 0) {
                         return;
                     }
                     matchElements[0].classList.add("search-mark--hl");
-                    matchRectTop = matchElements[0].getBoundingClientRect().top;
+                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
                 }
-                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
             });
         });
     });

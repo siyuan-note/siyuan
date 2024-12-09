@@ -634,14 +634,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		}
 	}
 
-	if isBacklink { // 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-		if ast.NodeParagraph == node.Type {
-			if nil != node.Parent && ast.NodeListItem == node.Parent.Type {
-				node = node.Parent
-			}
-		}
-	}
-
 	located := false
 	isDoc := ast.NodeDocument == node.Type
 	isHeading := ast.NodeHeading == node.Type
@@ -801,6 +793,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 
+	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
 		if 0 == queryMethod {
 			query = stringQuery(query)
@@ -882,6 +875,15 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+	for i, keyword := range keywords {
+		keyword = strings.TrimPrefix(keyword, "#")
+		keyword = strings.TrimSuffix(keyword, "#")
+		keywords[i] = keyword
+	}
 
 	go setRecentDocByTree(tree)
 	return

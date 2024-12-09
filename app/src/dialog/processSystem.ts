@@ -179,14 +179,14 @@ export const setDefRefCount = (data: {
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");
             const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
-                if (data.refCount === 0) {
+                if (data.rootRefCount === 0) {
                     countElement.remove();
                 } else {
-                    countElement.textContent = data.refCount.toString();
-                    countElement.setAttribute("data-id", data.refIDs.toString());
+                    countElement.textContent = data.rootRefCount.toString();
+                    countElement.setAttribute("data-id", JSON.stringify(data.refIDs));
                 }
-            } else if (data.refCount > 0) {
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`);
+            } else if (data.rootRefCount > 0) {
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${JSON.stringify(data.refIDs)}" style="">${data.rootRefCount}</div>`);
             }
             return;
         }

@@ -35,6 +35,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func reloadUI(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.ReloadUI()
+}
+
 func getWorkspaceInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

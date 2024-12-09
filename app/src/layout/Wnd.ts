@@ -445,7 +445,7 @@ export class Wnd {
         });
         // 在 JSONToLayout 中进行 focus
         if (!isInitActive) {
-            setPanelFocus(this.headersElement.parentElement.parentElement);
+            setPanelFocus(this.headersElement.parentElement.parentElement, isSaveLayout);
         }
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");

@@ -136,6 +136,14 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
+                const filterIconElement = inputElement.nextElementSibling;
+                if (inputElement.value) {
+                    filterIconElement.classList.add("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
+                } else {
+                    filterIconElement.classList.remove("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {
@@ -434,11 +442,12 @@ export class Backlink extends Model {
             });
             svgElement.removeAttribute("disabled");
         } else {
+            const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId,
                 highlight: !isSupportCSSHL(),
-                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value,
+                keyword,
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");
@@ -458,7 +467,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, ["TODO"], false);
+                searchMarkRender(editor.protyle, keyword.split(" "));
                 this.editors.push(editor);
             });
         }

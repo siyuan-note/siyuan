@@ -371,6 +371,7 @@ func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
 
 type ValueBlock struct {
 	ID      string `json:"id"`
+	Icon    string `json:"icon"`
 	Content string `json:"content"`
 	Created int64  `json:"created"`
 	Updated int64  `json:"updated"`

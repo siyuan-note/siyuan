@@ -101,11 +101,25 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
+                    // 阻止 Linux 中键粘贴
+                    if ("linux" === window.siyuan.config.system.os) {
+                        const activeElement = document.activeElement;
+                        window.addEventListener("paste", (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                        }, {
+                            capture: true,
+                            once: true
+                        });
+                        // 保持原有焦点
+                        if (activeElement instanceof HTMLElement) {
+                            activeElement.focus();
+                        }
+                    }
                     break;
                 }
                 target = target.parentElement;
             }
-
         });
         this.headersElement.addEventListener("mousewheel", (event: WheelEvent) => {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;

@@ -1402,11 +1402,39 @@ func ExportStdMarkdown(id string) string {
 	if IsSubscriber() {
 		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
 	}
+
+	var defBlockIDs []string
+	if 4 == Conf.Export.BlockRefMode { // 脚注+锚点哈希
+		// 导出锚点哈希，这里先记录下所有定义块的 ID
+		ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			var defID string
+			if treenode.IsBlockLink(n) {
+				defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
+
+			} else if treenode.IsBlockRef(n) {
+				defID, _, _ = treenode.GetBlockRef(n)
+			}
+
+			if "" != defID {
+				if defBt := treenode.GetBlockTree(defID); nil != defBt {
+					defBlockIDs = append(defBlockIDs, defID)
+					defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+				}
+			}
+			return ast.WalkContinue
+		})
+	}
+	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
+
 	return exportMarkdownContent0(tree, cloudAssetsBase, false,
 		Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, nil)
+		Conf.Export.AddTitle, defBlockIDs)
 }
 
 func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
@@ -1428,7 +1456,7 @@ func BatchExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipP
 	}
 	docPaths = util.FilterSelfChildDocs(docPaths)
 
-	zipPath = exportPandocConvertZip(box.ID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1452,7 +1480,7 @@ func ExportPandocConvertZip(id, pandocTo, ext string) (name, zipPath string) {
 		docPaths = append(docPaths, docFile.path)
 	}
 
-	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "gfm+footnotes+hard_line_breaks", pandocTo, ext)
 	name = util.GetTreeID(block.Path)
 	return
 }
@@ -1480,7 +1508,7 @@ func ExportNotebookMarkdown(boxID, folderPath string) (zipPath string) {
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
-	zipPath = exportPandocConvertZip(boxID, baseFolderName, docPaths, "", "", ".md")
+	zipPath = exportPandocConvertZip(baseFolderName, docPaths, "", "", ".md")
 	return
 }
 
@@ -1990,7 +2018,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		if 4 == blockRefMode { // 脚注+锚点哈希
 			if n.IsBlock() && gulu.Str.Contains(n.ID, defBlockIDs) {
 				// 如果是定义块，则在开头处添加锚点
-				anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + n.ID + "\"></span>")}
+				anchorSpan := treenode.NewSpanAnchor(n.ID)
 				if ast.NodeDocument != n.Type {
 					firstLeaf := treenode.FirstLeafBlock(n)
 					if nil != firstLeaf {
@@ -2226,7 +2254,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 	} else {
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			anchorSpan := &ast.Node{Type: ast.NodeInlineHTML, Tokens: []byte("<span id=\"" + id + "\"></span>")}
+			anchorSpan := treenode.NewSpanAnchor(id)
 			ret.Root.PrependChild(anchorSpan)
 		}
 	}
@@ -3050,7 +3078,7 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 	return ast.WalkSkipChildren
 }
 
-func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
+func exportPandocConvertZip(baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
@@ -3060,7 +3088,6 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 		name += "_"
 	}
 	baseFolderName = path.Join(dir, name)
-	box := Conf.Box(boxID)
 
 	exportFolder := filepath.Join(util.TempDir, "export", baseFolderName+ext)
 	os.RemoveAll(exportFolder)
@@ -3079,11 +3106,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 				continue
 			}
 
-			docIAL := box.docIAL(p)
-			if nil == docIAL {
-				continue
-			}
-			id := docIAL["id"]
+			id := util.GetTreeID(p)
 			tree, err := LoadTreeByBlockID(id)
 			if err != nil {
 				continue
@@ -3119,12 +3142,7 @@ func exportPandocConvertZip(boxID, baseFolderName string, docPaths []string,
 
 	luteEngine := util.NewLute()
 	for _, p := range docPaths {
-		docIAL := box.docIAL(p)
-		if nil == docIAL {
-			continue
-		}
-
-		id := docIAL["id"]
+		id := util.GetTreeID(p)
 		hPath, md := exportMarkdownContent(id, exportRefMode, defBlockIDs)
 		dir, name = path.Split(hPath)
 		dir = util.FilterFilePath(dir) // 导出文档时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/4590

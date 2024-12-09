@@ -1,6 +1,7 @@
 import {Constants} from "../../constants";
+import {isInEmbedBlock} from "../util/hasClosest";
 
-export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolean, cb?: () => void) => {
+export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void) => {
     if (!isSupportCSSHL()) {
         return;
     }
@@ -8,6 +9,16 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
         protyle.highlight.markHL.clear();
         protyle.highlight.mark.clear();
         protyle.highlight.ranges = [];
+        let isSetHL = false;
+        let hlBlockElement: Element;
+        if (typeof hlId === "string") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id='${hlId}']`)).find(item => {
+                if (!isInEmbedBlock(item)) {
+                    hlBlockElement = item
+                    return true
+                }
+            })
+        }
 
 
         // 准备一个数组来保存所有文本节点
@@ -25,7 +36,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
         }
 
         const text = protyle.wysiwyg.element.textContent;
-        const rangeIndexes: { range: Range, startIndex: number }[] = [];
+        const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
 
         keys.forEach(key => {
             if (!key) {
@@ -50,7 +61,13 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
                     currentTextNode = textNodes[currentNodeIndex];
                     range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
 
-                    rangeIndexes.push({range, startIndex});
+                    let isCurrent = false;
+                    if (!isSetHL && hlBlockElement && hlBlockElement.contains(currentTextNode)) {
+                        isSetHL = true;
+                        isCurrent = true;
+                    }
+
+                    rangeIndexes.push({range, startIndex, isCurrent});
                 } catch (e) {
                     console.error("searchMarkRender error:", e);
                 }
@@ -65,7 +82,8 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
                 return 0;
             }
         }).forEach((item, index) => {
-            if (index === protyle.highlight.rangeIndex && isHL) {
+            if ((typeof hlId === "string" && item.isCurrent) || (typeof hlId === "number" && hlId === index)) {
+                protyle.highlight.rangeIndex = index;
                 protyle.highlight.markHL.add(item.range);
             } else {
                 protyle.highlight.mark.add(item.range);
@@ -73,7 +91,7 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], isHL: boolea
             protyle.highlight.ranges.push(item.range);
         });
         CSS.highlights.set("search-mark-" + protyle.highlight.styleElement.dataset.uuid, protyle.highlight.mark);
-        if (isHL) {
+        if (typeof hlId !== "undefined") {
             CSS.highlights.set("search-mark-hl-" + protyle.highlight.styleElement.dataset.uuid, protyle.highlight.markHL);
         }
         if (cb) {

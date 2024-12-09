@@ -484,7 +484,7 @@ interface IProtyle {
         mark: Highlight
         markHL: Highlight
         ranges: Range[]
-        rangeIndex: 0
+        rangeIndex: number
         styleElement: HTMLStyleElement
     }
     getInstance: () => import("../protyle").Protyle,

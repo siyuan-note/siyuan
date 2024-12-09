@@ -136,7 +136,7 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
-                const filterIconElement =  inputElement.nextElementSibling;
+                const filterIconElement = inputElement.nextElementSibling;
                 if (inputElement.value) {
                     filterIconElement.classList.add("block__icon--active");
                     filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
@@ -467,7 +467,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, keyword.split(" "), false);
+                searchMarkRender(editor.protyle, keyword.split(" "));
                 this.editors.push(editor);
             });
         }

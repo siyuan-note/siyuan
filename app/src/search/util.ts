@@ -1249,10 +1249,9 @@ export const getArticle = (options: {
 
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
                 if (isSupportCSSHL()) {
-                    options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, true, () => {
-                        if (options.edit.protyle.highlight.ranges.length > 0) {
-                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
+                        if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
+                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
                         }
                     });
                 } else {

@@ -694,7 +694,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     assetElement.classList.remove("fn__none");
                     assetElement.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
-                    const k  = (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value;
+                    const k = (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
                         highlight: !isSupportCSSHL(),
@@ -713,7 +713,7 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
-                            searchMarkRender(historyEditor.protyle, k.split(" "), false);
+                            searchMarkRender(historyEditor.protyle, k.split(" "));
                         }
                     });
                 }

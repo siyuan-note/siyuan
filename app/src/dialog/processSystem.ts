@@ -183,10 +183,10 @@ export const setDefRefCount = (data: {
                     countElement.remove();
                 } else {
                     countElement.textContent = data.refCount.toString();
-                    countElement.setAttribute("data-id", data.refIDs.toString());
+                    countElement.setAttribute("data-id", JSON.stringify(data.refIDs));
                 }
             } else if (data.refCount > 0) {
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${data.refIDs.toString()}" style="">${data.refCount}</div>`);
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${JSON.stringify(data.refIDs)}" style="">${data.refCount}</div>`);
             }
             return;
         }

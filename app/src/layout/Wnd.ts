@@ -101,11 +101,31 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
+                    const activeElement = document.activeElement;
+                    const pasteHandler = (e: ClipboardEvent) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                    };
+                    window.addEventListener("paste", pasteHandler, {
+                        capture: true,
+                        once: true
+                    });
+
+                    // 如果在短时间内没有 paste 事件发生,移除监听
+                    setTimeout(() => {
+                        window.removeEventListener("paste", pasteHandler, {
+                            capture: true
+                        });
+                    }, 250);
+
+                    // 保持原有焦点
+                    if (activeElement instanceof HTMLElement) {
+                        activeElement.focus();
+                    }
                     break;
                 }
                 target = target.parentElement;
             }
-
         });
         this.headersElement.addEventListener("mousewheel", (event: WheelEvent) => {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;

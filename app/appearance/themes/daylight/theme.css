@@ -4,7 +4,7 @@
     --b3-theme-primary-light: rgba(53, 117, 240, .54);
     --b3-theme-primary-lighter: rgba(53, 117, 240, .38);
     --b3-theme-primary-lightest: rgba(53, 117, 240, .12);
-    --b3-theme-secondary: #f3a92f;
+    --b3-theme-secondary: #ff9200;
     --b3-theme-background: #fff;
     --b3-theme-background-light: #dfe0e1;
     --b3-theme-surface: #f6f6f6;
@@ -66,13 +66,13 @@
     --b3-mask-background: rgba(220, 220, 220, .4);
 
     /* 卡片背景 */
-    --b3-card-error-color: rgb(97, 26, 21);
+    --b3-card-error-color: #790600;
     --b3-card-error-background: #f5d1cf;
-    --b3-card-warning-color: rgb(102, 60, 0);
-    --b3-card-warning-background: #fddaab;
-    --b3-card-info-color: rgb(13, 60, 97);
+    --b3-card-warning-color: #b16700;
+    --b3-card-warning-background: #ffe8c8;
+    --b3-card-info-color: #005599;
     --b3-card-info-background: #d6eaf9;
-    --b3-card-success-color: rgb(30, 70, 32);
+    --b3-card-success-color: #008606;
     --b3-card-success-background: #d7eed8;
 
     /* 自定义文字 */
@@ -85,7 +85,7 @@
     --b3-font-color7: var(--b3-theme-secondary);
     --b3-font-color8: var(--b3-theme-error);
     --b3-font-color9: #f5539e;
-    --b3-font-color10: #00a0a0;
+    --b3-font-color10: #00cdcd;
     --b3-font-color11: #00b853;
     --b3-font-color12: #9e9700;
     --b3-font-color13: var(--b3-theme-background);
@@ -95,7 +95,7 @@
     --b3-font-background4: var(--b3-card-success-background);
     --b3-font-background5: #e2e3e4;
     --b3-font-background6: #acd0fc;
-    --b3-font-background7: #fdeed6;
+    --b3-font-background7: #fddaab;
     --b3-font-background8: #ffb0a9;
     --b3-font-background9: #fdbfff;
     --b3-font-background10: #b1ffff;

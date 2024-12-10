@@ -390,6 +390,10 @@ export class Outline extends Model {
                 id: this.blockId,
                 preview: this.isPreview
             }, response => {
+                // 文档切换后不再更新原有推送 https://github.com/siyuan-note/siyuan/issues/13409
+                if (data.data.rootID !== this.blockId) {
+                    return;
+                }
                 this.update(response);
                 // https://github.com/siyuan-note/siyuan/issues/8372
                 if (getSelection().rangeCount > 0) {

@@ -101,7 +101,7 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
-                    const frontend = getFrontend()
+                    const frontend = getFrontend();
                     if ((["desktop", "desktop-window"].includes(frontend) && window.siyuan.config.system.os === "linux") ||
                         (frontend === "browser-desktop" && navigator.userAgent.indexOf("Linux") !== -1)) {
                         const activeElement = document.activeElement;

@@ -69,7 +69,7 @@
     --b3-card-error-color: rgb(97, 26, 21);
     --b3-card-error-background: #f5d1cf;
     --b3-card-warning-color: rgb(102, 60, 0);
-    --b3-card-warning-background: #ffe8c8;
+    --b3-card-warning-background: #fddaab;
     --b3-card-info-color: rgb(13, 60, 97);
     --b3-card-info-background: #d6eaf9;
     --b3-card-success-color: rgb(30, 70, 32);
@@ -85,9 +85,9 @@
     --b3-font-color7: var(--b3-theme-secondary);
     --b3-font-color8: var(--b3-theme-error);
     --b3-font-color9: #f5539e;
-    --b3-font-color10: #944194;
-    --b3-font-color11: #65b84d;
-    --b3-font-color12: #f5822e;
+    --b3-font-color10: #00a0a0;
+    --b3-font-color11: #00b853;
+    --b3-font-color12: #9e9700;
     --b3-font-color13: var(--b3-theme-background);
     --b3-font-background1: var(--b3-card-error-background);
     --b3-font-background2: var(--b3-card-warning-background);
@@ -95,11 +95,11 @@
     --b3-font-background4: var(--b3-card-success-background);
     --b3-font-background5: #e2e3e4;
     --b3-font-background6: #acd0fc;
-    --b3-font-background7: #fae3e4;
-    --b3-font-background8: #e6c7e6;
+    --b3-font-background7: #fdeed6;
+    --b3-font-background8: #ffb0a9;
     --b3-font-background9: #fdbfff;
     --b3-font-background10: #b1ffff;
-    --b3-font-background11: #d3f8b6;
+    --b3-font-background11: #affad1;
     --b3-font-background12: #fff88f;
     --b3-font-background13: var(--b3-theme-on-background);
 

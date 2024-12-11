@@ -14,7 +14,7 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package treenode
+package filesys
 
 import (
 	"math"
@@ -25,6 +25,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/spf13/cast"
 )
@@ -48,6 +49,7 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["parseTime"] = parseTime
 	ret["FormatFloat"] = FormatFloat
 	ret["getHPathByID"] = getHPathByID
+	ret["statBlock"] = StatBlock
 	return
 }
 
@@ -73,7 +75,7 @@ func FormatFloat(format string, n float64) string {
 }
 
 func getHPathByID(id string) (ret string) {
-	bt := GetBlockTree(id)
+	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
 	}

@@ -26,6 +26,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -320,7 +321,7 @@ func getContentWordCount(c *gin.Context) {
 	}
 
 	content := arg["content"].(string)
-	ret.Data = model.ContentStat(content)
+	ret.Data = filesys.ContentStat(content)
 }
 
 func getBlocksWordCount(c *gin.Context) {
@@ -337,7 +338,7 @@ func getBlocksWordCount(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	ret.Data = model.BlocksWordCount(ids)
+	ret.Data = filesys.BlocksWordCount(ids)
 }
 
 func getTreeStat(c *gin.Context) {
@@ -350,7 +351,7 @@ func getTreeStat(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = model.StatTree(id)
+	ret.Data = filesys.StatTree(id)
 }
 
 func getDOMText(c *gin.Context) {

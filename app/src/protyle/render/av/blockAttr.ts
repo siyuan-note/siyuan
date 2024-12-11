@@ -184,6 +184,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     <div class="block__logo popover__block" data-id='${JSON.stringify(table.blockIDs)}'>
         <svg class="block__logoicon"><use xlink:href="#iconDatabase"></use></svg><span>${table.avName || window.siyuan.languages.database}</span>
     </div>
+    <div class="fn__flex-1"></div>
     <span class="fn__space"></span>
     <span data-type="remove" class="block__icon block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;

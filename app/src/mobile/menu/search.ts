@@ -26,6 +26,7 @@ import {
 import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {getDefaultType} from "../../search/getDefault";
+import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -313,7 +314,17 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
         let target = event.target as HTMLElement;
         while (target && !target.isSameNode(element)) {
             const type = target.getAttribute("data-type");
-            if (type === "previous") {
+            if (type === "replaceHistory") {
+                toggleReplaceHistory(target.nextElementSibling as HTMLInputElement)
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "assetHistory") {
+                toggleAssetHistory(assetsElement)
+                event.stopPropagation();
+                event.preventDefault();
+                break;
+            } else if (type === "previous") {
                 if (!target.getAttribute("disabled")) {
                     config.page--;
                     updateSearchResult(config, element);
@@ -663,13 +674,19 @@ export const popSearch = (app: App, searchConfig?: any) => {
 
     openModel({
         title: `<div class="fn__flex">
+    <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="history">
+        <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
+        <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
+    </span>
     <input id="toolbarSearch" placeholder="${window.siyuan.languages.showRecentUpdatedBlocks}" class="toolbar__title fn__block">
     <svg id="toolbarSearchNew" class="toolbar__icon"><use xlink:href="#iconFile"></use></svg>
 </div>`,
-        icon: "iconSearch",
         html: `<div class="fn__flex-column" style="height: 100%">
     <div class="toolbar toolbar--border${config.hasReplace ? "" : " fn__none"}">
-        <svg class="toolbar__icon"><use xlink:href="#iconReplace"></use></svg>
+        <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="replaceHistory">
+            <svg class="svg--mid"><use xlink:href="#iconReplace"></use></svg>
+            <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
+        </span>
         <input id="toolbarReplace" class="toolbar__title">
         <svg class="fn__rotate fn__none toolbar__icon"><use xlink:href="#iconRefresh"></use></svg>
         <div class="fn__space"></div>
@@ -707,7 +724,10 @@ export const popSearch = (app: App, searchConfig?: any) => {
      </div>
      <div class="fn__none fn__flex-column" style="position: fixed;top: 0;width: 100%;background: var(--b3-theme-surface);height: 100%;" id="searchAssetsPanel">
         <div class="toolbar toolbar--border">
-            <svg class="toolbar__icon"><use xlink:href="#iconSearch"></use></svg>
+           <span data-menu="true" class="toolbar__icon toolbar__icon--history" data-type="assetHistory">
+                <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
+                <svg class="svg--smaller"><use xlink:href="#iconDown"></use></svg>
+            </span>
             <input id="searchAssetInput" placeholder="${window.siyuan.languages.keyword}" class="toolbar__title fn__block">
         </div>
         <div class="toolbar">
@@ -749,6 +769,10 @@ export const popSearch = (app: App, searchConfig?: any) => {
         bindEvent(element) {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
                 newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
+            });
+            const historyElement = document.querySelector('.toolbar [data-type="history"]')
+            historyElement.addEventListener("click", () => {
+                toggleSearchHistory(document.querySelector("#model"), config, undefined);
             });
             initSearchEvent(app, element.firstElementChild, config);
             updateSearchResult(config, element);

@@ -393,7 +393,7 @@ export const bindEditEvent = (options: {
                     return;
                 }
                 colData.options.push({
-                    color: (colData.options.length + 1).toString(),
+                    color: ((colData.options.length || 0) % 14 + 1).toString(),
                     name: addOptionElement.value
                 });
                 transaction(options.protyle, [{

@@ -46,7 +46,7 @@ const filterSelectHTML = (key: string, options: {
         });
     }
     if (!hasMatch && key) {
-        const colorIndex = (options?.length || 0) % 13 + 1;
+        const colorIndex = (options?.length || 0) % 14 + 1;
         html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
@@ -318,8 +318,8 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    let html = `<div class="fn__flex fn__flex-wrap" style="width: 238px"><button data-color="0" class="color__square${color === "0" ? " color__square--current" : ""}" style="color: var(--b3-font-color0);background-color: var(--b3-font-background0);">A</button>`;
-    Array.from(Array(13).keys()).forEach(index => {
+    let html = `<div class="fn__flex fn__flex-wrap" style="width: 238px">`;
+    Array.from(Array(14).keys()).forEach(index => {
         html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`;
     });
     menu.addItem({
@@ -634,7 +634,7 @@ export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:
             }
         });
         if (!needAdd) {
-            const newColor = ((column.options?.length || 0) % 13 + 1).toString();
+            const newColor = ((column.options?.length || 0) % 14 + 1).toString();
             column.options.push({
                 name: item.content,
                 color: newColor

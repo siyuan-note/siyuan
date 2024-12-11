@@ -80,6 +80,12 @@ func renderTemplate(c *gin.Context) {
 		return
 	}
 
+	if !util.IsAbsPathInWorkspace(p) {
+		ret.Code = -1
+		ret.Msg = "Path [" + p + "] is not in workspace"
+		return
+	}
+
 	preview := false
 	if previewArg := arg["preview"]; nil != previewArg {
 		preview = previewArg.(bool)

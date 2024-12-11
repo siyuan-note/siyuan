@@ -31,6 +31,12 @@ import (
 
 func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret = sprig.TxtFuncMap()
+
+	// 因为安全原因移除一些函数 https://github.com/siyuan-note/siyuan/issues/13426
+	delete(ret, "env")
+	delete(ret, "expandenv")
+	delete(ret, "getHostByName")
+
 	ret["Weekday"] = util.Weekday
 	ret["WeekdayCN"] = util.WeekdayCN
 	ret["WeekdayCN2"] = util.WeekdayCN2

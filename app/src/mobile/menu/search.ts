@@ -26,7 +26,13 @@ import {
 import {addClearButton} from "../../util/addClearButton";
 import {checkFold} from "../../util/noRelyPCFunction";
 import {getDefaultType} from "../../search/getDefault";
-import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "../../search/toggleHistory";
+import {
+    saveAssetKeyList,
+    saveKeyList,
+    toggleAssetHistory,
+    toggleReplaceHistory,
+    toggleSearchHistory
+} from "../../search/toggleHistory";
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
     if (config.method === 1 || config.method === 2) {
@@ -40,6 +46,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     if (!loadElement.classList.contains("fn__none")) {
         return;
     }
+    saveKeyList("replaceKeys", replaceInputElement.value);
     let currentLiElement: HTMLElement = searchListElement.querySelector(".b3-list-item--focus");
     if (!currentLiElement) {
         return;
@@ -288,6 +295,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
             window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
             setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
         }
+        saveKeyList("keys", searchInputElement.value);
     });
     addClearButton({
         inputElement: searchInputElement,
@@ -801,6 +809,9 @@ const goAsset = () => {
             return;
         }
         assetInputEvent(assetsElement, localSearch);
+    });
+    inputElement.addEventListener("blur", () => {
+        saveAssetKeyList(inputElement)
     });
     assetInputEvent(assetsElement, localSearch);
     addClearButton({

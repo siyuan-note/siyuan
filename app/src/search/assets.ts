@@ -12,6 +12,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {addClearButton} from "../util/addClearButton";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
+import {saveAssetKeyList} from "./toggleHistory";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -108,18 +109,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         assetInputEvent(element, localSearch);
     });
     searchInputElement.addEventListener("blur", () => {
-        if (!searchInputElement.value) {
-            return;
-        }
-        let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
-        list.splice(0, 0, searchInputElement.value);
-        list = Array.from(new Set(list));
-        if (list.length > window.siyuan.config.search.limit) {
-            list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-        }
-        window.siyuan.storage[Constants.LOCAL_SEARCHASSET].k = searchInputElement.value;
-        window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
-        setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+        saveAssetKeyList(searchInputElement)
     });
     assetInputEvent(element, localSearch);
     addClearButton({

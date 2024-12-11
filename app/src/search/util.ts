@@ -50,19 +50,7 @@ import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultType} from "./getDefault";
 import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
-import {toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
-
-const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
-    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
-    list.splice(0, 0, value);
-    list = Array.from(new Set(list));
-    if (list.length > window.siyuan.config.search.limit) {
-        list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-    }
-    // new Set 后需重新赋值
-    window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type] = list;
-    setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-};
+import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();

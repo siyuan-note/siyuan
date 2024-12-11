@@ -220,3 +220,30 @@ export const toggleAssetHistory = (assetElement: Element) => {
         y: rect.bottom
     });
 };
+
+export const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
+    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
+    list.splice(0, 0, value);
+    list = Array.from(new Set(list));
+    if (list.length > window.siyuan.config.search.limit) {
+        list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
+    }
+    // new Set 后需重新赋值
+    window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type] = list;
+    setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
+};
+
+export const saveAssetKeyList = (inputElement:HTMLInputElement) => {
+    if (!inputElement.value) {
+        return;
+    }
+    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
+    list.splice(0, 0, inputElement.value);
+    list = Array.from(new Set(list));
+    if (list.length > window.siyuan.config.search.limit) {
+        list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
+    }
+    window.siyuan.storage[Constants.LOCAL_SEARCHASSET].k = inputElement.value;
+    window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
+    setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+}

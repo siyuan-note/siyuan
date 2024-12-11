@@ -314,9 +314,18 @@
 
     &--select {
       background-color: var(--b3-theme-primary-lightest);
-      outline: 2px solid var(--b3-theme-primary-lighter);
-      outline-offset: -2px;
-      border-radius: var(--b3-border-radius);
+
+      &::after {
+        content: '';
+        position: absolute;
+        top: 2px;
+        left: 2px;
+        right: 2px;
+        bottom: 2px;
+        border-radius: 3px;
+        box-shadow: 0 0 0 2px var(--b3-theme-primary-lighter);
+        pointer-events: none;
+      }
     }
 
     &--active {

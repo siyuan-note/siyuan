@@ -798,7 +798,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		typeFilter := buildTypeFilter(queryTypes)
 		switch queryMethod {
 		case 0:
-			query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 			keywords = strings.Split(query, " ")
 		case 1:
 			keywords = highlightByFTS(query, typeFilter, rootID)

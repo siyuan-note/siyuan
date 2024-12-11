@@ -393,7 +393,7 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
 };
 
 const getTextNode = (element: HTMLElement, isFirst: boolean) => {
-    const spans = element.querySelectorAll(".markedContent span");
+    const spans = element.querySelectorAll('span[role="presentation"]');
     let index = isFirst ? 0 : spans.length - 1;
     while (spans[index]) {
         if (spans[index].textContent) {

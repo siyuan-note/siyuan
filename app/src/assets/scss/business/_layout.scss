@@ -243,6 +243,7 @@
         }
 
         &--readonly {
+          cursor: default;
           padding-left: 13px;
           padding-right: 8px;
           max-width: none;

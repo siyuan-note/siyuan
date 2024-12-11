@@ -22,6 +22,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -117,12 +118,16 @@ func (tx *Transaction) doUnfoldHeading(operation *Operation) (ret *TxErr) {
 	return
 }
 
+var docConvertLock = sync.Mutex{}
+
 func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath string, err error) {
 	if !ast.IsNodeIDPattern(srcID) || !ast.IsNodeIDPattern(targetID) {
 		return
 	}
 
 	FlushTxQueue()
+	docConvertLock.Lock()
+	defer docConvertLock.Unlock()
 
 	srcTree, _ := LoadTreeByBlockID(srcID)
 	if nil == srcTree {
@@ -277,6 +282,8 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
 	FlushTxQueue()
+	docConvertLock.Lock()
+	defer docConvertLock.Unlock()
 
 	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
 	if nil == srcTree {

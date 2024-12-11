@@ -241,6 +241,10 @@ func PushClearProgress() {
 	BroadcastByType("main", "cprogress", 0, "", nil)
 }
 
+func PushUpdateIDs(ids map[string]string) {
+	BroadcastByType("main", "updateids", 0, "", ids)
+}
+
 func PushReloadDoc(rootID string) {
 	BroadcastByType("main", "reloaddoc", 0, "", rootID)
 }

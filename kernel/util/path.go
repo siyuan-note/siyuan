@@ -302,3 +302,7 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 	}
 	return "", os.ErrPermission
 }
+
+func IsAbsPathInWorkspace(absPath string) bool {
+	return IsSubPath(WorkspaceDir, absPath)
+}

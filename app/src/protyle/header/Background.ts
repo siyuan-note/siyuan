@@ -443,8 +443,8 @@ export class Background {
         if (tags) {
             let html = "";
             const colors = ["secondary", "primary", "info", "success", "warning", "error", "pink"];
-            tags.split(",").forEach((item, index) => {
-                if (!item) {
+            new Set(tags.split(",")).forEach((item, index) => {
+                if (!item.replace(/ /g, "")) {
                     return;
                 }
                 html += `<div class="b3-chip b3-chip--middle b3-chip--pointer b3-chip--${colors[index % 7]}" data-type="open-search">${escapeHtml(item)}<svg class="b3-chip__close" data-type="remove-tag"><use xlink:href="#iconCloseRound"></use></svg></div>`;
@@ -542,7 +542,7 @@ export class Background {
                             this.addTags(inputElement.value, protyle);
                         }
                         inputElement.value = "";
-                        inputElement.dispatchEvent(new  CustomEvent("input"));
+                        inputElement.dispatchEvent(new CustomEvent("input"));
                     } else if (event.key === "Escape") {
                         window.siyuan.menus.menu.remove();
                     }

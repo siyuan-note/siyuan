@@ -795,13 +795,14 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
-		if 0 == queryMethod {
-			query = stringQuery(query)
-		}
 		typeFilter := buildTypeFilter(queryTypes)
-		if 0 == queryMethod || 1 == queryMethod {
+		switch queryMethod {
+		case 0:
+			query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
+			keywords = strings.Split(query, " ")
+		case 1:
 			keywords = highlightByFTS(query, typeFilter, rootID)
-		} else {
+		case 3:
 			keywords = highlightByRegexp(query, typeFilter, rootID)
 		}
 	}

@@ -1027,6 +1027,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
+			query = stringQuery(query)
 			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 		} else {
 			docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584

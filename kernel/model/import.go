@@ -49,6 +49,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -612,6 +613,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	IncSync()
+
+	task.AppendTask(task.UpdateIDs, util.PushUpdateIDs, blockIDs)
 	return
 }
 

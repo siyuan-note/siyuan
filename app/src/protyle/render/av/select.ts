@@ -318,9 +318,9 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    let html = `<div class="fn__flex fn__flex-wrap" style="width: 238px"><button data-color="0" class="color__square${color === "0" ? " color__square--current" : ""}" style="color: var(--b3-font-color0);background-color: var(--b3-font-background0);">A</button>`
+    let html = `<div class="fn__flex fn__flex-wrap" style="width: 238px"><button data-color="0" class="color__square${color === "0" ? " color__square--current" : ""}" style="color: var(--b3-font-color0);background-color: var(--b3-font-background0);">A</button>`;
     Array.from(Array(13).keys()).forEach(index => {
-        html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`
+        html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`;
     });
     menu.addItem({
         type: "empty",
@@ -328,11 +328,11 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         label: html + "</div>",
         bind(element) {
             element.addEventListener("click", (event) => {
-                const target = event.target as HTMLElement
+                const target = event.target as HTMLElement;
                 if (target.classList.contains("color__square") && !target.classList.contains("color__square--current")) {
                     element.querySelector(".color__square--current")?.classList.remove("color__square--current");
                     target.classList.add("color__square--current");
-                    const newColor = target.getAttribute("data-color")
+                    const newColor = target.getAttribute("data-color");
                     transaction(protyle, [{
                         action: "updateAttrViewColOption",
                         id: colId,
@@ -401,7 +401,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     desc = descElement.value;
                     color = newColor;
                 }
-            })
+            });
         }
     });
     const rect = target.getBoundingClientRect();

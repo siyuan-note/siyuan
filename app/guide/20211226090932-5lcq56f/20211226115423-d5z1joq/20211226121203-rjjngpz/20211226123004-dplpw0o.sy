@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20241008201617"
+		"updated": "20241212102113"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20241008201617"
+				"updated": "20241212102113"
 			},
 			"Children": [
 				{
@@ -208,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20240921122732"
+				"updated": "20241212102113"
 			},
 			"Children": [
 				{
@@ -474,6 +474,270 @@
 								{
 									"Type": "NodeText",
 									"Data": "​：該函數用於查詢資料庫，返回值為 spans 列表，請參考下面的例子"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102019-gassjqt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102019-gassjqt",
+						"updated": "20241212102113"
+					},
+					"Children": [
+						{
+							"ID": "20241212102021-54wv84h",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102021-54wv84h",
+								"updated": "20241212102113"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：統計區塊內容"
+								}
+							]
+						},
+						{
+							"ID": "20241212102021-87matlt",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102021-87matlt",
+								"updated": "20241212102021"
+							},
+							"Children": [
+								{
+									"ID": "20241212102021-t2dln9h",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102021-t2dln9h",
+										"updated": "20241212102021"
+									},
+									"Children": [
+										{
+											"ID": "20241212102021-cfsaes6",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102021-cfsaes6",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										},
+										{
+											"ID": "20241212102021-vj2zyyl",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20241212102021-vj2zyyl",
+												"updated": "20241212102021"
+											},
+											"Children": [
+												{
+													"ID": "20241212102021-92gy6t3",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-92gy6t3",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-d3lo8xu",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-d3lo8xu",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "RuneCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102021-n8ufevw",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-n8ufevw",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-omvwh9v",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-omvwh9v",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "WordCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102021-s12eoe7",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-s12eoe7",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-518qvnd",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-518qvnd",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "LinkCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102021-dolb6ct",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-dolb6ct",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-dx5rhed",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-dx5rhed",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "ImageCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102021-yt0q53w",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-yt0q53w",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-z97tnzw",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-z97tnzw",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "RefCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102021-npgihna",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102021-npgihna",
+														"updated": "20241212102021"
+													},
+													"Children": [
+														{
+															"ID": "20241212102021-80qheu7",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102021-80qheu7",
+																"updated": "20241212102021"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "BlockCount"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
 								}
 							]
 						}

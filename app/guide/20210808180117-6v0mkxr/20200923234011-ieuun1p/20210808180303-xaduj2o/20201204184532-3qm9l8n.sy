@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20241008202623"
+		"updated": "20241212102051"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20241008202623"
+				"updated": "20241212102051"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20240921122726"
+				"updated": "20241212102051"
 			},
 			"Children": [
 				{
@@ -481,6 +481,270 @@
 								{
 									"Type": "NodeText",
 									"Data": "​: This function is used to query the database, and the return value is a list of spans,  please refer to the example below"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102027-j293sei",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102027-j293sei",
+						"updated": "20241212102051"
+					},
+					"Children": [
+						{
+							"ID": "20241212102028-6c8tlnu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102028-6c8tlnu",
+								"updated": "20241212102051"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: Statistics block content"
+								}
+							]
+						},
+						{
+							"ID": "20241212102028-60g8ajq",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102028-60g8ajq",
+								"updated": "20241212102028"
+							},
+							"Children": [
+								{
+									"ID": "20241212102028-eiulm47",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-eiulm47",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-ac9h87f",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-ac9h87f",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "code",
+													"TextMarkTextContent": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}"
+												},
+												{
+													"Type": "NodeText",
+													"Data": "​"
+												}
+											]
+										},
+										{
+											"ID": "20241212102028-4ew89te",
+											"Type": "NodeList",
+											"ListData": {},
+											"Properties": {
+												"id": "20241212102028-4ew89te",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"ID": "20241212102028-wai3afs",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-wai3afs",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-wmtwngj",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-wmtwngj",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "RuneCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102028-r9k7ody",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-r9k7ody",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-le5lpgo",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-le5lpgo",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "WordCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102028-3egh1dg",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-3egh1dg",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-pijmoea",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-pijmoea",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "LinkCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102028-qu6f5tc",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-qu6f5tc",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-8yj65um",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-8yj65um",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "ImageCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102028-8ivthzb",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-8ivthzb",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-p8nmm3a",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-p8nmm3a",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "RefCount"
+																}
+															]
+														}
+													]
+												},
+												{
+													"ID": "20241212102028-frusted",
+													"Type": "NodeListItem",
+													"ListData": {
+														"BulletChar": 42,
+														"Marker": "Kg=="
+													},
+													"Properties": {
+														"id": "20241212102028-frusted",
+														"updated": "20241212102028"
+													},
+													"Children": [
+														{
+															"ID": "20241212102028-h58utua",
+															"Type": "NodeParagraph",
+															"Properties": {
+																"id": "20241212102028-h58utua",
+																"updated": "20241212102028"
+															},
+															"Children": [
+																{
+																	"Type": "NodeText",
+																	"Data": "BlockCount"
+																}
+															]
+														}
+													]
+												}
+											]
+										}
+									]
 								}
 							]
 						}

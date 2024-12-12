@@ -502,6 +502,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             return;
         } else if (files && files.length > 0) {
             uploadFiles(protyle, files);
+            return;
         } else if (textPlain.trim() !== "" && files && files.length === 0) {
             if (range.toString() !== "") {
                 const firstLine = textPlain.split("\n")[0];

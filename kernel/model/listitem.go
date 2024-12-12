@@ -29,8 +29,6 @@ import (
 
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
 	FlushTxQueue()
-	docConvertLock.Lock()
-	defer docConvertLock.Unlock()
 
 	srcTree, _ := LoadTreeByBlockID(srcListItemID)
 	if nil == srcTree {

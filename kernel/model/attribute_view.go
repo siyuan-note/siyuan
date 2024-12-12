@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
@@ -3112,7 +3113,11 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
 					// 不存在的选项新建保存
-					opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+					color := valOpt.Color
+					if "" == color {
+						color = fmt.Sprintf("%d", 1+rand.Intn(15))
+					}
+					opt = &av.SelectOption{Name: valOpt.Content, Color: color}
 					key.Options = append(key.Options, opt)
 				} else {
 					// 已经存在的选项颜色需要保持不变

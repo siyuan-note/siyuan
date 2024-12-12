@@ -1482,7 +1482,14 @@ export class WYSIWYG {
                     }
                 });
                 tableSelectElement.removeAttribute("style");
+                if (getSelection().rangeCount>0) {
+                    const range = getSelection().getRangeAt(0)
+                    if (nodeElement.contains(range.startContainer)) {
+                        range.insertNode(document.createElement("wbr"))
+                    }
+                }
                 const oldHTML = nodeElement.outerHTML;
+                nodeElement.querySelector("wbr")?.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 selectCellElements.forEach((item, index) => {
                     if (index === 0 || !item.previousElementSibling ||

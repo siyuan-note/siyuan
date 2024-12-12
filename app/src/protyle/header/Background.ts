@@ -522,8 +522,12 @@ export class Background {
                     k: "",
                 }, (response) => {
                     let html = "";
+                    const currentTags = this.getTags()
                     response.data.tags.forEach((item: string, index: number) => {
-                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
+                        html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
+    <div class="fn__flex-1">${item}</div>
+    ${currentTags.includes(Lute.UnEscapeHTMLStr(item))?'<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>':""}
+</div>`;
                     });
                     listElement.innerHTML = html;
                 });
@@ -537,9 +541,9 @@ export class Background {
                     if (event.key === "Enter") {
                         const currentElement = listElement.querySelector(".b3-list-item--focus");
                         if (currentElement) {
-                            this.addTags(currentElement.textContent, protyle);
+                            this.addTags(currentElement.textContent.trim(), protyle);
                         } else {
-                            this.addTags(inputElement.value, protyle);
+                            this.addTags(inputElement.value.trim(), protyle);
                         }
                         inputElement.value = "";
                         inputElement.dispatchEvent(new CustomEvent("input"));
@@ -554,8 +558,12 @@ export class Background {
                     }, (response) => {
                         let searchHTML = "";
                         let hasKey = false;
+                        const currentTags = this.getTags();
                         response.data.tags.forEach((item: string) => {
-                            searchHTML += `<div class="b3-list-item b3-list-item--narrow">${item}</div>`;
+                            searchHTML += `<div class="b3-list-item b3-list-item--narrow">
+    <div class="fn__flex-1">${item}</div>
+    ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g,"").replace(/<\/mark>/g,"")))?'<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>':""}
+</div>`;
                             if (item === `<mark>${response.data.k}</mark>`) {
                                 hasKey = true;
                             }
@@ -573,7 +581,8 @@ export class Background {
                     if (!listItemElement) {
                         return;
                     }
-                    this.addTags(listItemElement.textContent, protyle);
+                    this.addTags(listItemElement.textContent.trim(), protyle);
+                    inputElement.dispatchEvent(new CustomEvent("input"));
                 });
             }
         });

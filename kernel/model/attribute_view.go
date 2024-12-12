@@ -3115,7 +3115,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					// 不存在的选项新建保存
 					color := valOpt.Color
 					if "" == color {
-						color = fmt.Sprintf("%d", 1+rand.Intn(15))
+						color = fmt.Sprintf("%d", 1+rand.Intn(14))
 					}
 					opt = &av.SelectOption{Name: valOpt.Content, Color: color}
 					key.Options = append(key.Options, opt)

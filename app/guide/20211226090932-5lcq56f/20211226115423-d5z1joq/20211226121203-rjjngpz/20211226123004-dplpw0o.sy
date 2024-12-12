@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20241212102113"
+		"updated": "20241212164017"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20241212102113"
+				"updated": "20241212164017"
 			},
 			"Children": [
 				{
@@ -208,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20241212102113"
+				"updated": "20241212164017"
 			},
 			"Children": [
 				{
@@ -496,7 +496,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212102021-54wv84h",
-								"updated": "20241212102113"
+								"updated": "20241212164010"
 							},
 							"Children": [
 								{
@@ -510,7 +510,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：統計區塊內容"
+									"Data": "​：此函數用於統計區塊內容"
 								}
 							]
 						},
@@ -738,6 +738,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212164016-nxteno5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212164016-nxteno5",
+						"updated": "20241212164017"
+					},
+					"Children": [
+						{
+							"ID": "20241212164016-ot8vo9l",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212164016-ot8vo9l",
+								"updated": "20241212164017"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回字串長度"
 								}
 							]
 						}

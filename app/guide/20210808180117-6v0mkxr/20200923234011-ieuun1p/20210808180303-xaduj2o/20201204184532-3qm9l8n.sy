@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20241212102051"
+		"updated": "20241212163918"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20241212102051"
+				"updated": "20241212163918"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20241212102051"
+				"updated": "20241212163918"
 			},
 			"Children": [
 				{
@@ -495,7 +495,7 @@
 					},
 					"Properties": {
 						"id": "20241212102027-j293sei",
-						"updated": "20241212102051"
+						"updated": "20241212163902"
 					},
 					"Children": [
 						{
@@ -503,7 +503,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212102028-6c8tlnu",
-								"updated": "20241212102051"
+								"updated": "20241212163902"
 							},
 							"Children": [
 								{
@@ -517,7 +517,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: Statistics block content"
+									"Data": "​: This function is used to count the block content"
 								}
 							]
 						},
@@ -745,6 +745,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163841-3yjhffn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163841-3yjhffn",
+						"updated": "20241212163918"
+					},
+					"Children": [
+						{
+							"ID": "20241212163841-d8t3qxb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163841-d8t3qxb",
+								"updated": "20241212163918"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the string length"
 								}
 							]
 						}

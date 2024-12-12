@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20241212101821"
+		"updated": "20241212163739"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20241212101821"
+				"updated": "20241212163739"
 			},
 			"Children": [
 				{
@@ -237,7 +237,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20241212101821"
+				"updated": "20241212163739"
 			},
 			"Children": [
 				{
@@ -517,7 +517,7 @@
 					},
 					"Properties": {
 						"id": "20241212101708-0euo6is",
-						"updated": "20241212101821"
+						"updated": "20241212163723"
 					},
 					"Children": [
 						{
@@ -525,7 +525,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212101708-llv0ngj",
-								"updated": "20241212101734"
+								"updated": "20241212163723"
 							},
 							"Children": [
 								{
@@ -539,7 +539,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：统计块内容"
+									"Data": "​：该函数用于统计块内容"
 								}
 							]
 						},
@@ -767,6 +767,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163704-qmyz1ss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163704-qmyz1ss",
+						"updated": "20241212163739"
+					},
+					"Children": [
+						{
+							"ID": "20241212163704-i9p11h6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163704-i9p11h6",
+								"updated": "20241212163739"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回字符串长度"
 								}
 							]
 						}

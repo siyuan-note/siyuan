@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20241212102145"
+		"updated": "20241212163955"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20241212102145"
+				"updated": "20241212163955"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20241212102145"
+				"updated": "20241212163955"
 			},
 			"Children": [
 				{
@@ -514,7 +514,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212102033-d4azb7k",
-								"updated": "20241212102145"
+								"updated": "20241212163936"
 							},
 							"Children": [
 								{
@@ -528,7 +528,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：統計ブロックの内容"
+									"Data": "​：この関数はブロックの内容を数えるために使用されます"
 								}
 							]
 						},
@@ -756,6 +756,43 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163938-ewajrsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163938-ewajrsj",
+						"updated": "20241212163955"
+					},
+					"Children": [
+						{
+							"ID": "20241212163938-y1al3b9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163938-y1al3b9",
+								"updated": "20241212163955"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は文字列の長さを返すために使用されます"
 								}
 							]
 						}

@@ -20,6 +20,7 @@ import (
 	"math"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/go-humanize"
 	"github.com/Masterminds/sprig/v3"
@@ -50,7 +51,12 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["FormatFloat"] = FormatFloat
 	ret["getHPathByID"] = getHPathByID
 	ret["statBlock"] = StatBlock
+	ret["runeLen"] = runeLen
 	return
+}
+
+func runeLen(s string) int {
+	return utf8.RuneCountInString(s)
 }
 
 func pow(a, b interface{}) int64    { return int64(math.Pow(cast.ToFloat64(a), cast.ToFloat64(b))) }

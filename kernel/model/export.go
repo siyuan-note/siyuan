@@ -577,7 +577,7 @@ func Preview(id string) (retStdHTML string) {
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle)
+		Conf.Export.AddTitle, true)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
@@ -680,7 +680,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle)
+		Conf.Export.AddTitle, true)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 	savePath = strings.TrimSpace(savePath)
@@ -839,7 +839,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle)
+		Conf.Export.AddTitle, true)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -1973,7 +1973,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle)
+		addTitle, 0 < len(defBlockIDs))
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -2084,7 +2084,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
-	addTitle bool) (ret *parse.Tree) {
+	addTitle, addDocAnchorSpan bool) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID

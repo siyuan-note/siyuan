@@ -2068,3 +2068,36 @@ func (box *Box) addSort(previousPath, id string) {
 		return
 	}
 }
+
+func (box *Box) setSort(sortIDVals map[string]int) {
+	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	if !filelock.IsExist(confPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(confPath)
+	if err != nil {
+		logging.LogErrorf("read sort conf failed: %s", err)
+		return
+	}
+
+	fullSortIDs := map[string]int{}
+	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
+		logging.LogErrorf("unmarshal sort conf failed: %s", err)
+		return
+	}
+
+	for sortID := range sortIDVals {
+		fullSortIDs[sortID] = sortIDVals[sortID]
+	}
+
+	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
+	if err != nil {
+		logging.LogErrorf("marshal sort conf failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(confPath, data); err != nil {
+		logging.LogErrorf("write sort conf failed: %s", err)
+		return
+	}
+}

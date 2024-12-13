@@ -54,7 +54,7 @@ export const initBlockPopover = (app: App) => {
                         aElement.style.overflow = "";
                     }
                 }
-            } else if (aElement.parentElement.parentElement.classList.contains("av__views")) {
+            } else if (aElement.parentElement.parentElement.classList.contains("av__views") && aElement.parentElement.classList.contains("layout-tab-bar")) {
                 const textElement = aElement.querySelector(".item__text");
                 const desc = aElement.getAttribute("data-desc");
                 if (textElement.scrollWidth > textElement.clientWidth + 2 || desc) {

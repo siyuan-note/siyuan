@@ -349,7 +349,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 if (isSearching) {
                     searchInputElement.focus();
                 }
+                searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
+                    event.stopPropagation();
+                })
                 searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+                    event.stopPropagation();
                     if (event.isComposing) {
                         return;
                     }

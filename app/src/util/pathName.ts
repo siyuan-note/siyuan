@@ -211,8 +211,9 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
     }, flashcard);
 
     const inputElement = dialog.element.querySelector(".b3-text-field") as HTMLInputElement;
+    inputElement.value = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k;
     /// #if !MOBILE
-    inputElement.focus();
+    inputElement.select();
     /// #endif
     const inputEvent = (event?: InputEvent) => {
         if (event && event.isComposing) {
@@ -324,7 +325,6 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             y: rect.bottom
         });
     }
-    inputElement.value = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].k;
     inputEvent();
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         inputEvent(event);

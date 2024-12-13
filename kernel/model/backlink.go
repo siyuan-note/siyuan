@@ -62,8 +62,7 @@ type Backlink struct {
 	node *ast.Node // 仅用于按文档内容顺序排序
 }
 
-func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink) {
-	var keywords []string
+func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -98,6 +97,11 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
 	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
+	keywords = append(keywords, mentionKeywords...)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
 
 	var refTree *parse.Tree
 	trees := filesys.LoadTrees(mentionBlockIDs)
@@ -118,11 +122,14 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink) {
-	var keywords []string
+func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
+	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
 	}
 
 	ret = []*Backlink{}

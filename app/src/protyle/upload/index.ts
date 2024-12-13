@@ -128,7 +128,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         const type = pathPosix().extname(key).toLowerCase();
         const filename = protyle.options.upload.filename(key);
         const name = filename.substring(0, filename.length - type.length);
-        hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type)
+        hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type);
         avAssets.push({
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
             content: path,

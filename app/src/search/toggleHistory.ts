@@ -246,4 +246,4 @@ export const saveAssetKeyList = (inputElement:HTMLInputElement) => {
     window.siyuan.storage[Constants.LOCAL_SEARCHASSET].k = inputElement.value;
     window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
     setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-}
+};

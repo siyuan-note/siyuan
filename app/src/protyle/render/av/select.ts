@@ -318,7 +318,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    let html = `<div class="fn__flex fn__flex-wrap" style="width: 238px">`;
+    let html = "<div class=\"fn__flex fn__flex-wrap\" style=\"width: 238px\">";
     Array.from(Array(14).keys()).forEach(index => {
         html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`;
     });

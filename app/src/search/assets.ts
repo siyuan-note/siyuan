@@ -109,7 +109,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         assetInputEvent(element, localSearch);
     });
     searchInputElement.addEventListener("blur", () => {
-        saveAssetKeyList(searchInputElement)
+        saveAssetKeyList(searchInputElement);
     });
     assetInputEvent(element, localSearch);
     addClearButton({

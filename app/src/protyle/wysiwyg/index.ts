@@ -1483,9 +1483,9 @@ export class WYSIWYG {
                 });
                 tableSelectElement.removeAttribute("style");
                 if (getSelection().rangeCount>0) {
-                    const range = getSelection().getRangeAt(0)
+                    const range = getSelection().getRangeAt(0);
                     if (nodeElement.contains(range.startContainer)) {
-                        range.insertNode(document.createElement("wbr"))
+                        range.insertNode(document.createElement("wbr"));
                     }
                 }
                 const oldHTML = nodeElement.outerHTML;

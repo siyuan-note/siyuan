@@ -351,7 +351,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 }
                 searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
                     event.stopPropagation();
-                })
+                });
                 searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
                     event.stopPropagation();
                     if (event.isComposing) {

@@ -323,12 +323,12 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
         while (target && !target.isSameNode(element)) {
             const type = target.getAttribute("data-type");
             if (type === "replaceHistory") {
-                toggleReplaceHistory(target.nextElementSibling as HTMLInputElement)
+                toggleReplaceHistory(target.nextElementSibling as HTMLInputElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
             } else if (type === "assetHistory") {
-                toggleAssetHistory(assetsElement)
+                toggleAssetHistory(assetsElement);
                 event.stopPropagation();
                 event.preventDefault();
                 break;
@@ -778,7 +778,7 @@ export const popSearch = (app: App, searchConfig?: any) => {
             document.querySelector("#toolbarSearchNew").addEventListener("click", () => {
                 newFileByName(app, (document.querySelector("#toolbarSearch") as HTMLInputElement).value);
             });
-            const historyElement = document.querySelector('.toolbar [data-type="history"]')
+            const historyElement = document.querySelector('.toolbar [data-type="history"]');
             historyElement.addEventListener("click", () => {
                 toggleSearchHistory(document.querySelector("#model"), config, undefined);
             });
@@ -811,7 +811,7 @@ const goAsset = () => {
         assetInputEvent(assetsElement, localSearch);
     });
     inputElement.addEventListener("blur", () => {
-        saveAssetKeyList(inputElement)
+        saveAssetKeyList(inputElement);
     });
     assetInputEvent(assetsElement, localSearch);
     addClearButton({

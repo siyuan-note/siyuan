@@ -324,7 +324,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             x: rect.left,
             y: rect.bottom
         });
-    }
+    };
     inputEvent();
     inputElement.addEventListener("compositionend", (event: InputEvent) => {
         inputEvent(event);
@@ -357,7 +357,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             return;
         }
         if (window.siyuan.menus.menu.element.getAttribute("data-name") === "move-path-history") {
-            return
+            return;
         }
         const currentPanelElement = searchListElement.classList.contains("fn__none") ? searchTreeElement : searchListElement;
         const currentItemElements = currentPanelElement.querySelectorAll(".b3-list-item--focus");

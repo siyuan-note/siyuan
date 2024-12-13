@@ -522,7 +522,7 @@ export class Background {
                     k: "",
                 }, (response) => {
                     let html = "";
-                    const currentTags = this.getTags()
+                    const currentTags = this.getTags();
                     response.data.tags.forEach((item: string, index: number) => {
                         html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
     <div class="fn__flex-1">${item}</div>

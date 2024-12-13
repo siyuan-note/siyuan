@@ -197,7 +197,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             } else if (type === "remove") {
                 const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
                 const config = getConfig(pdf);
-                const id = rectElement.getAttribute("data-node-id")
+                const id = rectElement.getAttribute("data-node-id");
                 delete config[id];
                 element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
                     item.remove();

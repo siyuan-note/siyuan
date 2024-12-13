@@ -1132,15 +1132,28 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {
-                    for (let i = 0; i < ids.length; i++) {
-                        if (ids[i]) {
-                            await fetchSyncPost("/api/filetree/doc2Heading", {
-                                srcID: ids[i],
-                                after: targetElement.classList.contains("dragover__bottom"),
-                                targetID: targetElement.getAttribute("data-node-id"),
-                            });
+                    if (targetElement.classList.contains("dragover__bottom")) {
+                        for (let i = ids.length - 1; i > -1; i--) {
+                            if (ids[i]) {
+                                await fetchSyncPost("/api/filetree/doc2Heading", {
+                                    srcID: ids[i],
+                                    after: true,
+                                    targetID: targetElement.getAttribute("data-node-id"),
+                                });
+                            }
+                        }
+                    } else {
+                        for (let i = 0; i < ids.length; i++) {
+                            if (ids[i]) {
+                                await fetchSyncPost("/api/filetree/doc2Heading", {
+                                    srcID: ids[i],
+                                    after: false,
+                                    targetID: targetElement.getAttribute("data-node-id"),
+                                });
+                            }
                         }
                     }
+
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.block.id,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,

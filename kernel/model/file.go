@@ -919,19 +919,14 @@ func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func writeTreeIndexQueue(tree *parse.Tree) (err error) {
-	size, err := filesys.WriteTree(tree)
+func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
+	treenode.IndexBlockTree(tree)
+	_, err = filesys.WriteTree(tree)
 	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
-	refreshDocInfo(tree, size)
 	return
-}
-
-func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
-	return writeTreeIndexQueue(tree)
 }
 
 func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {

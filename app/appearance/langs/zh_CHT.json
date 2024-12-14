@@ -1,4 +1,6 @@
 {
+  "second": "秒",
+  "syncInterval": "同步間隔",
   "removeAV": "從資料庫中移除",
   "empty": "空白",
   "newRowInRelation": "在 ${x} 中新建條目 <b class='ft__on-surface'>${y}</b>",
@@ -768,7 +770,7 @@
   "openSyncTip2": "從禁用改為啟用時建議手動點擊同步按鈕觸發一次同步",
   "syncMode": "雲端同步模式",
   "syncModeTip": "啟用雲端同步後可進一步選擇同步模式",
-  "syncMode1": "自動同步（資料不再變動後 30 秒進行一次同步）",
+  "syncMode1": "自動同步",
   "syncMode2": "手動同步（僅啟動和關閉軟體時自動同步一次，其他時候需要手動觸發同步）",
   "syncMode3": "完全手動同步（啟動和關閉時均不同步，完全手動控制同步時機和同步方向）",
   "cloudSync": "雲端同步",

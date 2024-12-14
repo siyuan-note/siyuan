@@ -541,6 +541,17 @@ func setSyncEnable(c *gin.Context) {
 	model.SetSyncEnable(enabled)
 }
 
+func setSyncInterval(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+	interval := int(arg["interval"].(float64))
+	model.SetSyncInterval(interval)
+}
+
 func setSyncPerception(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

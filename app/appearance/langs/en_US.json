@@ -768,7 +768,7 @@
   "openSyncTip2": "When changing from disabled to enabled, it is recommended to manually click the sync button to trigger a synchronization",
   "syncMode": "Cloud sync mode",
   "syncModeTip": "The sync mode can be further selected after cloud sync is enabled",
-  "syncMode1": "Auto (sync every 30 seconds after the data no longer changes)",
+  "syncMode1": "Auto",
   "syncMode2": "Manual (automatic auto only once when the software is started and closed, other times need to manually trigger)",
   "syncMode3": "Full manual sync (no sync on startup and shutdown, full manual control of sync timing and sync direction)",
   "cloudSync": "Cloud sync",

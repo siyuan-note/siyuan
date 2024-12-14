@@ -1,4 +1,6 @@
 {
+  "second": "seconde",
+  "syncInterval": "intervalle de synchronisation",
   "removeAV": "Supprimer de la base de données",
   "empty": "Vide",
   "newRowInRelation": "Créer une nouvelle entrée dans ${x} <b class='ft__on-surface'>${y}</b>",
@@ -768,7 +770,7 @@
   "openSyncTip2": "Lorsque vous passez de la désactivation à l'activation, il est recommandé de cliquer manuellement sur le bouton de synchronisation pour déclencher une synchronisation",
   "syncMode": "Mode de synchronisation cloud",
   "syncModeTip": "Le mode de synchronisation peut être sélectionné davantage après l'activation de la synchronisation dans le cloud",
-  "syncMode1": "Automatique (synchronisation toutes les 30 secondes après que les données ne changent plus)",
+  "syncMode1": "Automatique",
   "syncMode2": "Manuelle (synchronisation automatique une seule fois lorsque le logiciel est démarré et fermé, les autres fois, il faut déclencher manuellement la synchronisation)",
   "syncMode3": "Manuelle Complète (pas de synchronisation au démarrage et à l'arrêt, contrôle manuel complet de la synchronisation et du sens de synchronisation)",
   "cloudSync": "Cloud Sync",

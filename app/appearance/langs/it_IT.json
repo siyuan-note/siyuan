@@ -1,4 +1,6 @@
 {
+  "second": "secondo",
+  "syncInterval": "intervallo di sincronizzazione",
   "removeAV": "Rimuovi dal database",
   "empty": "Vuoto",
   "newRowInRelation": "Crea una nuova voce in ${x} <b class='ft__on-surface'>${y}</b>",
@@ -768,7 +770,7 @@
   "openSyncTip2": "Quando si cambia da disabilitato ad abilitato, si consiglia di fare clic manualmente sul pulsante di sincronizzazione per avviare la sincronizzazione",
   "syncMode": "Modalità di sincronizzazione cloud",
   "syncModeTip": "La modalità di sincronizzazione può essere ulteriormente selezionata dopo l'abilitazione della sincronizzazione cloud",
-  "syncMode1": "Auto (sincronizza ogni 30 secondi dopo che i dati non cambiano più)",
+  "syncMode1": "Auto",
   "syncMode2": "Manuale (auto automatico solo una volta quando il software viene avviato e chiuso, altre volte richiede l'attivazione manuale)",
   "syncMode3": "Sincronizzazione completamente manuale (nessuna sincronizzazione all'avvio e alla chiusura, controllo manuale completo del momento e della direzione della sincronizzazione)",
   "cloudSync": "Sincronizzazione cloud",

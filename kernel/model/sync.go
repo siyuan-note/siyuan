@@ -389,6 +389,20 @@ func SetSyncEnable(b bool) {
 	return
 }
 
+func SetSyncInterval(interval int) {
+	if 30 > interval {
+		interval = 30
+	}
+	if 43200 < interval {
+		interval = 43200
+	}
+
+	Conf.Sync.Interval = interval
+	Conf.Save()
+	planSyncAfter(time.Duration(interval) * time.Second)
+	return
+}
+
 func SetSyncPerception(b bool) {
 	if util.ContainerDocker == util.Container {
 		b = false
@@ -641,7 +655,7 @@ func getSyncIgnoreLines() (ret []string) {
 
 func IncSync() {
 	syncSameCount.Store(0)
-	planSyncAfter(30 * time.Second)
+	planSyncAfter(time.Duration(Conf.Sync.Interval) * time.Second)
 }
 
 func planSyncAfter(d time.Duration) {

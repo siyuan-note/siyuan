@@ -1350,6 +1350,10 @@ declare namespace Config {
          */
         mode: number;
         /**
+         * Synchronization interval (unit: seconds)
+         */
+        interval: number;
+        /**
          * Whether to enable synchronization perception
          */
         perception: boolean;

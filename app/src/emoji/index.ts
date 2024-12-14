@@ -249,7 +249,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
         disableAnimation: true,
         transparent: true,
         hideCloseIcon: true,
-        width: isMobile() ? "80vw" : "372px",
+        width: isMobile() ? "80vw" : "368px",
         height: "50vh",
         content: `<div class="emojis">
     <div class="emojis__tabheader">

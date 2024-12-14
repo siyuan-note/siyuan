@@ -394,6 +394,14 @@ export const repos = {
     </div>
     <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) ? " fn__none" : ""}">
         <div class="fn__flex-1">
+            ${window.siyuan.languages.syncInterval}
+            <div class="b3-label__text">${window.siyuan.languages.syncIntervalTip}</div>
+        </div>
+        <span class="fn__space"></span>
+        <input type="number" min="30" max="43200" id="syncInterval" class="b3-text-field fn__flex-center" value="${window.siyuan.config.sync.interval}" > ${window.siyuan.languages.second} 
+    </label>
+    <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) ? " fn__none" : ""}">
+        <div class="fn__flex-1">
             ${window.siyuan.languages.syncPerception}
             <div class="b3-label__text">${window.siyuan.languages.syncPerceptionTip}</div>
         </div>
@@ -434,6 +442,21 @@ export const repos = {
                 processSync();
             });
         });
+        const syncIntervalElement = repos.element.querySelector("#syncInterval") as HTMLInputElement;
+        syncIntervalElement.addEventListener("change", () => {
+            let interval = parseInt(syncIntervalElement.value);
+            if (30 > interval) {
+                interval = 30;
+            }
+            if (43200 < interval) {
+                interval = 43200;
+            }
+
+            fetchPost("/api/sync/setSyncInterval", {interval: interval}, () => {
+                window.siyuan.config.sync.interval = interval;
+                processSync();
+            });
+        });
         const syncPerceptionElement = repos.element.querySelector("#syncPerception") as HTMLInputElement;
         syncPerceptionElement.addEventListener("change", () => {
             fetchPost("/api/sync/setSyncPerception", {enabled: syncPerceptionElement.checked}, () => {
@@ -452,8 +475,10 @@ export const repos = {
             fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, () => {
                 if (syncModeElement.value === "1" && window.siyuan.config.sync.provider === 0 && window.siyuan.config.system.container !== "docker") {
                     syncPerceptionElement.parentElement.classList.remove("fn__none");
+                    syncIntervalElement.parentElement.classList.remove("fn__none");
                 } else {
                     syncPerceptionElement.parentElement.classList.add("fn__none");
+                    syncIntervalElement.parentElement.classList.add("fn__none");
                 }
                 window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
             });
@@ -475,8 +500,10 @@ export const repos = {
                 syncConfigElement.classList.add("fn__none");
                 if (window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) {
                     syncPerceptionElement.parentElement.classList.add("fn__none");
+                    syncIntervalElement.parentElement.classList.add("fn__none");
                 } else {
                     syncPerceptionElement.parentElement.classList.remove("fn__none");
+                    syncIntervalElement.parentElement.classList.remove("fn__none");
                 }
             });
         });

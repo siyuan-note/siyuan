@@ -344,6 +344,12 @@ func InitConf() {
 	if 0 == Conf.Sync.Mode {
 		Conf.Sync.Mode = 1
 	}
+	if 30 > Conf.Sync.Interval {
+		Conf.Sync.Interval = 30
+	}
+	if 60*60*12 < Conf.Sync.Interval {
+		Conf.Sync.Interval = 60 * 60 * 12
+	}
 	if nil == Conf.Sync.S3 {
 		Conf.Sync.S3 = &conf.S3{PathStyle: true, SkipTlsVerify: true}
 	}

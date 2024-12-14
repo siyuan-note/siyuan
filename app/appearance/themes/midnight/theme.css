@@ -23,7 +23,7 @@
 
     /* 字体 */
     --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", "Tahoma", "Arial", "Other Emojis", sans-serif;
-    --b3-font-family-protyle: var(--b3-font-family);
+    --b3-font-family-protyle: "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", var(--b3-font-family);
     --b3-font-family-code: "Number Glyphs Of JetBrainsMono-Regular", "Segoe Good Emoji", "Other SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: arial;
     --b3-font-family-emoji: "Segoe Good Emoji", "Other Emojis";

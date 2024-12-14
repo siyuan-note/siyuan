@@ -3,8 +3,8 @@
   box-sizing: border-box;
   display: flex;
   max-width: 100%;
-  margin-top: 4px;
-  margin-bottom: 4px;
+  margin-top: 4px !important;
+  margin-bottom: 4px !important;
 
   &:hover .av__views .block__icon {
     opacity: 1;

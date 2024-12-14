@@ -451,7 +451,7 @@ export const repos = {
             if (43200 < interval) {
                 interval = 43200;
             }
-
+            syncIntervalElement.value = interval.toString();
             fetchPost("/api/sync/setSyncInterval", {interval: interval}, () => {
                 window.siyuan.config.sync.interval = interval;
                 processSync();

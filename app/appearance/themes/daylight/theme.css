@@ -24,8 +24,8 @@
     /* 字体 */
     /* Windows 斜体遮挡添加 "Segoe UI" 字体 https://github.com/siyuan-note/siyuan/issues/11841 */
     --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
-    --b3-font-family-protyle: "Number Glyphs", "SiYuan Emojis", "Emojis", var(--b3-font-family);
-    --b3-font-family-code: "Number Glyphs Of JetBrainsMono-Regular", "SiYuan Emojis", "Emoji", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    --b3-font-family-protyle: "Number Glyphs", "SiYuan Emojis", var(--b3-font-family);
+    --b3-font-family-code: "Number Glyphs Of JetBrainsMono-Regular", "SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: arial;
     --b3-font-family-emoji: "SiYuan Emojis", "Emojis";
     --b3-font-family-math: KaTeX_Math;

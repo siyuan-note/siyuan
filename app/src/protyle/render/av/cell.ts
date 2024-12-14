@@ -307,7 +307,6 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
     if (contentElement && cellElement.getAttribute("data-dtype") !== "checkbox") {
         const keyboardToolbarElement = document.getElementById("keyboardToolbar");
         const keyboardH = parseInt(keyboardToolbarElement.getAttribute("data-keyboardheight")) || (window.outerHeight / 2 - 42);
-        console.log(keyboardH, window.innerHeight, cellRect.bottom);
         if (cellRect.bottom > window.innerHeight - keyboardH - 42) {
             contentElement.scrollTop += cellRect.bottom - window.innerHeight + 42 + keyboardH;
         } else if (cellRect.top < 110) {

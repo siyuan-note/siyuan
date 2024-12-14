@@ -547,6 +547,22 @@ func GetHeadingChildrenDOM(id string) (ret string) {
 	nodes := append([]*ast.Node{}, heading)
 	children := treenode.HeadingChildren(heading)
 	nodes = append(nodes, children...)
+
+	// 取消折叠 https://github.com/siyuan-note/siyuan/issues/13232#issuecomment-2535955152
+	for _, child := range children {
+		ast.Walk(child, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			n.RemoveIALAttr("heading-fold")
+			n.RemoveIALAttr("fold")
+			return ast.WalkContinue
+		})
+	}
+	heading.RemoveIALAttr("fold")
+	heading.RemoveIALAttr("heading-fold")
+
 	luteEngine := util.NewLute()
 	ret = renderBlockDOMByNodes(nodes, luteEngine)
 	return

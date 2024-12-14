@@ -1,4 +1,6 @@
 {
+  "second": "sekunda",
+  "syncInterval": "interwał synchronizacji",
   "removeAV": "Usuń z bazy danych",
   "empty": "Pusty",
   "newRowInRelation": "Utwórz nowy wpis w ${x} <b class='ft__on-surface'>${y}</b>",
@@ -768,7 +770,7 @@
   "openSyncTip2": "Podczas zmiany z wyłączonej na włączoną, zaleca się ręczne kliknięcie przycisku synchronizacji, aby wyzwolić synchronizację",
   "syncMode": "Tryb synchronizacji w chmurze",
   "syncModeTip": "Tryb synchronizacji można dalej wybrać po włączeniu synchronizacji w chmurze",
-  "syncMode1": "Auto (synchronizacja co 30 sekund po tym, jak dane przestają się zmieniać)",
+  "syncMode1": "Auto",
   "syncMode2": "Ręczny (automatyczna synchronizacja tylko raz przy uruchamianiu i zamykaniu oprogramowania, inne czasy wymagają ręcznego wyzwolenia)",
   "syncMode3": "W pełni ręczna synchronizacja (brak synchronizacji przy uruchamianiu i zamykaniu, pełna ręczna kontrola nad czasem synchronizacji i kierunkiem synchronizacji)",
   "cloudSync": "Synchronizacja w chmurze",

@@ -6,7 +6,7 @@
 		"id": "20201210233038-3xr19g5",
 		"title": "Conversion of Document and Heading",
 		"type": "doc",
-		"updated": "20241018105907"
+		"updated": "20241214173509"
 	},
 	"Children": [
 		{
@@ -135,7 +135,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091550-5sh49go"
+				"id": "20210104091550-5sh49go",
+				"updated": "20241214173509"
 			},
 			"Children": [
 				{
@@ -152,12 +153,13 @@
 			"ID": "20210104091550-rbetlgr",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104091550-rbetlgr"
+				"id": "20210104091550-rbetlgr",
+				"updated": "20241214173509"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "In the doc tree, select the document that needs to be converted into a heading block, and then drag it to the position to be inserted in the editor tab. There are two situations here:"
+					"Data": "In the document tree, select the document you want to convert to a heading block, then hold down the Alt key and drag it to the position in the editor tab where you want to insert it. There are two situations here:"
 				}
 			]
 		},

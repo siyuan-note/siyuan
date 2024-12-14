@@ -121,13 +121,11 @@ export class BlockPanel {
                         openNewWindowById(this.nodeIds[0]);
                         /// #endif
                     } else if (type === "stickTab") {
-                        /// #if !BROWSER
                         openFileById({
                             app: options.app,
                             id: this.nodeIds[0],
                             action: this.editors[0].protyle.block.rootID !== this.nodeIds[0] ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT],
                         });
-                        /// #endif
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -233,14 +231,14 @@ export class BlockPanel {
             return;
         }
         let openHTML = "";
-        /// #if !BROWSER
         if (this.nodeIds.length === 1) {
             openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openBy}"><svg><use xlink:href="#iconOpen"></use></svg></span>
-<span class="fn__space"></span>
-<span data-type="open" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
 <span class="fn__space"></span>`;
+            /// #if !BROWSER
+            openHTML += `<span data-type="open" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
+<span class="fn__space"></span>`;
+            /// #endif
         }
-        /// #endif
         let html = `<div class="block__icons block__icons--menu">
     <span class="fn__space fn__flex-1 resize__move"></span>${openHTML}
     <span data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>

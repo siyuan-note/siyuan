@@ -61,7 +61,9 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
         }
         if (protyle.wysiwyg.element.getAttribute("data-top") || protyle.block.showAll ||
             (protyle.scroll && protyle.scroll.element.classList.contains("fn__none")) || !protyle.scroll ||
-            protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1) {
+            protyle.scroll.lastScrollTop === element.scrollTop || protyle.scroll.lastScrollTop === -1 ||
+            // 移动端跳转的时候会设置 wysiwyg.element.innerHTML = "";
+            !protyle.wysiwyg.element.firstElementChild) {
             return;
         }
         if (protyle.scroll.lastScrollTop - element.scrollTop > 0) {

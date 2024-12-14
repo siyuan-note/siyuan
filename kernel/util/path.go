@@ -38,6 +38,9 @@ var (
 )
 
 func GetTreeID(treePath string) string {
+	if strings.Contains(treePath, "\\") {
+		return strings.TrimSuffix(filepath.Base(treePath), ".sy")
+	}
 	return strings.TrimSuffix(path.Base(treePath), ".sy")
 }
 
@@ -298,4 +301,8 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 		return absPath, nil
 	}
 	return "", os.ErrPermission
+}
+
+func IsAbsPathInWorkspace(absPath string) bool {
+	return IsSubPath(WorkspaceDir, absPath)
 }

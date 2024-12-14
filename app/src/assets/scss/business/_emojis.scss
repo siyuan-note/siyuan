@@ -27,7 +27,7 @@
 
   .emoji__dynamic {
     &-item {
-      width: 74px;
+      width: 73px;
       margin: 8px;
       cursor: pointer;
       transition: var(--b3-transition);
@@ -46,12 +46,11 @@
   }
 
   &__item {
-    font-size: 24px;
-    line-height: .9em; // windows 需要这样设置
+    font-size: 19px;
     font-family: var(--b3-font-family-emoji);
     text-align: center;
-    height: 28px;
-    padding: 2px 4px;
+    height: 32px;
+    padding: 4px;
     cursor: pointer;
     display: inline-block;
     transition: var(--b3-transition);
@@ -60,7 +59,7 @@
     margin: 1px;
     overflow: hidden;
     border-radius: var(--b3-border-radius);
-    min-width: 32px;
+    width: 32px;
 
     img, svg {
       height: 24px;
@@ -103,6 +102,7 @@
     background-color: transparent;
     border: 0;
     padding: 0;
+    font-family: var(--b3-font-family-emoji);
 
     &:hover {
       background-color: var(--b3-theme-surface-lighter);

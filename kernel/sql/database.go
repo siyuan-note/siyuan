@@ -1513,4 +1513,8 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		retSpans = SelectSpansRawStmt(stmt, 512)
 		return
 	}
+	(*templateFuncMap)["querySQL"] = func(stmt string) (ret []map[string]interface{}) {
+		ret, _ = Query(stmt, 1024)
+		return
+	}
 }

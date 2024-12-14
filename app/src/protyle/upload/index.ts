@@ -9,6 +9,7 @@ import {genAssetHTML} from "../../asset/renderAssets";
 import {hasClosestBlock} from "../util/hasClosest";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getTypeByCellElement, updateCellsValue} from "../render/av/cell";
+import {scrollCenter} from "../../util/highlightById";
 
 export class Upload {
     public element: HTMLElement;
@@ -118,28 +119,30 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
             }
         }
     }
-    let succFileText = "";
+    let successFileText = "";
     const keys = Object.keys(response.data.succMap);
     const avAssets: IAVCellAssetValue[] = [];
+    let hasImage = false;
     keys.forEach((key, index) => {
         const path = response.data.succMap[key];
         const type = pathPosix().extname(key).toLowerCase();
         const filename = protyle.options.upload.filename(key);
         const name = filename.substring(0, filename.length - type.length);
+        hasImage = Constants.SIYUAN_ASSETS_IMAGE.includes(type);
         avAssets.push({
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(type) ? "image" : "file",
             content: path,
             name: name
         });
-        succFileText += genAssetHTML(type, path, name, filename);
+        successFileText += genAssetHTML(type, path, name, filename);
         if (!Constants.SIYUAN_ASSETS_AUDIO.includes(type) && !Constants.SIYUAN_ASSETS_VIDEO.includes(type) &&
             keys.length - 1 !== index) {
             if (nodeElement && nodeElement.classList.contains("table")) {
-                succFileText += "<br>";
+                successFileText += "<br>";
             } else if (insertBlock) {
-                succFileText += "\n\n";
+                successFileText += "\n\n";
             } else {
-                succFileText += "\n";
+                successFileText += "\n";
             }
         }
     });
@@ -191,7 +194,11 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         }
     }
     // 避免插入代码块中，其次因为都要独立成块 https://github.com/siyuan-note/siyuan/issues/7607
-    insertHTML(succFileText, protyle, insertBlock);
+    insertHTML(successFileText, protyle, insertBlock);
+    // 粘贴图片后定位不准确 https://github.com/siyuan-note/siyuan/issues/13336
+    setTimeout(() => {
+        scrollCenter(protyle, undefined, false, "smooth");
+    }, hasImage ? 0 : Constants.TIMEOUT_LOAD);
 };
 
 export const uploadLocalFiles = (files: string[], protyle: IProtyle, isUpload: boolean) => {

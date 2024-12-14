@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20240921123108"
+		"updated": "20241213215720"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20240921123108"
+				"updated": "20241213215720"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20240921123108"
+				"updated": "20241213215720"
 			},
 			"Children": [
 				{
@@ -440,7 +440,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-obb5zo9",
-								"updated": "20240530101000"
+								"updated": "20241213215612"
 							},
 							"Children": [
 								{
@@ -454,7 +454,33 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はデータベースをクエリしてブロックのリストを返します (下記の使用例を参照してください)"
+									"Data": "​: この関数はデータベースをクエリしてブロックのリストを返します"
+								}
+							]
+						},
+						{
+							"ID": "20241213215628-5gixpmp",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215628-5gixpmp",
+								"updated": "20241213215628"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -477,7 +503,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240530101000-4wi25sk",
-								"updated": "20240530101000"
+								"updated": "20241213215614"
 							},
 							"Children": [
 								{
@@ -491,7 +517,375 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はデータベースをクエリしてスパンのリストを返します (下記の使用例を参照してください)"
+									"Data": "​: この関数はデータベースをクエリしてスパンのリストを返します"
+								}
+							]
+						},
+						{
+							"ID": "20241213215619-gkqs282",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215619-gkqs282",
+								"updated": "20241213215619"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241213215009-qrtc56j",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241213215009-qrtc56j",
+						"updated": "20241213215009"
+					},
+					"Children": [
+						{
+							"ID": "20241213215009-fev1gao",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241213215009-fev1gao",
+								"updated": "20241213215617"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数はデータベースへのクエリに使用され、戻り値は結果セットです"
+								}
+							]
+						},
+						{
+							"ID": "20241213215633-69ltmv1",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215633-69ltmv1",
+								"updated": "20241213215633"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM refs LIMIT 3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102033-rn9u6t8",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102033-rn9u6t8",
+						"updated": "20241213215720"
+					},
+					"Children": [
+						{
+							"ID": "20241212102033-d4azb7k",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102033-d4azb7k",
+								"updated": "20241212163936"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：この関数はブロックの内容を数えるために使用されます"
+								}
+							]
+						},
+						{
+							"ID": "20241213215720-ueqpsna",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215720-ueqpsna",
+								"updated": "20241213215720"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20241212102033-ib8fdwx",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102033-ib8fdwx",
+								"updated": "20241212102033"
+							},
+							"Children": [
+								{
+									"ID": "20241212102033-lijk8pe",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-lijk8pe",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-ch66lvd",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-ch66lvd",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-527kxt0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-527kxt0",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-7iop2es",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-7iop2es",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-zicftlk",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-zicftlk",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-871ju7g",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-871ju7g",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-2k2gz3h",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-2k2gz3h",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-1ss2d9y",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-1ss2d9y",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-905g5ga",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-905g5ga",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-k7jgqz4",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-k7jgqz4",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102033-xbpy9ew",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102033-xbpy9ew",
+										"updated": "20241212102033"
+									},
+									"Children": [
+										{
+											"ID": "20241212102033-kvquhrn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102033-kvquhrn",
+												"updated": "20241212102033"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163938-ewajrsj",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163938-ewajrsj",
+						"updated": "20241212163955"
+					},
+					"Children": [
+						{
+							"ID": "20241212163938-y1al3b9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163938-y1al3b9",
+								"updated": "20241212163955"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数は文字列の長さを返すために使用されます"
 								}
 							]
 						}
@@ -865,71 +1259,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-5twj99z",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"ID": "20240530101000-p45pa4c",
-				"id": "20240530101000-5twj99z",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeText",
-					"Data": "​"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "queryBlocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ と "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "querySpans"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ はパラメータの入力を容易にするために、SQL のプリペアドステートメントに似た可変長引数リストをサポートしています:"
-				}
-			]
-		},
-		{
-			"ID": "20240530101000-ao36z4x",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"ID": "20240530101000-2pwl178",
-				"id": "20240530101000-ao36z4x",
-				"updated": "20240530101000"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker"
-				},
-				{
-					"ID": "20240530101000-ry5jzum",
-					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n",
-					"Properties": {
-						"ID": "20240530101000-i3tqwi3",
-						"id": "20240530101000-ry5jzum"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
 				}
 			]
 		},

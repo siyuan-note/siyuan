@@ -124,6 +124,7 @@ export abstract class Constants {
     public static readonly LOCAL_PLUGIN_DOCKS = "local-plugin-docks";
     public static readonly LOCAL_IMAGES = "local-images";
     public static readonly LOCAL_EMOJIS = "local-emojis";
+    public static readonly LOCAL_MOVE_PATH = "local-move-path";
 
     // dialog
     public static readonly DIALOG_CONFIRM = "dialog-confirm";

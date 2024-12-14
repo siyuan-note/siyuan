@@ -197,8 +197,11 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             } else if (type === "remove") {
                 const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
                 const config = getConfig(pdf);
-                delete config[rectElement.getAttribute("data-node-id")];
-                rectElement.remove();
+                const id = rectElement.getAttribute("data-node-id");
+                delete config[id];
+                element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
+                    item.remove();
+                });
                 fetchPost("/api/asset/setFileAnnotation", {
                     path: urlPath + ".sya",
                     data: JSON.stringify(config),
@@ -393,7 +396,7 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
 };
 
 const getTextNode = (element: HTMLElement, isFirst: boolean) => {
-    const spans = element.querySelectorAll(".markedContent span");
+    const spans = element.querySelectorAll('span[role="presentation"]');
     let index = isFirst ? 0 : spans.length - 1;
     while (spans[index]) {
         if (spans[index].textContent) {

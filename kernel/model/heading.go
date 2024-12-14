@@ -248,10 +248,6 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		pivot.InsertAfter(heading)
 	}
 
-	if contentPivot := treenode.GetNodeInTree(targetTree, targetID); nil != contentPivot && ast.NodeParagraph == contentPivot.Type && nil == contentPivot.FirstChild { // 插入到空的段落块下
-		contentPivot.Unlink()
-	}
-
 	box := Conf.Box(srcTree.Box)
 	if removeErr := box.Remove(srcTree.Path); nil != removeErr {
 		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)

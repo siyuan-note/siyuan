@@ -49,6 +49,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -67,7 +68,7 @@ func HTML2Markdown(htmlStr string, luteEngine *lute.Lute) (markdown string, with
 }
 
 func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMath bool) {
-	htmlStr = util.RemoveInvalid(htmlStr)
+	htmlStr = gulu.Str.RemovePUA(htmlStr)
 	assetDirPath := filepath.Join(util.DataDir, "assets")
 	tree = luteEngine.HTML2Tree(htmlStr)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -612,6 +613,8 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	IncSync()
+
+	task.AppendTask(task.UpdateIDs, util.PushUpdateIDs, blockIDs)
 	return
 }
 
@@ -723,7 +726,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 		targetPaths := map[string]string{}
 		assetsDone := map[string]string{}
-
+		count := 0
 		// md 转换 sy
 		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
 			if strings.HasPrefix(d.Name(), ".") {
@@ -894,6 +897,11 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 
 			hPathsIDs[tree.HPath] = tree.ID
 			idPaths[tree.ID] = tree.Path
+
+			count++
+			if 0 == count%4 {
+				util.PushEndlessProgress(fmt.Sprintf(Conf.language(70), fmt.Sprintf("%s", tree.HPath)))
+			}
 			return nil
 		})
 	} else { // 导入单个文件
@@ -1015,6 +1023,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		convertWikiLinksAndTags()
 		buildBlockRefInText()
 
+		box := Conf.Box(boxID)
 		for i, tree := range importTrees {
 			indexWriteTreeIndexQueue(tree)
 			if 0 == i%4 {
@@ -1027,15 +1036,41 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		searchLinks = map[string]string{}
 
 		// 按照路径排序 Improve sort when importing markdown files https://github.com/siyuan-note/siyuan/issues/11390
-		var paths, hPaths []string
+		var hPaths []string
 		for hPath := range hPathsIDs {
 			hPaths = append(hPaths, hPath)
 		}
 		sort.Strings(hPaths)
+		paths := map[string][]string{}
 		for _, hPath := range hPaths {
-			paths = append(paths, idPaths[hPathsIDs[hPath]])
+			p := idPaths[hPathsIDs[hPath]]
+			parent := path.Dir(p)
+			for {
+				if baseTargetPath == parent {
+					break
+				}
+
+				if ps, ok := paths[parent]; !ok {
+					paths[parent] = []string{p}
+				} else {
+					ps = append(ps, p)
+					ps = gulu.Str.RemoveDuplicatedElem(ps)
+					paths[parent] = ps
+				}
+				p = parent
+				parent = path.Dir(parent)
+			}
 		}
-		ChangeFileTreeSort(boxID, paths)
+
+		sortIDVals := map[string]int{}
+		for _, ps := range paths {
+			sortVal := 0
+			for _, p := range ps {
+				sortIDVals[util.GetTreeID(p)] = sortVal
+				sortVal++
+			}
+		}
+		box.setSort(sortIDVals)
 	}
 
 	IncSync()

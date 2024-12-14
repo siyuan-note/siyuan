@@ -467,7 +467,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, keyword.split(" "));
+                searchMarkRender(editor.protyle, response.data.keywords);
                 this.editors.push(editor);
             });
         }

@@ -132,6 +132,11 @@ func Upload(c *gin.Context) {
 	if nil != form.Value["assetsDirPath"] {
 		relAssetsDirPath = form.Value["assetsDirPath"][0]
 		assetsDirPath = filepath.Join(util.DataDir, relAssetsDirPath)
+		if !util.IsAbsPathInWorkspace(assetsDirPath) {
+			ret.Code = -1
+			ret.Msg = "Path [" + assetsDirPath + "] is not in workspace"
+			return
+		}
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {

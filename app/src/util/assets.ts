@@ -204,14 +204,14 @@ export const setInlineStyle = (set = true) => {
     let style;
     if (window.siyuan.config.editor.fontFamily) {
         style = `@font-face {
-  font-family: "Text Glyphs";
+  font-family: "Basic Latin Glyphs";
   src: local("${window.siyuan.config.editor.fontFamily}");
   unicode-range: U+23, U+2A, U+30-39;
 }
-.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Text Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
+.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Basic Latin Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
     } else {
         style = `@font-face {
-  font-family: "Text Glyphs";
+  font-family: "Basic Latin Glyphs";
   src: local("Helvetica Neue"),
   local("Luxi Sans"),
   local("DejaVu Sans"),

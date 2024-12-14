@@ -1324,7 +1324,7 @@
     "quit": "Salir de la aplicación"
   },
   "_attrView": {
-    "tabla": "Tabla",
+    "table": "Tabla",
     "key": "Clave principal",
     "select": "Selección"
   },

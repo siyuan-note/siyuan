@@ -23,10 +23,10 @@
 
     /* 字体 */
     --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
-    --b3-font-family-protyle: "Basic Latin Glyphs", "Basic Segoe Emojis", "SiYuan Emojis", var(--b3-font-family);
-    --b3-font-family-code: "Basic Latin Glyphs Of JetBrainsMono-Regular", "Basic Segoe Emojis", "SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    --b3-font-family-protyle: "Basic Latin Glyphs", "Basic Segoe Emojis", "Basic Emojis", "SiYuan Emojis", var(--b3-font-family);
+    --b3-font-family-code: "Basic Latin Glyphs Of JetBrainsMono-Regular", "Basic Segoe Emojis", "Basic Emojis", "SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: arial;
-    --b3-font-family-emoji: "Basic Segoe Emojis", "SiYuan Emojis", "Emojis";
+    --b3-font-family-emoji: "Basic Segoe Emojis", "Basic Emojis", "SiYuan Emojis", "Emojis";
     --b3-font-family-math: KaTeX_Math;
     --b3-font-size: 14px;
 

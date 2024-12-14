@@ -204,14 +204,14 @@ export const setInlineStyle = (set = true) => {
     let style;
     if (window.siyuan.config.editor.fontFamily) {
         style = `@font-face {
-  font-family: "Number Glyphs";
+  font-family: "Text Glyphs";
   src: local("${window.siyuan.config.editor.fontFamily}");
-  unicode-range: U+30-39;
+  unicode-range: U+23, U+2A, U+30-39;
 }
-.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Number Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
+.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Text Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
     } else {
         style = `@font-face {
-  font-family: "Number Glyphs";
+  font-family: "Text Glyphs";
   src: local("Helvetica Neue"),
   local("Luxi Sans"),
   local("DejaVu Sans"),
@@ -219,7 +219,7 @@ export const setInlineStyle = (set = true) => {
   local("Segoe UI"),
   local("Microsoft Yahei"),
   local("sans-serif");
-  unicode-range: U+30-39;
+  unicode-range: U+23, U+2A, U+30-39;
 }`;
     }
     style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}

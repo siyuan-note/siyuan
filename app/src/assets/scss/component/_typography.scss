@@ -4,10 +4,10 @@
 }
 
 @font-face {
-  font-family: "Number Glyphs Of JetBrainsMono-Regular";
+  font-family: "Text Glyphs Of JetBrainsMono-Regular";
   src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
-  /* 数字 0-9 */
-  unicode-range: U+30-39;
+  /* “按键”emoji 中的字符 # * 、数字 0-9 */
+  unicode-range: U+23, U+2A, U+30-39;
 }
 
 @font-face {

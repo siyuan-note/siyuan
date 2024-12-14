@@ -23,12 +23,11 @@
 
     /* 字体 */
     /* Windows 斜体遮挡添加 "Segoe UI" 字体 https://github.com/siyuan-note/siyuan/issues/11841 */
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", "Tahoma", "Arial", "Other Emojis", sans-serif;
-    /* 优先使用定义好的数字和表情 */
-    --b3-font-family-protyle: "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", var(--b3-font-family);
-    --b3-font-family-code: "Number Glyphs Of JetBrainsMono-Regular", "Segoe Good Emoji", "Other SiYuan Emojis", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
+    --b3-font-family-protyle: "Number Glyphs", "SiYuan Emojis", "Emojis", var(--b3-font-family);
+    --b3-font-family-code: "Number Glyphs Of JetBrainsMono-Regular", "SiYuan Emojis", "Emoji", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: arial;
-    --b3-font-family-emoji: "Segoe Good Emoji", "Other Emojis";
+    --b3-font-family-emoji: "SiYuan Emojis", "Emojis";
     --b3-font-family-math: KaTeX_Math;
     --b3-font-size: 14px;
 
@@ -202,14 +201,16 @@
     --b3-parent-background: var(--b3-theme-background);
 }
 
-:root:lang(zh_CN) { /* Simplified Chinese */
-    --b3-font-family: "Helvetica Neue", "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Source Han Sans SC", "Microsoft Yahei", "Tahoma", "Arial", "Other Emojis", sans-serif;
+:root:lang(zh_CN) {
+    --b3-font-family: "Helvetica Neue", "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Source Han Sans SC", "Microsoft Yahei", sans-serif, "Arial", "Tahoma", "Emojis";
 }
-:root:lang(zh_CHT) { /* Traditional Chinese */
-    --b3-font-family: "Helvetica Neue", "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Segoe UI", "Source Han Sans TC", "Microsoft JhengHei", "Tahoma", "Arial", "Other Emojis", sans-serif;
+
+:root:lang(zh_CHT) {
+    --b3-font-family: "Helvetica Neue", "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Segoe UI", "Source Han Sans TC", "Microsoft JhengHei", sans-serif, "Arial", "Tahoma", "Emojis";
 }
-:root:lang(ja_JP) { /* Japanese */
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI Symbol", "Segoe UI", "Tahoma", "Arial", "Other Emojis", sans-serif;
+
+:root:lang(ja_JP) {
+    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */

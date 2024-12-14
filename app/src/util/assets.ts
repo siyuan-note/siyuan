@@ -208,7 +208,7 @@ export const setInlineStyle = (set = true) => {
   src: local("${window.siyuan.config.editor.fontFamily}");
   unicode-range: U+30-39;
 }
-.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Number Glyphs", "Segoe Good Emoji", "Other SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
+.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Number Glyphs", "SiYuan Emojis", "Emoji", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
     } else {
         style = `@font-face {
   font-family: "Number Glyphs";

@@ -201,28 +201,7 @@ export const addGA = () => {
 
 export const setInlineStyle = (set = true) => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
-    let style;
-    if (window.siyuan.config.editor.fontFamily) {
-        style = `@font-face {
-  font-family: "Number Glyphs";
-  src: local("${window.siyuan.config.editor.fontFamily}");
-  unicode-range: U+30-39;
-}
-.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Number Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
-    } else {
-        style = `@font-face {
-  font-family: "Number Glyphs";
-  src: local("Helvetica Neue"),
-  local("Luxi Sans"),
-  local("DejaVu Sans"),
-  local("Hiragino Sans GB"),
-  local("Segoe UI"),
-  local("Microsoft Yahei"),
-  local("sans-serif");
-  unicode-range: U+30-39;
-}`;
-    }
-    style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
+    let style = `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:${height + 8}px;}
@@ -239,6 +218,9 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg [data-node-id] {${window.siyuan.config.editor.justify ? " text-align: justify;" : ""}}
 .protyle-wysiwyg .li {min-height:${height + 8}px}
 .protyle-gutters button svg {height:${height}px}`;
+    if (window.siyuan.config.editor.fontFamily) {
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-base)}`;
+    }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";

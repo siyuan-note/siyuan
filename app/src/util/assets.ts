@@ -206,7 +206,7 @@ export const setInlineStyle = (set = true) => {
         style = `@font-face {
   font-family: "Basic Latin Glyphs";
   src: local("${window.siyuan.config.editor.fontFamily}");
-  unicode-range: U+23, U+2A, U+30-39;
+  unicode-range: U+20, U+23, U+2A, U+30-39;
 }
 .b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Basic Latin Glyphs", "SiYuan Emojis", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-protyle)}`;
     } else {
@@ -219,7 +219,7 @@ export const setInlineStyle = (set = true) => {
   local("Segoe UI"),
   local("Microsoft Yahei"),
   local("sans-serif");
-  unicode-range: U+23, U+2A, U+30-39;
+  unicode-range: U+20, U+23, U+2A, U+30-39;
 }`;
     }
     style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}

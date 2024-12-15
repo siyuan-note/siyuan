@@ -62,7 +62,8 @@ export class Tab {
                         id
                     }, (response) => {
                         if (!this.headElement.getAttribute("aria-label")) {
-                            showTooltip(escapeGreat(response.data), this.headElement);
+                            const tooltipClass = "tab_header";
+                            showTooltip(escapeGreat(response.data), this.headElement, tooltipClass);
                         }
                         this.headElement.setAttribute("aria-label", escapeGreat(response.data));
                     });

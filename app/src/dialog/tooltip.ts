@@ -19,12 +19,13 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     } else {
         if (messageElement.className !== className) {
             messageElement.className = className;
+            // 避免原本的 top 和 left 影响计算
+            messageElement.removeAttribute("style");
         }
         if (messageElement.innerHTML !== message) {
             messageElement.innerHTML = message;
+            messageElement.removeAttribute("style");
         }
-        // 避免原本的 top 和 left 影响计算
-        messageElement.removeAttribute("style");
     }
 
     let left = targetRect.left;
@@ -60,10 +61,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
-    // 避免原本的 top 和 left 影响计算
-    messageElement.style.top = "0px";
-    messageElement.style.left = "0px";
-
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
         messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {
@@ -84,6 +81,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 export const hideTooltip = () => {
     const messageElement = document.getElementById("tooltip");
     if (messageElement) {
-        messageElement.remove();
+        messageElement.classList.add("fn__none");
     }
 };

@@ -1,8 +1,7 @@
 {
-  "second": "second",
-  "syncInterval": "Sync interval",
   "second": "segundo",
   "syncInterval": "intervalo de sincronización",
+  "syncIntervalTip": "Sincronización automática de datos después de que los datos dejen de cambiar",
   "removeAV": "Eliminar de la base de datos",
   "empty": "Vacío",
   "newRowInRelation": "Crear una nueva entrada en ${x} <b class='ft__on-surface'>${y}</b>",
@@ -915,7 +914,7 @@
   "insertBefore": "Inserta un bloque vacío antes del bloque donde está el cursor",
   "insertAfter": "Inserta un bloque vacío después del bloque donde se encuentra el cursor",
   "list1": "Lista",
-  "insert": "Insertar elemento",
+  "element": "elemento",
   "closeTab": "Cerrar pestaña actual",
   "keymap": "Mapa de teclas",
   "clearFontStyle": "Limpiar estilo",

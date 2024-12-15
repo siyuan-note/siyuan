@@ -1,6 +1,7 @@
 {
   "second": "secondo",
   "syncInterval": "intervallo di sincronizzazione",
+  "syncIntervalTip": "Sincronizzazione automatica dei dati dopo che non ci sono più variazioni",
   "removeAV": "Rimuovi dal database",
   "empty": "Vuoto",
   "newRowInRelation": "Crea una nuova voce in ${x} <b class='ft__on-surface'>${y}</b>",
@@ -913,7 +914,7 @@
   "insertBefore": "Inserisci un blocco vuoto prima del blocco corrente",
   "insertAfter": "Inserisci un blocco vuoto dopo il blocco corrente",
   "list1": "Lista",
-  "insert": "Inserisci elemento",
+  "element": "elemento",
   "closeTab": "Chiudi scheda corrente",
   "keymap": "Mappa dei tasti",
   "clearFontStyle": "Pulisci stile",

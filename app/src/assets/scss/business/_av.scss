@@ -194,13 +194,13 @@
       .av__calc {
         display: flex;
         align-items: center;
-        padding: 5px;
+        padding: 5px 6px 5px 5px;
         border-right: 1px;
         flex-direction: row-reverse;
         box-sizing: border-box;
         opacity: 0;
         overflow: hidden;
-        font-size: 75%;
+        font-size: 87.5%;
         white-space: nowrap;
         line-height: 1.625em;
         cursor: pointer;
@@ -210,7 +210,7 @@
         }
 
         &:first-child {
-          padding-left: 1.625em;
+          padding-left: calc(1.625em - 6px);
           box-sizing: initial;
         }
 
@@ -221,11 +221,10 @@
         svg {
           margin-left: 5px;
           height: 1.625em;
-          width: calc(1.625em - 10px);
+          width: calc(1.625em - 14px);
         }
 
         span {
-          font-size: 116%;
           color: var(--b3-theme-on-background);
           margin-left: 5px;
         }

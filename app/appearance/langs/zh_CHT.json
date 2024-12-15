@@ -1,6 +1,7 @@
 {
   "second": "秒",
   "syncInterval": "同步間隔",
+  "syncIntervalTip": "數據不再變動後自動進行數據同步",
   "removeAV": "從資料庫中移除",
   "empty": "空白",
   "newRowInRelation": "在 ${x} 中新建條目 <b class='ft__on-surface'>${y}</b>",
@@ -913,7 +914,7 @@
   "insertBefore": "游標所在塊前插入空塊",
   "insertAfter": "游標所在塊後插入空塊",
   "list1": "列表",
-  "insert": "插入元素",
+  "element": "元素",
   "closeTab": "關閉當前分頁",
   "keymap": "快速鍵",
   "clearFontStyle": "清除樣式",

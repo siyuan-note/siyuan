@@ -1,6 +1,7 @@
 {
   "second": "Sekunde",
   "syncInterval": "Synchronisierungsintervall",
+  "syncIntervalTip": "Automatische Datensynchronisierung, nachdem die Daten nicht mehr geändert werden",
   "removeAV": "Aus der Datenbank entfernen",
   "empty": "Leer",
   "newRowInRelation": "Erstellen Sie einen neuen Eintrag in ${x} <b class='ft__on-surface'>${y}</b>",
@@ -913,7 +914,7 @@
   "insertBefore": "Fügen Sie einen leeren Block vor dem Block ein, an dem sich der Cursor befindet",
   "insertAfter": "Fügen Sie einen leeren Block nach dem Block ein, an dem sich der Cursor befindet",
   "list1": "Liste",
-  "insert": "Element einfügen",
+  "element": "Element",
   "closeTab": "Aktuellen Tab schließen",
   "keymap": "Tastenbelegung",
   "clearFontStyle": "Stil löschen",

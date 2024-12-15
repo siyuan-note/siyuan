@@ -253,9 +253,6 @@ func UninstallBazaarPlugin(pluginName, frontend string) error {
 		}
 	}
 	petals = tmp
-	if 1 > len(petals) {
-		petals = []*Petal{}
-	}
 	savePetals(petals)
 	return nil
 }

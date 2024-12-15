@@ -219,7 +219,7 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg .li {min-height:${height + 8}px}
 .protyle-gutters button svg {height:${height}px}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family-base)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {

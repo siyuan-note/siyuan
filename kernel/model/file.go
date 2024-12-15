@@ -648,6 +648,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		}
 	}
 
+	existKeywords := 0 < len(keywords)
 	for _, n := range nodes {
 		var unlinks []*ast.Node
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -679,7 +680,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				}
 			}
 
-			if highlight && 0 < len(keywords) {
+			if highlight && existKeywords {
 				hitBlock := false
 				for p := n.Parent; nil != p; p = p.Parent {
 					if p.ID == id {
@@ -698,6 +699,16 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 						}
 					} else if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
 						return ast.WalkContinue
+					}
+				}
+			}
+
+			if existKeywords && id == n.ID {
+				inlines := n.ChildrenByType(ast.NodeTextMark)
+				for _, inline := range inlines {
+					if inline.IsTextMarkType("inline-memo") && util.ContainsSubStr(inline.TextMarkInlineMemoContent, keywords) {
+						// 支持行级备注搜索定位 https://github.com/siyuan-note/siyuan/issues/13465
+						keywords = append(keywords, inline.TextMarkTextContent)
 					}
 				}
 			}
@@ -726,6 +737,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		keyword = strings.TrimSuffix(keyword, "#")
 		keywords[i] = keyword
 	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 
 	go setRecentDocByTree(tree)
 	return

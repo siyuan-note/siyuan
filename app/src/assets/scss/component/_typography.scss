@@ -3,6 +3,14 @@
   src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
 
+// Windows 斜体遮挡添加 "Segoe UI" 字体 https://github.com/siyuan-note/siyuan/issues/11841
+@font-face {
+  font-family: 'Segoe UI Italic Char';
+  src: local("Segoe UI italic");
+  font-style: italic;
+  unicode-range: U+30-39, U+41-5A, U+61-7A, U+29, U+7D;
+}
+
 @font-face {
   font-family: "Emojis";
   src: url(../fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
@@ -71,6 +79,7 @@
   span[data-type~="em"] {
     font-style: italic;
     color: var(--b3-protyle-inline-em-color);
+    font-family: "Segoe UI Italic Char";
   }
 
   s,

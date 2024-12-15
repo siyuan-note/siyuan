@@ -22,7 +22,7 @@
     --b3-theme-on-error: #fff;
 
     /* 字体 */
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
+    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", sans-serif, "Arial", "Emojis";
     --b3-font-family-protyle: var(--b3-font-family);
     --b3-font-family-code: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
     --b3-font-family-graph: arial;
@@ -201,15 +201,15 @@
 }
 
 :root:lang(zh_CN) {
-    --b3-font-family: "Helvetica Neue", "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Source Han Sans SC", "Microsoft Yahei", sans-serif, "Arial", "Tahoma", "Emojis";
+    --b3-font-family: "Helvetica Neue", "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Source Han Sans SC", "Microsoft Yahei", sans-serif, "Arial", "Emojis";
 }
 
 :root:lang(zh_CHT) {
-    --b3-font-family: "Helvetica Neue", "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Segoe UI", "Source Han Sans TC", "Microsoft JhengHei", sans-serif, "Arial", "Tahoma", "Emojis";
+    --b3-font-family: "Helvetica Neue", "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Source Han Sans TC", "Microsoft JhengHei", sans-serif, "Arial", "Emojis";
 }
 
 :root:lang(ja_JP) {
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI", sans-serif, "Arial", "Tahoma", "Emojis";
+    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", sans-serif, "Arial", "Emojis";
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */

@@ -279,7 +279,8 @@ declare namespace Config {
         | "de_DE"
         | "he_IL"
         | "ru_RU"
-        | "pl_PL";
+        | "pl_PL"
+        | "ar_SA";
 
     /**
      * SiYuan bazaar related configuration

@@ -1125,7 +1125,9 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		ret = []*Block{}
 	}
 
-	filterSelfHPath(ret)
+	if 0 == groupBy {
+		filterSelfHPath(ret)
+	}
 	return
 }
 

@@ -221,6 +221,10 @@ export const setInlineStyle = (set = true) => {
     if (window.siyuan.config.editor.fontFamily) {
         style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }
+    // Windows 斜体遮挡添加 "Segoe UI" 字体 https://github.com/siyuan-note/siyuan/issues/11841
+    if (navigator.platform.indexOf('Win') > -1) {
+        style += `\n.b3-typography em, .b3-typography span[data-type~=em], .protyle-wysiwyg em, .protyle-wysiwyg span[data-type~=em] { font-family: emojis, "Segoe UI"; }`;
+    }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {
         style += "\n.b3-menu .b3-menu__action {opacity: 0.68;}";

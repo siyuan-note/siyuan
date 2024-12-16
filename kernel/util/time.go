@@ -186,7 +186,7 @@ func humanizeTimeMagnitudes(lang string) (labels map[string]interface{}, magnitu
 		{humanize.Month, labels["xw"].(string), humanize.Week},
 		{2 * humanize.Month, labels["1M"].(string), 1},
 		{humanize.Year, labels["xM"].(string), humanize.Month},
-		{18 * humanize.Month, labels["1y"].(string), 1},
+		{23 * humanize.Month, labels["1y"].(string), 1},
 		{2 * humanize.Year, labels["2y"].(string), 1},
 		{humanize.LongTime, labels["xy"].(string), humanize.Year},
 		{math.MaxInt64, labels["max"].(string), 1},

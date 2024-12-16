@@ -18,6 +18,7 @@ package model
 
 import (
 	"bytes"
+	"crypto/sha1"
 	"encoding/csv"
 	"errors"
 	"fmt"
@@ -1706,6 +1707,11 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	// 导出引用的资源文件
+	assetPathMap, err := allAssetAbsPaths()
+	if nil != err {
+		logging.LogWarnf("get assets abs path failed: %s", err)
+		return
+	}
 	copiedAssets := hashset.New()
 	for _, tree := range trees {
 		var assets []string
@@ -1729,14 +1735,14 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 				continue
 			}
 
-			srcPath, assetErr := GetAssetAbsPath(asset)
-			if nil != assetErr {
-				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, assetErr)
+			srcPath := assetPathMap[asset]
+			if "" == srcPath {
+				logging.LogWarnf("get asset [%s] abs path failed", asset)
 				continue
 			}
 
 			destPath := filepath.Join(exportFolder, asset)
-			assetErr = filelock.Copy(srcPath, destPath)
+			assetErr := filelock.Copy(srcPath, destPath)
 			if nil != assetErr {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, assetErr)
 				continue
@@ -1794,9 +1800,9 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 							}
 
 							destPath := filepath.Join(exportFolder, asset.Content)
-							srcPath, assetErr := GetAssetAbsPath(asset.Content)
-							if nil != assetErr {
-								logging.LogWarnf("get asset [%s] abs path failed: %s", asset.Content, assetErr)
+							srcPath := assetPathMap[asset.Content]
+							if "" == srcPath {
+								logging.LogWarnf("get asset [%s] abs path failed", asset.Content)
 								continue
 							}
 
@@ -3086,6 +3092,8 @@ func processFileAnnotationRef(refID string, n *ast.Node, fileAnnotationRefMode i
 
 func exportPandocConvertZip(baseFolderName string, docPaths []string,
 	pandocFrom, pandocTo, ext string) (zipPath string) {
+	defer util.ClearPushProgress(100)
+
 	dir, name := path.Split(baseFolderName)
 	name = util.FilterFileName(name)
 	if strings.HasSuffix(name, "..") {
@@ -3146,8 +3154,15 @@ func exportPandocConvertZip(baseFolderName string, docPaths []string,
 		docPaths = gulu.Str.RemoveDuplicatedElem(docPaths)
 	}
 
+	wrotePathHash := map[string]string{}
+	assetsPathMap, err := allAssetAbsPaths()
+	if nil != err {
+		logging.LogWarnf("get assets abs path failed: %s", err)
+		return
+	}
+
 	luteEngine := util.NewLute()
-	for _, p := range docPaths {
+	for i, p := range docPaths {
 		id := util.GetTreeID(p)
 		hPath, md := exportMarkdownContent(id, exportRefMode, defBlockIDs)
 		dir, name = path.Split(hPath)
@@ -3156,7 +3171,8 @@ func exportPandocConvertZip(baseFolderName string, docPaths []string,
 		hPath = path.Join(dir, name)
 		p = hPath + ext
 		writePath := filepath.Join(exportFolder, p)
-		if gulu.File.IsExist(writePath) {
+		hash := fmt.Sprintf("%x", sha1.Sum([]byte(md)))
+		if gulu.File.IsExist(writePath) && hash != wrotePathHash[writePath] {
 			// 重名文档加 ID
 			p = hPath + "-" + id + ext
 			writePath = filepath.Join(exportFolder, p)
@@ -3181,15 +3197,14 @@ func exportPandocConvertZip(baseFolderName string, docPaths []string,
 				continue
 			}
 
-			srcPath, err := GetAssetAbsPath(asset)
-			if err != nil {
-				logging.LogWarnf("get asset [%s] abs path failed: %s", asset, err)
+			srcPath := assetsPathMap[asset]
+			if "" == srcPath {
+				logging.LogWarnf("get asset [%s] abs path failed", asset)
 				continue
 			}
 
 			destPath := filepath.Join(writeFolder, asset)
-			err = filelock.Copy(srcPath, destPath)
-			if err != nil {
+			if copyErr := filelock.Copy(srcPath, destPath); copyErr != nil {
 				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", srcPath, destPath, err)
 				continue
 			}
@@ -3201,6 +3216,9 @@ func exportPandocConvertZip(baseFolderName string, docPaths []string,
 			logging.LogErrorf("pandoc failed: %s", err)
 			continue
 		}
+
+		wrotePathHash[writePath] = hash
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), name)))
 	}
 
 	zipPath = exportFolder + ".zip"

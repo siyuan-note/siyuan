@@ -291,6 +291,10 @@
       color: var(--b3-protyle-inline-blockref-color);
     }
 
+    .b3-menu__avemoji {
+      display: inline-block;
+    }
+
     &[data-wrap="true"] {
       white-space: pre-wrap;
     }

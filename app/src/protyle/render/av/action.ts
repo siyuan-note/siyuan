@@ -22,7 +22,7 @@ import {hintRef} from "../../hint/extend";
 import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
 import {previewImage} from "../../preview/image";
-import {unicode2Emoji} from "../../../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
 import {avRender} from "./render";
@@ -230,6 +230,17 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("av__calc")) {
             openCalcMenu(protyle, target, undefined, event.clientX - 64);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("b3-menu__avemoji")) {
+            const rect = target.getBoundingClientRect();
+            openEmojiPanel(target.parentElement.getAttribute("data-block-id"), "doc", {
+                x: rect.left,
+                y: rect.bottom,
+                h: rect.height,
+                w: rect.width,
+            }, undefined, target.querySelector("img"));
             event.preventDefault();
             event.stopPropagation();
             return true;

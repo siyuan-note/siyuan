@@ -705,6 +705,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
             separatorPosition: "top",
         });
     }
+    window.siyuan.menus.menu.element.setAttribute("data-name", "docTreeMore");
     return window.siyuan.menus.menu;
 };
 

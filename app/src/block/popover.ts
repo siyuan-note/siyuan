@@ -211,7 +211,7 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
     } else {
         // 浮窗上点击菜单，浮窗不能消失 https://ld246.com/article/1632668091023
         const menuElement = hasClosestByClassName(target, "b3-menu");
-        if (menuElement) {
+        if (menuElement && menuElement.getAttribute("data-name") !== "docTreeMore") {
             const blockPanel = window.siyuan.blockPanels.find((item) => {
                 if (item.element.style.zIndex < menuElement.style.zIndex) {
                     return true;

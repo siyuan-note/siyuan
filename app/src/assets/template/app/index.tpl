@@ -38,7 +38,7 @@
         if (refreshElement) {
             refreshElement.style.display = ""
         }
-    }, 2000)
+    }, 7000)
 </script>
 </body>
 </html>

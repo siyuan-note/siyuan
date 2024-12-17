@@ -1421,7 +1421,6 @@ func ExportStdMarkdown(id string) string {
 			var defID string
 			if treenode.IsBlockLink(n) {
 				defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
-
 			} else if treenode.IsBlockRef(n) {
 				defID, _, _ = treenode.GetBlockRef(n)
 			}
@@ -3133,7 +3132,6 @@ func exportPandocConvertZip(baseFolderName string, docPaths []string,
 				var defID string
 				if treenode.IsBlockLink(n) {
 					defID = strings.TrimPrefix(n.TextMarkAHref, "siyuan://blocks/")
-
 				} else if treenode.IsBlockRef(n) {
 					defID, _, _ = treenode.GetBlockRef(n)
 				}
@@ -3267,43 +3265,4 @@ func getExportBlockRefLinkText(blockRef *ast.Node, blockRefTextLeft, blockRefTex
 	}
 	linkText = blockRefTextLeft + linkText + blockRefTextRight
 	return
-}
-
-func getDestViewVal(attrView *av.AttributeView, keyID, blockID string) *av.TableColumn {
-	rollupKey, _ := attrView.GetKey(keyID)
-	if nil == rollupKey || nil == rollupKey.Rollup {
-		return nil
-	}
-
-	relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
-	if nil == relKey || nil == relKey.Relation {
-		return nil
-	}
-
-	relVal := attrView.GetValue(relKey.ID, blockID)
-	if nil == relVal || nil == relVal.Relation {
-		return nil
-	}
-
-	destAv, _ := av.ParseAttributeView(relKey.Relation.AvID)
-	if nil == destAv {
-		return nil
-	}
-
-	destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
-	if nil == destKey {
-		return nil
-	}
-
-	destView, _ := destAv.GetCurrentView(destAv.ViewID)
-	if nil == destView {
-		return nil
-	}
-
-	destTable := sql.RenderAttributeViewTable(destAv, destView, "")
-	if nil == destTable {
-		return nil
-	}
-
-	return destTable.GetColumn(rollupKey.Rollup.KeyID)
 }

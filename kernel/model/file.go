@@ -711,6 +711,14 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 						keywords = append(keywords, inline.TextMarkTextContent)
 					}
 				}
+				images := n.ChildrenByType(ast.NodeImage)
+				for _, image := range images {
+					dest := image.ChildByType(ast.NodeLinkDest)
+					if nil != dest && util.ContainsSubStr(string(dest.Tokens), keywords) {
+						// 支持图片搜索定位 https://github.com/siyuan-note/siyuan/issues/13510
+						keywords = append(keywords, string(dest.Tokens))
+					}
+				}
 			}
 
 			if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {

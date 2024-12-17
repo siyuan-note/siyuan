@@ -243,7 +243,7 @@ export const setInlineStyle = (set = true) => {
   unicode-range: U+263a, U+2194-2199, U+2934-2935, U+2639, U+26a0, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+203c, U+2049,
   U+2611, U+303d, U+00a9, U+00ae, U+2122, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a,
   U+1f232-1f23a, U+1f251, U+3297, U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642,
-  U+1f635, U+2620, U+2763, U+2764, U+1f441, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030;
+  U+1f635, U+2620, U+2763, U+2764, U+1f441, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030, U+21aa, U+21a9;
 }`;
     }
     style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}

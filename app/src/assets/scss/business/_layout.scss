@@ -415,8 +415,10 @@
     }
 
     &--activefocus {
-      color: var(--b3-theme-on-primary) !important;
-      background-color: var(--b3-theme-primary) !important;
+      &, &:hover {
+        color: var(--b3-theme-on-primary);
+        background-color: var(--b3-theme-primary);
+      }
     }
   }
 }

@@ -40,7 +40,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/imroc/req/v3 v3.48.0
+	github.com/imroc/req/v3 v3.49.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.12.2
@@ -48,7 +48,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.2.1
-	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.0
+	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
 	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pdfcpu/pdfcpu v0.9.1
@@ -57,13 +57,13 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20241217020112-965399e9b276
+	github.com/siyuan-note/dejavu v0.0.0-20241217094848-8beeb0605db2
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20241212013445-c66518cdacfa
-	github.com/siyuan-note/httpclient v0.0.0-20241212013326-2b23123573c3
+	github.com/siyuan-note/httpclient v0.0.0-20241217094627-0dbb1d2d7698
 	github.com/siyuan-note/logging v0.0.0-20241212013108-623e0bb0bcd9
-	github.com/siyuan-note/riff v0.0.0-20241203002117-3b8d28360e46
+	github.com/siyuan-note/riff v0.0.0-20241217095231-017015753318
 	github.com/spf13/cast v1.7.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -169,7 +169,7 @@ require (
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.10.0 // indirect
 	golang.org/x/crypto v0.31.0 // indirect
-	golang.org/x/exp v0.0.0-20241210194714-1829a127f884 // indirect
+	golang.org/x/exp v0.0.0-20241215155358-4a5509556b9e // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect

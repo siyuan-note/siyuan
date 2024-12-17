@@ -7,7 +7,7 @@ import {exportLayout} from "../layout/util";
 /// #endif
 import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
-import {isInAndroid, isInHarmony, isInIOS} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac} from "../protyle/util/compatibility";
 
 const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
     addScript(iconURL, "iconDefaultScript").then(() => {
@@ -201,7 +201,52 @@ export const addGA = () => {
 
 export const setInlineStyle = (set = true) => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
-    let style = `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
+    let style;
+    // Emojis Reset: 字体中包含了 emoji，需重置
+    // Apple Additional Emojis： 苹果字体中没有的 emoji
+    if (isMac() || isIPad() || isIPhone()) {
+        style = `@font-face {
+  font-family: "Apple Additional Emojis";
+  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
+}
+@font-face {
+  font-family: "Emojis Reset";
+  src: local("Apple Color Emoji"),
+  local("Segoe UI Emoji"),
+  local("Segoe UI Symbol");
+  unicode-range: U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+2611, U+303d,
+  U+3030, U+00a9, U+00ae, U+2122, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f, U+1f232-1f23a,
+  U+1f251, U+3297, U+3299, U+2639;
+}
+@font-face {
+  font-family: "Emojis";
+  src: local("Apple Color Emoji"),
+  local("Segoe UI Emoji"),
+  local("Segoe UI Symbol");
+}`
+    } else {
+        style = `@font-face {
+  font-family: "Emojis";
+  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2"),
+  local("Segoe UI Emoji"),
+  local("Segoe UI Symbol"),
+  local("Apple Color Emoji"),
+  local("Twemoji Mozilla"),
+  local("Noto Color Emoji"),
+  local("Android Emoji"),
+  local("EmojiSymbols");
+}
+@font-face {
+  font-family: "Emojis Reset";
+  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  unicode-range: U+263a, U+2194-2199, U+2934-2935, U+2639, U+26a0, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+203c, U+2049,
+  U+2611, U+303d, U+00a9, U+00ae, U+2122, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a,
+  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642,
+  U+1f635, U+2620, U+2763, U+2764, U+1f441, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030;
+}`;
+    }
+    style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:${height + 8}px;}
@@ -219,7 +264,7 @@ export const setInlineStyle = (set = true) => {
 .protyle-wysiwyg .li {min-height:${height + 8}px}
 .protyle-gutters button svg {height:${height}px}`;
     if (window.siyuan.config.editor.fontFamily) {
-        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
+        style += `\n.b3-typography:not(.b3-typography--default), .protyle-wysiwyg, .protyle-title {font-family: "Apple Additional Emojis", "Emojis Reset", "${window.siyuan.config.editor.fontFamily}", var(--b3-font-family)}`;
     }
     // pad 端菜单移除显示，如工作空间
     if ("ontouchend" in document) {

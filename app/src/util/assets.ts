@@ -217,7 +217,7 @@ export const setInlineStyle = (set = true) => {
   local("Segoe UI Symbol");
   unicode-range: U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+2611, U+303d,
   U+3030, U+00a9, U+00ae, U+2122, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f, U+1f232-1f23a,
-  U+1f251, U+3297, U+3299, U+2639;
+  U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663;
 }
 @font-face {
   font-family: "Emojis";

@@ -1971,10 +1971,8 @@ func exportMarkdownContent(id string, exportRefMode int, defBlockIDs []string) (
 
 func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
-	tagOpenMarker, tagCloseMarker string,
-	blockRefTextLeft, blockRefTextRight string,
-	addTitle bool,
-	defBlockIDs []string) (ret string) {
+	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
+	addTitle bool, defBlockIDs []string) (ret string) {
 	tree = exportTree(tree, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
@@ -2266,8 +2264,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 	} else {
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			anchorSpan := treenode.NewSpanAnchor(id)
-			ret.Root.PrependChild(anchorSpan)
+			if addDocAnchorSpan {
+				anchorSpan := treenode.NewSpanAnchor(id)
+				ret.Root.PrependChild(anchorSpan)
+			}
 		}
 	}
 

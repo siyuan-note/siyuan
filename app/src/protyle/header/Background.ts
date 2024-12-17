@@ -443,7 +443,7 @@ export class Background {
         if (tags) {
             let html = "";
             const colors = ["secondary", "primary", "info", "success", "warning", "error", "pink"];
-            new Set(tags.split(",")).forEach((item, index) => {
+            new Set(tags.split(",").map(item => item.trim())).forEach((item, index) => {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }

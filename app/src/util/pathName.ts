@@ -154,8 +154,10 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
         return;
     }
     const dialog = new Dialog({
-        title: `${title || window.siyuan.languages.move}
-<div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>`,
+        title: `<div style="padding: 8px;">
+    ${title || window.siyuan.languages.move}
+    <div style="max-height: 16px;overflow: auto;line-height: 14px;-webkit-mask-image: linear-gradient(to top, rgba(0, 0, 0, 0) 0, #000 6px);padding-bottom: 4px;margin-bottom: -4px" class="ft__smaller ft__on-surface fn__hidescrollbar"></div>
+</div>`,
         content: `<div class="b3-form__icon" style="margin: 8px">
     <span data-menu="true" class="b3-form__icon-list fn__a b3-tooltips b3-tooltips__s" aria-label="${updateHotkeyTip("⌥↓")}">
         <svg class="svg--mid"><use xlink:href="#iconSearch"></use></svg>
@@ -178,6 +180,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
             }
         }
     });
+    dialog.element.querySelector(".b3-dialog__header").setAttribute("style", "padding:0");
     dialog.element.setAttribute("data-key", Constants.DIALOG_MOVEPATHTO);
     if (paths && paths.length > 0) {
         fetchPost("/api/filetree/getHPathsByPaths", {paths}, (response) => {
@@ -260,7 +263,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
 
     const toggleMovePathHistory = () => {
         const keys = window.siyuan.storage[Constants.LOCAL_MOVE_PATH].keys;
-        if (!keys || keys.length === 0) {
+        if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === inputElement.value)) {
             return;
         }
         const menu = new Menu("move-path-history");

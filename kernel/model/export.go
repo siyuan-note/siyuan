@@ -2667,13 +2667,9 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
 	var rendered []string
 	for _, foot := range *refFootnotes {
-		t := (*treeCache)[foot.defID]
-		if nil == t {
-			var err error
-			if t, err = LoadTreeByBlockID(foot.defID); err != nil {
-				continue
-			}
-			(*treeCache)[t.ID] = t
+		t, err := loadTreeWithCache(foot.defID, treeCache)
+		if nil != err {
+			return
 		}
 
 		defNode := treenode.GetNodeInTree(t, foot.defID)
@@ -2807,14 +2803,11 @@ func blockLink2Ref(currentTree *parse.Tree, id string, treeCache *map[string]*pa
 	if nil == b {
 		return
 	}
-	t := (*treeCache)[b.RootID]
-	if nil == t {
-		var err error
-		if t, err = LoadTreeByBlockID(b.ID); err != nil {
-			return
-		}
-		(*treeCache)[t.ID] = t
+	t, err := loadTreeWithCache(b.ID, treeCache)
+	if nil != err {
+		return
 	}
+
 	node := treenode.GetNodeInTree(t, b.ID)
 	if nil == node {
 		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
@@ -2860,14 +2853,11 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*r
 	if nil == b {
 		return
 	}
-	t := (*treeCache)[b.RootID]
-	if nil == t {
-		var err error
-		if t, err = LoadTreeByBlockID(b.ID); err != nil {
-			return
-		}
-		(*treeCache)[t.ID] = t
+	t, err := loadTreeWithCache(b.ID, treeCache)
+	if nil != err {
+		return
 	}
+
 	node := treenode.GetNodeInTree(t, b.ID)
 	if nil == node {
 		logging.LogErrorf("not found node [%s] in tree [%s]", b.ID, t.Root.ID)
@@ -3132,7 +3122,7 @@ func prepareExportTrees(docPaths []string) (defBlockIDs []string, trees *map[str
 	defBlockIDs = []string{}
 	for _, p := range docPaths {
 		id := util.GetTreeID(p)
-		tree, err := LoadTreeByBlockID(id)
+		tree, err := loadTreeWithCache(id, treeCache)
 		if err != nil {
 			continue
 		}
@@ -3172,7 +3162,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			if (*treeCache)[defBlock.RootID] != nil {
 				defTree = (*treeCache)[defBlock.RootID]
 			} else {
-				defTree, err = LoadTreeByBlockID(defBlock.RootID)
+				defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
 				if err != nil {
 					return ast.WalkSkipChildren
 				}
@@ -3196,7 +3186,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			if (*treeCache)[defBlock.RootID] != nil {
 				defTree = (*treeCache)[defBlock.RootID]
 			} else {
-				defTree, err = LoadTreeByBlockID(defBlock.RootID)
+				defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
 				if err != nil {
 					return ast.WalkSkipChildren
 				}
@@ -3235,7 +3225,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 				if (*treeCache)[defBlock.RootID] != nil {
 					defTree = (*treeCache)[defBlock.RootID]
 				} else {
-					defTree, err = LoadTreeByBlockID(defBlock.RootID)
+					defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
 					if err != nil {
 						continue
 					}

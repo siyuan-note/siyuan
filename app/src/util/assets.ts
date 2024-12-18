@@ -225,7 +225,7 @@ export const setInlineStyle = async (set = true) => {
   src: local("Apple Color Emoji"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
-}`
+}`;
     } else {
         const isWin11Browser = await isWin11();
         if (isWin11Browser) {

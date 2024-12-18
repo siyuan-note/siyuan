@@ -855,7 +855,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             if (nextSibling.nodeType === 3 && nextSibling.textContent === Constants.ZWSP) {
                                 if (!nextSibling.nextSibling) {
                                     // https://github.com/siyuan-note/siyuan/issues/13524
-                                    const nextBlockElement = getNextBlock(nodeElement)
+                                    const nextBlockElement = getNextBlock(nodeElement);
                                     if (nextBlockElement) {
                                         removeBlock(protyle, nextBlockElement, range, "remove");
                                     }

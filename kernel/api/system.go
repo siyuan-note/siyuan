@@ -634,23 +634,6 @@ func setGoogleAnalytics(c *gin.Context) {
 	model.Conf.Save()
 }
 
-func setUploadErrLog(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	uploadErrLog := arg["uploadErrLog"].(bool)
-	model.Conf.System.UploadErrLog = uploadErrLog
-	model.Conf.Save()
-
-	util.PushMsg(model.Conf.Language(42), 1000*15)
-	time.Sleep(time.Second * 3)
-}
-
 func setAutoLaunch(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

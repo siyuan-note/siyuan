@@ -34,7 +34,6 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
 	"github.com/Xuanwo/go-locale"
-	"github.com/getsentry/sentry-go"
 	"github.com/sashabaranov/go-openai"
 	"github.com/siyuan-note/eventbus"
 	"github.com/siyuan-note/filelock"
@@ -508,15 +507,6 @@ func InitConf() {
 
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
-
-	if Conf.System.UploadErrLog {
-		logging.LogInfof("user has enabled [Automatically upload error messages and diagnostic data]")
-		sentry.Init(sentry.ClientOptions{
-			Dsn:         "https://bdff135f14654ae58a054adeceb2c308@o1173696.ingest.sentry.io/6269178",
-			Release:     util.Ver,
-			Environment: util.Mode,
-		})
-	}
 
 	if Conf.System.DisableGoogleAnalytics {
 		logging.LogInfof("user has disabled [Google Analytics]")

@@ -380,8 +380,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
             click: () => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 fetchPost("/api/export/exportNotebookMd", {
-                    notebook: notebookId,
-                    path: "/"
+                    notebook: notebookId
                 }, response => {
                     hideMessage(msgId);
                     openByMobile(response.data.zip);

@@ -7,7 +7,7 @@
 		"id": "20200813163359-v04n73b",
 		"title": "隐私政策和用户协议",
 		"type": "doc",
-		"updated": "20221027114353"
+		"updated": "20241218172032"
 	},
 	"Children": [
 		{
@@ -16,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220212224529-hcqln0k",
-				"updated": "20220212224529"
+				"updated": "20241218172032"
 			},
 			"Children": [
 				{
@@ -31,7 +31,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220212224529-q784muc",
-				"updated": "20221027114353"
+				"updated": "20241218172032"
 			},
 			"Children": [
 				{
@@ -71,7 +71,7 @@
 					},
 					"Properties": {
 						"id": "20220212224529-q652whb",
-						"updated": "20221027114353"
+						"updated": "20241218172032"
 					},
 					"Children": [
 						{
@@ -79,12 +79,12 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220212224529-1embibu",
-								"updated": "20221027114353"
+								"updated": "20241218172032"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "最新日期：2022 年 10 月 27 日"
+									"Data": "最新日期：2024 年 12 月 18 日"
 								}
 							]
 						}
@@ -3498,102 +3498,6 @@
 				{
 					"Type": "NodeText",
 					"Data": "开发类服务 SDK："
-				}
-			]
-		},
-		{
-			"ID": "20221027112340-j85t36u",
-			"Type": "NodeBlockquote",
-			"Properties": {
-				"id": "20221027112340-j85t36u",
-				"updated": "20221027112341"
-			},
-			"Children": [
-				{
-					"Type": "NodeBlockquoteMarker",
-					"Data": "\u003e"
-				},
-				{
-					"ID": "20221027112341-fh7jv2y",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20221027112341-fh7jv2y",
-						"updated": "20221027112341"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "SDK 名称：Sentry"
-						}
-					]
-				},
-				{
-					"ID": "20221027112341-znirf8k",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20221027112341-znirf8k",
-						"updated": "20221027112341"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "公司名称：FUNCTIONAL SOFTWARE, INC."
-						}
-					]
-				},
-				{
-					"ID": "20221027112341-japnv8y",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20221027112341-japnv8y",
-						"updated": "20221027112341"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "SDK 官网："
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "a",
-							"TextMarkAHref": "https://sentry.io/",
-							"TextMarkTextContent": "https://sentry.io"
-						}
-					]
-				},
-				{
-					"ID": "20221027112341-ohaorb0",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20221027112341-ohaorb0",
-						"updated": "20221027112341"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "使用目的：用于收集报错信息和诊断数据，进而改善用户体验"
-						}
-					]
-				},
-				{
-					"ID": "20221027112341-n2n81eo",
-					"Type": "NodeParagraph",
-					"Properties": {
-						"id": "20221027112341-n2n81eo",
-						"updated": "20221027112341"
-					},
-					"Children": [
-						{
-							"Type": "NodeText",
-							"Data": "收集的个人信息类型/字段：设备标识信息和报错日志、诊断数据等不涉及个人隐私的数据 "
-						},
-						{
-							"Type": "NodeTextMark",
-							"TextMarkType": "a",
-							"TextMarkAHref": "https://sentry.io/privacy/",
-							"TextMarkTextContent": "https://sentry.io/privacy/"
-						}
-					]
 				}
 			]
 		},

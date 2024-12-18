@@ -317,8 +317,7 @@ func exportNotebookMd(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	p := arg["path"].(string)
-	zipPath := model.ExportNotebookMarkdown(notebook, p)
+	zipPath := model.ExportNotebookMarkdown(notebook)
 	ret.Data = map[string]interface{}{
 		"name": path.Base(zipPath),
 		"zip":  zipPath,

@@ -1,6 +1,7 @@
 {
   "second": "שנייה",
   "syncInterval": "מרווח סנכרון",
+  "syncIntervalTip": "סנכרון נתונים אוטומטי לאחר שהנתונים מפסיקים להשתנות",
   "removeAV": "הסר ממסד הנתונים",
   "empty": "ריק",
   "newRowInRelation": "צור ערך חדש ב-${x} <b class='ft__on-surface'>${y}</b>",
@@ -913,7 +914,7 @@
   "insertBefore": "הכנס בלוק ריק לפני הבלוק שבו נמצא הסמן",
   "insertAfter": "הכנס בלוק ריק אחרי הבלוק שבו נמצא הסמן",
   "list1": "רשימה",
-  "insert": "הכנס אלמנט",
+  "element": "אלמנט",
   "closeTab": "סגור טאב נוכחי",
   "keymap": "מפת מקשים",
   "clearFontStyle": "נקה סגנון",

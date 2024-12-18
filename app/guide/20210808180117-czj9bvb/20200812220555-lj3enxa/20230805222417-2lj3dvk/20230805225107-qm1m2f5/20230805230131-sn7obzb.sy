@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230805230131-sn7obzb",
 		"title": "对接第三方云端存储",
-		"updated": "20240301090951"
+		"type": "doc",
+		"updated": "20241216171525"
 	},
 	"Children": [
 		{
@@ -55,7 +56,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805230746-4q9cmrb",
-				"updated": "20240301090951"
+				"updated": "20241216171525"
 			},
 			"Children": [
 				{
@@ -121,7 +122,7 @@
 					},
 					"Properties": {
 						"id": "20230805230746-zb33erf",
-						"updated": "20240301090951"
+						"updated": "20241216171525"
 					},
 					"Children": [
 						{
@@ -129,7 +130,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230805230746-i9fzmzi",
-								"updated": "20240301090951"
+								"updated": "20241216171521"
 							},
 							"Children": [
 								{
@@ -141,20 +142,79 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://infini-cloud.net/",
 									"TextMarkTextContent": "InfiniCLOUD"
+								}
+							]
+						},
+						{
+							"ID": "20241216171521-40xtiyf",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241216171521-40xtiyf",
+								"updated": "20241216171525"
+							},
+							"Children": [
+								{
+									"ID": "20241216171530-dhfkay6",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241216171530-dhfkay6",
+										"updated": "20241216171530"
+									},
+									"Children": [
+										{
+											"ID": "20241216171530-kxdtu73",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241216171530-kxdtu73",
+												"updated": "20241216171531"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "由于 WebDAV 协议本身的问题，数据量较大后会出现启动慢、同步慢、资源占用高等问题，所以建议选择使用 S3 对象存储"
+												}
+											]
+										}
+									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "（不支持坚果云 WebDAV，因为其"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
-									"TextMarkTextContent": "接口存在限制"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "）"
+									"ID": "20241216171521-ccruwd8",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241216171521-ccruwd8",
+										"updated": "20241216171525"
+									},
+									"Children": [
+										{
+											"ID": "20241216171521-z0p3t71",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241216171521-z0p3t71",
+												"updated": "20241216171525"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "不支持坚果云 WebDAV，因为其"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
+													"TextMarkTextContent": "接口存在限制"
+												}
+											]
+										}
+									]
 								}
 							]
 						}
@@ -167,7 +227,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230805230746-pq0po1p",
-				"updated": "20230828111951"
+				"updated": "20241216171020"
 			},
 			"Children": [
 				{

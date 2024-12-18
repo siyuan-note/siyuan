@@ -1,4 +1,7 @@
 {
+  "second": "second",
+  "syncInterval": "sync interval",
+  "syncIntervalTip": "Automatically sync data after it stops changing",
   "removeAV": "Remove from database",
   "empty": "Empty",
   "newRowInRelation": "Create a new entry in ${x} <b class='ft__on-surface'>${y}</b>",
@@ -911,7 +914,7 @@
   "insertBefore": "Insert an empty block before the block where the cursor is",
   "insertAfter": "Insert an empty block after the block where the cursor is located",
   "list1": "List",
-  "insert": "Insert Element",
+  "element": "Element",
   "closeTab": "Close current Tab",
   "keymap": "Keymap",
   "clearFontStyle": "Clear Style",

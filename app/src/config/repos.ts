@@ -392,7 +392,7 @@ export const repos = {
             <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
         </select>
     </div>
-    <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) ? " fn__none" : ""}">
+    <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1) ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.syncInterval}
             <div class="b3-label__text">${window.siyuan.languages.syncIntervalTip}</div>
@@ -477,9 +477,12 @@ export const repos = {
             fetchPost("/api/sync/setSyncMode", {mode: parseInt(syncModeElement.value, 10)}, () => {
                 if (syncModeElement.value === "1" && window.siyuan.config.sync.provider === 0 && window.siyuan.config.system.container !== "docker") {
                     syncPerceptionElement.parentElement.classList.remove("fn__none");
-                    syncIntervalElement.parentElement.classList.remove("fn__none");
                 } else {
                     syncPerceptionElement.parentElement.classList.add("fn__none");
+                }
+                if (syncModeElement.value === "1") {
+                    syncIntervalElement.parentElement.classList.remove("fn__none");
+                } else {
                     syncIntervalElement.parentElement.classList.add("fn__none");
                 }
                 window.siyuan.config.sync.mode = parseInt(syncModeElement.value, 10);
@@ -502,9 +505,12 @@ export const repos = {
                 syncConfigElement.classList.add("fn__none");
                 if (window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) {
                     syncPerceptionElement.parentElement.classList.add("fn__none");
-                    syncIntervalElement.parentElement.classList.add("fn__none");
                 } else {
                     syncPerceptionElement.parentElement.classList.remove("fn__none");
+                }
+                if (window.siyuan.config.sync.mode !== 1) {
+                    syncIntervalElement.parentElement.classList.add("fn__none");
+                } else {
                     syncIntervalElement.parentElement.classList.remove("fn__none");
                 }
             });

@@ -874,7 +874,8 @@ interface IAVCellValue {
     mAsset?: IAVCellAssetValue[]
     block?: {
         content: string,
-        id?: string
+        id?: string,
+        icon?: string
     }
     url?: {
         content: string

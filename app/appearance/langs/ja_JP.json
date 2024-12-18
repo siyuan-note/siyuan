@@ -1,6 +1,7 @@
 {
   "second": "秒",
   "syncInterval": "同期間隔",
+  "syncIntervalTip": "データが変動しなくなった後に自動的にデータを同期します",
   "removeAV": "データベースから削除",
   "empty": "空白",
   "newRowInRelation": "${x} に新しい項目を作成 <b class='ft__on-surface'>${y}</b>",
@@ -913,7 +914,7 @@
   "insertBefore": "前にブロックを挿入",
   "insertAfter": "後にブロックを挿入",
   "list1": "リスト",
-  "insert": "要素の挿入",
+  "element": "要素",
   "closeTab": "現在のタブを閉じる",
   "keymap": "ショートカット",
   "clearFontStyle": "スタイルを消去",

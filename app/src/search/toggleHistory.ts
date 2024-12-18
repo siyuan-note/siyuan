@@ -13,7 +13,7 @@ import {inputEvent} from "./util";
 
 export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.replaceKeys || list.replaceKeys.length === 0) {
+    if (!list.replaceKeys || list.replaceKeys.length === 0 || (list.length === 1 && list[0] === replaceInputElement.value)) {
         return;
     }
     const menu = new Menu("search-replace-history");
@@ -79,8 +79,9 @@ export const toggleReplaceHistory = (replaceInputElement: HTMLInputElement) => {
 };
 
 export const toggleSearchHistory = (searchElement: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
+    const searchInputElement = searchElement.querySelector("#searchInput, #toolbarSearch") as HTMLInputElement;
     const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.keys || list.keys.length === 0) {
+    if (!list.keys || list.keys.length === 0 || (list.length === 1 && list[0] === searchInputElement.value)) {
         return;
     }
     const menu = new Menu("search-history");
@@ -98,7 +99,6 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
     });
     const separatorElement = menu.addSeparator(1);
     let current = true;
-    const searchInputElement = searchElement.querySelector("#searchInput, #toolbarSearch") as HTMLInputElement;
     list.keys.forEach((s: string) => {
         if (s !== searchInputElement.value && s) {
             const menuItem = menu.addItem({
@@ -153,8 +153,9 @@ export const toggleSearchHistory = (searchElement: Element, config: Config.IUILa
 };
 
 export const toggleAssetHistory = (assetElement: Element) => {
+    const assetInputElement = assetElement.querySelector("#searchAssetInput") as HTMLInputElement;
     const keys = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
-    if (!keys || keys.length === 0) {
+    if (!keys || keys.length === 0 || (keys.length === 1 && keys[0] === assetInputElement.value)) {
         return;
     }
     const menu = new Menu("search-asset-history");
@@ -172,7 +173,6 @@ export const toggleAssetHistory = (assetElement: Element) => {
     });
     const separatorElement = menu.addSeparator(1);
     let current = true;
-    const assetInputElement = assetElement.querySelector("#searchAssetInput") as HTMLInputElement;
     keys.forEach((s: string) => {
         if (s !== assetInputElement.value && s) {
             const menuItem = menu.addItem({
@@ -233,7 +233,7 @@ export const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
     setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
 };
 
-export const saveAssetKeyList = (inputElement:HTMLInputElement) => {
+export const saveAssetKeyList = (inputElement: HTMLInputElement) => {
     if (!inputElement.value) {
         return;
     }

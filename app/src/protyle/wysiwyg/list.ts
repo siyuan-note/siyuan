@@ -83,7 +83,6 @@ export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: 
     range.collapse(false);
     range.insertNode(document.createElement("wbr"));
     liItemElements.forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
     });
@@ -348,7 +347,6 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         let nextElement = liItemElements[liItemElements.length - 1].nextElementSibling;
         let lastBlockElement = liItemElements[liItemElements.length - 1].lastElementChild.previousElementSibling;
         liItemElements.forEach(item => {
-            item.classList.remove("protyle-wysiwyg--select");
             item.removeAttribute("select-start");
             item.removeAttribute("select-end");
             Array.from(item.children).forEach((blockElement, index) => {
@@ -507,7 +505,6 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     const undoOperations: IOperation[] = [];
     const previousID = liItemElements[0].previousElementSibling?.getAttribute("data-node-id");
     liItemElements.forEach(item => {
-        item.classList.remove("protyle-wysiwyg--select");
         item.removeAttribute("select-start");
         item.removeAttribute("select-end");
     });

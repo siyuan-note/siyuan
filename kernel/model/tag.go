@@ -328,7 +328,7 @@ func labelTags() (ret map[string]Tags) {
 
 	tagSpans := sql.QueryTagSpans("")
 	for _, tagSpan := range tagSpans {
-		label := tagSpan.Content
+		label := util.UnescapeHTML(tagSpan.Content)
 		if _, ok := ret[label]; ok {
 			ret[label] = append(ret[label], &Tag{})
 		} else {

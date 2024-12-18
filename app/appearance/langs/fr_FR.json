@@ -1179,8 +1179,6 @@
   "about6": "Configuré comme mot de passe d'authentification d'accès, laisser vide pour désactiver l'authentification.",
   "about7": "Suivez l'écran de verrouillage du système",
   "about8": "Après activation, l'application sera automatiquement verrouillée lors du verrouillage de l'écran système",
-  "about9": "Télécharger automatiquement les messages d'erreur et les données de diagnostic",
-  "about10": "Après l'activation, il télécharge automatiquement les informations d'erreur et les données de diagnostic via le SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, qui n'implique pas de données de confidentialité personnelles afin que les développeurs peut corriger des bogues.  L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about11": "Service de réseau",
   "about12": "Après l'activation, les autres appareils du même réseau local seront autorisés à accéder. L'application sera fermée automatiquement après modification, veuillez la redémarrer manuellement.",
   "about13": "API token",

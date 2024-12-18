@@ -1179,8 +1179,6 @@
   "about6": "Nach der Konfiguration wird es als Zugangsauthentifizierungspasswort verwendet, lassen Sie es leer, um die Authentifizierung zu schließen",
   "about7": "Entspricht dem Systembildschirm",
   "about8": "Nach der Aktivierung wird die Anwendung automatisch gesperrt, wenn der Systembildschirm gesperrt wird",
-  "about9": "Fehlermeldungen und Diagnosedaten automatisch hochladen",
-  "about10": "Nach der Aktivierung werden Fehlerinformationen und Diagnosedaten automatisch über das <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK hochgeladen, was keine persönlichen Privatsphärendaten umfasst, damit Entwickler Fehler beheben können. Die Anwendung wird nach der Modifikation automatisch geschlossen, bitte manuell neu starten",
   "about11": "Netzwerkservice",
   "about12": "Nach der Aktivierung dürfen andere Geräte im selben LAN zugreifen. Die Anwendung wird nach der Modifikation automatisch geschlossen, bitte manuell neu starten",
   "about13": "API-Token",

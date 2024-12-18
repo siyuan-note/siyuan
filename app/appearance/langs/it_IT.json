@@ -1179,8 +1179,6 @@
   "about6": "Dopo la configurazione, verrà utilizzato come password di autenticazione per l'accesso. Lascia vuoto per chiudere l'autenticazione",
   "about7": "Segui il blocco schermo del sistema",
   "about8": "Dopo l'abilitazione, l'applicazione verrà automaticamente bloccata quando blocchi lo schermo del sistema",
-  "about9": "Carica automaticamente i messaggi di errore e i dati diagnostici",
-  "about10": "Dopo l'abilitazione, caricherà automaticamente informazioni sugli errori e dati diagnostici tramite l'SDK <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a>, che non riguarda i dati personali, in modo che gli sviluppatori possano risolvere i bug. L'applicazione verrà chiusa automaticamente dopo la modifica, si prega di riavviarla manualmente",
   "about11": "Servizio di rete",
   "about12": "Dopo l'abilitazione, altri dispositivi nella stessa LAN potranno accedere. L'applicazione verrà chiusa automaticamente dopo la modifica, si prega di riavviarla manualmente",
   "about13": "Token API",

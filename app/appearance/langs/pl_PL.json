@@ -1179,8 +1179,6 @@
   "about6": "Po skonfigurowaniu, będzie używany jako hasło do autoryzacji dostępu, zostaw puste, aby wyłączyć autoryzację",
   "about7": "Podążaj za ekranem blokady systemu",
   "about8": "Po włączeniu, aplikacja zostanie automatycznie zablokowana przy zablokowaniu ekranu systemu",
-  "about9": "Automatycznie przesyłaj wiadomości o błędach i dane diagnostyczne",
-  "about10": "Po włączeniu, automatycznie przesyła informacje o błędach i dane diagnostyczne przez <a href=\"https://sentry.io\" target=\"_blank\">Sentry</a> SDK, co nie wiąże się z danymi prywatnymi, dzięki czemu deweloperzy mogą poprawiać błędy. Aplikacja zostanie automatycznie zamknięta po modyfikacji, proszę uruchomić ją ponownie ręcznie",
   "about11": "Usługa sieciowa",
   "about12": "Po włączeniu, inne urządzenia w tej samej sieci LAN będą miały możliwość dostępu. Aplikacja zostanie automatycznie zamknięta po modyfikacji, proszę uruchomić ponownie ręcznie",
   "about13": "Token API",

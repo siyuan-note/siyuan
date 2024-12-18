@@ -67,8 +67,8 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
-                const dataName = aElement.getAttribute("data-name") || "";
-                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${dataName ? "<div class=\"fn__hr\"></div>" + dataName : ""}` : dataName;
+                const title = aElement.getAttribute("data-name") || "";
+                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}` : title;
                 tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
@@ -92,16 +92,16 @@ export const initBlockPopover = (app: App) => {
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
                         if (response.code === 1) {
                             if (title) {
-                                assetTip += '<div class="fn__hr"></div>' + title;
+                                assetTip += '<div class="fn__hr"></div><span>' + title + "</span>";
                             }
                         } else {
-                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div>' + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
+                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
                         showTooltip(assetTip, aElement, tooltipClass);
                     });
                     tip = "";
                 } else if (title) {
-                    tip += '<div class="fn__hr"></div>' + title;
+                    tip += '<div class="fn__hr"></div><span>' + title + "</span>";
                 }
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {

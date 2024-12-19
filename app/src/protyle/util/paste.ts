@@ -395,6 +395,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
+        // https://github.com/siyuan-note/siyuan/issues/13552
+        textPlain = textPlain.replace(/\u200D```/g, "```");
+        textPlain = textPlain.replace(/```/g, "\u200D```");
+
         insertHTML(textPlain, protyle);
         return;
     } else if (siyuanHTML) {
@@ -434,6 +438,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 // 复制 HTML 块粘贴出来的不是 HTML 块 https://github.com/siyuan-note/siyuan/issues/12994
                 tempInnerHTML = Lute.UnEscapeHTMLStr(tempInnerHTML);
             }
+
+            // https://github.com/siyuan-note/siyuan/issues/13552
+            tempInnerHTML = tempInnerHTML.replace(/\u200D```/g, "```");
+
             insertHTML(tempInnerHTML, protyle, isBlock, false, true);
         }
         filterClipboardHint(protyle, protyle.lute.BlockDOM2StdMd(tempInnerHTML));
@@ -531,6 +539,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
+
+            // https://github.com/siyuan-note/siyuan/issues/13552
+            textPlain = textPlain.replace(/\u200D```/g, "```");
+
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             insertHTML(textPlainDom, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);

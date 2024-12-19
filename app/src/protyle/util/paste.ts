@@ -398,6 +398,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // https://github.com/siyuan-note/siyuan/issues/13552
         textPlain = textPlain.replace(/\u200D```/g, "```");
         textPlain = textPlain.replace(/```/g, "\u200D```");
+
         insertHTML(textPlain, protyle);
         return;
     } else if (siyuanHTML) {
@@ -534,6 +535,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     }
                 }
             }
+
+            // https://github.com/siyuan-note/siyuan/issues/13552
+            textPlain = textPlain.replace(/\u200D```/g, "```");
+
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
             insertHTML(textPlainDom, protyle, false, false, true);
             filterClipboardHint(protyle, textPlain);

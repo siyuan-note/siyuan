@@ -16,6 +16,7 @@ import {Constants} from "../constants";
 import {Setting} from "./Setting";
 import {Menu} from "./Menu";
 import {Protyle} from "../protyle";
+import {renderAVAttribute as blockAttrRenderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
@@ -24,11 +25,15 @@ import {getAllEditor} from "../layout/getAll";
 
 let openTab;
 let openWindow;
+let renderAVAttribute;
 /// #if MOBILE
 openTab = () => {
     // TODO: Mobile
 };
 openWindow = () => {
+    // TODO: Mobile
+};
+renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void) => {
     // TODO: Mobile
 };
 /// #else
@@ -166,6 +171,11 @@ openTab = (options: {
     }
 
 };
+
+renderAVAttribute = (element: HTMLElement, id: string, protyle: IProtyle, cb?: (element: HTMLElement) => void) => {
+    blockAttrRenderAVAttribute(element, id, protyle, cb);
+};
+
 /// #endif
 
 const getModelByDockType = (type: TDock | string) => {
@@ -198,5 +208,6 @@ export const API = {
     Menu,
     Setting,
     getAllEditor,
+    renderAVAttribute,
     platformUtils
 };

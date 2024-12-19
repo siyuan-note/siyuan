@@ -168,7 +168,7 @@ const renderPDF = async (id: string) => {
         .b3-label:last-child {
             border-bottom: none;
         }
-        ${setInlineStyle(false)}
+        ${await setInlineStyle(false)}
         ${document.getElementById("pluginsStyle").innerHTML}
         ${getSnippetCSS()}
     </style>

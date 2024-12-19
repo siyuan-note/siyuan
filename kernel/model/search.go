@@ -475,6 +475,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	r, _ := regexp.Compile(keyword)
 	escapedKey := util.EscapeHTML(keyword)
+	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
+	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	escapedR, _ := regexp.Compile(escapedKey)
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	var renameRoots []*ast.Node
@@ -1517,7 +1519,6 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
-	query = stringQuery(query)
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {

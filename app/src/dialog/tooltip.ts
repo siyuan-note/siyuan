@@ -53,6 +53,10 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     } else if (position?.endsWith("top")) {
         // 编辑器动态滚动条
         top = targetRect.top - messageElement.clientHeight;
+    } else if (position?.endsWith("west")) {
+        // 删除按钮
+        top = targetRect.top + (parseInt(position) || 0);
+        left = targetRect.left - messageElement.clientWidth - 8;
     }
 
     const topHeight = position === "parentE" ? top : targetRect.top;

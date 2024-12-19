@@ -1473,11 +1473,6 @@ func ExportNotebookMarkdown(boxID string) (zipPath string) {
 	docFiles := box.ListFiles("/")
 	var docPaths []string
 	for _, docFile := range docFiles {
-		id := strings.TrimSuffix(path.Base(docFile.path), ".sy")
-		if !ast.IsNodeIDPattern(id) {
-			continue
-		}
-
 		docPaths = append(docPaths, docFile.path)
 	}
 
@@ -3108,11 +3103,11 @@ func prepareExportTrees(docPaths []string) (defBlockIDs []string, trees *map[str
 	treeCache := &map[string]*parse.Tree{}
 	defBlockIDs = []string{}
 	for _, p := range docPaths {
-		if strings.HasSuffix(p, ".sy") {
+		id := strings.TrimSuffix(path.Base(p), ".sy")
+		if !ast.IsNodeIDPattern(id) {
 			continue
 		}
 
-		id := util.GetTreeID(p)
 		tree, err := loadTreeWithCache(id, treeCache)
 		if err != nil {
 			continue

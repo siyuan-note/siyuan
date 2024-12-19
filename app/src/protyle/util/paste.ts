@@ -395,6 +395,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
+        // https://github.com/siyuan-note/siyuan/issues/13552
+        textPlain = textPlain.replace(/\u200D```/g, "```");
+        textPlain = textPlain.replace(/```/g, "\u200D```");
         insertHTML(textPlain, protyle);
         return;
     } else if (siyuanHTML) {

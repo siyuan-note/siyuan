@@ -1,7 +1,7 @@
 import {isMobile} from "../util/functions";
 import {Constants} from "../constants";
 
-export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
+export const showTooltip = (message: string, target: Element, tooltipClasses?: string[]) => {
     if (isMobile()) {
         return;
     }
@@ -11,7 +11,10 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         return;
     }
 
-    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
+    // 合并默认类名和额外类名
+    const additionalClasses = tooltipClasses ? tooltipClasses.map(cls => `tooltip--${cls}`).join(" ") : "";
+    const className = ["tooltip ", additionalClasses].filter(Boolean).join("");
+
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
         document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);

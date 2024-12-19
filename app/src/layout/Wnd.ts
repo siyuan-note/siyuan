@@ -320,6 +320,25 @@ export class Wnd {
             saveLayout();
         });
 
+        const updateDragElementStyle = (event: DragEvent, rect: DOMRect, dragElement: HTMLElement) => {
+            const height = rect.height;
+            const width = rect.width;
+            const x = event.clientX - rect.left;
+            const y = event.clientY - rect.top;
+
+            if (x < width / 3 && x / y < 2 * width / height && x / (height - y) < 2 * width / height) {
+                dragElement.setAttribute("style", "height:100%;width:50%;right:50%;bottom:0;left:0;top:0");
+            } else if (x > width * 2 / 3 && (width - x) / y < 2 * width / height && (width - x) / (height - y) < 2 * width / height) {
+                dragElement.setAttribute("style", "height:100%;width:50%;right:0;bottom:0;left:50%;top:0");
+            } else if (y < height / 6) {
+                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:50%;left:0;top:0");
+            } else if (y > height * 5 / 6) {
+                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:0;left:0;top:50%");
+            } else {
+                dragElement.setAttribute("style", "height:100%;width:100%;right:0;bottom:0;left:0;top:0");
+            }
+        };
+
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 const tabHeadersElement = hasClosestByClassName(event.target, "layout-tab-bar");
@@ -329,7 +348,8 @@ export class Wnd {
                 const tabPanelsElement = hasClosestByClassName(event.target, "layout-tab-container", true);
                 if (tabPanelsElement) {
                     dragElement.classList.remove("fn__none");
-                    dragElement.setAttribute("style", "height:100%;width:100%;right:auto;bottom:auto");
+                    const rect = dragElement.parentElement.getBoundingClientRect();
+                    updateDragElementStyle(event, rect, dragElement);
                 }
             }
         });
@@ -340,24 +360,12 @@ export class Wnd {
                 return;
             }
             const rect = dragElement.parentElement.getBoundingClientRect();
-            const height = rect.height;
-            const width = rect.width;
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            if (x <= width / 8 || (x <= width / 3 && x > width / 8 && y >= height / 8 && y <= height * 7 / 8)) {
-                dragElement.setAttribute("style", "height:100%;width:50%;right:50%;bottom:0;left:0;top:0");
-            } else if (x >= width * 7 / 8 || (x >= width * 2 / 3 && x < width * 7 / 8 && y >= height / 8 && y <= height * 7 / 8)) {
-                dragElement.setAttribute("style", "height:100%;width:50%;right:0;bottom:0;left:50%;top:0");
-            } else if (y <= height / 8) {
-                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:50%;left:0;top:0");
-            } else if (y >= height * 7 / 8) {
-                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:0;left:0;top:50%");
-            } else {
-                dragElement.setAttribute("style", "height:100%;width:100%;right:0;bottom:0;top:0;left:0");
-            }
+            updateDragElementStyle(event, rect, dragElement);
         });
+
         dragElement.addEventListener("dragleave", () => {
             dragElement.classList.add("fn__none");
+            dragElement.removeAttribute("style");
         });
         dragElement.addEventListener("drop", (event: DragEvent & { target: HTMLElement }) => {
             dragElement.classList.add("fn__none");
@@ -374,6 +382,7 @@ export class Wnd {
             }
             /// #endif
             if (!oldTab) {
+                dragElement.removeAttribute("style");
                 return;
             }
 
@@ -406,10 +415,12 @@ export class Wnd {
                 /// #if !BROWSER
                 setTabPosition();
                 /// #endif
+                dragElement.removeAttribute("style");
                 return;
             }
 
             if (targetWndElement.contains(document.querySelector(`[data-id="${tabData.id}"]`))) {
+                dragElement.removeAttribute("style");
                 return;
             }
             if (targetWnd) {
@@ -418,6 +429,8 @@ export class Wnd {
                 targetWnd.moveTab(oldTab);
                 resizeTabs();
             }
+
+            dragElement.removeAttribute("style");
         });
     }
 

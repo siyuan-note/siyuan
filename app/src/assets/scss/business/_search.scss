@@ -127,10 +127,7 @@
     overflow: auto;
     padding: 8px 0;
     background-color: var(--b3-theme-background);
-
-    .b3-list-item__text {
-      user-select: none;
-    }
+    user-select: none;
   }
 
   &__path {

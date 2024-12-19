@@ -95,7 +95,7 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		if splitWords {
 			wordBoundary = lex.IsASCIILetterNums(gulu.Str.ToBytes(k)) // Improve virtual reference split words https://github.com/siyuan-note/siyuan/issues/7833
 		}
-		k = regexp.QuoteMeta(k)
+		k = regexp.QuoteMeta(util.EscapeHTML(k))
 		re += "("
 		if wordBoundary {
 			re += "\\b"
@@ -110,10 +110,10 @@ func EncloseHighlighting(text string, keywords []string, openMark, closeMark str
 		}
 	}
 	re += ")"
-	ret = text
+	ret = util.EscapeHTML(text)
 
 	if reg, err := regexp.Compile(re); err == nil {
-		ret = reg.ReplaceAllStringFunc(text, func(s string) string { return openMark + util.EscapeHTML(s) + closeMark })
+		ret = reg.ReplaceAllStringFunc(ret, func(s string) string { return openMark + s + closeMark })
 	}
 
 	// 搜索结果预览包含转义符问题 Search results preview contains escape character issue https://github.com/siyuan-note/siyuan/issues/9790

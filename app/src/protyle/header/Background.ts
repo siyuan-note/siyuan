@@ -443,7 +443,7 @@ export class Background {
         if (tags) {
             let html = "";
             const colors = ["secondary", "primary", "info", "success", "warning", "error", "pink"];
-            new Set(tags.split(",").map(item => item.trim())).forEach((item, index) => {
+            Array.from(new Set(tags.split(",").map(item => item.trim()))).forEach((item, index) => {
                 if (!item.replace(/ /g, "")) {
                     return;
                 }
@@ -526,7 +526,7 @@ export class Background {
                     response.data.tags.forEach((item: string, index: number) => {
                         html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}">
     <div class="fn__flex-1">${item}</div>
-    ${currentTags.includes(Lute.UnEscapeHTMLStr(item))?'<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>':""}
+    ${currentTags.includes(Lute.UnEscapeHTMLStr(item)) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
 </div>`;
                     });
                     listElement.innerHTML = html;
@@ -562,7 +562,7 @@ export class Background {
                         response.data.tags.forEach((item: string) => {
                             searchHTML += `<div class="b3-list-item b3-list-item--narrow">
     <div class="fn__flex-1">${item}</div>
-    ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g,"").replace(/<\/mark>/g,"")))?'<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>':""}
+    ${currentTags.includes(Lute.UnEscapeHTMLStr(item.replace(/<mark>/g, "").replace(/<\/mark>/g, ""))) ? '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>' : ""}
 </div>`;
                             if (item === `<mark>${response.data.k}</mark>`) {
                                 hasKey = true;

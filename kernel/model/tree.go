@@ -210,7 +210,8 @@ func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
 
 func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	if !ast.IsNodeIDPattern(id) {
-		logging.LogErrorf("block id is invalid [id=%s]", id)
+		stack := logging.ShortStack()
+		logging.LogErrorf("block id is invalid [id=%s], stack: [%s]", id, stack)
 		return nil, ErrTreeNotFound
 	}
 

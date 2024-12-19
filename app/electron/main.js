@@ -862,7 +862,7 @@ app.whenReady().then(() => {
                 }
                 break;
             case "setTrafficLightPosition":
-                if (!currentWindow) {
+                if (!currentWindow || !currentWindow.setWindowButtonPosition) {
                     return;
                 }
                 if (new URL(currentWindow.getURL()).pathname === "/stage/build/app/window.html") {

@@ -208,7 +208,7 @@ export const setInlineStyle = async (set = true) => {
     if (isMac() || isIPad() || isIPhone()) {
         style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
 }
 @font-face {
@@ -231,7 +231,7 @@ export const setInlineStyle = async (set = true) => {
         if (isWin11Browser) {
             style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
   U+e0065, U+e006e, U+e0067, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
 }
@@ -251,7 +251,7 @@ export const setInlineStyle = async (set = true) => {
             style = `
 @font-face {
   font-family: "Emojis Reset";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+263a, U+2194-2199, U+2934-2935, U+2639, U+26a0, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+203c, U+2049,
   U+2611, U+303d, U+00a9, U+00ae, U+2122, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a,
   U+1f232-1f23a, U+1f251, U+3297, U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642,
@@ -260,7 +260,7 @@ export const setInlineStyle = async (set = true) => {
 }
 @font-face {
   font-family: "Emojis";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2"),
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol"),
   local("Apple Color Emoji"),

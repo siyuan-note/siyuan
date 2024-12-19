@@ -57,7 +57,7 @@ export const showTooltip = (message: string, target: Element, tooltipClasses?: s
         // 编辑器动态滚动条
         top = targetRect.top - messageElement.clientHeight;
     } else if (position?.endsWith("west")) {
-        // 删除按钮
+        // 数据库属性视图 移除条目按钮
         top = targetRect.top + (parseInt(position) || 0);
         left = targetRect.left - messageElement.clientWidth - 8;
     }

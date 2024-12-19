@@ -751,7 +751,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		from := filepath.Join(util.DataDir, emoji)
 		to := filepath.Join(savePath, emoji)
 		if err := filelock.Copy(from, to); err != nil {
-			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
+			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
 			return
 		}
 	}
@@ -909,7 +909,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			from := filepath.Join(util.DataDir, emoji)
 			to := filepath.Join(savePath, emoji)
 			if err := filelock.Copy(from, to); err != nil {
-				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, savePath, err)
+				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
 				return
 			}
 		}
@@ -1721,6 +1721,16 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 			}
 
 			copiedAssets.Add(asset)
+		}
+
+		// 复制自定义表情图片
+		emojis := emojisInTree(tree)
+		for _, emoji := range emojis {
+			from := filepath.Join(util.DataDir, emoji)
+			to := filepath.Join(exportFolder, emoji)
+			if copyErr := filelock.Copy(from, to); copyErr != nil {
+				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, copyErr)
+			}
 		}
 	}
 

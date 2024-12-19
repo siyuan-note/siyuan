@@ -392,7 +392,7 @@ export const repos = {
             <option value="3" ${window.siyuan.config.sync.mode === 3 ? "selected" : ""}>${window.siyuan.languages.syncMode3}</option>
         </select>
     </div>
-    <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1) ? " fn__none" : ""}">
+    <div class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1) ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.syncInterval}
             <div class="b3-label__text">${window.siyuan.languages.syncIntervalTip}</div>
@@ -401,7 +401,7 @@ export const repos = {
         <input type="number" min="30" max="43200" id="syncInterval" class="b3-text-field fn__flex-center" value="${window.siyuan.config.sync.interval}" >
         <span class="fn__space"></span>        
         <span class="fn__flex-center ft__on-surface">${window.siyuan.languages.second}</span> 
-    </label>
+    </div>
     <label class="fn__flex b3-label${(window.siyuan.config.sync.mode !== 1 || window.siyuan.config.system.container === "docker" || window.siyuan.config.sync.provider !== 0) ? " fn__none" : ""}">
         <div class="fn__flex-1">
             ${window.siyuan.languages.syncPerception}

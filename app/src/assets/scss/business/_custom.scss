@@ -40,6 +40,10 @@
         opacity: 1;
       }
     }
+
+    .block__icon[data-type="remove"]:hover {
+      color: var(--b3-theme-error);
+    }
   }
 
   .b3-label {

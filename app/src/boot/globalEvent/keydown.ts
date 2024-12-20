@@ -1366,14 +1366,14 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/8913#issuecomment-1679720605
-    const confirmElement = document.querySelector("#confirmDialogConfirmBtn");
-    if (confirmElement) {
+    const confirmDialogElement = document.querySelector('.b3-dialog--open[data-key="dialog-confirm"]');
+    if (confirmDialogElement) {
         if (event.key === "Enter") {
-            confirmElement.dispatchEvent(new CustomEvent("click"));
+            confirmDialogElement.dispatchEvent(new CustomEvent("click", {detail: event.key}));
             event.preventDefault();
             return;
         } else if (event.key === "Escape") {
-            confirmElement.previousElementSibling.previousElementSibling.dispatchEvent(new CustomEvent("click"));
+            confirmDialogElement.dispatchEvent(new CustomEvent("click", {detail: event.key}));
             event.preventDefault();
             return;
         }

@@ -1106,11 +1106,12 @@ export const openMenuPanel = (options: {
     <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
                         });
-                        dialog.element.addEventListener("click", (event) => {
-                            let target = event.target as HTMLElement;
-                            while (target && !target.isSameNode(dialog.element)) {
+                        dialog.element.addEventListener("click", (dialogEvent) => {
+                            let target = dialogEvent.target as HTMLElement;
+                            const isDispatch = typeof dialogEvent.detail === "string";
+                            while (target && !target.isSameNode(dialog.element) || isDispatch) {
                                 const action = target.getAttribute("data-action");
-                                if (action === "delete") {
+                                if (action === "delete" || (isDispatch && dialogEvent.detail === "Enter")) {
                                     removeCol({
                                         protyle: options.protyle,
                                         data,
@@ -1140,13 +1141,14 @@ export const openMenuPanel = (options: {
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--cancel")) {
+                                } else if (target.classList.contains("b3-button--cancel") || (isDispatch && dialogEvent.detail === "Escape")) {
                                     dialog.destroy();
                                     break;
                                 }
                                 target = target.parentElement;
                             }
                         });
+                        dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                     } else {
                         removeCol({
                             protyle: options.protyle,

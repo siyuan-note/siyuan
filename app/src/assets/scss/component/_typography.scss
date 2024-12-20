@@ -281,7 +281,7 @@
   }
 
   .code-block:not(pre) {
-    margin: 1em 0;
+    margin: 2px 0;
     box-sizing: border-box;
 
     .protyle-action {
@@ -299,8 +299,14 @@
         align-self: center;
       }
 
-      .protyle-icon,
+      .protyle-icon {
+        opacity: 0;
+        transition: var(--b3-transition);
+      }
+
       .protyle-action__language {
+        position: absolute;
+        left: 1em;
         opacity: 0;
         transition: var(--b3-transition);
       }

@@ -266,6 +266,15 @@
         max-width: 100%;
         padding: 2px 4px;
 
+        /* 选中块的高亮覆盖 border */
+        &.protyle-wysiwyg--select::after,
+        &.protyle-wysiwyg--hl::after{
+          width: calc(100% + 2px);
+          height: calc(100% + 2px);
+          left: -1px;
+          top: -1px;
+        }
+
         // https://github.com/siyuan-note/siyuan/issues/8715 & https://ld246.com/article/1689063197687 第一点无法进行以下设置
         //.protyle-attr--refcount {right: 0;}
 

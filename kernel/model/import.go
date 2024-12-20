@@ -554,6 +554,25 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		os.RemoveAll(assets)
 	}
 
+	// 将包含的自定义表情统一移动到 data/emojis/ 下
+	var emojiDirs []string
+	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if strings.Contains(path, "emojis") && d.IsDir() {
+			emojiDirs = append(emojiDirs, path)
+		}
+		return nil
+	})
+	dataEmojis := filepath.Join(util.DataDir, "emojis")
+	for _, emojis := range emojiDirs {
+		if gulu.File.IsDir(emojis) {
+			if err = filelock.Copy(emojis, dataEmojis); err != nil {
+				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", emojis, dataEmojis, err)
+				return
+			}
+		}
+		os.RemoveAll(emojis)
+	}
+
 	var baseTargetPath string
 	if "/" == toPath {
 		baseTargetPath = "/"

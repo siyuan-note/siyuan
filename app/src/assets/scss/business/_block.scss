@@ -85,7 +85,7 @@
     transition: var(--b3-transition), opacity .3s cubic-bezier(0, 0, .2, 1) 0ms;
     line-height: 14px;
 
-    &:hover:not([disabled]):not(.ft__primary),
+    &:hover:not([disabled]):not(.ft__primary):not(.block__icon--warning),
     &--active {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);
@@ -98,6 +98,11 @@
         opacity: .38;
         cursor: not-allowed;
       }
+    }
+
+    &--warning:hover {
+      color: var(--b3-theme-error);
+      background-color: var(--b3-list-icon-hover);
     }
 
     svg {

@@ -43,6 +43,7 @@ import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
 import {getAllModels} from "../layout/getAll";
 import {isSupportCSSHL} from "./render/searchMarkRender";
+import {renderAVAttribute} from "./render/av/blockAttr";
 
 export class Protyle {
 
@@ -462,5 +463,9 @@ export class Protyle {
 
     public enable() {
         enableProtyle(this.protyle);
+    }
+
+    public renderAVAttribute(element: HTMLElement, id: string, cb?: (element: HTMLElement) => void) {
+        renderAVAttribute(element, id, this.protyle, cb);
     }
 }

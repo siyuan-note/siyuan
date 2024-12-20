@@ -186,7 +186,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
     </div>
     <div class="fn__flex-1"></div>
     <span class="fn__space"></span>
-    <span data-type="remove" class="block__icon block__icon--show ariaLabel ariaLabel--warning" data-position="west" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+    <span data-type="remove" class="block__icon block__icon--warning block__icon--show ariaLabel" data-position="west" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
                 innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
@@ -358,6 +358,10 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                             action: "removeAttrViewBlock",
                             srcIDs: [id],
                             avID: blockElement.dataset.avId,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }]);
                         blockElement.remove();
                         if (!element.innerHTML) {

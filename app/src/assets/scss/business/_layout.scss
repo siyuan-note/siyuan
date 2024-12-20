@@ -409,14 +409,14 @@
       transition: var(--b3-transition);
     }
 
-    &:hover,
+    &:hover:not(.dock__item--activefocus),
     &--active {
       background-color: var(--b3-theme-background-light);
     }
 
     &--activefocus {
-      color: var(--b3-theme-on-primary) !important;
-      background-color: var(--b3-theme-primary) !important;
+      color: var(--b3-theme-on-primary);
+      background-color: var(--b3-theme-primary);
     }
   }
 }

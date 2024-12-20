@@ -10,7 +10,7 @@ import {Protyle} from "../protyle";
 import {resize} from "../protyle/util/resize";
 import {Menu} from "../plugin/Menu";
 
-export const openSearchUnRef = (element: Element, editor: Protyle) => {
+export const openSearchUnRef = (element: HTMLElement, editor: Protyle) => {
     window.siyuan.menus.menu.remove();
     element.previousElementSibling.previousElementSibling.classList.add("fn__none");
     element.classList.remove("fn__none");
@@ -46,7 +46,7 @@ export const openSearchUnRef = (element: Element, editor: Protyle) => {
 
         nextElement.classList.remove("fn__flex-1");
         nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
-
+        element.style.userSelect = "none";
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
             moveEvent.preventDefault();
             moveEvent.stopPropagation();
@@ -59,6 +59,7 @@ export const openSearchUnRef = (element: Element, editor: Protyle) => {
         };
 
         documentSelf.onmouseup = () => {
+            element.style.userSelect = "";
             documentSelf.onmousemove = null;
             documentSelf.onmouseup = null;
             documentSelf.ondragstart = null;

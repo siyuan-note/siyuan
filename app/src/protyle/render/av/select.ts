@@ -139,7 +139,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         if ((name === inputElement.value && desc === descElement.value) || !inputElement.value) {
             return;
         }
-        // 不判断重名 https://github.com/siyuan-note/siyuan/issues/11484
+        // cell 不判断重名 https://github.com/siyuan-note/siyuan/issues/11484
         transaction(protyle, [{
             action: "updateAttrViewColOption",
             id: colId,
@@ -163,13 +163,23 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }]);
         data.view.columns.find(column => {
             if (column.id === colId) {
+                // 重名不进行更新 https://github.com/siyuan-note/siyuan/issues/13554
+                let hasName = false;
                 column.options.find((item) => {
-                    if (item.name === name) {
-                        item.name = inputElement.value;
-                        item.desc = descElement.value;
+                    if (item.name === inputElement.value) {
+                        hasName = true;
                         return true;
                     }
                 });
+                if (!hasName) {
+                    column.options.find((item) => {
+                        if (item.name === name) {
+                            item.name = inputElement.value;
+                            item.desc = descElement.value;
+                            return true;
+                        }
+                    });
+                }
                 return true;
             }
         });

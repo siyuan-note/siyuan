@@ -28,7 +28,7 @@ export const initBlockPopover = (app: App) => {
         if (aElement) {
             const tooltipClasses: string[] = [];
             let tip = aElement.getAttribute("aria-label");
-            if (aElement.classList.contains("ariaLabel--warning")) {
+            if (aElement.classList.contains("has-tooltip--warning")) {
                 tooltipClasses.push("error");
             }
             if (aElement.getAttribute("data-type") === "tab-header") {

@@ -358,6 +358,10 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone"].includes
                             action: "removeAttrViewBlock",
                             srcIDs: [id],
                             avID: blockElement.dataset.avId,
+                        }, {
+                            action: "doUpdateUpdated",
+                            id,
+                            data: dayjs().format("YYYYMMDDHHmmss"),
                         }]);
                         blockElement.remove();
                         if (!element.innerHTML) {

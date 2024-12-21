@@ -148,11 +148,13 @@
     }
 
     &.sb {
+      display: flex;
+      flex-direction: column;
       padding: 0;
       max-width: 100%;
 
       &[data-sb-layout="col"] {
-        display: flex;
+        flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
         column-gap: 1.5em;

@@ -76,16 +76,23 @@ export const addSubList = (protyle: IProtyle, nodeElement: Element, range: Range
 };
 
 export const listIndent = (protyle: IProtyle, liItemElements: Element[], range: Range) => {
+    liItemElements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+    });
+    if (!liItemElements[0].classList.contains("li")) {
+        if (liItemElements[0].parentElement.childElementCount === liItemElements.length + 2) {
+            liItemElements = [liItemElements[0].parentElement];
+        } else {
+            return;
+        }
+    }
     const previousElement = liItemElements[0].previousElementSibling as HTMLElement;
     if (!previousElement) {
         return;
     }
     range.collapse(false);
     range.insertNode(document.createElement("wbr"));
-    liItemElements.forEach(item => {
-        item.removeAttribute("select-start");
-        item.removeAttribute("select-end");
-    });
     const html = previousElement.parentElement.outerHTML;
     if (previousElement.lastElementChild.previousElementSibling.getAttribute("data-type") === "NodeList") {
         // 上一个列表的最后一项为子列表
@@ -319,6 +326,17 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
  * @param deleteElement 末尾反向删除时才会传入
  */
 export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range: Range, isDelete = false, deleteElement?: Element) => {
+    liItemElements.forEach(item => {
+        item.removeAttribute("select-start");
+        item.removeAttribute("select-end");
+    });
+    if (!liItemElements[0].classList.contains("li")) {
+        if (liItemElements[0].parentElement.childElementCount === liItemElements.length + 2) {
+            liItemElements = [liItemElements[0].parentElement];
+        } else {
+            return;
+        }
+    }
     const liElement = liItemElements[0].parentElement;
     const liId = liElement.getAttribute("data-node-id");
     if (!liId) {
@@ -347,8 +365,6 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
         let nextElement = liItemElements[liItemElements.length - 1].nextElementSibling;
         let lastBlockElement = liItemElements[liItemElements.length - 1].lastElementChild.previousElementSibling;
         liItemElements.forEach(item => {
-            item.removeAttribute("select-start");
-            item.removeAttribute("select-end");
             Array.from(item.children).forEach((blockElement, index) => {
                 const id = blockElement.getAttribute("data-node-id");
                 if (!id) {
@@ -504,10 +520,6 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     const previousID = liItemElements[0].previousElementSibling?.getAttribute("data-node-id");
-    liItemElements.forEach(item => {
-        item.removeAttribute("select-start");
-        item.removeAttribute("select-end");
-    });
     let startIndex;
     if (!liItemElements[0].previousElementSibling && liElement.getAttribute("data-subtype") === "o") {
         startIndex = parseInt(liItemElements[0].getAttribute("data-marker"));

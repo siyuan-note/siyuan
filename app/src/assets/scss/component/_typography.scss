@@ -165,6 +165,10 @@
   .h5,
   .h6 {
     font-weight: 600;
+
+    &[data-node-id] [spellcheck] {
+      min-height: 1.625em;
+    }
   }
 
   h1 {

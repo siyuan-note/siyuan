@@ -177,6 +177,13 @@
           position: initial;
           margin-left: 4px;
         }
+
+        /* 选中块的高亮覆盖 margin */
+        &> :not(.sb).protyle-wysiwyg--select::after,
+        &> :not(.sb).protyle-wysiwyg--hl::after{
+          height: calc(100% + 4px);
+          top: -2px;
+        }
       }
     }
 

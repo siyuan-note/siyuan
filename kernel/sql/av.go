@@ -195,6 +195,15 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
+			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+				if nil != cell.Value.Block {
+					for k, v := range ials[row.ID] {
+						if k == av.NodeAttrViewStaticText+"-"+attrView.ID {
+							cell.Value.Block.Content = v
+							break
+						}
+					}
+				}
 			case av.KeyTypeRollup: // 渲染汇总列
 				rollupKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil == rollupKey || nil == rollupKey.Rollup {

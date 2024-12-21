@@ -614,10 +614,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             json.push([]);
         }
         json[json.length - 1].push(oldValue);
+        let newValue = value;
         // relation 为全部更新，以下类型为添加
         if (type === "mAsset") {
             if (Array.isArray(value)) {
-                value = oldValue.mAsset.concat(value);
+                newValue = oldValue.mAsset.concat(value);
             } else if (typeof value !== "undefined") { // 不传入为删除，传入字符串不进行处理
                 let link = protyle.lute.GetLinkDest(value);
                 let name = "";
@@ -645,14 +646,14 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                 }
                 if (imgSrc) {
                     // 支持解析 ![]() https://github.com/siyuan-note/siyuan/issues/11487
-                    value = oldValue.mAsset.concat({
+                    newValue = oldValue.mAsset.concat({
                         type: "image",
                         content: imgSrc,
                         name: ""
                     });
                 } else {
                     // 支持解析 https://github.com/siyuan-note/siyuan/issues/11463
-                    value = oldValue.mAsset.concat({
+                    newValue = oldValue.mAsset.concat({
                         type: "file",
                         content: link,
                         name
@@ -685,10 +686,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                         color: colorIndex.toString()
                     });
                 });
-                value = oldValue.mSelect.concat(newMSelectValue);
+                newValue = oldValue.mSelect.concat(newMSelectValue);
             }
         }
-        const cellValue = genCellValue(type, value);
+        const cellValue = genCellValue(type, newValue);
         cellValue.id = cellId;
         if ((cellValue.type === "date" && typeof cellValue.date === "string") ||
             (cellValue.type === "relation" && typeof cellValue.relation === "string")) {

@@ -218,7 +218,7 @@ export const setInlineStyle = async (set = true) => {
   local("Segoe UI Symbol");
   unicode-range: U+26a1, U+21a9, U+21aa, U+2708, U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf,
   U+2640, U+2642, U+2611, U+303d,U+3030, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f,
-  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663, U+26A0, U+00a9, U+00ae, U+2122;
+  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663, U+26A0, U+a9, U+ae, U+2122;
 }
 @font-face {
   font-family: "Emojis";
@@ -240,7 +240,7 @@ export const setInlineStyle = async (set = true) => {
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
   unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666, 
-  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c;
+  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122;;
 }
 @font-face {
   font-family: "Emojis";
@@ -255,7 +255,7 @@ export const setInlineStyle = async (set = true) => {
   U+2611, U+303d, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a, U+1f232-1f23a, U+1f251, U+3297,
   U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642, U+1f635, U+2620, U+2763, U+2764,
   U+1f441, U+fe0f, U+1f5e8, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030, U+21aa, U+21a9, U+1f525, U+1fa79, U+1f4ab, 
-  U+1f4a8, U+1f32b;
+  U+1f4a8, U+1f32b, U+a9, U+ae, U+2122;;
 }
 @font-face {
   font-family: "Emojis";

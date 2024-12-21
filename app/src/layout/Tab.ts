@@ -36,7 +36,8 @@ export class Tab {
             this.headElement.setAttribute("data-type", "tab-header");
             this.headElement.setAttribute("draggable", "true");
             this.headElement.setAttribute("data-id", this.id);
-            this.headElement.classList.add("item", "item--focus");
+            this.headElement.setAttribute("data-tooltipclass", "tab_header");
+            this.headElement.classList.add("item", "item--focus", "ariaLabel");
             let iconHTML = "";
             if (options.icon) {
                 iconHTML = `<svg class="item__graphic"><use xlink:href="#${options.icon}"></use></svg>`;

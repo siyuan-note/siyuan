@@ -21,19 +21,16 @@ export const initBlockPopover = (app: App) => {
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByClassName(event.target, "ariaLabel") ||
-            hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             const tooltipClasses: string[] = [];
-            let tip = aElement.getAttribute("aria-label");
-            if (aElement.classList.contains("has-tooltip--warning")) {
-                tooltipClasses.push("error");
+            let tip = aElement.getAttribute("aria-label") || "";
+            if (aElement.hasAttribute("data-tooltipclass")) {
+                tooltipClasses.push(...aElement.getAttribute("data-tooltipclass").split(" "));
             }
-            if (aElement.getAttribute("data-type") === "tab-header") {
-                tooltipClasses.push("tab_header");
-            } else if (aElement.classList.contains("av__cell")) {
+            if (aElement.classList.contains("av__cell")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
                     const desc = aElement.getAttribute("data-desc");

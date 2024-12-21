@@ -56,7 +56,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
             if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;
@@ -124,7 +124,7 @@ export const filterEmoji = (key = "", max?: number) => {
                     if (category.id === "custom") {
                         customStore.push(emoji);
                     } else {
-                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                        keyHTML += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     }
                     maxCount++;
@@ -134,7 +134,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                     recentEmojis.push(emoji);
                 }
                 if (index < 2) {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
                 }
             }
@@ -159,7 +159,7 @@ ${unicode2Emoji(emoji.unicode, undefined, false, true)}</button>`;
             }
             return 0;
         }).forEach(item => {
-            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(item)}">
+            html += `<button data-unicode="${item.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(item)}">
 ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         });
         html = html + keyHTML + "</div>";
@@ -170,7 +170,7 @@ ${unicode2Emoji(item.unicode, undefined, false, true)}</button>`;
         window.siyuan.config.editor.emoji.forEach(emojiUnicode => {
             const emoji = recentEmojis.filter((item) => item.unicode === emojiUnicode);
             if (emoji[0]) {
-                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji[0])}">
+                recentHTML += `<button data-unicode="${emoji[0].unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji[0])}">
 ${unicode2Emoji(emoji[0].unicode, undefined, false, true)}
 </button>`;
             }
@@ -286,7 +286,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             ["267e-fe0f", getEmojiTitle(7)],
             ["1f6a9", getEmojiTitle(8)],
         ].map(([unicode, title], index) =>
-            `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
+            `<div data-type="${index}" class="emojis__type ariaLabel" data-tooltipclass="emoji" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
         ).join("")}
             </div>
         </div>
@@ -527,7 +527,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;

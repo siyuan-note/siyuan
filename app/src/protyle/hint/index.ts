@@ -79,7 +79,7 @@ export class Hint {
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;
@@ -386,7 +386,7 @@ ${genHintItemHTML(item)}
                 ["267e-fe0f", getEmojiTitle(7)],
                 ["1f6a9", getEmojiTitle(8)],
             ].map(([unicode, title], index) =>
-                `<button data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
+                `<button data-type="${index}" class="emojis__type ariaLabel" data-tooltipclass="emoji" aria-label="${title}">${unicode2Emoji(unicode)}</button>`
             ).join("")}
 </div>
 </div>`;

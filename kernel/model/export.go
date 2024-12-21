@@ -752,7 +752,6 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		to := filepath.Join(savePath, emoji)
 		if err := filelock.Copy(from, to); err != nil {
 			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
-			return
 		}
 	}
 
@@ -910,7 +909,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			to := filepath.Join(savePath, emoji)
 			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
-				return
 			}
 		}
 	}

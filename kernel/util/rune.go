@@ -17,10 +17,13 @@
 package util
 
 import (
+	"os"
+	"path/filepath"
 	"regexp"
 	"unicode"
 
 	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
 )
 
 func ContainsCJK(text string) bool {
@@ -63,5 +66,31 @@ func RemoveEmojiInvisible(text string) (ret string) {
 func RemoveInvalid(text string) (ret string) {
 	ret = gulu.Str.RemoveInvisible(text)
 	ret = gulu.Str.RemovePUA(ret)
+	return
+}
+
+var NativeEmojiChars = map[string]bool{}
+
+func InitEmojiChars() {
+	builtConfPath := filepath.Join(AppearancePath, "emojis", "conf.json")
+	data, err := os.ReadFile(builtConfPath)
+	if err != nil {
+		logging.LogErrorf("read emojis conf.json failed: %s", err)
+		return
+	}
+
+	var conf []map[string]interface{}
+	if err = gulu.JSON.UnmarshalJSON(data, &conf); err != nil {
+		logging.LogErrorf("unmarshal emojis conf.json failed: %s", err)
+		return
+	}
+
+	for _, emoji := range conf {
+		items := emoji["items"].([]interface{})
+		for _, item := range items {
+			e := item.(map[string]interface{})
+			NativeEmojiChars[e["unicode"].(string)] = true
+		}
+	}
 	return
 }

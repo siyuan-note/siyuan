@@ -186,6 +186,13 @@
           height: calc(100% + 4px);
           top: -2px;
         }
+
+        /* 选中块的高亮覆盖 border 和 margin */
+        &> .render-node[data-type="NodeBlockQueryEmbed"].protyle-wysiwyg--select::after,
+        &> .render-node[data-type="NodeBlockQueryEmbed"].protyle-wysiwyg--hl::after{
+          height: calc(100% + 6px);
+          top: -3px;
+        }
       }
     }
 

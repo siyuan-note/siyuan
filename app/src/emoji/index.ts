@@ -523,7 +523,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             if (target.classList.contains("emojis__type")) {
                 const titleElement = emojisContentElement.querySelector(`[data-type="${target.getAttribute("data-type")}"]`) as HTMLElement;
                 if (titleElement) {
-                    const previousIndex = titleElement.previousElementSibling.getAttribute("data-index");
+                    const previousIndex = titleElement.previousElementSibling ? titleElement.previousElementSibling.getAttribute("data-index") : null;
                     const index = titleElement.nextElementSibling.getAttribute("data-index");
 
                     if (previousIndex) {

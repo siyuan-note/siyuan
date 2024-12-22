@@ -523,12 +523,21 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             if (target.classList.contains("emojis__type")) {
                 const titleElement = emojisContentElement.querySelector(`[data-type="${target.getAttribute("data-type")}"]`) as HTMLElement;
                 if (titleElement) {
+                    const previousIndex = titleElement.previousElementSibling.getAttribute("data-index");
                     const index = titleElement.nextElementSibling.getAttribute("data-index");
+
+                    if (previousIndex) {
+                        let html = "";
+                        window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
+                        });
+                        titleElement.previousElementSibling.innerHTML = html;
+                        titleElement.previousElementSibling.removeAttribute("data-index");
+                    }
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
                         });
                         titleElement.nextElementSibling.innerHTML = html;
                         titleElement.nextElementSibling.removeAttribute("data-index");

@@ -962,7 +962,7 @@ func MissingAssets() (ret []string) {
 
 func emojisInTree(tree *parse.Tree) (ret []string) {
 	if icon := tree.Root.IALAttr("icon"); "" != icon {
-		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") {
+		if !strings.Contains(icon, "://") && !strings.HasPrefix(icon, "api/icon/") && !util.NativeEmojiChars[icon] {
 			ret = append(ret, "/emojis/"+icon)
 		}
 	}

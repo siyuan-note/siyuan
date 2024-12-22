@@ -65,6 +65,8 @@ func InitAppearance() {
 	}
 
 	Conf.Save()
+
+	util.InitEmojiChars()
 }
 
 func containTheme(name string, themes []*conf.AppearanceTheme) bool {

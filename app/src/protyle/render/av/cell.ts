@@ -275,7 +275,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         }
     }
     if (colType === "block") {
-        cellValue.isDetached = true;
+        if (typeof value === "object" && value.id) {
+            cellValue.isDetached = false;
+        } else {
+            cellValue.isDetached = true;
+        }
     }
     return cellValue;
 };
@@ -363,9 +367,6 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         type = getTypeByCellElement(cellElements[0]);
     }
     if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
-        return;
-    }
-    if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
         return;
     }
     const blockElement = hasClosestBlock(cellElements[0]);
@@ -688,6 +689,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                 });
                 newValue = oldValue.mSelect.concat(newMSelectValue);
             }
+        } else if (type === "block" && typeof value === "string" && oldValue.block.id) {
+            newValue = {
+                content: value,
+                id: oldValue.block.id
+            };
         }
         const cellValue = genCellValue(type, newValue);
         cellValue.id = cellId;
@@ -703,26 +709,16 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (objEquals(cellValue, oldValue)) {
             return;
         }
-        if (type === "block" && !item.dataset.detached) {
-            const newId = Lute.NewNodeID();
-            doOperations.push({
-                action: "unbindAttrViewBlock",
-                id: rowID,
-                nextID: newId,
-                avID,
-            });
-            rowElement.dataset.id = newId;
-            item.dataset.blockId = newId;
-        } else {
-            doOperations.push({
-                action: "updateAttrViewCell",
-                id: cellId,
-                avID,
-                keyID: colId,
-                rowID,
-                data: cellValue
-            });
-        }
+
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: cellValue
+        });
+
         undoOperations.push({
             action: "updateAttrViewCell",
             id: cellId,

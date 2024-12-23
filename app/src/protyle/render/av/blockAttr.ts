@@ -429,6 +429,8 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 }, (setResponse) => {
                     if (type === "number") {
                         item.parentElement.querySelector(".fn__flex-center").textContent = setResponse.data.value.number.formattedContent;
+                    } else if (type === "block" && !item.value) {
+                        item.value = setResponse.data.value.block.content;
                     }
                 });
             });

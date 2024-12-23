@@ -3285,7 +3285,7 @@ func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tre
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrViewStaticText+"-"+avID] = text
 	var err error
-	if nil != tree {
+	if nil != tx {
 		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {
 		err = setNodeAttrs(node, nil, attrs)

@@ -11,6 +11,7 @@ import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {isMobile} from "../../../util/functions";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
     let avElements: Element[] = [];
@@ -149,7 +150,7 @@ style="width: ${column.width || "200px"};">
                         calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${column.width || "200px"}">&nbsp;</div>`;
                     } else {
                         calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
-style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
+style="width: ${column.width || "200px"};${isMobile() ? " opacity: 1;" : ""}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
                     }
                     if (column.calc && column.calc.operator !== "") {
                         hasCalc = true;

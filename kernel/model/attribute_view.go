@@ -3112,7 +3112,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 						return
 					}
 
-					updateBlockValueStaticText(node, tree, avID, strings.TrimSpace(val.Block.Content))
+					updateBlockValueStaticText(tx, node, tree, avID, strings.TrimSpace(val.Block.Content))
 				}
 			}
 		}
@@ -3281,12 +3281,12 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 	return
 }
 
-func updateBlockValueStaticText(node *ast.Node, tree *parse.Tree, avID, text string) {
+func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrViewStaticText+"-"+avID] = text
 	var err error
 	if nil != tree {
-		err = setNodeAttrsWithTx(nil, node, tree, attrs)
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {
 		err = setNodeAttrs(node, nil, attrs)
 	}

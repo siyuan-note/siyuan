@@ -281,6 +281,12 @@ func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 	} else {
 		content = getNodeRefText0(node, 1024)
 	}
+
+	content = strings.TrimSpace(content)
+	if "" == content {
+		content = Conf.language(105)
+	}
+
 	return
 }
 

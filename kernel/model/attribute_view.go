@@ -3288,7 +3288,7 @@ func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tre
 	if nil != tx {
 		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {
-		err = setNodeAttrs(node, nil, attrs)
+		err = setNodeAttrs(node, tree, attrs)
 	}
 	if err != nil {
 		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)

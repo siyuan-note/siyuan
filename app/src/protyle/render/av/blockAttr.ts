@@ -412,6 +412,14 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                             }
                         };
                     }
+                } else if (type === "block") {
+                    value = {
+                        block: {
+                            content: item.value,
+                            id: item.parentElement.dataset.blockId,
+                        },
+                        isDetached: false
+                    };
                 }
                 fetchPost("/api/av/setAttributeViewBlockAttr", {
                     avID: item.parentElement.dataset.avId,

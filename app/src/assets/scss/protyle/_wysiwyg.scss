@@ -181,15 +181,15 @@
         }
 
         /* 选中块的高亮覆盖 margin */
-        &> :not(.sb).protyle-wysiwyg--select::after,
-        &> :not(.sb).protyle-wysiwyg--hl::after{
+        &> .protyle-wysiwyg--select:not(.sb)::after,
+        &> .protyle-wysiwyg--hl:not(.sb)::after{
           height: calc(100% + 4px);
           top: -2px;
         }
 
         /* 选中块的高亮覆盖 border 和 margin */
-        &> .render-node[data-type="NodeBlockQueryEmbed"].protyle-wysiwyg--select::after,
-        &> .render-node[data-type="NodeBlockQueryEmbed"].protyle-wysiwyg--hl::after{
+        &> .protyle-wysiwyg--select.render-node[data-type="NodeBlockQueryEmbed"]::after,
+        &> .protyle-wysiwyg--hl.render-node[data-type="NodeBlockQueryEmbed"]::after{
           height: calc(100% + 6px);
           top: -3px;
         }

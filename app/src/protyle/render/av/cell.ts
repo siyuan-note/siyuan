@@ -78,7 +78,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         };
         if (colType === "block" && textElement.dataset.id) {
             cellValue.block.id = textElement.dataset.id;
-            if (textElement.previousElementSibling.classList.contains("b3-menu__avemoji")) {
+            if (textElement.previousElementSibling?.classList.contains("b3-menu__avemoji")) {
                 cellValue.block.icon = textElement.previousElementSibling.getAttribute("data-unicode");
             }
         }

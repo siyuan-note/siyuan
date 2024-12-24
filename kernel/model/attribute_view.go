@@ -3108,12 +3108,22 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
+					updateStaticText := true
+					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
-						_, val.Block.Content = getNodeAvBlockText(node)
+						val.Block.Content = blockText
+					} else {
+						if blockText == content {
+							updateStaticText = false
+						} else {
+							val.Block.Content = blockText
+						}
 					}
 
-					// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
-					updateBlockValueStaticText(tx, node, tree, avID, content)
+					if updateStaticText {
+						// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+						updateBlockValueStaticText(tx, node, tree, avID, content)
+					}
 				}
 			}
 		}

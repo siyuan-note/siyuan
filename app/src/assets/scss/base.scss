@@ -35,6 +35,7 @@
 @import "business/resize";
 @import "business/av";
 @import "business/emojis";
+@import "component/svg";
 
 /*
 .status: 2
@@ -93,25 +94,6 @@ html {
   }
 }
 
-.svg {
-  fill: currentColor;
-  display: inline-block;
-  stroke-width: 0;
-  stroke: currentColor;
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-
-  &--mid {
-    width: 16px;
-    height: 16px;
-  }
-
-  &--small {
-    width: 12px;
-    height: 12px;
-  }
-}
 
 .toolbar {
   background-color: var(--b3-toolbar-background);

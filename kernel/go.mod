@@ -9,8 +9,8 @@ require (
 	github.com/88250/clipboard v0.1.5
 	github.com/88250/epub v0.0.0-20230830085737-c19055cd1f48
 	github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7
-	github.com/88250/gulu v1.2.3-0.20241127120230-1ae6a9868a2d
-	github.com/88250/lute v1.7.7-0.20241202034509-ac239093024e
+	github.com/88250/gulu v1.2.3-0.20241212012748-c4dc08fe45ec
+	github.com/88250/lute v1.7.7-0.20241217024500-996f9fa60606
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
 	github.com/ConradIrwin/font v0.0.0-20240627033111-8567075b2bfe
@@ -30,7 +30,6 @@ require (
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.7.0
 	github.com/gabriel-vasile/mimetype v1.4.5
-	github.com/getsentry/sentry-go v0.29.1
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/sessions v1.0.1
 	github.com/gin-gonic/gin v1.10.0
@@ -40,7 +39,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/imroc/req/v3 v3.48.0
+	github.com/imroc/req/v3 v3.49.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.12.2
@@ -48,7 +47,7 @@ require (
 	github.com/mitchellh/go-ps v1.0.0
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.2.1
-	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.0
+	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
 	github.com/panjf2000/ants/v2 v2.10.0
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pdfcpu/pdfcpu v0.9.1
@@ -57,13 +56,13 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.29.1
 	github.com/shirou/gopsutil/v3 v3.24.5
-	github.com/siyuan-note/dejavu v0.0.0-20241203001841-7d657c12d5dd
+	github.com/siyuan-note/dejavu v0.0.0-20241218090338-be682e478d2e
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
-	github.com/siyuan-note/filelock v0.0.0-20241202160444-1a99015900ff
-	github.com/siyuan-note/httpclient v0.0.0-20241203001628-e7e7cab1f949
-	github.com/siyuan-note/logging v0.0.0-20240505035402-6430d57006a2
-	github.com/siyuan-note/riff v0.0.0-20241203002117-3b8d28360e46
+	github.com/siyuan-note/filelock v0.0.0-20241212013445-c66518cdacfa
+	github.com/siyuan-note/httpclient v0.0.0-20241218090012-d3bf82b2e5be
+	github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742
+	github.com/siyuan-note/riff v0.0.0-20241217095231-017015753318
 	github.com/spf13/cast v1.7.0
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.9.0
@@ -74,8 +73,8 @@ require (
 	golang.org/x/image v0.21.0
 	golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b
 	golang.org/x/mod v0.22.0
-	golang.org/x/net v0.31.0
-	golang.org/x/text v0.20.0
+	golang.org/x/net v0.32.0
+	golang.org/x/text v0.21.0
 	golang.org/x/time v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
 )
@@ -110,7 +109,7 @@ require (
 	github.com/go-resty/resty/v2 v2.14.0 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/pprof v0.0.0-20241128161848-dc51965c6481 // indirect
+	github.com/google/pprof v0.0.0-20241210010833-40e02aabc2ad // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.2 // indirect
@@ -168,11 +167,11 @@ require (
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.uber.org/mock v0.5.0 // indirect
 	golang.org/x/arch v0.10.0 // indirect
-	golang.org/x/crypto v0.29.0 // indirect
-	golang.org/x/exp v0.0.0-20241108190413-2d47ceb2692f // indirect
-	golang.org/x/sync v0.9.0 // indirect
-	golang.org/x/sys v0.27.0 // indirect
-	golang.org/x/tools v0.27.0 // indirect
+	golang.org/x/crypto v0.31.0 // indirect
+	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
+	golang.org/x/sync v0.10.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
+	golang.org/x/tools v0.28.0 // indirect
 	google.golang.org/protobuf v1.34.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

@@ -34,15 +34,17 @@ import (
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	"github.com/xrash/smetrics"
 )
 
 func RenderGoTemplate(templateContent string) (ret string, err error) {
 	tmpl := template.New("")
-	tplFuncMap := treenode.BuiltInTemplateFuncs()
+	tplFuncMap := filesys.BuiltInTemplateFuncs()
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	tmpl = tmpl.Funcs(tplFuncMap)
 	tpl, err := tmpl.Parse(templateContent)
@@ -86,14 +88,19 @@ func SearchTemplate(keyword string) (ret []*Block) {
 		return util.PinYinCompare(filepath.Base(groups[i].Name()), filepath.Base(groups[j].Name()))
 	})
 
-	k := strings.ToLower(keyword)
+	keyword = strings.TrimSpace(keyword)
+	type result struct {
+		block *Block
+		score float64
+	}
+	var results []*result
+	keywords := strings.Fields(keyword)
 	for _, group := range groups {
 		if strings.HasPrefix(group.Name(), ".") {
 			continue
 		}
 
 		if group.IsDir() {
-			var templateBlocks []*Block
 			templateDir := filepath.Join(templates, group.Name())
 			filelock.Walk(templateDir, func(path string, d fs.DirEntry, err error) error {
 				name := strings.ToLower(d.Name())
@@ -104,36 +111,65 @@ func SearchTemplate(keyword string) (ret []*Block) {
 					return nil
 				}
 
-				if !strings.HasSuffix(name, ".md") || strings.HasPrefix(name, "readme") || !strings.Contains(name, k) {
+				if !strings.HasSuffix(name, ".md") || strings.HasPrefix(name, "readme") {
 					return nil
 				}
 
 				content := strings.TrimPrefix(path, templates)
 				content = strings.TrimSuffix(content, ".md")
-				content = filepath.ToSlash(content)
-				content = strings.TrimPrefix(content, "/")
-				_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
-				b := &Block{Path: path, Content: content}
-				templateBlocks = append(templateBlocks, b)
+				p := filepath.Join(group.Name(), content)
+				score := 0.0
+				hit := true
+				for _, k := range keywords {
+					if strings.Contains(strings.ToLower(p), strings.ToLower(k)) {
+						score += smetrics.JaroWinkler(name, k, 0.7, 4)
+					} else {
+						hit = false
+						break
+					}
+				}
+				if hit {
+					content = strings.TrimPrefix(path, templates)
+					content = strings.TrimSuffix(content, ".md")
+					content = filepath.ToSlash(content)
+					_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
+					b := &Block{Path: path, Content: content}
+					results = append(results, &result{block: b, score: score})
+				}
 				return nil
 			})
-			sort.Slice(templateBlocks, func(i, j int) bool {
-				return util.PinYinCompare(filepath.Base(templateBlocks[i].Path), filepath.Base(templateBlocks[j].Path))
-			})
-			ret = append(ret, templateBlocks...)
 		} else {
 			name := strings.ToLower(group.Name())
-			if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") || "readme.md" == name || !strings.Contains(name, k) {
+			if strings.HasPrefix(name, ".") || !strings.HasSuffix(name, ".md") || "readme.md" == name {
 				continue
 			}
 
 			content := group.Name()
 			content = strings.TrimSuffix(content, ".md")
-			content = filepath.ToSlash(content)
-			_, content = search.MarkText(content, keyword, 32, Conf.Search.CaseSensitive)
-			b := &Block{Path: filepath.Join(templates, group.Name()), Content: content}
-			ret = append(ret, b)
+			score := 0.0
+			hit := true
+			for _, k := range keywords {
+				if strings.Contains(strings.ToLower(content), strings.ToLower(k)) {
+					score += smetrics.JaroWinkler(name, k, 0.7, 4)
+				} else {
+					hit = false
+					break
+				}
+			}
+			if hit {
+				content = filepath.ToSlash(content)
+				_, content = search.MarkText(content, strings.Join(keywords, search.TermSep), 32, Conf.Search.CaseSensitive)
+				b := &Block{Path: filepath.Join(templates, group.Name()), Content: content}
+				results = append(results, &result{block: b, score: score})
+			}
 		}
+	}
+
+	sort.Slice(results, func(i, j int) bool {
+		return results[i].score > results[j].score
+	})
+	for _, r := range results {
+		ret = append(ret, r.block)
 	}
 	return
 }
@@ -219,7 +255,7 @@ func RenderDynamicIconContentTemplate(content, id string) (ret string) {
 	dataModel["alias"] = block.Alias
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := treenode.BuiltInTemplateFuncs()
+	tplFuncMap := filesys.BuiltInTemplateFuncs()
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(content)
@@ -269,7 +305,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 	}
 
 	goTpl := template.New("").Delims(".action{", "}")
-	tplFuncMap := treenode.BuiltInTemplateFuncs()
+	tplFuncMap := filesys.BuiltInTemplateFuncs()
 	sql.SQLTemplateFuncs(&tplFuncMap)
 	goTpl = goTpl.Funcs(tplFuncMap)
 	tpl, err := goTpl.Funcs(tplFuncMap).Parse(gulu.Str.FromBytes(md))

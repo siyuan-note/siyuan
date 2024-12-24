@@ -17,7 +17,6 @@
 package model
 
 import (
-	"bytes"
 	"errors"
 	"fmt"
 	"io/fs"
@@ -442,164 +441,8 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	return
 }
 
-func ContentStat(content string) (ret *util.BlockStatResult) {
-	luteEngine := util.NewLute()
-	return contentStat(content, luteEngine)
-}
-
-func contentStat(content string, luteEngine *lute.Lute) (ret *util.BlockStatResult) {
-	tree := luteEngine.BlockDOM2Tree(content)
-	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
-	return &util.BlockStatResult{
-		RuneCount:  runeCnt,
-		WordCount:  wordCnt,
-		LinkCount:  linkCnt,
-		ImageCount: imgCnt,
-		RefCount:   refCnt,
-	}
-}
-
-func BlocksWordCount(ids []string) (ret *util.BlockStatResult) {
-	ret = &util.BlockStatResult{}
-	trees := filesys.LoadTrees(ids)
-	for _, id := range ids {
-		tree := trees[id]
-		if nil == tree {
-			continue
-		}
-
-		node := treenode.GetNodeInTree(tree, id)
-		if nil == node {
-			continue
-		}
-
-		runeCnt, wordCnt, linkCnt, imgCnt, refCnt := node.Stat()
-		ret.RuneCount += runeCnt
-		ret.WordCount += wordCnt
-		ret.LinkCount += linkCnt
-		ret.ImageCount += imgCnt
-		ret.RefCount += refCnt
-	}
-	ret.BlockCount = len(ids)
-	return
-}
-
-func StatTree(id string) (ret *util.BlockStatResult) {
-	FlushTxQueue()
-
-	tree, _ := LoadTreeByBlockID(id)
-	if nil == tree {
-		return
-	}
-
-	blockCount := 0
-	var databaseBlockNodes []*ast.Node
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
-			return ast.WalkContinue
-		}
-
-		if n.IsBlock() {
-			blockCount++
-		}
-
-		if ast.NodeAttributeView != n.Type {
-			return ast.WalkContinue
-		}
-
-		databaseBlockNodes = append(databaseBlockNodes, n)
-		return ast.WalkContinue
-	})
-
-	luteEngine := util.NewLute()
-	var dbRuneCnt, dbWordCnt, dbLinkCnt, dbImgCnt, dbRefCnt int
-	for _, n := range databaseBlockNodes {
-		if "" == n.AttributeViewID {
-			continue
-		}
-
-		attrView, _ := av.ParseAttributeView(n.AttributeViewID)
-		if nil == attrView {
-			continue
-		}
-
-		content := bytes.Buffer{}
-		for _, kValues := range attrView.KeyValues {
-			for _, v := range kValues.Values {
-				switch kValues.Key.Type {
-				case av.KeyTypeURL:
-					if v.IsEmpty() {
-						continue
-					}
-
-					dbLinkCnt++
-					content.WriteString(v.URL.Content)
-				case av.KeyTypeMAsset:
-					if v.IsEmpty() {
-						continue
-					}
-
-					for _, asset := range v.MAsset {
-						if av.AssetTypeImage == asset.Type {
-							dbImgCnt++
-						}
-					}
-				case av.KeyTypeBlock:
-					if v.IsEmpty() {
-						continue
-					}
-
-					if !v.IsDetached {
-						dbRefCnt++
-					}
-					content.WriteString(v.Block.Content)
-				case av.KeyTypeText:
-					if v.IsEmpty() {
-						continue
-					}
-					content.WriteString(v.Text.Content)
-				case av.KeyTypeNumber:
-					if v.IsEmpty() {
-						continue
-					}
-					v.Number.FormatNumber()
-					content.WriteString(v.Number.FormattedContent)
-				case av.KeyTypeEmail:
-					if v.IsEmpty() {
-						continue
-					}
-					content.WriteString(v.Email.Content)
-				case av.KeyTypePhone:
-					if v.IsEmpty() {
-						continue
-					}
-					content.WriteString(v.Phone.Content)
-				}
-			}
-		}
-
-		dbStat := contentStat(content.String(), luteEngine)
-		dbRuneCnt += dbStat.RuneCount
-		dbWordCnt += dbStat.WordCount
-	}
-
-	runeCnt, wordCnt, linkCnt, imgCnt, refCnt := tree.Root.Stat()
-	runeCnt += dbRuneCnt
-	wordCnt += dbWordCnt
-	linkCnt += dbLinkCnt
-	imgCnt += dbImgCnt
-	refCnt += dbRefCnt
-	return &util.BlockStatResult{
-		RuneCount:  runeCnt,
-		WordCount:  wordCnt,
-		LinkCount:  linkCnt,
-		ImageCount: imgCnt,
-		RefCount:   refCnt,
-		BlockCount: blockCount,
-	}
-}
-
-func GetDoc(startID, endID, id string, index int, query string, queryTypes map[string]bool, queryMethod, mode int, size int, isBacklink bool) (blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, err error) {
+func GetDoc(startID, endID, id string, index int, query string, queryTypes map[string]bool, queryMethod, mode int, size int, isBacklink, highlight bool) (
+	blockCount int, dom, parentID, parent2ID, rootID, typ string, eof, scroll bool, boxID, docPath string, isBacklinkExpand bool, keywords []string, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/GetDoc")
 	//pprof.StartCPUProfile(cpuProfile)
@@ -630,14 +473,6 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		if nil == node {
 			err = ErrBlockNotFound
 			return
-		}
-	}
-
-	if isBacklink { // 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-		if ast.NodeParagraph == node.Type {
-			if nil != node.Parent && ast.NodeListItem == node.Parent.Type {
-				node = node.Parent
-			}
 		}
 	}
 
@@ -800,19 +635,20 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	subTree := &parse.Tree{ID: rootID, Root: &ast.Node{Type: ast.NodeDocument}, Marks: tree.Marks}
 
-	var keywords []string
+	query = filterQueryInvisibleChars(query)
 	if "" != query && (0 == queryMethod || 1 == queryMethod || 3 == queryMethod) { // 只有关键字、查询语法和正则表达式搜索支持高亮
-		if 0 == queryMethod {
-			query = stringQuery(query)
-		}
 		typeFilter := buildTypeFilter(queryTypes)
-		if 0 == queryMethod || 1 == queryMethod {
+		switch queryMethod {
+		case 0:
+			keywords = strings.Split(query, " ")
+		case 1:
 			keywords = highlightByFTS(query, typeFilter, rootID)
-		} else {
+		case 3:
 			keywords = highlightByRegexp(query, typeFilter, rootID)
 		}
 	}
 
+	existKeywords := 0 < len(keywords)
 	for _, n := range nodes {
 		var unlinks []*ast.Node
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -844,7 +680,7 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				}
 			}
 
-			if 0 < len(keywords) {
+			if highlight && existKeywords {
 				hitBlock := false
 				for p := n.Parent; nil != p; p = p.Parent {
 					if p.ID == id {
@@ -867,6 +703,16 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 				}
 			}
 
+			if existKeywords && id == n.ID {
+				inlines := n.ChildrenByType(ast.NodeTextMark)
+				for _, inline := range inlines {
+					if inline.IsTextMarkType("inline-memo") && util.ContainsSubStr(inline.TextMarkInlineMemoContent, keywords) {
+						// 支持行级备注搜索定位 https://github.com/siyuan-note/siyuan/issues/13465
+						keywords = append(keywords, inline.TextMarkTextContent)
+					}
+				}
+			}
+
 			if processVirtualRef(n, &unlinks, virtualBlockRefKeywords, refCount, luteEngine) {
 				return ast.WalkContinue
 			}
@@ -882,6 +728,16 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 
 	luteEngine.RenderOptions.NodeIndexStart = index
 	dom = luteEngine.Tree2BlockDOM(subTree, luteEngine.RenderOptions)
+
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
+	for i, keyword := range keywords {
+		keyword = strings.TrimPrefix(keyword, "#")
+		keyword = strings.TrimSuffix(keyword, "#")
+		keywords[i] = keyword
+	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 
 	go setRecentDocByTree(tree)
 	return
@@ -1075,19 +931,14 @@ func writeTreeUpsertQueue(tree *parse.Tree) (err error) {
 	return
 }
 
-func writeTreeIndexQueue(tree *parse.Tree) (err error) {
-	size, err := filesys.WriteTree(tree)
+func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
+	treenode.IndexBlockTree(tree)
+	_, err = filesys.WriteTree(tree)
 	if err != nil {
 		return
 	}
 	sql.IndexTreeQueue(tree)
-	refreshDocInfo(tree, size)
 	return
-}
-
-func indexWriteTreeIndexQueue(tree *parse.Tree) (err error) {
-	treenode.IndexBlockTree(tree)
-	return writeTreeIndexQueue(tree)
 }
 
 func indexWriteTreeUpsertQueue(tree *parse.Tree) (err error) {
@@ -2212,6 +2063,39 @@ func (box *Box) addSort(previousPath, id string) {
 			fullSortIDs[id] = sortVal
 		}
 		sortVal++
+	}
+
+	data, err = gulu.JSON.MarshalJSON(fullSortIDs)
+	if err != nil {
+		logging.LogErrorf("marshal sort conf failed: %s", err)
+		return
+	}
+	if err = filelock.WriteFile(confPath, data); err != nil {
+		logging.LogErrorf("write sort conf failed: %s", err)
+		return
+	}
+}
+
+func (box *Box) setSort(sortIDVals map[string]int) {
+	confPath := filepath.Join(util.DataDir, box.ID, ".siyuan", "sort.json")
+	if !filelock.IsExist(confPath) {
+		return
+	}
+
+	data, err := filelock.ReadFile(confPath)
+	if err != nil {
+		logging.LogErrorf("read sort conf failed: %s", err)
+		return
+	}
+
+	fullSortIDs := map[string]int{}
+	if err = gulu.JSON.UnmarshalJSON(data, &fullSortIDs); err != nil {
+		logging.LogErrorf("unmarshal sort conf failed: %s", err)
+		return
+	}
+
+	for sortID := range sortIDVals {
+		fullSortIDs[sortID] = sortIDVals[sortID]
 	}
 
 	data, err = gulu.JSON.MarshalJSON(fullSortIDs)

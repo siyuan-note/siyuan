@@ -14,23 +14,31 @@
 // You should have received a copy of the GNU Affero General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-package treenode
+package filesys
 
 import (
 	"math"
 	"text/template"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/go-humanize"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"github.com/spf13/cast"
 )
 
 func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret = sprig.TxtFuncMap()
+
+	// 因为安全原因移除一些函数 https://github.com/siyuan-note/siyuan/issues/13426
+	delete(ret, "env")
+	delete(ret, "expandenv")
+	delete(ret, "getHostByName")
+
 	ret["Weekday"] = util.Weekday
 	ret["WeekdayCN"] = util.WeekdayCN
 	ret["WeekdayCN2"] = util.WeekdayCN2
@@ -42,7 +50,13 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["parseTime"] = parseTime
 	ret["FormatFloat"] = FormatFloat
 	ret["getHPathByID"] = getHPathByID
+	ret["statBlock"] = StatBlock
+	ret["runeLen"] = runeLen
 	return
+}
+
+func runeLen(s string) int {
+	return utf8.RuneCountInString(s)
 }
 
 func pow(a, b interface{}) int64    { return int64(math.Pow(cast.ToFloat64(a), cast.ToFloat64(b))) }
@@ -67,7 +81,7 @@ func FormatFloat(format string, n float64) string {
 }
 
 func getHPathByID(id string) (ret string) {
-	bt := GetBlockTree(id)
+	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
 	}

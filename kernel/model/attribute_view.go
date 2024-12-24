@@ -19,6 +19,7 @@ package model
 import (
 	"bytes"
 	"fmt"
+	"math/rand"
 	"os"
 	"path/filepath"
 	"slices"
@@ -1980,8 +1981,9 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 		return
 	}
 
+	var blockIcon string
 	if !isDetached {
-		addingBlockContent = getNodeAvBlockText(node)
+		blockIcon, addingBlockContent = getNodeAvBlockText(node)
 	}
 
 	// 检查是否重复添加相同的块
@@ -1992,6 +1994,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 				// 重复绑定一下，比如剪切数据库块、取消绑定块后再次添加的场景需要
 				bindBlockAv0(tx, avID, node, tree)
 				blockValue.IsDetached = isDetached
+				blockValue.Block.Icon = blockIcon
 				blockValue.Block.Content = addingBlockContent
 				blockValue.UpdatedAt = now
 				err = av.SaveAttributeView(attrView)
@@ -2008,7 +2011,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 		IsDetached: isDetached,
 		CreatedAt:  now,
 		UpdatedAt:  now,
-		Block:      &av.ValueBlock{ID: addingBlockID, Content: addingBlockContent, Created: now, Updated: now}}
+		Block:      &av.ValueBlock{ID: addingBlockID, Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
@@ -2936,7 +2939,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				if !operation.IsDetached {
 					bindBlockAv0(tx, operation.AvID, node, tree)
 					value.IsDetached = false
-					value.Block.Content = getNodeAvBlockText(node)
+					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
 					value.UpdatedAt = now
 					err = av.SaveAttributeView(attrView)
 				}
@@ -2973,7 +2976,7 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				value.Block.ID = operation.NextID
 				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					value.Block.Content = getNodeAvBlockText(node)
+					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
 				}
 			}
 
@@ -3110,7 +3113,11 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
 					// 不存在的选项新建保存
-					opt = &av.SelectOption{Name: valOpt.Content, Color: valOpt.Color}
+					color := valOpt.Color
+					if "" == color {
+						color = fmt.Sprintf("%d", 1+rand.Intn(14))
+					}
+					opt = &av.SelectOption{Name: valOpt.Content, Color: color}
 					key.Options = append(key.Options, opt)
 				} else {
 					// 已经存在的选项颜色需要保持不变

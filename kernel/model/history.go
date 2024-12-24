@@ -147,7 +147,7 @@ func ClearWorkspaceHistory() (err error) {
 	return
 }
 
-func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content string, isLargeDoc bool, err error) {
+func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, rootID, content string, isLargeDoc bool, err error) {
 	if !gulu.File.IsExist(historyPath) {
 		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
@@ -185,7 +185,7 @@ func GetDocHistoryContent(historyPath, keyword string) (id, rootID, content stri
 			n.RemoveIALAttr("heading-fold")
 			n.RemoveIALAttr("fold")
 
-			if 0 < len(keywords) {
+			if highlight && 0 < len(keywords) {
 				if markReplaceSpan(n, &unlinks, keywords, search.MarkDataType, luteEngine) {
 					return ast.WalkContinue
 				}

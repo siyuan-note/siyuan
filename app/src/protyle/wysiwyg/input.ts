@@ -1,4 +1,3 @@
-import {log} from "../util/log";
 import {focusBlock, focusByWbr} from "../util/selection";
 import {Constants} from "../../constants";
 import * as dayjs from "dayjs";
@@ -174,8 +173,6 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         ) &&
         !(tempElement.content.childElementCount === 1 && tempElement.content.firstElementChild.classList.contains("code-block") && type === "NodeCodeBlock")
     ) {
-        log("SpinBlockDOM", blockElement.outerHTML, "argument", protyle.options.debugger);
-        log("SpinBlockDOM", html, "result", protyle.options.debugger);
         if (blockElement.getAttribute("data-type") === "NodeHeading" && blockElement.getAttribute("fold") === "1" &&
             tempElement.content.firstElementChild.getAttribute("data-subtype") !== blockElement.dataset.subtype) {
             setFold(protyle, blockElement, undefined, undefined, false);

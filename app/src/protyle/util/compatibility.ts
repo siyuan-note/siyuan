@@ -138,6 +138,19 @@ export const isMac = () => {
     return navigator.platform.toUpperCase().indexOf("MAC") > -1;
 };
 
+export const isWin11 = async () => {
+    if (!(navigator as any).userAgentData || !(navigator as any).userAgentData.getHighEntropyValues) {
+        return false;
+    }
+    const ua = await (navigator as any).userAgentData.getHighEntropyValues(["platformVersion"]);
+    if ((navigator as any).userAgentData.platform === "Windows") {
+        if (parseInt(ua.platformVersion.split(".")[0]) >= 13) {
+           return true;
+        }
+    }
+    return false;
+};
+
 export const isInAndroid = () => {
     return window.siyuan.config.system.container === "android" && window.JSAndroid;
 };
@@ -300,6 +313,7 @@ export const getLocalStorage = (cb: () => void) => {
             replaceTypes: Object.assign({}, Constants.SIYUAN_DEFAULT_REPLACETYPES),
         };
         defaultStorage[Constants.LOCAL_ZOOM] = 1;
+        defaultStorage[Constants.LOCAL_MOVE_PATH] = {keys: [], k: ""};
 
         [Constants.LOCAL_EXPORTIMG, Constants.LOCAL_SEARCHKEYS, Constants.LOCAL_PDFTHEME, Constants.LOCAL_BAZAAR,
             Constants.LOCAL_EXPORTWORD, Constants.LOCAL_EXPORTPDF, Constants.LOCAL_DOCINFO, Constants.LOCAL_FONTSTYLES,
@@ -307,7 +321,7 @@ export const getLocalStorage = (cb: () => void) => {
             Constants.LOCAL_PLUGINTOPUNPIN, Constants.LOCAL_SEARCHASSET, Constants.LOCAL_FLASHCARD,
             Constants.LOCAL_DIALOGPOSITION, Constants.LOCAL_SEARCHUNREF, Constants.LOCAL_HISTORY,
             Constants.LOCAL_OUTLINE, Constants.LOCAL_FILEPOSITION, Constants.LOCAL_FILESPATHS, Constants.LOCAL_IMAGES,
-            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS].forEach((key) => {
+            Constants.LOCAL_PLUGIN_DOCKS, Constants.LOCAL_EMOJIS, Constants.LOCAL_MOVE_PATH].forEach((key) => {
             if (typeof response.data[key] === "string") {
                 try {
                     const parseData = JSON.parse(response.data[key]);

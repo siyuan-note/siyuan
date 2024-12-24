@@ -12,6 +12,7 @@ import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {addClearButton} from "../util/addClearButton";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
+import {saveAssetKeyList} from "./toggleHistory";
 
 export const openSearchAsset = (element: Element, isStick: boolean) => {
     /// #if !MOBILE
@@ -108,18 +109,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         assetInputEvent(element, localSearch);
     });
     searchInputElement.addEventListener("blur", () => {
-        if (!searchInputElement.value) {
-            return;
-        }
-        let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
-        list.splice(0, 0, searchInputElement.value);
-        list = Array.from(new Set(list));
-        if (list.length > window.siyuan.config.search.limit) {
-            list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-        }
-        window.siyuan.storage[Constants.LOCAL_SEARCHASSET].k = searchInputElement.value;
-        window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = list;
-        setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
+        saveAssetKeyList(searchInputElement);
     });
     assetInputEvent(element, localSearch);
     addClearButton({
@@ -240,75 +230,6 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
 </div>`;
         });
     }, Constants.TIMEOUT_INPUT);
-};
-
-export const toggleAssetHistory = (assetElement: Element) => {
-    const keys = window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys;
-    if (!keys || keys.length === 0) {
-        return;
-    }
-    const menu = new Menu("search-asset-history");
-    if (menu.isOpen) {
-        return;
-    }
-    menu.element.classList.add("b3-menu--list");
-    menu.addItem({
-        iconHTML: "",
-        label: window.siyuan.languages.clearHistory,
-        click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = [];
-            setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-        }
-    });
-    const separatorElement = menu.addSeparator(1);
-    let current = true;
-    const assetInputElement = assetElement.querySelector("#searchAssetInput") as HTMLInputElement;
-    keys.forEach((s: string) => {
-        if (s !== assetInputElement.value && s) {
-            const menuItem = menu.addItem({
-                iconHTML: "",
-                label: escapeHtml(s),
-                action: "iconCloseRound",
-                bind(element) {
-                    element.addEventListener("click", (itemEvent) => {
-                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                            keys.find((item: string, index: number) => {
-                                if (item === s) {
-                                    keys.splice(index, 1);
-                                    return true;
-                                }
-                            });
-                            window.siyuan.storage[Constants.LOCAL_SEARCHASSET].keys = keys;
-                            setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
-                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
-                                window.siyuan.menus.menu.remove();
-                            } else {
-                                element.remove();
-                            }
-                        } else {
-                            assetInputElement.value = element.textContent;
-                            assetInputEvent(assetElement);
-                            window.siyuan.menus.menu.remove();
-                        }
-                        itemEvent.preventDefault();
-                        itemEvent.stopPropagation();
-                    });
-                }
-            });
-            if (current) {
-                menuItem.classList.add("b3-menu__item--current");
-            }
-            current = false;
-        }
-    });
-    if (current) {
-        separatorElement.remove();
-    }
-    const rect = assetInputElement.getBoundingClientRect();
-    menu.open({
-        x: rect.left,
-        y: rect.bottom
-    });
 };
 
 export const renderPreview = (element: Element, id: string, query: string, queryMethod: number) => {

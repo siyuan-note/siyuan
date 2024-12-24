@@ -122,6 +122,8 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
+	FlushTxQueue()
+
 	srcTree, _ := LoadTreeByBlockID(srcID)
 	if nil == srcTree {
 		err = ErrBlockNotFound
@@ -246,10 +248,6 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		pivot.InsertAfter(heading)
 	}
 
-	if contentPivot := treenode.GetNodeInTree(targetTree, targetID); nil != contentPivot && ast.NodeParagraph == contentPivot.Type && nil == contentPivot.FirstChild { // 插入到空的段落块下
-		contentPivot.Unlink()
-	}
-
 	box := Conf.Box(srcTree.Box)
 	if removeErr := box.Remove(srcTree.Path); nil != removeErr {
 		logging.LogWarnf("remove tree [%s] failed: %s", srcTree.Path, removeErr)
@@ -274,6 +272,8 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 }
 
 func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
+	FlushTxQueue()
+
 	srcTree, _ := LoadTreeByBlockID(srcHeadingID)
 	if nil == srcTree {
 		err = ErrBlockNotFound

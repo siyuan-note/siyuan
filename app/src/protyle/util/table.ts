@@ -1,12 +1,13 @@
 import {updateTransaction} from "../wysiwyg/transaction";
 import {getSelectionOffset, focusByWbr, focusByRange, focusBlock} from "./selection";
-import {hasClosestBlock, hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
 import {matchHotKey} from "./hotKey";
 import {isNotCtrl} from "./compatibility";
 import {scrollCenter} from "../../util/highlightById";
 import {insertEmptyBlock} from "../../block/util";
 import {removeBlock} from "../wysiwyg/remove";
 import {hasPreviousSibling} from "../wysiwyg/getBlock";
+import * as dayjs from "dayjs";
 
 const scrollToView = (nodeElement: Element, rowElement: HTMLElement, protyle: IProtyle) => {
     if (nodeElement.getAttribute("custom-pinthead") === "true") {
@@ -370,10 +371,6 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         return false;
     }
 
-    if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
-        return false;
-    }
-
     // shift+enter 软换行
     if (event.key === "Enter" && event.shiftKey && isNotCtrl(event) && !event.altKey) {
         const wbrElement = document.createElement("wbr");
@@ -399,164 +396,167 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         event.preventDefault();
         return true;
     }
-    // enter 光标跳转到下一行同列
-    if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
-        event.preventDefault();
-        const trElement = cellElement.parentElement as HTMLTableRowElement;
-        if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-            (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+
+    if (!nodeElement.classList.contains("protyle-wysiwyg--select") && !hasClosestByClassName(nodeElement, "protyle-wysiwyg--select")) {
+        // enter 光标跳转到下一行同列
+        if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Enter") {
+            event.preventDefault();
+            const trElement = cellElement.parentElement as HTMLTableRowElement;
+            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
+                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
+                insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
+                return true;
+            }
+            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
+            if (!nextElement) {
+                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
+            }
+            if (!nextElement) {
+                return true;
+            }
+            range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
+            range.collapse(true);
+            scrollCenter(protyle);
+            return true;
+        }
+        // 表格后无内容时，按右键需新建空块
+        if (event.key === "ArrowRight" && range.toString() === "" &&
+            !nodeElement.nextElementSibling &&
+            cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
+            getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
+            event.preventDefault();
             insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
             return true;
         }
-        let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-        if (!nextElement) {
-            nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-        }
-        if (!nextElement) {
-            return true;
-        }
-        range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
-        range.collapse(true);
-        scrollCenter(protyle);
-        return true;
-    }
-    // 表格后无内容时，按右键需新建空块
-    if (event.key === "ArrowRight" && range.toString() === "" &&
-        !nodeElement.nextElementSibling &&
-        cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
-        getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
-        event.preventDefault();
-        insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));
-        return true;
-    }
-    // tab：光标移向下一个 cell
-    if (event.key === "Tab" && isNotCtrl(event)) {
-        if (event.shiftKey) {
-            // shift + tab 光标移动到前一个 cell
-            goPreviousCell(cellElement, range);
+        // tab：光标移向下一个 cell
+        if (event.key === "Tab" && isNotCtrl(event)) {
+            if (event.shiftKey) {
+                // shift + tab 光标移动到前一个 cell
+                goPreviousCell(cellElement, range);
+                event.preventDefault();
+                return true;
+            }
+
+            let nextElement = cellElement.nextElementSibling;
+            if (!nextElement) {
+                if (cellElement.parentElement.nextElementSibling) {
+                    nextElement = cellElement.parentElement.nextElementSibling.firstElementChild;
+                } else if (cellElement.parentElement.parentElement.tagName === "THEAD" &&
+                    cellElement.parentElement.parentElement.nextElementSibling) {
+                    nextElement =
+                        cellElement.parentElement.parentElement.nextElementSibling.firstElementChild.firstElementChild;
+                } else {
+                    nextElement = null;
+                }
+            }
+            if (nextElement) {
+                range.selectNodeContents(nextElement);
+            } else {
+                insertRow(protyle, range, cellElement, nodeElement);
+                range.selectNodeContents(nodeElement.querySelector("tbody").lastElementChild.firstElementChild);
+            }
             event.preventDefault();
             return true;
         }
 
-        let nextElement = cellElement.nextElementSibling;
-        if (!nextElement) {
-            if (cellElement.parentElement.nextElementSibling) {
-                nextElement = cellElement.parentElement.nextElementSibling.firstElementChild;
-            } else if (cellElement.parentElement.parentElement.tagName === "THEAD" &&
-                cellElement.parentElement.parentElement.nextElementSibling) {
-                nextElement =
-                    cellElement.parentElement.parentElement.nextElementSibling.firstElementChild.firstElementChild;
+        if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
+            const startContainer = range.startContainer as HTMLElement;
+            let previousBrElement;
+            if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
+                previousBrElement = (startContainer.childNodes[Math.min(range.startOffset, startContainer.childNodes.length - 1)] as HTMLElement);
+            } else if (startContainer.parentElement.tagName === "SPAN") {
+                previousBrElement = startContainer.parentElement.previousElementSibling;
             } else {
-                nextElement = null;
+                previousBrElement = startContainer.previousElementSibling;
             }
-        }
-        if (nextElement) {
-            range.selectNodeContents(nextElement);
-        } else {
-            insertRow(protyle, range, cellElement, nodeElement);
-            range.selectNodeContents(nodeElement.querySelector("tbody").lastElementChild.firstElementChild);
-        }
-        event.preventDefault();
-        return true;
-    }
-
-    if (event.key === "ArrowUp" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-        const startContainer = range.startContainer as HTMLElement;
-        let previousBrElement;
-        if (startContainer.nodeType !== 3 && (startContainer.tagName === "TH" || startContainer.tagName === "TD")) {
-            previousBrElement = (startContainer.childNodes[Math.min(range.startOffset, startContainer.childNodes.length - 1)] as HTMLElement);
-        } else if (startContainer.parentElement.tagName === "SPAN") {
-            previousBrElement = startContainer.parentElement.previousElementSibling;
-        } else {
-            previousBrElement = startContainer.previousElementSibling;
-        }
-        while (previousBrElement) {
-            if (previousBrElement.tagName === "BR" && hasPreviousSibling(previousBrElement)) {
+            while (previousBrElement) {
+                if (previousBrElement.tagName === "BR" && hasPreviousSibling(previousBrElement)) {
+                    return false;
+                }
+                previousBrElement = previousBrElement.previousElementSibling;
+            }
+            const trElement = cellElement.parentElement as HTMLTableRowElement;
+            let previousElement = trElement.previousElementSibling as HTMLTableRowElement;
+            if (!previousElement) {
+                previousElement = trElement.parentElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
+            }
+            if (!previousElement || previousElement?.tagName === "COL") {
                 return false;
             }
-            previousBrElement = previousBrElement.previousElementSibling;
+            range.selectNodeContents(previousElement.cells[getColIndex(cellElement)]);
+            range.collapse(false);
+            scrollCenter(protyle);
+            event.preventDefault();
+            return true;
         }
-        const trElement = cellElement.parentElement as HTMLTableRowElement;
-        let previousElement = trElement.previousElementSibling as HTMLTableRowElement;
-        if (!previousElement) {
-            previousElement = trElement.parentElement.previousElementSibling.lastElementChild as HTMLTableRowElement;
-        }
-        if (!previousElement || previousElement?.tagName === "COL") {
-            return false;
-        }
-        range.selectNodeContents(previousElement.cells[getColIndex(cellElement)]);
-        range.collapse(false);
-        scrollCenter(protyle);
-        event.preventDefault();
-        return true;
-    }
 
-    if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
-        const endContainer = range.endContainer as HTMLElement;
-        let nextBrElement;
-        if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
-            nextBrElement = (endContainer.childNodes[Math.max(0, range.endOffset - 1)] as HTMLElement)?.nextElementSibling;
-        } else if (endContainer.parentElement.tagName === "SPAN") {
-            nextBrElement = endContainer.parentElement.nextElementSibling;
-        } else {
-            nextBrElement = endContainer.nextElementSibling;
-        }
-        while (nextBrElement) {
-            if (nextBrElement.tagName === "BR" && nextBrElement.nextSibling) {
+        if (event.key === "ArrowDown" && isNotCtrl(event) && !event.shiftKey && !event.altKey) {
+            const endContainer = range.endContainer as HTMLElement;
+            let nextBrElement;
+            if (endContainer.nodeType !== 3 && (endContainer.tagName === "TH" || endContainer.tagName === "TD")) {
+                nextBrElement = (endContainer.childNodes[Math.max(0, range.endOffset - 1)] as HTMLElement)?.nextElementSibling;
+            } else if (endContainer.parentElement.tagName === "SPAN") {
+                nextBrElement = endContainer.parentElement.nextElementSibling;
+            } else {
+                nextBrElement = endContainer.nextElementSibling;
+            }
+            while (nextBrElement) {
+                if (nextBrElement.tagName === "BR" && nextBrElement.nextSibling) {
+                    return false;
+                }
+                nextBrElement = nextBrElement.nextElementSibling;
+            }
+            const trElement = cellElement.parentElement as HTMLTableRowElement;
+            if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
+                (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
                 return false;
             }
-            nextBrElement = nextBrElement.nextElementSibling;
+            let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
+            if (!nextElement) {
+                nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
+            }
+            if (!nextElement) {
+                return false;
+            }
+            range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
+            range.collapse(true);
+            scrollCenter(protyle);
+            event.preventDefault();
+            return true;
         }
-        const trElement = cellElement.parentElement as HTMLTableRowElement;
-        if ((!trElement.nextElementSibling && trElement.parentElement.tagName === "TBODY") ||
-            (trElement.parentElement.tagName === "THEAD" && !trElement.parentElement.nextElementSibling)) {
-            return false;
-        }
-        let nextElement = trElement.nextElementSibling as HTMLTableRowElement;
-        if (!nextElement) {
-            nextElement = trElement.parentElement.nextElementSibling.firstChild as HTMLTableRowElement;
-        }
-        if (!nextElement) {
-            return false;
-        }
-        range.selectNodeContents(nextElement.cells[getColIndex(cellElement)]);
-        range.collapse(true);
-        scrollCenter(protyle);
-        event.preventDefault();
-        return true;
-    }
 
-    // Backspace：光标移动到前一个 cell
-    if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Backspace"
-        && getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === 0 && range.toString() === "" &&
-        // 空换行无法删除 https://github.com/siyuan-note/siyuan/issues/2732
-        (range.startOffset === 0 || (range.startOffset === 1 && cellElement.querySelectorAll("br").length === 1))) {
-        const previousCellElement = goPreviousCell(cellElement, range, false);
-        if (!previousCellElement && nodeElement.previousElementSibling) {
-            focusBlock(nodeElement.previousElementSibling, undefined, false);
+        // Backspace：光标移动到前一个 cell
+        if (isNotCtrl(event) && !event.shiftKey && !event.altKey && event.key === "Backspace"
+            && getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === 0 && range.toString() === "" &&
+            // 空换行无法删除 https://github.com/siyuan-note/siyuan/issues/2732
+            (range.startOffset === 0 || (range.startOffset === 1 && cellElement.querySelectorAll("br").length === 1))) {
+            const previousCellElement = goPreviousCell(cellElement, range, false);
+            if (!previousCellElement && nodeElement.previousElementSibling) {
+                focusBlock(nodeElement.previousElementSibling, undefined, false);
+            }
+            scrollCenter(protyle);
+            event.preventDefault();
+            return true;
         }
-        scrollCenter(protyle);
-        event.preventDefault();
-        return true;
-    }
 
-    // 居左
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
-        setTableAlign(protyle, [cellElement], nodeElement, "left", range);
-        event.preventDefault();
-        return true;
-    }
-    // 居中
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
-        setTableAlign(protyle, [cellElement], nodeElement, "center", range);
-        event.preventDefault();
-        return true;
-    }
-    // 居右
-    if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
-        setTableAlign(protyle, [cellElement], nodeElement, "right", range);
-        event.preventDefault();
-        return true;
+        // 居左
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignLeft.custom, event)) {
+            setTableAlign(protyle, [cellElement], nodeElement, "left", range);
+            event.preventDefault();
+            return true;
+        }
+        // 居中
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignCenter.custom, event)) {
+            setTableAlign(protyle, [cellElement], nodeElement, "center", range);
+            event.preventDefault();
+            return true;
+        }
+        // 居右
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.alignRight.custom, event)) {
+            setTableAlign(protyle, [cellElement], nodeElement, "right", range);
+            event.preventDefault();
+            return true;
+        }
     }
 
     const tableElement = nodeElement.querySelector("table");
@@ -720,4 +720,34 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         event.preventDefault();
         return true;
     }
+};
+
+export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement) => {
+    if (!tableBlockElement) {
+        return;
+    }
+    const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
+    const selectCellElements: HTMLTableCellElement[] = [];
+    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+        if (!item.classList.contains("fn__none") &&
+            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+            selectCellElements.push(item);
+        }
+    });
+    tableSelectElement.removeAttribute("style");
+    if (getSelection().rangeCount>0) {
+        const range = getSelection().getRangeAt(0);
+        if (tableBlockElement.contains(range.startContainer)) {
+            range.insertNode(document.createElement("wbr"));
+        }
+    }
+    const oldHTML = tableBlockElement.outerHTML;
+    tableBlockElement.querySelector("wbr")?.remove();
+    tableBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+    selectCellElements.forEach(item => {
+        item.innerHTML = "";
+    });
+    updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
 };

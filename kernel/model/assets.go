@@ -123,7 +123,6 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
-				name = util.TruncateLenFileName(name)
 				name = "network-asset-" + name
 				name = util.AssetName(name)
 				writePath := filepath.Join(assetsDirPath, name)
@@ -205,23 +204,28 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					name = name[:strings.Index(name, "#")]
 				}
 				name, _ = url.PathUnescape(name)
-				ext := path.Ext(name)
+				name = util.FilterUploadFileName(name)
+				ext := util.Ext(name)
 				if "" == ext {
 					if mtype := mimetype.Detect(data); nil != mtype {
 						ext = mtype.Extension()
+						name += ext
 					}
+				}
+				if "" == ext && bytes.HasPrefix(data, []byte("<svg ")) && bytes.HasSuffix(data, []byte("</svg>")) {
+					ext = ".svg"
+					name += ext
 				}
 				if "" == ext {
 					contentType := resp.Header.Get("Content-Type")
 					exts, _ := mime.ExtensionsByType(contentType)
 					if 0 < len(exts) {
 						ext = exts[0]
+						name += ext
 					}
 				}
-				name = strings.TrimSuffix(name, ext)
-				name = util.FilterUploadFileName(name)
-				name = util.TruncateLenFileName(name)
-				name = "network-asset-" + name + "-" + ast.NewNodeID() + ext
+				name = util.AssetName(name)
+				name = "network-asset-" + name
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); err != nil {
 					logging.LogErrorf("write downloaded network asset [%s] to local asset [%s] failed: %s", u, writePath, err)
@@ -318,13 +322,24 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	if strings.Contains(relativePath, "?") {
 		relativePath = relativePath[:strings.Index(relativePath, "?")]
 	}
+
+	// 在全局 assets 路径下搜索
+	p := filepath.Join(util.DataDir, relativePath)
+	if gulu.File.IsExist(p) {
+		ret = p
+		if !util.IsSubPath(util.WorkspaceDir, ret) {
+			err = fmt.Errorf("[%s] is not sub path of workspace", ret)
+			return
+		}
+		return
+	}
+
+	// 在笔记本下搜索
 	notebooks, err := ListNotebooks()
 	if err != nil {
 		err = errors.New(Conf.Language(0))
 		return
 	}
-
-	// 在笔记本下搜索
 	for _, notebook := range notebooks {
 		notebookAbsPath := filepath.Join(util.DataDir, notebook.ID)
 		filelock.Walk(notebookAbsPath, func(path string, d fs.DirEntry, err error) error {
@@ -352,16 +367,6 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 		}
 	}
 
-	// 在全局 assets 路径下搜索
-	p := filepath.Join(util.DataDir, relativePath)
-	if gulu.File.IsExist(p) {
-		ret = p
-		if !util.IsSubPath(util.WorkspaceDir, ret) {
-			err = fmt.Errorf("[%s] is not sub path of workspace", ret)
-			return
-		}
-		return
-	}
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
@@ -607,7 +612,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	defer util.PushClearProgress()
 
 	newName = strings.TrimSpace(newName)
-	newName = util.RemoveInvalid(newName)
+	newName = util.FilterFileName(newName)
 	if path.Base(oldPath) == newName {
 		return
 	}

@@ -43,165 +43,15 @@ import {
     openSearchAsset,
     renderNextAssetMark,
     renderPreview,
-    toggleAssetHistory
 } from "./assets";
 import {resize} from "../protyle/util/resize";
-import {Menu} from "../plugin/Menu";
 import {addClearButton} from "../util/addClearButton";
 import {checkFold} from "../util/noRelyPCFunction";
 import {getUnRefList, openSearchUnRef, unRefMoreMenu} from "./unRef";
 import {getDefaultType} from "./getDefault";
-import {searchMarkRender} from "../protyle/render/searchMarkRender";
-
-export const toggleReplaceHistory = (searchElement: Element) => {
-    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.replaceKeys || list.replaceKeys.length === 0) {
-        return;
-    }
-    const menu = new Menu("search-replace-history");
-    if (menu.isOpen) {
-        return;
-    }
-    menu.element.classList.add("b3-menu--list");
-    menu.addItem({
-        iconHTML: "",
-        label: window.siyuan.languages.clearHistory,
-        click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].replaceKeys = [];
-            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-        }
-    });
-    const separatorElement = menu.addSeparator(1);
-    let current = true;
-    const replaceInputElement = searchElement.querySelector("#replaceInput") as HTMLInputElement;
-    list.replaceKeys.forEach((s: string) => {
-        if (s !== replaceInputElement.value && s) {
-            const menuItem = menu.addItem({
-                iconHTML: "",
-                label: escapeHtml(s),
-                action: "iconCloseRound",
-                bind(element) {
-                    element.addEventListener("click", (itemEvent) => {
-                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                            list.replaceKeys.find((item: string, index: number) => {
-                                if (item === s) {
-                                    list.replaceKeys.splice(index, 1);
-                                    return true;
-                                }
-                            });
-                            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].replaceKeys = list.replaceKeys;
-                            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
-                                window.siyuan.menus.menu.remove();
-                            } else {
-                                element.remove();
-                            }
-                        } else {
-                            replaceInputElement.value = element.textContent;
-                            window.siyuan.menus.menu.remove();
-                        }
-                        itemEvent.preventDefault();
-                        itemEvent.stopPropagation();
-                    });
-                }
-            });
-            if (current) {
-                menuItem.classList.add("b3-menu__item--current");
-            }
-            current = false;
-        }
-    });
-    if (current) {
-        separatorElement.remove();
-    }
-    const rect = replaceInputElement.getBoundingClientRect();
-    menu.open({
-        x: rect.left,
-        y: rect.bottom
-    });
-};
-
-export const toggleSearchHistory = (searchElement: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle) => {
-    const list = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS];
-    if (!list.keys || list.keys.length === 0) {
-        return;
-    }
-    const menu = new Menu("search-history");
-    if (menu.isOpen) {
-        return;
-    }
-    menu.element.classList.add("b3-menu--list");
-    menu.addItem({
-        iconHTML: "",
-        label: window.siyuan.languages.clearHistory,
-        click() {
-            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].keys = [];
-            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-        }
-    });
-    const separatorElement = menu.addSeparator(1);
-    let current = true;
-    const searchInputElement = searchElement.querySelector("#searchInput") as HTMLInputElement;
-    list.keys.forEach((s: string) => {
-        if (s !== searchInputElement.value && s) {
-            const menuItem = menu.addItem({
-                iconHTML: "",
-                label: escapeHtml(s),
-                action: "iconCloseRound",
-                bind(element) {
-                    element.addEventListener("click", (itemEvent) => {
-                        if (hasClosestByClassName(itemEvent.target as Element, "b3-menu__action")) {
-                            list.keys.find((item: string, index: number) => {
-                                if (item === s) {
-                                    list.keys.splice(index, 1);
-                                    return true;
-                                }
-                            });
-                            window.siyuan.storage[Constants.LOCAL_SEARCHKEYS].keys = list.keys;
-                            setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-                            if (element.previousElementSibling?.classList.contains("b3-menu__separator") && !element.nextElementSibling) {
-                                window.siyuan.menus.menu.remove();
-                            } else {
-                                element.remove();
-                            }
-                        } else {
-                            searchInputElement.value = element.textContent;
-                            config.page = 1;
-                            inputEvent(searchElement, config, edit, true);
-                            window.siyuan.menus.menu.remove();
-                        }
-                        itemEvent.preventDefault();
-                        itemEvent.stopPropagation();
-                    });
-                }
-            });
-            if (current) {
-                menuItem.classList.add("b3-menu__item--current");
-            }
-            current = false;
-        }
-    });
-    if (current) {
-        separatorElement.remove();
-    }
-    const rect = searchInputElement.getBoundingClientRect();
-    menu.open({
-        x: rect.left,
-        y: rect.bottom
-    });
-};
-
-const saveKeyList = (type: "keys" | "replaceKeys", value: string) => {
-    let list: string[] = window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type];
-    list.splice(0, 0, value);
-    list = Array.from(new Set(list));
-    if (list.length > window.siyuan.config.search.limit) {
-        list.splice(window.siyuan.config.search.limit, list.length - window.siyuan.config.search.limit);
-    }
-    // new Set 后需重新赋值
-    window.siyuan.storage[Constants.LOCAL_SEARCHKEYS][type] = list;
-    setStorageVal(Constants.LOCAL_SEARCHKEYS, window.siyuan.storage[Constants.LOCAL_SEARCHKEYS]);
-};
+import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
+import {saveKeyList, toggleAssetHistory, toggleReplaceHistory, toggleSearchHistory} from "./toggleHistory";
+import {highlightById} from "../util/highlightById";
 
 export const openGlobalSearch = (app: App, text: string, replace: boolean, searchData?: Config.IUILayoutTabSearchConfig) => {
     text = text.trim();
@@ -296,7 +146,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     </div>
     <div class="b3-form__icon search__header">
         <div style="position: relative" class="fn__flex-1">
-             <span class="search__history-icon ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
+            <span class="search__history-icon ariaLabel" id="searchHistoryBtn" aria-label="${updateHotkeyTip("⌥↓")}">
                 <svg data-menu="true" class="b3-form__icon-icon"><use xlink:href="#iconSearch"></use></svg>
                 <svg class="search__arrowdown"><use xlink:href="#iconDown"></use></svg>
             </span>
@@ -908,7 +758,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 event.preventDefault();
                 return;
             } else if (target.id === "replaceHistoryBtn") {
-                toggleReplaceHistory(element);
+                toggleReplaceHistory(element.querySelector("#replaceInput"));
                 event.stopPropagation();
                 event.preventDefault();
                 return;
@@ -1161,7 +1011,7 @@ const renderNextSearchMark = (options: {
     target: Element,
 }) => {
     const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-    if (CSS.highlights) {
+    if (isSupportCSSHL()) {
         options.edit.protyle.highlight.markHL.clear();
         options.edit.protyle.highlight.mark.clear();
         options.edit.protyle.highlight.rangeIndex++;
@@ -1200,18 +1050,27 @@ const renderNextSearchMark = (options: {
     }
 };
 
+let articleId: string;
+
 export const getArticle = (options: {
     id: string,
     config?: Config.IUILayoutTabSearchConfig,
     edit: Protyle
     value?: string,
 }) => {
+    articleId = options.id;
     checkFold(options.id, (zoomIn) => {
+        if (articleId !== options.id) {
+            return;
+        }
         options.edit.protyle.scroll.lastScrollTop = 0;
         addLoading(options.edit.protyle);
         fetchPost("/api/block/getDocInfo", {
             id: options.id,
         }, (response) => {
+            if (articleId !== options.id) {
+                return;
+            }
             options.edit.protyle.wysiwyg.renderCustom(response.data.ial);
             fetchPost("/api/filetree/getDoc", {
                 id: options.id,
@@ -1221,7 +1080,11 @@ export const getArticle = (options: {
                 mode: zoomIn ? 0 : 3,
                 size: zoomIn ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,
                 zoom: zoomIn,
+                highlight: !isSupportCSSHL(),
             }, getResponse => {
+                if (articleId !== options.id) {
+                    return;
+                }
                 options.edit.protyle.query = {
                     key: options.value || null,
                     method: options.config?.method || null,
@@ -1233,21 +1096,24 @@ export const getArticle = (options: {
                     protyle: options.edit.protyle,
                     action: zoomIn ? [Constants.CB_GET_ALL, Constants.CB_GET_HTML] : [Constants.CB_GET_HTML],
                 });
-                const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
-                if (matchElements.length === 0) {
-                    return;
-                }
+
                 const contentRect = options.edit.protyle.contentElement.getBoundingClientRect();
-                let matchRectTop: number;
-                if (CSS.highlights) {
-                    options.edit.protyle.highlight.rangeIndex = 0;
-                    searchMarkRender(options.edit.protyle, matchElements);
-                    matchRectTop = options.edit.protyle.highlight.ranges[0].getBoundingClientRect().top;
+                if (isSupportCSSHL()) {
+                    searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
+                        if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
+                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                        } else {
+                            highlightById(options.edit.protyle, options.id);
+                        }
+                    });
                 } else {
+                    const matchElements = options.edit.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]');
+                    if (matchElements.length === 0) {
+                        return;
+                    }
                     matchElements[0].classList.add("search-mark--hl");
-                    matchRectTop = matchElements[0].getBoundingClientRect().top;
+                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchElements[0].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
                 }
-                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + matchRectTop - contentRect.top - contentRect.height / 2;
             });
         });
     });

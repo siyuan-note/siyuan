@@ -28,10 +28,11 @@ const filterSelectHTML = (key: string, options: {
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
+                const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1">
-        <span class="b3-chip ariaLabel" data-position="2parentW" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
+    <div class="fn__flex-1 ariaLabel" data-position="2parentW" aria-label="${airaLabel}">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
     </div>
@@ -45,7 +46,7 @@ const filterSelectHTML = (key: string, options: {
         });
     }
     if (!hasMatch && key) {
-        const colorIndex = (options?.length || 0) % 13 + 1;
+        const colorIndex = (options?.length || 0) % 14 + 1;
         html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
 <div class="fn__flex-1">
@@ -209,18 +210,17 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
     }
     menu.addItem({
         iconHTML: "",
-        type: "readonly",
-        label: `<div>
-    <div class="b3-form__icona fn__block">
-        <input class="b3-text-field b3-form__icona-input" type="text">
-        <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
-    </div>
-    <div class="fn__none">
-        <div class="fn__hr"></div>
-        <textarea rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
-    </div>
-    <div class="fn__hr--small"></div>
-</div>`,
+        type: "empty",
+        label: `<div class="fn__hr"></div>
+<div class="b3-form__icona fn__block">
+    <input class="b3-text-field b3-form__icona-input" type="text">
+    <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+</div>
+<div class="fn__none">
+    <div class="fn__hr"></div>
+    <textarea rows="1" placeholder="${window.siyuan.languages.addDesc}" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(desc)}">${desc}</textarea>
+</div>
+<div class="fn__hr--small"></div>`,
         bind(element) {
             const inputElement = element.querySelector("input");
             inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
@@ -318,87 +318,91 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addSeparator();
-    Array.from(Array(13).keys()).forEach(index => {
-        menu.addItem({
-            checked: parseInt(color) === index + 1,
-            iconHTML: "",
-            label: `<span class="color__square color__square--list"  style="margin: 2px 0;color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</span>`,
-            click(element) {
-                if (element.lastElementChild.classList.contains("b3-menu__checked")) {
-                    return;
-                }
-                element.parentElement.querySelector(".b3-menu__checked")?.remove();
-                element.insertAdjacentHTML("beforeend", '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg></span>');
-                transaction(protyle, [{
-                    action: "updateAttrViewColOption",
-                    id: colId,
-                    avID: data.id,
-                    data: {
-                        oldName: name,
-                        newName: inputElement.value,
-                        oldColor: color,
-                        newColor: (index + 1).toString(),
-                        newDesc: descElement.value
-                    },
-                }], [{
-                    action: "updateAttrViewColOption",
-                    id: colId,
-                    avID: data.id,
-                    data: {
-                        oldName: inputElement.value,
-                        newName: name,
-                        oldColor: (index + 1).toString(),
-                        newColor: color,
-                        newDesc: descElement.value
-                    },
-                }]);
+    let html = "<div class=\"fn__flex fn__flex-wrap\" style=\"width: 238px\">";
+    Array.from(Array(14).keys()).forEach(index => {
+        html += `<button data-color="${index + 1}" class="color__square${parseInt(color) === index + 1 ? " color__square--current" : ""}" style="color: var(--b3-font-color${index + 1});background-color: var(--b3-font-background${index + 1});">A</button>`;
+    });
+    menu.addItem({
+        type: "empty",
+        iconHTML: "",
+        label: html + "</div>",
+        bind(element) {
+            element.addEventListener("click", (event) => {
+                const target = event.target as HTMLElement;
+                if (target.classList.contains("color__square") && !target.classList.contains("color__square--current")) {
+                    element.querySelector(".color__square--current")?.classList.remove("color__square--current");
+                    target.classList.add("color__square--current");
+                    const newColor = target.getAttribute("data-color");
+                    transaction(protyle, [{
+                        action: "updateAttrViewColOption",
+                        id: colId,
+                        avID: data.id,
+                        data: {
+                            oldName: name,
+                            newName: inputElement.value,
+                            oldColor: color,
+                            newColor,
+                            newDesc: descElement.value
+                        },
+                    }], [{
+                        action: "updateAttrViewColOption",
+                        id: colId,
+                        avID: data.id,
+                        data: {
+                            oldName: inputElement.value,
+                            newName: name,
+                            oldColor: newColor,
+                            newColor: color,
+                            newDesc: descElement.value
+                        },
+                    }]);
 
-                data.view.columns.find(column => {
-                    if (column.id === colId) {
-                        column.options.find((item) => {
-                            if (item.name === name) {
-                                item.name = inputElement.value;
-                                item.color = (index + 1).toString();
-                                return true;
-                            }
-                        });
-                        return true;
-                    }
-                });
-                const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
-                if (!cellElements) {
-                    menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
-                    bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
-                } else {
-                    cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
-                        const rowElement = hasClosestByClassName(cellElement, "av__row");
-                        if (rowElement) {
-                            cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
-                                blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
-                        }
-                        cellValues[cellIndex].mSelect.find((item) => {
-                            if (item.content === name) {
-                                item.content = inputElement.value;
-                                item.color = (index + 1).toString();
-                                return true;
-                            }
-                        });
-                        if (cellElement.classList.contains("custom-attr__avvalue")) {
-                            cellElement.innerHTML = genAVValueHTML(cellValues[cellIndex]);
-                        } else {
-                            updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
+                    data.view.columns.find(column => {
+                        if (column.id === colId) {
+                            column.options.find((item) => {
+                                if (item.name === name) {
+                                    item.name = inputElement.value;
+                                    item.color = newColor;
+                                    return true;
+                                }
+                            });
+                            return true;
                         }
                     });
-                    menuElement.innerHTML = getSelectHTML(data.view, cellElements);
-                    bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
+                    const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
+                    if (!cellElements) {
+                        menuElement.innerHTML = getEditHTML({protyle, data, colId, isCustomAttr});
+                        bindEditEvent({protyle, data, menuElement, isCustomAttr, blockID});
+                    } else {
+                        cellElements.forEach((cellElement: HTMLElement, cellIndex) => {
+                            const rowElement = hasClosestByClassName(cellElement, "av__row");
+                            if (rowElement) {
+                                cellElement = cellElements[cellIndex] = (blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElement.dataset.colId}"]`) ||
+                                    blockElement.querySelector(`.fn__flex-1[data-col-id="${cellElement.dataset.colId}"]`)) as HTMLElement;
+                            }
+                            cellValues[cellIndex].mSelect.find((item) => {
+                                if (item.content === name) {
+                                    item.content = inputElement.value;
+                                    item.color = newColor;
+                                    return true;
+                                }
+                            });
+                            if (cellElement.classList.contains("custom-attr__avvalue")) {
+                                cellElement.innerHTML = genAVValueHTML(cellValues[cellIndex]);
+                            } else {
+                                updateAttrViewCellAnimation(cellElement, cellValues[cellIndex]);
+                            }
+                        });
+                        menuElement.innerHTML = getSelectHTML(data.view, cellElements);
+                        bindSelectEvent(protyle, data, menuElement, cellElements, blockElement);
+                    }
+                    menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
+                    name = inputElement.value;
+                    desc = descElement.value;
+                    color = newColor;
                 }
-                menuElement.querySelector(".b3-menu__items").scrollTop = oldScroll;
-                name = inputElement.value;
-                desc = descElement.value;
-                color = (index + 1).toString();
-                return true;
-            }
-        });
+            });
+        }
     });
     const rect = target.getBoundingClientRect();
     menu.open({
@@ -601,7 +605,7 @@ export const getSelectHTML = (data: IAVTable, cellElements: HTMLElement[], init 
     const selected: string[] = [];
     cellValues[0].mSelect?.forEach((item) => {
         selected.push(item.content);
-        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}<svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
+        selectedHTML += `<div class="b3-chip b3-chip--middle" data-content="${escapeAttr(item.content)}" style="white-space: nowrap;max-width:100%;background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})"><span class="fn__ellipsis">${escapeHtml(item.content)}</span><svg class="b3-chip__close" data-type="removeCellOption"><use xlink:href="#iconCloseRound"></use></svg></div>`;
     });
 
     return `<div class="b3-menu__items">
@@ -630,7 +634,7 @@ export const mergeAddOption = (column: IAVColumn, cellValue: IAVCellValue, avID:
             }
         });
         if (!needAdd) {
-            const newColor = ((column.options?.length || 0) % 13 + 1).toString();
+            const newColor = ((column.options?.length || 0) % 14 + 1).toString();
             column.options.push({
                 name: item.content,
                 color: newColor

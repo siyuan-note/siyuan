@@ -20,6 +20,8 @@ import (
 	"os"
 	"sort"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/ConradIrwin/font/sfnt"
@@ -30,8 +32,21 @@ import (
 	"golang.org/x/text/transform"
 )
 
-func GetSysFonts(currentLanguage string) (ret []string) {
-	fonts := loadFonts(currentLanguage)
+var (
+	sysFonts     []string
+	sysFontsLock = sync.Mutex{}
+)
+
+func LoadSysFonts() (ret []string) {
+	sysFontsLock.Lock()
+	defer sysFontsLock.Unlock()
+
+	if 0 < len(sysFonts) {
+		return sysFonts
+	}
+
+	start := time.Now()
+	fonts := loadFonts()
 	ret = []string{}
 	for _, font := range fonts {
 		ret = append(ret, font.Family)
@@ -39,6 +54,8 @@ func GetSysFonts(currentLanguage string) (ret []string) {
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
+	sysFonts = ret
+	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
 	return
 }
 
@@ -58,7 +75,7 @@ type Font struct {
 	Family string
 }
 
-func loadFonts(currentLanguage string) (ret []*Font) {
+func loadFonts() (ret []*Font) {
 	ret = []*Font{}
 	for _, fontPath := range findfont.List() {
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
@@ -102,51 +119,28 @@ func loadFonts(currentLanguage string) (ret []*Font) {
 				return
 			}
 			fontFile.Close()
-			var family, familyChinese string
+			var family string
 			for _, e := range t.List() {
 				if sfnt.NameFontFamily != e.NameID && sfnt.NamePreferredFamily != e.NameID {
 					continue
 				}
 
-				if sfnt.PlatformLanguageID(1033) == e.LanguageID {
-					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-					if err != nil {
-						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
-						continue
-					}
-					val := string(v)
-					if sfnt.NameFontFamily == e.NameID && "" != val {
-						family = val
-					}
-					if sfnt.NamePreferredFamily == e.NameID && "" != val {
-						family = val
-					}
-				} else if sfnt.PlatformLanguageID(2052) == e.LanguageID {
-					if "zh_CN" != currentLanguage {
-						continue
-					}
-
-					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-					if err != nil {
-						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
-						continue
-					}
-					val := string(v)
-					if sfnt.NameFontFamily == e.NameID && "" != val {
-						familyChinese = val
-					}
-					if sfnt.NamePreferredFamily == e.NameID && "" != val {
-						familyChinese = val
-					}
+				v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+				if err != nil {
+					//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
+					continue
+				}
+				val := string(v)
+				if sfnt.NameFontFamily == e.NameID && "" != val {
+					family = val
+				}
+				if sfnt.NamePreferredFamily == e.NameID && "" != val {
+					family = val
 				}
 			}
 			if "" != family && !strings.HasPrefix(family, ".") {
 				ret = append(ret, &Font{fontPath, family})
-				//LogInfof("[%s] [%s]", fontPath, family)
-			}
-			if "" != familyChinese && !strings.HasPrefix(familyChinese, ".") {
-				ret = append(ret, &Font{fontPath, familyChinese})
-				//LogInfof("[%s] [%s]", fontPath, family)
+				//logging.LogInfof("[%s] [%s]", fontPath, family)
 			}
 		}
 	}

@@ -157,7 +157,7 @@ func refreshRefCount(rootID, blockID string) {
 	for _, count := range refCounts {
 		rootRefCount += count
 	}
-	refIDs, _, _ := GetBlockRefs(blockID)
+	refIDs, _, _ := GetBlockRefs(blockID, false)
 	util.PushSetDefRefCount(rootID, blockID, refIDs, refCount, rootRefCount)
 }
 
@@ -269,7 +269,11 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 			for _, blockValue := range blockValues.Values {
 				if blockValue.Block.ID == updatedDefNode.ID {
-					newContent := getNodeRefText(updatedDefNode)
+					newIcon, newContent := getNodeAvBlockText(updatedDefNode)
+					if newIcon != blockValue.Block.Icon {
+						blockValue.Block.Icon = newIcon
+						changedAv = true
+					}
 					if newContent != blockValue.Block.Content {
 						blockValue.Block.Content = newContent
 						changedAv = true

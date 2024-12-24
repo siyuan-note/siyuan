@@ -113,7 +113,7 @@ export class Preview {
                     }
                     break;
                 } else if (target.tagName === "IMG") {
-                    previewDocImage((event.target as HTMLImageElement).src, protyle.block.rootID);
+                    previewDocImage((event.target as HTMLElement).getAttribute("src"), protyle.block.rootID);
                     event.stopPropagation();
                     event.preventDefault();
                     break;

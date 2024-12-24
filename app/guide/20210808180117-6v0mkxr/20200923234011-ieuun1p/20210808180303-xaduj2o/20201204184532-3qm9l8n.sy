@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20241008202623"
+		"updated": "20241213215714"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20241008202623"
+				"updated": "20241213215714"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20240921122726"
+				"updated": "20241213215714"
 			},
 			"Children": [
 				{
@@ -429,7 +429,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131162138-7ufhbho",
-								"updated": "20240403150956"
+								"updated": "20241213215545"
 							},
 							"Children": [
 								{
@@ -443,7 +443,33 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database, and the return value is a list of blocks,  please refer to the example below"
+									"Data": "​: This function is used to query the database, and the return value is a list of blocks"
+								}
+							]
+						},
+						{
+							"ID": "20241213215602-dk7iion",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215602-dk7iion",
+								"updated": "20241213215602"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -466,7 +492,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210504093232-6wxl589",
-								"updated": "20240403151002"
+								"updated": "20241213215547"
 							},
 							"Children": [
 								{
@@ -480,7 +506,375 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to query the database, and the return value is a list of spans,  please refer to the example below"
+									"Data": "​: This function is used to query the database, and the return value is a list of spans"
+								}
+							]
+						},
+						{
+							"ID": "20241213215606-a1mq6zf",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215606-a1mq6zf",
+								"updated": "20241213215606"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241213214939-he4wmcd",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241213214939-he4wmcd",
+						"updated": "20241213214939"
+					},
+					"Children": [
+						{
+							"ID": "20241213214939-hrshqgv",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241213214939-hrshqgv",
+								"updated": "20241213215550"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to query the database and the return value is a result set"
+								}
+							]
+						},
+						{
+							"ID": "20241213215554-rox3jk7",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215554-rox3jk7",
+								"updated": "20241213215554"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM refs LIMIT 3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212102027-j293sei",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212102027-j293sei",
+						"updated": "20241213215714"
+					},
+					"Children": [
+						{
+							"ID": "20241212102028-6c8tlnu",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212102028-6c8tlnu",
+								"updated": "20241212163902"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to count the block content"
+								}
+							]
+						},
+						{
+							"ID": "20241213215714-u0j3i4k",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215714-u0j3i4k",
+								"updated": "20241213215714"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20241212102028-4ew89te",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212102028-4ew89te",
+								"updated": "20241212102028"
+							},
+							"Children": [
+								{
+									"ID": "20241212102028-wai3afs",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-wai3afs",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-wmtwngj",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-wmtwngj",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102028-r9k7ody",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-r9k7ody",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-le5lpgo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-le5lpgo",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102028-3egh1dg",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-3egh1dg",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-pijmoea",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-pijmoea",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102028-qu6f5tc",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-qu6f5tc",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-8yj65um",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-8yj65um",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102028-8ivthzb",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-8ivthzb",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-p8nmm3a",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-p8nmm3a",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212102028-frusted",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212102028-frusted",
+										"updated": "20241212102028"
+									},
+									"Children": [
+										{
+											"ID": "20241212102028-h58utua",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212102028-h58utua",
+												"updated": "20241212102028"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163841-3yjhffn",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163841-3yjhffn",
+						"updated": "20241212163918"
+					},
+					"Children": [
+						{
+							"ID": "20241212163841-d8t3qxb",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163841-d8t3qxb",
+								"updated": "20241212163918"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function is used to return the string length"
 								}
 							]
 						}
@@ -854,64 +1248,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210604111714-yc1e5gj",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604111714-yc1e5gj",
-				"updated": "20210604111715"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "queryBlocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " and "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "querySpans"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " support variable parameter lists similar to SQL prepared statements to facilitate the input of parameters:"
-				}
-			]
-		},
-		{
-			"ID": "20210604111750-c3sm3jr",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20210604111750-c3sm3jr",
-				"updated": "20210604111632"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker"
-				},
-				{
-					"ID": "20220307092214-3yza25q",
-					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n",
-					"Properties": {
-						"id": "20220307092214-3yza25q"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
 				}
 			]
 		},

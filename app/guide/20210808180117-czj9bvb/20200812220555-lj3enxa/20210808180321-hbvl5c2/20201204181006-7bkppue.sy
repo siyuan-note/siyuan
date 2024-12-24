@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20241008201610"
+		"updated": "20241213215655"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20241008201610"
+				"updated": "20241213215655"
 			},
 			"Children": [
 				{
@@ -237,7 +237,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20240921122737"
+				"updated": "20241213215655"
 			},
 			"Children": [
 				{
@@ -451,7 +451,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210131155558-ghlchbx",
-								"updated": "20240403150712"
+								"updated": "20241213215236"
 							},
 							"Children": [
 								{
@@ -465,7 +465,33 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询数据库，返回值为 blocks 列表，请参考下面的例子"
+									"Data": "​：该函数用于查询数据库，返回值为 blocks 列表"
+								}
+							]
+						},
+						{
+							"ID": "20210604111446-p6vadfc",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20210604111446-p6vadfc",
+								"updated": "20241213215118"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
 								}
 							]
 						}
@@ -480,7 +506,7 @@
 					},
 					"Properties": {
 						"id": "20210504093313-4aoyxd0",
-						"updated": "20240403150838"
+						"updated": "20241213215416"
 					},
 					"Children": [
 						{
@@ -488,7 +514,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210504093313-ya53o58",
-								"updated": "20240403150838"
+								"updated": "20241213215302"
 							},
 							"Children": [
 								{
@@ -502,7 +528,375 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询数据库，返回值为 spans 列表，请参考下面的例子"
+									"Data": "​：该函数用于查询数据库，返回值为 spans 列表"
+								}
+							]
+						},
+						{
+							"ID": "20241213215337-rhkoc8k",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215337-rhkoc8k",
+								"updated": "20241213215416"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241213214733-ro4xcjm",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241213214733-ro4xcjm",
+						"updated": "20241213215421"
+					},
+					"Children": [
+						{
+							"ID": "20241213214733-73dpip9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241213214733-73dpip9",
+								"updated": "20241213215139"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "querySQL"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于查询数据库，返回值为结果集"
+								}
+							]
+						},
+						{
+							"ID": "20241213215240-f33bsqs",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241213215240-f33bsqs",
+								"updated": "20241213215421"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": " .action{querySQL \"SELECT * FROM refs LIMIT 3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212101708-0euo6is",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212101708-0euo6is",
+						"updated": "20241213215655"
+					},
+					"Children": [
+						{
+							"ID": "20241212101708-llv0ngj",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212101708-llv0ngj",
+								"updated": "20241212163723"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "statBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于统计块内容"
+								}
+							]
+						},
+						{
+							"ID": "20241212101810-6ffociu",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20241212101810-6ffociu",
+								"updated": "20241213215655"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{ (statBlock .id).RuneCount} .action{ (statBlock .id).WordCount}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						},
+						{
+							"ID": "20241212101821-kf6un09",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241212101821-kf6un09",
+								"updated": "20241212101821"
+							},
+							"Children": [
+								{
+									"ID": "20241212101821-1qt2j1i",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-1qt2j1i",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-mkxql2a",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-mkxql2a",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RuneCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212101821-kok8u5t",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-kok8u5t",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-7gsgfqo",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-7gsgfqo",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "WordCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212101821-jxbirdz",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-jxbirdz",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-mep8mwc",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-mep8mwc",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "LinkCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212101821-8dho5yg",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-8dho5yg",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-hriiyll",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-hriiyll",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "ImageCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212101821-mrg92au",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-mrg92au",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-ovwsmzs",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-ovwsmzs",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "RefCount"
+												}
+											]
+										}
+									]
+								},
+								{
+									"ID": "20241212101821-kq0fb53",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241212101821-kq0fb53",
+										"updated": "20241212101821"
+									},
+									"Children": [
+										{
+											"ID": "20241212101821-6k4evcn",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241212101821-6k4evcn",
+												"updated": "20241212101821"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "BlockCount"
+												}
+											]
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241212163704-qmyz1ss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241212163704-qmyz1ss",
+						"updated": "20241212163739"
+					},
+					"Children": [
+						{
+							"ID": "20241212163704-i9p11h6",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241212163704-i9p11h6",
+								"updated": "20241212163739"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "runeLen"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回字符串长度"
 								}
 							]
 						}
@@ -876,64 +1270,6 @@
 							]
 						}
 					]
-				}
-			]
-		},
-		{
-			"ID": "20210604111213-774ll6c",
-			"Type": "NodeParagraph",
-			"Properties": {
-				"id": "20210604111213-774ll6c",
-				"updated": "20210604111557"
-			},
-			"Children": [
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "queryBlocks"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 和 "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "querySpans"
-				},
-				{
-					"Type": "NodeText",
-					"Data": " 支持类似 SQL 预编译语句的变参列表，方便传入参数："
-				}
-			]
-		},
-		{
-			"ID": "20210604111446-p6vadfc",
-			"Type": "NodeCodeBlock",
-			"IsFencedCodeBlock": true,
-			"Properties": {
-				"id": "20210604111446-p6vadfc",
-				"updated": "20210604111632"
-			},
-			"Children": [
-				{
-					"Type": "NodeCodeBlockFenceOpenMarker",
-					"Data": "```"
-				},
-				{
-					"Type": "NodeCodeBlockFenceInfoMarker"
-				},
-				{
-					"ID": "20220307091943-diuexe8",
-					"Type": "NodeCodeBlockCode",
-					"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n",
-					"Properties": {
-						"id": "20220307091943-diuexe8"
-					}
-				},
-				{
-					"Type": "NodeCodeBlockFenceCloseMarker",
-					"Data": "```"
 				}
 			]
 		},

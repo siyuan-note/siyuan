@@ -3156,20 +3156,6 @@
         "keywords": "business,person,suit,スレンダーマン,スーツ,ビジネスマン,男,男性,都市伝説,商务,业务,正装,西装革履"
       },
       {
-        "unicode": "1f574-fe0f-200d-2642-fe0f",
-        "description": "Man in Suit Levitating",
-        "description_ja_jp": "浮いてるスーツの男性",
-        "description_zh_cn": "西装革履的男人",
-        "keywords": "business,suit,man,male,men,スレンダーマン,スーツ,ビジネスマン,都市伝説,商务,正装,西装革履,业务,西装,男,男性,男子"
-      },
-      {
-        "unicode": "1f574-fe0f-200d-2640-fe0f",
-        "description": "Woman in Suit Levitating",
-        "description_ja_jp": "浮いてるスーツの女性",
-        "description_zh_cn": "西装革履的女人",
-        "keywords": "business,suit,woman,female,women,スレンダーマン,スーツ,ビジネスマン,都市伝説,商务,正装,西装革履,业务,西装,女,女性,妇女"
-      },
-      {
         "unicode": "1f46f",
         "description": "People with Bunny Ears",
         "description_ja_jp": "バニー",
@@ -6952,13 +6938,6 @@
         "description_ja_jp": "鳥居",
         "description_zh_cn": "神社",
         "keywords": "religion,shinto,shrine,宗教,建物,建築物,神社,神道,日本,神道教"
-      },
-      {
-        "unicode": "e50a",
-        "description": "Shibuya",
-        "description_ja_jp": "渋谷",
-        "description_zh_cn": "涩谷",
-        "keywords": "109,shibuya,建物,建築物,渋谷区,日本,涩谷区"
       },
       {
         "unicode": "1f54b",

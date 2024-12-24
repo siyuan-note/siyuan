@@ -4,9 +4,8 @@ import {Constants} from "../constants";
 import {Files} from "../layout/dock/Files";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
-import {getAllModels} from "../layout/getAll";
 /// #endif
-import {getAllEditor} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 import {setNoteBook} from "../util/pathName";
 import {Dialog} from "../dialog";
 import {setPosition} from "../util/setPosition";

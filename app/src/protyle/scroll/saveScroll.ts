@@ -4,6 +4,7 @@ import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
 import {Constants} from "../../constants";
 import {setStorageVal} from "../util/compatibility";
+import {isSupportCSSHL} from "../render/searchMarkRender";
 
 export const saveScroll = (protyle: IProtyle, getObject = false) => {
     if (!protyle.wysiwyg.element.firstElementChild || window.siyuan.config.readonly) {
@@ -52,7 +53,7 @@ export const getDocByScroll = (options: {
     protyle: IProtyle,
     scrollAttr?: IScrollAttr,
     mergedOptions?: IProtyleOptions,
-    cb?: () => void
+    cb?: (keys: string[]) => void
     focus?: boolean,
     updateReadonly?: boolean
 }) => {
@@ -73,6 +74,7 @@ export const getDocByScroll = (options: {
             query: options.protyle.query?.key,
             queryMethod: options.protyle.query?.method,
             queryTypes: options.protyle.query?.types,
+            highlight: !isSupportCSSHL(),
         }, response => {
             if (response.code === 1) {
                 fetchPost("/api/filetree/getDoc", {
@@ -80,13 +82,16 @@ export const getDocByScroll = (options: {
                     query: options.protyle.query?.key,
                     queryMethod: options.protyle.query?.method,
                     queryTypes: options.protyle.query?.types,
+                    highlight: !isSupportCSSHL(),
                 }, response => {
                     onGet({
                         data: response,
                         protyle: options.protyle,
                         action: actions,
                         scrollAttr: options.scrollAttr,
-                        afterCB: options.cb,
+                        afterCB: options.cb ? () => {
+                            options.cb(response.data.keywords);
+                        } : undefined,
                         updateReadonly: options.updateReadonly
                     });
                 });
@@ -97,7 +102,9 @@ export const getDocByScroll = (options: {
                     protyle: options.protyle,
                     action: actions,
                     scrollAttr: options.scrollAttr,
-                    afterCB: options.cb,
+                    afterCB: options.cb ? () => {
+                        options.cb(response.data.keywords);
+                    } : undefined,
                     updateReadonly: options.updateReadonly
                 });
             }
@@ -111,13 +118,16 @@ export const getDocByScroll = (options: {
         query: options.protyle.query?.key,
         queryMethod: options.protyle.query?.method,
         queryTypes: options.protyle.query?.types,
+        highlight: !isSupportCSSHL(),
     }, response => {
         onGet({
             data: response,
             protyle: options.protyle,
             action: actions,
             scrollAttr: options.scrollAttr,
-            afterCB: options.cb,
+            afterCB: options.cb ? () => {
+                options.cb(response.data.keywords);
+            } : undefined,
             updateReadonly: options.updateReadonly
         });
     });

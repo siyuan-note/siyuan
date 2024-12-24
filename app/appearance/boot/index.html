@@ -52,10 +52,7 @@
 
     const redirect = () => {
         const uri = 'http://127.0.0.1:' + location.port
-        if (navigator.userAgent.match(/Android/i))
-            document.location = uri
-        else
-            window.location.replace(uri)
+        window.location.replace(uri)
     }
     (async () => {
         const v = getSearch('v')

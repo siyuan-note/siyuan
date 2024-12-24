@@ -28,6 +28,7 @@
 @import "business/av";
 @import "business/search";
 @import "business/emojis";
+@import "component/svg";
 
 .block__popover {
   width: 80vw;
@@ -138,6 +139,15 @@
     &:not(.toolbar__icon-deactivate):hover {
       background-color: var(--b3-list-hover);
     }
+
+    &--history {
+      height: 36px;
+      width: 36px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 0;
+    }
   }
 
   &__title {
@@ -150,10 +160,6 @@
     border: 0;
     background-color: transparent;
     color: var(--b3-theme-on-background);
-  }
-
-  &__search {
-    margin: 8px;
   }
 
   &__text {
@@ -395,6 +401,7 @@
   stroke: currentColor;
   width: 14px;
   height: 14px;
+  flex-shrink: 0;
 
   &--mid {
     width: 16px;
@@ -404,6 +411,11 @@
   &--small {
     width: 12px;
     height: 12px;
+  }
+
+  &--smaller {
+    width: 10px;
+    height: 10px;
   }
 }
 

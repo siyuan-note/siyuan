@@ -62,8 +62,7 @@ type Backlink struct {
 	node *ast.Node // 仅用于按文档内容顺序排序
 }
 
-func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (ret []*Backlink) {
-	var keywords []string
+func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
@@ -98,11 +97,16 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 		mentionKeywords = append(mentionKeywords, strings.Split(keyword, " ")...)
 	}
 	mentionKeywords = gulu.Str.RemoveDuplicatedElem(mentionKeywords)
+	keywords = append(keywords, mentionKeywords...)
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
+	}
 
 	var refTree *parse.Tree
 	trees := filesys.LoadTrees(mentionBlockIDs)
 	for id, tree := range trees {
-		backlink := buildBacklink(id, tree, mentionKeywords, luteEngine)
+		backlink := buildBacklink(id, tree, mentionKeywords, highlight, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -118,11 +122,14 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren bool) (
 	return
 }
 
-func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret []*Backlink) {
-	var keywords []string
+func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight bool) (ret []*Backlink, keywords []string) {
 	keyword = strings.TrimSpace(keyword)
 	if "" != keyword {
 		keywords = strings.Split(keyword, " ")
+	}
+	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
+	if 1 > len(keywords) {
+		keywords = []string{}
 	}
 
 	ret = []*Backlink{}
@@ -150,7 +157,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren bool) (ret
 
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, keywords, luteEngine)
+		backlink := buildBacklink(linkRef.ID, refTree, keywords, highlight, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -191,7 +198,7 @@ func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
 	})
 }
 
-func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEngine *lute.Lute) (ret *Backlink) {
+func buildBacklink(refID string, refTree *parse.Tree, keywords []string, highlight bool, luteEngine *lute.Lute) (ret *Backlink) {
 	n := treenode.GetNodeInTree(refTree, refID)
 	if nil == n {
 		return
@@ -199,7 +206,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, luteEng
 
 	renderNodes, expand := getBacklinkRenderNodes(n)
 
-	if 0 < len(keywords) {
+	if highlight && 0 < len(keywords) {
 		for _, renderNode := range renderNodes {
 			var unlinks []*ast.Node
 

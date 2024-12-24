@@ -874,7 +874,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < selectedIds.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: selectedIds[i]});
-                    html += `((${selectedIds[i]} '${response.data}')) `;
+                    html += protyle.lute.Md2BlockDOM(`((${selectedIds[i]} '${response.data}'))`);
                 }
                 insertHTML(html, protyle);
             } else if (event.shiftKey) {
@@ -1085,7 +1085,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
-                    html += `((${ids[i]} '${response.data}')) `;
+                    html += protyle.lute.Md2BlockDOM(`((${ids[i]} '${response.data}'))`);
                 }
                 insertHTML(html, protyle);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
@@ -1132,15 +1132,28 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {
-                    for (let i = 0; i < ids.length; i++) {
-                        if (ids[i]) {
-                            await fetchSyncPost("/api/filetree/doc2Heading", {
-                                srcID: ids[i],
-                                after: targetElement.classList.contains("dragover__bottom"),
-                                targetID: targetElement.getAttribute("data-node-id"),
-                            });
+                    if (targetElement.classList.contains("dragover__bottom")) {
+                        for (let i = ids.length - 1; i > -1; i--) {
+                            if (ids[i]) {
+                                await fetchSyncPost("/api/filetree/doc2Heading", {
+                                    srcID: ids[i],
+                                    after: true,
+                                    targetID: targetElement.getAttribute("data-node-id"),
+                                });
+                            }
+                        }
+                    } else {
+                        for (let i = 0; i < ids.length; i++) {
+                            if (ids[i]) {
+                                await fetchSyncPost("/api/filetree/doc2Heading", {
+                                    srcID: ids[i],
+                                    after: false,
+                                    targetID: targetElement.getAttribute("data-node-id"),
+                                });
+                            }
                         }
                     }
+
                     fetchPost("/api/filetree/getDoc", {
                         id: protyle.block.id,
                         size: window.siyuan.config.editor.dynamicLoadBlocks,

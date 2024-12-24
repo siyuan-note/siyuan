@@ -131,10 +131,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     if (column.hidden) {
                         return;
                     }
-                    tableHTML += `<div class="av__cell av__cell--header ariaLabel" data-col-id="${column.id}"  draggable="true" 
+                    tableHTML += `<div class="av__cell av__cell--header" data-col-id="${column.id}"  draggable="true" 
 data-icon="${column.icon}" data-dtype="${column.type}" data-wrap="${column.wrap}" data-pin="${column.pin}" 
 data-desc="${escapeAttr(column.desc)}" data-position="top"
-aria-label="${escapeAriaLabel(column.name)}<div class='ft__on-surface'>${escapeAriaLabel(column.desc || "")}</div>"
 style="width: ${column.width || "200px"};">
     ${column.icon ? unicode2Emoji(column.icon, "av__cellheadericon", true) : `<svg class="av__cellheadericon"><use xlink:href="#${getColIconByType(column.type)}"></use></svg>`}
     <span class="av__celltext fn__flex-1">${escapeHtml(column.name)}</span>
@@ -150,7 +149,7 @@ style="width: ${column.width || "200px"};">
                         calcHTML += `<div data-col-id="${column.id}" data-dtype="${column.type}" class="av__calc" style="width: ${column.width || "200px"}">&nbsp;</div>`;
                     } else {
                         calcHTML += `<div class="av__calc${column.calc && column.calc.operator !== "" ? " av__calc--ashow" : ""}" data-col-id="${column.id}" data-dtype="${column.type}" data-operator="${column.calc?.operator || ""}" 
-style="width: ${column.width || "200px"}">${getCalcValue(column) || '<svg><use xlink:href="#iconDown"></use></svg>' + window.siyuan.languages.calc}</div>`;
+style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use xlink:href="#iconDown"></use></svg><small>${window.siyuan.languages.calc}</small>`}</div>`;
                     }
                     if (column.calc && column.calc.operator !== "") {
                         hasCalc = true;
@@ -202,7 +201,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let tabHTML = "";
                 let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-position="top" data-id="${item.id}" data-page="${item.pageSize}" aria-label="${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div data-position="top" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : '<svg class="item__graphic"><use xlink:href="#iconTable"></use></svg>'}
     <span class="item__text">${escapeHtml(item.name)}</span>
 </div>`;
@@ -350,7 +349,11 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 if (isSearching) {
                     searchInputElement.focus();
                 }
+                searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
+                    event.stopPropagation();
+                });
                 searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+                    event.stopPropagation();
                     if (event.isComposing) {
                         return;
                     }

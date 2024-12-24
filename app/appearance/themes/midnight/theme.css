@@ -22,11 +22,11 @@
     --b3-theme-on-error: #fff;
 
     /* 字体 */
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Segoe UI", "Microsoft Yahei", sans-serif, "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+    --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Hiragino Sans", arial, sans-serif, emojis;
     --b3-font-family-protyle: var(--b3-font-family);
-    --b3-font-family-code: "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", Menlo, Courier, monospace, var(--b3-font-family);
+    --b3-font-family-code: "Emojis Additional", "Emojis Reset", "JetBrainsMono-Regular", mononoki, Consolas, "Liberation Mono", var(--b3-font-family);
     --b3-font-family-graph: arial;
-    --b3-font-family-emoji: "Segoe UI Emoji", "Segoe UI Symbol", "Segoe UI", "Apple Color Emoji", "Twemoji Mozilla", "Noto Color Emoji", "Android Emoji";
+    --b3-font-family-emoji: "Emojis Additional", emojis;
     --b3-font-family-math: KaTeX_Math;
     --b3-font-size: 14px;
 
@@ -40,6 +40,7 @@
     /* 线条 */
     --b3-border-color: #363636;
     --b3-border-radius: 6px;
+    --b3-border-radius-s: 3px;
     --b3-border-radius-b: 12px;
 
     /* 滚动条 */
@@ -84,22 +85,22 @@
     --b3-font-color7: var(--b3-theme-secondary);
     --b3-font-color8: var(--b3-theme-error);
     --b3-font-color9: #f5539e;
-    --b3-font-color10: #bc67bc;
-    --b3-font-color11: #65b84d;
-    --b3-font-color12: #f5822e;
+    --b3-font-color10: #00eeff;
+    --b3-font-color11: #74ff00;
+    --b3-font-color12: #fff200;
     --b3-font-color13: var(--b3-theme-background);
     --b3-font-background1: var(--b3-card-error-background);
     --b3-font-background2: var(--b3-card-warning-background);
     --b3-font-background3: var(--b3-card-info-background);
     --b3-font-background4: var(--b3-card-success-background);
     --b3-font-background5: #4c5257;
-    --b3-font-background6: #0c3d88;
+    --b3-font-background6: #08296c;
     --b3-font-background7: #593905;
     --b3-font-background8: #541812;
-    --b3-font-background9: #6a0634;
-    --b3-font-background10: #6b2f6b;
-    --b3-font-background11: #376629;
-    --b3-font-background12: #803a06;
+    --b3-font-background9: #843473;
+    --b3-font-background10: #329096;
+    --b3-font-background11: #568b2a;
+    --b3-font-background12: #8d8829;
     --b3-font-background13: var(--b3-theme-on-background);
 
     /* 动画效果 */
@@ -107,6 +108,11 @@
     --b3-width-transition: width .2s cubic-bezier(0, 0, .2, 1) 0ms;
     --b3-color-transition: color .2s cubic-bezier(0, 0, .2, 1) 0ms;
     --b3-background-transition: background 20ms ease-in 0s;
+
+    /* 高亮 */
+    --b3-highlight-color: #222;
+    --b3-highlight-background: #ffff00;
+    --b3-highlight-current-background: #ff9632;
 
     /* 下拉菜单 */
     --b3-select-background: url("data:image/svg+xml;utf8,<svg fill='rgba(154, 160, 166, .68)' height='24' viewBox='0 0 24 24' width='24' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/><path d='M0 0h24v24H0z' fill='none'/></svg>") no-repeat right 2px center var(--b3-theme-background);
@@ -194,8 +200,17 @@
     --b3-parent-background: var(--b3-theme-background);
 }
 
-:lang(ja_JP):root {
-    --b3-font-family: "Helvetica Neue", "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", "Segoe UI", sans-serif, "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols";
+/* 微软字体斜体会被相邻背景遮挡，将 arial 放置其前 https://github.com/siyuan-note/siyuan/issues/11841；"Segoe UI" 和 Noto-COLRv1-2.047 冲突，故移除。 */
+:root:lang(zh_CN) {
+    --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "PingFang SC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans GB", "Source Han Sans SC", arial, "Microsoft Yahei", sans-serif, emojis;
+}
+
+:root:lang(zh_CHT) {
+    --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "PingFang TC", "Luxi Sans", "DejaVu Sans", "Hiragino Sans TC", "Source Han Sans TC", "Microsoft JhengHei", arial, sans-serif, emojis;
+}
+
+:root:lang(ja_JP) {
+    --b3-font-family: "Emojis Additional", "Emojis Reset", BlinkMacSystemFont, Helvetica, "Luxi Sans", "DejaVu Sans", "Hiragino Sans", "Yu Gothic UI", arial, sans-serif, emojis;
 }
 
 /* https://github.com/siyuan-note/siyuan/issues/6440 */

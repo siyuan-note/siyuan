@@ -29,12 +29,20 @@ export const getDateHTML = (data: IAVTable, cellElements: HTMLElement[]) => {
     const currentDate = new Date().getTime();
     if (cellValue?.value?.date?.isNotEmpty) {
         value = dayjs(cellValue.value.date.content).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+        const year = value.split("-")[0];
+        if (year.length !== 4) {
+            value = new Array(4 - year.length).fill(0).join("") + value;
+        }
     } else {
         value = dayjs(currentDate).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     }
     let value2 = "";
     if (cellValue?.value?.date?.isNotEmpty2) {
         value2 = dayjs(cellValue.value.date.content2).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+        const year = value.split("-")[0];
+        if (year.length !== 4) {
+            value = new Array(4 - year.length).fill(0).join("") + value;
+        }
     } else if (hasEndDate) {
         value2 = dayjs(currentDate).format(isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
     }
@@ -77,9 +85,9 @@ export const bindDateEvent = (options: {
             }
             if (event.key === "Enter") {
                 updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
-                    content: new Date(inputElements[0].dataset.value).getTime(),
+                    content: getFullYearTime(inputElements[0].dataset.value),
                     isNotEmpty: inputElements[0].value !== "",
-                    content2: new Date(inputElements[1].dataset.value).getTime(),
+                    content2: getFullYearTime(inputElements[1].dataset.value),
                     isNotEmpty2: inputElements[1].value !== "",
                     hasEndDate: inputElements[2].checked,
                     isNotTime: !inputElements[3].checked,
@@ -125,12 +133,23 @@ export const bindDateEvent = (options: {
     });
     return () => {
         updateCellsValue(options.protyle, options.blockElement as HTMLElement, {
-            content: new Date(inputElements[0].dataset.value).getTime(),
+            content: getFullYearTime(inputElements[0].dataset.value),
             isNotEmpty: inputElements[0].value !== "",
-            content2: new Date(inputElements[1].dataset.value).getTime(),
+            content2: getFullYearTime(inputElements[1].dataset.value),
             isNotEmpty2: inputElements[1].value !== "",
             hasEndDate: inputElements[2].checked,
             isNotTime: !inputElements[3].checked,
         }, options.cellElements);
     };
+};
+
+const getFullYearTime = (dateStr: string) => {
+    const year = dateStr.split("-")[0];
+    const date = new Date(dateStr);
+    if (year.startsWith("00") || year.startsWith("000") || year.length < 3) {
+        date.setFullYear(parseInt(year));
+        return date.getTime();
+    } else {
+        return date.getTime();
+    }
 };

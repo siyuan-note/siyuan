@@ -19,6 +19,15 @@
       width: 16px;
     }
 
+    &-list {
+      height: 28px;
+      width: 42px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      position: absolute;
+    }
+
     &-input {
       padding-left: 35px !important;
     }

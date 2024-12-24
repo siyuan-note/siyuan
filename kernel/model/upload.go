@@ -25,7 +25,6 @@ import (
 	"strings"
 
 	"github.com/88250/gulu"
-	"github.com/88250/lute/ast"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -87,9 +86,7 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 			// 已经存在同样数据的资源文件的话不重复保存
 			succMap[baseName] = existAsset.Path
 		} else {
-			ext := path.Ext(fName)
-			fName = fName[0 : len(fName)-len(ext)]
-			fName = fName + "-" + ast.NewNodeID() + ext
+			fName = util.AssetName(fName)
 			writePath := filepath.Join(assetsDirPath, fName)
 			if _, err = f.Seek(0, io.SeekStart); err != nil {
 				f.Close()
@@ -135,6 +132,11 @@ func Upload(c *gin.Context) {
 	if nil != form.Value["assetsDirPath"] {
 		relAssetsDirPath = form.Value["assetsDirPath"][0]
 		assetsDirPath = filepath.Join(util.DataDir, relAssetsDirPath)
+		if !util.IsAbsPathInWorkspace(assetsDirPath) {
+			ret.Code = -1
+			ret.Msg = "Path [" + assetsDirPath + "] is not in workspace"
+			return
+		}
 	}
 	if !gulu.File.IsExist(assetsDirPath) {
 		if err = os.MkdirAll(assetsDirPath, 0755); err != nil {

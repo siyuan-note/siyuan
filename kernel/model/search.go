@@ -360,8 +360,8 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			ret = []*Block{}
 		}
 
-		// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
 		prependNotebookNameInHPath(ret)
+		filterSelfHPath(ret)
 		return
 	}
 
@@ -423,12 +423,25 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		newDoc = true
 	}
 
-	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
 	prependNotebookNameInHPath(ret)
+	filterSelfHPath(ret)
 	return
 }
 
+func filterSelfHPath(blocks []*Block) {
+	// 简化搜索结果列表中的文档块路径 Simplify document block paths in search results https://github.com/siyuan-note/siyuan/issues/13364
+	// 文档块不显示自己的路径（最后一层）
+
+	for _, b := range blocks {
+		if b.IsDoc() {
+			b.HPath = strings.TrimSuffix(b.HPath, path.Base(b.HPath))
+		}
+	}
+}
+
 func prependNotebookNameInHPath(blocks []*Block) {
+	// 在 hPath 中加入笔记本名 Show notebooks in hpath of block ref search list results https://github.com/siyuan-note/siyuan/issues/9378
+
 	var boxIDs []string
 	for _, b := range blocks {
 		boxIDs = append(boxIDs, b.Box)
@@ -579,7 +592,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						return ast.WalkContinue
 					}
 
-					replaceNodeTokens(n, method, keyword, replacement, r)
+					replaceNodeTokens(n, method, keyword, strings.TrimSpace(replacement), r)
 				case ast.NodeLinkText:
 					if !replaceTypes["imgText"] {
 						return ast.WalkContinue
@@ -660,11 +673,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						if replaceTypes["aHref"] {
 							if 0 == method {
 								if strings.Contains(n.TextMarkAHref, keyword) {
-									n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, replacement)
+									n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, strings.TrimSpace(replacement))
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {
-									n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, replacement)
+									n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, strings.TrimSpace(replacement))
 								}
 							}
 						}
@@ -976,6 +989,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		return
 	}
 
+	query = filterQueryInvisibleChars(query)
 	trimQuery := strings.TrimSpace(query)
 	if "" != trimQuery {
 		query = trimQuery
@@ -1013,6 +1027,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
 		if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
+			query = stringQuery(query)
 			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
 		} else {
 			docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
@@ -1108,6 +1123,10 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	}
 	if 1 > len(ret) {
 		ret = []*Block{}
+	}
+
+	if 0 == groupBy {
+		filterSelfHPath(ret)
 	}
 	return
 }
@@ -1223,7 +1242,6 @@ func buildTypeFilter(types map[string]bool) string {
 }
 
 func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	stmt = filterQueryInvisibleChars(stmt)
 	stmt = strings.TrimSpace(stmt)
 	blocks := sql.SelectBlocksRawStmt(stmt, page, pageSize)
 	ret = fromSQLBlocks(&blocks, "", beforeLen)
@@ -1348,7 +1366,6 @@ func extractID(content string) (ret string) {
 }
 
 func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = filterQueryInvisibleChars(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
@@ -1357,7 +1374,6 @@ func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignor
 }
 
 func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = filterQueryInvisibleChars(query)
 	if ast.IsNodeIDPattern(query) {
 		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		return
@@ -1366,8 +1382,6 @@ func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFil
 }
 
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	exp = filterQueryInvisibleChars(exp)
-
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
 	stmt += boxFilter + pathFilter + ignoreFilter + " " + orderBy
@@ -1401,7 +1415,6 @@ func fullTextSearchCountByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreF
 }
 
 func fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = stringQuery(query)
 	table := "blocks_fts" // 大小写敏感
 	if !Conf.Search.CaseSensitive {
 		table = "blocks_fts_case_insensitive"
@@ -1448,8 +1461,7 @@ func fullTextSearchCountByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFi
 }
 
 func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	query = strings.ReplaceAll(query, "'", "''")
-	query = strings.ReplaceAll(query, "\"", "\"\"")
+	query = strings.ReplaceAll(query, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	keywords := strings.Split(query, " ")
 	contentField := columnConcat()
 	var likeFilter string
@@ -1496,6 +1508,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 
 	keywords = gulu.Str.RemoveDuplicatedElem(keywords)
 	terms := strings.Join(keywords, search.TermSep)
+	terms = strings.ReplaceAll(terms, "''", "'")
 	ret = fromSQLBlocks(&resultBlocks, terms, beforeLen)
 	if 1 > len(ret) {
 		ret = []*Block{}
@@ -1504,6 +1517,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
+	query = stringQuery(query)
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {

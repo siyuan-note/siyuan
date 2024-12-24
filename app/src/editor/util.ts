@@ -276,7 +276,7 @@ export const openFile = async (options: IOpenFileOptions) => {
             }
             wnd.showHeading();
             if (options.afterOpen) {
-                options.afterOpen(createdTab.model);
+                options.afterOpen(createdTab ? createdTab.model : undefined);
             }
             return createdTab;
         }

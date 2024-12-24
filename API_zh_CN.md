@@ -381,8 +381,8 @@
   }
   ```
 
-  * `id`：文档 ID
-  * `title`：新标题
+    * `id`：文档 ID
+    * `title`：新标题
 * 返回值
 
   ```json
@@ -416,7 +416,7 @@
     "data": null
   }
   ```
-  
+
 通过 `id` 删除文档：
 
 * `/api/filetree/removeDocByID`
@@ -428,7 +428,7 @@
   }
   ```
 
-  * `id`：文档 ID
+    * `id`：文档 ID
 * 返回值
 
   ```json
@@ -455,6 +455,30 @@
     * `fromPaths`：源路径
     * `toNotebook`：目标笔记本 ID
     * `toPath`：目标路径
+* 返回值
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+通过 `id` 移动文档：
+
+* `/api/filetree/moveDocsByID`
+* 参数
+
+  ```json
+  {
+    "fromIDs": ["20210917220056-yxtyl7i"],
+    "toID": "20210817205410-2kvfpfn"
+  }
+  ```
+
+    * `fromIDs`：源文档 ID
+    * `toID`：目标父文档 ID
 * 返回值
 
   ```json
@@ -522,7 +546,7 @@
   }
   ```
 
-  * `id`：块 ID
+    * `id`：块 ID
 * 返回值
 
   ```json
@@ -545,8 +569,8 @@
   }
   ```
 
-  * `path`：人类可读路径
-  * `notebook`：笔记本 ID
+    * `path`：人类可读路径
+    * `notebook`：笔记本 ID
 * 返回值
 
   ```json
@@ -860,7 +884,7 @@
   }
   ```
 
-  * `id`：待折叠块的 ID
+    * `id`：待折叠块的 ID
 * 返回值
 
   ```json
@@ -882,7 +906,7 @@
   }
   ```
 
-  * `id`：待展开块的 ID
+    * `id`：待展开块的 ID
 * 返回值
 
   ```json
@@ -1063,7 +1087,7 @@
     ]
   }
   ```
-  
+
 ### 提交事务
 
 * `/api/sqlite/flushTransaction`

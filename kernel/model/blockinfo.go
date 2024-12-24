@@ -90,7 +90,8 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
+	buildBacklinkListItemRefs(&ret.RefIDs)
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -162,7 +163,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		if queryRefCount {
-			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, false)
+			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
 			ret.RefCount = len(ret.RefIDs) // 填充块引计数
 		}
 
@@ -204,6 +205,8 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 }
 
 func GetBlockRefText(id string) string {
+	FlushTxQueue()
+
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return ErrBlockNotFound.Error()
@@ -265,17 +268,20 @@ func getNodeRefText(node *ast.Node) string {
 	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
 }
 
-func getNodeAvBlockText(node *ast.Node) string {
+func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 	if nil == node {
-		return ""
+		return
 	}
 
-	if ret := node.IALAttr("name"); "" != ret {
-		ret = strings.TrimSpace(ret)
-		ret = util.EscapeHTML(ret)
-		return ret
+	icon = node.IALAttr("icon")
+	if name := node.IALAttr("name"); "" != name {
+		name = strings.TrimSpace(name)
+		name = util.EscapeHTML(name)
+		content = name
+	} else {
+		content = getNodeRefText0(node, 1024)
 	}
-	return getNodeRefText0(node, 1024)
+	return
 }
 
 func getNodeRefText0(node *ast.Node, maxLen int) string {
@@ -308,7 +314,7 @@ func getNodeRefText0(node *ast.Node, maxLen int) string {
 	return ret
 }
 
-func GetBlockRefs(defID string) (refIDs, refTexts, defIDs []string) {
+func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string) {
 	refIDs = []string{}
 	refTexts = []string{}
 	defIDs = []string{}
@@ -323,6 +329,10 @@ func GetBlockRefs(defID string) (refIDs, refTexts, defIDs []string) {
 		defIDs = sql.QueryChildDefIDsByRootDefID(defID)
 	} else {
 		defIDs = append(defIDs, defID)
+	}
+
+	if isBacklink {
+		buildBacklinkListItemRefs(&refIDs)
 	}
 	return
 }
@@ -539,4 +549,18 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 	}
 	return
+}
+
+func buildBacklinkListItemRefs(refIDs *[]string) {
+	refBts := treenode.GetBlockTrees(*refIDs)
+	for i, refID := range *refIDs {
+		if bt := refBts[refID]; nil != bt {
+			if "p" == bt.Type {
+				if parent := treenode.GetBlockTree(bt.ParentID); nil != parent && "i" == parent.Type {
+					// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
+					(*refIDs)[i] = parent.ID
+				}
+			}
+		}
+	}
 }

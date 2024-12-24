@@ -52,6 +52,7 @@
       min-height: 0 !important;
       min-width: 0 !important;
       width: 100%;
+      pointer-events: none;
     }
   }
 
@@ -244,11 +245,18 @@
     display: inline-block;
     font-size: 12px;
     line-height: 1.2;
-    margin: 0 5% 5px;
+    margin: 5px 5%;
     max-width: 90%;
+    min-height: 14px;
+    opacity: 0.8;
     overflow: hidden;
     text-overflow: ellipsis;
+    transition: opacity 0.15s;
     white-space: nowrap;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   &-button {

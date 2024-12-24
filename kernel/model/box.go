@@ -596,7 +596,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 					}
 					continue
 				}
-				if "tags" == attrK {
+				if "tags" == attrK && nil != attrV {
 					var tags string
 					if str, ok := attrV.(string); ok {
 						tags = strings.TrimSpace(str)
@@ -614,7 +614,10 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 						tags += tagStr + ","
 					}
 					tags = strings.TrimRight(tags, ",")
-					tree.Root.SetIALAttr("tags", tags)
+					tags = strings.TrimSpace(tags)
+					if "" != tags {
+						tree.Root.SetIALAttr("tags", tags)
+					}
 					continue
 				}
 

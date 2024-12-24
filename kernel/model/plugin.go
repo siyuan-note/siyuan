@@ -184,6 +184,13 @@ var petalsStoreLock = sync.Mutex{}
 func savePetals(petals []*Petal) {
 	petalsStoreLock.Lock()
 	defer petalsStoreLock.Unlock()
+	savePetals0(petals)
+}
+
+func savePetals0(petals []*Petal) {
+	if 1 > len(petals) {
+		petals = []*Petal{}
+	}
 
 	petalDir := filepath.Join(util.DataDir, "storage", "petal")
 	confPath := filepath.Join(petalDir, "petals.json")
@@ -232,6 +239,21 @@ func getPetals() (ret []*Petal) {
 	if err = gulu.JSON.UnmarshalJSON(data, &ret); err != nil {
 		logging.LogErrorf("unmarshal petals failed: %s", err)
 		return
+	}
+
+	var tmp []*Petal
+	pluginsDir := filepath.Join(util.DataDir, "plugins")
+	for _, petal := range ret {
+		if petal.Enabled && filelock.IsExist(filepath.Join(pluginsDir, petal.Name)) {
+			tmp = append(tmp, petal)
+		}
+	}
+	if len(tmp) != len(ret) {
+		savePetals0(tmp)
+		ret = tmp
+	}
+	if 1 > len(ret) {
+		ret = []*Petal{}
 	}
 	return
 }

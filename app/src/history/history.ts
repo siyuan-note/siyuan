@@ -15,6 +15,7 @@ import {openModel} from "../mobile/menu/model";
 import {closeModel} from "../mobile/util/closePanel";
 import {App} from "../index";
 import {resizeSide} from "./resizeSide";
+import {isSupportCSSHL, searchMarkRender} from "../protyle/render/searchMarkRender";
 
 let historyEditor: Protyle;
 
@@ -38,6 +39,7 @@ const renderDoc = (element: HTMLElement, currentPage: number) => {
     const assetElement = element.querySelector('.history__text[data-type="assetPanel"]');
     const mdElement = element.querySelector('.history__text[data-type="mdPanel"]') as HTMLTextAreaElement;
     const listElement = element.querySelector(".b3-list");
+    element.querySelector(".protyle-title__input").classList.add("fn__none");
     assetElement.classList.add("fn__none");
     mdElement.classList.add("fn__none");
     docElement.classList.add("fn__none");
@@ -398,7 +400,7 @@ export const openHistory = (app: App) => {
                 </ul>
                 <div class="history__resize"></div>
                 <div class="fn__flex-column fn__flex-1">
-                    <div class="protyle-title__input ft__center ft__breakword"></div>
+                    <div class="protyle-title__input ft__center ft__breakword fn__none"></div>
                     <div class="fn__flex-1 history__text fn__none" data-type="assetPanel"></div>
                     <textarea class="fn__flex-1 history__text fn__none" data-type="mdPanel"></textarea>
                     <div class="fn__flex-1 history__text fn__none" style="padding: 0" data-type="docPanel"></div>
@@ -692,9 +694,11 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                     assetElement.classList.remove("fn__none");
                     assetElement.innerHTML = renderAssetsPreview(dataPath);
                 } else if (type === "doc") {
+                    const k = (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value;
                     fetchPost("/api/history/getDocHistoryContent", {
                         historyPath: dataPath,
-                        k: (firstPanelElement.querySelector(".b3-text-field") as HTMLInputElement).value
+                        highlight: !isSupportCSSHL(),
+                        k
                     }, (response) => {
                         if (response.data.isLargeDoc) {
                             mdElement.value = response.data.content;
@@ -709,9 +713,11 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                 protyle: historyEditor.protyle,
                                 action: [Constants.CB_GET_HISTORY, Constants.CB_GET_HTML],
                             });
+                            searchMarkRender(historyEditor.protyle, k.split(" "));
                         }
                     });
                 }
+                titleElement.classList.remove("fn__none");
                 titleElement.textContent = target.querySelector(".b3-list-item__text").textContent;
                 let currentItem = hasClosestByClassName(target, "b3-list") as HTMLElement;
                 if (currentItem) {

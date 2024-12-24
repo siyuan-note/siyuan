@@ -197,8 +197,11 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
             } else if (type === "remove") {
                 const urlPath = pdf.appConfig.file.replace(location.origin, "").substr(1);
                 const config = getConfig(pdf);
-                delete config[rectElement.getAttribute("data-node-id")];
-                rectElement.remove();
+                const id = rectElement.getAttribute("data-node-id");
+                delete config[id];
+                element.querySelectorAll(`[data-node-id="${id}"]`).forEach(item => {
+                    item.remove();
+                });
                 fetchPost("/api/asset/setFileAnnotation", {
                     path: urlPath + ".sya",
                     data: JSON.stringify(config),
@@ -392,6 +395,23 @@ const showToolbar = (element: HTMLElement, range: Range, target?: HTMLElement) =
     setPosition(utilElement, targetRect.left, targetRect.top + targetRect.height + 4);
 };
 
+const getTextNode = (element: HTMLElement, isFirst: boolean) => {
+    const spans = element.querySelectorAll('span[role="presentation"]');
+    let index = isFirst ? 0 : spans.length - 1;
+    while (spans[index]) {
+        if (spans[index].textContent) {
+            break;
+        } else {
+            if (isFirst) {
+                index++;
+            } else {
+                index--;
+            }
+        }
+    }
+    return spans[index];
+};
+
 const getHightlightCoordsByRange = (pdf: any, color: string) => {
     const range = window.getSelection().getRangeAt(0);
     const startPageElement = hasClosestByClassName(range.startContainer, "page");
@@ -431,8 +451,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
 
     const cloneRange = range.cloneRange();
     if (startIndex !== endIndex) {
-        const startDivs = startPage.textLayer.textDivs;
-        range.setEndAfter(startDivs[startDivs.length - 1]);
+        range.setEndAfter(getTextNode(startPage.textLayer.div, false));
     }
 
     const startSelected: number[] = [];
@@ -450,8 +469,7 @@ const getHightlightCoordsByRange = (pdf: any, color: string) => {
         const endPage = pdf.pdfViewer.getPageView(endIndex);
         const endPageRect = endPage.canvas.getClientRects()[0];
         const endViewport = endPage.viewport;
-        const endDivs = endPage.textLayer.textDivs;
-        cloneRange.setStart(endDivs[0], 0);
+        cloneRange.setStart(getTextNode(endPage.textLayer.div, true), 0);
         mergeRects(cloneRange).forEach(function (r) {
             endSelected.push(
                 endViewport.convertToPdfPoint(r.left - endPageRect.x,

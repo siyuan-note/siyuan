@@ -198,9 +198,7 @@ interface Window {
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
-        writeImageClipboard(uri: string): void
         readClipboard(): string
-        getBlockURL(): string
     }
 
     Protyle: import("../protyle/method").default
@@ -876,7 +874,8 @@ interface IAVCellValue {
     mAsset?: IAVCellAssetValue[]
     block?: {
         content: string,
-        id?: string
+        id?: string,
+        icon?: string
     }
     url?: {
         content: string

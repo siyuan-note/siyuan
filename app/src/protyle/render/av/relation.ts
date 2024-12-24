@@ -210,13 +210,13 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
 const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string) => {
     if (type === "selected") {
         return `<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-<span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
+<span class="b3-menu__label fn__ellipsis ${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
 <svg class="b3-menu__action"><use xlink:href="#iconMin"></use></svg>`;
     }
     if (type === "empty") {
         if (id) {
             return `<button class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label">${window.siyuan.languages.newRowInRelation.replace("${x}", text).replace("${y}", id)}</span>
+    <span class="b3-menu__label fn__ellipsis">${window.siyuan.languages.newRowInRelation.replace("${x}", text).replace("${y}", id)}</span>
 </button>`;
         }
         return `<button class="b3-menu__item">
@@ -225,7 +225,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
     }
     if (type == "unselect") {
         return `<button data-id="${id}" class="b3-menu__item" data-type="setRelationCell">
-    <span class="b3-menu__label${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
+    <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
     }

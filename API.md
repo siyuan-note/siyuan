@@ -73,7 +73,8 @@
 
 * Endpoint: `http://127.0.0.1:6806`
 * Both are POST methods
-* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header Content-Type is `application/json`
+* An interface with parameters is required, the parameter is a JSON string, placed in the body, and the header
+  Content-Type is `application/json`
 * Return value
 
    ````json
@@ -328,7 +329,8 @@ View API token in <kbd>Settings - About</kbd>, request header: `Authorization: T
   ```
 
     * `notebook`: Notebook ID
-    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the database hpath field)
+    * `path`: Document path, which needs to start with / and separate levels with / (path here corresponds to the
+      database hpath field)
     * `markdown`: GFM Markdown content
 * Return value
 
@@ -381,8 +383,8 @@ Rename a document by `id`:
   }
   ```
 
-  * `id`: Document ID
-  * `title`: New document title
+    * `id`: Document ID
+    * `title`: New document title
 * Return value
 
   ```json
@@ -416,7 +418,7 @@ Rename a document by `id`:
     "data": null
   }
   ```
-  
+
 Remove a document by `id`:
 
 * `/api/filetree/removeDocByID`
@@ -428,7 +430,7 @@ Remove a document by `id`:
   }
   ```
 
-  * `id`: Document ID
+    * `id`: Document ID
 * Return value
 
   ```json
@@ -455,6 +457,30 @@ Remove a document by `id`:
     * `fromPaths`: Source paths
     * `toNotebook`: Target notebook ID
     * `toPath`: Target path
+* Return value
+
+  ```json
+  {
+    "code": 0,
+    "msg": "",
+    "data": null
+  }
+  ```
+
+Move documents by `id`:
+
+* `/api/filetree/moveDocsByID`
+* Parameters
+
+  ```json
+  {
+    "fromIDs": ["20210917220056-yxtyl7i"],
+    "toID": "20210817205410-2kvfpfn"
+  }
+  ```
+
+    * `fromIDs`: Source docs' IDs
+    * `toID`: Target parent ID
 * Return value
 
   ```json
@@ -510,7 +536,7 @@ Remove a document by `id`:
     "data": "/foo/bar"
   }
   ```
-  
+
 ### Get storage path based on ID
 
 * `/api/filetree/getPathByID`
@@ -522,7 +548,7 @@ Remove a document by `id`:
   }
   ```
 
-  * `id`: Block ID
+    * `id`: Block ID
 * Return value
 
   ```json
@@ -545,8 +571,8 @@ Remove a document by `id`:
   }
   ```
 
-  * `path`: Human-readable path
-  * `notebook`: Notebook ID
+    * `path`: Human-readable path
+    * `notebook`: Notebook ID
 * Return value
 
   ```json
@@ -570,7 +596,8 @@ Remove a document by `id`:
         * `"/assets/"`: workspace/data/assets/ folder
         * `"/assets/sub/"`: workspace/data/assets/sub/ folder
 
-      Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder of the workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
+      Under normal circumstances, it is recommended to use the first method, which is stored in the assets folder of the
+      workspace, putting in a subdirectory has some side effects, please refer to the assets chapter of the user guide.
     * `file[]`: Uploaded file list
 * Return value
 
@@ -588,7 +615,9 @@ Remove a document by `id`:
   ```
 
     * `errFiles`: List of filenames with errors in upload processing
-    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the uploaded address
+    * `succMap`: For successfully processed files, the key is the file name when uploading, and the value is
+      assets/foo-id.png, which is used to replace the asset link address in the existing Markdown content with the
+      uploaded address
 
 ## Blocks
 
@@ -613,7 +642,8 @@ Remove a document by `id`:
     * `previousID`: The ID of the previous block, used to anchor the insertion position
     * `parentID`: The ID of the parent block, used to anchor the insertion position
 
-  `nextID`, `previousID`, and `parentID` must have at least one value, using priority: `nextID` > `previousID` > `parentID`
+  `nextID`, `previousID`, and `parentID` must have at least one value, using priority: `nextID` > `previousID` >
+  `parentID`
 * Return value
 
   ```json
@@ -820,7 +850,8 @@ Remove a document by `id`:
 
     * `id`: Block ID to move
     * `previousID`: The ID of the previous block, used to anchor the insertion position
-    * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot be empty at the same time, if they exist at the same time, `previousID` will be used first
+    * `parentID`: The ID of the parent block, used to anchor the insertion position, `previousID` and `parentID` cannot
+      be empty at the same time, if they exist at the same time, `previousID` will be used first
 * Return value
 
   ```json
@@ -860,7 +891,7 @@ Remove a document by `id`:
   }
   ```
 
-  * `id`: Block ID to fold
+    * `id`: Block ID to fold
 * Return value
 
   ```json
@@ -882,7 +913,7 @@ Remove a document by `id`:
   }
   ```
 
-  * `id`: Block ID to unfold
+    * `id`: Block ID to unfold
 * Return value
 
   ```json
@@ -1380,7 +1411,8 @@ Remove a document by `id`:
     "timeout": 7000
   }
   ```
-    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000 milliseconds
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
 * Return value
 
   ```json
@@ -1405,7 +1437,8 @@ Remove a document by `id`:
     "timeout": 7000
   }
   ```
-    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000 milliseconds
+    * `timeout`: The duration of the message display in milliseconds. This field can be omitted, the default is 7000
+      milliseconds
 * Return value
 
   ```json
@@ -1457,7 +1490,8 @@ Remove a document by `id`:
         * `base32` | `base32-std`
         * `base32-hex`
         * `hex`
-    * `responseEncoding`: The encoding scheme used by `body` in response data, default is `text`, optional values are as follows
+    * `responseEncoding`: The encoding scheme used by `body` in response data, default is `text`, optional values are as
+      follows
 
         * `text`
         * `base64` | `base64-std`
@@ -1484,7 +1518,8 @@ Remove a document by `id`:
   }
   ```
 
-    * `bodyEncoding`: The encoding scheme used by `body`, is consistent with field `responseEncoding` in request, default is `text`, optional values are as follows
+    * `bodyEncoding`: The encoding scheme used by `body`, is consistent with field `responseEncoding` in request,
+      default is `text`, optional values are as follows
 
         * `text`
         * `base64` | `base64-std`

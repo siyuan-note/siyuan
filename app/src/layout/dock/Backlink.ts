@@ -10,7 +10,7 @@ import {openFileById} from "../../editor/util";
 import {Protyle} from "../../protyle";
 import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
-import {searchMarkRender} from "../../protyle/render/searchMarkRender";
+import {isSupportCSSHL, searchMarkRender} from "../../protyle/render/searchMarkRender";
 
 export class Backlink extends Model {
     public element: HTMLElement;
@@ -136,6 +136,14 @@ export class Backlink extends Model {
             item.addEventListener("blur", (event: KeyboardEvent) => {
                 const inputElement = event.target as HTMLInputElement;
                 inputElement.classList.add("fn__none");
+                const filterIconElement = inputElement.nextElementSibling;
+                if (inputElement.value) {
+                    filterIconElement.classList.add("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter + " " + inputElement.value);
+                } else {
+                    filterIconElement.classList.remove("block__icon--active");
+                    filterIconElement.setAttribute("aria-label", window.siyuan.languages.filter);
+                }
             });
             item.addEventListener("keydown", (event: KeyboardEvent) => {
                 if (!event.isComposing && event.key === "Enter") {
@@ -434,10 +442,12 @@ export class Backlink extends Model {
             });
             svgElement.removeAttribute("disabled");
         } else {
+            const keyword = isMention ? this.inputsElement[1].value : this.inputsElement[0].value;
             fetchPost(isMention ? "/api/ref/getBackmentionDoc" : "/api/ref/getBacklinkDoc", {
                 defID: this.blockId,
                 refTreeID: docId,
-                keyword: isMention ? this.inputsElement[1].value : this.inputsElement[0].value,
+                highlight: !isSupportCSSHL(),
+                keyword,
             }, (response) => {
                 svgElement.removeAttribute("disabled");
                 svgElement.classList.add("b3-list-item__arrow--open");
@@ -457,7 +467,7 @@ export class Backlink extends Model {
                     }
                 });
                 editor.protyle.notebookId = liElement.getAttribute("data-notebook-id");
-                searchMarkRender(editor.protyle, editor.protyle.wysiwyg.element.querySelectorAll('span[data-type~="search-mark"]'));
+                searchMarkRender(editor.protyle, response.data.keywords);
                 this.editors.push(editor);
             });
         }

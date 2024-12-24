@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230805232903-erdoerp",
 		"title": "對接第三方雲端存儲",
-		"updated": "20240301091104"
+		"type": "doc",
+		"updated": "20241216171627"
 	},
 	"Children": [
 		{
@@ -55,7 +56,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805232945-ugjx8sl",
-				"updated": "20240301091104"
+				"updated": "20241216171627"
 			},
 			"Children": [
 				{
@@ -121,7 +122,7 @@
 					},
 					"Properties": {
 						"id": "20230805232945-2dksutx",
-						"updated": "20240301091104"
+						"updated": "20241216171627"
 					},
 					"Children": [
 						{
@@ -129,7 +130,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230805232945-ayx9zfr",
-								"updated": "20240301091104"
+								"updated": "20241216171606"
 							},
 							"Children": [
 								{
@@ -151,20 +152,79 @@
 									"TextMarkType": "a",
 									"TextMarkAHref": "https://koofr.eu/",
 									"TextMarkTextContent": "Koofr"
+								}
+							]
+						},
+						{
+							"ID": "20241216171609-pu5jvmt",
+							"Type": "NodeList",
+							"ListData": {},
+							"Properties": {
+								"id": "20241216171609-pu5jvmt",
+								"updated": "20241216171627"
+							},
+							"Children": [
+								{
+									"ID": "20241216171609-abg7al0",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241216171609-abg7al0",
+										"updated": "20241216171627"
+									},
+									"Children": [
+										{
+											"ID": "20241216171609-aled0a0",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241216171609-aled0a0",
+												"updated": "20241216171627"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "由於 WebDAV 協定本身的問題，資料量較大後會出現啟動慢、同步慢、資源佔用高等問題，所以建議選擇使用 S3 對象存儲服務"
+												}
+											]
+										}
+									]
 								},
 								{
-									"Type": "NodeText",
-									"Data": "（不支援堅果雲 WebDAV，因為其"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "a",
-									"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
-									"TextMarkTextContent": "介面存在限制"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "）"
+									"ID": "20241216171609-in2fc0o",
+									"Type": "NodeListItem",
+									"ListData": {
+										"BulletChar": 42,
+										"Marker": "Kg=="
+									},
+									"Properties": {
+										"id": "20241216171609-in2fc0o",
+										"updated": "20241216171609"
+									},
+									"Children": [
+										{
+											"ID": "20241216171609-8zspojy",
+											"Type": "NodeParagraph",
+											"Properties": {
+												"id": "20241216171609-8zspojy",
+												"updated": "20241216171609"
+											},
+											"Children": [
+												{
+													"Type": "NodeText",
+													"Data": "不支援堅果雲 WebDAV，因為其"
+												},
+												{
+													"Type": "NodeTextMark",
+													"TextMarkType": "a",
+													"TextMarkAHref": "https://help.jianguoyun.com/?p=2064",
+													"TextMarkTextContent": "介面存在限制"
+												}
+											]
+										}
+									]
 								}
 							]
 						}

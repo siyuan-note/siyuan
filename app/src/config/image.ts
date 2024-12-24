@@ -28,13 +28,13 @@ export const image = {
     <div class="fn__flex-1">
         <div class="config-assets" data-type="remove" data-init="true">
             <div class="fn__hr--b"></div>
-            <label class="fn__flex">
+            <div class="fn__flex">
                 <div class="fn__space"></div>
                 <button id="removeAll" class="b3-button b3-button--outline fn__flex-center fn__size200">
                     <svg class="svg"><use xlink:href="#iconTrashcan"></use></svg>
                     ${window.siyuan.languages.delete}
                 </button>
-            </label>
+            </div>
             <div class="fn__hr"></div>
             <ul class="b3-list b3-list--background config-assets__list">
                 <li class="fn__loading"><img src="/stage/loading-pure.svg"></li>

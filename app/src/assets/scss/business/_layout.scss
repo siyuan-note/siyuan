@@ -18,7 +18,7 @@
   &__dockl,
   &__dockr,
   &__dockb {
-    transition: var(--b3-width-transition);
+    transition: var(--b3-width-transition), height .2s cubic-bezier(0, 0, .2, 1) 0ms;
     flex-shrink: 0;
   }
 
@@ -243,6 +243,7 @@
         }
 
         &--readonly {
+          cursor: default;
           padding-left: 13px;
           padding-right: 8px;
           max-width: none;

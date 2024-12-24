@@ -215,8 +215,27 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 		}
 	}
 
+	if tag, ok := nameValues["tags"]; ok {
+		var tags []string
+		tmp := strings.Split(tag, ",")
+		for _, t := range tmp {
+			t = util.RemoveInvalid(t)
+			t = strings.TrimSpace(t)
+			if "" != t {
+				tags = append(tags, t)
+			}
+		}
+		tags = gulu.Str.RemoveDuplicatedElem(tags)
+		if 0 < len(tags) {
+			nameValues["tags"] = strings.Join(tags, ",")
+		}
+	}
+
 	for name, value := range nameValues {
-		if "" == strings.TrimSpace(value) {
+		value = util.RemoveInvalid(value)
+		value = strings.TrimSpace(value)
+		value = strings.TrimSuffix(value, ",")
+		if "" == value {
 			node.RemoveIALAttr(name)
 		} else {
 			node.SetIALAttr(name, value)

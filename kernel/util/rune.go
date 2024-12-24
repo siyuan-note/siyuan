@@ -62,6 +62,6 @@ func RemoveEmojiInvisible(text string) (ret string) {
 
 func RemoveInvalid(text string) (ret string) {
 	ret = gulu.Str.RemoveInvisible(text)
-	ret = gulu.Str.RemovePUA(text)
+	ret = gulu.Str.RemovePUA(ret)
 	return
 }

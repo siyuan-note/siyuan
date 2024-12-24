@@ -33,7 +33,7 @@ import {
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
-import {fixTable} from "../util/table";
+import {clearTableCell, fixTable} from "../util/table";
 import {
     turnsIntoOneTransaction,
     turnsIntoTransaction,
@@ -808,6 +808,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return;
                 }
             } else if (selectText === "") {
+                if (nodeElement.classList.contains("table") && nodeElement.querySelector(".table__select").clientHeight > 0) {
+                    clearTableCell(protyle, nodeElement);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
                 const editElement = getContenteditableElement(nodeElement) as HTMLElement;
                 if (!editElement) {
                     nodeElement.classList.add("protyle-wysiwyg--select");
@@ -847,8 +853,19 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         let nextSibling = hasNextSibling(range.startContainer) as Element;
                         if (nextSibling) {
                             if (nextSibling.nodeType === 3 && nextSibling.textContent === Constants.ZWSP) {
+                                if (!nextSibling.nextSibling) {
+                                    // https://github.com/siyuan-note/siyuan/issues/13524
+                                    const nextBlockElement = getNextBlock(nodeElement);
+                                    if (nextBlockElement) {
+                                        removeBlock(protyle, nextBlockElement, range, "remove");
+                                    }
+                                    event.stopPropagation();
+                                    event.preventDefault();
+                                    return;
+                                }
                                 nextSibling = nextSibling.nextSibling as Element;
                             }
+
                             if (nextSibling.nodeType === 1 && nextSibling.classList.contains("img")) {
                                 // 光标需在图片前 https://github.com/siyuan-note/siyuan/issues/12452
                                 const textPosition = getSelectionOffset(range.startContainer, protyle.wysiwyg.element, range);
@@ -1305,12 +1322,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // toolbar action
         if (matchHotKey(window.siyuan.config.keymap.editor.insert.lastUsed.custom, event)) {
             protyle.toolbar.range = range;
-            let selectElements: Element[] = [];
-            if (selectText === "" && protyle.toolbar.getCurrentType(range).length === 0) {
-                selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-                if (selectElements.length === 0) {
-                    selectElements = [nodeElement];
-                }
+            const selectElements: Element[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectText === "" && selectElements.length === 0) {
+                selectElements.push(nodeElement);
             }
             fontEvent(protyle, selectElements);
             event.stopPropagation();
@@ -1350,8 +1364,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         if (matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0 && selectElements[0].getAttribute("data-type") === "NodeListItem") {
-                listOutdent(protyle, Array.from(selectElements), range);
+            if (selectElements.length > 0) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                    listOutdent(protyle, Array.from(selectElements), range);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return true;
@@ -1362,10 +1378,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return true;
             }
         }
+
         if (matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0 && selectElements[0].getAttribute("data-type") === "NodeListItem") {
-                listIndent(protyle, Array.from(selectElements), range);
+            if (selectElements.length > 0) {
+                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                    listIndent(protyle, Array.from(selectElements), range);
+                }
                 event.preventDefault();
                 event.stopPropagation();
                 return true;

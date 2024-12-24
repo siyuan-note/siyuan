@@ -37,7 +37,7 @@ import {Asset} from "../asset";
 import {newFile} from "../util/newFile";
 import {MenuItem} from "../menus/Menu";
 import {escapeHtml} from "../util/escape";
-import {isWindow} from "../util/functions";
+import {getFrontend, isWindow} from "../util/functions";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {focusByOffset, getSelectionOffset} from "../protyle/util/selection";
 import {Custom} from "./dock/Custom";
@@ -101,11 +101,29 @@ export class Wnd {
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                     event.preventDefault();
+                    const frontend = getFrontend();
+                    if ((["desktop", "desktop-window"].includes(frontend) && window.siyuan.config.system.os === "linux") ||
+                        (frontend === "browser-desktop" && navigator.userAgent.indexOf("Linux") !== -1)) {
+                        const activeElement = document.activeElement;
+                        window.addEventListener("paste", this.#preventPast, {
+                            capture: true,
+                            once: true
+                        });
+                        // TODO 保持原有焦点？https://github.com/siyuan-note/siyuan/pull/13395/files#r1877004077
+                        if (activeElement instanceof HTMLElement) {
+                            activeElement.focus();
+                        }
+                        // 如果在短时间内没有 paste 事件发生,移除监听
+                        setTimeout(() => {
+                            window.removeEventListener("paste", this.#preventPast, {
+                                capture: true
+                            });
+                        }, Constants.TIMEOUT_INPUT);
+                    }
                     break;
                 }
                 target = target.parentElement;
             }
-
         });
         this.headersElement.addEventListener("mousewheel", (event: WheelEvent) => {
             this.headersElement.scrollLeft = this.headersElement.scrollLeft + event.deltaY;
@@ -445,7 +463,7 @@ export class Wnd {
         });
         // 在 JSONToLayout 中进行 focus
         if (!isInitActive) {
-            setPanelFocus(this.headersElement.parentElement.parentElement);
+            setPanelFocus(this.headersElement.parentElement.parentElement, isSaveLayout);
         }
         if (currentTab && currentTab.headElement) {
             const initData = currentTab.headElement.getAttribute("data-initdata");
@@ -588,6 +606,11 @@ export class Wnd {
         if (isSaveLayout) {
             saveLayout();
         }
+    }
+
+    #preventPast(event: ClipboardEvent) {
+        event.preventDefault();
+        event.stopPropagation();
     }
 
     private renderTabList(target: HTMLElement) {

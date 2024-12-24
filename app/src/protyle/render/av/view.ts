@@ -212,7 +212,7 @@ export const getViewHTML = (data: IAV) => {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea style="margin-left: 22px;width: calc(100% - 22px);" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
+            <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(view.desc)}">${view.desc}</textarea>
         </div>
     </div>
 </button>
@@ -319,7 +319,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex" data-type="av-view-switch">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : '<svg class="b3-menu__icon"><use xlink:href="#iconTable"></use></svg>'}
-        ${item.name}
+        <span class="fn__ellipsis">${item.name}</span>
     </div>
     <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
@@ -330,7 +330,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
     <span class="b3-menu__label">${window.siyuan.languages.newView}</span>
 </button>
 <button class="b3-menu__separator"></button>
-<div class="b3-menu__item b3-menu__item--readonly fn__flex-shrink" data-type="nobg">
+<div class="b3-menu__item fn__flex-shrink" data-type="nobg">
     <input class="b3-text-field fn__block" type="text" style="margin: 4px 0" placeholder="${window.siyuan.languages.search}">
 </div>
 <div class="fn__flex-1" style="overflow: auto">

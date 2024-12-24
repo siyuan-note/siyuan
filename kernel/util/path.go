@@ -38,6 +38,9 @@ var (
 )
 
 func GetTreeID(treePath string) string {
+	if strings.Contains(treePath, "\\") {
+		return strings.TrimSuffix(filepath.Base(treePath), ".sy")
+	}
 	return strings.TrimSuffix(path.Base(treePath), ".sy")
 }
 
@@ -266,7 +269,7 @@ func IsAssetLinkDest(dest []byte) bool {
 
 var (
 	SiYuanAssetsImage = []string{".apng", ".ico", ".cur", ".jpg", ".jpe", ".jpeg", ".jfif", ".pjp", ".pjpeg", ".png", ".gif", ".webp", ".bmp", ".svg", ".avif"}
-	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a"}
+	SiYuanAssetsAudio = []string{".mp3", ".wav", ".ogg", ".m4a", ".flac"}
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 
@@ -298,4 +301,8 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 		return absPath, nil
 	}
 	return "", os.ErrPermission
+}
+
+func IsAbsPathInWorkspace(absPath string) bool {
+	return IsSubPath(WorkspaceDir, absPath)
 }

@@ -67,7 +67,7 @@ func exportEPUB(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "epub", ".epub")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "epub", ".epub")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -84,7 +84,7 @@ func exportRTF(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "rtf", ".rtf")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rtf", ".rtf")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -101,7 +101,7 @@ func exportODT(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "odt", ".odt")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "odt", ".odt")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -118,7 +118,7 @@ func exportMediaWiki(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "mediawiki", ".wiki")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "mediawiki", ".wiki")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -135,7 +135,7 @@ func exportOrgMode(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "org", ".org")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "org", ".org")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -152,7 +152,7 @@ func exportOPML(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "opml", ".opml")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "opml", ".opml")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -169,7 +169,7 @@ func exportTextile(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "textile", ".textile")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "textile", ".textile")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -186,7 +186,7 @@ func exportAsciiDoc(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "asciidoc", ".adoc")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "asciidoc", ".adoc")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -203,7 +203,7 @@ func exportReStructuredText(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "rst", ".rst")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "rst", ".rst")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -317,8 +317,7 @@ func exportNotebookMd(c *gin.Context) {
 	}
 
 	notebook := arg["notebook"].(string)
-	p := arg["path"].(string)
-	zipPath := model.ExportNotebookMarkdown(notebook, p)
+	zipPath := model.ExportNotebookMarkdown(notebook)
 	ret.Data = map[string]interface{}{
 		"name": path.Base(zipPath),
 		"zip":  zipPath,
@@ -340,7 +339,7 @@ func exportMds(c *gin.Context) {
 		ids = append(ids, id.(string))
 	}
 
-	name, zipPath := model.BatchExportPandocConvertZip(ids, "", ".md")
+	name, zipPath := model.ExportPandocConvertZip(ids, "", ".md")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,
@@ -357,7 +356,7 @@ func exportMd(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	name, zipPath := model.ExportPandocConvertZip(id, "", ".md")
+	name, zipPath := model.ExportPandocConvertZip([]string{id}, "", ".md")
 	ret.Data = map[string]interface{}{
 		"name": name,
 		"zip":  zipPath,

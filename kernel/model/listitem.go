@@ -28,6 +28,8 @@ import (
 )
 
 func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (srcRootBlockID, newTargetPath string, err error) {
+	FlushTxQueue()
+
 	srcTree, _ := LoadTreeByBlockID(srcListItemID)
 	if nil == srcTree {
 		err = ErrBlockNotFound

@@ -113,12 +113,14 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         return;
     }
     // https://github.com/siyuan-note/siyuan/issues/9015
-    if (trimStartText === "¥¥<wbr>" || trimStartText === "￥￥<wbr>") {
-        editElement.innerHTML = "$$<wbr>";
-    } else if (trimStartText.indexOf("\n¥¥<wbr>") > -1 || trimStartText.indexOf("\n￥￥<wbr>") > -1) {
+    if (type === "NodeParagraph" && (
+        editElement.innerHTML.startsWith("¥¥<wbr>") || editElement.innerHTML.startsWith("￥￥<wbr>") ||
         // https://ld246.com/article/1730020516427
-        editElement.innerHTML = trimStartText.replace("\n¥¥<wbr>", "\n$$$$<wbr>").replace("\n￥￥<wbr>", "\n$$$$<wbr>");
+        trimStartText.indexOf("\n¥¥<wbr>") > -1 || trimStartText.indexOf("\n￥￥<wbr>") > -1
+    )) {
+        editElement.innerHTML = editElement.innerHTML.replace("¥¥<wbr>", "$$$$<wbr>").replace("￥￥<wbr>", "$$$$<wbr>");
     }
+
     const refElement = hasClosestByAttribute(range.startContainer, "data-type", "block-ref");
     if (refElement && refElement.getAttribute("data-subtype") === "d") {
         const response = await fetchSyncPost("/api/block/getRefText", {id: refElement.getAttribute("data-id")});

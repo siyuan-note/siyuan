@@ -329,7 +329,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             id: "copyBlockRef",
             iconHTML: "",
             label: window.siyuan.languages.copyBlockRef,
-            click: async () => {
+            click: () => {
                 let text = "";
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
@@ -338,8 +338,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        const response = await fetchSyncPost("/api/block/getRefText", {id});
-                        content = `((${id} '${response.data}'))`;
+                        content = `((${id} '${cellElement.querySelector(".av__celltext").textContent}'))`;
                     }
                     if (ids.length > 1) {
                         text += "* ";
@@ -399,7 +398,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
             id: "copyProtocolInMd",
             iconHTML: "",
             label: window.siyuan.languages.copyProtocolInMd,
-            click: async () => {
+            click: () => {
                 let text = "";
                 for (let i = 0; i < ids.length; i++) {
                     const id = ids[i];
@@ -408,8 +407,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        const response = await fetchSyncPost("/api/block/getRefText", {id});
-                        content = `[${response.data}](siyuan://blocks/${id})`;
+                        content = `[${cellElement.querySelector(".av__celltext").textContent}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
                         text += "* ";

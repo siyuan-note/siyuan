@@ -568,6 +568,7 @@
   "newDocBelow": "在下方新建文檔",
   "newDocAbove": "在上方新建文檔",
   "fullWidth": "自適應寬度",
+  "switchAdjust": "自適應寬度切換",
   "fullWidthTip": "啟用後將盡可能寬地顯示編輯區",
   "tabLimit": "分頁打開最大數量",
   "tabLimit1": "按照打開時間排序，關閉最早打開的分頁",

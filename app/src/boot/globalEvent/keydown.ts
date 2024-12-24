@@ -380,6 +380,22 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         updateReadonly(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
         return true;
     }
+    if (matchHotKey(window.siyuan.config.keymap.editor.general.switchAdjust.custom, event)) {
+        event.preventDefault();
+        let fullWidth;
+        const adjustWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH)
+        if (!adjustWidth) {
+            fullWidth = window.siyuan.config.editor.fullWidth ? "false" : "true";
+        } else {
+            fullWidth = adjustWidth === "true" ? "false" : "true";
+        }
+        fetchPost("/api/attr/setBlockAttrs", {
+            id: protyle.block.rootID,
+            attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: fullWidth}
+        });
+        return true;
+    }
+
     if (matchHotKey(window.siyuan.config.keymap.editor.general.backlinks.custom, event)) {
         event.preventDefault();
         if (range) {

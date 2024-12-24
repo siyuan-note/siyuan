@@ -568,6 +568,7 @@
   "newDocBelow": "Crear documento a continuación",
   "newDocAbove": "Crear documento arriba",
   "fullWidth": "Ancho adaptable",
+  "switchAdjust": "Cambio de ancho adaptativo",
   "fullWidthTip": "Después de habilitarlo, el área de edición se mostrará lo más amplia posible",
   "tabLimit": "Límite de la pestaña",
   "tabLimit1": "Ordenar por hora de apertura, cerrar la primera pestaña abierta",

@@ -568,6 +568,7 @@
   "newDocBelow": "Créer un document ci-dessous",
   "newDocAbove": "Créer un document ci-dessus",
   "fullWidth": "Largeur adaptative",
+  "switchAdjust": "Commutation de la largeur adaptative",
   "fullWidthTip": "Lorsqu'il est activé, la zone d'édition sera affichée aussi large que possible",
   "tabLimit": "Nombre maximum d'onglets ouverts",
   "tabLimit1": "Trier par heure d'ouverture, fermer le premier onglet ouvert",

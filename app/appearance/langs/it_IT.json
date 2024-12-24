@@ -568,6 +568,7 @@
   "newDocBelow": "Crea documento sotto",
   "newDocAbove": "Crea documento sopra",
   "fullWidth": "Larghezza adattiva",
+  "switchAdjust": "Commutazione larghezza adattiva",
   "fullWidthTip": "Dopo l'abilitazione, l'area di modifica verrà visualizzata nel modo più ampio possibile",
   "tabLimit": "Limite schede",
   "tabLimit1": "Ordina per ora di apertura, chiudi la scheda aperta per prima",

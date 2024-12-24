@@ -459,6 +459,7 @@ export abstract class Constants {
                 exitFocus: {default: "", custom: ""},
                 ai: {default: "", custom: ""},
                 switchReadonly: {default: "", custom: ""},
+                switchAdjust: {default: "", custom: ""},
             },
             insert: {
                 appearance: {default: "⌥⌘X", custom: "⌥⌘X"},

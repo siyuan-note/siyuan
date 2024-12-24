@@ -568,6 +568,7 @@
   "newDocBelow": "Dokument darunter erstellen",
   "newDocAbove": "Dokument darüber erstellen",
   "fullWidth": "Adaptive Breite",
+  "switchAdjust": "Adaptive Breitenumschaltung",
   "fullWidthTip": "Nach der Aktivierung wird der Bearbeitungsbereich so breit wie möglich angezeigt.",
   "tabLimit": "Tab-Limit",
   "tabLimit1": "Nach Eröffnungszeit sortieren, schließen Sie das frühest eröffnete Tab.",

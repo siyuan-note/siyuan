@@ -568,6 +568,7 @@
   "newDocBelow": "Utwórz dokument poniżej",
   "newDocAbove": "Utwórz dokument powyżej",
   "fullWidth": "Szerokość adaptacyjna",
+  "switchAdjust": "Przełączanie szerokości adaptacyjnej",
   "fullWidthTip": "Po włączeniu, obszar edycji będzie wyświetlany tak szeroko, jak to możliwe",
   "tabLimit": "Limit zakładki",
   "tabLimit1": "Sortuj według czasu otwarcia, zamknij najwcześniej otwartą zakładkę",

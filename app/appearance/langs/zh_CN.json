@@ -568,6 +568,7 @@
   "newDocBelow": "在下方新建文档",
   "newDocAbove": "在上方新建文档",
   "fullWidth": "自适应宽度",
+  "switchAdjust": "自适应宽度切换",
   "fullWidthTip": "启用后将尽可能宽地显示编辑区",
   "tabLimit": "页签打开最大数量",
   "tabLimit1": "按照打开时间排序，关闭最早打开的页签",

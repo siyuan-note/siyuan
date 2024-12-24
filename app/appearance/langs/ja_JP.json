@@ -568,6 +568,7 @@
   "newDocBelow": "下にドキュメントを作成",
   "newDocAbove": "上にドキュメントを作成",
   "fullWidth": "幅に合わせる",
+  "switchAdjust": "自動調整幅切り替え",
   "fullWidthTip": "編集領域を可能な限り広く表示します",
   "tabLimit": "タブの制限",
   "tabLimit1": "この制限を超えると先に開いたタブから順に閉じられます",

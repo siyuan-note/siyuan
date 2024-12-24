@@ -140,7 +140,6 @@
       height: 4px;
       background-color: var(--b3-theme-primary-lighter);
       z-index: 3;
-      pointer-events: none;
     }
 
     &.dragover__top::after {

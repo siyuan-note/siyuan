@@ -6,4 +6,4 @@ export const img3115 = (imgElement: HTMLElement) => {
     } else {
         imgElement.removeAttribute("style");
     }
-}
+};

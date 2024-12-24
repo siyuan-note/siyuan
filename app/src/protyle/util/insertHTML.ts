@@ -208,7 +208,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (textJSON.length === 1 && textJSON[0].length === 1) {
                 updateCellsValue(protyle, blockElement as HTMLElement, text, cellElements, columns, html);
             } else {
-                let currentRowElement:Element
+                let currentRowElement:Element;
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
                 textJSON.forEach((rowValue, rowIndex) => {
                     if (!currentRowElement) {
@@ -231,7 +231,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         }
                         updateCellsValue(protyle, blockElement as HTMLElement, cellValue, [cellElement], columns, html);
                     });
-                })
+                });
             }
             document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {

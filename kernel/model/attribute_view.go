@@ -3106,13 +3106,14 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.BlockID)
 				} else { // 之前绑定的块和现在绑定的块一样
-					// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
-					node, tree, getErr := getNodeByBlockID(tx, val.BlockID)
-					if nil != getErr || nil == node {
-						return
+					content := strings.TrimSpace(val.Block.Content)
+					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
+					if "" == content {
+						_, val.Block.Content = getNodeAvBlockText(node)
 					}
 
-					updateBlockValueStaticText(node, tree, avID, strings.TrimSpace(val.Block.Content))
+					// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+					updateBlockValueStaticText(tx, node, tree, avID, content)
 				}
 			}
 		}
@@ -3281,14 +3282,18 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 	return
 }
 
-func updateBlockValueStaticText(node *ast.Node, tree *parse.Tree, avID, text string) {
+func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {
+	if nil == node {
+		return
+	}
+
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrViewStaticText+"-"+avID] = text
 	var err error
-	if nil != tree {
-		err = setNodeAttrsWithTx(nil, node, tree, attrs)
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
 	} else {
-		err = setNodeAttrs(node, nil, attrs)
+		err = setNodeAttrs(node, tree, attrs)
 	}
 	if err != nil {
 		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)

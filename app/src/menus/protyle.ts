@@ -1189,7 +1189,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeElement.value = "0";
                         rangeElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
-                        img3115(assetElement)
+                        img3115(assetElement);
                         imgElement.parentElement.style.width = inputElement.value ? (inputElement.value + "px") : "";
                         imgElement.style.height = "";
                     });
@@ -1220,7 +1220,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
-                            img3115(assetElement)
+                            img3115(assetElement);
                             imgElement.parentElement.style.width = rangeElement.value + "%";
                             imgElement.style.height = "";
                             rangeElement.parentElement.setAttribute("aria-label", `${rangeElement.value}%`);
@@ -1254,7 +1254,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                         rangeHeightElement.parentElement.setAttribute("aria-label", inputElement.value ? (inputElement.value + "px") : window.siyuan.languages.default);
 
                         imgElement.style.height = inputElement.value ? (inputElement.value + "px") : "";
-                        img3115(assetElement)
+                        img3115(assetElement);
                         imgElement.parentElement.style.width = "";
                     });
                     inputElement.addEventListener("blur", () => {
@@ -1284,7 +1284,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     bind(element) {
                         rangeHeightElement = element.querySelector("input");
                         rangeHeightElement.addEventListener("input", () => {
-                            img3115(assetElement)
+                            img3115(assetElement);
                             imgElement.parentElement.style.width = "";
                             imgElement.style.height = rangeHeightElement.value + "vh";
                             rangeHeightElement.parentElement.setAttribute("aria-label", `${rangeHeightElement.value}%`);
@@ -1825,7 +1825,7 @@ const genImageWidthMenu = (label: string, imgElement: HTMLElement, protyle: IPro
         label,
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            img3115(imgElement.parentElement.parentElement)
+            img3115(imgElement.parentElement.parentElement);
             imgElement.parentElement.style.width = label === window.siyuan.languages.default ? "" : label;
             imgElement.style.height = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
@@ -1841,7 +1841,7 @@ const genImageHeightMenu = (label: string, imgElement: HTMLElement, protyle: IPr
         click() {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
             imgElement.style.height = label === window.siyuan.languages.default ? "" : parseInt(label) + "vh";
-            img3115(imgElement.parentElement.parentElement)
+            img3115(imgElement.parentElement.parentElement);
             imgElement.parentElement.style.width = "";
             updateTransaction(protyle, id, nodeElement.outerHTML, html);
             focusBlock(nodeElement);

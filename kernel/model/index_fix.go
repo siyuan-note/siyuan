@@ -48,6 +48,11 @@ var (
 // checkIndex 自动校验数据库索引，仅在数据同步执行完成后执行一次。
 func checkIndex() {
 	checkIndexOnce.Do(func() {
+		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+			// 移动端不执行校验 https://ld246.com/article/1734939896061
+			return
+		}
+
 		logging.LogInfof("start checking index...")
 
 		removeDuplicateDatabaseIndex()

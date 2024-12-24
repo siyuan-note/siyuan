@@ -78,6 +78,9 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         };
         if (colType === "block" && textElement.dataset.id) {
             cellValue.block.id = textElement.dataset.id;
+            if (textElement.previousElementSibling?.classList.contains("b3-menu__avemoji")) {
+                cellValue.block.icon = textElement.previousElementSibling.getAttribute("data-unicode");
+            }
         }
     } else if (colType === "mSelect" || colType === "select") {
         const mSelect: IAVCellSelectValue[] = [];
@@ -275,7 +278,11 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         }
     }
     if (colType === "block") {
-        cellValue.isDetached = true;
+        if (typeof value === "object" && value.id) {
+            cellValue.isDetached = false;
+        } else {
+            cellValue.isDetached = true;
+        }
     }
     return cellValue;
 };
@@ -365,9 +372,6 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     if (type === "updated" || type === "created" || document.querySelector(".av__mask")) {
         return;
     }
-    if (type === "block" && (cellElements.length > 1 || !cellElements[0].getAttribute("data-detached"))) {
-        return;
-    }
     const blockElement = hasClosestBlock(cellElements[0]);
     if (!blockElement) {
         return;
@@ -391,7 +395,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {
-        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.textContent}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].querySelector(".av__celltext").textContent}</textarea>`;
     } else if (type === "url") {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
     } else if (type === "number") {
@@ -688,6 +692,12 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                 });
                 newValue = oldValue.mSelect.concat(newMSelectValue);
             }
+        } else if (type === "block" && typeof value === "string" && oldValue.block.id) {
+            newValue = {
+                content: value,
+                id: oldValue.block.id,
+                icon: oldValue.block.icon
+            };
         }
         const cellValue = genCellValue(type, newValue);
         cellValue.id = cellId;
@@ -703,26 +713,16 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (objEquals(cellValue, oldValue)) {
             return;
         }
-        if (type === "block" && !item.dataset.detached) {
-            const newId = Lute.NewNodeID();
-            doOperations.push({
-                action: "unbindAttrViewBlock",
-                id: rowID,
-                nextID: newId,
-                avID,
-            });
-            rowElement.dataset.id = newId;
-            item.dataset.blockId = newId;
-        } else {
-            doOperations.push({
-                action: "updateAttrViewCell",
-                id: cellId,
-                avID,
-                keyID: colId,
-                rowID,
-                data: cellValue
-            });
-        }
+
+        doOperations.push({
+            action: "updateAttrViewCell",
+            id: cellId,
+            avID,
+            keyID: colId,
+            rowID,
+            data: cellValue
+        });
+
         undoOperations.push({
             action: "updateAttrViewCell",
             id: cellId,
@@ -790,7 +790,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0) => {
         if (cellValue?.isDetached) {
             text = `<span class="av__celltext">${cellValue.block.content || ""}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.more}</span>`;
         } else {
-            text = `${cellValue.block.icon ? `<span class="b3-menu__avemoji">${unicode2Emoji(cellValue.block.icon)}</span>` : ""}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content || window.siyuan.languages.untitled}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
+            text = `${cellValue.block.icon ? `<span class="b3-menu__avemoji" data-unicode="${cellValue.block.icon}">${unicode2Emoji(cellValue.block.icon)}</span>` : ""}<span data-type="block-ref" data-id="${cellValue.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block.content}</span><span class="b3-chip b3-chip--info b3-chip--small" data-type="block-more">${window.siyuan.languages.update}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = `<span class="av__celltext" data-content="${cellValue?.number.isNotEmpty ? cellValue?.number.content : ""}">${cellValue?.number.formattedContent || cellValue?.number.content || ""}</span>`;
@@ -878,7 +878,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         if (cellValue?.isDetached) {
             text = `<span class="av__celltext" data-id="${cellValue.block?.id}">${cellValue.block?.content || window.siyuan.languages.untitled}</span>`;
         } else {
-            text = `${cellValue.block.icon ? `<span class="b3-menu__avemoji">${unicode2Emoji(cellValue.block.icon)}</span>` : ""}<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || window.siyuan.languages.untitled}</span>`;
+            text = `${cellValue.block.icon ? `<span class="b3-menu__avemoji" data-unicode="${cellValue.block.icon}">${unicode2Emoji(cellValue.block.icon)}</span>` : ""}<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${cellValue.block?.content || window.siyuan.languages.untitled}</span>`;
         }
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";

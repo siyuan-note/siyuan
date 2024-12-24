@@ -214,7 +214,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 }
                 const cellType = getTypeByCellElement(target);
                 // TODO 点击单元格的时候， lineNumber 选中整行
-                if (cellType === "updated" || cellType === "created" || cellType === "lineNumber" || (cellType === "block" && !target.getAttribute("data-detached"))) {
+                if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
                     selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
                 } else {
                     scrollElement.querySelectorAll(".av__row--select").forEach(item => {
@@ -584,18 +584,9 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
         });
         const editAttrSubmenu: IMenu[] = [];
         rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
-            let hideBlock = false;
             const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
-            if (cellElement.dataset.dtype === "block") {
-                selectElements.find(item => {
-                    if (!item.dataset.detached) {
-                        hideBlock = true;
-                        return true;
-                    }
-                });
-            }
             const type = cellElement.getAttribute("data-dtype") as TAVCol;
-            if (!hideBlock && !["updated", "created"].includes(type)) {
+            if (!["updated", "created"].includes(type)) {
                 const icon = cellElement.dataset.icon;
                 editAttrSubmenu.push({
                     iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,

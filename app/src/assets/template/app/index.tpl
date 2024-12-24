@@ -5,6 +5,8 @@
     <!-- https://electronjs.org/docs/tutorial/security#csp-meta-tag
     <meta http-equiv="Content-Security-Policy" content="script-src 'self'"/>-->
     <style id="editorAttr" type="text/css"></style>
+    <link rel="preload" href="../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="../../../appearance/fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2" as="font" type="font/woff2" crossorigin>
     <script src="../../protyle/js/pdf/pdf.min.mjs?v=4.7.85" type="module"></script>
 </head>
 <body class="fn__flex-column">

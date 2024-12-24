@@ -14,7 +14,7 @@ import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
 import {saveAssetKeyList} from "./toggleHistory";
 
-export const openSearchAsset = (element: Element, isStick: boolean) => {
+export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     /// #if !MOBILE
     window.siyuan.menus.menu.remove();
     element.previousElementSibling.classList.add("fn__none");
@@ -133,7 +133,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
 
         nextElement.classList.remove("fn__flex-1");
         nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
-
+        element.style.userSelect = "none";
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
             moveEvent.preventDefault();
             moveEvent.stopPropagation();
@@ -146,6 +146,7 @@ export const openSearchAsset = (element: Element, isStick: boolean) => {
         };
 
         documentSelf.onmouseup = () => {
+            element.style.userSelect = "none";
             documentSelf.onmousemove = null;
             documentSelf.onmouseup = null;
             documentSelf.ondragstart = null;

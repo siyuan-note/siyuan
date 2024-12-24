@@ -1,5 +1,5 @@
 import {Constants} from "../constants";
-import {webFrame} from "electron";
+import {ipcRenderer, webFrame} from "electron";
 import {fetchPost} from "../util/fetch";
 import {adjustLayout, getInstanceById, JSONToCenter} from "../layout/util";
 import {resizeTabs} from "../layout/tabUtil";
@@ -16,6 +16,11 @@ import {initWindowEvent} from "../boot/globalEvent/event";
 
 export const init = (app: App) => {
     webFrame.setZoomFactor(window.siyuan.storage[Constants.LOCAL_ZOOM]);
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd: "setTrafficLightPosition",
+        zoom: window.siyuan.storage[Constants.LOCAL_ZOOM],
+        position: Constants.SIZE_ZOOM.find((item) => item.zoom === window.siyuan.storage[Constants.LOCAL_ZOOM]).position
+    });
     initWindowEvent(app);
     fetchPost("/api/system/getEmojiConf", {}, response => {
         window.siyuan.emojis = response.data as IEmoji[];

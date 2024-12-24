@@ -1288,14 +1288,13 @@ func bootSyncRepo() (err error) {
 
 	isBootSyncing.Store(true)
 
-	start := time.Now()
-
 	waitGroup := sync.WaitGroup{}
 	var errs []error
 	waitGroup.Add(1)
 	go func() {
 		defer waitGroup.Done()
 
+		start := time.Now()
 		_, _, indexErr := indexRepoBeforeCloudSync(repo)
 		if indexErr != nil {
 			errs = append(errs, indexErr)
@@ -1311,6 +1310,8 @@ func bootSyncRepo() (err error) {
 			isBootSyncing.Store(false)
 			return
 		}
+
+		logging.LogInfof("boot index repo elapsed [%.2fs]", time.Since(start).Seconds())
 	}()
 
 	var fetchedFiles []*entity.File
@@ -1318,6 +1319,7 @@ func bootSyncRepo() (err error) {
 	go func() {
 		defer waitGroup.Done()
 
+		start := time.Now()
 		syncContext := map[string]interface{}{eventbus.CtxPushMsg: eventbus.CtxPushMsgToStatusBar}
 		cloudLatest, getErr := repo.GetCloudLatest(syncContext)
 		if nil != getErr {
@@ -1342,29 +1344,14 @@ func bootSyncRepo() (err error) {
 			isBootSyncing.Store(false)
 			return
 		}
+
+		logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", time.Since(start).Seconds())
 	}()
 	waitGroup.Wait()
 	if 0 < len(errs) {
 		err = errs[0]
-		return
 	}
 
-	syncingFiles = sync.Map{}
-	syncingStorages.Store(false)
-	for _, fetchedFile := range fetchedFiles {
-		name := path.Base(fetchedFile.Path)
-		if strings.HasSuffix(name, ".sy") {
-			id := name[:len(name)-3]
-			syncingFiles.Store(id, true)
-			continue
-		}
-		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
-			syncingStorages.Store(true)
-		}
-	}
-
-	elapsed := time.Since(start)
-	logging.LogInfof("boot get sync cloud files elapsed [%.2fs]", elapsed.Seconds())
 	if err != nil {
 		autoSyncErrCount++
 		planSyncAfter(fixSyncInterval)
@@ -1385,6 +1372,20 @@ func bootSyncRepo() (err error) {
 		BootSyncSucc = 1
 		isBootSyncing.Store(false)
 		return
+	}
+
+	syncingFiles = sync.Map{}
+	syncingStorages.Store(false)
+	for _, fetchedFile := range fetchedFiles {
+		name := path.Base(fetchedFile.Path)
+		if strings.HasSuffix(name, ".sy") {
+			id := name[:len(name)-3]
+			syncingFiles.Store(id, true)
+			continue
+		}
+		if strings.HasPrefix(fetchedFile.Path, "/storage/") {
+			syncingStorages.Store(true)
+		}
 	}
 
 	if 0 < len(fetchedFiles) {

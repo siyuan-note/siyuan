@@ -339,7 +339,11 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                 let blockRefHTML;
                 if (source === "av") {
                     // av 搜索时需要获取值 https://github.com/siyuan-note/siyuan/issues/12020
-                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
+                    let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                    if (nodeElement) {
+                        refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
+                    }
+                    blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
                 } else {
                     blockRefHTML = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${oldValue}</span>`;
                 }

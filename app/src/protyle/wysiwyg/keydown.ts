@@ -1365,7 +1365,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                let isContinuous = true;
+                selectElements.forEach((item, index) => {
+                    if (item.nextElementSibling && selectElements[index + 1]) {
+                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                            isContinuous = false;
+                        }
+                    }
+                });
+                if (isContinuous &&
+                    (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     listOutdent(protyle, Array.from(selectElements), range);
                 }
                 event.preventDefault();
@@ -1382,7 +1391,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                let isContinuous = true;
+                selectElements.forEach((item, index) => {
+                    if (item.nextElementSibling && selectElements[index + 1]) {
+                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                            isContinuous = false;
+                        }
+                    }
+                });
+                if (isContinuous &&
+                    (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     listIndent(protyle, Array.from(selectElements), range);
                 }
                 event.preventDefault();
@@ -1795,6 +1813,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 置于最后，太多快捷键会使用到选中元素
         if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
             hideElements(["select"], protyle);
+        }
+
+        if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
         }
     });
 };

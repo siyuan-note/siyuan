@@ -23,7 +23,6 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -366,129 +365,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	}
 
 	// 做一些数据兼容和订正处理
-	now := util.CurrentTimeMillis()
-	for _, kv := range av.KeyValues {
-		switch kv.Key.Type {
-		case KeyTypeBlock:
-			// 补全 block 的创建时间和更新时间
-			for _, v := range kv.Values {
-				if 0 == v.Block.Created {
-					logging.LogWarnf("block [%s] created time is empty", v.BlockID)
-					if "" == v.Block.ID {
-						v.Block.ID = v.BlockID
-						if "" == v.Block.ID {
-							v.Block.ID = ast.NewNodeID()
-							v.BlockID = v.Block.ID
-						}
-					}
-
-					createdStr := v.Block.ID[:len("20060102150405")]
-					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-					if nil == parseErr {
-						v.Block.Created = created.UnixMilli()
-					} else {
-						v.Block.Created = now
-					}
-				}
-				if 0 == v.Block.Updated {
-					logging.LogWarnf("block [%s] updated time is empty", v.BlockID)
-					v.Block.Updated = v.Block.Created
-				}
-			}
-		case KeyTypeNumber:
-			for _, v := range kv.Values {
-				if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
-					v.Number.IsNotEmpty = true
-				}
-			}
-		}
-
-		for _, v := range kv.Values {
-			if "" == kv.Key.ID {
-				kv.Key.ID = ast.NewNodeID()
-				for _, val := range kv.Values {
-					val.KeyID = kv.Key.ID
-				}
-				if "" == v.KeyID {
-					logging.LogWarnf("value [%s] key id is empty", v.ID)
-					v.KeyID = kv.Key.ID
-				}
-
-				// 校验日期 IsNotEmpty
-				if KeyTypeDate == kv.Key.Type {
-					if nil != v.Date && 0 != v.Date.Content && !v.Date.IsNotEmpty {
-						v.Date.IsNotEmpty = true
-					}
-				}
-
-				// 校验数字 IsNotEmpty
-				if KeyTypeNumber == kv.Key.Type {
-					if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
-						v.Number.IsNotEmpty = true
-					}
-				}
-
-				// 清空关联实际值
-				if KeyTypeRelation == kv.Key.Type {
-					v.Relation.Contents = nil
-				}
-
-				// 清空汇总实际值
-				if KeyTypeRollup == kv.Key.Type {
-					v.Rollup.Contents = nil
-				}
-
-				for _, view := range av.Views {
-					switch view.LayoutType {
-					case LayoutTypeTable:
-						for _, column := range view.Table.Columns {
-							if "" == column.ID {
-								column.ID = kv.Key.ID
-								break
-							}
-						}
-					}
-				}
-			}
-
-			// 补全值的创建时间和更新时间
-			if "" == v.ID {
-				logging.LogWarnf("value id is empty")
-				v.ID = ast.NewNodeID()
-			}
-
-			if 0 == v.CreatedAt {
-				logging.LogWarnf("value [%s] created time is empty", v.ID)
-				createdStr := v.ID[:len("20060102150405")]
-				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-				if nil == parseErr {
-					v.CreatedAt = created.UnixMilli()
-				} else {
-					v.CreatedAt = now
-				}
-			}
-
-			if 0 == v.UpdatedAt {
-				logging.LogWarnf("value [%s] updated time is empty", v.ID)
-				v.UpdatedAt = v.CreatedAt
-			}
-		}
-	}
-
-	// 补全过滤器 Value
-	for _, view := range av.Views {
-		if nil != view.Table {
-			for _, f := range view.Table.Filters {
-				if nil != f.Value {
-					continue
-				}
-
-				if k, _ := av.GetKey(f.Column); nil != k {
-					f.Value = &Value{Type: k.Type}
-				}
-			}
-		}
-	}
+	UpgradeSpec(av)
 
 	// 值去重
 	blockValues := av.GetBlockKeyValues()
@@ -729,8 +606,9 @@ var (
 )
 
 const (
-	NodeAttrNameAvs = "custom-avs"        // 用于标记块所属的属性视图，逗号分隔 av id
-	NodeAttrView    = "custom-sy-av-view" // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
+	NodeAttrNameAvs        = "custom-avs"          // 用于标记块所属的属性视图，逗号分隔 av id
+	NodeAttrView           = "custom-sy-av-view"   // 用于标记块所属的属性视图视图 view id Database block support specified view https://github.com/siyuan-note/siyuan/issues/10443
+	NodeAttrViewStaticText = "custom-sy-av-s-text" // 用于标记块所属的属性视图静态文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
 
 	NodeAttrViewNames = "av-names" // 用于临时标记块所属的属性视图名称，空格分隔
 )

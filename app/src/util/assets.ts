@@ -208,7 +208,7 @@ export const setInlineStyle = async (set = true) => {
     if (isMac() || isIPad() || isIPhone()) {
         style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1fa8f;
 }
 @font-face {
@@ -216,9 +216,9 @@ export const setInlineStyle = async (set = true) => {
   src: local("Apple Color Emoji"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
-  unicode-range: U+26a1, U+21a9, U+21aa, U+2708, U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+2611, U+303d,
-  U+3030, U+00a9, U+00ae, U+2122, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f, U+1f232-1f23a,
-  U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663, U+26A0;
+  unicode-range: U+26a1, U+21a9, U+21aa, U+2708, U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf,
+  U+2640, U+2642, U+2611, U+303d,U+3030, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f,
+  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663, U+26A0, U+a9, U+ae, U+2122;
 }
 @font-face {
   font-family: "Emojis";
@@ -231,7 +231,7 @@ export const setInlineStyle = async (set = true) => {
         if (isWin11Browser) {
             style = `@font-face {
   font-family: "Emojis Additional";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
   U+e0065, U+e006e, U+e0067, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
 }
@@ -239,8 +239,8 @@ export const setInlineStyle = async (set = true) => {
   font-family: "Emojis Reset";
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
-  unicode-range: U+263a,U+21a9,U+2642,U+303d,U+2197,U+2198,U+2199,U+2196,U+2195,U+2194,U+2660,U+2665,U+2666,U+2663,
-  U+3030,U+a9,U+ae,U+2122,U+21aa,U+25b6,U+25c0,U+2640,U+203c;
+  unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666, 
+  U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122;;
 }
 @font-face {
   font-family: "Emojis";
@@ -248,19 +248,18 @@ export const setInlineStyle = async (set = true) => {
   local("Segoe UI Symbol");
 }`;
         } else {
-            style = `
-@font-face {
+            style = `@font-face {
   font-family: "Emojis Reset";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2");
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+263a, U+2194-2199, U+2934-2935, U+2639, U+26a0, U+25b6, U+25c0, U+23cf, U+2640, U+2642, U+203c, U+2049,
-  U+2611, U+303d, U+00a9, U+00ae, U+2122, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a,
-  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642,
-  U+1f635, U+2620, U+2763, U+2764, U+1f441,U+fe0f, U+1f5e8, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030, U+21aa, 
-  U+21a9, U+1f525, U+1fa79, U+1f4ab, U+1f4a8, U+1f32b;
+  U+2611, U+303d, U+1f170-1f171, U+24c2, U+1f17e, U+1f17f, U+1f22f, U+1f250, U+1f21a, U+1f232-1f23a, U+1f251, U+3297,
+  U+3299, U+25aa, U+25ab, U+2660, U+2666, U+2665, U+2663, U+1f636, U+1f62e, U+1f642, U+1f635, U+2620, U+2763, U+2764,
+  U+1f441, U+fe0f, U+1f5e8, U+270c, U+261d, U+270d, U+200d, U+e50a, U+3030, U+21aa, U+21a9, U+1f525, U+1fa79, U+1f4ab, 
+  U+1f4a8, U+1f32b, U+a9, U+ae, U+2122;;
 }
 @font-face {
   font-family: "Emojis";
-  src: url(stage/build/fonts/Noto-COLRv1.woff2) format("woff2"),
+  src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol"),
   local("Apple Color Emoji"),

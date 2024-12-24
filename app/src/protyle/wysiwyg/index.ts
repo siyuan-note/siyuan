@@ -95,6 +95,7 @@ import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
+import {img3115} from "../../boot/compatibleVersion";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -669,14 +670,17 @@ export class WYSIWYG {
                 const dragElement = target.previousElementSibling as HTMLElement;
                 const dragWidth = dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
+
+                const imgElement = dragElement.parentElement.parentElement;
+                if (dragElement.tagName === "IMG") {
+                   img3115(imgElement);
+                }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
                         dragElement.style.height = "";
-                        // 历史兼容
-                        dragElement.parentElement.parentElement.removeAttribute("style");
                     }
                     if (moveEvent.clientX > x - dragWidth + 8 && moveEvent.clientX < mostRight) {
-                        const multiple = ((dragElement.tagName === "IMG" && !dragElement.parentElement.parentElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
+                        const multiple = ((dragElement.tagName === "IMG" && !imgElement.style.minWidth && nodeElement.style.textAlign !== "center") || !isCenter) ? 1 : 2;
                         if (dragElement.tagName === "IMG") {
                             dragElement.parentElement.style.width = Math.max(17, dragWidth + (moveEvent.clientX - x) * multiple) + "px";
                         } else {
@@ -1484,7 +1488,7 @@ export class WYSIWYG {
                     }
                 });
                 tableSelectElement.removeAttribute("style");
-                if (getSelection().rangeCount>0) {
+                if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
                     if (nodeElement.contains(range.startContainer)) {
                         range.insertNode(document.createElement("wbr"));

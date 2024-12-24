@@ -861,6 +861,15 @@ app.whenReady().then(() => {
                     globalShortcut.unregister(hotKey2Electron(data.accelerator));
                 }
                 break;
+            case "setTrafficLightPosition":
+                if (!currentWindow || !currentWindow.setWindowButtonPosition) {
+                    return;
+                }
+                if (new URL(currentWindow.getURL()).pathname === "/stage/build/app/window.html") {
+                    data.position.y += 5 * data.zoom;
+                }
+                currentWindow.setWindowButtonPosition(data.position);
+                break;
             case "show":
                 if (!currentWindow) {
                     return;

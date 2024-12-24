@@ -560,6 +560,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		// 先处理关联列、汇总列、创建时间列和更新时间列
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
+			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+				if nil != kv.Values[0].Block {
+					ial := sql.GetBlockAttrs(blockID)
+					if v := ial[av.NodeAttrViewStaticText+"-"+attrView.ID]; "" != v {
+						kv.Values[0].Block.Content = v
+					}
+				}
 			case av.KeyTypeRollup:
 				if nil == kv.Key.Rollup {
 					break
@@ -875,82 +882,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 
 	// 做一些数据兼容和订正处理，保存的时候也会做 av.SaveAttributeView()
-	currentTimeMillis := util.CurrentTimeMillis()
-	for _, kv := range attrView.KeyValues {
-		switch kv.Key.Type {
-		case av.KeyTypeBlock: // 补全 block 的创建时间和更新时间
-			for _, v := range kv.Values {
-				if 0 == v.Block.Created {
-					if "" == v.Block.ID {
-						v.Block.ID = v.BlockID
-						if "" == v.Block.ID {
-							v.Block.ID = ast.NewNodeID()
-							v.BlockID = v.Block.ID
-						}
-					}
-
-					createdStr := v.Block.ID[:len("20060102150405")]
-					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-					if nil == parseErr {
-						v.Block.Created = created.UnixMilli()
-					} else {
-						v.Block.Created = currentTimeMillis
-					}
-				}
-				if 0 == v.Block.Updated {
-					v.Block.Updated = v.Block.Created
-				}
-			}
-		}
-
-		for _, v := range kv.Values {
-			// 校验日期 IsNotEmpty
-			if av.KeyTypeDate == kv.Key.Type {
-				if nil != v.Date && 0 != v.Date.Content && !v.Date.IsNotEmpty {
-					v.Date.IsNotEmpty = true
-				}
-			}
-
-			// 校验数字 IsNotEmpty
-			if av.KeyTypeNumber == kv.Key.Type {
-				if nil != v.Number && 0 != v.Number.Content && !v.Number.IsNotEmpty {
-					v.Number.IsNotEmpty = true
-				}
-			}
-
-			// 补全值的创建时间和更新时间
-			if "" == v.ID {
-				v.ID = ast.NewNodeID()
-			}
-
-			if 0 == v.CreatedAt {
-				createdStr := v.ID[:len("20060102150405")]
-				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-				if nil == parseErr {
-					v.CreatedAt = created.UnixMilli()
-				} else {
-					v.CreatedAt = currentTimeMillis
-				}
-			}
-
-			if 0 == v.UpdatedAt {
-				v.UpdatedAt = v.CreatedAt
-			}
-		}
-	}
-
-	// 补全过滤器 Value
-	if nil != view.Table {
-		for _, f := range view.Table.Filters {
-			if nil != f.Value {
-				continue
-			}
-
-			if k, _ := attrView.GetKey(f.Column); nil != k {
-				f.Value = &av.Value{Type: k.Type}
-			}
-		}
-	}
+	upgradeAttributeViewSpec(attrView)
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
@@ -3174,8 +3106,24 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.BlockID)
 				} else { // 之前绑定的块和现在绑定的块一样
-					// 直接返回，因为锚文本不允许更改
-					return
+					content := strings.TrimSpace(val.Block.Content)
+					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
+					updateStaticText := true
+					_, blockText := getNodeAvBlockText(node)
+					if "" == content {
+						val.Block.Content = blockText
+					} else {
+						if blockText == content {
+							updateStaticText = false
+						} else {
+							val.Block.Content = blockText
+						}
+					}
+
+					if updateStaticText {
+						// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+						updateBlockValueStaticText(tx, node, tree, avID, content)
+					}
 				}
 			}
 		}
@@ -3342,6 +3290,25 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 		return
 	}
 	return
+}
+
+func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {
+	if nil == node {
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrViewStaticText+"-"+avID] = text
+	var err error
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
+	} else {
+		err = setNodeAttrs(node, tree, attrs)
+	}
+	if err != nil {
+		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
+		return
+	}
 }
 
 func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *parse.Tree, err error) {

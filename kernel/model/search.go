@@ -475,6 +475,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	r, _ := regexp.Compile(keyword)
 	escapedKey := util.EscapeHTML(keyword)
+	escapedKey = strings.ReplaceAll(escapedKey, "&#34;", "&quot;")
+	escapedKey = strings.ReplaceAll(escapedKey, "&#39;", "'")
 	escapedR, _ := regexp.Compile(escapedKey)
 	ids = gulu.Str.RemoveDuplicatedElem(ids)
 	var renameRoots []*ast.Node
@@ -1014,7 +1016,11 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		if ast.IsNodeIDPattern(query) {
+			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
+		} else {
+			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		}
 	case 2: // SQL
 		blocks, matchedBlockCount, matchedRootCount = searchBySQL(query, beforeLen, page, pageSize)
 	case 3: // 正则表达式
@@ -1026,12 +1032,16 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		typeFilter := buildTypeFilter(types)
 		boxFilter := buildBoxesFilter(boxes)
 		pathFilter := buildPathsFilter(paths)
-		if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
-			query = stringQuery(query)
-			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+		if ast.IsNodeIDPattern(query) {
+			blocks, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
 		} else {
-			docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
-			blocks, matchedBlockCount, matchedRootCount = fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+			if 2 > len(strings.Split(strings.TrimSpace(query), " ")) {
+				query = stringQuery(query)
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+			} else {
+				docMode = true // 文档全文搜索模式 https://github.com/siyuan-note/siyuan/issues/10584
+				blocks, matchedBlockCount, matchedRootCount = fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderByClause, beforeLen, page, pageSize)
+			}
 		}
 	}
 	pageCount = (matchedBlockCount + pageSize - 1) / pageSize
@@ -1365,22 +1375,6 @@ func extractID(content string) (ret string) {
 	return
 }
 
-func fullTextSearchByQuerySyntax(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
-		return
-	}
-	return fullTextSearchByFTS(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
-}
-
-func fullTextSearchByKeyword(query, boxFilter, pathFilter, typeFilter, ignoreFilter string, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
-	if ast.IsNodeIDPattern(query) {
-		ret, matchedBlockCount, matchedRootCount = searchBySQL("SELECT * FROM `blocks` WHERE `id` = '"+query+"'", beforeLen, page, pageSize)
-		return
-	}
-	return fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy, beforeLen, page, pageSize)
-}
-
 func fullTextSearchByRegexp(exp, boxFilter, pathFilter, typeFilter, ignoreFilter, orderBy string, beforeLen, page, pageSize int) (ret []*Block, matchedBlockCount, matchedRootCount int) {
 	fieldFilter := fieldRegexp(exp)
 	stmt := "SELECT * FROM `blocks` WHERE " + fieldFilter + " AND type IN " + typeFilter
@@ -1517,7 +1511,6 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
-	query = stringQuery(query)
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {

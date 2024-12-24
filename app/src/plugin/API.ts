@@ -20,7 +20,7 @@ import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 import {getDockByType} from "../layout/tabUtil";
-import {getAllEditor} from "../layout/getAll";
+import {getAllEditor, getAllModels} from "../layout/getAll";
 
 let openTab;
 let openWindow;
@@ -198,5 +198,6 @@ export const API = {
     Menu,
     Setting,
     getAllEditor,
+    getAllModels,
     platformUtils
 };

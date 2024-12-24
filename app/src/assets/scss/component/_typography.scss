@@ -1,6 +1,7 @@
 @font-face {
   font-family: 'JetBrainsMono-Regular';
-  src: url(../fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
+  /* webpackIgnore: true */
+  src: url(../../../appearance/fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
 
 .b3-typography,

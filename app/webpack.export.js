@@ -71,13 +71,6 @@ module.exports = (env, argv) => {
                         },
                     ],
                 },
-                {
-                    test: /\.woff2$/,
-                    type: "asset/resource",
-                    generator: {
-                        filename: "../fonts/[name][ext]",
-                    },
-                },
             ],
         },
         plugins: [

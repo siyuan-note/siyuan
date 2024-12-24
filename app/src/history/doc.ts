@@ -45,6 +45,7 @@ const renderDoc = (element: HTMLElement, currentPage: number, id: string) => {
         pageNumElement.setAttribute("data-totalpage", response.data.pageCount.toString());
         pageNumElement.textContent = currentPage.toString();
         const pageInfoElement = nextElement.nextElementSibling.nextElementSibling;
+        pageInfoElement.classList.remove("fn__none");
         pageInfoElement.textContent = window.siyuan.languages.pageCountAndHistoryCount.replace("${x}", response.data.pageCount).replace("${y}", response.data.totalCount);
         if (response.data.histories.length === 0) {
             listElement.innerHTML = `<li class="b3-list--empty">${window.siyuan.languages.emptyContent}</li>`;
@@ -76,7 +77,7 @@ export const openDocHistory = (options: {
         <button class="b3-button b3-button--text ft__selectnone" data-type="jumpRepoPage" disabled>1</button>
         <span data-type="docnext" class="block__icon block__icon--show b3-tooltips b3-tooltips__e" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href="#iconRight"></use></svg></span>
         <span class="fn__space"></span>
-        <span class="ft__on-surface fn__flex-shrink ft__selectnone">${window.siyuan.languages.pageCountAndHistoryCount}</span>
+        <span class="ft__on-surface fn__flex-shrink ft__selectnone fn__none">${window.siyuan.languages.pageCountAndHistoryCount}</span>
         <span class="fn__space"></span>
         <div class="fn__flex-1"></div>
         <select data-type="opselect" class="b3-select">

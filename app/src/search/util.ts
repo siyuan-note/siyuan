@@ -85,7 +85,7 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
 };
 
 // closeCB 不存在为页签搜索
-export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: Element, closeCB?: () => void) => {
+export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement, closeCB?: () => void) => {
     let methodText = window.siyuan.languages.keyword;
     if (config.method === 1) {
         methodText = window.siyuan.languages.querySyntax;
@@ -312,7 +312,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
 
         nextElement.classList.remove("fn__flex-1");
         nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
-
+        element.style.userSelect = "none";
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
             moveEvent.preventDefault();
             moveEvent.stopPropagation();
@@ -325,6 +325,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         };
 
         documentSelf.onmouseup = () => {
+            element.style.userSelect = "";
             documentSelf.onmousemove = null;
             documentSelf.onmouseup = null;
             documentSelf.ondragstart = null;
@@ -339,8 +340,8 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     });
 
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
-    const assetsElement = element.querySelector("#searchAssets");
-    const unRefPanelElement = element.querySelector("#searchUnRefPanel");
+    const assetsElement = element.querySelector("#searchAssets") as HTMLElement;
+    const unRefPanelElement = element.querySelector("#searchUnRefPanel") as HTMLElement;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");

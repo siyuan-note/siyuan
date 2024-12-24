@@ -440,6 +440,12 @@ export const hintRef = (key: string, protyle: IProtyle, source: THintSource): IH
             let value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="d">${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
             if (source === "search") {
                 value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${key}${Constants.ZWSP}${item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "")}</span>`;
+            } else if (source === "av") {
+                let refText = item.name || item.refText.replace(new RegExp(Constants.ZWSP, "g"), "");
+                if (nodeElement) {
+                    refText = item.ial["custom-sy-av-s-text-" + nodeElement.getAttribute("data-av-id")] || refText;
+                }
+                value = `<span data-type="block-ref" data-id="${item.id}" data-subtype="s">${refText}</span>`;
             }
             dataList.push({
                 value,

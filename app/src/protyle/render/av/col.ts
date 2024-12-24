@@ -968,9 +968,10 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;
-                            while (target && !target.isSameNode(dialog.element)) {
+                            const isDispatch = typeof event.detail === "string";
+                            while (target && !target.isSameNode(dialog.element) || isDispatch) {
                                 const action = target.getAttribute("data-action");
-                                if (action === "delete") {
+                                if (action === "delete" || (isDispatch && event.detail === "Enter")) {
                                     removeColByMenu({
                                         protyle,
                                         colId,
@@ -998,13 +999,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                     });
                                     dialog.destroy();
                                     break;
-                                } else if (target.classList.contains("b3-button--cancel")) {
+                                } else if (target.classList.contains("b3-button--cancel") || (isDispatch && event.detail === "Escape")) {
                                     dialog.destroy();
                                     break;
                                 }
                                 target = target.parentElement;
                             }
                         });
+                        dialog.element.querySelector("button").focus();
+                        dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                         return;
                     }
                 }

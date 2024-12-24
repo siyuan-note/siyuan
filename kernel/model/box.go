@@ -154,8 +154,6 @@ func ListNotebooks() (ret []*Box, err error) {
 		sort.Slice(ret, func(i, j int) bool {
 			return util.PinYinCompare(ret[j].Name, ret[i].Name)
 		})
-	case util.SortModeUpdatedASC:
-	case util.SortModeUpdatedDESC:
 	case util.SortModeAlphanumASC:
 		sort.Slice(ret, func(i, j int) bool {
 			return util.NaturalCompare(ret[i].Name, ret[j].Name)
@@ -166,12 +164,10 @@ func ListNotebooks() (ret []*Box, err error) {
 		})
 	case util.SortModeCustom:
 		sort.Slice(ret, func(i, j int) bool { return ret[i].Sort < ret[j].Sort })
-	case util.SortModeRefCountASC:
-	case util.SortModeRefCountDESC:
 	case util.SortModeCreatedASC:
-		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return ret[i].ID < ret[j].ID })
 	case util.SortModeCreatedDESC:
-		sort.Slice(ret, func(i, j int) bool { return util.NaturalCompare(ret[j].ID, ret[i].ID) })
+		sort.Slice(ret, func(i, j int) bool { return ret[i].ID > ret[j].ID })
 	}
 	return
 }

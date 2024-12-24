@@ -116,6 +116,9 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				if strings.Contains(u, ":") {
 					u = strings.TrimPrefix(u, "/")
 				}
+				if strings.Contains(u, "?") {
+					u = u[:strings.Index(u, "?")]
+				}
 
 				if !gulu.File.IsExist(u) || gulu.File.IsDir(u) {
 					continue

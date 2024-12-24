@@ -671,9 +671,9 @@ export class WYSIWYG {
                 const dragWidth = dragElement.clientWidth;
                 const dragHeight = dragElement.clientHeight;
 
-                const imgElement = dragElement.parentElement.parentElement
+                const imgElement = dragElement.parentElement.parentElement;
                 if (dragElement.tagName === "IMG") {
-                   img3115(imgElement)
+                   img3115(imgElement);
                 }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {

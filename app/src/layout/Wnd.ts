@@ -326,9 +326,9 @@ export class Wnd {
             const x = event.clientX - rect.left;
             const y = event.clientY - rect.top;
 
-            if (x < width / 3 && x / y < 2 * width / height && x / (height - y) < 2 * width / height) {
+            if (x < width / 6 || x < width / 3 && (x - width / 6) / y < width / height && (x - width / 6) / (height - y) < width / height) {
                 dragElement.setAttribute("style", "height:100%;width:50%;right:50%;bottom:0;left:0;top:0");
-            } else if (x > width * 2 / 3 && (width - x) / y < 2 * width / height && (width - x) / (height - y) < 2 * width / height) {
+            } else if (x > width * 5 / 6 || x > width * 2 / 3 && (width * 5 / 6 - x) / y < width / height && (width * 5 / 6 - x) / (height - y) < width / height) {
                 dragElement.setAttribute("style", "height:100%;width:50%;right:0;bottom:0;left:50%;top:0");
             } else if (y < height / 6) {
                 dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:50%;left:0;top:0");

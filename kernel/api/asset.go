@@ -57,6 +57,9 @@ func statAsset(c *gin.Context) {
 		if strings.Contains(p, ":") {
 			p = strings.TrimPrefix(p, "/")
 		}
+		if strings.Contains(p, "?") {
+			p = p[:strings.Index(p, "?")]
+		}
 	} else {
 		ret.Code = 1
 		return

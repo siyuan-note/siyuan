@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20241213215720"
+		"updated": "20241224162728"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20241213215720"
+				"updated": "20241224162728"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20241213215720"
+				"updated": "20241224162728"
 			},
 			"Children": [
 				{
@@ -495,7 +495,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-238ctfi",
-						"updated": "20240530101000"
+						"updated": "20241224162728"
 					},
 					"Children": [
 						{
@@ -527,7 +527,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215619-gkqs282",
-								"updated": "20241213215619"
+								"updated": "20241224162728"
 							},
 							"Children": [
 								{
@@ -539,7 +539,7 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": " .action{querySQL \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
+									"Data": " .action{querySpans \"SELECT * FROM spans LIMIT ?\" \"3\"}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",

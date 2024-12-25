@@ -73,6 +73,7 @@ import {copyPNGByLink} from "../../menus/util";
 import {globalCommand} from "./command/global";
 import {duplicateCompletely} from "../../protyle/render/av/action";
 import {copyTextByType} from "../../protyle/toolbar/util";
+import {onlyProtyleCommand} from "./command/protyle";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -377,21 +378,19 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.switchReadonly.custom, event)) {
         event.preventDefault();
-        updateReadonly(protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), protyle);
+        onlyProtyleCommand({
+            protyle,
+            command: "switchReadonly",
+            previousRange: range,
+        });
         return true;
     }
     if (matchHotKey(window.siyuan.config.keymap.editor.general.switchAdjust.custom, event)) {
         event.preventDefault();
-        let fullWidth;
-        const adjustWidth = protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH)
-        if (!adjustWidth) {
-            fullWidth = window.siyuan.config.editor.fullWidth ? "false" : "true";
-        } else {
-            fullWidth = adjustWidth === "true" ? "false" : "true";
-        }
-        fetchPost("/api/attr/setBlockAttrs", {
-            id: protyle.block.rootID,
-            attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: fullWidth}
+        onlyProtyleCommand({
+            protyle,
+            command: "switchAdjust",
+            previousRange: range,
         });
         return true;
     }

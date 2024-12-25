@@ -56,7 +56,7 @@ export const lazyLoadEmoji = (element: HTMLElement) => {
             if ((typeof entrie.isIntersecting === "undefined" ? entrie.intersectionRatio !== 0 : entrie.isIntersecting) && index) {
                 let html = "";
                 window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
+                    html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" data-tooltipclass="emoji" aria-label="${getEmojiDesc(emoji)}">
 ${unicode2Emoji(emoji.unicode)}</button>`;
                 });
                 entrie.target.innerHTML = html;

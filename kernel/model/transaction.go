@@ -1619,7 +1619,10 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 
 			changed = true
 			if "d" == subtype {
-				refText = getNodeRefText(defNode)
+				refText = strings.TrimSpace(getNodeRefText(defNode))
+				if "" == refText {
+					refText = n.TextMarkBlockRefID
+				}
 				treenode.SetDynamicBlockRefText(n, refText)
 			}
 			defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText, refType: "ref-" + subtype})

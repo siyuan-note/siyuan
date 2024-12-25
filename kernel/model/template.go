@@ -354,7 +354,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		// 块引缺失锚文本情况下自动补全 https://github.com/siyuan-note/siyuan/issues/6087
 		if n.IsTextMarkType("block-ref") {
 			if refText := n.Text(); "" == refText {
-				refText = sql.GetRefText(n.TextMarkBlockRefID)
+				refText = strings.TrimSpace(sql.GetRefText(n.TextMarkBlockRefID))
 				if "" != refText {
 					treenode.SetDynamicBlockRefText(n, refText)
 				} else {

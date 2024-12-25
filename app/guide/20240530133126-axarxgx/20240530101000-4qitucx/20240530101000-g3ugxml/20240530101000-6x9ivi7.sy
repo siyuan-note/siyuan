@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20241224162728"
+		"updated": "20241225192831"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20241224162728"
+				"updated": "20241225192831"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20241224162728"
+				"updated": "20241225192831"
 			},
 			"Children": [
 				{
@@ -454,7 +454,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はデータベースをクエリしてブロックのリストを返します"
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "をクエリしてブロックのリストを返します"
 								}
 							]
 						},
@@ -464,6 +472,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215628-5gixpmp",
+								"style": "line-height: 22px;",
 								"updated": "20241213215628"
 							},
 							"Children": [
@@ -517,7 +526,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はデータベースをクエリしてスパンのリストを返します"
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "をクエリしてスパンのリストを返します"
 								}
 							]
 						},
@@ -527,6 +544,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215619-gkqs282",
+								"style": "line-height: 22px;",
 								"updated": "20241224162728"
 							},
 							"Children": [
@@ -580,7 +598,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数はデータベースへのクエリに使用され、戻り値は結果セットです"
+									"Data": "​: この関数は"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "データベース"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "へのクエリに使用され、戻り値は結果セットです"
 								}
 							]
 						},
@@ -590,6 +616,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215633-69ltmv1",
+								"style": "line-height: 22px;",
 								"updated": "20241213215633"
 							},
 							"Children": [
@@ -653,6 +680,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215720-ueqpsna",
+								"style": "line-height: 22px;",
 								"updated": "20241213215720"
 							},
 							"Children": [
@@ -871,7 +899,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212163938-y1al3b9",
-								"updated": "20241212163955"
+								"updated": "20241225192824"
 							},
 							"Children": [
 								{
@@ -881,11 +909,48 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "runeLen"
+									"TextMarkTextContent": "runeCount"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は文字列の長さを返すために使用されます"
+									"Data": "​: この関数は文字列内の文字数を返すために使用されます"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241225192825-vi77q0u",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241225192825-vi77q0u",
+						"updated": "20241225192831"
+					},
+					"Children": [
+						{
+							"ID": "20241225192825-uicespl",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241225192825-uicespl",
+								"updated": "20241225192831"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "wordCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：この関数は文字列内の単語数を返すために使用されます"
 								}
 							]
 						}

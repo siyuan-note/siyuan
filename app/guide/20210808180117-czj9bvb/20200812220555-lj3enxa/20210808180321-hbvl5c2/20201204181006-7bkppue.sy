@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20241224162826"
+		"updated": "20241225192538"
 	},
 	"Children": [
 		{
@@ -69,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091309-fhb549c",
-				"updated": "20241224162826"
+				"updated": "20241225192538"
 			},
 			"Children": [
 				{
@@ -237,7 +237,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091309-gjkg3u5",
-				"updated": "20241224162826"
+				"updated": "20241225192538"
 			},
 			"Children": [
 				{
@@ -271,7 +271,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该变量用于插入当前文档名。比如模板内容为 "
+									"Data": "​：该变量用于插入当前文档名。比如"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "模板"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "内容为 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -465,7 +473,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询数据库，返回值为 blocks 列表"
+									"Data": "​：该函数用于查询"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值为 blocks 列表"
 								}
 							]
 						},
@@ -475,6 +491,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20210604111446-p6vadfc",
+								"style": "line-height: 22px;",
 								"updated": "20241213215118"
 							},
 							"Children": [
@@ -528,7 +545,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询数据库，返回值为 spans 列表"
+									"Data": "​：该函数用于查询"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值为 spans 列表"
 								}
 							]
 						},
@@ -538,6 +563,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215337-rhkoc8k",
+								"style": "line-height: 22px;",
 								"updated": "20241224162826"
 							},
 							"Children": [
@@ -591,7 +617,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于查询数据库，返回值为结果集"
+									"Data": "​：该函数用于查询"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "数据库"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值为结果集"
 								}
 							]
 						},
@@ -601,6 +635,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241213215240-f33bsqs",
+								"style": "line-height: 22px;",
 								"updated": "20241213215421"
 							},
 							"Children": [
@@ -664,6 +699,7 @@
 							"IsFencedCodeBlock": true,
 							"Properties": {
 								"id": "20241212101810-6ffociu",
+								"style": "line-height: 22px;",
 								"updated": "20241213215655"
 							},
 							"Children": [
@@ -882,7 +918,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20241212163704-i9p11h6",
-								"updated": "20241212163739"
+								"updated": "20241225192521"
 							},
 							"Children": [
 								{
@@ -892,11 +928,48 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "runeLen"
+									"TextMarkTextContent": "runeCount"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：该函数用于返回字符串长度"
+									"Data": "​：该函数用于返回字符串中的字符数"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241225192524-3b660ss",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241225192524-3b660ss",
+						"updated": "20241225192538"
+					},
+					"Children": [
+						{
+							"ID": "20241225192524-vyuve5f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241225192524-vyuve5f",
+								"updated": "20241225192538"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "wordCount"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：该函数用于返回字符串中的字数"
 								}
 							]
 						}

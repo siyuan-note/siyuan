@@ -894,7 +894,6 @@ export class Wnd {
         if (this.children.length > window.siyuan.config.fileTree.maxOpenTabCount) {
             this.removeOverCounter();
         }
-        this.switchTab(tab.headElement);
 
         const oldWnd = tab.parent;
         if (oldWnd.children.length === 1) {
@@ -922,6 +921,10 @@ export class Wnd {
                 }
             }
         }
+
+        // https://github.com/siyuan-note/siyuan/issues/13551
+        this.switchTab(tab.headElement);
+
         tab.parent = this;
         hideAllElements(["toolbar"]);
         /// #if !BROWSER

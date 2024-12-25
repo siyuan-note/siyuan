@@ -257,6 +257,29 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	return
 }
 
+func GetUnfoldedParentID(id string) (parentID string) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	if !node.IsBlock() {
+		return
+	}
+
+	for parent := treenode.HeadingParent(node); nil != parent && ast.NodeDocument != parent.Type; parent = treenode.HeadingParent(parent) {
+		if "1" != parent.IALAttr("fold") {
+			return parent.ID
+		}
+	}
+	return
+}
+
 func IsBlockFolded(id string) (isFolded, isRoot bool) {
 	tree, _ := LoadTreeByBlockID(id)
 	if nil == tree {

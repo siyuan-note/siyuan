@@ -224,6 +224,22 @@ func setBlockReminder(c *gin.Context) {
 	}
 }
 
+func getUnfoldedParentID(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	parentID := model.GetUnfoldedParentID(id)
+	ret.Data = map[string]interface{}{
+		"parentID": parentID,
+	}
+}
+
 func checkBlockFold(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

@@ -908,6 +908,8 @@ export const zoomOut = (options: {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
     }, getResponse => {
+        // 折叠标题块下内容退出聚焦定位 https://github.com/siyuan-note/siyuan/issues/13577
+        const parents2Id = options.protyle.block.parent2ID;
         if (options.isPushBack) {
             onGet({
                 data: getResponse,
@@ -925,7 +927,7 @@ export const zoomOut = (options: {
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
-            const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
+            const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"], [data-node-id="${parents2Id}"]`);
             if (focusElement) {
                 // 退出聚焦后块在折叠中 https://github.com/siyuan-note/siyuan/issues/10746
                 let showElement = focusElement;

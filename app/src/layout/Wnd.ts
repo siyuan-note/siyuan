@@ -231,8 +231,9 @@ export class Wnd {
                         item.remove();
                     });
                 }, 1000);
-                const it = this as HTMLElement;
-                it.classList.remove("layout-tab-bars--drag");
+                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                    item.classList.remove("layout-tab-bars--drag");
+                })
             }
         });
         this.headersElement.parentElement.addEventListener("dragenter", (event) => {
@@ -257,7 +258,9 @@ export class Wnd {
                     }
                 });
                 window.siyuan.dragElement = undefined;
-                it.classList.remove("layout-tab-bars--drag");
+                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                    item.classList.remove("layout-tab-bars--drag");
+                })
                 return;
             }
             const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB));
@@ -275,7 +278,9 @@ export class Wnd {
                 }
             }
             /// #endif
-            it.classList.remove("layout-tab-bars--drag");
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            })
             if (!oldTab) {
                 return;
             }

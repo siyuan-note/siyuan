@@ -23,7 +23,8 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "ariaLabel") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
-            hasClosestByClassName(event.target, "av__cell");
+            hasClosestByClassName(event.target, "av__cell")||
+            hasClosestByAttribute(event.target, "data-type", "setRelationCell");
         if (aElement) {
             const tooltipClasses: string[] = [];
             let tip = aElement.getAttribute("aria-label") || "";
@@ -72,6 +73,11 @@ export const initBlockPopover = (app: App) => {
                 tooltipClasses.push("href");
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
+            } else if (aElement.getAttribute("data-type") === "setRelationCell") {
+                const childElement = aElement.querySelector(".b3-menu__label");
+                if (childElement && childElement.clientWidth < childElement.scrollWidth) {
+                    tip = childElement.textContent;
+                }
             }
             if (!tip) {
                 tip = aElement.getAttribute("data-inline-memo-content");

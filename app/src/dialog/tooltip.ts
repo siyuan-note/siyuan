@@ -67,7 +67,7 @@ export const showTooltip = (message: string, target: Element, tooltipClasses?: s
     messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
+        messageElement.style.top = ((position === "parentE" || position === "west" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {
         messageElement.style.top = top + "px";
     }

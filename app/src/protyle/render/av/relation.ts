@@ -224,7 +224,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
 </button>`;
     }
     if (type == "unselect") {
-        return `<button data-id="${id}" class="b3-menu__item" data-type="setRelationCell">
+        return `<button data-id="${id}" class="b3-menu__item" data-position="west" data-type="setRelationCell">
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
@@ -242,7 +242,7 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         const hasIds: string[] = [];
         cellElement.querySelectorAll("span").forEach((item) => {
             hasIds.push(item.dataset.id);
-            selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
+            selectHTML += `<button data-id="${item.dataset.id}" data-position="west" data-type="setRelationCell" class="b3-menu__item${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
         });
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
@@ -273,7 +273,7 @@ export const bindRelationEvent = (options: {
         const hasIds: string[] = [];
         options.cellElements[0].querySelectorAll("span").forEach((item) => {
             hasIds.push(item.dataset.id);
-            selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
+            selectHTML += `<button data-id="${item.dataset.id}" data-position="west" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
         });
         cells.forEach((item) => {
             if (!hasIds.includes(item.block.id)) {
@@ -399,7 +399,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 isDetached: !target.firstElementChild.getAttribute("style")
             });
             separatorElement.before(target);
-            target.outerHTML = `<button data-id="${targetId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent)}</button>`;
+            target.outerHTML = `<button data-id="${targetId}" data-position="west" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), target.querySelector(".b3-menu__label").textContent)}</button>`;
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
             }
@@ -431,7 +431,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 },
                 isDetached: true
             });
-            separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", rowId, true, content)}</button>`);
+            separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-position="west" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", rowId, true, content)}</button>`);
         }
         menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
         menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");

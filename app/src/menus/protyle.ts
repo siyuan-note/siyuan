@@ -23,7 +23,7 @@ import {
 import {mathRender} from "../protyle/render/mathRender";
 import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
 import {copyPlainText, readText, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
@@ -907,7 +907,7 @@ export const zoomOut = (options: {
     fetchPost("/api/filetree/getDoc", {
         id: options.id,
         size: options.id === options.protyle.block.rootID ? window.siyuan.config.editor.dynamicLoadBlocks : Constants.SIZE_GET_MAX,
-    }, getResponse => {
+    }, async (getResponse) => {
         if (options.isPushBack) {
             onGet({
                 data: getResponse,
@@ -925,7 +925,11 @@ export const zoomOut = (options: {
         }
         // https://github.com/siyuan-note/siyuan/issues/4874
         if (options.focusId) {
-            const focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
+            let focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
+            if (!focusElement) {
+                const unfoldResponse = await fetchSyncPost("/api/block/getUnfoldedParentID", {id:options.focusId})
+                focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${unfoldResponse.data.parentID}"]`);
+            }
             if (focusElement) {
                 // 退出聚焦后块在折叠中 https://github.com/siyuan-note/siyuan/issues/10746
                 let showElement = focusElement;

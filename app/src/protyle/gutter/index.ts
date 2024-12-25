@@ -470,7 +470,7 @@ export class Gutter {
             hideElements(["gutter"], protyle);
             event.stopPropagation();
             event.preventDefault();
-        });
+        }, {passive: true});
     }
 
     private isMatchNode(item: Element) {

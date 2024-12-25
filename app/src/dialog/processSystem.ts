@@ -310,6 +310,11 @@ export const exitSiYuan = async () => {
             }
         } else if (response.code === 2) { // 提示新安装包
             hideMessage();
+
+            if ("std" === window.siyuan.config.system.container) {
+                ipcRenderer.send(Constants.SIYUAN_SHOW_WINDOW);
+            }
+
             confirmDialog(window.siyuan.languages.tip, response.msg, () => {
                 fetchPost("/api/system/exit", {
                     force: true,

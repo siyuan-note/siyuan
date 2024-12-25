@@ -629,19 +629,17 @@ func Close(force, setCurrentWorkspace bool, execInstallPkg int) (exitCode int) {
 
 	util.IsExiting.Store(true)
 	waitSecondForExecInstallPkg := false
-	if !skipNewVerInstallPkg() {
-		if newVerInstallPkgPath := getNewVerInstallPkgPath(); "" != newVerInstallPkgPath {
-			if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
-				waitSecondForExecInstallPkg = true
-				if gulu.OS.IsWindows() {
-					util.PushMsg(Conf.Language(130), 1000*30)
-				}
-				go execNewVerInstallPkg(newVerInstallPkgPath)
-			} else if 0 == execInstallPkg { // 新版本安装包已经准备就绪
-				exitCode = 2
-				logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
-				return
+	if !skipNewVerInstallPkg() && "" != newVerInstallPkgPath {
+		if 2 == execInstallPkg || (force && 0 == execInstallPkg) { // 执行新版本安装
+			waitSecondForExecInstallPkg = true
+			if gulu.OS.IsWindows() {
+				util.PushMsg(Conf.Language(130), 1000*30)
 			}
+			go execNewVerInstallPkg(newVerInstallPkgPath)
+		} else if 0 == execInstallPkg { // 新版本安装包已经准备就绪
+			exitCode = 2
+			logging.LogInfof("the new version install pkg is ready [%s], waiting for the user's next instruction", newVerInstallPkgPath)
+			return
 		}
 	}
 

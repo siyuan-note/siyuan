@@ -57,6 +57,8 @@ export abstract class Constants {
 
     public static readonly SIYUAN_CONTEXT_MENU: string = "siyuan-context-menu";
 
+    public static readonly SIYUAN_SHOW_WINDOW: string = "siyuan-show-window";
+
     // custom
     public static readonly CUSTOM_SY_READONLY: string = "custom-sy-readonly";
     public static readonly CUSTOM_SY_FULLWIDTH: string = "custom-sy-fullwidth";

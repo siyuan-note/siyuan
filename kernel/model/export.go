@@ -1457,7 +1457,6 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 			docPaths = append(docPaths, docFile.path)
 		}
 	}
-	docPaths = util.FilterSelfChildDocs(docPaths)
 
 	defBlockIDs, trees, docPaths := prepareExportTrees(docPaths)
 	zipPath = exportPandocConvertZip(baseFolderName, docPaths, defBlockIDs, "gfm+footnotes+hard_line_breaks", pandocTo, ext, trees)

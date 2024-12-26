@@ -181,7 +181,7 @@ export class Wnd {
             let oldTabHeaderElement = window.siyuan.dragElement;
             let exitDrag = false;
             Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
-                if (item.style.opacity === "0.1") {
+                if (item.style?.opacity === "0.1") {
                     oldTabHeaderElement = item;
                     exitDrag = true;
                     return true;
@@ -222,12 +222,14 @@ export class Wnd {
         });
         let dragleaveTimeout: number;
         let headerDragCounter = 0;
-        this.headersElement.parentElement.addEventListener("dragleave",  (event)=> {
+        this.headersElement.parentElement.addEventListener("dragleave", function () {
             if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
                 headerDragCounter--;
             }
             if (headerDragCounter === 0) {
-                this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
+                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                    item.classList.remove("layout-tab-bars--drag");
+                })
                 clearTimeout(dragleaveTimeout);
                 // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
                 dragleaveTimeout = window.setTimeout(() => {
@@ -248,12 +250,14 @@ export class Wnd {
             this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
         });
 
-        this.headersElement.parentElement.addEventListener("drop",  (event: DragEvent & {
+        this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
-        })=> {
-            this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
+        }) {
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            })
             headerDragCounter = 0;
-            const it = this.headersElement;
+            const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
                 setPanelFocus(it.parentElement);
@@ -289,7 +293,7 @@ export class Wnd {
             }
 
             const nextTabHeaderElement = (Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
-                if (item.style.opacity === "0.1") {
+                if (item.style?.opacity === "0.1") {
                     return true;
                 }
             }) as HTMLElement)?.nextElementSibling;

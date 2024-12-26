@@ -167,6 +167,7 @@ export class Wnd {
             target: HTMLElement
         }) {
             const it = this as HTMLElement;
+            it.classList.remove("layout-tab-bars--drag");
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 event.preventDefault();
                 it.classList.add("layout-tab-bars--drag");
@@ -221,9 +222,12 @@ export class Wnd {
         });
         let dragleaveTimeout: number;
         let headerDragCounter = 0;
-        this.headersElement.parentElement.addEventListener("dragleave", function () {
-            headerDragCounter--;
+        this.headersElement.parentElement.addEventListener("dragleave",  (event)=> {
+            if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
+                headerDragCounter--;
+            }
             if (headerDragCounter === 0) {
+                this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
                 clearTimeout(dragleaveTimeout);
                 // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
                 dragleaveTimeout = window.setTimeout(() => {
@@ -231,20 +235,25 @@ export class Wnd {
                         item.remove();
                     });
                 }, 1000);
-                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                    item.classList.remove("layout-tab-bars--drag");
-                })
             }
         });
         this.headersElement.parentElement.addEventListener("dragenter", (event) => {
             event.preventDefault();
-            headerDragCounter++;
+            if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
+                headerDragCounter++;
+            }
         });
-        this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
+
+        this.headersElement.parentElement.addEventListener("dragend", (event) => {
+            this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
+        });
+
+        this.headersElement.parentElement.addEventListener("drop",  (event: DragEvent & {
             target: HTMLElement
-        }) {
+        })=> {
+            this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
             headerDragCounter = 0;
-            const it = this as HTMLElement;
+            const it = this.headersElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
                 setPanelFocus(it.parentElement);
@@ -258,9 +267,6 @@ export class Wnd {
                     }
                 });
                 window.siyuan.dragElement = undefined;
-                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                    item.classList.remove("layout-tab-bars--drag");
-                })
                 return;
             }
             const tabData = JSON.parse(event.dataTransfer.getData(Constants.SIYUAN_DROP_TAB));
@@ -278,9 +284,6 @@ export class Wnd {
                 }
             }
             /// #endif
-            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                item.classList.remove("layout-tab-bars--drag");
-            })
             if (!oldTab) {
                 return;
             }

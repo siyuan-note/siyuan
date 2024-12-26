@@ -272,9 +272,18 @@ func GetUnfoldedParentID(id string) (parentID string) {
 		return
 	}
 
+	var firstFoldedParent *ast.Node
 	for parent := treenode.HeadingParent(node); nil != parent && ast.NodeDocument != parent.Type; parent = treenode.HeadingParent(parent) {
+		if "1" == parent.IALAttr("fold") {
+			firstFoldedParent = parent
+		}
 		if "1" != parent.IALAttr("fold") {
-			return parent.ID
+			if nil != firstFoldedParent {
+				parentID = firstFoldedParent.ID
+			} else {
+				parentID = parent.ID
+			}
+			return
 		}
 	}
 	return

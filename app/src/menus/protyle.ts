@@ -928,6 +928,7 @@ export const zoomOut = (options: {
             let focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${options.focusId}"]`);
             if (!focusElement) {
                 const unfoldResponse = await fetchSyncPost("/api/block/getUnfoldedParentID", {id:options.focusId})
+                options.focusId = unfoldResponse.data.parentID
                 focusElement = options.protyle.wysiwyg.element.querySelector(`[data-node-id="${unfoldResponse.data.parentID}"]`);
             }
             if (focusElement) {

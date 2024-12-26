@@ -1290,6 +1290,8 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "av-view-switch") {
                     if (!target.parentElement.classList.contains("b3-menu__item--current")) {
+                        avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                        target.parentElement.classList.add("b3-menu__item--current")
                         options.blockElement.removeAttribute("data-render");
                         avRender(options.blockElement, options.protyle, undefined, target.parentElement.dataset.id);
                     }
@@ -1304,6 +1306,8 @@ export const openMenuPanel = (options: {
                             element: target.parentElement
                         });
                     } else {
+                        avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                        target.parentElement.classList.add("b3-menu__item--current")
                         options.blockElement.removeAttribute("data-render");
                         avRender(options.blockElement, options.protyle, () => {
                             openViewMenu({

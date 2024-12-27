@@ -29,7 +29,6 @@ import (
 	"sync"
 	"time"
 
-	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -834,7 +833,8 @@ func (conf *AppConf) language(num int) (ret string) {
 }
 
 func InitBoxes() {
-	initialized := 0 < treenode.CountBlocks()
+	blockCount := treenode.CountBlocks()
+	initialized := 0 < blockCount
 	for _, box := range Conf.GetOpenedBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
@@ -843,11 +843,7 @@ func InitBoxes() {
 		}
 	}
 
-	var dbSize string
-	if dbFile, err := os.Stat(util.DBPath); err == nil {
-		dbSize = humanize.BytesCustomCeil(uint64(dbFile.Size()), 2)
-	}
-	logging.LogInfof("database size [%s], tree/block count [%d/%d]", dbSize, treenode.CountTrees(), treenode.CountBlocks())
+	logging.LogInfof("tree/block count [%d/%d]", treenode.CountTrees(), blockCount)
 }
 
 func IsSubscriber() bool {

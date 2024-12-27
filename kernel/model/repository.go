@@ -1556,7 +1556,6 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 			}
 			planSyncAfter(delay)
 		}
-		util.PushClearProgress()
 		return
 	}
 

@@ -193,11 +193,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
         text.split("\n").forEach(row => {
             textJSON.push(row.split("\t"));
         });
-        if (rowsElement && textJSON.length === 1 && textJSON[0].length === 1) {
+        if (rowsElement.length > 0 && textJSON.length === 1 && textJSON[0].length === 1) {
             updateCellsValue(protyle, blockElement as HTMLElement, text, undefined, columns, html);
             return;
         }
-        if (rowsElement) {
+        if (rowsElement.length > 0) {
             rowsElement.forEach(rowElement => {
                 rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
                     cellElements.push(cellElement);

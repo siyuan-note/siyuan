@@ -744,7 +744,20 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
         "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey",
         "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc"].includes(operation.action)) {
-        refreshAV(protyle, operation);
+        if (!isUndo) {
+            // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
+            refreshAV(protyle, operation);
+        } else if (operation.action === "setAttrViewName") {
+            // setAttrViewName 同文档不会推送，需手动刷新
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+                const titleElement = item.querySelector(".av__title") as HTMLElement;
+                if (!titleElement) {
+                    return;
+                }
+                titleElement.textContent = operation.data;
+                titleElement.dataset.title = operation.data;
+            });
+        }
         return;
     }
     if (operation.action === "doUpdateUpdated") {

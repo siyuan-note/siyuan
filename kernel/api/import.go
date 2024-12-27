@@ -135,6 +135,7 @@ func importData(c *gin.Context) {
 		return
 	}
 	file := form.File["file"][0]
+	logging.LogInfof("import data [name=%s, size=%d]", file.Filename, file.Size)
 	fileReader, err := file.Open()
 	if err != nil {
 		logging.LogErrorf("open upload file failed: %s", err)

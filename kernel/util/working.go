@@ -32,6 +32,7 @@ import (
 	"sync/atomic"
 	"time"
 
+	"github.com/88250/go-humanize"
 	"github.com/88250/gulu"
 	figure "github.com/common-nighthawk/go-figure"
 	"github.com/gofrs/flock"
@@ -499,4 +500,14 @@ func UnlockWorkspace() {
 		logging.LogErrorf("remove workspace lock failed: %s", err)
 		return
 	}
+}
+
+func LogDatabaseSize(dbPath string) {
+	dbFile, err := os.Stat(dbPath)
+	if nil != err {
+		return
+	}
+
+	dbSize := humanize.BytesCustomCeil(uint64(dbFile.Size()), 2)
+	logging.LogInfof("database [%s] size [%s]", dbPath, dbSize)
 }

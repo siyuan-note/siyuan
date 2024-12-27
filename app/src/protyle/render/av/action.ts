@@ -568,7 +568,9 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
                     label: window.siyuan.languages.unbindBlock,
                     icon: "iconLinkOff",
                     click() {
-                        updateCellsValue(protyle, blockElement, keyCellElement.querySelector(".av__celltext").textContent, [keyCellElement]);
+                        updateCellsValue(protyle, blockElement, {
+                            content: keyCellElement.querySelector(".av__celltext").textContent,
+                        }, [keyCellElement]);
                     }
                 });
             }

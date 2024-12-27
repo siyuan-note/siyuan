@@ -977,7 +977,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else if (targetElement.classList.contains("av__row")) {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
-                    if (blockElement && sourceElements.length > 0) {
+                    if (blockElement) {
                         let previousID = "";
                         if (targetClass.includes("dragover__bottom")) {
                             previousID = targetElement.getAttribute("data-id") || "";

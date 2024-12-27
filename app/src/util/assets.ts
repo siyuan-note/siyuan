@@ -322,7 +322,7 @@ export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
             css = "github-dark";
         }
     }
-    const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.5.0`;
+    const href = `${cdn}/js/highlight.js/styles/${css}.min.css?v=11.11.1`;
     if (!protyleHljsStyle) {
         addStyle(href, "protyleHljsStyle");
     } else if (!protyleHljsStyle.href.includes(href)) {

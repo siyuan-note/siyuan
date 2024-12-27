@@ -136,6 +136,8 @@
       border-radius: var(--b3-border-radius);
       display: flex;
       align-items: center;
+      min-width: 16px;
+      justify-content: center;
 
       &:hover {
         color: var(--b3-theme-on-background);

@@ -294,13 +294,13 @@
     .b3-menu__avemoji {
       display: inline-block;
       font-size: 1em;
-      line-height: normal;
+      line-height: 1.625;
       height: auto;
 
       img {
-        height: calc(1.625em - 10px);
+        height: calc(1.625em - 8px);
         font-size: 1em;
-        width: calc(1.625em - 10px);
+        width: calc(1.625em - 8px);
       }
     }
 

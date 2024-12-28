@@ -237,6 +237,7 @@ export const setInlineStyle = async (set = true) => {
   src: url(../../../appearance/fonts/Noto-COLRv1-2.047/Noto-COLRv1.woff2) format("woff2");
   unicode-range: U+1fae9, U+1fac6, U+1fabe, U+1fadc, U+e50a, U+1fa89, U+1fadf, U+1f1e6-1f1ff, U+1f3f4, U+e0067, U+e0062,
   U+e0065, U+e006e, U+e007f, U+e0073, U+e0063, U+e0074, U+e0077, U+e006c;
+  size-adjust: 85%;
 }
 @font-face {
   font-family: "Emojis Reset";
@@ -244,11 +245,13 @@ export const setInlineStyle = async (set = true) => {
   local("Segoe UI Symbol");
   unicode-range: U+263a, U+21a9, U+2642, U+303d, U+2197, U+2198, U+2199, U+2196, U+2195, U+2194, U+2660, U+2665, U+2666, 
   U+2663, U+3030, U+21aa, U+25b6, U+25c0, U+2640, U+203c, U+a9, U+ae, U+2122;
+  size-adjust: 85%;
 }
 @font-face {
   font-family: "Emojis";
   src: local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
+  size-adjust: 85%;
 }`;
         } else {
             style = `@font-face {
@@ -262,6 +265,7 @@ export const setInlineStyle = async (set = true) => {
   U+265f, U+2660, U+2663, U+2665, U+2666, U+267b, U+267e, U+267f, U+2692-2697, U+2699, U+269b, U+269c, U+26a0, U+26a1, 
   U+26a7, U+26aa, U+26ab, U+26b0, U+26b1, U+2702, U+2708, U+2709, U+270c, U+270d, U+2712, U+2714, U+2716, U+271d, U+2733, 
   U+2734, U+2744, U+2747, U+2763, U+2764, U+2934-2935, U+3030, U+303d, U+3297, U+3299, U+fe0f, U+e50a, U+a9, U+ae;
+  size-adjust: 92%;
 }
 @font-face {
   font-family: "Emojis";
@@ -273,6 +277,7 @@ export const setInlineStyle = async (set = true) => {
   local("Noto Color Emoji"),
   local("Android Emoji"),
   local("EmojiSymbols");
+  size-adjust: 92%;
 }`;
         }
     }

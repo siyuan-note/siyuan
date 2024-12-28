@@ -14,7 +14,7 @@ import {
     focusSideBlock,
     getEditorRange,
     getSelectionOffset,
-    setFirstNodeRange,
+    setFirstNodeRange, setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
@@ -673,7 +673,7 @@ export class WYSIWYG {
 
                 const imgElement = dragElement.parentElement.parentElement;
                 if (dragElement.tagName === "IMG") {
-                   img3115(imgElement);
+                    img3115(imgElement);
                 }
                 documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                     if (dragElement.tagName === "IMG") {
@@ -2011,9 +2011,7 @@ export class WYSIWYG {
             const range = getEditorRange(protyle.wysiwyg.element);
             const nodeElement = hasClosestBlock(range.startContainer);
             if (!isMac() && nodeElement) {
-                range.insertNode(document.createElement("wbr"));
-                protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
-                nodeElement.querySelector("wbr").remove();
+                setInsertWbrHTML(nodeElement, range, protyle);
             }
             event.stopPropagation();
         });
@@ -2097,9 +2095,7 @@ export class WYSIWYG {
                     // 微软双拼 keyup 会记录拼音字符，因此在 compositionstart 记录
                     !isComposition &&
                     (typeof protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] === "undefined" || range.toString() !== "" || !this.preventKeyup)) {
-                    range.insertNode(document.createElement("wbr"));
-                    protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
-                    nodeElement.querySelector("wbr").remove();
+                    setInsertWbrHTML(nodeElement, range, protyle);
                 }
                 this.preventKeyup = false;
                 return;

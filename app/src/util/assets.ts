@@ -216,15 +216,18 @@ export const setInlineStyle = async (set = true) => {
   src: local("Apple Color Emoji"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
-  unicode-range: U+26a1, U+21a9, U+21aa, U+2708, U+263a, U+1fae4, U+2194-2199, U+2934-2935, U+25b6, U+25c0, U+23cf,
-  U+2640, U+2642, U+2611, U+303d,U+3030, U+1f170, U+1f171, U+24c2, U+1f17e, U+1f17f, U+1f250, U+1f21a, U+1f22f,
-  U+1f232-1f23a, U+1f251, U+3297, U+3299, U+2639, U+2660, U+2666, U+2665, U+2663, U+26A0, U+a9, U+ae, U+2122;
+  unicode-range: U+21a9, U+21aa, U+2122, U+2194-2199, U+23cf, U+25b6, U+25c0, U+25fb, U+25fc, U+25aa, U+25ab, U+2600-2603,
+  U+260e, U+2611, U+261d, U+2639, U+263a, U+2640, U+2642, U+2660, U+2663, U+2665, U+2666, U+2668, U+267b, U+26aa, U+26ab, 
+  U+2702, U+2708, U+2934, U+2935, U+1f170, U+1f171, U+1f17e, U+1f17f, U+1f202, U+1f21a, U+1f22f, U+1f232-1f23a, U+1f250, 
+  U+1f251, U+1fae4, U+2049, U+203c, U+3030, U+303d, U+24c2, U+26a0, U+26a1, U+26be, U+27a1, U+2b05-2b07, U+3297, U+3299, U+a9, U+ae;
+  size-adjust: 115%;
 }
 @font-face {
   font-family: "Emojis";
   src: local("Apple Color Emoji"),
   local("Segoe UI Emoji"),
   local("Segoe UI Symbol");
+  size-adjust: 115%;
 }`;
     } else {
         const isWin11Browser = await isWin11();

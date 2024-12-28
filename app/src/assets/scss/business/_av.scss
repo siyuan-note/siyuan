@@ -293,6 +293,15 @@
 
     .b3-menu__avemoji {
       display: inline-block;
+      font-size: 1em;
+      line-height: normal;
+      height: auto;
+
+      img {
+        height: calc(1.625em - 10px);
+        font-size: 1em;
+        width: calc(1.625em - 10px);
+      }
     }
 
     &[data-wrap="true"] {
@@ -550,6 +559,7 @@
           background-color: var(--b3-theme-primary-lighter);
           z-index: 3;
         }
+
         &.dragover__top::after {
           top: -2.5px;
         }

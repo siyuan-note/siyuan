@@ -339,6 +339,8 @@ github.com/richardlehane/mscfb v1.0.4/go.mod h1:YzVpcZg9czvAuhk9T+a3avCpcFPMUWm7
 github.com/richardlehane/msoleps v1.0.1/go.mod h1:BWev5JBpU9Ko2WAgmZEuiz4/u3ZYTKbjLycmwiWUfWg=
 github.com/richardlehane/msoleps v1.0.3 h1:aznSZzrwYRl3rLKRT3gUk9am7T/mLNSnJINvN0AQoVM=
 github.com/richardlehane/msoleps v1.0.3/go.mod h1:BWev5JBpU9Ko2WAgmZEuiz4/u3ZYTKbjLycmwiWUfWg=
+github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285 h1:d54EL9l+XteliUfUCGsEwwuk65dmmxX85VXF+9T6+50=
+github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285/go.mod h1:fxIDly1xtudczrZeOOlfaUvd2OPb2qZAPuWdU2BsBTk=
 github.com/rivo/uniseg v0.1.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.2.0/go.mod h1:J6wj4VEh+S6ZtnVlnTBMWIodfgj8LQOQFoIToxlJtxc=
 github.com/rivo/uniseg v0.4.7 h1:WUdvkW8uEhrYfLC4ZzdpI2ztxP1I582+49Oc5Mq64VQ=
@@ -365,8 +367,6 @@ github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+D
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20241225015029-d441b991d87e h1:VOdd8vUFzMiT9NsuezgczDyxStkaCLAiRrUlKx+IMc8=
-github.com/siyuan-note/dejavu v0.0.0-20241225015029-d441b991d87e/go.mod h1:+gaHpNFsoVagw956l456Cm4eZclB/gXsjkW4YmvWmJM=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4 h1:kJaw5L/evyW6LcB9IQT8PR4ppx8JVqOFP9Ix3rfwSrc=
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4/go.mod h1:UYcCCY+0wh+GmUoDOaO63j1sV5lgy7laLAk1XhEiUis=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=

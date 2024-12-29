@@ -74,6 +74,7 @@ require (
 	golang.org/x/mobile v0.0.0-20240520174638-fa72addaaa1b
 	golang.org/x/mod v0.22.0
 	golang.org/x/net v0.33.0
+	golang.org/x/sys v0.28.0
 	golang.org/x/text v0.21.0
 	golang.org/x/time v0.6.0
 	gopkg.in/yaml.v3 v3.0.1
@@ -166,6 +167,7 @@ require (
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
+	github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
@@ -186,7 +188,6 @@ require (
 	golang.org/x/crypto v0.31.0 // indirect
 	golang.org/x/exp v0.0.0-20241217172543-b2144cdd0a67 // indirect
 	golang.org/x/sync v0.10.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/tools v0.28.0 // indirect
 	google.golang.org/protobuf v1.35.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -195,6 +196,8 @@ require (
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950
 
 replace github.com/pdfcpu/pdfcpu => github.com/88250/pdfcpu v0.3.14-0.20241201033812-5a93b7586a01
+
+replace github.com/siyuan-note/dejavu => D:\Sync\GitHub\dejavu
 
 //replace github.com/88250/lute => F:\golang\gopath\src\github.com\88250\lute
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu

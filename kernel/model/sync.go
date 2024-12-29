@@ -252,7 +252,7 @@ func checkSync(boot, exit, byHand bool) bool {
 		if !IsSubscriber() {
 			return false
 		}
-	case conf.ProviderWebDAV, conf.ProviderS3:
+	case conf.ProviderWebDAV, conf.ProviderS3, conf.ProviderLocal:
 		if !IsPaidUser() {
 			return false
 		}
@@ -477,7 +477,10 @@ var (
 )
 
 func CreateCloudSyncDir(name string) (err error) {
-	if conf.ProviderSiYuan != Conf.Sync.Provider {
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan, conf.ProviderLocal:
+		break
+	default:
 		err = errors.New(Conf.Language(131))
 		return
 	}
@@ -502,7 +505,10 @@ func CreateCloudSyncDir(name string) (err error) {
 }
 
 func RemoveCloudSyncDir(name string) (err error) {
-	if conf.ProviderSiYuan != Conf.Sync.Provider {
+	switch Conf.Sync.Provider {
+	case conf.ProviderSiYuan, conf.ProviderLocal:
+		break
+	default:
 		err = errors.New(Conf.Language(131))
 		return
 	}
@@ -678,6 +684,9 @@ func isProviderOnline(byHand bool) (ret bool) {
 		checkURL = Conf.Sync.WebDAV.Endpoint
 		skipTlsVerify = Conf.Sync.WebDAV.SkipTlsVerify
 		timeout = Conf.Sync.WebDAV.Timeout * 1000
+	case conf.ProviderLocal:
+		checkURL = "file://" + Conf.Sync.Local.Endpoint
+		timeout = Conf.Sync.Local.Timeout * 1000
 	default:
 		logging.LogWarnf("unknown provider: %d", Conf.Sync.Provider)
 		return false

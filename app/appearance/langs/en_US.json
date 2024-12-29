@@ -1579,6 +1579,6 @@
     "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
     "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions",
     "251": "Total unused assets [%d], only [%d] listed here",
-    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list <button id=\"addMicrosoftDefenderExclusion\">Add</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Add</button><span class=\"fn__space\"></span>"
   }
 }

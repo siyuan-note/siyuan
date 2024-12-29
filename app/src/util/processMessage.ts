@@ -8,10 +8,11 @@ import {fetchPost} from "./fetch";
 
 export const processMessage = (response: IWebSocketData) => {
     if ("msg" === response.cmd) {
-        showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
+        const id = showMessage(response.msg, response.data.closeTimeout, response.code === 0 ? "info" : "error", response.data.id);
         document.querySelector("#message #addMicrosoftDefenderExclusion")?.addEventListener("click", (event) => {
-            fetchPost("/api/system/addMicrosoftDefenderExclusion", {}, (response) => {
-                (event.target as HTMLElement).innerHTML = '<svg class="fn__rotate" style="margin-right: 0;"><use xlink:href="#iconRefresh"></use></svg>';
+            (event.target as HTMLElement).innerHTML = '<svg class="fn__rotate" style="margin-right: 0;"><use xlink:href="#iconRefresh"></use></svg>';
+            fetchPost("/api/system/addMicrosoftDefenderExclusion", {}, () => {
+                hideMessage(id);
             });
         }, {once: true});
         return false;

@@ -63,7 +63,7 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		}
 	} else {
 		logging.LogInfof("current user is not admin, use elevator to add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
-		elevator := filepath.Join(util.WorkingDir, "elevator.exe")
+		elevator := filepath.Join(util.WorkingDir, "kernel", "elevator.exe")
 		if "dev" == util.Mode || !gulu.File.IsExist(elevator) {
 			elevator = filepath.Join(util.WorkingDir, "elevator", "elevator-"+runtime.GOARCH+".exe")
 		}

@@ -26,6 +26,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"sync"
 	"syscall"
 
 	"github.com/88250/gulu"
@@ -34,7 +35,12 @@ import (
 	"golang.org/x/sys/windows"
 )
 
+var microsoftDefenderLock = sync.Mutex{}
+
 func AddMicrosoftDefenderExclusion() (err error) {
+	microsoftDefenderLock.Lock()
+	defer microsoftDefenderLock.Unlock()
+
 	if !gulu.OS.IsWindows() {
 		return
 	}
@@ -91,6 +97,9 @@ func AutoProcessMicrosoftDefender() {
 }
 
 func checkMicrosoftDefender() {
+	microsoftDefenderLock.Lock()
+	defer microsoftDefenderLock.Unlock()
+
 	if !gulu.OS.IsWindows() || Conf.System.MicrosoftDefenderExcluded {
 		return
 	}

@@ -1578,6 +1578,7 @@
     "248": "El rumbo de destino está ubicado en el bloque contenedor y no puede usarse como punto de entrega",
     "249": "No se puede acceder a los datos debido a un error de configuración. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
     "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
-    "251": "Total de activos no utilizados [%d], solo [%d] listados aquí"
+    "251": "Total de activos no utilizados [%d], solo [%d] listados aquí",
+    "252": "\uD83D\uDEA8 Microsoft Defender puede eliminar por error el núcleo, eliminar datos y reducir significativamente el rendimiento. Se recomienda agregar la ruta de instalación y el espacio de trabajo de SiYuan a la lista de exclusiones <button id=\"addMicrosoftDefenderExclusion\">Agregar</button>"
   }
 }

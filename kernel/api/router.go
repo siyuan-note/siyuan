@@ -66,6 +66,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/system/importConf", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, importConf)
 	ginServer.Handle("POST", "/api/system/getWorkspaceInfo", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getWorkspaceInfo)
 	ginServer.Handle("POST", "/api/system/reloadUI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadUI)
+	ginServer.Handle("POST", "/api/system/addMicrosoftDefenderExclusion", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, addMicrosoftDefenderExclusion)
 
 	ginServer.Handle("POST", "/api/storage/setLocalStorage", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, setLocalStorage)
 	ginServer.Handle("POST", "/api/storage/getLocalStorage", model.CheckAuth, getLocalStorage)

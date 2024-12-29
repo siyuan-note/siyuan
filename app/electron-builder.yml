@@ -71,3 +71,5 @@ extraResources:
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-windows-amd64.zip"
     to: "pandoc.zip"
+  - from: "elevator/elevator-amd64.exe"
+    to: "elevator.exe"

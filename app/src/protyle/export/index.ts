@@ -421,7 +421,7 @@ const renderPDF = async (id: string) => {
             alert(response.msg)
             return;
         }
-        document.title = '${window.siyuan.languages.export} PDF - ' + response.data.name
+        document.title = response.data.name
         window.siyuan = {
           config: {
             appearance: { mode: 0, codeBlockThemeDark: "${window.siyuan.config.appearance.codeBlockThemeDark}", codeBlockThemeLight: "${window.siyuan.config.appearance.codeBlockThemeLight}" },

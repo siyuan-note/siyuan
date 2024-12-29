@@ -70,3 +70,5 @@ extraResources:
   - from: "src/assets/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"
+  - from: "elevator/elevator-arm64.exe"
+    to: "elevator.exe"

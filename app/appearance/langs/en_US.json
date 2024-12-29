@@ -1578,6 +1578,7 @@
     "248": "The target heading is located in the container block and cannot be used as a drop point",
     "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
     "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions",
-    "251": "Total unused assets [%d], only [%d] listed here"
+    "251": "Total unused assets [%d], only [%d] listed here",
+    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list <button id=\"addMicrosoftDefenderExclusion\">Add</button>"
   }
 }

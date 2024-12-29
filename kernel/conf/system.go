@@ -45,6 +45,8 @@ type System struct {
 	LockScreenMode         int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 
 	DisabledFeatures []string `json:"disabledFeatures"`
+
+	MicrosoftDefenderExcluded bool `json:"microsoftDefenderExcluded"` // 是否已加入 Microsoft Defender 排除项 https://github.com/siyuan-note/siyuan/issues/13650
 }
 
 func NewSystem() *System {

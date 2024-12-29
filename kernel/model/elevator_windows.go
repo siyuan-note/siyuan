@@ -62,11 +62,12 @@ func AddMicrosoftDefenderExclusion() (err error) {
 			return
 		}
 	} else {
-		logging.LogInfof("current user is not admin, use elevator to add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
-		elevator := filepath.Join(util.WorkingDir, "kernel", "elevator.exe")
-		if "dev" == util.Mode || !gulu.File.IsExist(elevator) {
-			elevator = filepath.Join(util.WorkingDir, "elevator", "elevator-"+runtime.GOARCH+".exe")
+		elevator := getElevatorBin()
+		if !gulu.File.IsExist(elevator) {
+			logging.LogWarnf("not found elevator [%s]", elevator)
+			return
 		}
+		logging.LogInfof("current user is not admin, use elevator to add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
 
 		if !gulu.File.IsExist(elevator) {
 			msg := fmt.Sprintf("not found elevator [%s]", elevator)
@@ -106,11 +107,7 @@ func checkMicrosoftDefender() {
 		return
 	}
 
-	elevator := filepath.Join(util.WorkingDir, "elevator.exe")
-	if "dev" == util.Mode || !gulu.File.IsExist(elevator) {
-		elevator = filepath.Join(util.WorkingDir, "elevator", "elevator-"+runtime.GOARCH+".exe")
-	}
-
+	elevator := getElevatorBin()
 	if !gulu.File.IsExist(elevator) {
 		logging.LogWarnf("not found elevator [%s]", elevator)
 		return
@@ -136,4 +133,12 @@ func isUsingMicrosoftDefender() bool {
 func isAdmin() bool {
 	_, err := os.Open("\\\\.\\PHYSICALDRIVE0")
 	return err == nil
+}
+
+func getElevatorBin() string {
+	elevator := filepath.Join(util.WorkingDir, "kernel", "elevator.exe")
+	if "dev" == util.Mode || !gulu.File.IsExist(elevator) {
+		elevator = filepath.Join(util.WorkingDir, "elevator", "elevator-"+runtime.GOARCH+".exe")
+	}
+	return elevator
 }

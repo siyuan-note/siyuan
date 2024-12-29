@@ -87,7 +87,6 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		}
 	}
 
-	util.PushClearAllMsg()
 	util.PushMsg(Conf.language(102), 5000)
 	return
 }

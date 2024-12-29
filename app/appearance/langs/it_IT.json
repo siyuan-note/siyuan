@@ -1579,6 +1579,6 @@
     "249": "Impossibile accedere ai dati a causa di un errore di configurazione. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
     "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
     "251": "Totale risorse inutilizzate [%d], qui elencate solo [%d]",
-    "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni <button id=\"addMicrosoftDefenderExclusion\">Aggiungi</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Aggiungi</button><span class=\"fn__space\"></span>"
   }
 }

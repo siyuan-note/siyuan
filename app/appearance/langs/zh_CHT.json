@@ -1579,6 +1579,6 @@
     "249": "因配置錯誤導致無法存取數據，請仔細逐個核對配置項，並檢查雲端存儲相關權限配置",
     "250": "請求已被雲端存儲限流，請仔細逐個核對配置項，並檢查雲端存儲相關權限配置",
     "251": "未引用資源一共 ${x} 個，這裡僅列出 ${y} 個",
-    "252": "\uD83D\uDEA8 Microsoft Defender 可能會誤殺內核、誤刪數據和嚴重降低運行性能，建議將思源安裝路徑和工作空間路徑添加到排除列表 <button id=\"addMicrosoftDefenderExclusion\">添加</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender 可能會誤殺內核、誤刪數據和嚴重降低運行性能，建議將思源安裝路徑和工作空間路徑添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">添加</button><span class=\"fn__space\"></span>"
   }
 }

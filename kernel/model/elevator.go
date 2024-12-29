@@ -18,6 +18,6 @@
 
 package model
 
-func AddMicrosoftDefenderExclusion() (err error) {}
+func AddMicrosoftDefenderExclusion() error { return nil }
 
 func AutoProcessMicrosoftDefender() {}

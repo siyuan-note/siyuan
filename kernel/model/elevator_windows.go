@@ -90,6 +90,9 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		}
 	}
 
+	Conf.System.MicrosoftDefenderExcluded = true
+	Conf.Save()
+
 	logging.LogInfof("added Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
 	util.PushMsg(Conf.language(102), 5000)
 	return

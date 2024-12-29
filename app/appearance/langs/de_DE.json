@@ -1578,6 +1578,7 @@
     "248": "Die Zielfüberschrift befindet sich im Containerblock und kann nicht als Ablagepunkt verwendet werden.",
     "249": "Aufgrund eines Konfigurationsfehlers kann nicht auf die Daten zugegriffen werden. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
     "250": "Die Anfrage wurde vom Cloud-Speicher begrenzt. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
-    "251": "Insgesamt ungenutzte Assets [%d], hier nur [%d] aufgeführt"
+    "251": "Insgesamt ungenutzte Assets [%d], hier nur [%d] aufgeführt",
+    "252": "\uD83D\uDEA8 Microsoft Defender könnte fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den Installationspfad und den Arbeitsbereich von SiYuan zur Ausschlussliste hinzuzufügen <button id=\"addMicrosoftDefenderExclusion\">Hinzufügen</button>"
   }
 }

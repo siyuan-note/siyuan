@@ -84,10 +84,10 @@ func AddMicrosoftDefenderExclusion() (err error) {
 }
 
 func AutoProcessMicrosoftDefender() {
-	processMicrosoftDefender()
+	checkMicrosoftDefender()
 }
 
-func processMicrosoftDefender() {
+func checkMicrosoftDefender() {
 	if !gulu.OS.IsWindows() || Conf.System.MicrosoftDefenderExcluded {
 		return
 	}
@@ -106,32 +106,7 @@ func processMicrosoftDefender() {
 		return
 	}
 
-	installPath := filepath.Dir(util.WorkingDir)
-	psArgs := []string{"-Command", "Add-MpPreference", "-ExclusionPath", installPath, ",", util.WorkspaceDir}
-	if isAdmin() {
-		cmd := exec.Command("powershell", psArgs...)
-		gulu.CmdAttr(cmd)
-		output, err := cmd.CombinedOutput()
-		if nil != err {
-			logging.LogErrorf("add Windows Defender exclusion path [%s] failed: %s, %s", installPath, err, string(output))
-			return
-		}
-	} else {
-		ps := []string{"powershell"}
-		ps = append(ps, psArgs...)
-		verbPtr, _ := syscall.UTF16PtrFromString("runas")
-		exePtr, _ := syscall.UTF16PtrFromString(elevator)
-		cwdPtr, _ := syscall.UTF16PtrFromString(util.WorkingDir)
-		argPtr, _ := syscall.UTF16PtrFromString(strings.Join(ps, " "))
-		err := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
-		if err != nil {
-			logging.LogErrorf("add Windows Defender exclusion path [%s] failed: %s", installPath, err)
-			return
-		}
-	}
-
-	// TODO Conf.System.MicrosoftDefenderExcluded = true
-	//Conf.Save()
+	util.PushMsg(Conf.language(252), 0)
 }
 
 func isUsingMicrosoftDefender() bool {

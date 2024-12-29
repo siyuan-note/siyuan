@@ -18,6 +18,5 @@
 
 package model
 
-func processMicrosoftDefender() {
-	return
+func AutoProcessMicrosoftDefender() {
 }

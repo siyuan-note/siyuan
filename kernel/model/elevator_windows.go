@@ -19,6 +19,8 @@
 package model
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -31,6 +33,59 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 	"golang.org/x/sys/windows"
 )
+
+func AddMicrosoftDefenderExclusion() (err error) {
+	if !gulu.OS.IsWindows() {
+		return
+	}
+
+	if !isUsingMicrosoftDefender() {
+		return
+	}
+
+	installPath := filepath.Dir(util.WorkingDir)
+	psArgs := []string{"-Command", "Add-MpPreference", "-ExclusionPath", installPath, ",", util.WorkspaceDir}
+	if isAdmin() {
+		cmd := exec.Command("powershell", psArgs...)
+		gulu.CmdAttr(cmd)
+		output, cmdErr := cmd.CombinedOutput()
+		if nil != cmdErr {
+			logging.LogErrorf("add Windows Defender exclusion path [%s] failed: %s, %s", installPath, cmdErr, string(output))
+			err = cmdErr
+			return
+		}
+	} else {
+		elevator := filepath.Join(util.WorkingDir, "elevator.exe")
+		if "dev" == util.Mode || !gulu.File.IsExist(elevator) {
+			elevator = filepath.Join(util.WorkingDir, "elevator", "elevator-"+runtime.GOARCH+".exe")
+		}
+
+		if !gulu.File.IsExist(elevator) {
+			msg := fmt.Sprintf("not found elevator [%s]", elevator)
+			logging.LogWarnf(msg)
+			err = errors.New(msg)
+			return
+		}
+
+		ps := []string{"powershell"}
+		ps = append(ps, psArgs...)
+		verbPtr, _ := syscall.UTF16PtrFromString("runas")
+		exePtr, _ := syscall.UTF16PtrFromString(elevator)
+		cwdPtr, _ := syscall.UTF16PtrFromString(util.WorkingDir)
+		argPtr, _ := syscall.UTF16PtrFromString(strings.Join(ps, " "))
+		execErr := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
+		if execErr != nil {
+			logging.LogErrorf("add Windows Defender exclusion path [%s] failed: %s", installPath, execErr)
+			err = execErr
+			return
+		}
+	}
+	return
+}
+
+func AutoProcessMicrosoftDefender() {
+	processMicrosoftDefender()
+}
 
 func processMicrosoftDefender() {
 	if !gulu.OS.IsWindows() || Conf.System.MicrosoftDefenderExcluded {
@@ -76,7 +131,7 @@ func processMicrosoftDefender() {
 	}
 
 	// TODO Conf.System.MicrosoftDefenderExcluded = true
-	Conf.Save()
+	//Conf.Save()
 }
 
 func isUsingMicrosoftDefender() bool {

@@ -167,7 +167,6 @@ require (
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.3 // indirect
-	github.com/ricochet2200/go-disk-usage/du v0.0.0-20210707232629-ac9918953285 // indirect
 	github.com/rivo/uniseg v0.4.7 // indirect
 	github.com/shoenig/go-m1cpu v0.1.6 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
@@ -196,8 +195,6 @@ require (
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950
 
 replace github.com/pdfcpu/pdfcpu => github.com/88250/pdfcpu v0.3.14-0.20241201033812-5a93b7586a01
-
-replace github.com/siyuan-note/dejavu => D:\Sync\GitHub\dejavu
 
 //replace github.com/88250/lute => F:\golang\gopath\src\github.com\88250\lute
 //replace github.com/siyuan-note/dejavu => D:\88250\dejavu

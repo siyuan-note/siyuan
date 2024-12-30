@@ -46,7 +46,16 @@ export class Title {
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
             event.preventDefault();
-            document.execCommand("insertText", false, replaceFileName(event.clipboardData.getData("text/plain")));
+            const range = getSelection().getRangeAt(0)
+            let text = event.clipboardData.getData("text/siyuan")
+            range.deleteContents();
+            if (text) {
+                text = protyle.lute.BlockDOM2Content(text)
+            } else {
+                text = event.clipboardData.getData("text/plain")
+            }
+            range.insertNode(document.createTextNode(replaceFileName(text)));
+            range.collapse(false);
             this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {
@@ -220,10 +229,7 @@ export class Title {
                 accelerator: "⌘V",
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
-                    // 不能使用 execCommand https://github.com/siyuan-note/siyuan/issues/7045
-                    const text = await readText();
-                    document.execCommand("insertText", false, replaceFileName(text));
-                    this.rename(protyle);
+                    document.execCommand("paste");
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

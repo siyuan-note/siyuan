@@ -4,7 +4,7 @@ import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
-    focusBlock,
+    focusBlock, focusByRange,
     focusByWbr,
     getEditorRange,
     getSelectionOffset, setLastNodeRange,
@@ -235,8 +235,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             }
             document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {
-            range.insertNode(document.createTextNode(text));
+            const node = document.createTextNode(text)
+            range.insertNode(node);
+            range.setEnd(node, text.length);
             range.collapse(false);
+            focusByRange(range)
             updateAVName(protyle, blockElement);
         }
     });

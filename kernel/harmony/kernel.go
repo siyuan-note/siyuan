@@ -132,8 +132,8 @@ func DisableFeature(feature *C.char) {
 }
 
 //export Unzip
-func Unzip(zipFilePath, destination string) {
-	if err := gulu.Zip.Unzip(zipFilePath, destination); nil != err {
+func Unzip(zipFilePath, destination *C.char) {
+	if err := gulu.Zip.Unzip(C.GoString(zipFilePath), C.GoString(destination)); nil != err {
 		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
 	}
 }

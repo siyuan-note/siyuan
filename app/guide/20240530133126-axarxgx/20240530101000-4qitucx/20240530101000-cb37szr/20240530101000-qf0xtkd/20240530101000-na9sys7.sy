@@ -7,7 +7,7 @@
 		"id": "20240530101000-na9sys7",
 		"title": "サードパーティのクラウドストレージへの接続",
 		"type": "doc",
-		"updated": "20241216171841"
+		"updated": "20241231014328"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-y5kmw6j",
-				"updated": "20241216171841"
+				"updated": "20241231014328"
 			},
 			"Children": [
 				{
@@ -240,6 +240,34 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241231014316-b0vcf9w",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241231014316-b0vcf9w",
+						"updated": "20241231014328"
+					},
+					"Children": [
+						{
+							"ID": "20241231014316-5w9cag8",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241231014316-5w9cag8",
+								"updated": "20241231014328"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "ローカルファイルシステム"
 								}
 							]
 						}

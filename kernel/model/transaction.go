@@ -792,9 +792,17 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 
 	node.Unlink()
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
-		// 保持空列表项
-		node.FirstChild = nil
-		parent.AppendChild(node)
+		needAppendEmptyListItem := true
+		for _, op := range tx.DoOperations {
+			if "insert" == op.Action && op.ParentID == parent.ID {
+				needAppendEmptyListItem = false
+				break
+			}
+		}
+
+		if needAppendEmptyListItem {
+			parent.AppendChild(treenode.NewParagraph(ast.NewNodeID()))
+		}
 	}
 	treenode.RemoveBlockTree(node.ID)
 

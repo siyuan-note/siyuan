@@ -455,14 +455,14 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 };
 
 export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    const offset = getSelectionOffset(nodeElement, nodeElement, range)
+    const offset = getSelectionOffset(nodeElement, nodeElement, range);
     const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
     const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
     if (cloneRange) {
         cloneRange.insertNode(document.createElement("wbr"));
     }
     protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
-}
+};
 
 export const focusByWbr = (element: Element, range: Range) => {
     const wbrElements = element.querySelectorAll("wbr");

@@ -20,7 +20,7 @@ export const onlyProtyleCommand = (options: {
     }
     if (options.command === "switchAdjust") {
         let fullWidth;
-        const adjustWidth = options.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH)
+        const adjustWidth = options.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
         if (!adjustWidth) {
             fullWidth = window.siyuan.config.editor.fullWidth ? "false" : "true";
         } else {

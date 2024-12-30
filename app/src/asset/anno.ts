@@ -167,7 +167,7 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                                 item.style.backgroundColor = "transparent";
                             }
                         });
-                    })
+                    });
                     fetchPost("/api/asset/setFileAnnotation", {
                         path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
                         data: JSON.stringify(config),
@@ -723,7 +723,7 @@ export const hlPDFRect = (element: HTMLElement, id: string) => {
                 item.classList.remove("pdf__rect--hl");
             }, 1500);
         }
-    })
+    });
 };
 
 const copyAnno = (idPath: string, fileName: string, pdf: any) => {

@@ -158,13 +158,15 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                     const config = getConfig(pdf);
                     const annoItem = config[rectElement.getAttribute("data-node-id")];
                     annoItem.color = color;
-                    Array.from(rectElement.children).forEach((item: HTMLElement) => {
-                        item.style.border = "2px solid " + color;
-                        if (annoItem.type === "text") {
-                            item.style.backgroundColor = color;
-                        } else {
-                            item.style.backgroundColor = "transparent";
-                        }
+                    element.querySelectorAll(`.pdf__rect[data-node-id="${rectElement.getAttribute("data-node-id")}"]`).forEach(rectItem => {
+                        Array.from(rectItem.children).forEach((item: HTMLElement) => {
+                            item.style.border = "2px solid " + color;
+                            if (annoItem.type === "text") {
+                                item.style.backgroundColor = color;
+                            } else {
+                                item.style.backgroundColor = "transparent";
+                            }
+                        });
                     });
                     fetchPost("/api/asset/setFileAnnotation", {
                         path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
@@ -234,12 +236,14 @@ export const initAnno = (element: HTMLElement, pdf: any) => {
                 } else {
                     annoItem.type = "border";
                 }
-                Array.from(rectElement.children).forEach((item: HTMLElement) => {
-                    if (annoItem.type === "text") {
-                        item.style.backgroundColor = item.style.border.replace("2px solid ", "");
-                    } else {
-                        item.style.backgroundColor = "";
-                    }
+                element.querySelectorAll(`.pdf__rect[data-node-id="${rectElement.getAttribute("data-node-id")}"]`).forEach(rectItem => {
+                    Array.from(rectItem.children).forEach((item: HTMLElement) => {
+                        if (annoItem.type === "text") {
+                            item.style.backgroundColor = item.style.border.replace("2px solid ", "");
+                        } else {
+                            item.style.backgroundColor = "";
+                        }
+                    });
                 });
                 fetchPost("/api/asset/setFileAnnotation", {
                     path: pdf.appConfig.file.replace(location.origin, "").substr(1) + ".sya",
@@ -700,29 +704,26 @@ height: ${Math.abs(bounds[1] - bounds[3])}px"></div>`;
 };
 
 export const hlPDFRect = (element: HTMLElement, id: string) => {
-    const currentElement = element.querySelector(`.pdf__rect[data-node-id="${id}"]`);
-    if (currentElement && currentElement.firstElementChild) {
-        const scrollElement = hasClosestByAttribute(currentElement, "id",
-            "viewerContainer");
-        if (scrollElement) {
-            const currentRect = currentElement.firstElementChild.getBoundingClientRect();
-            const scrollRect = scrollElement.getBoundingClientRect();
-            if (currentRect.top < scrollRect.top) {
-                scrollElement.scrollTop = scrollElement.scrollTop -
-                    (scrollRect.top - currentRect.top) -
-                    (scrollRect.height - currentRect.height) / 2;
-            } else if (currentRect.bottom > scrollRect.bottom) {
-                scrollElement.scrollTop = scrollElement.scrollTop +
-                    (currentRect.bottom - scrollRect.bottom) +
-                    (scrollRect.height - currentRect.height) / 2;
+    element.querySelectorAll(`.pdf__rect[data-node-id="${id}"]`).forEach(item => {
+        if (item && item.firstElementChild) {
+            const scrollElement = hasClosestByAttribute(item, "id", "viewerContainer");
+            if (scrollElement) {
+                const currentRect = item.firstElementChild.getBoundingClientRect();
+                const scrollRect = scrollElement.getBoundingClientRect();
+                if (currentRect.top < scrollRect.top) {
+                    scrollElement.scrollTop = scrollElement.scrollTop - (scrollRect.top - currentRect.top) -
+                        (scrollRect.height - currentRect.height) / 2;
+                } else if (currentRect.bottom > scrollRect.bottom) {
+                    scrollElement.scrollTop = scrollElement.scrollTop + (currentRect.bottom - scrollRect.bottom) +
+                        (scrollRect.height - currentRect.height) / 2;
+                }
             }
+            item.classList.add("pdf__rect--hl");
+            setTimeout(() => {
+                item.classList.remove("pdf__rect--hl");
+            }, 1500);
         }
-
-        currentElement.classList.add("pdf__rect--hl");
-        setTimeout(() => {
-            currentElement.classList.remove("pdf__rect--hl");
-        }, 1500);
-    }
+    });
 };
 
 const copyAnno = (idPath: string, fileName: string, pdf: any) => {

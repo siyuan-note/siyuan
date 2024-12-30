@@ -20,14 +20,12 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"github.com/88250/lute/render"
-	"strconv"
 	"strings"
 	"time"
 
-	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/open-spaced-repetition/go-fsrs/v3"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -254,6 +252,39 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 		}
 	}
 
+	return
+}
+
+func GetUnfoldedParentID(id string) (parentID string) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		return
+	}
+
+	if !node.IsBlock() {
+		return
+	}
+
+	var firstFoldedParent *ast.Node
+	for parent := treenode.HeadingParent(node); nil != parent && ast.NodeDocument != parent.Type; parent = treenode.HeadingParent(parent) {
+		if "1" == parent.IALAttr("fold") {
+			firstFoldedParent = parent
+			parentID = firstFoldedParent.ID
+		}
+		if "1" != parent.IALAttr("fold") {
+			if nil != firstFoldedParent {
+				parentID = firstFoldedParent.ID
+			} else {
+				parentID = parent.ID
+			}
+			return
+		}
+	}
 	return
 }
 
@@ -869,33 +900,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
-	var defIDs []string
-	for _, n := range nodes {
-		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			if n.IsBlock() {
-				defIDs = append(defIDs, n.ID)
-			}
-			return ast.WalkContinue
-		})
-	}
-	defIDs = gulu.Str.RemoveDuplicatedElem(defIDs)
-	refCount := sql.QueryRefCount(defIDs)
-	for _, n := range nodes {
-		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering || !n.IsBlock() {
-				return ast.WalkContinue
-			}
-
-			if cnt := refCount[n.ID]; 0 < cnt {
-				n.SetIALAttr("refcount", strconv.Itoa(cnt))
-			}
-			return ast.WalkContinue
-		})
-	}
+	fillBlockRefCount(nodes)
 
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑

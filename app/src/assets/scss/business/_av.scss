@@ -293,6 +293,15 @@
 
     .b3-menu__avemoji {
       display: inline-block;
+      font-size: 1em;
+      line-height: 1.625;
+      height: auto;
+
+      img {
+        height: calc(1.625em - 8px);
+        font-size: 1em;
+        width: calc(1.625em - 8px);
+      }
     }
 
     &[data-wrap="true"] {
@@ -534,6 +543,30 @@
           opacity: .38;
           cursor: not-allowed;
         }
+
+        &.dragover__bottom,
+        &.dragover__top {
+          box-shadow: none !important;
+        }
+
+        &.dragover__top::after,
+        &.dragover__bottom::after {
+          content: '';
+          position: absolute;
+          left: 0;
+          right: 0;
+          height: 4px;
+          background-color: var(--b3-theme-primary-lighter);
+          z-index: 3;
+        }
+
+        &.dragover__top::after {
+          top: -2.5px;
+        }
+
+        &.dragover__bottom::after {
+          bottom: -2.5px;
+        }
       }
 
       &__item:hover .b3-menu__action {
@@ -559,12 +592,4 @@ img.av__cellassetimg {
   max-width: none;
   vertical-align: top;
   font-size: inherit;
-}
-
-html[data-theme-mode="dark"] .av__panel .b3-menu__item[draggable="true"] {
-  mix-blend-mode: lighten;
-}
-
-html[data-theme-mode="light"] .av__panel .b3-menu__item[draggable="true"] {
-  mix-blend-mode: darken;
 }

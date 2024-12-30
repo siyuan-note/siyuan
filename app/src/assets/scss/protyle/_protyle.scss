@@ -251,7 +251,8 @@
       transition: padding .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
 
-    .protyle-title {
+    .protyle-title,
+    .protyle-background__ia {
       transition: margin .3s cubic-bezier(.25, .46, .45, .94) 0ms;
     }
   }

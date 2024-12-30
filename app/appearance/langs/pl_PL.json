@@ -568,6 +568,7 @@
   "newDocBelow": "Utwórz dokument poniżej",
   "newDocAbove": "Utwórz dokument powyżej",
   "fullWidth": "Szerokość adaptacyjna",
+  "switchAdjust": "Przełączanie szerokości adaptacyjnej",
   "fullWidthTip": "Po włączeniu, obszar edycji będzie wyświetlany tak szeroko, jak to możliwe",
   "tabLimit": "Limit zakładki",
   "tabLimit1": "Sortuj według czasu otwarcia, zamknij najwcześniej otwartą zakładkę",
@@ -1577,6 +1578,7 @@
     "248": "Docelowy nagłówek znajduje się w bloku kontenera i nie może być użyty jako punkt upuszczenia",
     "249": "Z powodu błędu konfiguracji nie można uzyskać dostępu do danych. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
     "250": "Żądanie zostało ograniczone przez przechowywanie w chmurze. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
-    "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]"
+    "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]",
+    "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność, zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Dodaj</button><span class=\"fn__space\"></span>"
   }
 }

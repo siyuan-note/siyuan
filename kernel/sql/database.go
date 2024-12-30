@@ -225,6 +225,8 @@ func initDBConnection() {
 	if nil != db {
 		closeDatabase()
 	}
+
+	util.LogDatabaseSize(util.DBPath)
 	dsn := util.DBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +
@@ -272,6 +274,7 @@ func initHistoryDBConnection() {
 		historyDB.Close()
 	}
 
+	util.LogDatabaseSize(util.HistoryDBPath)
 	dsn := util.HistoryDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +
@@ -327,6 +330,7 @@ func initAssetContentDBConnection() {
 		assetContentDB.Close()
 	}
 
+	util.LogDatabaseSize(util.AssetContentDBPath)
 	dsn := util.AssetContentDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +

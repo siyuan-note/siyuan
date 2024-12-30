@@ -380,7 +380,7 @@ export const setFirstNodeRange = (editElement: Element, range: Range) => {
     return range;
 };
 
-export const focusByOffset = (container: Element, start: number, end: number) => {
+export const focusByOffset = (container: Element, start: number, end: number, isFocus = true) => {
     if (!container) {
         return false;
     }
@@ -448,8 +448,20 @@ export const focusByOffset = (container: Element, start: number, end: number) =>
             setLastNodeRange(getContenteditableElement(container as Element), range, false);
         }
     }
-    focusByRange(range);
+    if (isFocus) {
+        focusByRange(range);
+    }
     return range;
+};
+
+export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
+    const offset = getSelectionOffset(nodeElement, nodeElement, range);
+    const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
+    const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
+    if (cloneRange) {
+        cloneRange.insertNode(document.createElement("wbr"));
+    }
+    protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = cloneNode.outerHTML;
 };
 
 export const focusByWbr = (element: Element, range: Range) => {

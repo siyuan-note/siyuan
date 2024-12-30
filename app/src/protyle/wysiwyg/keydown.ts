@@ -8,7 +8,7 @@ import {
     getSelectionOffset,
     getSelectionPosition,
     selectAll,
-    setFirstNodeRange,
+    setFirstNodeRange, setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
 import {
@@ -103,7 +103,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.code !== "") { // 悬浮工具会触发但 code 为空 https://github.com/siyuan-note/siyuan/issues/6573
             hideElements(["toolbar"], protyle);
         }
-        let range = getEditorRange(protyle.wysiwyg.element);
+        const range = getEditorRange(protyle.wysiwyg.element);
         const nodeElement = hasClosestBlock(range.startContainer);
         if (!nodeElement) {
             return;
@@ -169,15 +169,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             !isNotEditBlock(nodeElement) && !/^F\d{1,2}$/.test(event.key) &&
             // 微软双拼使用 compositionstart，否则 focusByRange 导致无法输入文字
             event.key !== "Process") {
-            const cloneRange = range.cloneRange();
-            range.collapse(false);
-            range.insertNode(document.createElement("wbr"));
-            protyle.wysiwyg.lastHTMLs[nodeElement.getAttribute("data-node-id")] = nodeElement.outerHTML;
-            nodeElement.querySelector("wbr").remove();
-            // 光标位于引用结尾后 ctrl+b 偶尔会失效
-            range = cloneRange;
-            focusByRange(cloneRange);
-            protyle.toolbar.range = cloneRange;
+            setInsertWbrHTML(nodeElement, range, protyle);
             protyle.wysiwyg.preventKeyup = true;
         }
 
@@ -1365,7 +1357,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.list.outdent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                let isContinuous = true;
+                selectElements.forEach((item, index) => {
+                    if (item.nextElementSibling && selectElements[index + 1]) {
+                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                            isContinuous = false;
+                        }
+                    }
+                });
+                if (isContinuous &&
+                    (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     listOutdent(protyle, Array.from(selectElements), range);
                 }
                 event.preventDefault();
@@ -1382,7 +1383,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (matchHotKey(window.siyuan.config.keymap.editor.list.indent.custom, event)) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
-                if (selectElements[0].getAttribute("data-type") === "NodeListItem") {
+                let isContinuous = true;
+                selectElements.forEach((item, index) => {
+                    if (item.nextElementSibling && selectElements[index + 1]) {
+                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                            isContinuous = false;
+                        }
+                    }
+                });
+                if (isContinuous &&
+                    (selectElements[0].classList.contains("li") || selectElements[0].parentElement.classList.contains("li"))) {
                     listIndent(protyle, Array.from(selectElements), range);
                 }
                 event.preventDefault();
@@ -1795,6 +1805,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 置于最后，太多快捷键会使用到选中元素
         if (isNotCtrl(event) && event.key !== "Backspace" && event.key !== "Escape" && event.key !== "Delete" && !event.shiftKey && !event.altKey && event.key !== "Enter") {
             hideElements(["select"], protyle);
+        }
+
+        if (matchHotKey("⌘B", event) || matchHotKey("⌘I", event) || matchHotKey("⌘U", event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
         }
     });
 };

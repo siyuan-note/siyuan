@@ -560,6 +560,13 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		// 先处理关联列、汇总列、创建时间列和更新时间列
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
+			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+				if nil != kv.Values[0].Block {
+					ial := sql.GetBlockAttrs(blockID)
+					if v := ial[av.NodeAttrViewStaticText+"-"+attrView.ID]; "" != v {
+						kv.Values[0].Block.Content = v
+					}
+				}
 			case av.KeyTypeRollup:
 				if nil == kv.Key.Rollup {
 					break
@@ -3099,8 +3106,24 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.BlockID)
 				} else { // 之前绑定的块和现在绑定的块一样
-					// 直接返回，因为锚文本不允许更改
-					return
+					content := strings.TrimSpace(val.Block.Content)
+					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
+					updateStaticText := true
+					_, blockText := getNodeAvBlockText(node)
+					if "" == content {
+						val.Block.Content = blockText
+					} else {
+						if blockText == content {
+							updateStaticText = false
+						} else {
+							val.Block.Content = blockText
+						}
+					}
+
+					if updateStaticText {
+						// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+						updateBlockValueStaticText(tx, node, tree, avID, content)
+					}
 				}
 			}
 		}
@@ -3267,6 +3290,25 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 		return
 	}
 	return
+}
+
+func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {
+	if nil == node {
+		return
+	}
+
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrViewStaticText+"-"+avID] = text
+	var err error
+	if nil != tx {
+		err = setNodeAttrsWithTx(tx, node, tree, attrs)
+	} else {
+		err = setNodeAttrs(node, tree, attrs)
+	}
+	if err != nil {
+		logging.LogWarnf("set node [%s] attrs failed: %s", node.ID, err)
+		return
+	}
 }
 
 func getNodeByBlockID(tx *Transaction, blockID string) (node *ast.Node, tree *parse.Tree, err error) {

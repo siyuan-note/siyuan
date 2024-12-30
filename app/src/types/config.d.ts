@@ -885,6 +885,7 @@ declare namespace Config {
         showInFolder: IKey;
         spaceRepetition: IKey;
         switchReadonly: IKey;
+        switchAdjust: IKey;
         undo: IKey;
         vLayout: IKey;
         wysiwyg: IKey;

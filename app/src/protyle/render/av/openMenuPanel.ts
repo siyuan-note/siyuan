@@ -1289,7 +1289,9 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "av-view-switch") {
-                    if (!target.querySelector(".b3-chip--primary")) {
+                    if (!target.parentElement.classList.contains("b3-menu__item--current")) {
+                        avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                        target.parentElement.classList.add("b3-menu__item--current");
                         options.blockElement.removeAttribute("data-render");
                         avRender(options.blockElement, options.protyle, undefined, target.parentElement.dataset.id);
                     }
@@ -1297,13 +1299,15 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "av-view-edit") {
-                    if (target.parentElement.querySelector(".b3-chip--primary")) {
+                    if (target.parentElement.classList.contains("b3-menu__item--current")) {
                         openViewMenu({
                             protyle: options.protyle,
                             blockElement: options.blockElement as HTMLElement,
                             element: target.parentElement
                         });
                     } else {
+                        avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                        target.parentElement.classList.add("b3-menu__item--current");
                         options.blockElement.removeAttribute("data-render");
                         avRender(options.blockElement, options.protyle, () => {
                             openViewMenu({

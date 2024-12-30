@@ -568,6 +568,7 @@
   "newDocBelow": "在下方新建文档",
   "newDocAbove": "在上方新建文档",
   "fullWidth": "自适应宽度",
+  "switchAdjust": "自适应宽度切换",
   "fullWidthTip": "启用后将尽可能宽地显示编辑区",
   "tabLimit": "页签打开最大数量",
   "tabLimit1": "按照打开时间排序，关闭最早打开的页签",
@@ -1482,7 +1483,7 @@
     "153": "下载文件数 %d 下载分块数 %d 接收字节数 %s",
     "154": "云端最多只能支持备份 12 个快照",
     "155": "云端同步目录已经重置为 [main]",
-    "156": "访问鉴权失败，请 <button onclick=\"window.location.reload()\">刷新</button> 或者重新打开",
+    "156": "访问鉴权失败，请<button onclick=\"window.location.reload()\">刷新</button>或者重新打开",
     "157": "无法识别密钥，请确认复制的密钥字符串是否正确",
     "158": "正在索引数据仓库，遍历数据 %s",
     "159": "正在索引数据仓库，获取最新文件 %v/%v",
@@ -1577,6 +1578,7 @@
     "248": "目标标题位于容器块中，无法作为放置点",
     "249": "因配置错误导致无法存取数据，请仔细逐个核对配置项，并检查云端存储相关权限配置",
     "250": "请求已被云端存储限流，请仔细逐个核对配置项，并检查云端存储相关权限配置",
-    "251": "未引用资源一共 [%d] 个，这里仅列出 [%d] 个"
+    "251": "未引用资源一共 [%d] 个，这里仅列出 [%d] 个",
+    "252": "\uD83D\uDEA8 Microsoft Defender 可能会误杀内核、误删数据和严重降低运行性能，建议将思源安装路径和工作空间路径添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">添加</button><span class=\"fn__space\"></span>"
   }
 }

@@ -1006,7 +1006,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 target = target.parentElement;
                             }
                         });
-                        dialog.element.querySelector("button").focus()
+                        dialog.element.querySelector("button").focus();
                         dialog.element.setAttribute("data-key", Constants.DIALOG_CONFIRM);
                         return;
                     }

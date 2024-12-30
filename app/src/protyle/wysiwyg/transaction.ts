@@ -277,10 +277,15 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
         focusSideBlock(updateElements[0]);
     }
     updateElements.forEach(item => {
-        // 需移除顶层，否则删除唯一的列表项后列表无法清除干净 https://github.com/siyuan-note/siyuan/issues/12326 第一点
-        const topElement = getTopAloneElement(item);
-        if (topElement) {
-            topElement.remove();
+        if (isUndo) {
+            // https://github.com/siyuan-note/siyuan/issues/13617
+            item.remove();
+        } else {
+            // 需移除顶层，否则删除唯一的列表项后列表无法清除干净 https://github.com/siyuan-note/siyuan/issues/12326 第一点
+            const topElement = getTopAloneElement(item);
+            if (topElement) {
+                topElement.remove();
+            }
         }
     });
     // 更新 ws 嵌入块

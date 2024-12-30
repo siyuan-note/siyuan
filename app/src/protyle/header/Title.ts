@@ -46,13 +46,13 @@ export class Title {
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
             event.preventDefault();
-            const range = getSelection().getRangeAt(0)
-            let text = event.clipboardData.getData("text/siyuan")
+            const range = getSelection().getRangeAt(0);
+            let text = event.clipboardData.getData("text/siyuan");
             range.deleteContents();
             if (text) {
-                text = protyle.lute.BlockDOM2Content(text)
+                text = protyle.lute.BlockDOM2Content(text);
             } else {
-                text = event.clipboardData.getData("text/plain")
+                text = event.clipboardData.getData("text/plain");
             }
             range.insertNode(document.createTextNode(replaceFileName(text)));
             range.collapse(false);

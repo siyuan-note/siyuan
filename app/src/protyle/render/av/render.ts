@@ -227,7 +227,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
         </div>
     </div>
     <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>
-</div>`
+</div>`;
                 if (renderAll) {
                     e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">

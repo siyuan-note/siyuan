@@ -1,7 +1,12 @@
 const CONTAINER_BACKEND_SET = new Set(["docker", "ios", "android", "harmony"]);
+const MOBILE_BACKEND_SET = new Set(["ios", "android", "harmony"]);
 
 export const isKernelInContainer = (): boolean => {
     return CONTAINER_BACKEND_SET.has(window.siyuan.config.system.container);
+};
+
+export const isKernelInMobile = (): boolean => {
+    return MOBILE_BACKEND_SET.has(window.siyuan.config.system.container);
 };
 
 export const isMobile = () => {

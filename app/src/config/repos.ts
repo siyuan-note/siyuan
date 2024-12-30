@@ -6,7 +6,7 @@ import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
 import {openByMobile} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
-import {isKernelInContainer} from "../util/functions";
+import {isKernelInMobile} from "../util/functions";
 
 const renderProvider = (provider: number) => {
     if (provider === 0) {
@@ -180,7 +180,7 @@ const renderProvider = (provider: number) => {
     </button>
 </div>`;
     } else if (provider === 4) {
-        if (isKernelInContainer()) {
+        if (isKernelInMobile()) {
             return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
     <div class="fn__hr"></div>

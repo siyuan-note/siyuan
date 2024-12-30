@@ -471,6 +471,18 @@ func SetSyncProviderWebDAV(webdav *conf.WebDAV) (err error) {
 	return
 }
 
+func SetSyncProviderLocal(local *conf.Local) (err error) {
+	local.Endpoint = strings.TrimSpace(local.Endpoint)
+	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
+
+	local.Timeout = util.NormalizeTimeout(local.Timeout)
+	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
+
+	Conf.Sync.Local = local
+	Conf.Save()
+	return
+}
+
 var (
 	syncLock  = sync.Mutex{}
 	isSyncing = atomic.Bool{}

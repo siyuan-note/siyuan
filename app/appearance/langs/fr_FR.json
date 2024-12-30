@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Système de fichiers local",
+  "deviceNotSupport": "L'appareil actuel n'est pas pris en charge",
   "second": "seconde",
   "syncInterval": "intervalle de synchronisation",
   "syncIntervalTip": "Synchronisation automatique des données après l'arrêt des modifications",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Actuellement sélectionné est le service de stockage en nuage officiellement fourni par SiYuan, qui ne prend en charge que les utilisateurs d'abonnement payant",
   "syncThirdPartyProviderS3Intro": "L'actuel sélectionné est un service de stockage cloud tiers compatible avec le protocole Amazon S3",
   "syncThirdPartyProviderWebDAVIntro": "Le service de stockage cloud tiers du protocole WebDAV est actuellement sélectionné. En raison des performances médiocres et de la stabilité insuffisante de ce protocole, il est recommandé de choisir d'abord le service S3",
+  "syncThirdPartyProviderLocalIntro": "Le service de stockage fourni par le système de fichiers local est actuellement sélectionné. Veuillez saisir le chemin complet du dossier local dans le champ <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "Avant d'utiliser cette fonctionnalité, veuillez prêter attention aux limitations techniques et aux éléments de facturation du service de stockage cloud tiers : <div class=\"b3-label__text\"><ul class='fn__list'><li>Limitations techniques telles que la fréquence d'appel et la bande passante de l'interface</li><li >Éléments de facturation tels que l'espace de stockage et le trafic</li><li>Conditions d'utilisation et garantie de disponibilité</li></ul></div><div class='fn__hr'></div>Avis de non-responsabilité : pour plus de détails, veuillez vous référer aux termes pertinents dans la licence open source AGPLv3 utilisé par SiYuan",
   "syncProvider": "Fournisseur de services de stockage en nuage",
   "syncProviderTip": "Si sélectionné, le service de stockage cloud de ce fournisseur sera utilisé pour réaliser les fonctions de synchronisation et de sauvegarde cloud",

@@ -20,9 +20,9 @@ import (
 	"math"
 	"text/template"
 	"time"
-	"unicode/utf8"
 
 	"github.com/88250/go-humanize"
+	util2 "github.com/88250/lute/util"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
 	"github.com/siyuan-note/logging"
@@ -51,12 +51,19 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["FormatFloat"] = FormatFloat
 	ret["getHPathByID"] = getHPathByID
 	ret["statBlock"] = StatBlock
-	ret["runeLen"] = runeLen
+	ret["runeCount"] = runeCount
+	ret["wordCount"] = wordCount
 	return
 }
 
-func runeLen(s string) int {
-	return utf8.RuneCountInString(s)
+func runeCount(s string) (ret int) {
+	ret, _ = util2.WordCount(s)
+	return
+}
+
+func wordCount(s string) (ret int) {
+	_, ret = util2.WordCount(s)
+	return
 }
 
 func pow(a, b interface{}) int64    { return int64(math.Pow(cast.ToFloat64(a), cast.ToFloat64(b))) }

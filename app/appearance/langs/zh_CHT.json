@@ -568,6 +568,7 @@
   "newDocBelow": "在下方新建文檔",
   "newDocAbove": "在上方新建文檔",
   "fullWidth": "自適應寬度",
+  "switchAdjust": "自適應寬度切換",
   "fullWidthTip": "啟用後將盡可能寬地顯示編輯區",
   "tabLimit": "分頁打開最大數量",
   "tabLimit1": "按照打開時間排序，關閉最早打開的分頁",
@@ -1482,7 +1483,7 @@
     "153": "下載文件數 %d 下載分塊數 %d 接收位元組數 %s",
     "154": "雲端最多只能支持備份 12 個快照",
     "155": "雲端同步目錄已經重置為 [main]",
-    "156": "訪問鑑權失敗，請 <button onclick=\"window.location.reload()\">刷新</button> 或者重新打開",
+    "156": "訪問鑑權失敗，請<button onclick=\"window.location.reload()\">刷新</button>或者重新打開",
     "157": "無法識別密鑰，請確認複製的密鑰字串是否正確",
     "158": "正在索引資料倉庫，遍歷資料 %s",
     "159": "正在索引資料倉庫，獲取最新文件 %v/%v",
@@ -1577,6 +1578,7 @@
     "248": "目標標題位於容器塊中，無法作為放置點",
     "249": "因配置錯誤導致無法存取數據，請仔細逐個核對配置項，並檢查雲端存儲相關權限配置",
     "250": "請求已被雲端存儲限流，請仔細逐個核對配置項，並檢查雲端存儲相關權限配置",
-    "251": "未引用資源一共 ${x} 個，這裡僅列出 ${y} 個"
+    "251": "未引用資源一共 ${x} 個，這裡僅列出 ${y} 個",
+    "252": "\uD83D\uDEA8 Microsoft Defender 可能會誤殺內核、誤刪數據和嚴重降低運行性能，建議將思源安裝路徑和工作空間路徑添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">添加</button><span class=\"fn__space\"></span>"
   }
 }

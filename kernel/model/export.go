@@ -610,6 +610,7 @@ func ExportDocx(id, savePath string, removeAssets, merge bool) (fullPath string,
 	}
 	defer os.Remove(tmpDir)
 	name, content := ExportMarkdownHTML(id, tmpDir, true, merge)
+	content = strings.ReplaceAll(content, "  \n", "<br>\n")
 
 	tmpDocxPath := filepath.Join(tmpDir, name+".docx")
 	args := []string{ // pandoc -f html --resource-path=请从这里开始 请从这里开始\index.html -o test.docx
@@ -710,13 +711,12 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		}
 	}
 
-	srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
+	srcs := []string{"stage/build/export", "stage/protyle"}
 	for _, src := range srcs {
 		from := filepath.Join(util.WorkingDir, src)
 		to := filepath.Join(savePath, src)
 		if err := filelock.Copy(from, to); err != nil {
 			logging.LogWarnf("copy stage from [%s] to [%s] failed: %s", from, savePath, err)
-			return
 		}
 	}
 
@@ -752,7 +752,6 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		to := filepath.Join(savePath, emoji)
 		if err := filelock.Copy(from, to); err != nil {
 			logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
-			return
 		}
 	}
 
@@ -869,7 +868,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 	}
 
 	if !pdf && "" != savePath { // 导出 HTML 需要复制静态资源
-		srcs := []string{"stage/build/export", "stage/build/fonts", "stage/protyle"}
+		srcs := []string{"stage/build/export", "stage/protyle"}
 		for _, src := range srcs {
 			from := filepath.Join(util.WorkingDir, src)
 			to := filepath.Join(savePath, src)
@@ -899,7 +898,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			to := filepath.Join(savePath, "appearance", src)
 			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy appearance from [%s] to [%s] failed: %s", from, savePath, err)
-				return
 			}
 		}
 
@@ -910,7 +908,6 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			to := filepath.Join(savePath, emoji)
 			if err := filelock.Copy(from, to); err != nil {
 				logging.LogErrorf("copy emojis from [%s] to [%s] failed: %s", from, to, err)
-				return
 			}
 		}
 	}
@@ -1460,7 +1457,6 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 			docPaths = append(docPaths, docFile.path)
 		}
 	}
-	docPaths = util.FilterSelfChildDocs(docPaths)
 
 	defBlockIDs, trees, docPaths := prepareExportTrees(docPaths)
 	zipPath = exportPandocConvertZip(baseFolderName, docPaths, defBlockIDs, "gfm+footnotes+hard_line_breaks", pandocTo, ext, trees)

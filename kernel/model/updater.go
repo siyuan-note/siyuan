@@ -54,23 +54,28 @@ func execNewVerInstallPkg(newVerInstallPkgPath string) {
 	}
 }
 
+var newVerInstallPkgPath string
+
 func getNewVerInstallPkgPath() string {
 	if skipNewVerInstallPkg() {
+		newVerInstallPkgPath = ""
 		return ""
 	}
 
 	downloadPkgURLs, checksum, err := getUpdatePkg()
 	if err != nil || 1 > len(downloadPkgURLs) || "" == checksum {
+		newVerInstallPkgPath = ""
 		return ""
 	}
 
 	pkg := path.Base(downloadPkgURLs[0])
-	ret := filepath.Join(util.TempDir, "install", pkg)
-	localChecksum, _ := sha256Hash(ret)
+	newVerInstallPkgPath = filepath.Join(util.TempDir, "install", pkg)
+	localChecksum, _ := sha256Hash(newVerInstallPkgPath)
 	if checksum != localChecksum {
+		newVerInstallPkgPath = ""
 		return ""
 	}
-	return ret
+	return newVerInstallPkgPath
 }
 
 var checkDownloadInstallPkgLock = sync.Mutex{}

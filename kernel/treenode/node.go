@@ -451,6 +451,11 @@ func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 		return
 	}
 
+	refText = strings.TrimSpace(refText)
+	if "" == refText {
+		refText = blockRef.TextMarkBlockRefID
+	}
+
 	blockRef.TextMarkBlockRefSubtype = "d"
 	blockRef.TextMarkTextContent = refText
 

@@ -568,6 +568,7 @@
   "newDocBelow": "Create doc below",
   "newDocAbove": "Create doc above",
   "fullWidth": "Adaptive Width",
+  "switchAdjust": "Adaptive width switch",
   "fullWidthTip": "After enabling, the editing area will be displayed as wide as possible",
   "tabLimit": "Tab Limit",
   "tabLimit1": "Sort by opening time, close the earliest opened tab",
@@ -1577,6 +1578,7 @@
     "248": "The target heading is located in the container block and cannot be used as a drop point",
     "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
     "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions",
-    "251": "Total unused assets [%d], only [%d] listed here"
+    "251": "Total unused assets [%d], only [%d] listed here",
+    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Add</button><span class=\"fn__space\"></span>"
   }
 }

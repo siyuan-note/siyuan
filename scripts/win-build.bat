@@ -47,6 +47,10 @@ cd ..
 
 echo 'Building Electron App amd64'
 cd app
+
+copy "elevator\elevator-amd64.exe" "kernel\elevator.exe"
+copy "elevator\elevator-arm64.exe" "kernel-arm64\elevator.exe"
+
 call pnpm run dist
 if errorlevel 1 (
     exit /b %errorlevel%

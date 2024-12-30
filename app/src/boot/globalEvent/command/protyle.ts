@@ -5,12 +5,33 @@ import {enterBack, zoomOut} from "../../../menus/protyle";
 import {openFileById} from "../../../editor/util";
 /// #endif
 import {checkFold} from "../../../util/noRelyPCFunction";
+import {updateReadonly} from "../../../protyle/breadcrumb/action";
+import {Constants} from "../../../constants";
+import {fetchPost} from "../../../util/fetch";
 
 export const onlyProtyleCommand = (options: {
     command: string,
     previousRange: Range,
     protyle: IProtyle,
 }) => {
+    if (options.command === "switchReadonly") {
+        updateReadonly(options.protyle.breadcrumb.element.parentElement.querySelector('.block__icon[data-type="readonly"]'), options.protyle);
+        return true;
+    }
+    if (options.command === "switchAdjust") {
+        let fullWidth;
+        const adjustWidth = options.protyle.wysiwyg.element.getAttribute(Constants.CUSTOM_SY_FULLWIDTH);
+        if (!adjustWidth) {
+            fullWidth = window.siyuan.config.editor.fullWidth ? "false" : "true";
+        } else {
+            fullWidth = adjustWidth === "true" ? "false" : "true";
+        }
+        fetchPost("/api/attr/setBlockAttrs", {
+            id: options.protyle.block.rootID,
+            attrs: {[Constants.CUSTOM_SY_FULLWIDTH]: fullWidth}
+        });
+        return true;
+    }
     const nodeElement = hasClosestBlock(options.previousRange.startContainer);
     if (!nodeElement) {
         return false;

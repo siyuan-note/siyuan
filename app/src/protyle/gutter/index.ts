@@ -52,7 +52,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {appearanceMenu} from "../toolbar/Font";
 import {setPosition} from "../../util/setPosition";
 import {emitOpenMenu} from "../../plugin/EventBus";
-import {insertAttrViewBlockAnimation} from "../render/av/row";
+import {insertAttrViewBlockAnimation, updateHeader} from "../render/av/row";
 import {avContextmenu, duplicateCompletely} from "../render/av/action";
 import {getPlainText} from "../util/paste";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
@@ -94,7 +94,10 @@ export class Gutter {
                         return true;
                     }
                 });
-                avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`).classList.add("av__row--select");
+                const rowElement = avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                rowElement.classList.add("av__row--select");
+                rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+                updateHeader(rowElement as HTMLElement);
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
                     selectIds.push(item.getAttribute("data-id"));
                     selectElements.push(item);
@@ -145,7 +148,7 @@ export class Gutter {
 
             buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
-            event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}`,
+            event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,
                 protyle.wysiwyg.element.innerHTML);
         });
         this.element.addEventListener("dragend", () => {
@@ -437,7 +440,7 @@ export class Gutter {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
                     const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, av__row--hl")).forEach(hlItem => {
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
                         if (!item.isSameNode(hlItem)) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
                         }
@@ -467,7 +470,7 @@ export class Gutter {
             hideElements(["gutter"], protyle);
             event.stopPropagation();
             event.preventDefault();
-        });
+        }, {passive: true});
     }
 
     private isMatchNode(item: Element) {

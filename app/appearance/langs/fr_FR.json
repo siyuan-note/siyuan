@@ -568,6 +568,7 @@
   "newDocBelow": "Créer un document ci-dessous",
   "newDocAbove": "Créer un document ci-dessus",
   "fullWidth": "Largeur adaptative",
+  "switchAdjust": "Commutation de la largeur adaptative",
   "fullWidthTip": "Lorsqu'il est activé, la zone d'édition sera affichée aussi large que possible",
   "tabLimit": "Nombre maximum d'onglets ouverts",
   "tabLimit1": "Trier par heure d'ouverture, fermer le premier onglet ouvert",
@@ -1577,6 +1578,7 @@
     "248": "Le cap cible est situé dans le bloc conteneur et ne peut pas être utilisé comme point de dépôt",
     "249": "Impossible d'accéder aux données en raison d'une erreur de configuration. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
     "250": "La demande a été limitée par le stockage cloud. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
-    "251": "Total des actifs inutilisés [%d], seulement [%d] listés ici"
+    "251": "Total des actifs inutilisés [%d], seulement [%d] listés ici",
+    "252": "\uD83D\uDEA8 Microsoft Defender peut supprimer par erreur le noyau, supprimer des données et réduire considérablement les performances. Il est recommandé d'ajouter le chemin d'installation et l'espace de travail de SiYuan à la liste des exclusions<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ajouter</button><span class=\"fn__space\"></span>"
   }
 }

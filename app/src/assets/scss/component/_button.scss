@@ -49,11 +49,6 @@
     }
   }
 
-  &--small {
-    padding: 0 4px;
-    font-size: 12px;
-  }
-
   &--mid {
     padding: 2px 8px;
   }
@@ -162,6 +157,11 @@
   &--success {
     color: var(--b3-card-success-color);
     background-color: var(--b3-card-success-background);
+  }
+
+  &--small {
+    padding: 0 4px;
+    font-size: 12px;
   }
 
   &:disabled {

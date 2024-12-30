@@ -34,16 +34,25 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
         });
     }
     topAloneElement.remove();
-    if (protyle.block.rootID === protyle.block.id && protyle.wysiwyg.element.childElementCount === 0) {
-        const newId = Lute.NewNodeID();
-        const newElement = genEmptyElement(false, false, newId);
-        doOperations.push({
-            action: "insert",
-            data: newElement.outerHTML,
-            id: newId,
-            parentID: protyle.block.parentID
-        });
-        protyle.wysiwyg.element.innerHTML = newElement.outerHTML;
+    if (protyle.wysiwyg.element.childElementCount === 0) {
+        if (protyle.block.rootID === protyle.block.id) {
+            const newId = Lute.NewNodeID();
+            const newElement = genEmptyElement(false, false, newId);
+            doOperations.push({
+                action: "insert",
+                data: newElement.outerHTML,
+                id: newId,
+                parentID: protyle.block.parentID
+            });
+            protyle.wysiwyg.element.innerHTML = newElement.outerHTML;
+        } else {
+            zoomOut({
+                protyle,
+                id: protyle.block.rootID,
+                isPushBack: false,
+                focusId: protyle.block.id,
+            })
+        }
     }
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, []);

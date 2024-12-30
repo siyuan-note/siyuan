@@ -46,16 +46,17 @@ export class Title {
         this.editElement.addEventListener("paste", (event: ClipboardEvent) => {
             event.stopPropagation();
             event.preventDefault();
-            const range = getSelection().getRangeAt(0);
+            // 不能使用 range.insertNode，否则无法撤销
             let text = event.clipboardData.getData("text/siyuan");
-            range.deleteContents();
             if (text) {
                 text = protyle.lute.BlockDOM2Content(text);
             } else {
                 text = event.clipboardData.getData("text/plain");
             }
-            range.insertNode(document.createTextNode(replaceFileName(text)));
-            range.collapse(false);
+            // 阻止右键复制菜单报错
+            setTimeout(function () {
+                document.execCommand("insertText", false, replaceFileName(text));
+            }, 0);
             this.rename(protyle);
         });
         this.editElement.addEventListener("click", () => {

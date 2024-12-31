@@ -667,6 +667,45 @@ func setSyncProviderWebDAV(c *gin.Context) {
 	}
 }
 
+func setSyncProviderLocal(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	localArg := arg["local"].(interface{})
+	data, err := gulu.JSON.MarshalJSON(localArg)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	local := &conf.Local{}
+	if err = gulu.JSON.UnmarshalJSON(data, local); err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	err = model.SetSyncProviderLocal(local)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 5000}
+		return
+	}
+
+	ret.Data = map[string]interface{}{
+		"local": local,
+	}
+}
+
 func setCloudSyncDir(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

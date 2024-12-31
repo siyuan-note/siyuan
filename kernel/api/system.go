@@ -50,6 +50,18 @@ func addMicrosoftDefenderExclusion(c *gin.Context) {
 	}
 }
 
+func ignoreAddMicrosoftDefenderExclusion(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if !gulu.OS.IsWindows() {
+		return
+	}
+
+	model.Conf.System.MicrosoftDefenderExcluded = true
+	model.Conf.Save()
+}
+
 func reloadUI(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

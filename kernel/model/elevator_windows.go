@@ -21,6 +21,10 @@ package model
 import (
 	"errors"
 	"fmt"
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
+	"golang.org/x/sys/windows"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -28,11 +32,7 @@ import (
 	"strings"
 	"sync"
 	"syscall"
-
-	"github.com/88250/gulu"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/sys/windows"
+	"time"
 )
 
 var microsoftDefenderLock = sync.Mutex{}
@@ -98,11 +98,8 @@ func AddMicrosoftDefenderExclusion() (err error) {
 	return
 }
 
-func AutoProcessMicrosoftDefender() {
-	checkMicrosoftDefender()
-}
-
-func checkMicrosoftDefender() {
+func AutoCheckMicrosoftDefender() {
+	time.Sleep(7 * time.Second)
 	microsoftDefenderLock.Lock()
 	defer microsoftDefenderLock.Unlock()
 

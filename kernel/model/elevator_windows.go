@@ -21,11 +21,6 @@ package model
 import (
 	"errors"
 	"fmt"
-	"github.com/88250/gulu"
-	"github.com/siyuan-note/logging"
-	"github.com/siyuan-note/siyuan/kernel/util"
-	"golang.org/x/sys/windows"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
@@ -33,6 +28,12 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"golang.org/x/sys/windows"
+
+	"github.com/88250/gulu"
+	"github.com/siyuan-note/logging"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 var microsoftDefenderLock = sync.Mutex{}
@@ -49,45 +50,33 @@ func AddMicrosoftDefenderExclusion() (err error) {
 		return
 	}
 
+	elevator := getElevatorBin()
+	if !gulu.File.IsExist(elevator) {
+		logging.LogWarnf("not found elevator [%s]", elevator)
+		return
+	}
+
 	installPath := filepath.Dir(util.WorkingDir)
-	psArgs := []string{"-Command", "Add-MpPreference", "-ExclusionPath", installPath, ",", util.WorkspaceDir}
-	if isAdmin() {
-		logging.LogInfof("current user is admin, add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
-		cmd := exec.Command("powershell", psArgs...)
-		gulu.CmdAttr(cmd)
-		output, cmdErr := cmd.CombinedOutput()
-		if nil != cmdErr {
-			logging.LogErrorf("add Windows Defender exclusion path [%s, %s] failed: %s, %s", installPath, util.WorkspaceDir, cmdErr, string(output))
-			err = cmdErr
-			return
-		}
-	} else {
-		elevator := getElevatorBin()
-		if !gulu.File.IsExist(elevator) {
-			logging.LogWarnf("not found elevator [%s]", elevator)
-			return
-		}
-		logging.LogInfof("current user is not admin, use elevator to add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
+	logging.LogInfof("use elevator to add Windows Defender exclusion path [%s, %s]", installPath, util.WorkspaceDir)
 
-		if !gulu.File.IsExist(elevator) {
-			msg := fmt.Sprintf("not found elevator [%s]", elevator)
-			logging.LogWarnf(msg)
-			err = errors.New(msg)
-			return
-		}
+	if !gulu.File.IsExist(elevator) {
+		msg := fmt.Sprintf("not found elevator [%s]", elevator)
+		logging.LogWarnf(msg)
+		err = errors.New(msg)
+		return
+	}
 
-		ps := []string{"powershell"}
-		ps = append(ps, psArgs...)
-		verbPtr, _ := syscall.UTF16PtrFromString("runas")
-		exePtr, _ := syscall.UTF16PtrFromString(elevator)
-		cwdPtr, _ := syscall.UTF16PtrFromString(util.WorkingDir)
-		argPtr, _ := syscall.UTF16PtrFromString(strings.Join(ps, " "))
-		execErr := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
-		if execErr != nil {
-			logging.LogErrorf("add Windows Defender exclusion path [%s, %s] failed: %s", installPath, util.WorkspaceDir, execErr)
-			err = execErr
-			return
-		}
+	ps := []string{"powershell"}
+	ps = append(ps, []string{"-Command", "Add-MpPreference", "-ExclusionPath", installPath, ",", util.WorkspaceDir}...)
+	verbPtr, _ := syscall.UTF16PtrFromString("runas")
+	exePtr, _ := syscall.UTF16PtrFromString(elevator)
+	cwdPtr, _ := syscall.UTF16PtrFromString(util.WorkingDir)
+	argPtr, _ := syscall.UTF16PtrFromString(strings.Join(ps, " "))
+	execErr := windows.ShellExecute(0, verbPtr, exePtr, argPtr, cwdPtr, 1)
+	if execErr != nil {
+		logging.LogErrorf("add Windows Defender exclusion path [%s, %s] failed: %s", installPath, util.WorkspaceDir, execErr)
+		err = execErr
+		return
 	}
 
 	Conf.System.MicrosoftDefenderExcluded = true
@@ -128,11 +117,6 @@ func isUsingMicrosoftDefender() bool {
 	cmd := exec.Command("powershell", "-Command", "Get-MpPreference")
 	gulu.CmdAttr(cmd)
 	return cmd.Run() == nil
-}
-
-func isAdmin() bool {
-	_, err := os.Open("\\\\.\\PHYSICALDRIVE0")
-	return err == nil
 }
 
 func getElevatorBin() string {

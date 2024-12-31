@@ -162,7 +162,7 @@ func getEmojiConf(c *gin.Context) {
 		} else {
 			for _, customEmoji := range customEmojis {
 				name := customEmoji.Name()
-				if strings.HasPrefix(name, ".") {
+				if strings.HasPrefix(name, ".") || strings.Contains(name, "<") {
 					continue
 				}
 
@@ -180,7 +180,7 @@ func getEmojiConf(c *gin.Context) {
 						}
 
 						name = subCustomEmoji.Name()
-						if strings.HasPrefix(name, ".") {
+						if strings.HasPrefix(name, ".") || strings.Contains(name, "<") {
 							continue
 						}
 

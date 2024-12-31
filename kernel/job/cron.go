@@ -43,7 +43,7 @@ func StartCron() {
 	go every(30*time.Second, model.FlushAssetsTextsJob)
 	go every(30*time.Second, model.HookDesktopUIProcJob)
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
-	go every(30*time.Minute, model.AutoProcessMicrosoftDefender)
+	go every(30*time.Minute, model.AutoCheckMicrosoftDefender)
 }
 
 func every(interval time.Duration, f func()) {

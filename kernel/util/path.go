@@ -188,16 +188,39 @@ func GetChildDocDepth(treeAbsPath string) (ret int) {
 }
 
 func NormalizeConcurrentReqs(concurrentReqs int, provider int) int {
-	if 1 > concurrentReqs {
-		if 2 == provider { // S3
-			return 8
-		} else if 3 == provider { // WebDAV
-			return 1
+	switch provider {
+	case 0: // SiYuan
+		switch {
+		case concurrentReqs < 1:
+			concurrentReqs = 8
+		case concurrentReqs > 16:
+			concurrentReqs = 16
+		default:
 		}
-		return 8
-	}
-	if 16 < concurrentReqs {
-		return 16
+	case 2: // S3
+		switch {
+		case concurrentReqs < 1:
+			concurrentReqs = 8
+		case concurrentReqs > 16:
+			concurrentReqs = 16
+		default:
+		}
+	case 3: // WebDAV
+		switch {
+		case concurrentReqs < 1:
+			concurrentReqs = 1
+		case concurrentReqs > 16:
+			concurrentReqs = 16
+		default:
+		}
+	case 4: // Local File System
+		switch {
+		case concurrentReqs < 1:
+			concurrentReqs = 16
+		case concurrentReqs > 1024:
+			concurrentReqs = 1024
+		default:
+		}
 	}
 	return concurrentReqs
 }
@@ -223,6 +246,18 @@ func NormalizeEndpoint(endpoint string) string {
 	if !strings.HasPrefix(endpoint, "http://") && !strings.HasPrefix(endpoint, "https://") {
 		endpoint = "http://" + endpoint
 	}
+	if !strings.HasSuffix(endpoint, "/") {
+		endpoint = endpoint + "/"
+	}
+	return endpoint
+}
+
+func NormalizeLocalPath(endpoint string) string {
+	endpoint = strings.TrimSpace(endpoint)
+	if "" == endpoint {
+		return ""
+	}
+	endpoint = filepath.ToSlash(filepath.Clean(endpoint))
 	if !strings.HasSuffix(endpoint, "/") {
 		endpoint = endpoint + "/"
 	}

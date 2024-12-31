@@ -1582,6 +1582,6 @@
     "249": "אין אפשרות לגשת לנתונים עקב שגיאת תצורה. אנא בדוק את ההגדרות והרשאות האחסון בענן",
     "250": "הבקשה הוגבלה על ידי אחסון הענן. אנא בדוק את ההגדרות והרשאות האחסון בענן",
     "251": "סך כל הנכסים שלא נעשה בהם שימוש [%d], רק [%d] מופיעים כאן",
-    "252": "\uD83D\uDEA8 Microsoft Defender עלול למחוק בטעות את הליבה, למחוק נתונים ולהפחית משמעותית את הביצועים. מומלץ להוסיף את נתיב ההתקנה ונתיב סביבת העבודה של SiYuan לרשימת החריגים<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">הוסף</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender עלול למחוק בטעות את הליבה, למחוק נתונים ולהפחית משמעותית את הביצועים. מומלץ להוסיף את נתיב ההתקנה ונתיב סביבת העבודה של SiYuan לרשימת החריגים<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">הוסף</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">התעלם</button>"
   }
 }

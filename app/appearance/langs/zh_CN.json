@@ -1582,6 +1582,6 @@
     "249": "因配置错误导致无法存取数据，请仔细逐个核对配置项，并检查云端存储相关权限配置",
     "250": "请求已被云端存储限流，请仔细逐个核对配置项，并检查云端存储相关权限配置",
     "251": "未引用资源一共 [%d] 个，这里仅列出 [%d] 个",
-    "252": "\uD83D\uDEA8 Microsoft Defender 可能会误杀内核、误删数据和严重降低运行性能，建议将思源安装路径和工作空间路径添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">添加</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender 可能会误杀内核、误删数据和严重降低运行性能，建议将思源安装路径和工作空间路径添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">添加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">忽略</button>"
   }
 }

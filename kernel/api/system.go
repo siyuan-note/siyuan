@@ -50,6 +50,18 @@ func addMicrosoftDefenderExclusion(c *gin.Context) {
 	}
 }
 
+func ignoreAddMicrosoftDefenderExclusion(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if !gulu.OS.IsWindows() {
+		return
+	}
+
+	model.Conf.System.MicrosoftDefenderExcluded = true
+	model.Conf.Save()
+}
+
 func reloadUI(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -283,6 +295,7 @@ func exportConf(c *gin.Context) {
 		clonedConf.System.Container = ""
 		clonedConf.System.IsMicrosoftStore = false
 		clonedConf.System.IsInsider = false
+		clonedConf.System.MicrosoftDefenderExcluded = false
 	}
 	clonedConf.Sync = nil
 	clonedConf.Stat = nil

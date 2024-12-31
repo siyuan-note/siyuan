@@ -406,7 +406,7 @@ const renderPDF = async (id: string) => {
         // https://github.com/siyuan-note/siyuan/issues/13669
         wysElement.querySelectorAll('[data-node-id]').forEach((item) => {
             if (item.querySelector(".img")) {
-                item.innerHTML = item.innerHTML + "<hr style='margin:0;border:0'>"
+                item.insertAdjacentHTML("beforeend", "<hr style='margin:0;border:0'>");
             }
         })
         Protyle.mermaidRender(wysElement, "${servePath}/stage/protyle");

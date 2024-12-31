@@ -31,7 +31,7 @@ const getHotkeyOrMarker = (hotkey: string, marker: string) => {
 
 export const hintSlash = (key: string, protyle: IProtyle) => {
     const allList: IHintData[] = [{
-        filter: [window.siyuan.languages.template, "moban", "mb", "template", "模板"],
+        filter: [window.siyuan.languages.template, "moban", "muban", "mb", "template", "模板"],
         id: "template",
         value: Constants.ZWSP,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMarkdown"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.template}</span></div>`,
@@ -80,32 +80,32 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         id: "separator_1",
         html: "separator",
     }, {
-        filter: [window.siyuan.languages.heading1, "yijibiaoti", "yjbt", "h1", "heading", "一级标题"],
+        filter: [window.siyuan.languages.heading1, "yijibiaoti", "yjbt", "h1", "heading1", "一级标题"],
         id: "heading1",
         value: "# " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH1"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading1}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading1.custom, "# ")}</div>`,
     }, {
-        filter: [window.siyuan.languages.heading2, "erjibiaoti", "ejbt", "h2", "heading", "二级标题"],
+        filter: [window.siyuan.languages.heading2, "erjibiaoti", "ejbt", "h2", "heading2", "二级标题"],
         id: "heading2",
         value: "## " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH2"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading2}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading2.custom, "## ")}</div>`,
     }, {
-        filter: [window.siyuan.languages.heading3, "sanjibiaoti", "sjbt", "h3", "heading", "三级标题"],
+        filter: [window.siyuan.languages.heading3, "sanjibiaoti", "sjbt", "h3", "heading3", "三级标题"],
         id: "heading3",
         value: "### " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH3"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading3}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading3.custom, "### ")}</div>`,
     }, {
-        filter: [window.siyuan.languages.heading4, "sijibiaoti", "sjbt", "h4", "heading", "四级标题"],
+        filter: [window.siyuan.languages.heading4, "sijibiaoti", "sjbt", "h4", "heading4", "四级标题"],
         id: "heading4",
         value: "#### " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH4"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading4}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading4.custom, "#### ")}</div>`,
     }, {
-        filter: [window.siyuan.languages.heading5, "wujibiaoti", "wjbt", "h5", "heading", "五级标题"],
+        filter: [window.siyuan.languages.heading5, "wujibiaoti", "wjbt", "h5", "heading5", "五级标题"],
         id: "heading5",
         value: "##### " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH5"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading5}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading5.custom, "##### ")}</div>`,
     }, {
-        filter: [window.siyuan.languages.heading6, "liujibiaoti", "ljbt", "h6", "heading", "六级标题"],
+        filter: [window.siyuan.languages.heading6, "liujibiaoti", "ljbt", "h6", "heading6", "六级标题"],
         id: "heading6",
         value: "###### " + Lute.Caret,
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconH6"></use></svg><span class="b3-list-item__text">${window.siyuan.languages.heading6}</span>${getHotkeyOrMarker(window.siyuan.config.keymap.editor.heading.heading6.custom, "###### ")}</div>`,
@@ -214,7 +214,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         value: "code",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconInlineCode"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-code"]}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-code"].custom))}</span></div>`,
     }, {
-        filter: [window.siyuan.languages["inline-math"], "hangjigongshi", "hjgs", "inline math", "行级数学公式"],
+        filter: [window.siyuan.languages["inline-math"], "hangjigongshi", "hjgs", "hangjishuxvegongshi", "hjsxgs", "inline math", "行级公式", "行级数学公式"],
         id: "inlineMath",
         value: "inline-math",
         html: `<div class="b3-list-item__first"><svg class="b3-list-item__graphic"><use xlink:href="#iconMath"></use></svg><span class="b3-list-item__text">${window.siyuan.languages["inline-math"]}</span><span class="b3-menu__accelerator">${updateHotkeyTip((window.siyuan.config.keymap.editor.insert["inline-math"].custom))}</span></div>`,

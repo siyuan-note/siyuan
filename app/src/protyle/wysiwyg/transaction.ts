@@ -51,7 +51,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
                 id: protyle.block.rootID,
                 isPushBack: false,
                 focusId: protyle.block.id,
-            })
+            });
         }
     }
     if (doOperations.length > 0) {

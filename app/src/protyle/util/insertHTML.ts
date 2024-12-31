@@ -235,11 +235,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             }
             document.querySelector(".av__panel")?.remove();
         } else if (hasClosestByClassName(range.startContainer, "av__title")) {
-            const node = document.createTextNode(text)
+            const node = document.createTextNode(text);
             range.insertNode(node);
             range.setEnd(node, text.length);
             range.collapse(false);
-            focusByRange(range)
+            focusByRange(range);
             updateAVName(protyle, blockElement);
         }
     });

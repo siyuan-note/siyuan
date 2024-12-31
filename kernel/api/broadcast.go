@@ -35,6 +35,7 @@ type Channel struct {
 
 type PublishMessage struct {
 	Type     string `json:"type"`     // "string" | "binary"
+	Size     int    `json:"size"`     // message size
 	Filename string `json:"filename"` // empty string for string-message
 }
 
@@ -180,6 +181,7 @@ func subscribe(c *gin.Context, broadcastChannel *melody.Melody, channel string) 
 //				},
 //				message: {
 //					type: string, // "string" | "binary"
+//					size: int, // message size (Bytes)
 //					filename: string, // empty string for string-message
 //				},
 //			}[],
@@ -219,19 +221,21 @@ func broadcastPublish(c *gin.Context) {
 
 		// Broadcast each string message to the same channel
 		for _, value := range values {
+			content := []byte(value)
 			result := &PublishResult{
 				Code:    0,
 				Msg:     "",
 				Channel: channel,
 				Message: PublishMessage{
 					Type:     StringMessageType,
+					Size:     len(content),
 					Filename: "",
 				},
 			}
 			results = append(results, result)
 
 			if broadcastChannel != nil {
-				err := broadcastChannel.Broadcast([]byte(value))
+				err := broadcastChannel.Broadcast(content)
 				if err != nil {
 					logging.LogErrorf("broadcast message failed: %s", err)
 					result.Code = -1
@@ -267,7 +271,8 @@ func broadcastPublish(c *gin.Context) {
 				Msg:     "",
 				Channel: channel,
 				Message: PublishMessage{
-					Type:     "binary",
+					Type:     BinaryMessageType,
+					Size:     int(file.Size),
 					Filename: file.Filename,
 				},
 			}

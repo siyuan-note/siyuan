@@ -34,14 +34,35 @@ const (
 	MessageTypeString MessageType = "string"
 	MessageTypeBinary MessageType = "binary"
 	MessageTypeClose  MessageType = "close"
+)
 
-	GIN_CONTEXT_MESSAGE_EVENT_CHANNEL = "message-event-channel"
+var (
+	BroadcastChannels = sync.Map{} // [string (channel-name)] -> *BroadcastChannel
+	UnifiedSSE        = NewEventSourceServer()
+	messageID         = &MessageID{
+		lock: &sync.Mutex{},
+		id:   0,
+	}
 )
 
 type MessageType string
 type MessageEventChannel chan *MessageEvent
 
+type MessageID struct {
+	lock *sync.Mutex
+	id   uint64
+}
+
+func (m *MessageID) Next() uint64 {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+
+	m.id++
+	return m.id
+}
+
 type MessageEvent struct {
+	ID   uint64 // event ID
 	Type MessageType
 	Name string // channel name
 	Data []byte
@@ -121,14 +142,16 @@ type EventSourceSubscriber struct {
 }
 
 func (s *EventSourceSubscriber) updateCount(delta int) {
-	defer s.lock.Unlock()
 	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	s.count += delta
 }
 
 func (s *EventSourceSubscriber) Count() int {
-	defer s.lock.Unlock()
 	s.lock.Lock()
+	defer s.lock.Unlock()
+
 	return s.count
 }
 
@@ -167,6 +190,14 @@ func (s *EventSourceServer) Start() {
 
 // SendEvent sends a message to all subscribers
 func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
+	if event.ID == 0 {
+		switch event.Type {
+		case MessageTypeClose:
+		default:
+			event.ID = messageID.Next()
+		}
+	}
+
 	s.Channel <- event
 	return true
 
@@ -217,9 +248,17 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel Messag
 				case MessageTypeClose:
 					return false
 				case MessageTypeString:
-					c.SSEvent(event.Name, string(event.Data))
+					s.SSEvent(c, &sse.Event{
+						Id:    string(event.ID),
+						Event: event.Name,
+						Data:  string(event.Data),
+					})
 				default:
-					c.SSEvent(event.Name, event.Data)
+					s.SSEvent(c, &sse.Event{
+						Id:    string(event.ID),
+						Event: event.Name,
+						Data:  event.Data,
+					})
 				}
 				c.Writer.Flush()
 				return true
@@ -263,9 +302,17 @@ func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel Mes
 			case MessageTypeClose:
 				return true
 			case MessageTypeString:
-				c.SSEvent(event.Name, string(event.Data))
+				s.SSEvent(c, &sse.Event{
+					Id:    string(event.ID),
+					Event: event.Name,
+					Data:  string(event.Data),
+				})
 			default:
-				c.SSEvent(event.Name, event.Data)
+				s.SSEvent(c, &sse.Event{
+					Id:    string(event.ID),
+					Event: event.Name,
+					Data:  event.Data,
+				})
 			}
 			c.Writer.Flush()
 			return true
@@ -334,11 +381,6 @@ func NewEventSourceServer() (server *EventSourceServer) {
 	go server.Start()
 	return
 }
-
-var (
-	BroadcastChannels = sync.Map{} // [string (channel-name)] -> *BroadcastChannel
-	UnifiedSSE        = NewEventSourceServer()
-)
 
 type ChannelInfo struct {
 	Name  string `json:"name"`

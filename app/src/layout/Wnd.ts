@@ -220,23 +220,20 @@ export class Wnd {
                 }
             }
         });
-        let dragleaveTimeout: number;
         let headerDragCounter = 0;
-        this.headersElement.parentElement.addEventListener("dragleave", function () {
-            if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
+        this.headersElement.parentElement.addEventListener("dragleave", function (event: DragEvent & {
+            target: HTMLElement
+        }) {
+            if (!hasClosestByAttribute(event.target, "data-clone", "true")) {
                 headerDragCounter--;
             }
             if (headerDragCounter === 0) {
                 document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                     item.classList.remove("layout-tab-bars--drag");
                 });
-                clearTimeout(dragleaveTimeout);
-                // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
-                dragleaveTimeout = window.setTimeout(() => {
-                    document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
-                        item.remove();
-                    });
-                }, 1000);
+                this.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                    item.remove();
+                });
             }
         });
         this.headersElement.parentElement.addEventListener("dragenter", (event) => {
@@ -248,6 +245,10 @@ export class Wnd {
 
         this.headersElement.parentElement.addEventListener("dragend", (event) => {
             this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
+            // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
+            document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                item.remove();
+            });
         });
 
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {

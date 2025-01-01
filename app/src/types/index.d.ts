@@ -199,6 +199,7 @@ interface Window {
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
         readClipboard(): string
+        returnDesktop(): void
     }
 
     Protyle: import("../protyle/method").default

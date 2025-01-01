@@ -32,6 +32,7 @@ require (
 	github.com/gabriel-vasile/mimetype v1.4.5
 	github.com/gin-contrib/gzip v1.0.1
 	github.com/gin-contrib/sessions v1.0.1
+	github.com/gin-contrib/sse v0.1.0
 	github.com/gin-gonic/gin v1.10.0
 	github.com/go-ole/go-ole v1.3.0
 	github.com/goccy/go-json v0.10.3
@@ -121,7 +122,6 @@ require (
 	github.com/ebitengine/purego v0.8.1 // indirect
 	github.com/fatih/set v0.2.1 // indirect
 	github.com/gigawattio/window v0.0.0-20180317192513-0f5467e35573 // indirect
-	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-playground/locales v0.14.1 // indirect
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.22.1 // indirect

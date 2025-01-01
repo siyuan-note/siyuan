@@ -212,7 +212,6 @@ func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
 
 // Subscribe subscribes to specified broadcast channels
 func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel MessageEventChannel, channels ...string) {
-
 	defer s.WaitGroup.Done()
 	s.WaitGroup.Add(1)
 
@@ -239,8 +238,8 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel Messag
 		channelSet[channel] = true
 	}
 
-	s.SendRetry(c)
 	c.Writer.Flush()
+	retry := s.GetRetry(c)
 	s.Stream(c, messageEventChannel, func(event *MessageEvent, ok bool) bool {
 		if ok {
 			if _, exists := channelSet[event.Name]; exists {
@@ -251,12 +250,14 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel Messag
 					s.SSEvent(c, &sse.Event{
 						Id:    string(event.ID),
 						Event: event.Name,
+						Retry: retry,
 						Data:  string(event.Data),
 					})
 				default:
 					s.SSEvent(c, &sse.Event{
 						Id:    string(event.ID),
 						Event: event.Name,
+						Retry: retry,
 						Data:  event.Data,
 					})
 				}
@@ -288,14 +289,13 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel Messag
 
 // SubscribeAll subscribes to all broadcast channels
 func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel MessageEventChannel) {
-
 	defer s.WaitGroup.Done()
 	s.WaitGroup.Add(1)
 
 	s.Subscriber.updateCount(1)
 
-	s.SendRetry(c)
 	c.Writer.Flush()
+	retry := s.GetRetry(c)
 	s.Stream(c, messageEventChannel, func(event *MessageEvent, ok bool) bool {
 		if ok {
 			switch event.Type {
@@ -305,12 +305,14 @@ func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel Mes
 				s.SSEvent(c, &sse.Event{
 					Id:    string(event.ID),
 					Event: event.Name,
+					Retry: retry,
 					Data:  string(event.Data),
 				})
 			default:
 				s.SSEvent(c, &sse.Event{
 					Id:    string(event.ID),
 					Event: event.Name,
+					Retry: retry,
 					Data:  event.Data,
 				})
 			}
@@ -325,16 +327,15 @@ func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel Mes
 
 }
 
-func (s *EventSourceServer) SendRetry(c *gin.Context) uint64 {
+// GetRetry gets the retry interval
+//
+// If the retry interval is not specified, it will return 0
+func (s *EventSourceServer) GetRetry(c *gin.Context) uint {
 	value, err := c.GetQuery("retry")
 	if !err {
 		retry, err := strconv.ParseUint(value, 10, 0)
 		if err == nil {
-			s.SSEvent(c, &sse.Event{
-				Retry: uint(retry),
-				Data:  "retry",
-			})
-			return retry
+			return uint(retry)
 		}
 	}
 	return 0

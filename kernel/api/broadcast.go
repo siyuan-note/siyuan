@@ -18,6 +18,7 @@ package api
 
 import (
 	"net/http"
+	"strconv"
 	"sync"
 	"time"
 
@@ -32,8 +33,9 @@ import (
 const (
 	MessageTypeString MessageType = "string"
 	MessageTypeBinary MessageType = "binary"
+	MessageTypeClose  MessageType = "close"
 
-	MessageTypeClose MessageType = "close"
+	GIN_CONTEXT_MESSAGE_EVENT_CHANNEL = "message-event-channel"
 )
 
 type MessageType string
@@ -113,30 +115,58 @@ func (b *BroadcastChannel) Destroy(force bool) bool {
 	return false
 }
 
-type ServerSentEventSubscriber struct {
+type EventSourceSubscriber struct {
 	lock  *sync.Mutex
 	count int
 }
 
-func (s *ServerSentEventSubscriber) updateCount(delta int) {
+func (s *EventSourceSubscriber) updateCount(delta int) {
 	defer s.lock.Unlock()
 	s.lock.Lock()
 	s.count += delta
 }
 
-func (s *ServerSentEventSubscriber) Count() int {
+func (s *EventSourceSubscriber) Count() int {
 	defer s.lock.Unlock()
 	s.lock.Lock()
 	return s.count
 }
 
-type ServerSentEvent struct {
-	Channel    MessageEventChannel
+type EventSourceServer struct {
+	Channel     MessageEventChannel          // message broadcast channel
+	Open        chan MessageEventChannel     // SSE connection open channel
+	Close       chan MessageEventChannel     // SSE connection close channel
+	Connections map[MessageEventChannel]bool // SSE connections
+
 	WaitGroup  *sync.WaitGroup
-	Subscriber *ServerSentEventSubscriber
+	Subscriber *EventSourceSubscriber
 }
 
-func (s *ServerSentEvent) SendEvent(event *MessageEvent) bool {
+// Start starts the SSE server
+func (s *EventSourceServer) Start() {
+	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
+	for {
+		select {
+		// Add new available client
+		case channel := <-s.Open:
+			s.Connections[channel] = true
+
+		// Remove closed client
+		case channel := <-s.Close:
+			delete(s.Connections, channel)
+			close(channel)
+
+		// Broadcast message to client
+		case event := <-s.Channel:
+			for connection := range s.Connections {
+				connection <- event
+			}
+		}
+	}
+}
+
+// SendEvent sends a message to all subscribers
+func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
 	select {
 	case s.Channel <- event:
 		return true
@@ -146,8 +176,7 @@ func (s *ServerSentEvent) SendEvent(event *MessageEvent) bool {
 }
 
 // Subscribe subscribes to specified broadcast channels
-func (s *ServerSentEvent) Subscribe(c *gin.Context, channels ...string) {
-	logging.LogDebugf("[%s] Subscribe: %v", c.Request.URL.RequestURI(), channels)
+func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel MessageEventChannel, channels ...string) {
 
 	defer s.WaitGroup.Done()
 	s.WaitGroup.Add(1)
@@ -170,18 +199,14 @@ func (s *ServerSentEvent) Subscribe(c *gin.Context, channels ...string) {
 	}
 	wg.Wait()
 
-	channelSet := make(map[string]struct{})
+	channelSet := make(map[string]bool)
 	for _, channel := range channels {
-		channelSet[channel] = struct{}{}
+		channelSet[channel] = true
 	}
 
-	s.SSEvent(c, &sse.Event{
-		Retry: 1000,
-		Data:  "retry",
-	})
+	s.SendRetry(c)
 	c.Writer.Flush()
-
-	s.Stream(c, func(event *MessageEvent, ok bool) bool {
+	s.Stream(c, messageEventChannel, func(event *MessageEvent, ok bool) bool {
 		if ok {
 			if _, exists := channelSet[event.Name]; exists {
 				switch event.Type {
@@ -216,25 +241,19 @@ func (s *ServerSentEvent) Subscribe(c *gin.Context, channels ...string) {
 		}()
 	}
 	wg.Wait()
-	logging.LogDebugf("[%s] Subscribe END", c.Request.URL.RequestURI())
 }
 
 // SubscribeAll subscribes to all broadcast channels
-func (s *ServerSentEvent) SubscribeAll(c *gin.Context) {
-	logging.LogDebugf("[%s] SubscribeAll", c.Request.URL.RequestURI())
+func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel MessageEventChannel) {
 
 	defer s.WaitGroup.Done()
 	s.WaitGroup.Add(1)
 
 	s.Subscriber.updateCount(1)
 
-	s.SSEvent(c, &sse.Event{
-		Retry: 1000,
-		Data:  "retry",
-	})
+	s.SendRetry(c)
 	c.Writer.Flush()
-
-	s.Stream(c, func(event *MessageEvent, ok bool) bool {
+	s.Stream(c, messageEventChannel, func(event *MessageEvent, ok bool) bool {
 		if ok {
 			switch event.Type {
 			case MessageTypeClose:
@@ -253,17 +272,31 @@ func (s *ServerSentEvent) SubscribeAll(c *gin.Context) {
 	s.Subscriber.updateCount(-1)
 	PruneBroadcastChannels()
 
-	logging.LogDebugf("[%s] SubscribeAll END", c.Request.URL.RequestURI())
+}
+
+func (s *EventSourceServer) SendRetry(c *gin.Context) uint64 {
+	value, err := c.GetQuery("retry")
+	if !err {
+		retry, err := strconv.ParseUint(value, 10, 0)
+		if err == nil {
+			s.SSEvent(c, &sse.Event{
+				Retry: uint(retry),
+				Data:  "retry",
+			})
+			return retry
+		}
+	}
+	return 0
 }
 
 // Stream streams message to client
-func (s *ServerSentEvent) Stream(c *gin.Context, step func(event *MessageEvent, ok bool) bool) bool {
+func (s *EventSourceServer) Stream(c *gin.Context, channel MessageEventChannel, step func(event *MessageEvent, ok bool) bool) bool {
 	clientGone := c.Writer.CloseNotify()
 	for {
 		select {
 		case <-clientGone:
 			return true
-		case event, ok := <-s.Channel:
+		case event, ok := <-channel:
 			if step(event, ok) {
 				continue
 			}
@@ -273,21 +306,30 @@ func (s *ServerSentEvent) Stream(c *gin.Context, step func(event *MessageEvent, 
 }
 
 // SSEvent writes a Server-Sent Event into the body stream.
-func (s *ServerSentEvent) SSEvent(c *gin.Context, event *sse.Event) {
+func (s *EventSourceServer) SSEvent(c *gin.Context, event *sse.Event) {
 	c.Render(-1, event)
 }
 
-var (
-	BroadcastChannels = sync.Map{} // [string (channel-name)] -> *BroadcastChannel
+func NewEventSourceServer() (server *EventSourceServer) {
+	server = &EventSourceServer{
+		Channel:     make(MessageEventChannel),
+		Open:        make(chan MessageEventChannel),
+		Close:       make(chan MessageEventChannel),
+		Connections: make(map[MessageEventChannel]bool),
 
-	UnifiedSSE = &ServerSentEvent{
-		Channel:   make(chan *MessageEvent, 1024),
 		WaitGroup: &sync.WaitGroup{},
-		Subscriber: &ServerSentEventSubscriber{
+		Subscriber: &EventSourceSubscriber{
 			lock:  &sync.Mutex{},
 			count: 0,
 		},
 	}
+	go server.Start()
+	return
+}
+
+var (
+	BroadcastChannels = sync.Map{} // [string (channel-name)] -> *BroadcastChannel
+	UnifiedSSE        = NewEventSourceServer()
 )
 
 type ChannelInfo struct {
@@ -445,15 +487,31 @@ func PruneBroadcastChannels() []string {
 // broadcastSubscribe subscribe to a broadcast channel by SSE
 //
 // If the channel-name does not specified, the client will subscribe to all broadcast channels.
+//
+// @param
+//
+//	{
+//		retry: string, // retry interval (ms) (optional)
+//		channel: string, // channel name (optional, multiple)
+//	}
+//
+// @example
+//
+//	"http://localhost:6806/es/broadcast/subscribe?retry=1000&channel=test1&channel=test2"
 func broadcastSubscribe(c *gin.Context) {
 	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
 
+	messageEventChannel := make(MessageEventChannel)
+	UnifiedSSE.Open <- messageEventChannel
+
 	channels, ok := c.GetQueryArray("channel")
 	if ok { // subscribe specified broadcast channels
-		UnifiedSSE.Subscribe(c, channels...)
+		UnifiedSSE.Subscribe(c, messageEventChannel, channels...)
 	} else { // subscribe all broadcast channels
-		UnifiedSSE.SubscribeAll(c)
+		UnifiedSSE.SubscribeAll(c, messageEventChannel)
 	}
+
+	UnifiedSSE.Close <- messageEventChannel
 }
 
 // broadcastPublish push multiple binary messages to multiple broadcast channels

@@ -167,12 +167,16 @@ func (s *EventSourceServer) Start() {
 
 // SendEvent sends a message to all subscribers
 func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
-	select {
-	case s.Channel <- event:
-		return true
-	default:
-		return false
-	}
+	s.Channel <- event
+	return true
+
+	// select {
+	// case s.Channel <- event:
+	// 	return true
+	// default:
+	// 	logging.LogErrorf("send event failed: %v", event)
+	// 	return false
+	// }
 }
 
 // Subscribe subscribes to specified broadcast channels
@@ -310,11 +314,15 @@ func (s *EventSourceServer) SSEvent(c *gin.Context, event *sse.Event) {
 	c.Render(-1, event)
 }
 
+func (s *EventSourceServer) Subscribed() bool {
+	return s.Subscriber.Count() > 0
+}
+
 func NewEventSourceServer() (server *EventSourceServer) {
 	server = &EventSourceServer{
-		Channel:     make(MessageEventChannel),
-		Open:        make(chan MessageEventChannel),
-		Close:       make(chan MessageEventChannel),
+		Channel:     make(MessageEventChannel, 1024),
+		Open:        make(chan MessageEventChannel, 32),
+		Close:       make(chan MessageEventChannel, 32),
 		Connections: make(map[MessageEventChannel]bool),
 
 		WaitGroup: &sync.WaitGroup{},
@@ -384,6 +392,21 @@ func broadcast(c *gin.Context) {
 	// create a new channel
 	broadcastChannel = ConstructBroadcastChannel(channel)
 	broadcastChannel.HandleRequest(c)
+}
+
+// GetBroadcastChannel gets a broadcast channel
+//
+// If the channel does not exist but the SSE server is subscribed, it will create a new broadcast channel.
+// If the SSE server is not subscribed, it will return nil.
+func GetBroadcastChannel(channel string) *BroadcastChannel {
+	_broadcastChannel, exist := BroadcastChannels.Load(channel)
+	if exist {
+		return _broadcastChannel.(*BroadcastChannel)
+	}
+	if UnifiedSSE.Subscribed() {
+		return ConstructBroadcastChannel(channel)
+	}
+	return nil
 }
 
 // ConstructBroadcastChannel creates a broadcast channel
@@ -500,6 +523,10 @@ func PruneBroadcastChannels() []string {
 //	"http://localhost:6806/es/broadcast/subscribe?retry=1000&channel=test1&channel=test2"
 func broadcastSubscribe(c *gin.Context) {
 	// REF: https://github.com/gin-gonic/examples/blob/master/server-sent-event/main.go
+	c.Writer.Header().Set("Content-Type", "text/event-stream")
+	c.Writer.Header().Set("Cache-Control", "no-cache")
+	c.Writer.Header().Set("Connection", "keep-alive")
+	c.Writer.Header().Set("Transfer-Encoding", "chunked")
 
 	messageEventChannel := make(MessageEventChannel)
 	UnifiedSSE.Open <- messageEventChannel
@@ -568,14 +595,11 @@ func broadcastPublish(c *gin.Context) {
 		}
 
 		// Get broadcast channel
-		_broadcastChannel, exist := BroadcastChannels.Load(name)
-		var broadcastChannel *BroadcastChannel
-		if exist {
-			broadcastChannel = _broadcastChannel.(*BroadcastChannel)
-			channel.Count = broadcastChannel.SubscriberCount()
-		} else {
-			broadcastChannel = nil
+		broadcastChannel := GetBroadcastChannel(channel.Name)
+		if broadcastChannel == nil {
 			channel.Count = 0
+		} else {
+			channel.Count = broadcastChannel.SubscriberCount()
 		}
 
 		// Broadcast each string message to the same channel
@@ -612,14 +636,11 @@ func broadcastPublish(c *gin.Context) {
 		}
 
 		// Get broadcast channel
-		_broadcastChannel, exist := BroadcastChannels.Load(name)
-		var broadcastChannel *BroadcastChannel
-		if exist {
-			broadcastChannel = _broadcastChannel.(*BroadcastChannel)
-			channel.Count = broadcastChannel.SubscriberCount()
-		} else {
-			broadcastChannel = nil
+		broadcastChannel := GetBroadcastChannel(channel.Name)
+		if broadcastChannel == nil {
 			channel.Count = 0
+		} else {
+			channel.Count = broadcastChannel.SubscriberCount()
 		}
 
 		// Broadcast each binary message to the same channel
@@ -704,10 +725,11 @@ func postMessage(c *gin.Context) {
 		Count: 0,
 	}
 
-	if _broadcastChannel, ok := BroadcastChannels.Load(channel.Name); !ok {
+	broadcastChannel := GetBroadcastChannel(channel.Name)
+	if broadcastChannel == nil {
 		channel.Count = 0
 	} else {
-		var broadcastChannel = _broadcastChannel.(*BroadcastChannel)
+		channel.Count = broadcastChannel.SubscriberCount()
 		if _, err := broadcastChannel.BroadcastString(message); err != nil {
 			logging.LogErrorf("broadcast message failed: %s", err)
 
@@ -715,8 +737,6 @@ func postMessage(c *gin.Context) {
 			ret.Msg = err.Error()
 			return
 		}
-
-		channel.Count = broadcastChannel.SubscriberCount()
 	}
 	ret.Data = map[string]interface{}{
 		"channel": channel,

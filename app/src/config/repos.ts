@@ -75,7 +75,7 @@ const renderProvider = (provider: number) => {
     <input id="bucket" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.bucket}">
 </div>
 <div class="b3-label b3-label--inner fn__flex">
-    <div class="fn__flex-center fn__size200">Region</div>
+    <div class="fn__flex-center fn__size200">Region ID</div>
     <div class="fn__space"></div>
     <input id="region" class="b3-text-field fn__block" value="${window.siyuan.config.sync.s3.region}">
 </div>

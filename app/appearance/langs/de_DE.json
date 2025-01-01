@@ -1582,6 +1582,7 @@
     "249": "Aufgrund eines Konfigurationsfehlers kann nicht auf die Daten zugegriffen werden. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
     "250": "Die Anfrage wurde vom Cloud-Speicher begrenzt. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
     "251": "Insgesamt ungenutzte Assets [%d], hier nur [%d] aufgeführt",
-    "252": "\uD83D\uDEA8 Microsoft Defender kann fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den SiYuan-Installationspfad und den Arbeitsbereichspfad zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Hinzufügen</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorieren</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender kann fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den SiYuan-Installationspfad und den Arbeitsbereichspfad zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Hinzufügen</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorieren</button>",
+    "253": "Datei [%s] wird komprimiert, bitte warten..."
   }
 }

@@ -62,7 +62,7 @@ func (m *MessageID) Next() uint64 {
 }
 
 type MessageEvent struct {
-	ID   uint64 // event ID
+	ID   string // event ID
 	Type MessageType
 	Name string // channel name
 	Data []byte
@@ -190,11 +190,11 @@ func (s *EventSourceServer) Start() {
 
 // SendEvent sends a message to all subscribers
 func (s *EventSourceServer) SendEvent(event *MessageEvent) bool {
-	if event.ID == 0 {
+	if event.ID == "" {
 		switch event.Type {
 		case MessageTypeClose:
 		default:
-			event.ID = messageID.Next()
+			event.ID = strconv.FormatUint(messageID.Next(), 10)
 		}
 	}
 
@@ -248,14 +248,14 @@ func (s *EventSourceServer) Subscribe(c *gin.Context, messageEventChannel Messag
 					return false
 				case MessageTypeString:
 					s.SSEvent(c, &sse.Event{
-						Id:    string(event.ID),
+						Id:    event.ID,
 						Event: event.Name,
 						Retry: retry,
 						Data:  string(event.Data),
 					})
 				default:
 					s.SSEvent(c, &sse.Event{
-						Id:    string(event.ID),
+						Id:    event.ID,
 						Event: event.Name,
 						Retry: retry,
 						Data:  event.Data,
@@ -303,14 +303,14 @@ func (s *EventSourceServer) SubscribeAll(c *gin.Context, messageEventChannel Mes
 				return true
 			case MessageTypeString:
 				s.SSEvent(c, &sse.Event{
-					Id:    string(event.ID),
+					Id:    event.ID,
 					Event: event.Name,
 					Retry: retry,
 					Data:  string(event.Data),
 				})
 			default:
 				s.SSEvent(c, &sse.Event{
-					Id:    string(event.ID),
+					Id:    event.ID,
 					Event: event.Name,
 					Retry: retry,
 					Data:  event.Data,

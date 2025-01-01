@@ -426,19 +426,34 @@ func ControlConcurrency(c *gin.Context) {
 	reqPath := c.Request.URL.Path
 
 	// Improve the concurrency of the kernel data reading interfaces https://github.com/siyuan-note/siyuan/issues/10149
-	if strings.HasPrefix(reqPath, "/stage/") || strings.HasPrefix(reqPath, "/assets/") || strings.HasPrefix(reqPath, "/appearance/") {
+	if strings.HasPrefix(reqPath, "/stage/") ||
+		strings.HasPrefix(reqPath, "/assets/") ||
+		strings.HasPrefix(reqPath, "/emojis/") ||
+		strings.HasPrefix(reqPath, "/plugins/") ||
+		strings.HasPrefix(reqPath, "/public/") ||
+		strings.HasPrefix(reqPath, "/snippets/") ||
+		strings.HasPrefix(reqPath, "/templates/") ||
+		strings.HasPrefix(reqPath, "/widgets/") ||
+		strings.HasPrefix(reqPath, "/appearance/") ||
+		strings.HasPrefix(reqPath, "/export/") ||
+		strings.HasPrefix(reqPath, "/history/") ||
+
+		strings.HasPrefix(reqPath, "/api/query/") ||
+		strings.HasPrefix(reqPath, "/api/search/") ||
+		strings.HasPrefix(reqPath, "/api/network/") ||
+		strings.HasPrefix(reqPath, "/api/broadcast/") ||
+		strings.HasPrefix(reqPath, "/es/") {
 		c.Next()
 		return
 	}
 
 	parts := strings.Split(reqPath, "/")
 	function := parts[len(parts)-1]
-	if strings.HasPrefix(function, "get") || strings.HasPrefix(function, "list") ||
-		strings.HasPrefix(function, "search") || strings.HasPrefix(function, "render") || strings.HasPrefix(function, "ls") {
-		c.Next()
-		return
-	}
-	if strings.HasPrefix(function, "/api/query/") || strings.HasPrefix(function, "/api/search/") {
+	if strings.HasPrefix(function, "get") ||
+		strings.HasPrefix(function, "list") ||
+		strings.HasPrefix(function, "search") ||
+		strings.HasPrefix(function, "render") ||
+		strings.HasPrefix(function, "ls") {
 		c.Next()
 		return
 	}

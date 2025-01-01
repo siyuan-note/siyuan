@@ -1364,6 +1364,7 @@ declare namespace Config {
          * - `0`: SiYuan official cloud storage service
          * - `2`: Object storage service compatible with S3 protocol
          * - `3`: Network storage service using WebDAV protocol
+         * - `4`: Local file system
          */
         provider: number;
         s3: ISyncS3;

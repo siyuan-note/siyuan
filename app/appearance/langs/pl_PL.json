@@ -1582,6 +1582,7 @@
     "249": "Z powodu błędu konfiguracji nie można uzyskać dostępu do danych. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
     "250": "Żądanie zostało ograniczone przez przechowywanie w chmurze. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
     "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]",
-    "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność. Zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Dodaj</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignoruj</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność. Zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Dodaj</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignoruj</button>",
+    "253": "Kompresja pliku [%s], proszę czekać..."
   }
 }

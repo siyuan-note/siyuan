@@ -1582,6 +1582,7 @@
     "249": "設定エラーのためデータにアクセスできません。設定を一つずつ確認し、クラウドストレージの権限を確認してください",
     "250": "リクエストがクラウドストレージによって制限されました。設定を一つずつ確認し、クラウドストレージの権限を確認してください",
     "251": "未使用のアセットの合計 [%d]、ここにリストされているのは [%d] のみ",
-    "252": "\uD83D\uDEA8 Microsoft Defender は、カーネルを誤って削除したり、データを削除したり、パフォーマンスを大幅に低下させたりする可能性があります。SiYuan のインストールパスとワークスペースパスを除外リストに追加することをお勧めします<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">追加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">無視</button>"
+    "252": "\uD83D\uDEA8 Microsoft Defender は、カーネルを誤って削除したり、データを削除したり、パフォーマンスを大幅に低下させたりする可能性があります。SiYuan のインストールパスとワークスペースパスを除外リストに追加することをお勧めします<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">追加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">無視</button>",
+    "253": "ファイル [%s] を圧縮しています、お待ちください..."
   }
 }

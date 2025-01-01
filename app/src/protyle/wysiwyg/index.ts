@@ -1514,7 +1514,8 @@ export class WYSIWYG {
                 updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
             } else {
                 const id = nodeElement.getAttribute("data-node-id");
-                const oldHTML = nodeElement.outerHTML;
+                setInsertWbrHTML(nodeElement, range, protyle);
+                const oldHTML = protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML;
                 const tempElement = document.createElement("div");
                 // 首次选中标题时，range.startContainer 会为空
                 let startContainer = range.startContainer;
@@ -1658,7 +1659,8 @@ export class WYSIWYG {
                 }
                 if (nodeElement.parentElement.parentElement && !isFoldHeading && !nodeElement.classList.contains("av")) {
                     // 选中 heading 时，使用删除的 transaction
-                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                    setInsertWbrHTML(nodeElement, range, protyle);
+                    updateTransaction(protyle, id, protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML, oldHTML);
                 }
             }
             protyle.hint.render(protyle);

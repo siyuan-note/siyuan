@@ -20,6 +20,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -73,14 +74,19 @@ func IsLocalOrigin(origin string) bool {
 }
 
 func IsOnline(checkURL string, skipTlsVerify bool, timeout int) bool {
-	_, err := url.Parse(checkURL)
+	if "" == checkURL {
+		return false
+	}
+
+	u, err := url.Parse(checkURL)
 	if err != nil {
 		logging.LogWarnf("invalid check URL [%s]", checkURL)
 		return false
 	}
-
-	if "" == checkURL {
-		return false
+	if u.Scheme == "file" {
+		filePath := strings.TrimPrefix(checkURL, "file://")
+		_, err := os.Stat(filePath)
+		return err == nil
 	}
 
 	if isOnline(checkURL, skipTlsVerify, timeout) {

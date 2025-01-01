@@ -322,29 +322,35 @@ ${response.data.replace("%pages", "<span class=totalPages></span>").replace("%pa
                     path: pdfFilePath,
                     removeAssets: ipcData.removeAssets,
                     watermark: ipcData.watermark
-                }, () => {
+                }, async () => {
                     afterExport(pdfFilePath, msgId);
                     if (ipcData.removeAssets) {
                         const removePromise = (dir: string) => {
                             return new Promise(function (resolve) {
-                                //先读文件夹
                                 fs.stat(dir, function (err, stat) {
-                                    if (stat) {
-                                        if (stat.isDirectory()) {
-                                            fs.readdir(dir, function (err, files) {
-                                                files = files.map(file => path.join(dir, file)); // a/b  a/m
-                                                Promise.all(files.map(file => removePromise(file))).then(function () {
-                                                    fs.rm(dir, resolve);
-                                                });
+                                    if (!stat) {
+                                        return;
+                                    }
+
+                                    if (stat.isDirectory()) {
+                                        fs.readdir(dir, function (err, files) {
+                                            files = files.map(file => path.join(dir, file)); // a/b  a/m
+                                            Promise.all(files.map(file => removePromise(file))).then(function () {
+                                                fs.rm(dir, resolve);
                                             });
-                                        } else {
-                                            fs.unlink(dir, resolve);
-                                        }
+                                        });
+                                    } else {
+                                        fs.unlink(dir, resolve);
                                     }
                                 });
                             });
                         };
-                        removePromise(path.join(savePath, "assets"));
+
+                        const assetsDir = path.join(savePath, "assets");
+                        await removePromise(assetsDir);
+                        if (1 > fs.readdirSync(assetsDir).length) {
+                            fs.rmdirSync(assetsDir);
+                        }
                     }
                 });
             });

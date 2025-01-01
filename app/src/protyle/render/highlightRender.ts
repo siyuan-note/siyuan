@@ -143,7 +143,7 @@ width: ${codeElement.clientWidth}px;
 white-space:${codeElement.style.whiteSpace};
 word-break:${codeElement.style.wordBreak};
 font-variant-ligatures:${codeElement.style.fontVariantLigatures};
-max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
+padding-right:0;max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
 

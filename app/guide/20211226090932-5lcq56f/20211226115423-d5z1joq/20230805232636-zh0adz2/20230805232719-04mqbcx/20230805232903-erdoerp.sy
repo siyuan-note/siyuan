@@ -6,7 +6,7 @@
 		"id": "20230805232903-erdoerp",
 		"title": "對接第三方雲端存儲",
 		"type": "doc",
-		"updated": "20241216171627"
+		"updated": "20241231014235"
 	},
 	"Children": [
 		{
@@ -56,7 +56,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805232945-ugjx8sl",
-				"updated": "20241216171627"
+				"updated": "20241231014235"
 			},
 			"Children": [
 				{
@@ -225,6 +225,34 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241231014229-xkbbezi",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241231014229-xkbbezi",
+						"updated": "20241231014235"
+					},
+					"Children": [
+						{
+							"ID": "20241231014229-5oi1vuc",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241231014229-5oi1vuc",
+								"updated": "20241231014235"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "本地檔案系統"
 								}
 							]
 						}

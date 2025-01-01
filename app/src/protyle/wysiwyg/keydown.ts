@@ -948,17 +948,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (isNotCtrl(event) && event.key === "Enter") {
             if (event.altKey) {
                 addSubList(protyle, nodeElement, range);
-            } else {
-                if (!event.shiftKey) {
-                    enter(nodeElement, range, protyle);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                } else if (nodeElement.getAttribute("data-type") === "NodeAttributeView") {
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
-                }
+            } else if (!event.shiftKey) {
+                enter(nodeElement, range, protyle);
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
         }
 

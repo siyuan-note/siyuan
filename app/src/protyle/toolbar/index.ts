@@ -1296,7 +1296,7 @@ export class Toolbar {
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "min-width: 260px;max-width:50vw"}">
+<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "width: 280px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>

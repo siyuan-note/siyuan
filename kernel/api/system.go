@@ -50,6 +50,18 @@ func addMicrosoftDefenderExclusion(c *gin.Context) {
 	}
 }
 
+func ignoreAddMicrosoftDefenderExclusion(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	if !gulu.OS.IsWindows() {
+		return
+	}
+
+	model.Conf.System.MicrosoftDefenderExcluded = true
+	model.Conf.Save()
+}
+
 func reloadUI(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -162,7 +174,7 @@ func getEmojiConf(c *gin.Context) {
 		} else {
 			for _, customEmoji := range customEmojis {
 				name := customEmoji.Name()
-				if strings.HasPrefix(name, ".") {
+				if strings.HasPrefix(name, ".") || strings.Contains(name, "<") {
 					continue
 				}
 
@@ -180,7 +192,7 @@ func getEmojiConf(c *gin.Context) {
 						}
 
 						name = subCustomEmoji.Name()
-						if strings.HasPrefix(name, ".") {
+						if strings.HasPrefix(name, ".") || strings.Contains(name, "<") {
 							continue
 						}
 
@@ -283,6 +295,7 @@ func exportConf(c *gin.Context) {
 		clonedConf.System.Container = ""
 		clonedConf.System.IsMicrosoftStore = false
 		clonedConf.System.IsInsider = false
+		clonedConf.System.MicrosoftDefenderExcluded = false
 	}
 	clonedConf.Sync = nil
 	clonedConf.Stat = nil

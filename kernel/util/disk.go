@@ -20,7 +20,7 @@ package util
 
 import (
 	"github.com/88250/go-humanize"
-	"github.com/shirou/gopsutil/v3/disk"
+	"github.com/shirou/gopsutil/v4/disk"
 	"github.com/siyuan-note/logging"
 )
 

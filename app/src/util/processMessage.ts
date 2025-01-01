@@ -15,6 +15,10 @@ export const processMessage = (response: IWebSocketData) => {
                 hideMessage(id);
             });
         }, {once: true});
+        document.querySelector("#message #ignoreAddMicrosoftDefenderExclusion")?.addEventListener("click", (event) => {
+            hideMessage(id);
+            fetchPost("/api/system/ignoreAddMicrosoftDefenderExclusion");
+        }, {once: true});
         return false;
     }
     if ("cmsg" === response.cmd) {

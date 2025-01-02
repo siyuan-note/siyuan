@@ -483,13 +483,13 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 		return
 	}
 	if !gulu.File.IsExist(absPath) {
-		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint+" ("+absPath+")")
+		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
 		logging.LogErrorf(msg)
 		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
 		return
 	}
-	if util.IsAbsPathInWorkspace(absPath) {
-		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint+" ("+absPath+")")
+	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
+		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
 		logging.LogErrorf(msg)
 		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
 		return

@@ -429,6 +429,7 @@ interface ISiyuan {
         }[]
     },
     dragElement?: HTMLElement,
+    currentDragOverTabHeadersElement?: HTMLElement
     layout?: {
         layout?: import("../layout").Layout,
         centerLayout?: import("../layout").Layout,

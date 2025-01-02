@@ -232,7 +232,7 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 	}
 
 	for name, value := range nameValues {
-		value = util.RemoveInvalid(value)
+		value = util.RemoveInvalidRetainCtrl(value)
 		value = strings.TrimSpace(value)
 		value = strings.TrimSuffix(value, ",")
 		if "" == value {

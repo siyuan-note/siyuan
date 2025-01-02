@@ -297,12 +297,10 @@ func (s *EventSourceServer) SubscribeAll(c *gin.Context, retry uint) {
 //
 // If the retry interval is not specified, it will return 0
 func (s *EventSourceServer) GetRetry(c *gin.Context) uint {
-	value, err := c.GetQuery("retry")
-	if !err {
-		retry, err := strconv.ParseUint(value, 10, 0)
-		if err == nil {
-			return uint(retry)
-		}
+	value := c.DefaultQuery("retry", "")
+	retry, err := strconv.ParseUint(value, 10, 0)
+	if err == nil {
+		return uint(retry)
 	}
 	return 0
 }

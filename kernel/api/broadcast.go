@@ -322,15 +322,13 @@ func (s *EventSourceServer) Stream(c *gin.Context, step func(event *MessageEvent
 	for {
 		select {
 		case <-clientGone:
-			s.EventBus.Unsubscribe(EvtBroadcastMessage, subscriber)
-			close(channel)
+			logging.LogInfof("event source connection is closed by client")
 			return true
 		case event, ok := <-channel:
 			if step(event, ok) {
 				continue
 			}
-			s.EventBus.Unsubscribe(EvtBroadcastMessage, subscriber)
-			close(channel)
+			logging.LogInfof("event source connection is closed by server")
 			return false
 		}
 	}
@@ -341,6 +339,7 @@ func (s *EventSourceServer) SSEvent(c *gin.Context, event *sse.Event) {
 	c.Render(-1, event)
 }
 
+// Subscribed checks whether the SSE server is subscribed
 func (s *EventSourceServer) Subscribed() bool {
 	return s.Subscriber.Count() > 0
 }

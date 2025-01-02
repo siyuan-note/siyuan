@@ -134,7 +134,7 @@ func (b *BroadcastChannel) Subscribed() bool {
 }
 
 func (b *BroadcastChannel) Destroy(force bool) bool {
-	if force || b.Subscribed() {
+	if force || !b.Subscribed() {
 		b.WebSocket.Close()
 		UnifiedSSE.SendEvent(&MessageEvent{
 			Type: MessageTypeClose,

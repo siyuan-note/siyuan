@@ -188,11 +188,15 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 			return ast.WalkContinue
 		}
 
-		// Code content in templates is not properly escaped https://github.com/siyuan-note/siyuan/issues/9649
+		// Content in templates is not properly escaped
+		// https://github.com/siyuan-note/siyuan/issues/9649
+		// https://github.com/siyuan-note/siyuan/issues/13701
 		switch n.Type {
 		case ast.NodeCodeBlockCode:
 			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
 		case ast.NodeCodeSpanContent:
+			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
+		case ast.NodeBlockQueryEmbedScript:
 			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
 		case ast.NodeTextMark:
 			if n.IsTextMarkType("code") {

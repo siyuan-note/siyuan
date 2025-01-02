@@ -504,7 +504,7 @@ func exportData(exportFolder string) (zipPath string, err error) {
 	}
 
 	zipCallback := func(filename string) {
-		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename))
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(253), filename))
 	}
 
 	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
@@ -1465,9 +1465,17 @@ func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath s
 }
 
 func ExportNotebookMarkdown(boxID string) (zipPath string) {
+	util.PushEndlessProgress(Conf.Language(65))
+	defer util.ClearPushProgress(100)
+
 	box := Conf.Box(boxID)
-	docFiles := box.ListFiles("/")
+	if nil == box {
+		logging.LogErrorf("not found box [%s]", boxID)
+		return
+	}
+
 	var docPaths []string
+	docFiles := box.ListFiles("/")
 	for _, docFile := range docFiles {
 		docPaths = append(docPaths, docFile.path)
 	}
@@ -1859,7 +1867,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	}
 
 	zipCallback := func(filename string) {
-		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), filename))
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(253), filename))
 	}
 
 	if err = zip.AddDirectory(baseFolderName, exportFolder, zipCallback); err != nil {
@@ -3069,15 +3077,20 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		logging.LogErrorf("read export markdown folder [%s] failed: %s", exportFolder, err)
 		return ""
 	}
+
+	zipCallback := func(filename string) {
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(253), filename))
+	}
 	for _, entry := range entries {
-		entryPath := filepath.Join(exportFolder, entry.Name())
+		entryName := entry.Name()
+		entryPath := filepath.Join(exportFolder, entryName)
 		if gulu.File.IsDir(entryPath) {
-			err = zip.AddDirectory(entry.Name(), entryPath)
+			err = zip.AddDirectory(entryName, entryPath, zipCallback)
 		} else {
-			err = zip.AddEntry(entry.Name(), entryPath)
+			err = zip.AddEntry(entryName, entryPath, zipCallback)
 		}
 		if err != nil {
-			logging.LogErrorf("add entry [%s] to zip failed: %s", entry.Name(), err)
+			logging.LogErrorf("add entry [%s] to zip failed: %s", entryName, err)
 			return ""
 		}
 	}
@@ -3108,7 +3121,7 @@ func prepareExportTrees(docPaths []string) (defBlockIDs []string, trees *map[str
 	trees = &map[string]*parse.Tree{}
 	treeCache := &map[string]*parse.Tree{}
 	defBlockIDs = []string{}
-	for _, p := range docPaths {
+	for i, p := range docPaths {
 		id := strings.TrimSuffix(path.Base(p), ".sy")
 		if !ast.IsNodeIDPattern(id) {
 			continue
@@ -3119,6 +3132,8 @@ func prepareExportTrees(docPaths []string) (defBlockIDs []string, trees *map[str
 			continue
 		}
 		exportRefTrees(tree, &defBlockIDs, trees, treeCache)
+
+		util.PushEndlessProgress(Conf.language(65) + " " + fmt.Sprintf(Conf.language(70), fmt.Sprintf("%d/%d %s", i+1, len(docPaths), tree.Root.IALAttr("title"))))
 	}
 
 	for _, tree := range *trees {

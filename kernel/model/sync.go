@@ -475,6 +475,26 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 	local.Endpoint = strings.TrimSpace(local.Endpoint)
 	local.Endpoint = util.NormalizeLocalPath(local.Endpoint)
 
+	absPath, err := filepath.Abs(local.Endpoint)
+	if nil != err {
+		msg := fmt.Sprintf("get endpoint [%s] abs path failed: %s", local.Endpoint, err)
+		logging.LogErrorf(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		return
+	}
+	if !gulu.File.IsExist(absPath) {
+		msg := fmt.Sprintf("endpoint [%s] not exist", local.Endpoint)
+		logging.LogErrorf(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		return
+	}
+	if util.IsAbsPathInWorkspace(absPath) || filepath.Clean(absPath) == filepath.Clean(util.WorkspaceDir) {
+		msg := fmt.Sprintf("endpoint [%s] is in workspace", local.Endpoint)
+		logging.LogErrorf(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		return
+	}
+
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
 
@@ -592,6 +612,10 @@ func ListCloudSyncDir() (syncDirs []*Sync, hSize string, err error) {
 	if conf.ProviderSiYuan == Conf.Sync.Provider {
 		hSize = humanize.BytesCustomCeil(uint64(size), 2)
 	}
+	if conf.ProviderS3 == Conf.Sync.Provider {
+		Conf.Sync.CloudName = syncDirs[0].CloudName
+		Conf.Save()
+	}
 	return
 }
 
@@ -624,6 +648,8 @@ func formatRepoErrorMsg(err error) string {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 			msg = Conf.Language(33)
+		} else if strings.Contains(msgLowerCase, "region was not a valid DNS name") {
+			msg = Conf.language(254)
 		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
 			msg = fmt.Sprintf(Conf.Language(85), err)
 		} else if strings.Contains(msgLowerCase, "cipher: message authentication failed") {

@@ -240,7 +240,7 @@ func GetBlockRefText(id string) string {
 func GetDOMText(dom string) (ret string) {
 	luteEngine := NewLute()
 	tree := luteEngine.BlockDOM2Tree(dom)
-	ret = renderBlockText(tree.Root.FirstChild, nil)
+	ret = renderBlockText(tree.Root.FirstChild, nil, true)
 	return
 }
 
@@ -265,7 +265,7 @@ func getNodeRefText(node *ast.Node) string {
 		ret = util.EscapeHTML(ret)
 		return ret
 	}
-	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen, true)
 }
 
 func getNodeAvBlockText(node *ast.Node) (icon, content string) {
@@ -279,7 +279,7 @@ func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 		name = util.EscapeHTML(name)
 		content = name
 	} else {
-		content = getNodeRefText0(node, 1024)
+		content = getNodeRefText0(node, 1024, false)
 	}
 
 	content = strings.TrimSpace(content)
@@ -290,7 +290,7 @@ func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 	return
 }
 
-func getNodeRefText0(node *ast.Node, maxLen int) string {
+func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	switch node.Type {
 	case ast.NodeBlockQueryEmbed:
 		return "Query Embed Block..."
@@ -313,7 +313,7 @@ func getNodeRefText0(node *ast.Node, maxLen int) string {
 	if ast.NodeDocument != node.Type && node.IsContainerBlock() {
 		node = treenode.FirstLeafBlock(node)
 	}
-	ret := renderBlockText(node, nil)
+	ret := renderBlockText(node, nil, removeLineBreak)
 	if maxLen < utf8.RuneCountInString(ret) {
 		ret = gulu.Str.SubStr(ret, maxLen) + "..."
 	}
@@ -481,9 +481,9 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		} else {
 			if "" == name {
 				if ast.NodeListItem == parent.Type || ast.NodeList == parent.Type || ast.NodeSuperBlock == parent.Type || ast.NodeBlockquote == parent.Type {
-					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 				} else {
-					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes), maxNameLen)
+					name = gulu.Str.SubStr(renderBlockText(parent, excludeTypes, true), maxNameLen)
 				}
 			}
 			if ast.NodeHeading == parent.Type {
@@ -504,7 +504,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		}
 		if ast.NodeListItem == parent.Type {
 			if "" == name {
-				name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(fc, excludeTypes, true), maxNameLen)
 			}
 		}
 
@@ -542,7 +542,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 					continue
 				}
 
-				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes), maxNameLen)
+				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes, true), maxNameLen)
 				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{
 					ID:      b.ID,

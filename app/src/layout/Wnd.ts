@@ -219,6 +219,7 @@ export class Wnd {
                 }
                 return;
             }
+            it.classList.remove("layout-tab-bars--drag");
             if (!newTabHeaderElement.isSameNode(oldTabHeaderElement) &&
                 ((oldTabHeaderElement.classList.contains("item--pin") && newTabHeaderElement.classList.contains("item--pin")) ||
                     (!oldTabHeaderElement.classList.contains("item--pin") && !newTabHeaderElement.classList.contains("item--pin")))) {

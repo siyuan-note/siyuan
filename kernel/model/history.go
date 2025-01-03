@@ -18,6 +18,7 @@ package model
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/fs"
 	"math"
@@ -148,6 +149,13 @@ func ClearWorkspaceHistory() (err error) {
 }
 
 func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, rootID, content string, isLargeDoc bool, err error) {
+	if !util.IsAbsPathInWorkspace(historyPath) {
+		msg := "Path [" + historyPath + "] is not in workspace"
+		logging.LogErrorf(msg)
+		err = errors.New(msg)
+		return
+	}
+
 	if !gulu.File.IsExist(historyPath) {
 		logging.LogWarnf("doc history [%s] not exist", historyPath)
 		return
@@ -163,8 +171,7 @@ func GetDocHistoryContent(historyPath, keyword string, highlight bool) (id, root
 	luteEngine := NewLute()
 	historyTree, err := filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
-		logging.LogErrorf("parse tree from file [%s] failed, remove it", historyPath)
-		os.RemoveAll(historyPath)
+		logging.LogErrorf("parse tree from file [%s] failed: %s", historyPath, err)
 		return
 	}
 	id = historyTree.Root.ID

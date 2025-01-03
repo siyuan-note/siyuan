@@ -48,6 +48,16 @@ export class Tab {
             this.headElement.addEventListener("mouseenter", (event) => {
                 event.stopPropagation();
                 event.preventDefault();
+                const dragElement = Array.from(this.headElement.parentElement.childNodes).find((item: HTMLElement) => {
+                    if (item.style?.opacity === "0.1") {
+                        return true;
+                    }
+                });
+                if (dragElement) {
+                    hideTooltip();
+                    return;
+                }
+
                 let id = "";
                 if (this.model instanceof Editor && this.model.editor?.protyle?.block?.rootID) {
                     id = (this.model as Editor).editor.protyle.block.rootID;

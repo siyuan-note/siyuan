@@ -737,7 +737,7 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
         }
     });
     tableSelectElement.removeAttribute("style");
-    if (getSelection().rangeCount>0) {
+    if (getSelection().rangeCount > 0) {
         const range = getSelection().getRangeAt(0);
         if (tableBlockElement.contains(range.startContainer)) {
             range.insertNode(document.createElement("wbr"));

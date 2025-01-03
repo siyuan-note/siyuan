@@ -21,13 +21,16 @@ export const initBlockPopover = (app: App) => {
         }
         const aElement = hasClosestByAttribute(event.target, "data-type", "a", true) ||
             hasClosestByClassName(event.target, "ariaLabel") ||
-            hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
-            hasClosestByClassName(event.target, "av__cell");
+            hasClosestByClassName(event.target, "av__cell")||
+            hasClosestByAttribute(event.target, "data-type", "setRelationCell");
         if (aElement) {
-            let tooltipClass = "";
-            let tip = aElement.getAttribute("aria-label");
+            const tooltipClasses: string[] = [];
+            let tip = aElement.getAttribute("aria-label") || "";
+            if (aElement.hasAttribute("data-tooltipclass")) {
+                tooltipClasses.push(...aElement.getAttribute("data-tooltipclass").split(" "));
+            }
             if (aElement.classList.contains("av__cell")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
@@ -43,7 +46,7 @@ export const initBlockPopover = (app: App) => {
                     if (aElement.firstElementChild?.getAttribute("data-type") === "url") {
                         if (aElement.firstElementChild.textContent.indexOf("...") > -1) {
                             tip = Lute.EscapeHTMLStr(aElement.firstElementChild.getAttribute("data-href"));
-                            tooltipClass = "href";
+                            tooltipClasses.push("href");
                         }
                     }
                     if (!tip && aElement.dataset.wrap !== "true" && event.target.dataset.type !== "block-more" && !hasClosestByClassName(event.target, "block__icon")) {
@@ -65,15 +68,21 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
-                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><div class="fn__hr"></div>${aElement.getAttribute("data-name")}` : aElement.getAttribute("data-name");
-                tooltipClass = "href";
+                const title = aElement.getAttribute("data-name") || "";
+                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}` : title;
+                tooltipClasses.push("href");
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
+            } else if (aElement.getAttribute("data-type") === "setRelationCell") {
+                const childElement = aElement.querySelector(".b3-menu__label");
+                if (childElement && childElement.clientWidth < childElement.scrollWidth) {
+                    tip = childElement.textContent;
+                }
             }
             if (!tip) {
                 tip = aElement.getAttribute("data-inline-memo-content");
                 if (tip) {
-                    tooltipClass = "memo"; // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
+                    tooltipClasses.push("memo"); // 为行级备注添加 class https://github.com/siyuan-note/siyuan/issues/6161
                 }
             }
             if (!tip) {
@@ -81,7 +90,7 @@ export const initBlockPopover = (app: App) => {
                 // 链接地址强制换行 https://github.com/siyuan-note/siyuan/issues/11539
                 if (href) {
                     tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
-                    tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
+                    tooltipClasses.push("href"); // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
                 }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
@@ -89,25 +98,25 @@ export const initBlockPopover = (app: App) => {
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
                         if (response.code === 1) {
                             if (title) {
-                                assetTip += '<div class="fn__hr"></div>' + title;
+                                assetTip += '<div class="fn__hr"></div><span>' + title + "</span>";
                             }
                         } else {
-                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div>' + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
+                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
-                        showTooltip(assetTip, aElement, tooltipClass);
+                        showTooltip(assetTip, aElement, tooltipClasses);
                     });
                     tip = "";
                 } else if (title) {
-                    tip += '<div class="fn__hr"></div>' + title;
+                    tip += '<div class="fn__hr"></div><span>' + title + "</span>";
                 }
             }
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
-                    showTooltip(decodeURIComponent(tip), aElement, tooltipClass);
+                    showTooltip(decodeURIComponent(tip), aElement, tooltipClasses);
                 } catch (e) {
                     // https://ld246.com/article/1718235737991
-                    showTooltip(tip, aElement, tooltipClass);
+                    showTooltip(tip, aElement, tooltipClasses);
                 }
                 event.stopPropagation();
             } else {

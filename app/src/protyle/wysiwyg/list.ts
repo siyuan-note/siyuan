@@ -1,5 +1,5 @@
 import {focusByWbr} from "../util/selection";
-import {transaction, updateTransaction} from "./transaction";
+import {transaction, turnsIntoOneTransaction, updateTransaction} from "./transaction";
 import {genEmptyBlock} from "../../block/util";
 import * as dayjs from "dayjs";
 import {Constants} from "../../constants";
@@ -351,8 +351,8 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
     }
     if (parentLiItemElement.classList.contains("protyle-wysiwyg") || parentLiItemElement.classList.contains("sb") || parentLiItemElement.classList.contains("bq")) {
         // 顶层列表
-        const doOperations: IOperation[] = [];
-        const undoOperations: IOperation[] = [];
+        const topDoOperations: IOperation[] = [];
+        const topUndoOperations: IOperation[] = [];
         range.collapse(false);
         moveToPrevious(deleteElement, range, isDelete);
         range.insertNode(document.createElement("wbr"));
@@ -370,13 +370,13 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 if (!id) {
                     return;
                 }
-                doOperations.push({
+                topDoOperations.push({
                     action: "move",
                     id,
                     previousID: topPreviousID,
                     parentID: parentLiItemElement.getAttribute("data-node-id") || protyle.block.parentID
                 });
-                undoOperations.push({
+                topUndoOperations.push({
                     action: "move",
                     id,
                     previousID: index === 1 ? undefined : topPreviousID,
@@ -401,7 +401,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 lastBlockElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 lastBlockElement.innerHTML = `<div class="protyle-attr" contenteditable="false">${Constants.ZWSP}</div>`;
                 previousElement.after(lastBlockElement);
-                doOperations.push({
+                topDoOperations.push({
                     action: "insert",
                     id: newId,
                     data: lastBlockElement.outerHTML,
@@ -410,13 +410,13 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             }
             let topOldPreviousID;
             while (nextElement && !nextElement.classList.contains("protyle-attr")) {
-                doOperations.push({
+                topDoOperations.push({
                     action: "move",
                     id: nextElement.getAttribute("data-node-id"),
                     previousID: topOldPreviousID || lastBlockElement.lastElementChild.previousElementSibling?.getAttribute("data-node-id"),
                     parentID: lastBlockElement.getAttribute("data-node-id")
                 });
-                undoOperations.push({
+                topUndoOperations.push({
                     action: "move",
                     id: nextElement.getAttribute("data-node-id"),
                     parentID: lastBlockElement.getAttribute("data-node-id"),
@@ -431,7 +431,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 Array.from(lastBlockElement.children).forEach(orderItem => {
                     const id = orderItem.getAttribute("data-node-id");
                     if (id) {
-                        undoOperations.push({
+                        topUndoOperations.push({
                             action: "update",
                             id,
                             data: orderItem.outerHTML,
@@ -442,7 +442,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 Array.from(lastBlockElement.children).forEach(orderItem => {
                     const id = orderItem.getAttribute("data-node-id");
                     if (id) {
-                        doOperations.push({
+                        topDoOperations.push({
                             action: "update",
                             id,
                             data: orderItem.outerHTML,
@@ -451,7 +451,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
                 });
             }
             if (newId) {
-                undoOperations.push({
+                topUndoOperations.push({
                     action: "delete",
                     id: newId
                 });
@@ -464,7 +464,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
 
         if (liElement.childElementCount === 1) {
             // 列表只有一项
-            doOperations.push({
+            topDoOperations.push({
                 action: "delete",
                 id: liId
             });
@@ -472,7 +472,7 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             if (liId === protyle.block.id) {
                 protyle.block.id = protyle.block.parentID;
             }
-            undoOperations.splice(0, 0, {
+            topUndoOperations.splice(0, 0, {
                 action: "insert",
                 data: movedHTML,
                 id: liId,
@@ -484,18 +484,27 @@ export const listOutdent = (protyle: IProtyle, liItemElements: Element[], range:
             if (liElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(liElement, startIndex);
             }
-            doOperations.push({
+            topDoOperations.push({
                 action: "update",
                 id: liId,
                 data: liElement.outerHTML
             });
-            undoOperations.splice(0, 0, {
+            topUndoOperations.splice(0, 0, {
                 action: "update",
                 id: liId,
                 data: movedHTML,
             });
         }
-        transaction(protyle, doOperations, undoOperations);
+        transaction(protyle, topDoOperations, topUndoOperations);
+        if (liElement.childElementCount !== 1 && parentLiItemElement.classList.contains("sb") &&
+            parentLiItemElement.getAttribute("data-sb-layout") === "col") {
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: [liElement, liElement.nextElementSibling],
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
         focusByWbr(parentLiItemElement, range);
         return;
     }

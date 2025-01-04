@@ -130,6 +130,10 @@ func DeleteOutdatedHistories(before int64) {
 }
 
 func IndexHistoriesQueue(histories []*History) {
+	if 1 > len(histories) {
+		return
+	}
+
 	historyDBQueueLock.Lock()
 	defer historyDBQueueLock.Unlock()
 

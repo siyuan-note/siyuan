@@ -408,10 +408,24 @@ func importConf(c *gin.Context) {
 	}
 
 	tmpDir := filepath.Join(importDir, "conf")
-	if err = gulu.Zip.Unzip(tmp, tmpDir); err != nil {
-		logging.LogErrorf("import conf failed: %s", err)
+	os.RemoveAll(tmpDir)
+	if strings.HasSuffix(strings.ToLower(tmp), ".zip") {
+		if err = gulu.Zip.Unzip(tmp, tmpDir); err != nil {
+			logging.LogErrorf("import conf failed: %s", err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+			return
+		}
+	} else if strings.HasSuffix(strings.ToLower(tmp), ".json") {
+		if err = gulu.File.CopyFile(tmp, filepath.Join(tmpDir, f.Filename)); err != nil {
+			logging.LogErrorf("import conf failed: %s", err)
+			ret.Code = -1
+			ret.Msg = err.Error()
+		}
+	} else {
+		logging.LogErrorf("invalid conf package")
 		ret.Code = -1
-		ret.Msg = err.Error()
+		ret.Msg = "invalid conf package"
 		return
 	}
 

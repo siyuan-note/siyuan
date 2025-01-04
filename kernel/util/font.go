@@ -78,6 +78,9 @@ type Font struct {
 func loadFonts() (ret []*Font) {
 	ret = []*Font{}
 	for _, fontPath := range findfont.List() {
+		if strings.Contains(fontPath, "AppData") {
+			logging.LogInfof("skip font [%s]", fontPath)
+		}
 		if strings.HasSuffix(strings.ToLower(fontPath), ".ttc") {
 			data, err := os.ReadFile(fontPath)
 			if err != nil {
@@ -151,6 +154,8 @@ func loadFonts() (ret []*Font) {
 					if sfnt.NamePreferredFamily == e.NameID && "" != val {
 						family = val
 					}
+				} else {
+					logging.LogInfof("skip font family [%s] [%+v]", fontPath, e)
 				}
 			}
 			if "" != family && !strings.HasPrefix(family, ".") {

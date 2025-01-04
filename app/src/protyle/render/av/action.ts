@@ -344,7 +344,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        content = `((${id} '${cellElement.querySelector(".av__celltext").textContent}'))`;
+                        content = `((${id} '${cellElement.querySelector(".av__celltext").textContent.replace(/\n/g, " ")}'))`;
                     }
                     if (ids.length > 1) {
                         text += "* ";
@@ -413,7 +413,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     if (cellElement.getAttribute("data-detached") === "true") {
                         content = cellElement.querySelector(".av__celltext").textContent;
                     } else {
-                        content = `[${cellElement.querySelector(".av__celltext").textContent}](siyuan://blocks/${id})`;
+                        content = `[${cellElement.querySelector(".av__celltext").textContent.replace(/\n/g, " ")}](siyuan://blocks/${id})`;
                     }
                     if (ids.length > 1) {
                         text += "* ";

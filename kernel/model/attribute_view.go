@@ -3147,7 +3147,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 						if blockText == content {
 							updateStaticText = false
 						} else {
-							val.Block.Content = blockText
+							val.Block.Content = content
 						}
 					}
 

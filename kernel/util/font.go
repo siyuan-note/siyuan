@@ -125,17 +125,32 @@ func loadFonts() (ret []*Font) {
 					continue
 				}
 
-				v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
-				if err != nil {
-					//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
-					continue
-				}
-				val := string(v)
-				if sfnt.NameFontFamily == e.NameID && "" != val {
-					family = val
-				}
-				if sfnt.NamePreferredFamily == e.NameID && "" != val {
-					family = val
+				if sfnt.PlatformLanguageID(1033) == e.LanguageID {
+					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+					if err != nil {
+						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
+						continue
+					}
+					val := string(v)
+					if sfnt.NameFontFamily == e.NameID && "" != val {
+						family = val
+					}
+					if sfnt.NamePreferredFamily == e.NameID && "" != val {
+						family = val
+					}
+				} else if sfnt.PlatformLanguageID(2052) == e.LanguageID {
+					v, _, err := transform.Bytes(textUnicode.UTF16(textUnicode.BigEndian, textUnicode.IgnoreBOM).NewDecoder(), e.Value)
+					if err != nil {
+						//LogErrorf("decode font family [%s] failed: %s", fontPath, err)
+						continue
+					}
+					val := string(v)
+					if sfnt.NameFontFamily == e.NameID && "" != val {
+						family = val
+					}
+					if sfnt.NamePreferredFamily == e.NameID && "" != val {
+						family = val
+					}
 				}
 			}
 			if "" != family && !strings.HasPrefix(family, ".") {

@@ -241,7 +241,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 h: rect.height,
                 w: rect.width,
             }, (unicode) => {
-                target.innerHTML = unicode2Emoji(unicode);
+                if (target.parentElement.classList.contains("av__cell--relation")) {
+                    target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+                } else {
+                    target.innerHTML = unicode2Emoji(unicode);
+                }
             }, target.querySelector("img"));
             event.preventDefault();
             event.stopPropagation();

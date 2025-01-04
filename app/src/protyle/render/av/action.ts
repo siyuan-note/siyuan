@@ -240,7 +240,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 y: rect.bottom,
                 h: rect.height,
                 w: rect.width,
-            }, undefined, target.querySelector("img"));
+            }, (unicode) => {
+                target.innerHTML = unicode2Emoji(unicode);
+            }, target.querySelector("img"));
             event.preventDefault();
             event.stopPropagation();
             return true;

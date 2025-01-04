@@ -216,7 +216,7 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
 <option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`;
 };
 
-export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, avCB?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
+export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, callback?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
     } else {
@@ -432,8 +432,9 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                     updateFileTreeEmoji(unicode, id);
                     updateOutlineEmoji(unicode, id);
                 });
-            } else {
-                avCB(unicode);
+            }
+            if (callback) {
+                callback(unicode);
             }
             event.preventDefault();
             event.stopPropagation();
@@ -558,8 +559,9 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                         updateFileTreeEmoji("", id);
                         updateOutlineEmoji("", id);
                     });
-                } else {
-                    avCB("");
+                }
+                if (callback) {
+                    callback("");
                 }
                 break;
             } else if (target.classList.contains("emojis__item") || target.getAttribute("data-action") === "random" || target.classList.contains("emoji__dynamic-item")) {
@@ -590,9 +592,11 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
                         addEmoji(unicode);
                         updateFileTreeEmoji(unicode, id);
                         updateOutlineEmoji(unicode, id);
+
                     });
-                } else {
-                    avCB(unicode);
+                }
+                if (callback) {
+                    callback(unicode);
                 }
                 break;
             } else if (target.getAttribute("data-type")?.startsWith("tab-")) {

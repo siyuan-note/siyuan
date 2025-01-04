@@ -240,7 +240,8 @@ const filterItem = (menuElement: Element, cellElement: HTMLElement, keyword: str
         let html = "";
         let selectHTML = "";
         const hasIds: string[] = [];
-        cellElement.querySelectorAll("span").forEach((item) => {
+        cellElement.querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
+            const item = relationItem.querySelector(".av__celltext") as HTMLElement;
             hasIds.push(item.dataset.id);
             selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item${item.textContent.indexOf(keyword) > -1 ? "" : " fn__none"}" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
         });
@@ -271,7 +272,8 @@ export const bindRelationEvent = (options: {
         let html = "";
         let selectHTML = "";
         const hasIds: string[] = [];
-        options.cellElements[0].querySelectorAll("span").forEach((item) => {
+        options.cellElements[0].querySelectorAll(".av__cell--relation").forEach((relationItem: HTMLElement) => {
+            const item = relationItem.querySelector(".av__celltext") as HTMLElement;
             hasIds.push(item.dataset.id);
             selectHTML += `<button data-id="${item.dataset.id}" data-type="setRelationCell" class="b3-menu__item" draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), item.textContent || window.siyuan.languages.untitled)}</button>`;
         });

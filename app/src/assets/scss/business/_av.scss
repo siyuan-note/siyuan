@@ -381,6 +381,14 @@
 
     }
 
+    &--relation {
+      margin-left: 12px;
+
+      &:first-child {
+        margin-left: 0;
+      }
+    }
+
     .block__icon {
       position: absolute;
       right: 5px;

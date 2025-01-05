@@ -1181,7 +1181,7 @@ data-type="navigation-root" data-path="/">
             countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__nw" aria-label="${window.siyuan.languages.ref}">${item.count}</span>`;
         }
         const ariaLabel = this.genDocAriaLabel(item, escapeAriaLabel);
-        const paddingLeft = (item.path.split("/").length - 1) * 18
+        const paddingLeft = (item.path.split("/").length - 1) * 18;
         return `<li data-node-id="${item.id}" data-name="${Lute.EscapeHTMLStr(item.name)}" draggable="true" data-count="${item.subFileCount}" 
 data-type="navigation-file" 
 style="--file-toggle-width:${paddingLeft + 18}px" 

@@ -168,7 +168,7 @@ export class Wnd {
         }) {
             const it = this as HTMLElement;
             if(!window.siyuan.currentDragOverTabHeadersElement) {
-                window.siyuan.currentDragOverTabHeadersElement = it
+                window.siyuan.currentDragOverTabHeadersElement = it;
             }  else {
                 if (!window.siyuan.currentDragOverTabHeadersElement.isSameNode(it)) {
                     window.siyuan.currentDragOverTabHeadersElement.classList.remove("layout-tab-bars--drag");

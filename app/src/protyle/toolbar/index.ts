@@ -535,7 +535,10 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                            item.textContent = item.getAttribute("data-content");
+                            if (item.querySelector(".katex")) {
+                                // 选中完整的数学公式才进行备注 https://github.com/siyuan-note/siyuan/issues/13667
+                                item.textContent = item.getAttribute("data-content");
+                            }
                         } else if (type === "inline-math" && types.includes("inline-memo")) {
                             // 数学公式和备注不能同时存在
                             types.find((item, index) => {

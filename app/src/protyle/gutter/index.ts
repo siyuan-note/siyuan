@@ -380,7 +380,7 @@ export class Gutter {
                 this.renderMenu(protyle, buttonElement);
                 // https://ld246.com/article/1648433751993
                 if (!protyle.toolbar.range) {
-                    protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
+                    protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.querySelector(`[data-node-id="${id}"]`) || protyle.wysiwyg.element.firstElementChild);
                 }
                 /// #if MOBILE
                 window.siyuan.menus.menu.fullscreen();
@@ -418,7 +418,9 @@ export class Gutter {
                 } else if (buttonElement.dataset.type !== "NodeAttributeViewRow") {
                     this.renderMenu(protyle, buttonElement);
                     if (!protyle.toolbar.range) {
-                        protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
+                        protyle.toolbar.range = getEditorRange(
+                            protyle.wysiwyg.element.querySelector(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`) ||
+                            protyle.wysiwyg.element.firstElementChild);
                     }
                     /// #if MOBILE
                     window.siyuan.menus.menu.fullscreen();
@@ -1382,13 +1384,31 @@ export class Gutter {
                 id: "separator_cancelSuperBlock",
                 type: "separator"
             }).element);
+            const isCol = nodeElement.getAttribute("data-sb-layout") === "col";
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "cancelSuperBlock",
                 label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,
+                accelerator: window.siyuan.config.keymap.editor.general[isCol ? "hLayout" : "vLayout"].custom,
                 click() {
                     const sbData = cancelSB(protyle, nodeElement);
                     transaction(protyle, sbData.doOperations, sbData.undoOperations);
                     focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${sbData.previousId}"]`));
+                    hideElements(["gutter"], protyle);
+                }
+            }).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                accelerator: window.siyuan.config.keymap.editor.general[isCol ? "vLayout" : "hLayout"].custom,
+                label: window.siyuan.languages.turnInto + " " + window.siyuan.languages[isCol ? "vLayout" : "hLayout"],
+                click() {
+                    const oldHTML = nodeElement.outerHTML;
+                    if (isCol) {
+                        nodeElement.setAttribute("data-sb-layout", "row")
+                    } else {
+                        nodeElement.setAttribute("data-sb-layout", "col")
+                    }
+                    nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                    updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                    focusByRange(protyle.toolbar.range);
                     hideElements(["gutter"], protyle);
                 }
             }).element);

@@ -382,14 +382,14 @@ export class Gutter {
                 if (!protyle.toolbar.range) {
                     protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
                 }
-                if (isMobile()) {
-                    window.siyuan.menus.menu.fullscreen();
-                } else {
-                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
-                    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
-                    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                    focusByRange(protyle.toolbar.range);
-                }
+                /// #if MOBILE
+                window.siyuan.menus.menu.fullscreen();
+                /// #else
+                window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+                window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
+                focusByRange(protyle.toolbar.range);
+                /// #endif
             }
         });
         this.element.addEventListener("contextmenu", (event: MouseEvent & { target: HTMLInputElement }) => {
@@ -420,14 +420,14 @@ export class Gutter {
                     if (!protyle.toolbar.range) {
                         protyle.toolbar.range = getEditorRange(protyle.wysiwyg.element.firstElementChild);
                     }
-                    if (isMobile()) {
-                        window.siyuan.menus.menu.fullscreen();
-                    } else {
-                        window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
-                        const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
-                        window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
-                        focusByRange(protyle.toolbar.range);
-                    }
+                    /// #if MOBILE
+                    window.siyuan.menus.menu.fullscreen();
+                    /// #else
+                    window.siyuan.menus.menu.popup({x: gutterRect.left, y: gutterRect.bottom, isLeft: true});
+                    const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
+                    window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
+                    focusByRange(protyle.toolbar.range);
+                    /// #endif
                 }
             }
             event.preventDefault();

@@ -103,14 +103,16 @@ func renderOutline(heading *ast.Node, luteEngine *lute.Lute) (ret string) {
 	return
 }
 
-func renderBlockText(node *ast.Node, excludeTypes []string) (ret string) {
+func renderBlockText(node *ast.Node, excludeTypes []string, removeLineBreak bool) (ret string) {
 	if nil == node {
 		return
 	}
 
 	ret = sql.NodeStaticContent(node, excludeTypes, false, false, false)
 	ret = strings.TrimSpace(ret)
-	ret = strings.ReplaceAll(ret, "\n", "")
+	if removeLineBreak {
+		ret = strings.ReplaceAll(ret, "\n", "")
+	}
 	ret = util.UnescapeHTML(ret)
 	ret = util.EscapeHTML(ret)
 	ret = strings.TrimSpace(ret)

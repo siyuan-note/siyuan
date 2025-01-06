@@ -72,18 +72,6 @@ func LoadTrees(ids []string) (ret map[string]*parse.Tree) {
 	return
 }
 
-func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
-	filePath := filepath.Join(util.DataDir, boxID, p)
-	data, err := filelock.ReadFile(filePath)
-	if err != nil {
-		logging.LogErrorf("load tree [%s] failed: %s", p, err)
-		return
-	}
-
-	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
-	return
-}
-
 func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse.Tree, errs []error) {
 	waitGroup := sync.WaitGroup{}
 	lock := sync.Mutex{}
@@ -116,6 +104,18 @@ func batchLoadTrees(boxIDs, paths []string, luteEngine *lute.Lute) (ret []*parse
 	}
 	waitGroup.Wait()
 	p.Release()
+	return
+}
+
+func LoadTree(boxID, p string, luteEngine *lute.Lute) (ret *parse.Tree, err error) {
+	filePath := filepath.Join(util.DataDir, boxID, p)
+	data, err := filelock.ReadFile(filePath)
+	if err != nil {
+		logging.LogErrorf("load tree [%s] failed: %s", p, err)
+		return
+	}
+
+	ret, err = LoadTreeByData(data, boxID, p, luteEngine)
 	return
 }
 

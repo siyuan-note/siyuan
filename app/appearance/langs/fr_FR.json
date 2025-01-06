@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Système de fichiers local",
+  "deviceNotSupport": "L'appareil actuel n'est pas pris en charge",
   "second": "seconde",
   "syncInterval": "intervalle de synchronisation",
   "syncIntervalTip": "Synchronisation automatique des données après l'arrêt des modifications",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Actuellement sélectionné est le service de stockage en nuage officiellement fourni par SiYuan, qui ne prend en charge que les utilisateurs d'abonnement payant",
   "syncThirdPartyProviderS3Intro": "L'actuel sélectionné est un service de stockage cloud tiers compatible avec le protocole Amazon S3",
   "syncThirdPartyProviderWebDAVIntro": "Le service de stockage cloud tiers du protocole WebDAV est actuellement sélectionné. En raison des performances médiocres et de la stabilité insuffisante de ce protocole, il est recommandé de choisir d'abord le service S3",
+  "syncThirdPartyProviderLocalIntro": "Le service de stockage fourni par le système de fichiers local est actuellement sélectionné. Veuillez saisir le chemin complet du dossier local dans le champ <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "Avant d'utiliser cette fonctionnalité, veuillez prêter attention aux limitations techniques et aux éléments de facturation du service de stockage cloud tiers : <div class=\"b3-label__text\"><ul class='fn__list'><li>Limitations techniques telles que la fréquence d'appel et la bande passante de l'interface</li><li >Éléments de facturation tels que l'espace de stockage et le trafic</li><li>Conditions d'utilisation et garantie de disponibilité</li></ul></div><div class='fn__hr'></div>Avis de non-responsabilité : pour plus de détails, veuillez vous référer aux termes pertinents dans la licence open source AGPLv3 utilisé par SiYuan",
   "syncProvider": "Fournisseur de services de stockage en nuage",
   "syncProviderTip": "Si sélectionné, le service de stockage cloud de ce fournisseur sera utilisé pour réaliser les fonctions de synchronisation et de sauvegarde cloud",
@@ -1579,6 +1582,8 @@
     "249": "Impossible d'accéder aux données en raison d'une erreur de configuration. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
     "250": "La demande a été limitée par le stockage cloud. Veuillez vérifier les paramètres et les autorisations de stockage cloud",
     "251": "Total des actifs inutilisés [%d], seulement [%d] listés ici",
-    "252": "\uD83D\uDEA8 Microsoft Defender peut supprimer par erreur le noyau, supprimer des données et réduire considérablement les performances. Il est recommandé d'ajouter le chemin d'installation et l'espace de travail de SiYuan à la liste des exclusions<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ajouter</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender peut supprimer par erreur le noyau, supprimer des données et réduire considérablement les performances. Il est recommandé d'ajouter le chemin d'installation et l'espace de travail de SiYuan à la liste des exclusions<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Ajouter</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorer</button>",
+    "253": "Compression du fichier [%s], veuillez patienter...",
+    "254": "[Region ID] ID de région incorrect, veuillez consulter la documentation du fournisseur de services S3 pour configurer l'ID de région"
   }
 }

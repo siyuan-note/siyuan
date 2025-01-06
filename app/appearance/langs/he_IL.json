@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "מערכת קבצים מקומית",
+  "deviceNotSupport": "המכשיר הנוכחי אינו נתמך",
   "second": "שנייה",
   "syncInterval": "מרווח סנכרון",
   "syncIntervalTip": "סנכרון נתונים אוטומטי לאחר שהנתונים מפסיקים להשתנות",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "נבחר עתה הוא שירות האחסון בענן המוצע רשמית על ידי SiYuan, אשר תומך רק במשתמשים בתשלום",
   "syncThirdPartyProviderS3Intro": "הנבחר עתה הוא שירות אחסון בענן צד שלישי תואם עם פרוטוקול Amazon S3 (למשל <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "הנבחר עתה הוא שירות אחסון בענן צד שלישי עם פרוטוקול WebDAV. בשל ביצועים לקויים ויציבות בלתי מתאימה של פרוטוקול זה, הכרחי לבחור קודם בשירות S3",
+  "syncThirdPartyProviderLocalIntro": "שירות האחסון שסופק על ידי מערכת הקבצים המקומית נבחר כעת. אנא הזן את הנתיב המלא של התיקייה המקומית בשדה <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "לפני השימוש בתכונה זו, אנא שים לב למגבלות טכניות ופריטי חיוב של שירות האחסון בענן של צד שלישי: <div class=\"b3-label__text\"><ul class='fn__list'><li>מגבלות טכניות כמו תדירות קריאות ממשק ורוחב פס</li><li>פריטי חיוב כמו שטח אחסון ותעבורה</li><li>תנאי שימוש והתחייבות זמינות</li></ul></div><div class='fn__hr'></div>הבהרה: למידע נוסף, עיין בתנאים הרלוונטיים ברישיון הקוד הפתוח AGPLv3 בו משתמשת SiYuan",
   "syncProvider": "ספק שירות אחסון בענן",
   "syncProviderTip": "אם נבחר, שירות האחסון בענן של ספק זה ישמש כדי להשיג פונקציות סנכרון וגיבוי בענן",
@@ -1579,6 +1582,8 @@
     "249": "אין אפשרות לגשת לנתונים עקב שגיאת תצורה. אנא בדוק את ההגדרות והרשאות האחסון בענן",
     "250": "הבקשה הוגבלה על ידי אחסון הענן. אנא בדוק את ההגדרות והרשאות האחסון בענן",
     "251": "סך כל הנכסים שלא נעשה בהם שימוש [%d], רק [%d] מופיעים כאן",
-    "252": "\uD83D\uDEA8 Microsoft Defender עלול למחוק בטעות את הליבה, למחוק נתונים ולהפחית משמעותית את הביצועים. מומלץ להוסיף את נתיב ההתקנה ונתיב סביבת העבודה של SiYuan לרשימת החריגים<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">הוסף</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender עלול למחוק בטעות את הליבה, למחוק נתונים ולהפחית משמעותית את הביצועים. מומלץ להוסיף את נתיב ההתקנה ונתיב סביבת העבודה של SiYuan לרשימת החריגים<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">הוסף</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">התעלם</button>",
+    "253": "דוחס את הקובץ [%s], אנא המתן...",
+    "254": "[Region ID] מזהה האזור שגוי, אנא עיין בתיעוד ספק שירותי S3 כדי להגדיר את מזהה האזור"
   }
 }

@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "ローカルファイルシステム",
+  "deviceNotSupport": "現在のデバイスはサポートされていません",
   "second": "秒",
   "syncInterval": "同期間隔",
   "syncIntervalTip": "データが変動しなくなった後に自動的にデータを同期します",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "現在選択されているのは SiYuan が公式に提供するクラウドストレージサービスで、有料サブスクリプションユーザーのみが利用可能です",
   "syncThirdPartyProviderS3Intro": "現在選択されているのは Amazon S3 プロトコルに準拠したサードパーティのクラウドストレージサービスです (例: <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>、<a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>、<a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "現在選択されているのは WebDAV プロトコルに対応したサードパーティのクラウドストレージサービスです。このプロトコルはパフォーマンスが低く安定性に欠けるため、S3 サービスを優先して選択することをお勧めします",
+  "syncThirdPartyProviderLocalIntro": "現在、ローカルファイルシステムが提供するストレージサービスが選択されています。<code class='fn__code'>Endpoint</code>フィールドにローカルフォルダの完全なパスを入力してください",
   "syncThirdPartyProviderTip": "この機能を使用する前にサードパーティのクラウドストレージサービスの技術的な制限と請求項目に注意してください: <div class=\"b3-label__text\"><ul class='fn__list'><li>インターフェース呼び出し頻度や帯域幅などの技術的制限</li><li>ストレージ容量やトラフィックなどの請求項目</li><li>利用規約と可用性の保証</li></ul></div><div class='fn__hr'></div>免責事項: 詳細は SiYuan が使用するオープンソースライセンス AGPLv3 の関連規約を参照してください",
   "syncProvider": "クラウドストレージサービスプロバイダー",
   "syncProviderTip": "選択したプロバイダーのクラウドストレージサービスがクラウド同期とバックアップ機能を実現するために使用されます",
@@ -1579,6 +1582,8 @@
     "249": "設定エラーのためデータにアクセスできません。設定を一つずつ確認し、クラウドストレージの権限を確認してください",
     "250": "リクエストがクラウドストレージによって制限されました。設定を一つずつ確認し、クラウドストレージの権限を確認してください",
     "251": "未使用のアセットの合計 [%d]、ここにリストされているのは [%d] のみ",
-    "252": "\uD83D\uDEA8 Microsoft Defender はカーネルを誤って削除したり、データを削除したり、パフォーマンスを大幅に低下させ��可能性があります。SiYuan のインストールパスとワークスペースパスを除外リストに追加することをお勧めします<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">追加</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender は、カーネルを誤って削除したり、データを削除したり、パフォーマンスを大幅に低下させたりする可能性があります。SiYuan のインストールパスとワークスペースパスを除外リストに追加することをお勧めします<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">追加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">無視</button>",
+    "253": "ファイル [%s] を圧縮しています、お待ちください...",
+    "254": "[Region ID] リージョンIDが正しくありません。S3サービスプロバイダーのドキュメントを参照してリージョンIDを設定してください"
   }
 }

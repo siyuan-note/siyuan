@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "نظام الملفات المحلي",
+  "deviceNotSupport": "الجهاز الحالي غير مدعوم",
   "second": "ثانية",
   "syncInterval": "الفاصل الزمني للمزامنة",
   "syncIntervalTip": "مزامنة البيانات تلقائياً بعد أن توقف عن التغيير",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "‫المحدد حاليا هو خدمة تخزين السحابة التي توفرها رسميا SiYuan، والتي تدعم فقط المستخدمين المشتركين المدفوعة‬",
   "syncThirdPartyProviderS3Intro": "‫المحدد حاليا هو خدمة تخزين سحابية تابعة لطرف ثالث متوافقة مع بروتوكول Amazon S3 (على سبيل المثال <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>، <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>، <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)‬",
   "syncThirdPartyProviderWebDAVIntro": "‫المحدد حاليا هو خدمة تخزين سحابية لطرف ثالث مع بروتوكول WebDAV. بسبب ضعف أداء هذا البروتوكول وعدم كفاية استقراره، يوصى باختيار خدمة S3 أولا‬",
+  "syncThirdPartyProviderLocalIntro": "‫المحدد حاليا هو خدمة تخزين سحابية لطرف ثالث مع بروتوكوليتم حاليًا اختيار خدمة التخزين التي يوفرها نظام الملفات المحلي. الرجاء إدخال المسار الكامل للمجلد المحلي في حقل <code class='fn__code'>Endpoint</code>‬",
   "syncThirdPartyProviderTip": "‫قبل استخدام هذه الميزة، يرجى الانتباه إلى القيود التقنية وبنود الفوترة لخدمة التخزين السحابي من الطرف الثالث: <div class=\\\"b3-label__text\\\"><ul class='fn__list'><li>القيود التقنية مثل تكرار استدعاء الواجهة وعرض النطاق الترددي</li><li>بنود الفوترة مثل مساحة التخزين وحركة المرور</li><li>شروط الاستخدام وضمان التوفر</li></ul></div><div class='fn__hr'></div>إخلاء المسؤولية: للمزيد من التفاصيل، يرجى الرجوع إلى الشروط ذات الصلة في ترخيص المصدر المفتوح AGPLv3 المستخدم في SiYuan‬",
   "syncProvider": "موفر خدمات التخزين السحابي",
   "syncProviderTip": "إذا تم اختياره، سيتم استخدام خدمة التخزين السحابية لهذا الموفر لتحقيق مزامنة السحابة ووظائف النسخ الاحتياطي",
@@ -1579,6 +1582,8 @@
     "249": "تعذر الوصول إلى البيانات بسبب خطأ في الإعدادات. الرجاء التحقق من الإعدادات وأذونات التخزين السحابية",
     "250": "تم تحديد معدل الطلب بواسطة التخزين السحابي. الرجاء التحقق من الإعدادات وأذونات التخزين السحابية",
     "251": "‫مجموع الأصول غير المستخدمة [%d]، [%d] فقط منها مدرج هنا‬",
-    "252": "\uD83D\uDEA8 قد يقوم Microsoft Defender بحذف النواة عن طريق الخطأ، وحذف البيانات وتقليل الأداء بشكل كبير. يوصى بإضافة مسار التثبيت ومسار مساحة العمل الخاصة بـ SiYuan إلى قائمة الاستثناءات<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">إضافة</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 قد يقوم Microsoft Defender بحذف النواة عن طريق الخطأ، وحذف البيانات وتقليل الأداء بشكل كبير. يُوصى بإضافة مسار التثبيت ومسار مساحة العمل الخاصة بـ SiYuan إلى قائمة الاستثناءات<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">إضافة</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">تجاهل</button>",
+    "253": "جارٍ ضغط الملف [%s]، يرجى الانتظار...",
+    "254": "[Region ID] معرّف المنطقة غير صحيح، يرجى الرجوع إلى وثائق مزود خدمة S3 لتكوين معرّف المنطقة"
   }
 }

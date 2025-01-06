@@ -20,4 +20,4 @@ package model
 
 func AddMicrosoftDefenderExclusion() error { return nil }
 
-func AutoProcessMicrosoftDefender() {}
+func AutoCheckMicrosoftDefender() {}

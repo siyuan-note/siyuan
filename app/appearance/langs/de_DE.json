@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Lokales Dateisystem",
+  "deviceNotSupport": "Das aktuelle Gerät wird nicht unterstützt",
   "second": "Sekunde",
   "syncInterval": "Synchronisierungsintervall",
   "syncIntervalTip": "Automatische Datensynchronisierung, nachdem die Daten nicht mehr geändert werden",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Derzeit ausgewählt ist der von SiYuan offiziell bereitgestellte Cloud-Speicherdienst, der nur abonnierte Benutzer unterstützt.",
   "syncThirdPartyProviderS3Intro": "Derzeit ausgewählt ist ein Drittanbieter-Cloudspeicherdienst, der mit dem Amazon S3-Protokoll kompatibel ist (z. B. <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "Derzeit ausgewählt ist ein Drittanbieter-Cloudspeicherdienst mit dem WebDAV-Protokoll. Aufgrund der schlechten Leistung und unzureichenden Stabilität dieses Protokolls wird empfohlen, zuerst den S3-Dienst auszuwählen.",
+  "syncThirdPartyProviderLocalIntro": "Derzeit wird der vom lokalen Dateisystem bereitgestellte Speicherdienst ausgewählt. Bitte geben Sie im Feld <code class='fn__code'>Endpoint</code> den vollständigen Pfad des lokalen Ordners ein",
   "syncThirdPartyProviderTip": "Bitte beachten Sie vor der Nutzung dieser Funktion die technischen Einschränkungen und Abrechnungspositionen des Drittanbieter-Cloudspeicherdienstes: <div class=\"b3-label__text\"><ul class='fn__list'><li>Technische Einschränkungen wie Schnittstellenaufruffrequenz und Bandbreite</li><li>Abrechnungspositionen wie Speicherplatz und Datenverkehr</li><li>Nutzungsbedingungen und Verfügbarkeitsgarantie</li></ul></div><div class='fn__hr'></div>Haftungsausschluss: Für Details konsultieren Sie bitte die entsprechenden Bestimmungen in der Open Source Lizenz AGPLv3, die von SiYuan verwendet wird.",
   "syncProvider": "Cloud-Speicherdienstanbieter",
   "syncProviderTip": "Wenn ausgewählt, wird der Cloud-Speicherdienst dieses Anbieters verwendet, um Cloud-Synchronisations- und Backup-Funktionen zu erreichen.",
@@ -1579,6 +1582,8 @@
     "249": "Aufgrund eines Konfigurationsfehlers kann nicht auf die Daten zugegriffen werden. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
     "250": "Die Anfrage wurde vom Cloud-Speicher begrenzt. Bitte überprüfen Sie die Einstellungen und die Berechtigungen für den Cloud-Speicher",
     "251": "Insgesamt ungenutzte Assets [%d], hier nur [%d] aufgeführt",
-    "252": "\uD83D\uDEA8 Microsoft Defender könnte fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den Installationspfad und den Arbeitsbereich von SiYuan zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Hinzufügen</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender kann fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den SiYuan-Installationspfad und den Arbeitsbereichspfad zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Hinzufügen</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorieren</button>",
+    "253": "Datei [%s] wird komprimiert, bitte warten...",
+    "254": "[Region ID] Falsche Regions-ID, bitte konsultieren Sie die Dokumentation des S3-Dienstanbieters zur Konfiguration der Regions-ID"
   }
 }

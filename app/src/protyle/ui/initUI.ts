@@ -12,6 +12,9 @@ import {getContenteditableElement, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
+/// #if !MOBILE
+import {moveResize} from "../../dialog/moveResize";
+/// #endif
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -47,6 +50,16 @@ export const initUI = (protyle: IProtyle) => {
 
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);
+    /// #if !MOBILE
+    moveResize(protyle.toolbar.subElement, () => {
+        const pinElement = protyle.toolbar.subElement.querySelector('.block__icons [data-type="pin"]');
+        if (pinElement) {
+            pinElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
+            pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            protyle.toolbar.subElement.firstElementChild.setAttribute("data-drag", "true");
+        }
+    });
+    /// #endif
 
     protyle.element.append(protyle.highlight.styleElement);
 

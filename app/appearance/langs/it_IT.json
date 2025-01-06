@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "File system locale",
+  "deviceNotSupport": "Il dispositivo corrente non è supportato",
   "second": "secondo",
   "syncInterval": "intervallo di sincronizzazione",
   "syncIntervalTip": "Sincronizzazione automatica dei dati dopo che non ci sono più variazioni",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Attualmente è selezionato il servizio di archiviazione cloud ufficiale fornito da SiYuan, che supporta solo utenti abbonati a pagamento",
   "syncThirdPartyProviderS3Intro": "Attualmente è selezionato un servizio di archiviazione cloud di terze parti compatibile con il protocollo Amazon S3 (es. <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "Attualmente è selezionato un servizio di archiviazione cloud di terze parti con protocollo WebDAV. A causa delle scarse prestazioni e della stabilità insufficiente di questo protocollo, si consiglia di scegliere prima il servizio S3",
+  "syncThirdPartyProviderLocalIntro": "Attualmente è selezionato il servizio di archiviazione fornito dal file system locale. Inserisci il percorso completo della cartella locale nel campo <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "Prima di utilizzare questa funzione, presta attenzione ai limiti tecnici e agli elementi di fatturazione del servizio di archiviazione cloud di terze parti: <div class=\"b3-label__text\"><ul class='fn__list'><li>Limitazioni tecniche come la frequenza delle chiamate dell'interfaccia e la larghezza di banda</li><li>Elementi di fatturazione come lo spazio di archiviazione e il traffico</li><li>Termini di utilizzo e garanzia di disponibilità</li></ul></div><div class='fn__hr'></div>Disclaimer: Per dettagli, si prega di consultare i termini pertinenti nella licenza open source AGPLv3 utilizzata da SiYuan",
   "syncProvider": "Provider di servizio di archiviazione cloud",
   "syncProviderTip": "Se selezionato, verrà utilizzato il servizio di archiviazione cloud di questo provider per sincronizzare e fare il backup dei dati",
@@ -1579,6 +1582,8 @@
     "249": "Impossibile accedere ai dati a causa di un errore di configurazione. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
     "250": "La richiesta è stata limitata dall'archiviazione cloud. Si prega di controllare attentamente le impostazioni e le autorizzazioni di archiviazione cloud",
     "251": "Totale risorse inutilizzate [%d], qui elencate solo [%d]",
-    "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Aggiungi</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Aggiungi</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignora</button>",
+    "253": "Compressione del file [%s], attendere prego...",
+    "254": "[Region ID] ID regione non corretto, si prega di consultare la documentazione del fornitore di servizi S3 per configurare l'ID regione"
   }
 }

@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Sistema de archivos local",
+  "deviceNotSupport": "El dispositivo actual no es compatible",
   "second": "segundo",
   "syncInterval": "intervalo de sincronización",
   "syncIntervalTip": "Sincronización automática de datos después de que los datos dejen de cambiar",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Actualmente seleccionado es el servicio de almacenamiento en la nube proporcionado oficialmente por SiYuan, que solo admite usuarios de suscripción paga",
   "syncThirdPartyProviderS3Intro": "El actual seleccionado es un servicio de almacenamiento en la nube de terceros compatible con el protocolo Amazon S3",
   "syncThirdPartyProviderWebDAVIntro": "El servicio de almacenamiento en la nube de terceros del protocolo WebDAV está actualmente seleccionado. Debido al bajo rendimiento y la estabilidad insuficiente de este protocolo, se recomienda elegir primero el servicio S3",
+  "syncThirdPartyProviderLocalIntro": "Actualmente está seleccionado el servicio de almacenamiento proporcionado por el sistema de archivos local. Por favor, ingrese la ruta completa de la carpeta local en el campo <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "Antes de usar esta función, preste atención a las limitaciones técnicas y los elementos de facturación del servicio de almacenamiento en la nube de terceros: <div class=\"b3-label__text\"><ul class='fn__list'><li>Limitaciones técnicas, como la frecuencia de llamada de la interfaz y el ancho de banda</li><li >Artículos de facturación como espacio de almacenamiento y tráfico</li><li>Términos de uso y garantía de disponibilidad</li></ul></div><div class='fn__hr'></div>Descargo de responsabilidad: para obtener más información, consulte los términos relevantes en la licencia de código abierto AGPLv3 utilizado por SiYuan",
   "syncProvider": "Proveedor de servicios de almacenamiento en la nube",
   "syncProviderTip": "Si se selecciona, el servicio de almacenamiento en la nube de este proveedor se usará para lograr funciones de sincronización y copia de seguridad en la nube",
@@ -1579,6 +1582,8 @@
     "249": "No se puede acceder a los datos debido a un error de configuración. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
     "250": "La solicitud ha sido limitada por el almacenamiento en la nube. Por favor, verifique las configuraciones y permisos de almacenamiento en la nube",
     "251": "Total de activos no utilizados [%d], solo [%d] listados aquí",
-    "252": "\uD83D\uDEA8 Microsoft Defender puede eliminar por error el núcleo, eliminar datos y reducir significativamente el rendimiento. Se recomienda agregar la ruta de instalación y el espacio de trabajo de SiYuan a la lista de exclusiones<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Agregar</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender puede eliminar por error el núcleo, eliminar datos y reducir significativamente el rendimiento. Se recomienda agregar la ruta de instalación y el espacio de trabajo de SiYuan a la lista de exclusiones<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Agregar</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorar</button>",
+    "253": "Comprimiendo el archivo [%s], por favor espere...",
+    "254": "[Region ID] ID de región incorrecto, por favor consulte la documentación del proveedor de servicios S3 para configurar el ID de región"
   }
 }

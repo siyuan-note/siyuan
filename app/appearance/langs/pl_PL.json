@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Lokalny system plików",
+  "deviceNotSupport": "Bieżące urządzenie nie jest obsługiwane",
   "second": "sekunda",
   "syncInterval": "interwał synchronizacji",
   "syncIntervalTip": "Automatyczna synchronizacja danych po zaprzestaniu zmian",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Aktualnie wybrano usługę pamięci w chmurze oficjalnie dostarczaną przez SiYuan, która obsługuje tylko płatnych subskrybentów",
   "syncThirdPartyProviderS3Intro": "Wybrano aktualnie jest usługą pamięci w chmurze firmy trzeciej zgodną z protokołem Amazon S3 (np. <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "Wybrano obecnie jest usługą pamięci w chmurze firmy trzeciej z protokołem WebDAV. Z powodu słabej wydajności i niewystarczającej stabilności tego protokołu zaleca się najpierw wybranie usługi S3",
+  "syncThirdPartyProviderLocalIntro": "Obecnie wybrana jest usługa pamięci masowej dostarczana przez lokalny system plików. Wprowadź pełną ścieżkę do lokalnego folderu w polu <code class='fn__code'>Endpoint</code>",
   "syncThirdPartyProviderTip": "Przed użyciem tej funkcji proszę zwrócić uwagę na ograniczenia techniczne i pozycje rozliczeniowe usługi pamięci w chmurze firmy trzeciej: <div class=\"b3-label__text\"><ul class='fn__list'><li>Ograniczenia techniczne, takie jak częstotliwość wywołań interfejsów i przepustowość</li><li>Elementy rozliczeniowe, takie jak przestrzeń magazynowa i ruch</li><li>Warunki użytkowania i gwarancja dostępności</li></ul></div><div class='fn__hr'></div> Zastrzeżenie: Aby uzyskać szczegóły, należy się odwołać do odpowiednich warunków w licencji open source AGPLv3 używanej przez SiYuan",
   "syncProvider": "Dostawca usługi pamięci w chmurze",
   "syncProviderTip": "Jeśli zostanie wybrany, usługa pamięci w chmurze tego dostawcy zostanie wykorzystana do realizacji funkcji synchronizacji i kopii zapasowej w chmurze",
@@ -1579,6 +1582,8 @@
     "249": "Z powodu błędu konfiguracji nie można uzyskać dostępu do danych. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
     "250": "Żądanie zostało ograniczone przez przechowywanie w chmurze. Proszę dokładnie sprawdzić ustawienia i uprawnienia do przechowywania w chmurze",
     "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]",
-    "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność, zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Dodaj</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność. Zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Dodaj</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignoruj</button>",
+    "253": "Kompresja pliku [%s], proszę czekać...",
+    "254": "[Region ID] Nieprawidłowy identyfikator regionu, proszę zapoznać się z dokumentacją dostawcy usług S3 w celu skonfigurowania identyfikatora regionu"
   }
 }

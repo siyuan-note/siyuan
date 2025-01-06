@@ -22,7 +22,7 @@ import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {isIPad, isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {
@@ -1102,7 +1102,12 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
-                            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                            const blockElement = hasClosestBlock(options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].startContainer);
+                            if (blockElement && blockElement.getAttribute("data-node-id") !== options.id) {
+                                highlightById(options.edit.protyle, options.id);
+                            } else {
+                                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                            }
                         } else {
                             highlightById(options.edit.protyle, options.id);
                         }

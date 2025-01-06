@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "本地文件系统",
+  "deviceNotSupport": "当前设备不支持",
   "second": "秒",
   "syncInterval": "同步间隔",
   "syncIntervalTip": "数据不再变动后自动进行数据同步",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "当前选择的是 SiYuan 官方提供的云端存储服务，仅支持付费订阅用户使用",
   "syncThirdPartyProviderS3Intro": "当前选择的是 Amazon S3 协议兼容的第三方云端存储服务（比如<a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">七牛云</a>、<a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">阿里云 OSS</a>、<a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>）",
   "syncThirdPartyProviderWebDAVIntro": "当前选择的是 WebDAV 协议的第三方云端存储服务。由于该协议性能较差且稳定性不足，建议优先选择 S3 服务",
+  "syncThirdPartyProviderLocalIntro": "当前选择的是本地文件系统提供的存储服务。请在 <code class='fn__code'>Endpoint</code> 字段中输入本地文件夹的完整路径",
   "syncThirdPartyProviderTip": "在使用该特性前，请注意第三方云端存储服务的技术限制和计费项目等条款：<div class=\"b3-label__text\"><ul class='fn__list'><li>接口调用频率、带宽等技术限制</li><li>存储空间和流量等计费项目</li><li>使用条款和可用性保障等条款</li></ul></div><div class='fn__hr'></div>免责声明：详见思源笔记所使用的开源许可证 AGPLv3 中的相关条款",
   "syncProvider": "云端存储服务提供商",
   "syncProviderTip": "选择后将使用该提供商的云端存储服务实现云端同步和备份功能",
@@ -1579,6 +1582,8 @@
     "249": "因配置错误导致无法存取数据，请仔细逐个核对配置项，并检查云端存储相关权限配置",
     "250": "请求已被云端存储限流，请仔细逐个核对配置项，并检查云端存储相关权限配置",
     "251": "未引用资源一共 [%d] 个，这里仅列出 [%d] 个",
-    "252": "\uD83D\uDEA8 Microsoft Defender 可能会误杀内核、误删数据和严重降低运行性能，建议将思源安装路径和工作空间路径添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">添加</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender 可能会误杀内核、误删数据和严重降低运行性能，建议将思源安装路径和工作空间路径添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">添加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">忽略</button>",
+    "253": "正在压缩文件 [%s]，请稍等...",
+    "254": "[Region ID] 不正确，请参考 S3 服务提供商的文档配置地域 ID"
   }
 }

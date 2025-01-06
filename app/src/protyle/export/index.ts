@@ -403,6 +403,12 @@ const renderPDF = async (id: string) => {
         if (data.attrs.alias) {
             wysElement.setAttribute("alias", data.attrs.alias);
         }
+        // https://github.com/siyuan-note/siyuan/issues/13669
+        wysElement.querySelectorAll('[data-node-id]').forEach((item) => {
+            if (item.querySelector(".img")) {
+                item.insertAdjacentHTML("beforeend", "<hr style='margin:0;border:0'>");
+            }
+        })
         Protyle.mermaidRender(wysElement, "${servePath}/stage/protyle");
         Protyle.flowchartRender(wysElement, "${servePath}/stage/protyle");
         Protyle.graphvizRender(wysElement, "${servePath}/stage/protyle");

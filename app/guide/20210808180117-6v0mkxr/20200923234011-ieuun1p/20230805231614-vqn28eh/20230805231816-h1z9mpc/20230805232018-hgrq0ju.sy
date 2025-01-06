@@ -6,7 +6,7 @@
 		"id": "20230805232018-hgrq0ju",
 		"title": "Connect with third-party cloud storage",
 		"type": "doc",
-		"updated": "20241216171745"
+		"updated": "20241231014303"
 	},
 	"Children": [
 		{
@@ -56,7 +56,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230805232156-kbi85az",
-				"updated": "20241216171745"
+				"updated": "20241231014303"
 			},
 			"Children": [
 				{
@@ -225,6 +225,34 @@
 											]
 										}
 									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20241231014251-chridot",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20241231014251-chridot",
+						"updated": "20241231014303"
+					},
+					"Children": [
+						{
+							"ID": "20241231014251-9owrhd5",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20241231014251-9owrhd5",
+								"updated": "20241231014303"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Local file system"
 								}
 							]
 						}

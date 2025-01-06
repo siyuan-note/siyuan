@@ -337,7 +337,10 @@ func getContentWordCount(c *gin.Context) {
 	}
 
 	content := arg["content"].(string)
-	ret.Data = filesys.ContentStat(content)
+	ret.Data = map[string]any{
+		"reqId": arg["reqId"],
+		"stat":  filesys.ContentStat(content),
+	}
 }
 
 func getBlocksWordCount(c *gin.Context) {
@@ -354,7 +357,10 @@ func getBlocksWordCount(c *gin.Context) {
 	for _, id := range idsArg {
 		ids = append(ids, id.(string))
 	}
-	ret.Data = filesys.BlocksWordCount(ids)
+	ret.Data = map[string]any{
+		"reqId": arg["reqId"],
+		"stat":  filesys.BlocksWordCount(ids),
+	}
 }
 
 func getTreeStat(c *gin.Context) {
@@ -367,7 +373,10 @@ func getTreeStat(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = filesys.StatTree(id)
+	ret.Data = map[string]any{
+		"reqId": arg["reqId"],
+		"stat":  filesys.StatTree(id),
+	}
 }
 
 func getDOMText(c *gin.Context) {

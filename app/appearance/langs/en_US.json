@@ -1,4 +1,6 @@
 {
+  "localFlieSystem": "Local file system",
+  "deviceNotSupport": "The current device is not supported",
   "second": "second",
   "syncInterval": "sync interval",
   "syncIntervalTip": "Automatically sync data after it stops changing",
@@ -475,6 +477,7 @@
   "syncOfficialProviderIntro": "Currently selected is the cloud storage service officially provided by SiYuan, which only supports paid subscription users",
   "syncThirdPartyProviderS3Intro": "The current selected is a third-party cloud storage service compatible with the Amazon S3 protocol (eg <a href=\"https://s.qiniu.com/VbQfeu\" target=\"_blank\">Qiniu</a>, <a href=\"https://www.aliyun.com/product/oss?userCode=yqovuas2\" target=\"_blank\">Aliyun OSS</a>, <a href=\"https://www.cloudflare.com/\" target=\"_blank\">Cloudflare R2</a>)",
   "syncThirdPartyProviderWebDAVIntro": "The currently selected is a third-party cloud storage service with the WebDAV protocol. Due to the poor performance and insufficient stability of this protocol, it is recommended to choose the S3 service first",
+  "syncThirdPartyProviderLocalIntro": "The storage service provided by the local file system is currently selected. Please enter the full path of the local folder in the <code class='fn__code'>Endpoint</code> field",
   "syncThirdPartyProviderTip": "Before using this feature, please pay attention to the technical limitations and billing items of the third-party cloud storage service: <div class=\"b3-label__text\"><ul class='fn__list'><li>Technical limitations such as interface calling frequency and bandwidth</li><li>Billing items such as storage space and traffic</li><li>Terms of use and availability guarantee</li></ul></div><div class='fn__hr'></div>Disclaimer: For details, please refer to the relevant terms in the open source license AGPLv3 used by SiYuan",
   "syncProvider": "Cloud storage service provider",
   "syncProviderTip": "If selected, the cloud storage service of this provider will be used to achieve cloud synchronization and backup functions",
@@ -1579,6 +1582,8 @@
     "249": "Unable to access data due to configuration error. Please check the settings and cloud storage permissions",
     "250": "Request has been rate-limited by cloud storage. Please check the settings and cloud storage permissions",
     "251": "Total unused assets [%d], only [%d] listed here",
-    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Add</button><span class=\"fn__space\"></span>"
+    "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Add</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignore</button>",
+    "253": "Compressing file [%s], please wait...",
+    "254": "[Region ID] Incorrect Region ID, please refer to the S3 service provider's documentation to configure the Region ID"
   }
 }

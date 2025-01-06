@@ -2,7 +2,7 @@ import {focusByWbr, getEditorRange} from "../protyle/util/selection";
 import {hasClosestBlock} from "../protyle/util/hasClosest";
 import {getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
-import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
+import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
 import {hideElements} from "../protyle/ui/hideElements";
@@ -37,7 +37,7 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
             nodeElement.lastElementChild.remove();
             // 超级块中的 html 块需要反转义再赋值 https://github.com/siyuan-note/siyuan/issues/13155
             nodeElement.querySelectorAll("protyle-html").forEach(item => {
-                item.setAttribute("data-content" , item.getAttribute("data-content").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
+                item.setAttribute("data-content", item.getAttribute("data-content").replace(/&lt;/g, "<").replace(/&gt;/g, ">"));
             });
             nodeElement.outerHTML = nodeElement.innerHTML;
             return;
@@ -153,6 +153,15 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
             action: "delete",
             id: newId,
         }]);
+    }
+    if (blockElement.parentElement.classList.contains("sb") &&
+        blockElement.parentElement.getAttribute("data-sb-layout") === "col") {
+        turnsIntoOneTransaction({
+            protyle,
+            selectsElement: position === "afterend" ? [blockElement, blockElement.nextElementSibling] : [blockElement.previousElementSibling, blockElement],
+            type: "BlocksMergeSuperBlock",
+            level: "row"
+        });
     }
     focusByWbr(protyle.wysiwyg.element, range);
     scrollCenter(protyle);

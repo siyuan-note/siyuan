@@ -167,7 +167,17 @@ export class Wnd {
             target: HTMLElement
         }) {
             const it = this as HTMLElement;
-            it.classList.remove("layout-tab-bars--drag");
+            if(!window.siyuan.currentDragOverTabHeadersElement) {
+                window.siyuan.currentDragOverTabHeadersElement = it;
+            }  else {
+                if (!window.siyuan.currentDragOverTabHeadersElement.isSameNode(it)) {
+                    window.siyuan.currentDragOverTabHeadersElement.classList.remove("layout-tab-bars--drag");
+                    window.siyuan.currentDragOverTabHeadersElement.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                        item.remove();
+                    });
+                    window.siyuan.currentDragOverTabHeadersElement = it;
+                }
+            }
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 event.preventDefault();
                 it.classList.add("layout-tab-bars--drag");
@@ -209,6 +219,7 @@ export class Wnd {
                 }
                 return;
             }
+            it.classList.remove("layout-tab-bars--drag");
             if (!newTabHeaderElement.isSameNode(oldTabHeaderElement) &&
                 ((oldTabHeaderElement.classList.contains("item--pin") && newTabHeaderElement.classList.contains("item--pin")) ||
                     (!oldTabHeaderElement.classList.contains("item--pin") && !newTabHeaderElement.classList.contains("item--pin")))) {
@@ -220,34 +231,15 @@ export class Wnd {
                 }
             }
         });
-        let dragleaveTimeout: number;
-        let headerDragCounter = 0;
-        this.headersElement.parentElement.addEventListener("dragleave", function () {
-            if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
-                headerDragCounter--;
-            }
-            if (headerDragCounter === 0) {
-                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                    item.classList.remove("layout-tab-bars--drag");
-                });
-                clearTimeout(dragleaveTimeout);
-                // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
-                dragleaveTimeout = window.setTimeout(() => {
-                    document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
-                        item.remove();
-                    });
-                }, 1000);
-            }
-        });
-        this.headersElement.parentElement.addEventListener("dragenter", (event) => {
-            event.preventDefault();
-            if (!hasClosestByAttribute(event.target as HTMLElement, "data-clone", "true")) {
-                headerDragCounter++;
-            }
-        });
 
         this.headersElement.parentElement.addEventListener("dragend", (event) => {
-            this.headersElement.parentElement.classList.remove("layout-tab-bars--drag");
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            });
+            // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
+            document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
+                item.remove();
+            });
         });
 
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
@@ -256,7 +248,6 @@ export class Wnd {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");
             });
-            headerDragCounter = 0;
             const it = this as HTMLElement;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE)) {
                 // 文档树拖拽
@@ -347,6 +338,9 @@ export class Wnd {
         });
 
         dragElement.addEventListener("dragover", (event: DragEvent & { layerX: number, layerY: number }) => {
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            });
             event.preventDefault();
             if (!dragElement.nextElementSibling) {
                 return;

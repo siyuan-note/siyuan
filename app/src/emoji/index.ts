@@ -216,6 +216,19 @@ const genWeekdayOptions = (lang: string, weekdayType: string) => {
 <option value="4" ${weekdayType === "4" ? " selected" : ""}>${dynamicWeekdayLang[4][currentLang]}</option>`;
 };
 
+const renderEmojiContent = (previousIndex: string, previousContentElement: Element) => {
+    if (!previousIndex) {
+        return;
+    }
+    let html = "";
+    window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
+        html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
+    });
+    previousContentElement.innerHTML = html;
+    previousContentElement.removeAttribute("data-index");
+    previousContentElement.removeAttribute("style")
+}
+
 export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, callback?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {
         window.siyuan.menus.menu.remove();
@@ -524,30 +537,11 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             if (target.classList.contains("emojis__type")) {
                 const titleElement = emojisContentElement.querySelector(`[data-type="${target.getAttribute("data-type")}"]`) as HTMLElement;
                 if (titleElement) {
-                    const previousElement = titleElement.previousElementSibling as HTMLElement;
-                    const previousIndex = previousElement?.getAttribute("data-index");
-                    const nextElement = titleElement.nextElementSibling as HTMLElement;
-                    const index = nextElement?.getAttribute("data-index");
-
-                    if (previousIndex) {
-                        let html = "";
-                        window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
-                        });
-                        previousElement.innerHTML = html;
-                        previousElement.removeAttribute("data-index");
-                        previousElement.style.minHeight = "";
-                    }
+                    const index = titleElement.nextElementSibling.getAttribute("data-index");
                     if (index) {
-                        let html = "";
-                        window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
-                        });
-                        nextElement.innerHTML = html;
-                        nextElement.removeAttribute("data-index");
-                        nextElement.style.minHeight = "";
+                        renderEmojiContent(titleElement.previousElementSibling?.getAttribute("data-index"), titleElement.previousElementSibling);
+                        renderEmojiContent(index, titleElement.nextElementSibling);
                     }
-
                     emojisContentElement.scrollTo({
                         top: titleElement.offsetTop - 77,
                         // behavior: "smooth"  不能使用，否则无法定位

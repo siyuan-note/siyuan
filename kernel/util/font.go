@@ -150,6 +150,7 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 	defer logging.Recover()
 
 	fontFile, err := os.Open(fontPath)
+	defer fontFile.Close()
 	if err != nil {
 		//LogErrorf("open font file [%s] failed: %s", fontPath, err)
 		return

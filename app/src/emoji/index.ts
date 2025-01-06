@@ -524,15 +524,28 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             if (target.classList.contains("emojis__type")) {
                 const titleElement = emojisContentElement.querySelector(`[data-type="${target.getAttribute("data-type")}"]`) as HTMLElement;
                 if (titleElement) {
-                    const index = titleElement.nextElementSibling.getAttribute("data-index");
+                    const previousElement = titleElement.previousElementSibling as HTMLElement;
+                    const previousIndex = previousElement?.getAttribute("data-index");
+                    const nextElement = titleElement.nextElementSibling as HTMLElement;
+                    const index = nextElement?.getAttribute("data-index");
+
+                    if (previousIndex) {
+                        let html = "";
+                        window.siyuan.emojis[parseInt(previousIndex)].items.forEach(emoji => {
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
+                        });
+                        previousElement.innerHTML = html;
+                        previousElement.removeAttribute("data-index");
+                        previousElement.style.minHeight = "";
+                    }
                     if (index) {
                         let html = "";
                         window.siyuan.emojis[parseInt(index)].items.forEach(emoji => {
-                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">
-${unicode2Emoji(emoji.unicode)}</button>`;
+                            html += `<button data-unicode="${emoji.unicode}" class="emojis__item ariaLabel" aria-label="${getEmojiDesc(emoji)}">${unicode2Emoji(emoji.unicode)}</button>`;
                         });
-                        titleElement.nextElementSibling.innerHTML = html;
-                        titleElement.nextElementSibling.removeAttribute("data-index");
+                        nextElement.innerHTML = html;
+                        nextElement.removeAttribute("data-index");
+                        nextElement.style.minHeight = "";
                     }
 
                     emojisContentElement.scrollTo({

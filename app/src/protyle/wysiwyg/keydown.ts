@@ -157,6 +157,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (Constants.KEYCODELIST[event.keyCode] === "\\" ||
                 // 德语
                 event.key === "\\" ||
+                // Mac 日文-罗马字 https://github.com/siyuan-note/siyuan/issues/13725
+                (event.key === "," && event.keyCode === 229) ||
                 // windows 中文
                 (event.code === "Backslash" && event.key === "Process" && event.keyCode === 229)) {
                 protyle.hint.enableSlash = false;

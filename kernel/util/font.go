@@ -163,6 +163,7 @@ func parseTTFFontFamily(fontPath string) (ret string) {
 
 	t, err := font.NameTable()
 	if err != nil {
+		logging.LogErrorf("get font [%s] name table failed: %s", fontPath, err)
 		return
 	}
 

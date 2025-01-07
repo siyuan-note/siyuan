@@ -1402,9 +1402,9 @@ export class Gutter {
                 click() {
                     const oldHTML = nodeElement.outerHTML;
                     if (isCol) {
-                        nodeElement.setAttribute("data-sb-layout", "row")
+                        nodeElement.setAttribute("data-sb-layout", "row");
                     } else {
-                        nodeElement.setAttribute("data-sb-layout", "col")
+                        nodeElement.setAttribute("data-sb-layout", "col");
                     }
                     nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                     updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);

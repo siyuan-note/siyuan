@@ -226,8 +226,8 @@ const renderEmojiContent = (previousIndex: string, previousContentElement: Eleme
     });
     previousContentElement.innerHTML = html;
     previousContentElement.removeAttribute("data-index");
-    previousContentElement.removeAttribute("style")
-}
+    previousContentElement.removeAttribute("style");
+};
 
 export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", position: IPosition, callback?: (emoji: string) => void, dynamicImgElement?: HTMLElement) => {
     if (type !== "av") {

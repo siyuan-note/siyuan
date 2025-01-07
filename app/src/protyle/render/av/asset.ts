@@ -243,7 +243,7 @@ export const editAssetItem = (options: {
                 });
             }
         });
-        menu.addSeparator()
+        menu.addSeparator();
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",

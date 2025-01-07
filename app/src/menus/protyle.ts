@@ -259,14 +259,28 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        label: `${window.siyuan.languages.turnInto} <b>${window.siyuan.languages.text}</b>`,
+        label: window.siyuan.languages.turnInto,
         icon: "iconRefresh",
-        click() {
-            nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-            removeInlineType(refElement, "file-annotation-ref", protyle.toolbar.range);
-            updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
-            oldHTML = nodeElement.outerHTML;
-        }
+        submenu: [{
+            iconHTML: "",
+            label: window.siyuan.languages.text,
+            click() {
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                removeInlineType(refElement, "file-annotation-ref", protyle.toolbar.range);
+                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                oldHTML = nodeElement.outerHTML;
+            }
+        }, {
+            iconHTML: "",
+            label: window.siyuan.languages.text + " *",
+            click() {
+                refElement.insertAdjacentHTML("beforebegin", refElement.innerHTML + " ");
+                refElement.textContent = "*";
+                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
+                updateTransaction(protyle, id, nodeElement.outerHTML, oldHTML);
+                oldHTML = nodeElement.outerHTML;
+            }
+        }]
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
         icon: "iconTrashcan",

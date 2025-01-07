@@ -22,8 +22,8 @@ github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1 h1:48T899JQ
 github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1/go.mod h1:U3pckKQIgxxkmZjV5yXQjHdGxQK0o/vEZeZ6cQsxfHw=
 github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4 h1:r10k4+Lu1mDpiCKa1liAdGJUhB4BJHHJnMvtoli6Hts=
 github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4/go.mod h1:a3CzWIqeRxiODAscAIfZ4wbFRXxywBrdCwTENVAWB2g=
-github.com/ConradIrwin/font v0.0.0-20240627033111-8567075b2bfe h1:mtJy70dOPoXlIcNNZKPwK0vTqyABsD8Du0spzUy9W7A=
-github.com/ConradIrwin/font v0.0.0-20240627033111-8567075b2bfe/go.mod h1:krTLO7JWu6g8RMxG8sl+T1Hf8W93XQacBKJmqFZ2MFY=
+github.com/ConradIrwin/font v0.2.1 h1:D4tWi7zyRAdVKOtOys5960HnAAfUSRx/syaf+J9JqlI=
+github.com/ConradIrwin/font v0.2.1/go.mod h1:krTLO7JWu6g8RMxG8sl+T1Hf8W93XQacBKJmqFZ2MFY=
 github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052 h1:8T2zMbhLBbH9514PIQVHdsGhypMrsB4CxwbldKA9sBA=
 github.com/JalfResi/justext v0.0.0-20221106200834-be571e3e3052/go.mod h1:0SURuH1rsE8aVWvutuMZghRNrNrYEUzibzJfhEYR8L0=
 github.com/Masterminds/goutils v1.1.1 h1:5nUrii3FMTL5diU80unEVvNevw1nH4+ZV4DSLVJLSYI=

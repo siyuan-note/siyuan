@@ -13,7 +13,7 @@ require (
 	github.com/88250/lute v1.7.7-0.20241227030752-570570b3be71
 	github.com/88250/vitess-sqlparser v0.0.0-20210205111146-56a2ded2aba1
 	github.com/ClarkThan/ahocorasick v0.0.0-20231011042242-30d1ef1347f4
-	github.com/ConradIrwin/font v0.0.0-20240627033111-8567075b2bfe
+	github.com/ConradIrwin/font v0.2.1
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/PuerkitoBio/goquery v1.10.0
 	github.com/Xuanwo/go-locale v1.1.2

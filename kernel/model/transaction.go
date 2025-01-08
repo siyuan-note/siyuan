@@ -792,9 +792,17 @@ func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
 
 	node.Unlink()
 	if nil != parent && ast.NodeListItem == parent.Type && nil == parent.FirstChild {
-		// 保持空列表项
-		node.FirstChild = nil
-		parent.AppendChild(node)
+		needAppendEmptyListItem := true
+		for _, op := range tx.DoOperations {
+			if "insert" == op.Action && op.ParentID == parent.ID {
+				needAppendEmptyListItem = false
+				break
+			}
+		}
+
+		if needAppendEmptyListItem {
+			parent.AppendChild(treenode.NewParagraph(ast.NewNodeID()))
+		}
 	}
 	treenode.RemoveBlockTree(node.ID)
 
@@ -1305,10 +1313,17 @@ func upsertAvBlockRel(node *ast.Node) {
 		})
 	}
 
-	affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 	go func() {
 		time.Sleep(100 * time.Millisecond)
 		sql.FlushQueue()
+
+		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
+		var relatedAvIDs []string
+		for _, avID := range affectedAvIDs {
+			relatedAvIDs = append(relatedAvIDs, av.GetSrcAvIDs(avID)...)
+		}
+		affectedAvIDs = append(affectedAvIDs, relatedAvIDs...)
+		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 		for _, avID := range affectedAvIDs {
 			ReloadAttrView(avID)
 		}
@@ -1619,7 +1634,10 @@ func updateRefText(refNode *ast.Node, changedDefNodes map[string]*ast.Node) (cha
 
 			changed = true
 			if "d" == subtype {
-				refText = getNodeRefText(defNode)
+				refText = strings.TrimSpace(getNodeRefText(defNode))
+				if "" == refText {
+					refText = n.TextMarkBlockRefID
+				}
 				treenode.SetDynamicBlockRefText(n, refText)
 			}
 			defNodes = append(defNodes, &changedDefNode{id: defID, refText: refText, refType: "ref-" + subtype})

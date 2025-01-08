@@ -72,6 +72,14 @@ export const commandPanel = (app: App) => {
 </li>`;
         }
     });
+    Object.keys(window.siyuan.config.keymap.editor.general).forEach((key) => {
+        if (["switchReadonly", "switchAdjust"].includes(key)) {
+            html += `<li class="b3-list-item" data-command="${key}">
+    <span class="b3-list-item__text">${window.siyuan.languages[key]}</span>
+    <span class="b3-list-item__meta${isMobile() ? " fn__none" : ""}">${updateHotkeyTip(window.siyuan.config.keymap.editor.general[key].custom)}</span>
+</li>`;
+        }
+    });
     listElement.insertAdjacentHTML("beforeend", html);
     app.plugins.forEach(plugin => {
         plugin.commands.forEach(command => {

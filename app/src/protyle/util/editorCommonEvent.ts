@@ -895,7 +895,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             sourceElements.push(elementItem);
                         }
                     });
-                } else {    // 跨窗口拖拽
+                } else if (window.siyuan.config.system.workspaceDir.toLowerCase() === gutterTypes[3]) {
+                    // 跨窗口拖拽
+                    // 不能跨工作区域拖拽 https://github.com/siyuan-note/siyuan/issues/13582
                     const targetProtyleElement = document.createElement("template");
                     targetProtyleElement.innerHTML = `<div>${event.dataTransfer.getData(gutterType)}</div>`;
                     targetProtyleElement.content.querySelectorAll(queryClass.substring(0, queryClass.length - 1)).forEach(elementItem => {
@@ -1346,7 +1348,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeViewRowMenu${Constants.ZWSP}`.toLowerCase())) {
             // 行只能拖拽当前 av 中
             if ((!targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__row--util")) ||
-                !window.siyuan.dragElement.contains(targetElement)) {
+                (window.siyuan.dragElement && !window.siyuan.dragElement.contains(targetElement))) {
                 targetElement = false;
             }
         }

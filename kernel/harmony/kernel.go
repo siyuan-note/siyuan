@@ -24,6 +24,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
@@ -128,6 +129,13 @@ func SetTimezone(container, appDir, timezoneID string) {
 //export DisableFeature
 func DisableFeature(feature *C.char) {
 	util.DisableFeature(C.GoString(feature))
+}
+
+//export Unzip
+func Unzip(zipFilePath, destination *C.char) {
+	if err := gulu.Zip.Unzip(C.GoString(zipFilePath), C.GoString(destination)); nil != err {
+		logging.LogErrorf("unzip [%s] failed: %s", zipFilePath, err)
+	}
 }
 
 func main() {}

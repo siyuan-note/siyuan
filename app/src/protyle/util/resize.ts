@@ -23,7 +23,6 @@ export const recordBeforeResizeTop = () => {
             if (!topElement) {
                 return;
             }
-            console.log(topElement);
             topElement.setAttribute("data-resize-top", topElement.getBoundingClientRect().top.toString());
         }
     });

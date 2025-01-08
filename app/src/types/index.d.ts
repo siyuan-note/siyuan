@@ -199,6 +199,7 @@ interface Window {
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
         readClipboard(): string
+        returnDesktop(): void
     }
 
     Protyle: import("../protyle/method").default
@@ -429,6 +430,7 @@ interface ISiyuan {
         }[]
     },
     dragElement?: HTMLElement,
+    currentDragOverTabHeadersElement?: HTMLElement
     layout?: {
         layout?: import("../layout").Layout,
         centerLayout?: import("../layout").Layout,

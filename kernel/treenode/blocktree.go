@@ -96,6 +96,8 @@ func initDBConnection() {
 	if nil != db {
 		closeDatabase()
 	}
+
+	util.LogDatabaseSize(util.BlockTreeDBPath)
 	dsn := util.BlockTreeDBPath + "?_journal_mode=WAL" +
 		"&_synchronous=OFF" +
 		"&_mmap_size=2684354560" +

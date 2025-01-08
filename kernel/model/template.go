@@ -188,11 +188,15 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 			return ast.WalkContinue
 		}
 
-		// Code content in templates is not properly escaped https://github.com/siyuan-note/siyuan/issues/9649
+		// Content in templates is not properly escaped
+		// https://github.com/siyuan-note/siyuan/issues/9649
+		// https://github.com/siyuan-note/siyuan/issues/13701
 		switch n.Type {
 		case ast.NodeCodeBlockCode:
 			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
 		case ast.NodeCodeSpanContent:
+			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
+		case ast.NodeBlockQueryEmbedScript:
 			n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("&quot;"), []byte("\""))
 		case ast.NodeTextMark:
 			if n.IsTextMarkType("code") {
@@ -354,7 +358,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 		// 块引缺失锚文本情况下自动补全 https://github.com/siyuan-note/siyuan/issues/6087
 		if n.IsTextMarkType("block-ref") {
 			if refText := n.Text(); "" == refText {
-				refText = sql.GetRefText(n.TextMarkBlockRefID)
+				refText = strings.TrimSpace(sql.GetRefText(n.TextMarkBlockRefID))
 				if "" != refText {
 					treenode.SetDynamicBlockRefText(n, refText)
 				} else {

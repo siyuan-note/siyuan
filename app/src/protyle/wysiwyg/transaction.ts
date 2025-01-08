@@ -34,16 +34,25 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
         });
     }
     topAloneElement.remove();
-    if (protyle.block.rootID === protyle.block.id && protyle.wysiwyg.element.childElementCount === 0) {
-        const newId = Lute.NewNodeID();
-        const newElement = genEmptyElement(false, false, newId);
-        doOperations.push({
-            action: "insert",
-            data: newElement.outerHTML,
-            id: newId,
-            parentID: protyle.block.parentID
-        });
-        protyle.wysiwyg.element.innerHTML = newElement.outerHTML;
+    if (protyle.wysiwyg.element.childElementCount === 0) {
+        if (protyle.block.rootID === protyle.block.id) {
+            const newId = Lute.NewNodeID();
+            const newElement = genEmptyElement(false, false, newId);
+            doOperations.push({
+                action: "insert",
+                data: newElement.outerHTML,
+                id: newId,
+                parentID: protyle.block.parentID
+            });
+            protyle.wysiwyg.element.innerHTML = newElement.outerHTML;
+        } else {
+            zoomOut({
+                protyle,
+                id: protyle.block.rootID,
+                isPushBack: false,
+                focusId: protyle.block.id,
+            });
+        }
     }
     if (doOperations.length > 0) {
         transaction(protyle, doOperations, []);
@@ -277,10 +286,15 @@ const deleteBlock = (updateElements: Element[], id: string, protyle: IProtyle, i
         focusSideBlock(updateElements[0]);
     }
     updateElements.forEach(item => {
-        // 需移除顶层，否则删除唯一的列表项后列表无法清除干净 https://github.com/siyuan-note/siyuan/issues/12326 第一点
-        const topElement = getTopAloneElement(item);
-        if (topElement) {
-            topElement.remove();
+        if (isUndo) {
+            // https://github.com/siyuan-note/siyuan/issues/13617
+            item.remove();
+        } else {
+            // 需移除顶层，否则删除唯一的列表项后列表无法清除干净 https://github.com/siyuan-note/siyuan/issues/12326 第一点
+            const topElement = getTopAloneElement(item);
+            if (topElement) {
+                topElement.remove();
+            }
         }
     });
     // 更新 ws 嵌入块
@@ -744,7 +758,20 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
         "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey",
         "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc"].includes(operation.action)) {
-        refreshAV(protyle, operation);
+        if (!isUndo) {
+            // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
+            refreshAV(protyle, operation);
+        } else if (operation.action === "setAttrViewName") {
+            // setAttrViewName 同文档不会推送，需手动刷新
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+                const titleElement = item.querySelector(".av__title") as HTMLElement;
+                if (!titleElement) {
+                    return;
+                }
+                titleElement.textContent = operation.data;
+                titleElement.dataset.title = operation.data;
+            });
+        }
         return;
     }
     if (operation.action === "doUpdateUpdated") {

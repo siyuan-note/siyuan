@@ -153,9 +153,13 @@ export const goBack = () => {
         closePanel();
         return;
     }
-    if (window.JSAndroid && window.siyuan.backStack.length < 1) {
+    if ((window.JSAndroid || window.JSHarmony) && window.siyuan.backStack.length < 1) {
         if (document.querySelector('#message [data-id="exitTip"]')) {
-            window.JSAndroid.returnDesktop();
+            if (window.JSAndroid) {
+                window.JSAndroid.returnDesktop();
+            } else if (window.JSHarmony) {
+                window.JSHarmony.returnDesktop();
+            }
         } else {
             showMessage(window.siyuan.languages.returnDesktop, 3000, "info", "exitTip");
         }

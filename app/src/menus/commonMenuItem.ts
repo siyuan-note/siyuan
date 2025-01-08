@@ -423,7 +423,7 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
         iconHTML: "",
         label: window.siyuan.languages.copyHPath,
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyHPath.custom : undefined,
-        click:  () => {
+        click: () => {
             copyTextByType(ids, "hPath");
             if (focusElement) {
                 focusBlock(focusElement);

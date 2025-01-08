@@ -640,7 +640,8 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 		typeFilter := buildTypeFilter(queryTypes)
 		switch queryMethod {
 		case 0:
-			keywords = strings.Split(query, " ")
+			query = stringQuery(query)
+			keywords = highlightByFTS(query, typeFilter, rootID)
 		case 1:
 			keywords = highlightByFTS(query, typeFilter, rootID)
 		case 3:

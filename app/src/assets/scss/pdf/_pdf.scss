@@ -325,7 +325,7 @@
   align-items: center;
   flex-wrap: wrap;
   overflow: initial;
-  z-index: 3;
+  z-index: 99; // https://github.com/siyuan-note/siyuan/issues/13614
 
   #findInput {
     width: 120px;

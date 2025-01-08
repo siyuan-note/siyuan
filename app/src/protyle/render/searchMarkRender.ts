@@ -2,7 +2,7 @@ import {Constants} from "../../constants";
 import {isInEmbedBlock} from "../util/hasClosest";
 
 export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void) => {
-    if (!isSupportCSSHL()) {
+    if (!isSupportCSSHL() || !keys || keys.length === 0) {
         return;
     }
     setTimeout(() => {

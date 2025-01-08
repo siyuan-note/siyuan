@@ -221,6 +221,10 @@ func (value *Value) IsEdited() bool {
 }
 
 func (value *Value) IsEmpty() bool {
+	if nil == value {
+		return true
+	}
+
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil == value.Block {

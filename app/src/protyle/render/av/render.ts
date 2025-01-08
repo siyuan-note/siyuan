@@ -11,8 +11,9 @@ import {renderAVAttribute} from "./blockAttr";
 import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {electronUndo} from "../../undo";
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string, renderAll = true) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -209,7 +210,26 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         viewData = item;
                     }
                 });
-                e.firstElementChild.outerHTML = `<div class="av__container">
+                const avBodyHTML = `<div class="av__body">
+    ${tableHTML}
+    <div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
+        <div class="av__colsticky">
+            <button class="b3-button" data-type="av-add-bottom">
+                <svg><use xlink:href="#iconAdd"></use></svg>
+                <span>${window.siyuan.languages.newRow}</span>
+            </button>
+            <span class="fn__space"></span>
+            <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
+                <svg><use xlink:href="#iconArrowDown"></use></svg>
+                <span>${window.siyuan.languages.loadMore}</span>
+                <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
+            </button>
+        </div>
+    </div>
+    <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>
+</div>`;
+                if (renderAll) {
+                    e.firstElementChild.outerHTML = `<div class="av__container">
     <div class="av__header">
         <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
             <div class="layout-tab-bar fn__flex">
@@ -257,27 +277,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
         <div class="av__counter fn__none"></div>
     </div>
     <div class="av__scroll">
-        <div class="av__body">
-            ${tableHTML}
-            <div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
-                <div class="av__colsticky">
-                    <button class="b3-button" data-type="av-add-bottom">
-                        <svg><use xlink:href="#iconAdd"></use></svg>
-                        <span>${window.siyuan.languages.newRow}</span>
-                    </button>
-                    <span class="fn__space"></span>
-                    <button class="b3-button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
-                        <svg><use xlink:href="#iconArrowDown"></use></svg>
-                        <span>${window.siyuan.languages.loadMore}</span>
-                        <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
-                    </button>
-                </div>
-            </div>
-            <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>
-        </div>
+        ${avBodyHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
+                } else {
+                    e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
+                }
                 e.setAttribute("data-render", "true");
                 // 历史兼容
                 e.style.margin = "";
@@ -343,6 +349,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 if (cb) {
                     cb();
                 }
+                if (!renderAll) {
+                    return;
+                }
                 const viewsElement = e.querySelector(".av__views") as HTMLElement;
                 searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
                 searchInputElement.value = query || "";
@@ -351,6 +360,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 }
                 searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
                     event.stopPropagation();
+                });
+                searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+                    if (event.isComposing) {
+                        return;
+                    }
+                    electronUndo(event);
                 });
                 searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
                     event.stopPropagation();
@@ -403,7 +418,7 @@ const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
     clearTimeout(searchTimeout);
     searchTimeout = window.setTimeout(() => {
         e.removeAttribute("data-render");
-        avRender(e, protyle);
+        avRender(e, protyle, undefined, undefined, false);
     }, Constants.TIMEOUT_INPUT);
 };
 

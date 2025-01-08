@@ -212,19 +212,72 @@ export const editAssetItem = (options: {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `${window.siyuan.languages.link}
+            label: `<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.link}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>
 <div class="fn__hr"></div>
-${window.siyuan.languages.title}
+<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.title}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;resize: vertical;" rows="1" class="b3-text-field"></textarea>`,
+            bind(element) {
+                element.addEventListener("click", (event) => {
+                    let target = event.target as HTMLElement;
+                    while (target) {
+                        if (target.dataset.action === "copy") {
+                            writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
+                            showMessage(window.siyuan.languages.copied);
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                });
+            }
+        });
+        menu.addSeparator();
+        menu.addItem({
+            label: window.siyuan.languages.copy,
+            icon: "iconCopy",
+            click() {
+                writeText(`[${textElements[1].value || textElements[0].value}](${textElements[0].value})`);
+            }
         });
     } else {
         menu.addItem({
             iconHTML: "",
             type: "readonly",
-            label: `${window.siyuan.languages.link}
+            label: `<div class="fn__flex">
+    <span class="fn__flex-center">${window.siyuan.languages.link}</span>
+    <span class="fn__space"></span>
+    <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
+        <svg><use xlink:href="#iconCopy"></use></svg>
+    </span>   
+</div>
 <textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px;resize: vertical;" class="b3-text-field"></textarea>`,
+            bind(element) {
+                element.addEventListener("click", (event) => {
+                    let target = event.target as HTMLElement;
+                    while (target) {
+                        if (target.dataset.action === "copy") {
+                            writeText((target.parentElement.nextElementSibling as HTMLTextAreaElement).value);
+                            showMessage(window.siyuan.languages.copied);
+                            break;
+                        }
+                        target = target.parentElement;
+                    }
+                });
+            }
         });
+        menu.addSeparator();
         menu.addItem({
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
@@ -262,7 +315,10 @@ ${window.siyuan.languages.title}
             }
         });
     }
-    menu.addSeparator();
+    const openSubMenu = openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, true, false);
+    if (type !== "file" || openSubMenu.length > 0) {
+        menu.addSeparator();
+    }
     if (type !== "file") {
         menu.addItem({
             icon: "iconPreview",
@@ -272,7 +328,13 @@ ${window.siyuan.languages.title}
             }
         });
     }
-    openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, false, false);
+    if (openSubMenu.length > 0) {
+        window.siyuan.menus.menu.append(new MenuItem({
+            label: window.siyuan.languages.openBy,
+            icon: "iconOpen",
+            submenu: openSubMenu
+        }).element);
+    }
     if (linkAddress?.startsWith("assets/")) {
         window.siyuan.menus.menu.append(new MenuItem(exportAsset(linkAddress)).element);
     }

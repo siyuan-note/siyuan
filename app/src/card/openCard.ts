@@ -102,45 +102,45 @@ export const genCardHTML = (options: {
     <div class="fn__flex card__action fn__none">
         <button class="b3-button b3-button--cancel" disabled="disabled" data-type="-2" style="width: 25%;min-width: 86px;display: flex">
             <svg><use xlink:href="#iconLeft"></use></svg>
-            (p / q)
+            ${!isMobile() ? "(p / q)" : ""}
         </button>
         <span class="fn__space"></span>
-        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer} (${window.siyuan.languages.space} / ${window.siyuan.languages.enterKey})</button>
+        <button data-type="-1" class="b3-button fn__flex-1">${window.siyuan.languages.cardShowAnswer}${!isMobile() ? " (" + window.siyuan.languages.space + " / " + window.siyuan.languages.enterKey + ")" : ""}</button>
     </div>
     <div class="fn__flex card__action fn__none">
         <div>
-            <button class="b3-button b3-button--cancel" disabled="disabled" style="display: flex;margin-bottom: 8px;height: 28px;padding: 0;" data-type="-2"><svg><use xlink:href="#iconLeft"></use></svg>(p / q)</button>
+            <button class="b3-button b3-button--cancel" disabled="disabled" style="display: flex;margin-bottom: 8px;height: 28px;padding: 0;" data-type="-2"><svg><use xlink:href="#iconLeft"></use></svg>${!isMobile() ? "(p / q)" : ""}</button>
             <button data-type="-3" aria-label="0 / x" class="b3-button b3-button--cancel b3-tooltips__n b3-tooltips">
                 <div class="card__icon">💤</div>
-                ${window.siyuan.languages.skip} (0)
+                ${window.siyuan.languages.skip}${!isMobile() ? " (0)" : ""}
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="1" aria-label="1 / j / a" class="b3-button b3-button--error b3-tooltips__n b3-tooltips">
                 <div class="card__icon">🙈</div>
-                ${window.siyuan.languages.cardRatingAgain} (1)
+                ${window.siyuan.languages.cardRatingAgain}${!isMobile() ? " (1)" : ""}
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="2" aria-label="2 / k / s" class="b3-button b3-button--warning b3-tooltips__n b3-tooltips">
                 <div class="card__icon">😬</div>
-                ${window.siyuan.languages.cardRatingHard} (2)
+                ${window.siyuan.languages.cardRatingHard}${!isMobile() ? " (2)" : ""}
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="3" aria-label="3 / l / d / ${window.siyuan.languages.space} / ${window.siyuan.languages.enterKey}" class="b3-button b3-button--info b3-tooltips__n b3-tooltips">
                 <div class="card__icon">😊</div>
-                ${window.siyuan.languages.cardRatingGood} (3)
+                ${window.siyuan.languages.cardRatingGood}${!isMobile() ? " (3)" : ""}
             </button>
         </div>
         <div>
             <span></span>
             <button data-type="4" aria-label="4 / ; / f" class="b3-button b3-button--success b3-tooltips__n b3-tooltips">
                 <div class="card__icon">🌈</div>
-                ${window.siyuan.languages.cardRatingEasy} (4)
+                ${window.siyuan.languages.cardRatingEasy}${!isMobile() ? " (4)" : ""}
             </button>
         </div>
     </div>

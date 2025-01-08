@@ -176,10 +176,6 @@ func GetNodeSrcTokens(n *ast.Node) (ret string) {
 		src := n.Tokens[index+len("src=\""):]
 		if index = bytes.Index(src, []byte("\"")); 0 < index {
 			src = src[:bytes.Index(src, []byte("\""))]
-			if !util.IsAssetLinkDest(src) {
-				return
-			}
-
 			ret = strings.TrimSpace(string(src))
 			return
 		}
@@ -449,6 +445,11 @@ var DynamicRefTexts = sync.Map{}
 func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 	if !IsBlockRef(blockRef) {
 		return
+	}
+
+	refText = strings.TrimSpace(refText)
+	if "" == refText {
+		refText = blockRef.TextMarkBlockRefID
 	}
 
 	blockRef.TextMarkBlockRefSubtype = "d"

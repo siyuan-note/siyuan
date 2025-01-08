@@ -12,6 +12,9 @@ import {getContenteditableElement, getLastBlock} from "../wysiwyg/getBlock";
 import {genEmptyElement} from "../../block/util";
 import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
+/// #if !MOBILE
+import {moveResize} from "../../dialog/moveResize";
+/// #endif
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -47,6 +50,16 @@ export const initUI = (protyle: IProtyle) => {
 
     protyle.element.appendChild(protyle.toolbar.element);
     protyle.element.appendChild(protyle.toolbar.subElement);
+    /// #if !MOBILE
+    moveResize(protyle.toolbar.subElement, () => {
+        const pinElement = protyle.toolbar.subElement.querySelector('.block__icons [data-type="pin"]');
+        if (pinElement) {
+            pinElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
+            pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            protyle.toolbar.subElement.firstElementChild.setAttribute("data-drag", "true");
+        }
+    });
+    /// #endif
 
     protyle.element.append(protyle.highlight.styleElement);
 
@@ -80,7 +93,7 @@ export const initUI = (protyle: IProtyle) => {
         setInlineStyle();
         clearTimeout(wheelTimeout);
         showMessage(`${window.siyuan.languages.fontSize} ${window.siyuan.config.editor.fontSize}px<span class="fn__space"></span>
-<button class="b3-button b3-button--small b3-button--white">${window.siyuan.languages.reset} 16px</button>`, undefined, undefined, wheelId);
+<button class="b3-button b3-button--white">${window.siyuan.languages.reset} 16px</button>`, undefined, undefined, wheelId);
         wheelTimeout = window.setTimeout(() => {
             fetchPost("/api/setting/setEditor", window.siyuan.config.editor);
             protyle.wysiwyg.element.querySelectorAll(".code-block .protyle-linenumber__rows").forEach((block: HTMLElement) => {

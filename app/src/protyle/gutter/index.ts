@@ -717,7 +717,8 @@ export class Gutter {
                 type: "submenu",
                 submenu: turnIntoSubmenu
             }).element);
-            if (isContinue && !selectsElement[0].parentElement.classList.contains("sb")) {
+            if (isContinue && !(selectsElement[0].parentElement.classList.contains("sb") &&
+                selectsElement.length + 1 === selectsElement[0].parentElement.childElementCount)) {
                 window.siyuan.menus.menu.append(new MenuItem({
                     id: "mergeSuperBlock",
                     icon: "iconSuper",

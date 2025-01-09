@@ -270,11 +270,17 @@ const initMainWindow = () => {
         height: defaultHeight,
     }, oldWindowState);
 
-    writeLog("windowStat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
+    writeLog("window size [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
 
     let resetToCenter = false;
     let x = windowState.x;
+    if (-32 < x && 0 > x) {
+        x = 0;
+    }
     let y = windowState.y;
+    if (-32 < y && 0 > y) {
+        y = 0;
+    }
     if (workArea) {
         // 窗口大于 workArea 时缩小会隐藏到左下角，这里使用最小值重置
         if (windowState.width > workArea.width + 32 || windowState.height > workArea.height + 32) {
@@ -282,22 +288,27 @@ const initMainWindow = () => {
             // 这里 +32 是因为在某种情况下窗口大小会比 workArea 大几个像素导致恢复默认，+32 可以避免这种特殊情况
             windowState.width = Math.min(defaultWidth, workArea.width);
             windowState.height = Math.min(defaultHeight, workArea.height);
+            writeLog("reset window size [width=" + windowState.width + ", height=" + windowState.height + "]");
         }
 
         if (x >= workArea.width * 0.8 || y >= workArea.height * 0.8) {
             resetToCenter = true;
+            writeLog("reset window to center cause x or y >= 80% of workArea");
         }
     }
 
     if (x < 0 || y < 0) {
         resetToCenter = true;
+        writeLog("reset window to center cause x or y < 0");
     }
 
     if (windowState.width < 493) {
         windowState.width = 493;
+        writeLog("reset window width [493]");
     }
     if (windowState.height < 376) {
         windowState.height = 376;
+        writeLog("reset window height [376]");
     }
 
     // 创建主窗体
@@ -326,6 +337,7 @@ const initMainWindow = () => {
     if (resetToCenter) {
         currentWindow.center();
     } else {
+        writeLog("window position [x=" + x + ", y=" + y + "]");
         currentWindow.setPosition(x, y);
     }
     currentWindow.webContents.userAgent = "SiYuan/" + appVer + " https://b3log.org/siyuan Electron " + currentWindow.webContents.userAgent;

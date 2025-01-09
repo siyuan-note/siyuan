@@ -648,7 +648,7 @@ func formatRepoErrorMsg(err error) string {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 			msg = Conf.Language(33)
-		} else if strings.Contains(msgLowerCase, "region was not a valid DNS name") {
+		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)
 		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
 			msg = fmt.Sprintf(Conf.Language(85), err)

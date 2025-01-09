@@ -460,13 +460,31 @@
         }
     }
 
+    const showMessage = (msg)=> {
+        document.querySelector('#message').classList.add('b3-snackbar--show')
+        document.querySelector('#message').firstElementChild.innerHTML = msg
+        setTimeout(() => {
+            document.querySelector('#message').classList.remove('b3-snackbar--show')
+            document.querySelector('#message').firstElementChild.textContent = ''
+        }, 6000)
+    }
+
     const submitAuth = () => {
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
+        let code =  inputElement.value.trim();
+        if ("" === code) {
+            showMessage({{.l9}})
+            inputElement.value = ''
+            captchaElement.value = ''
+            inputElement.focus()
+            return
+        }
+
         fetch('/api/system/loginAuth', {
             method: 'POST',
             body: JSON.stringify({
-                authCode: inputElement.value,
+                authCode: code,
                 captcha: captchaElement.value,
             }),
         }).then((response) => {
@@ -486,15 +504,10 @@
                 captchaElement.previousElementSibling.src = ''
             }
 
-            document.querySelector('#message').classList.add('b3-snackbar--show')
-            document.querySelector('#message').firstElementChild.textContent = response.msg
+            showMessage(response.msg)
             inputElement.value = ''
             captchaElement.value = ''
             inputElement.focus()
-            setTimeout(() => {
-                document.querySelector('#message').classList.remove('b3-snackbar--show')
-                document.querySelector('#message').firstElementChild.textContent = ''
-            }, 6000)
         })
     }
 

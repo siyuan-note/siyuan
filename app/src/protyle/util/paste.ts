@@ -411,6 +411,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
             e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
             e.setAttribute("updated", newId.split("-")[0]);
+            e.querySelector(".protyle-attr--refcount")?.remove();
             isBlock = true;
         });
         if (nodeElement.classList.contains("table")) {

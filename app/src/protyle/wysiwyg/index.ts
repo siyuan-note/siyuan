@@ -2118,7 +2118,7 @@ export class WYSIWYG {
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {
                 if (nodeElement) {
                     this.setEmptyOutline(protyle, nodeElement);
-                    if (range.toString() === "") {
+                    if (range.toString() === "" && !nodeElement.classList.contains("protyle-wysiwyg--select")) {
                         countSelectWord(range, protyle.block.rootID);
                     }
                     if (protyle.breadcrumb) {

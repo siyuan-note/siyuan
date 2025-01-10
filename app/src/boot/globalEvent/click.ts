@@ -37,10 +37,7 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
             window.siyuan.menus.menu.remove();
         }
     }
-    // protyle.toolbar 点击空白处时进行隐藏
-    if (!hasClosestByClassName(event.target, "protyle-toolbar")) {
-        hideAllElements(["toolbar"]);
-    }
+
     if (!hasClosestByClassName(event.target, "pdf__outer")) {
         hideAllElements(["pdfutil"]);
     }

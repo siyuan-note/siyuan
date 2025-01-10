@@ -2656,7 +2656,6 @@ export class WYSIWYG {
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
                     protyle.toolbar.render(protyle, newRange);
                 } else {
-                    hideElements(["toolbar"], protyle);
                     // https://github.com/siyuan-note/siyuan/issues/9785
                     protyle.toolbar.range = newRange;
                 }

@@ -536,6 +536,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	luteEngine := util.NewLute()
 	var reloadTreeIDs []string
+	updateNodes := map[string]*ast.Node{}
 	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -863,6 +864,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			}
 		}
 
+		updateNodes[id] = node
+
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
@@ -879,6 +882,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	for _, id := range reloadTreeIDs {
 		refreshProtyle(id)
 	}
+
+	updateAttributeViewBlockText(updateNodes)
 
 	sql.FlushQueue()
 	util.PushClearProgress()

@@ -316,8 +316,13 @@ const bindProviderEvent = () => {
                     concurrentReqs = 16;
                 }
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
+                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
+                endpoint = endpoint.replace("http://http(s)://", "http://");
+                if (!endpoint.startsWith("http")) {
+                    endpoint = "http://" + endpoint;
+                }
                 const s3 = {
-                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
+                    endpoint: endpoint,
                     accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value,
                     secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value,
                     bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
@@ -346,8 +351,13 @@ const bindProviderEvent = () => {
                     concurrentReqs = 16;
                 }
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
+                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
+                endpoint = endpoint.replace("http://http(s)://", "http://");
+                if (!endpoint.startsWith("http")) {
+                    endpoint = "http://" + endpoint;
+                }
                 const webdav = {
-                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
+                    endpoint: endpoint,
                     username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value,
                     password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
                     skipTlsVerify: (providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLInputElement).value === "true",

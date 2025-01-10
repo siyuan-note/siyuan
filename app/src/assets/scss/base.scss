@@ -106,6 +106,9 @@ html {
 
   &--browser {
     padding-left: 0;
+    margin-left: env(titlebar-area-x, 0);
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 32px);
   }
 
   #windowControls {

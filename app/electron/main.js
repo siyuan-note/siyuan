@@ -248,6 +248,7 @@ const initMainWindow = () => {
     try {
         oldWindowState = JSON.parse(fs.readFileSync(windowStatePath, "utf8"));
     } catch (e) {
+        writeLog("read window state failed: " + e);
         fs.writeFileSync(windowStatePath, "{}");
     }
     let defaultWidth;
@@ -258,7 +259,7 @@ const initMainWindow = () => {
         defaultHeight = Math.floor(screen.getPrimaryDisplay().workAreaSize.height * 0.8);
         workArea = screen.getPrimaryDisplay().workArea;
     } catch (e) {
-        console.error(e);
+        writeLog("get screen size failed: " + e);
     }
     const windowState = Object.assign({}, {
         isMaximized: false,
@@ -270,7 +271,10 @@ const initMainWindow = () => {
         height: defaultHeight,
     }, oldWindowState);
 
-    writeLog("window size [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], default [width=" + defaultWidth + ", height=" + defaultHeight + "], workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
+    writeLog("window stat [x=" + windowState.x + ", y=" + windowState.y + ", width=" + windowState.width + ", height=" + windowState.height + "], " +
+        "default [x=0, y=0, width=" + defaultWidth + ", height=" + defaultHeight + "], " +
+        "old [x=" + oldWindowState.x + ", y=" + oldWindowState.y + ", width=" + oldWindowState.width + ", height=" + oldWindowState.height + "], " +
+        "workArea [width=" + workArea.width + ", height=" + workArea.height + "]");
 
     let resetToCenter = false;
     let x = windowState.x;

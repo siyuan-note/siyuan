@@ -760,7 +760,7 @@ export class Files extends Model {
         } else {
             return `<ul class="b3-list b3-list--background" data-url="${item.id}" data-sort="${item.sort}" data-sortmode="${item.sortMode}">
 <li class="b3-list-item b3-list-item--hide-action" ${window.siyuan.config.fileTree.sort === 6 ? 'draggable="true"' : ""} 
-style="--file-toggle-width:18px" 
+style="--file-toggle-width:22px" 
 data-type="navigation-root" data-path="/">
     <span class="b3-list-item__toggle b3-list-item__toggle--hl">
         <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>

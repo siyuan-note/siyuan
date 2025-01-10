@@ -314,6 +314,11 @@ html {
     opacity: .38;
   }
 
+  .dragover:not([data-type="navigation-root"]):not([data-subtype="h1"])::after {
+    width: calc(100% - var(--file-toggle-width));
+    left: var(--file-toggle-width);
+  }
+
   .dragover__top,
   .dragover__bottom {
     box-shadow: none !important;

@@ -603,7 +603,9 @@ func GetDoc(startID, endID, id string, index int, query string, queryTypes map[s
 	var nodes []*ast.Node
 	if isBacklink {
 		// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-		nodes, isBacklinkExpand = getBacklinkRenderNodes(node)
+		originalRefBlockIDs := map[string]string{}
+		// TODO
+		nodes, isBacklinkExpand = getBacklinkRenderNodes(node, originalRefBlockIDs)
 	} else {
 		// 如果同时存在 startID 和 endID，并且是动态加载的情况，则只加载 startID 和 endID 之间的块 [startID, endID]
 		if "" != startID && "" != endID && scroll {

@@ -91,7 +91,9 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	}
 
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-	buildBacklinkListItemRefs(&ret.RefIDs)
+	originalRefBlockIDs := map[string]string{}
+	// TODO
+	buildBacklinkListItemRefs(&ret.RefIDs, &originalRefBlockIDs)
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -320,10 +322,11 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	return ret
 }
 
-func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string) {
+func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string, originalRefIDs map[string]string) {
 	refIDs = []string{}
 	refTexts = []string{}
 	defIDs = []string{}
+	originalRefIDs = map[string]string{}
 	bt := treenode.GetBlockTree(defID)
 	if nil == bt {
 		return
@@ -338,7 +341,7 @@ func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []str
 	}
 
 	if isBacklink {
-		buildBacklinkListItemRefs(&refIDs)
+		buildBacklinkListItemRefs(&refIDs, &originalRefIDs)
 	}
 	return
 }
@@ -557,16 +560,19 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	return
 }
 
-func buildBacklinkListItemRefs(refIDs *[]string) {
+func buildBacklinkListItemRefs(refIDs *[]string, originalRefIDs *map[string]string) {
 	refBts := treenode.GetBlockTrees(*refIDs)
 	for i, refID := range *refIDs {
-		if bt := refBts[refID]; nil != bt {
-			if "p" == bt.Type {
-				if parent := treenode.GetBlockTree(bt.ParentID); nil != parent && "i" == parent.Type {
-					// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-					(*refIDs)[i] = parent.ID
-				}
-			}
+		bt := refBts[refID]
+		if nil == bt || "p" != bt.Type {
+			continue
+		}
+
+		if parent := treenode.GetBlockTree(bt.ParentID); nil != parent &&
+			("i" == parent.Type || "b" == parent.Type || "s" == parent.Type) {
+			// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
+			(*refIDs)[i] = parent.ID
+			(*originalRefIDs)[parent.ID] = refID
 		}
 	}
 }

@@ -174,7 +174,7 @@ export class Outline extends Model {
                     const type = target.getAttribute("data-type");
                     switch (type) {
                         case "min":
-                            getDockByType("outline").toggleModel("outline");
+                            getDockByType("outline").toggleModel("outline", false, true);
                             break;
                     }
                     break;

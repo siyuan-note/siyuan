@@ -110,7 +110,7 @@ export class Tag extends Model {
                     const type = target.getAttribute("data-type");
                     switch (type) {
                         case "min":
-                            getDockByType("tag").toggleModel("tag");
+                            getDockByType("tag").toggleModel("tag", false, true);
                             break;
                         case "sort":
                             window.siyuan.menus.menu.remove();

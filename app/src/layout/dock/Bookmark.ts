@@ -151,7 +151,7 @@ export class Bookmark extends Model {
                     const type = target.getAttribute("data-type");
                     switch (type) {
                         case "min":
-                            getDockByType("bookmark").toggleModel("bookmark");
+                            getDockByType("bookmark").toggleModel("bookmark", false, true);
                             break;
                         case "refresh":
                             this.update();

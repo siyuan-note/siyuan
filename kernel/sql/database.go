@@ -749,6 +749,7 @@ func buildSpanFromNode(n *ast.Node, tree *parse.Tree, rootID, boxID, p string) (
 			blocks = append(blocks, b)
 			attributes = append(attributes, attrs...)
 			walkStatus = ast.WalkContinue
+			logging.LogWarnf("inline HTML [%s] is converted to HTML block ", n.Tokens)
 			return
 		}
 

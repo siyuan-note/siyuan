@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/emirpasic/gods/sets/hashset"
 	"os"
 	"path/filepath"
 	"sort"
@@ -90,8 +91,8 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-	buildBacklinkListItemRefs(&ret.RefIDs, &map[string]string{})
+	refIDs, _ := sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
+	ret.RefIDs, _ = buildBacklinkListItemRefs(refIDs)
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
@@ -339,7 +340,7 @@ func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []str
 	}
 
 	if isBacklink {
-		buildBacklinkListItemRefs(&refIDs, &originalRefIDs)
+		refIDs, originalRefIDs = buildBacklinkListItemRefs(refIDs)
 	}
 	return
 }
@@ -558,19 +559,68 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	return
 }
 
-func buildBacklinkListItemRefs(refIDs *[]string, originalRefIDs *map[string]string) {
-	refBts := treenode.GetBlockTrees(*refIDs)
-	for i, refID := range *refIDs {
-		bt := refBts[refID]
-		if nil == bt || "p" != bt.Type {
-			continue
-		}
+func buildBacklinkListItemRefs(refIDs []string) (retRefIDs []string, originalRefBlockIDs map[string]string) {
+	retRefIDs = []string{}
+	originalRefBlockIDs = map[string]string{}
 
-		if parent := treenode.GetBlockTree(bt.ParentID); nil != parent &&
-			("i" == parent.Type || "b" == parent.Type || "s" == parent.Type) {
-			// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-			(*refIDs)[i] = parent.ID
-			(*originalRefIDs)[parent.ID] = refID
+	sqlRefBlocks := sql.GetBlocks(refIDs)
+	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
+
+	parentRefParagraphs := map[string]*Block{}
+	for _, ref := range refBlocks {
+		if nil != ref && "NodeParagraph" == ref.Type {
+			parentRefParagraphs[ref.ParentID] = ref
 		}
 	}
+
+	var paragraphParentIDs []string
+	for parentID := range parentRefParagraphs {
+		paragraphParentIDs = append(paragraphParentIDs, parentID)
+	}
+	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
+	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
+
+	luteEngine := util.NewLute()
+	processedParagraphs := hashset.New()
+	for _, parent := range paragraphParents {
+		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
+			refBlock := parentRefParagraphs[parent.ID]
+			if nil == refBlock {
+				continue
+			}
+
+			paragraphUseParentLi := true
+			if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
+				if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
+					for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
+						if treenode.IsBlockRef(c) {
+							continue
+						}
+
+						if "" != strings.TrimSpace(c.Text()) {
+							paragraphUseParentLi = false
+							break
+						}
+					}
+				}
+			}
+
+			if paragraphUseParentLi {
+				retRefIDs = append(retRefIDs, parent.ID)
+				processedParagraphs.Add(parent.ID)
+			} else {
+				retRefIDs = append(retRefIDs, refBlock.ID)
+			}
+
+			originalRefBlockIDs[parent.ID] = refBlock.ID
+		}
+	}
+
+	for _, ref := range refBlocks {
+		if !processedParagraphs.Contains(ref.ParentID) {
+			retRefIDs = append(retRefIDs, ref.ID)
+		}
+	}
+	retRefIDs = gulu.Str.RemoveDuplicatedElem(retRefIDs)
+	return
 }

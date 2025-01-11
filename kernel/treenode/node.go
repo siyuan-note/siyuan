@@ -100,7 +100,7 @@ func IsBlockRef(n *ast.Node) bool {
 	if nil == n {
 		return false
 	}
-	return ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")
+	return (ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")) || ast.NodeBlockRef == n.Type
 }
 
 func IsBlockLink(n *ast.Node) bool {

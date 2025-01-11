@@ -588,18 +588,41 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
+	luteEngine := util.NewLute()
 	originalRefBlockIDs = map[string]string{}
 	processedParagraphs := hashset.New()
 	for _, parent := range paragraphParents {
 		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
+			paragraphUseParentLi := true
 			if refBlock := parentRefParagraphs[parent.ID]; nil != refBlock {
-				processedParagraphs.Add(parent.ID)
+				if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
+					if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
+						for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
+							if treenode.IsBlockRef(c) {
+								continue
+							}
+
+							if "" != strings.TrimSpace(c.Text()) {
+								paragraphUseParentLi = false
+								break
+							}
+						}
+					}
+				}
+
+				if paragraphUseParentLi {
+					processedParagraphs.Add(parent.ID)
+				}
+
 				originalRefBlockIDs[parent.ID] = refBlock.ID
 				if !matchBacklinkKeyword(parent, keywords) {
 					refsCount--
 					continue
 				}
-				ret = append(ret, parent)
+
+				if paragraphUseParentLi {
+					ret = append(ret, parent)
+				}
 			}
 		}
 	}

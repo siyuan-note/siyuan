@@ -12,6 +12,12 @@
       background-color: var(--b3-list-hover);
     }
 
+    &.dragover,
+    &.dragover__top,
+    &.dragover__bottom {
+      cursor: copy;
+    }
+
     &.dragover::after {
       background-color: var(--b3-theme-primary-lightest);
       position: absolute;

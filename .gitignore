@@ -12,6 +12,7 @@
 app/node_modules
 app/stage/build
 app/build
+app/SiYuan-Kernel
 app/src/types/dist
 app/kernel*
 ios

@@ -495,6 +495,13 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 		return
 	}
 
+	if util.IsSubPath(absPath, util.WorkspaceDir) {
+		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
+		logging.LogErrorf(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		return
+	}
+
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
 

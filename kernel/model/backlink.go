@@ -78,7 +78,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	refs := sql.QueryRefsByDefID(defID, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, _, excludeBacklinkIDs, originalRefBlockIDs := buildLinkRefs(rootID, refs, keywords)
 	tmpMentions, mentionKeywords := buildTreeBackmention(sqlBlock, linkRefs, keyword, excludeBacklinkIDs, beforeLen)
 	luteEngine := util.NewLute()
 	var mentions []*Block
@@ -106,7 +106,7 @@ func GetBackmentionDoc(defID, refTreeID, keyword string, containChildren, highli
 	var refTree *parse.Tree
 	trees := filesys.LoadTrees(mentionBlockIDs)
 	for id, tree := range trees {
-		backlink := buildBacklink(id, tree, mentionKeywords, highlight, luteEngine)
+		backlink := buildBacklink(id, tree, originalRefBlockIDs, mentionKeywords, highlight, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -148,7 +148,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 	}
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, _, _ := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, _, _, originalRefBlockIDs := buildLinkRefs(rootID, refs, keywords)
 	refTree, err := LoadTreeByBlockID(refTreeID)
 	if err != nil {
 		logging.LogWarnf("load ref tree [%s] failed: %s", refTreeID, err)
@@ -157,7 +157,7 @@ func GetBacklinkDoc(defID, refTreeID, keyword string, containChildren, highlight
 
 	luteEngine := util.NewLute()
 	for _, linkRef := range linkRefs {
-		backlink := buildBacklink(linkRef.ID, refTree, keywords, highlight, luteEngine)
+		backlink := buildBacklink(linkRef.ID, refTree, originalRefBlockIDs, keywords, highlight, luteEngine)
 		if nil != backlink {
 			ret = append(ret, backlink)
 		}
@@ -198,13 +198,13 @@ func sortBacklinks(backlinks []*Backlink, tree *parse.Tree) {
 	})
 }
 
-func buildBacklink(refID string, refTree *parse.Tree, keywords []string, highlight bool, luteEngine *lute.Lute) (ret *Backlink) {
+func buildBacklink(refID string, refTree *parse.Tree, originalRefBlockIDs map[string]string, keywords []string, highlight bool, luteEngine *lute.Lute) (ret *Backlink) {
 	node := treenode.GetNodeInTree(refTree, refID)
 	if nil == node {
 		return
 	}
 
-	renderNodes, expand := getBacklinkRenderNodes(node)
+	renderNodes, expand := getBacklinkRenderNodes(node, originalRefBlockIDs)
 
 	if highlight && 0 < len(keywords) {
 		for _, renderNode := range renderNodes {
@@ -244,7 +244,7 @@ func buildBacklink(refID string, refTree *parse.Tree, keywords []string, highlig
 	return
 }
 
-func getBacklinkRenderNodes(n *ast.Node) (ret []*ast.Node, expand bool) {
+func getBacklinkRenderNodes(n *ast.Node, originalRefBlockIDs map[string]string) (ret []*ast.Node, expand bool) {
 	expand = true
 	if ast.NodeListItem == n.Type {
 		if nil == n.FirstChild {
@@ -257,13 +257,19 @@ func getBacklinkRenderNodes(n *ast.Node) (ret []*ast.Node, expand bool) {
 		}
 
 		if c != n.LastChild { // 存在子列表
-			for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
-				if treenode.IsBlockRef(liFirstBlockSpan) {
+			for ; nil != c; c = c.Next {
+				if originalRefBlockIDs[n.ID] != c.ID {
 					continue
 				}
-				if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
-					expand = false
-					break
+
+				for liFirstBlockSpan := c.FirstChild; nil != liFirstBlockSpan; liFirstBlockSpan = liFirstBlockSpan.Next {
+					if treenode.IsBlockRef(liFirstBlockSpan) {
+						continue
+					}
+					if "" != strings.TrimSpace(liFirstBlockSpan.Text()) {
+						expand = false
+						break
+					}
 				}
 			}
 		}
@@ -313,7 +319,7 @@ func GetBacklink2(id, keyword, mentionKeyword string, sortMode, mentionSortMode 
 	refs := sql.QueryRefsByDefID(id, containChildren)
 	refs = removeDuplicatedRefs(refs)
 
-	linkRefs, linkRefsCount, excludeBacklinkIDs := buildLinkRefs(rootID, refs, keywords)
+	linkRefs, linkRefsCount, excludeBacklinkIDs, _ := buildLinkRefs(rootID, refs, keywords)
 	tmpBacklinks := toFlatTree(linkRefs, 0, "backlink", nil)
 	for _, l := range tmpBacklinks {
 		l.Blocks = nil
@@ -509,7 +515,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	return
 }
 
-func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set) {
+func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []*Block, refsCount int, excludeBacklinkIDs *hashset.Set, originalRefBlockIDs map[string]string) {
 	// 为了减少查询，组装好 IDs 后一次查出
 	defSQLBlockIDs, refSQLBlockIDs := map[string]bool{}, map[string]bool{}
 	var queryBlockIDs []string
@@ -582,19 +588,18 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
+	originalRefBlockIDs = map[string]string{}
 	processedParagraphs := hashset.New()
-	for _, p := range paragraphParents {
-		// 改进标题下方块和列表项子块引用时的反链定位 https://github.com/siyuan-note/siyuan/issues/7484
-		if "NodeListItem" == p.Type {
-			refBlock := parentRefParagraphs[p.ID]
-			if nil != refBlock && p.FContent == refBlock.Content { // 使用内容判断是否是列表项下第一个子块
-				// 如果是列表项下第一个子块，则后续会通过列表项传递或关联处理，所以这里就不处理这个段落了
-				processedParagraphs.Add(p.ID)
-				if !matchBacklinkKeyword(p, keywords) {
+	for _, parent := range paragraphParents {
+		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
+			if refBlock := parentRefParagraphs[parent.ID]; nil != refBlock {
+				processedParagraphs.Add(parent.ID)
+				originalRefBlockIDs[parent.ID] = refBlock.ID
+				if !matchBacklinkKeyword(parent, keywords) {
 					refsCount--
 					continue
 				}
-				ret = append(ret, p)
+				ret = append(ret, parent)
 			}
 		}
 	}

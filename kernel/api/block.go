@@ -438,11 +438,12 @@ func getRefIDs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	refIDs, refTexts, defIDs := model.GetBlockRefs(id, true)
-	ret.Data = map[string][]string{
-		"refIDs":   refIDs,
-		"refTexts": refTexts,
-		"defIDs":   defIDs,
+	refIDs, refTexts, defIDs, originalRefBlockIDs := model.GetBlockRefs(id, true)
+	ret.Data = map[string]any{
+		"refIDs":              refIDs,
+		"refTexts":            refTexts,
+		"defIDs":              defIDs,
+		"originalRefBlockIDs": originalRefBlockIDs,
 	}
 }
 

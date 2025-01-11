@@ -42,7 +42,7 @@ body {
       }
 
       &__tab--active {
-        .b3-list--background .b3-list-item--focus:not(.dragover) {
+        .b3-list--background .b3-list-item--focus {
           background-color: var(--b3-list-hover);
         }
 

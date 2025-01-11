@@ -21,6 +21,47 @@
   [data-node-id] {
     position: relative;
 
+    &.dragover {
+      &__left::after,
+      &__right::after,
+      &__top::after,
+      &__bottom::after {
+        content: '';
+        position: absolute;
+        background-color: var(--b3-theme-primary-lighter);
+      }
+
+      &__top::after,
+      &__bottom::after {
+        left: 0;
+        right: 0;
+        height: 4px;
+      }
+
+      &__top::after {
+        top: -4px;
+      }
+
+      &__bottom::after {
+        bottom: -4px;
+      }
+
+      &__left::after,
+      &__right::after {
+        top: 0;
+        bottom: 0;
+        width: 4px;
+      }
+
+      &__left::after {
+        left: -4px;
+      }
+
+      &__right::after {
+        right: -4px;
+      }
+    }
+
     &[custom-riff-decks] {
       box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
     }
@@ -445,13 +486,18 @@
     }
   }
 
-  &--select,
-  &--hl {
-    @extend .dragover;
-
-    &::after {
-      border-radius: var(--b3-border-radius);
-    }
+  &--select::after,
+  &--hl::after {
+    background-color: var(--b3-theme-primary-lightest);
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    content: " ";
+    left: 0;
+    top: 0;
+    z-index: 3;
+    pointer-events: none;
+    border-radius: var(--b3-border-radius);
   }
 
   &--hl {
@@ -461,16 +507,6 @@
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;
-  }
-
-  .dragover {
-    &__top {
-      box-shadow: 0 -4px 0 0 var(--b3-theme-primary-lighter) !important;
-    }
-
-    &__bottom {
-      box-shadow: 0 4px 0 0 var(--b3-theme-primary-lighter) !important
-    }
   }
 
   &--attr .protyle-attr {

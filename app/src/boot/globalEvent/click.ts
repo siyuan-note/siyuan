@@ -22,8 +22,8 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
             if (startElement) {
                 startElement.style.opacity = "";
             }
-            ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover").forEach((item: HTMLElement) => {
-                item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+            ghostElement.parentElement.querySelectorAll(".dragover__top, .dragover__bottom, .dragover, .dragover__current").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__current");
                 item.style.opacity = "";
             });
         }

@@ -91,9 +91,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	}
 
 	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-	originalRefBlockIDs := map[string]string{}
-	// TODO
-	buildBacklinkListItemRefs(&ret.RefIDs, &originalRefBlockIDs)
+	buildBacklinkListItemRefs(&ret.RefIDs, &map[string]string{})
 	ret.RefCount = len(ret.RefIDs) // 填充块引计数
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545

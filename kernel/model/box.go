@@ -513,7 +513,7 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 		}
 
 		id := n.IALAttr("id")
-		if "" == id {
+		if "" == id && n.IsBlock() {
 			n.SetIALAttr("id", n.ID)
 		}
 

@@ -573,17 +573,14 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	}
 
 	parentRefParagraphs := map[string]*Block{}
+	var paragraphParentIDs []string
 	for _, link := range links {
 		for _, ref := range link.Refs {
 			if "NodeParagraph" == ref.Type {
 				parentRefParagraphs[ref.ParentID] = ref
+				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 			}
 		}
-	}
-
-	var paragraphParentIDs []string
-	for parentID := range parentRefParagraphs {
-		paragraphParentIDs = append(paragraphParentIDs, parentID)
 	}
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)

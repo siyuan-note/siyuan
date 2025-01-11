@@ -567,15 +567,12 @@ func buildBacklinkListItemRefs(refIDs []string) (retRefIDs []string, originalRef
 	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
 
 	parentRefParagraphs := map[string]*Block{}
+	var paragraphParentIDs []string
 	for _, ref := range refBlocks {
 		if nil != ref && "NodeParagraph" == ref.Type {
 			parentRefParagraphs[ref.ParentID] = ref
+			paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 		}
-	}
-
-	var paragraphParentIDs []string
-	for parentID := range parentRefParagraphs {
-		paragraphParentIDs = append(paragraphParentIDs, parentID)
 	}
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)

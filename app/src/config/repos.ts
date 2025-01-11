@@ -318,6 +318,7 @@ const bindProviderEvent = () => {
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
                 let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
                 endpoint = endpoint.trim().replace("http://http(s)://", "https://");
+                endpoint = endpoint.replace("http(s)://", "https://");
                 if (!endpoint.startsWith("http")) {
                     endpoint = "http://" + endpoint;
                 }
@@ -353,6 +354,7 @@ const bindProviderEvent = () => {
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
                 let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
                 endpoint = endpoint.trim().replace("http://http(s)://", "https://");
+                endpoint = endpoint.replace("http(s)://", "https://");
                 if (!endpoint.startsWith("http")) {
                     endpoint = "http://" + endpoint;
                 }

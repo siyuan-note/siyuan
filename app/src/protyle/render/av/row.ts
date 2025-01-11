@@ -131,7 +131,7 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
     });
     let html = "";
     srcIDs.forEach((id) => {
-      const blockCellElement =  blockElement.querySelector(`[data-block-id="${id}"]`);
+        const blockCellElement = blockElement.querySelector(`[data-block-id="${id}"]`);
         if (!blockCellElement) {
             html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
     ${colHTML}

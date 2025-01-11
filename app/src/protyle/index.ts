@@ -290,6 +290,7 @@ export class Protyle {
         fetchPost("/api/filetree/getDoc", {
             id: mergedOptions.blockId,
             isBacklink: mergedOptions.action.includes(Constants.CB_GET_BACKLINK),
+            originalRefBlockIDs: mergedOptions.originalRefBlockIDs,
             // 0: 仅当前 ID（默认值），1：向上 2：向下，3：上下都加载，4：加载最后
             mode: (mergedOptions.action && mergedOptions.action.includes(Constants.CB_GET_CONTEXT)) ? 3 : 0,
             size: mergedOptions.action?.includes(Constants.CB_GET_ALL) ? Constants.SIZE_GET_MAX : window.siyuan.config.editor.dynamicLoadBlocks,

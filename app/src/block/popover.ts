@@ -336,6 +336,7 @@ export const showPopover = async (app: App, showRef = false) => {
     }
     let ids: string[];
     let defIds: string[];
+    let originalRefBlockIDs: IObject
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
         // backlink/util/hint/正文标题 上的弹层
@@ -343,6 +344,7 @@ export const showPopover = async (app: App, showRef = false) => {
             const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
             ids = postResponse.data.refIDs;
             defIds = postResponse.data.defIDs;
+            originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         } else {
             if (dataId.startsWith("[")) {
                 ids = JSON.parse(dataId);
@@ -394,6 +396,7 @@ export const showPopover = async (app: App, showRef = false) => {
             const postResponse = await fetchSyncPost(url, {id: targetId});
             ids = postResponse.data.refIDs;
             defIds = postResponse.data.defIDs;
+            originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         }
     }
 
@@ -414,6 +417,7 @@ export const showPopover = async (app: App, showRef = false) => {
             isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
             nodeIds: ids,
             defIds,
+            originalRefBlockIDs,
         }));
     }
     // 不能清除，否则ctrl 后 shift 就 无效 popoverTargetElement = undefined;

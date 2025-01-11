@@ -29,6 +29,7 @@ export class BlockPanel {
     public editors: Protyle[] = [];
     private observerResize: ResizeObserver;
     private observerLoad: IntersectionObserver;
+    private originalRefBlockIDs: IObject;
 
     // x,y 和 targetElement 二选一必传
     constructor(options: {
@@ -38,7 +39,8 @@ export class BlockPanel {
         defIds?: string[],
         isBacklink: boolean,
         x?: number,
-        y?: number
+        y?: number,
+        originalRefBlockIDs?: IObject,  // isBacklink 为 true 时有效
     }) {
         this.id = genUUID();
         this.targetElement = options.targetElement;
@@ -48,6 +50,7 @@ export class BlockPanel {
         this.x = options.x;
         this.y = options.y;
         this.isBacklink = options.isBacklink;
+        this.originalRefBlockIDs = options.originalRefBlockIDs;
 
         this.element = document.createElement("div");
         this.element.classList.add("block__popover");
@@ -169,6 +172,7 @@ export class BlockPanel {
             const editor = new Protyle(this.app, editorElement, {
                 blockId: this.nodeIds[index],
                 defId: this.defIds[index] || this.defIds[0] || "",
+                originalRefBlockIDs: this.isBacklink ? this.originalRefBlockIDs : undefined,
                 action,
                 render: {
                     scroll: true,

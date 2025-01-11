@@ -385,6 +385,7 @@ export class Plugin {
         y?: number,
         targetElement?: HTMLElement,
         isBacklink: boolean,
+        originalRefBlockIDs?: IObject,
     }) => {
         window.siyuan.blockPanels.push(new BlockPanel({
             app: this.app,

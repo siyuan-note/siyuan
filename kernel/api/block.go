@@ -455,10 +455,9 @@ func getRefIDsByFileAnnotationID(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	refIDs, refTexts := model.GetBlockRefIDsByFileAnnotationID(id)
+	refIDs := model.GetBlockRefIDsByFileAnnotationID(id)
 	ret.Data = map[string][]string{
-		"refIDs":   refIDs,
-		"refTexts": refTexts,
+		"refIDs": refIDs,
 	}
 }
 

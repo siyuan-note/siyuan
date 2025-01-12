@@ -369,9 +369,8 @@ func queryDocRefDefs(rootID string) (refDefs []*RefDefs) {
 	return
 }
 
-func GetBlockRefIDsByFileAnnotationID(id string) (refIDs, refTexts []string) {
-	refIDs, refTexts = sql.QueryRefIDsByAnnotationID(id)
-	return
+func GetBlockRefIDsByFileAnnotationID(id string) []string {
+	return sql.QueryRefIDsByAnnotationID(id)
 }
 
 func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string) {

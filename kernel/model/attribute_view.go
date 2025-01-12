@@ -1916,6 +1916,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	var blockIcon string
 	if !isDetached {
 		blockIcon, addingBlockContent = getNodeAvBlockText(node)
+		addingBlockContent = util.UnescapeHTML(addingBlockContent)
 	}
 
 	// 检查是否重复添加相同的块

@@ -128,7 +128,7 @@ func refreshProtyle(rootID string) {
 	}
 
 	// 刷新关联的嵌入块
-	refIDs, _ := sql.QueryRefIDsByDefID(rootID, true)
+	refIDs := sql.QueryRefIDsByDefID(rootID, true)
 	var rootIDs []string
 	bts := treenode.GetBlockTrees(refIDs)
 	for _, bt := range bts {
@@ -154,11 +154,11 @@ func refreshRefCount(rootID, blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	refIDs, _ := sql.QueryRefIDsByDefID(bt.ID, isDoc)
+	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
 	if isDoc {
 		rootRefIDs = refIDs
 	} else {
-		rootRefIDs, _ = sql.QueryRefIDsByDefID(bt.RootID, true)
+		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)
 	}
 	refCount = len(refIDs)
 	rootRefCount = len(rootRefIDs)

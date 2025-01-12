@@ -91,9 +91,14 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	refIDs, _ := sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-	ret.RefIDs, _ = buildBacklinkListItemRefs(refIDs)
-	ret.RefCount = len(ret.RefIDs) // 填充块引计数
+	refDefs := queryDocRefDefs(blockID)
+	buildBacklinkListItemRefs(refDefs)
+	var refIDs []string
+	for _, refDef := range refDefs {
+		refIDs = append(refIDs, refDef.RefID)
+	}
+	ret.RefIDs = refIDs
+	ret.RefCount = len(ret.RefIDs)
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 	avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
@@ -164,8 +169,8 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		if queryRefCount {
-			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-			ret.RefCount = len(ret.RefIDs) // 填充块引计数
+			ret.RefIDs = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
+			ret.RefCount = len(ret.RefIDs)
 		}
 
 		if queryAv {
@@ -321,10 +326,13 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	return ret
 }
 
-func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string, originalRefIDs map[string]string) {
-	refIDs = []string{}
-	refTexts = []string{}
-	defIDs = []string{}
+type RefDefs struct {
+	RefID  string   `json:"refID"`
+	DefIDs []string `json:"defIDs"`
+}
+
+func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefIDs map[string]string) {
+	refDefs = []*RefDefs{}
 	originalRefIDs = map[string]string{}
 	bt := treenode.GetBlockTree(defID)
 	if nil == bt {
@@ -332,15 +340,31 @@ func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []str
 	}
 
 	isDoc := bt.ID == bt.RootID
-	refIDs, refTexts = sql.QueryRefIDsByDefID(defID, isDoc)
 	if isDoc {
-		defIDs = sql.QueryChildDefIDsByRootDefID(defID)
+		refDefs = queryDocRefDefs(defID)
 	} else {
-		defIDs = append(defIDs, defID)
+		refIDs := sql.QueryRefIDsByDefID(defID, false)
+		for _, refID := range refIDs {
+			refDefs = append(refDefs, &RefDefs{RefID: refID, DefIDs: []string{defID}})
+		}
 	}
 
-	if isBacklink {
-		refIDs, originalRefIDs = buildBacklinkListItemRefs(refIDs)
+	originalRefIDs = buildBacklinkListItemRefs(refDefs)
+	return
+}
+
+func queryDocRefDefs(rootID string) (refDefs []*RefDefs) {
+	refDefs = []*RefDefs{}
+	refDefIDs := sql.QueryChildRefDefIDsByRootDefID(rootID)
+	for rID, dIDs := range refDefIDs {
+		var defIDs []string
+		for _, dID := range dIDs {
+			defIDs = append(defIDs, dID)
+		}
+		if 1 > len(defIDs) {
+			defIDs = []string{}
+		}
+		refDefs = append(refDefs, &RefDefs{RefID: rID, DefIDs: defIDs})
 	}
 	return
 }
@@ -559,10 +583,13 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	return
 }
 
-func buildBacklinkListItemRefs(refIDs []string) (retRefIDs []string, originalRefBlockIDs map[string]string) {
-	retRefIDs = []string{}
+func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[string]string) {
 	originalRefBlockIDs = map[string]string{}
 
+	var refIDs []string
+	for _, refDef := range refDefs {
+		refIDs = append(refIDs, refDef.RefID)
+	}
 	sqlRefBlocks := sql.GetBlocks(refIDs)
 	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
 
@@ -603,21 +630,17 @@ func buildBacklinkListItemRefs(refIDs []string) (retRefIDs []string, originalRef
 			}
 
 			if paragraphUseParentLi {
-				retRefIDs = append(retRefIDs, parent.ID)
+				for _, refDef := range refDefs {
+					if refDef.RefID == refBlock.ID {
+						refDef.RefID = parent.ID
+						break
+					}
+				}
 				processedParagraphs.Add(parent.ID)
-			} else {
-				retRefIDs = append(retRefIDs, refBlock.ID)
 			}
 
 			originalRefBlockIDs[parent.ID] = refBlock.ID
 		}
 	}
-
-	for _, ref := range refBlocks {
-		if !processedParagraphs.Contains(ref.ParentID) {
-			retRefIDs = append(retRefIDs, ref.ID)
-		}
-	}
-	retRefIDs = gulu.Str.RemoveDuplicatedElem(retRefIDs)
 	return
 }

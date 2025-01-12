@@ -151,14 +151,25 @@ func refreshRefCount(rootID, blockID string) {
 		return
 	}
 
-	refCounts := sql.QueryRootChildrenRefCount(bt.RootID)
-	refCount := refCounts[blockID]
-	var rootRefCount int
-	for _, count := range refCounts {
-		rootRefCount += count
+	isDoc := bt.ID == bt.RootID
+	var rootRefIDs []string
+	var refCount, rootRefCount int
+	refIDs, _ := sql.QueryRefIDsByDefID(bt.ID, isDoc)
+	if isDoc {
+		rootRefIDs = refIDs
+	} else {
+		rootRefIDs, _ = sql.QueryRefIDsByDefID(bt.RootID, true)
 	}
-	refIDs, _, _, _ := GetBlockRefs(blockID, false)
-	util.PushSetDefRefCount(rootID, blockID, refIDs, refCount, rootRefCount)
+	refCount = len(refIDs)
+	rootRefCount = len(rootRefIDs)
+	var defIDs []string
+	if isDoc {
+		defIDs = sql.QueryChildDefIDsByRootDefID(bt.ID)
+	} else {
+		defIDs = append(defIDs, bt.ID)
+	}
+
+	util.PushSetDefRefCount(rootID, blockID, refIDs, rootRefIDs, defIDs, refCount, rootRefCount)
 }
 
 // refreshDynamicRefText 用于刷新块引用的动态锚文本。

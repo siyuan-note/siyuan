@@ -176,7 +176,7 @@ export const initBlockPopover = (app: App) => {
             }
         }, Constants.TIMEOUT_INPUT);
         timeout = window.setTimeout(() => {
-            if (!getTarget(event, aElement)) {
+            if (!getTarget(event, aElement) || isTouchDevice()) {
                 return;
             }
             clearTimeout(timeoutHide);

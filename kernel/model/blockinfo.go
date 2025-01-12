@@ -91,11 +91,15 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	refDefs := queryDocRefDefs(blockID)
+	bt := treenode.GetBlockTree(blockID)
+	refDefs := queryBlockRefDefs(bt)
 	buildBacklinkListItemRefs(refDefs)
 	var refIDs []string
 	for _, refDef := range refDefs {
 		refIDs = append(refIDs, refDef.RefID)
+	}
+	if 1 > len(refIDs) {
+		refIDs = []string{}
 	}
 	ret.RefIDs = refIDs
 	ret.RefCount = len(ret.RefIDs)
@@ -135,6 +139,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 	FlushTxQueue()
 
 	trees := filesys.LoadTrees(blockIDs)
+	bts := treenode.GetBlockTrees(blockIDs)
 	for _, blockID := range blockIDs {
 		tree := trees[blockID]
 		if nil == tree {
@@ -169,7 +174,16 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		if queryRefCount {
-			ret.RefIDs = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
+			var refIDs []string
+			refDefs := queryBlockRefDefs(bts[blockID])
+			buildBacklinkListItemRefs(refDefs)
+			for _, refDef := range refDefs {
+				refIDs = append(refIDs, refDef.RefID)
+			}
+			if 1 > len(refIDs) {
+				refIDs = []string{}
+			}
+			ret.RefIDs = refIDs
 			ret.RefCount = len(ret.RefIDs)
 		}
 
@@ -339,32 +353,35 @@ func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefIDs map[string]s
 		return
 	}
 
-	isDoc := bt.ID == bt.RootID
-	if isDoc {
-		refDefs = queryDocRefDefs(defID)
-	} else {
-		refIDs := sql.QueryRefIDsByDefID(defID, false)
-		for _, refID := range refIDs {
-			refDefs = append(refDefs, &RefDefs{RefID: refID, DefIDs: []string{defID}})
-		}
-	}
-
+	refDefs = queryBlockRefDefs(bt)
 	originalRefIDs = buildBacklinkListItemRefs(refDefs)
 	return
 }
 
-func queryDocRefDefs(rootID string) (refDefs []*RefDefs) {
+func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
 	refDefs = []*RefDefs{}
-	refDefIDs := sql.QueryChildRefDefIDsByRootDefID(rootID)
-	for rID, dIDs := range refDefIDs {
-		var defIDs []string
-		for _, dID := range dIDs {
-			defIDs = append(defIDs, dID)
+	if nil == bt {
+		return
+	}
+
+	isDoc := bt.ID == bt.RootID
+	if isDoc {
+		refDefIDs := sql.QueryChildRefDefIDsByRootDefID(bt.RootID)
+		for rID, dIDs := range refDefIDs {
+			var defIDs []string
+			for _, dID := range dIDs {
+				defIDs = append(defIDs, dID)
+			}
+			if 1 > len(defIDs) {
+				defIDs = []string{}
+			}
+			refDefs = append(refDefs, &RefDefs{RefID: rID, DefIDs: defIDs})
 		}
-		if 1 > len(defIDs) {
-			defIDs = []string{}
+	} else {
+		refIDs := sql.QueryRefIDsByDefID(bt.ID, false)
+		for _, refID := range refIDs {
+			refDefs = append(refDefs, &RefDefs{RefID: refID, DefIDs: []string{bt.ID}})
 		}
-		refDefs = append(refDefs, &RefDefs{RefID: rID, DefIDs: defIDs})
 	}
 	return
 }

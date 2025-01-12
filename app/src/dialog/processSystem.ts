@@ -173,10 +173,7 @@ export const setDefRefCount = (data: {
     rootRefIDs: string[]
 }) => {
     getAllEditor().forEach(editor => {
-        if (editor.protyle.block.rootID === data.rootID) {
-            if (!editor.protyle.title) {
-                return;
-            }
+        if (editor.protyle.block.rootID === data.rootID && editor.protyle.title) {
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");
             const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
@@ -189,7 +186,6 @@ export const setDefRefCount = (data: {
             } else if (data.rootRefCount > 0) {
                 attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.rootID}&quot;]" data-id="${JSON.stringify(data.rootRefIDs)}" style="">${data.rootRefCount}</div>`);
             }
-            return;
         }
         if (data.rootID === data.blockID) {
             return;

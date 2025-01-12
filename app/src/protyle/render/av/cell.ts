@@ -697,8 +697,10 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             newValue = {
                 content: value,
                 id: oldValue.block.id,
-                icon: oldValue.block.icon
             };
+            if (oldValue.block.icon) {
+                newValue.icon = oldValue.block.icon;
+            }
         }
         const cellValue = genCellValue(type, newValue);
         cellValue.id = cellId;

@@ -345,16 +345,16 @@ type RefDefs struct {
 	DefIDs []string `json:"defIDs"`
 }
 
-func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefIDs map[string]string) {
+func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
 	refDefs = []*RefDefs{}
-	originalRefIDs = map[string]string{}
+	originalRefBlockIDs = map[string]string{}
 	bt := treenode.GetBlockTree(defID)
 	if nil == bt {
 		return
 	}
 
 	refDefs = queryBlockRefDefs(bt)
-	originalRefIDs = buildBacklinkListItemRefs(refDefs)
+	originalRefBlockIDs = buildBacklinkListItemRefs(refDefs)
 	return
 }
 

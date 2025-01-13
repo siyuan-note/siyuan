@@ -400,6 +400,10 @@ export const showPopover = async (app: App, showRef = false) => {
         }
     }
 
+    if (refDefs.length === 0) {
+        return;
+    }
+
     let hasPin = false;
     window.siyuan.blockPanels.find((item) => {
         if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true"

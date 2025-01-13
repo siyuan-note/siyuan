@@ -338,7 +338,7 @@ export const showPopover = async (app: App, showRef = false) => {
     let originalRefBlockIDs: IObject
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
-        // backlink/util/hint/正文标题 上的弹层
+        // backlink/util/hint 上的弹层
         if (showRef) {
             const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
             refDefs = postResponse.data.refDefs;

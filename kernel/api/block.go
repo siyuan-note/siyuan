@@ -456,8 +456,13 @@ func getRefIDsByFileAnnotationID(c *gin.Context) {
 
 	id := arg["id"].(string)
 	refIDs := model.GetBlockRefIDsByFileAnnotationID(id)
-	ret.Data = map[string][]string{
-		"refIDs": refIDs,
+	var retRefDefs []model.RefDefs
+	for _, blockID := range refIDs {
+		retRefDefs = append(retRefDefs, model.RefDefs{RefID: blockID, DefIDs: []string{}})
+	}
+
+	ret.Data = map[string]any{
+		"refDefs": retRefDefs,
 	}
 }
 
@@ -478,7 +483,14 @@ func getBlockDefIDsByRefText(c *gin.Context) {
 	}
 	excludeIDs = nil // 不限制虚拟引用搜索自己 https://ld246.com/article/1633243424177
 	ids := model.GetBlockDefIDsByRefText(anchor, excludeIDs)
-	ret.Data = ids
+	var retRefDefs []model.RefDefs
+	for _, id := range ids {
+		retRefDefs = append(retRefDefs, model.RefDefs{RefID: id, DefIDs: []string{}})
+	}
+
+	ret.Data = map[string]any{
+		"refDefs": retRefDefs,
+	}
 }
 
 func getBlockBreadcrumb(c *gin.Context) {

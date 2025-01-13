@@ -77,6 +77,9 @@ func getMirrorDatabaseBlocks(c *gin.Context) {
 	for _, blockID := range blockIDs {
 		retRefDefs = append(retRefDefs, model.RefDefs{RefID: blockID, DefIDs: []string{}})
 	}
+	if 1 > len(retRefDefs) {
+		retRefDefs = []model.RefDefs{}
+	}
 
 	ret.Data = map[string]any{
 		"refDefs": retRefDefs,

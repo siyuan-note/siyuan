@@ -169,8 +169,6 @@ export const setDefRefCount = (data: {
     "refCount": number,
     "rootRefCount": number,
     "rootID": string
-    refIDs: string[]
-    rootRefIDs: string[]
 }) => {
     getAllEditor().forEach(editor => {
         if (editor.protyle.block.rootID === data.rootID && editor.protyle.title) {
@@ -181,7 +179,6 @@ export const setDefRefCount = (data: {
                     countElement.remove();
                 } else {
                     countElement.textContent = data.rootRefCount.toString();
-                    countElement.setAttribute("data-id", JSON.stringify(data.rootRefIDs));
                 }
             } else if (data.rootRefCount > 0) {
                 attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${data.rootRefCount}</div>`);

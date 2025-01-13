@@ -126,12 +126,12 @@ ${item.label ? "data-label='" + item.label + "'" : ""}>
             }
             let iconHTML;
             if (type === "outline") {
-                iconHTML = `<svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: 10px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
+                iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}" style="height: 22px;width: 10px;"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
             } else {
                 if (item.type === "NodeDocument") {
-                    iconHTML = `<span data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span>`;
+                    iconHTML = `<span data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}">${unicode2Emoji(item.ial.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span>`;
                 } else {
-                    iconHTML = `<svg data-defids='["${item.defID}"]' class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
+                    iconHTML = `<svg data-showref="true" class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type, item.subType)}"></use></svg>`;
                 }
             }
             let style = "";

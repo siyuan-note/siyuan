@@ -2436,7 +2436,7 @@ export class WYSIWYG {
                             app: protyle.app,
                             targetElement: embedItemElement,
                             isBacklink: false,
-                            nodeIds: [embedId],
+                            refDefs: [{refID: embedId}]
                         }));
                     }
                     /// #endif

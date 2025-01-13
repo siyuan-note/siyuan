@@ -755,7 +755,7 @@ export class Graph extends Model {
                         isBacklink: false,
                         x: params.event.center.x,
                         y: params.event.center.y,
-                        nodeIds: [node.id],
+                        refDefs: [{refID: node.id}]
                     }));
                 } else {
                     checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {

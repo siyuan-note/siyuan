@@ -448,7 +448,7 @@ interface IProtyleOptions {
     rootId?: string
     originalRefBlockIDs?: IObject
     key?: string
-    defId?: string
+    defIds?: string[]
     render?: {
         background?: boolean
         title?: boolean

@@ -184,7 +184,7 @@ export const setDefRefCount = (data: {
                     countElement.setAttribute("data-id", JSON.stringify(data.rootRefIDs));
                 }
             } else if (data.rootRefCount > 0) {
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.rootID}&quot;]" data-id="${JSON.stringify(data.rootRefIDs)}" style="">${data.rootRefCount}</div>`);
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${data.rootRefCount}</div>`);
             }
         }
         if (data.rootID === data.blockID) {

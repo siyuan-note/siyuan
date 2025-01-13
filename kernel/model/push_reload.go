@@ -154,8 +154,9 @@ func refreshRefCount(rootID, blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
+	var refIDs []string
 	if isDoc {
+		refIDs = sql.QueryRefIDsByDefID(bt.ID, isDoc)
 		rootRefIDs = refIDs
 	} else {
 		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)
@@ -169,7 +170,7 @@ func refreshRefCount(rootID, blockID string) {
 		defIDs = append(defIDs, bt.ID)
 	}
 
-	util.PushSetDefRefCount(rootID, blockID, refIDs, rootRefIDs, defIDs, refCount, rootRefCount)
+	util.PushSetDefRefCount(rootID, blockID, defIDs, refCount, rootRefCount)
 }
 
 // refreshDynamicRefText 用于刷新块引用的动态锚文本。

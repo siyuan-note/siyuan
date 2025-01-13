@@ -300,7 +300,7 @@ export class Backlink extends Model {
                             });
                             break;
                         case "min":
-                            getDockByType("backlink").toggleModel("backlink");
+                            getDockByType("backlink").toggleModel("backlink", false, true);
                             break;
                         case "search":
                             target.previousElementSibling.classList.remove("fn__none");

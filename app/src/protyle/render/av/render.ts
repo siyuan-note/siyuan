@@ -297,12 +297,18 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 if (headerTransform) {
                     (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
                 } else {
-                    stickyRow(e, editRect, "top");
+                    // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
+                    setTimeout(() => {
+                        stickyRow(e, editRect, "top");
+                    }, Constants.TIMEOUT_LOAD)
                 }
                 if (footerTransform) {
                     (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
                 } else {
-                    stickyRow(e, editRect, "bottom");
+                    // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
+                    setTimeout(() => {
+                        stickyRow(e, editRect, "bottom");
+                    }, Constants.TIMEOUT_LOAD);
                 }
                 if (selectCellId) {
                     const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);

@@ -32,8 +32,8 @@ declare namespace Config {
         bazaar: IBazaar;
         /**
          * Cloud Service Provider Region
-         * - `0`: Chinese mainland
-         * - `1`: North America
+         * - `0`: Chinese mainland (LianDi)
+         * - `1`: North America (LiuYun)
          */
         cloudRegion: number;
         editor: IEditor;

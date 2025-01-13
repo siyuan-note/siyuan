@@ -17,7 +17,6 @@
 @import "business/graph";
 @import "business/layout";
 @import "business/block";
-@import "business/drag";
 @import "util/reset";
 @import "component/card";
 @import "component/menu";
@@ -106,6 +105,9 @@ html {
 
   &--browser {
     padding-left: 0;
+    margin-left: env(titlebar-area-x, 0);
+    width: env(titlebar-area-width, 100%);
+    height: env(titlebar-area-height, 32px);
   }
 
   #windowControls {
@@ -309,31 +311,6 @@ html {
 
   &:hover .block__icons .block__icon[disabled] {
     opacity: .38;
-  }
-
-  .dragover__top,
-  .dragover__bottom {
-    box-shadow: none !important;
-  }
-
-  .dragover__top::after,
-  .dragover__bottom::after {
-    content: "";
-    position: absolute;
-    height: 4px;
-    width: calc(100% - var(--file-toggle-width));
-    left: var(--file-toggle-width);
-    background-color: var(--b3-theme-primary-lighter);
-    z-index: 1;
-    pointer-events: none;
-  }
-
-  .dragover__top::after {
-    top: -3px;
-  }
-
-  .dragover__bottom::after {
-    bottom: -2px;
   }
 
   &__close {

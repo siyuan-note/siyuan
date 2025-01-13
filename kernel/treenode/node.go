@@ -100,7 +100,7 @@ func IsBlockRef(n *ast.Node) bool {
 	if nil == n {
 		return false
 	}
-	return ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")
+	return (ast.NodeTextMark == n.Type && n.IsTextMarkType("block-ref")) || ast.NodeBlockRef == n.Type
 }
 
 func IsBlockLink(n *ast.Node) bool {
@@ -176,10 +176,6 @@ func GetNodeSrcTokens(n *ast.Node) (ret string) {
 		src := n.Tokens[index+len("src=\""):]
 		if index = bytes.Index(src, []byte("\"")); 0 < index {
 			src = src[:bytes.Index(src, []byte("\""))]
-			if !util.IsAssetLinkDest(src) {
-				return
-			}
-
 			ret = strings.TrimSpace(string(src))
 			return
 		}

@@ -1102,7 +1102,7 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
-                            const blockElement = hasClosestBlock(options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].startContainer)
+                            const blockElement = hasClosestBlock(options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].startContainer);
                             if (blockElement && blockElement.getAttribute("data-node-id") !== options.id) {
                                 highlightById(options.edit.protyle, options.id);
                             } else {

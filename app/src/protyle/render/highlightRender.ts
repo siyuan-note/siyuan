@@ -138,8 +138,9 @@ export const lineNumberRender = (block: HTMLElement) => {
 
     const lineNumberTemp = document.createElement("div");
     lineNumberTemp.className = "hljs";
+    // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
     lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
-width: ${codeElement.clientWidth}px;
+width: ${codeElement.getBoundingClientRect().width}px;
 white-space:${codeElement.style.whiteSpace};
 word-break:${codeElement.style.wordBreak};
 font-variant-ligatures:${codeElement.style.fontVariantLigatures};

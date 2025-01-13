@@ -1916,6 +1916,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	var blockIcon string
 	if !isDetached {
 		blockIcon, addingBlockContent = getNodeAvBlockText(node)
+		addingBlockContent = util.UnescapeHTML(addingBlockContent)
 	}
 
 	// 检查是否重复添加相同的块
@@ -2120,6 +2121,37 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	}
 
 	err = av.SaveAttributeView(attrView)
+
+	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	if err != nil {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
+	for _, blockID := range blockIDs {
+		tree := trees[blockID]
+		if nil == tree {
+			tree, _ = LoadTreeByBlockID(blockID)
+		}
+		if nil == tree {
+			continue
+		}
+
+		historyPath := filepath.Join(historyDir, tree.Box, tree.Path)
+		absPath := filepath.Join(util.DataDir, tree.Box, tree.Path)
+		if err = filelock.Copy(absPath, historyPath); err != nil {
+			logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absPath, historyPath, err)
+			return
+		}
+	}
+
+	srcAvPath := filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	destAvPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if copyErr := filelock.Copy(srcAvPath, destAvPath); nil != copyErr {
+		logging.LogErrorf("copy av [%s] failed: %s", srcAvPath, copyErr)
+	}
+
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 	return
 }
 
@@ -3105,6 +3137,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.BlockID)
+					val.Block.Content = util.UnescapeHTML(val.Block.Content)
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
@@ -3112,11 +3145,12 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
 						val.Block.Content = blockText
+						val.Block.Content = util.UnescapeHTML(val.Block.Content)
 					} else {
 						if blockText == content {
 							updateStaticText = false
 						} else {
-							val.Block.Content = blockText
+							val.Block.Content = content
 						}
 					}
 

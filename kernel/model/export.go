@@ -269,7 +269,7 @@ func Export2Liandi(id string) (err error) {
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
 	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
-		".md", 4, 1, 0,
+		".md", 4, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		"#", "#",
 		"", "",
 		false, nil, true, &map[string]*parse.Tree{})

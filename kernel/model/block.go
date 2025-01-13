@@ -359,7 +359,7 @@ func TransferBlockRef(fromID, toID string, refIDs []string) (err error) {
 	util.PushMsg(Conf.Language(116), 7000)
 
 	if 1 > len(refIDs) { // 如果不指定 refIDs，则转移所有引用了 fromID 的块
-		refIDs, _ = sql.QueryRefIDsByDefID(fromID, false)
+		refIDs = sql.QueryRefIDsByDefID(fromID, false)
 	}
 
 	trees := filesys.LoadTrees(refIDs)
@@ -900,7 +900,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
-	fillBlockRefCount(nodes, 0)
+	fillBlockRefCount(nodes)
 
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑

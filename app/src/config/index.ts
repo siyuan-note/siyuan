@@ -1,3 +1,6 @@
+/// #if MOBILE
+import {popMenu} from "../mobile/menu";
+/// #else
 import {editor} from "./editor";
 import {about} from "./about";
 import {appearance} from "./appearance";
@@ -17,6 +20,7 @@ import {publish} from "./publish";
 import {App} from "../index";
 import {isHuawei, isInHarmony} from "../protyle/util/compatibility";
 import {Constants} from "../constants";
+/// #endif
 
 export const genItemPanel = (type: string, containerElement: Element, app: App) => {
     switch (type) {
@@ -91,6 +95,9 @@ export const genItemPanel = (type: string, containerElement: Element, app: App) 
 };
 
 export const openSetting = (app: App) => {
+    /// #if MOBILE
+    popMenu();
+    /// #else
     const exitDialog = window.siyuan.dialogs.find((item) => {
         if (item.element.querySelector(".config__tab-container")) {
             item.destroy();
@@ -168,4 +175,5 @@ export const openSetting = (app: App) => {
     editor.element = dialog.element.querySelector('.config__tab-container[data-name="editor"]');
     editor.bindEvent();
     return dialog;
+    /// #endif
 };

@@ -28,9 +28,6 @@ import {blockRender} from "../render/blockRender";
 /// #if !BROWSER
 import {openBy} from "../../editor/util";
 /// #endif
-/// #if !MOBILE
-import {moveResize} from "../../dialog/moveResize";
-/// #endif
 import {fetchPost} from "../../util/fetch";
 import {isArrayEqual, isMobile} from "../../util/functions";
 import * as dayjs from "dayjs";
@@ -48,6 +45,7 @@ import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {pasteAsPlainText, pasteEscaped, pasteText} from "../util/paste";
 import {escapeHtml} from "../../util/escape";
+import {resizeSide} from "../../history/resizeSide";
 
 export class Toolbar {
     public element: HTMLElement;
@@ -537,7 +535,10 @@ export class Toolbar {
                                     return true;
                                 }
                             });
-                            item.textContent = item.getAttribute("data-content");
+                            if (item.querySelector(".katex")) {
+                                // 选中完整的数学公式才进行备注 https://github.com/siyuan-note/siyuan/issues/13667
+                                item.textContent = item.getAttribute("data-content");
+                            }
                         } else if (type === "inline-math" && types.includes("inline-memo")) {
                             // 数学公式和备注不能同时存在
                             types.find((item, index) => {
@@ -986,14 +987,6 @@ export class Toolbar {
                 });
             }, Constants.TIMEOUT_LOAD);
         };
-        /// #if !MOBILE
-        moveResize(this.subElement, () => {
-            const pinElement = headerElement.querySelector('[data-type="pin"]');
-            pinElement.querySelector("svg use").setAttribute("xlink:href", "#iconUnpin");
-            pinElement.setAttribute("aria-label", window.siyuan.languages.unpin);
-            this.subElement.firstElementChild.setAttribute("data-drag", "true");
-        });
-        /// #endif
         const textElement = this.subElement.querySelector(".b3-text-field") as HTMLTextAreaElement;
         if (types.includes("NodeHTMLBlock")) {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.querySelector("protyle-html").getAttribute("data-content") || "");
@@ -1296,7 +1289,7 @@ export class Toolbar {
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
         this.subElement.innerHTML = `<div style="max-height:50vh" class="fn__flex">
-<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "width: 280px"}">
+<div class="fn__flex-column" style="${isMobile() ? "width: 100%" : "width: 256px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
         <span class="fn__space"></span>
@@ -1306,9 +1299,14 @@ export class Toolbar {
     </div>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative"><img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg"></div>
 </div>
-<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none" : ""};overflow: auto;"></div>
+<div class="toolbarResize" style="    cursor: col-resize;
+    box-shadow: 2px 0 0 0 var(--b3-theme-surface) inset, 3px 0 0 0 var(--b3-border-color) inset;
+    width: 5px;
+    margin-left: -2px;"></div>
+<div style="width: 520px;${isMobile() || window.outerWidth < window.outerWidth / 2 + 520 ? "display:none;" : ""}overflow: auto;"></div>
 </div>`;
         const listElement = this.subElement.querySelector(".b3-list");
+        resizeSide(this.subElement.querySelector(".toolbarResize"), listElement.parentElement);
         const previewElement = this.subElement.firstElementChild.lastElementChild;
         let previewPath: string;
         listElement.addEventListener("mouseover", (event) => {

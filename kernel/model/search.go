@@ -536,6 +536,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 	luteEngine := util.NewLute()
 	var reloadTreeIDs []string
+	updateNodes := map[string]*ast.Node{}
 	for i, id := range ids {
 		bt := treenode.GetBlockTree(id)
 		if nil == bt {
@@ -790,11 +791,17 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 						if 0 == method {
 							if strings.Contains(n.TextMarkInlineMemoContent, keyword) {
 								n.TextMarkInlineMemoContent = strings.ReplaceAll(n.TextMarkInlineMemoContent, keyword, replacement)
+								n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 							}
 						} else if 3 == method {
 							if nil != r && r.MatchString(n.TextMarkInlineMemoContent) {
 								n.TextMarkInlineMemoContent = r.ReplaceAllString(n.TextMarkInlineMemoContent, replacement)
+								n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 							}
+						}
+
+						if "" == n.TextMarkTextContent {
+							unlinks = append(unlinks, n)
 						}
 					} else if n.IsTextMarkType("text") {
 						// Search and replace fails in some cases https://github.com/siyuan-note/siyuan/issues/10016
@@ -857,6 +864,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			}
 		}
 
+		updateNodes[id] = node
+
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
@@ -873,6 +882,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	for _, id := range reloadTreeIDs {
 		refreshProtyle(id)
 	}
+
+	updateAttributeViewBlockText(updateNodes)
 
 	sql.FlushQueue()
 	util.PushClearProgress()
@@ -988,11 +999,6 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 	}
 
 	query = filterQueryInvisibleChars(query)
-	trimQuery := strings.TrimSpace(query)
-	if "" != trimQuery {
-		query = trimQuery
-	}
-
 	var ignoreFilter string
 	if ignoreLines := getSearchIgnoreLines(); 0 < len(ignoreLines) {
 		// Support ignore search results https://github.com/siyuan-note/siyuan/issues/10089
@@ -1755,22 +1761,26 @@ func columnConcat() string {
 }
 
 func stringQuery(query string) string {
-	if "" == strings.TrimSpace(query) {
+	trimmedQuery := strings.TrimSpace(query)
+	if "" == trimmedQuery {
 		return "\"" + query + "\""
 	}
 
 	query = strings.ReplaceAll(query, "\"", "\"\"")
 	query = strings.ReplaceAll(query, "'", "''")
 
-	buf := bytes.Buffer{}
-	parts := strings.Split(query, " ")
-	for _, part := range parts {
-		part = strings.TrimSpace(part)
-		part = "\"" + part + "\""
-		buf.WriteString(part)
-		buf.WriteString(" ")
+	if strings.Contains(trimmedQuery, " ") {
+		buf := bytes.Buffer{}
+		parts := strings.Split(query, " ")
+		for _, part := range parts {
+			part = strings.TrimSpace(part)
+			part = "\"" + part + "\""
+			buf.WriteString(part)
+			buf.WriteString(" ")
+		}
+		return strings.TrimSpace(buf.String())
 	}
-	return strings.TrimSpace(buf.String())
+	return "\"" + query + "\""
 }
 
 // markReplaceSpan 用于处理搜索高亮。

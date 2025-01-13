@@ -163,7 +163,7 @@ export const countBlockWord = (ids: string[], rootID?: string, clearCache = fals
     if (document.getElementById("status").classList.contains("fn__none")) {
         return;
     }
-    if (getSelection().rangeCount > 0 && getSelection().getRangeAt(0).toString()) {
+    if (getSelection().rangeCount > 0 && getSelection().getRangeAt(0).toString() && ids.length === 0) {
         countSelectWord(getSelection().getRangeAt(0));
         return;
     }

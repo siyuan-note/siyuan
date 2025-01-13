@@ -341,7 +341,7 @@ export const showPopover = async (app: App, showRef = false) => {
         // backlink/util/hint/正文标题 上的弹层
         if (showRef) {
             const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
-            refDefs = postResponse.data.refIDs;
+            refDefs = postResponse.data.refDefs;
             originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         } else {
             if (dataId.startsWith("[")) {
@@ -395,7 +395,7 @@ export const showPopover = async (app: App, showRef = false) => {
         }
         if (url) {
             const postResponse = await fetchSyncPost(url, {id: targetId});
-            refDefs = postResponse.data.refIDs;
+            refDefs = postResponse.data.refDefs;
             originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         }
     }

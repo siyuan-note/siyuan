@@ -72,7 +72,15 @@ func getMirrorDatabaseBlocks(c *gin.Context) {
 	}
 
 	avID := arg["avID"].(string)
-	ret.Data = treenode.GetMirrorAttrViewBlockIDs(avID)
+	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
+	var retRefDefs []model.RefDefs
+	for _, blockID := range blockIDs {
+		retRefDefs = append(retRefDefs, model.RefDefs{RefID: blockID, DefIDs: []string{}})
+	}
+
+	ret.Data = map[string]any{
+		"refDefs": retRefDefs,
+	}
 }
 
 func setDatabaseBlockView(c *gin.Context) {

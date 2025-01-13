@@ -17,6 +17,7 @@
 package model
 
 import (
+	"github.com/emirpasic/gods/sets/hashset"
 	"os"
 	"path/filepath"
 	"sort"
@@ -90,9 +91,18 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 
-	ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-	buildBacklinkListItemRefs(&ret.RefIDs)
-	ret.RefCount = len(ret.RefIDs) // 填充块引计数
+	bt := treenode.GetBlockTree(blockID)
+	refDefs := queryBlockRefDefs(bt)
+	buildBacklinkListItemRefs(refDefs)
+	var refIDs []string
+	for _, refDef := range refDefs {
+		refIDs = append(refIDs, refDef.RefID)
+	}
+	if 1 > len(refIDs) {
+		refIDs = []string{}
+	}
+	ret.RefIDs = refIDs
+	ret.RefCount = len(ret.RefIDs)
 
 	// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
 	avIDs := strings.Split(ret.IAL[av.NodeAttrNameAvs], ",")
@@ -129,6 +139,7 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 	FlushTxQueue()
 
 	trees := filesys.LoadTrees(blockIDs)
+	bts := treenode.GetBlockTrees(blockIDs)
 	for _, blockID := range blockIDs {
 		tree := trees[blockID]
 		if nil == tree {
@@ -163,8 +174,17 @@ func GetDocsInfo(blockIDs []string, queryRefCount bool, queryAv bool) (rets []*B
 			}
 		}
 		if queryRefCount {
-			ret.RefIDs, _ = sql.QueryRefIDsByDefID(blockID, Conf.Editor.BacklinkContainChildren)
-			ret.RefCount = len(ret.RefIDs) // 填充块引计数
+			var refIDs []string
+			refDefs := queryBlockRefDefs(bts[blockID])
+			buildBacklinkListItemRefs(refDefs)
+			for _, refDef := range refDefs {
+				refIDs = append(refIDs, refDef.RefID)
+			}
+			if 1 > len(refIDs) {
+				refIDs = []string{}
+			}
+			ret.RefIDs = refIDs
+			ret.RefCount = len(ret.RefIDs)
 		}
 
 		if queryAv {
@@ -320,32 +340,54 @@ func getNodeRefText0(node *ast.Node, maxLen int, removeLineBreak bool) string {
 	return ret
 }
 
-func GetBlockRefs(defID string, isBacklink bool) (refIDs, refTexts, defIDs []string) {
-	refIDs = []string{}
-	refTexts = []string{}
-	defIDs = []string{}
+type RefDefs struct {
+	RefID  string   `json:"refID"`
+	DefIDs []string `json:"defIDs"`
+}
+
+func GetBlockRefs(defID string) (refDefs []*RefDefs, originalRefBlockIDs map[string]string) {
+	refDefs = []*RefDefs{}
+	originalRefBlockIDs = map[string]string{}
 	bt := treenode.GetBlockTree(defID)
 	if nil == bt {
 		return
 	}
 
-	isDoc := bt.ID == bt.RootID
-	refIDs, refTexts = sql.QueryRefIDsByDefID(defID, isDoc)
-	if isDoc {
-		defIDs = sql.QueryChildDefIDsByRootDefID(defID)
-	} else {
-		defIDs = append(defIDs, defID)
+	refDefs = queryBlockRefDefs(bt)
+	originalRefBlockIDs = buildBacklinkListItemRefs(refDefs)
+	return
+}
+
+func queryBlockRefDefs(bt *treenode.BlockTree) (refDefs []*RefDefs) {
+	refDefs = []*RefDefs{}
+	if nil == bt {
+		return
 	}
 
-	if isBacklink {
-		buildBacklinkListItemRefs(&refIDs)
+	isDoc := bt.ID == bt.RootID
+	if isDoc {
+		refDefIDs := sql.QueryChildRefDefIDsByRootDefID(bt.RootID)
+		for rID, dIDs := range refDefIDs {
+			var defIDs []string
+			for _, dID := range dIDs {
+				defIDs = append(defIDs, dID)
+			}
+			if 1 > len(defIDs) {
+				defIDs = []string{}
+			}
+			refDefs = append(refDefs, &RefDefs{RefID: rID, DefIDs: defIDs})
+		}
+	} else {
+		refIDs := sql.QueryRefIDsByDefID(bt.ID, false)
+		for _, refID := range refIDs {
+			refDefs = append(refDefs, &RefDefs{RefID: refID, DefIDs: []string{bt.ID}})
+		}
 	}
 	return
 }
 
-func GetBlockRefIDsByFileAnnotationID(id string) (refIDs, refTexts []string) {
-	refIDs, refTexts = sql.QueryRefIDsByAnnotationID(id)
-	return
+func GetBlockRefIDsByFileAnnotationID(id string) []string {
+	return sql.QueryRefIDsByAnnotationID(id)
 }
 
 func GetBlockDefIDsByRefText(refText string, excludeIDs []string) (ret []string) {
@@ -557,16 +599,64 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 	return
 }
 
-func buildBacklinkListItemRefs(refIDs *[]string) {
-	refBts := treenode.GetBlockTrees(*refIDs)
-	for i, refID := range *refIDs {
-		if bt := refBts[refID]; nil != bt {
-			if "p" == bt.Type {
-				if parent := treenode.GetBlockTree(bt.ParentID); nil != parent && "i" == parent.Type {
-					// 引用计数浮窗请求，需要按照反链逻辑组装 https://github.com/siyuan-note/siyuan/issues/6853
-					(*refIDs)[i] = parent.ID
-				}
-			}
+func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[string]string) {
+	originalRefBlockIDs = map[string]string{}
+
+	var refIDs []string
+	for _, refDef := range refDefs {
+		refIDs = append(refIDs, refDef.RefID)
+	}
+	sqlRefBlocks := sql.GetBlocks(refIDs)
+	refBlocks := fromSQLBlocks(&sqlRefBlocks, "", 12)
+
+	parentRefParagraphs := map[string]*Block{}
+	var paragraphParentIDs []string
+	for _, ref := range refBlocks {
+		if nil != ref && "NodeParagraph" == ref.Type {
+			parentRefParagraphs[ref.ParentID] = ref
+			paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 		}
 	}
+	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
+	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
+
+	luteEngine := util.NewLute()
+	processedParagraphs := hashset.New()
+	for _, parent := range paragraphParents {
+		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
+			refBlock := parentRefParagraphs[parent.ID]
+			if nil == refBlock {
+				continue
+			}
+
+			paragraphUseParentLi := true
+			if "NodeListItem" == parent.Type && parent.FContent != refBlock.Content {
+				if inlineTree := parse.Inline("", []byte(refBlock.Markdown), luteEngine.ParseOptions); nil != inlineTree {
+					for c := inlineTree.Root.FirstChild.FirstChild; c != nil; c = c.Next {
+						if treenode.IsBlockRef(c) {
+							continue
+						}
+
+						if "" != strings.TrimSpace(c.Text()) {
+							paragraphUseParentLi = false
+							break
+						}
+					}
+				}
+			}
+
+			if paragraphUseParentLi {
+				for _, refDef := range refDefs {
+					if refDef.RefID == refBlock.ID {
+						refDef.RefID = parent.ID
+						break
+					}
+				}
+				processedParagraphs.Add(parent.ID)
+			}
+
+			originalRefBlockIDs[parent.ID] = refBlock.ID
+		}
+	}
+	return
 }

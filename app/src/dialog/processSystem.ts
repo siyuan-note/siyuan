@@ -169,13 +169,9 @@ export const setDefRefCount = (data: {
     "refCount": number,
     "rootRefCount": number,
     "rootID": string
-    refIDs: string[]
 }) => {
     getAllEditor().forEach(editor => {
-        if (data.rootID === data.blockID && editor.protyle.block.rootID === data.rootID) {
-            if (!editor.protyle.title) {
-                return;
-            }
+        if (editor.protyle.block.rootID === data.rootID && editor.protyle.title) {
             const attrElement = editor.protyle.title.element.querySelector(".protyle-attr");
             const countElement = attrElement.querySelector(".protyle-attr--refcount");
             if (countElement) {
@@ -183,11 +179,12 @@ export const setDefRefCount = (data: {
                     countElement.remove();
                 } else {
                     countElement.textContent = data.rootRefCount.toString();
-                    countElement.setAttribute("data-id", JSON.stringify(data.refIDs));
                 }
             } else if (data.rootRefCount > 0) {
-                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block" data-defids="[&quot;${data.blockID}&quot;]" data-id="${JSON.stringify(data.refIDs)}" style="">${data.rootRefCount}</div>`);
+                attrElement.insertAdjacentHTML("beforeend", `<div class="protyle-attr--refcount popover__block">${data.rootRefCount}</div>`);
             }
+        }
+        if (data.rootID === data.blockID) {
             return;
         }
         // 不能对比 rootId，否则嵌入块中的锚文本无法更新

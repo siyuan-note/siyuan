@@ -316,13 +316,19 @@ const bindProviderEvent = () => {
                     concurrentReqs = 16;
                 }
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
+                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
+                endpoint = endpoint.trim().replace("http://http(s)://", "https://");
+                endpoint = endpoint.replace("http(s)://", "https://");
+                if (!endpoint.startsWith("http")) {
+                    endpoint = "http://" + endpoint;
+                }
                 const s3 = {
-                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
-                    accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value,
-                    secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value,
-                    bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value,
+                    endpoint: endpoint,
+                    accessKey: (providerPanelElement.querySelector("#accessKey") as HTMLInputElement).value.trim(),
+                    secretKey: (providerPanelElement.querySelector("#secretKey") as HTMLInputElement).value.trim(),
+                    bucket: (providerPanelElement.querySelector("#bucket") as HTMLInputElement).value.trim(),
                     pathStyle: (providerPanelElement.querySelector("#pathStyle") as HTMLInputElement).value === "true",
-                    region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value,
+                    region: (providerPanelElement.querySelector("#region") as HTMLInputElement).value.trim(),
                     skipTlsVerify: (providerPanelElement.querySelector("#s3SkipTlsVerify") as HTMLInputElement).value === "true",
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,
@@ -346,10 +352,16 @@ const bindProviderEvent = () => {
                     concurrentReqs = 16;
                 }
                 (providerPanelElement.querySelector("#timeout") as HTMLInputElement).value = timeout.toString();
+                let endpoint = (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value;
+                endpoint = endpoint.trim().replace("http://http(s)://", "https://");
+                endpoint = endpoint.replace("http(s)://", "https://");
+                if (!endpoint.startsWith("http")) {
+                    endpoint = "http://" + endpoint;
+                }
                 const webdav = {
-                    endpoint: (providerPanelElement.querySelector("#endpoint") as HTMLInputElement).value,
-                    username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value,
-                    password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value,
+                    endpoint: endpoint,
+                    username: (providerPanelElement.querySelector("#username") as HTMLInputElement).value.trim(),
+                    password: (providerPanelElement.querySelector("#password") as HTMLInputElement).value.trim(),
                     skipTlsVerify: (providerPanelElement.querySelector("#webdavSkipTlsVerify") as HTMLInputElement).value === "true",
                     timeout: timeout,
                     concurrentReqs: concurrentReqs,

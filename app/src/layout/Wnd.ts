@@ -167,9 +167,9 @@ export class Wnd {
             target: HTMLElement
         }) {
             const it = this as HTMLElement;
-            if(!window.siyuan.currentDragOverTabHeadersElement) {
+            if (!window.siyuan.currentDragOverTabHeadersElement) {
                 window.siyuan.currentDragOverTabHeadersElement = it;
-            }  else {
+            } else {
                 if (!window.siyuan.currentDragOverTabHeadersElement.isSameNode(it)) {
                     window.siyuan.currentDragOverTabHeadersElement.classList.remove("layout-tab-bars--drag");
                     window.siyuan.currentDragOverTabHeadersElement.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
@@ -332,7 +332,7 @@ export class Wnd {
                 const tabPanelsElement = hasClosestByClassName(event.target, "layout-tab-container", true);
                 if (tabPanelsElement) {
                     dragElement.classList.remove("fn__none");
-                    dragElement.setAttribute("style", "height:100%;width:100%;right:auto;bottom:auto");
+                    this.updateDragElement(event, dragElement.parentElement.getBoundingClientRect(), dragElement);
                 }
             }
         });
@@ -345,25 +345,12 @@ export class Wnd {
             if (!dragElement.nextElementSibling) {
                 return;
             }
-            const rect = dragElement.parentElement.getBoundingClientRect();
-            const height = rect.height;
-            const width = rect.width;
-            const x = event.clientX - rect.left;
-            const y = event.clientY - rect.top;
-            if (x <= width / 8 || (x <= width / 3 && x > width / 8 && y >= height / 8 && y <= height * 7 / 8)) {
-                dragElement.setAttribute("style", "height:100%;width:50%;right:50%;bottom:0;left:0;top:0");
-            } else if (x >= width * 7 / 8 || (x >= width * 2 / 3 && x < width * 7 / 8 && y >= height / 8 && y <= height * 7 / 8)) {
-                dragElement.setAttribute("style", "height:100%;width:50%;right:0;bottom:0;left:50%;top:0");
-            } else if (y <= height / 8) {
-                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:50%;left:0;top:0");
-            } else if (y >= height * 7 / 8) {
-                dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:0;left:0;top:50%");
-            } else {
-                dragElement.setAttribute("style", "height:100%;width:100%;right:0;bottom:0;top:0;left:0");
-            }
+            this.updateDragElement(event, dragElement.parentElement.getBoundingClientRect(), dragElement);
         });
+
         dragElement.addEventListener("dragleave", () => {
             dragElement.classList.add("fn__none");
+            dragElement.removeAttribute("style");
         });
         dragElement.addEventListener("drop", (event: DragEvent & { target: HTMLElement }) => {
             dragElement.classList.add("fn__none");
@@ -380,6 +367,7 @@ export class Wnd {
             }
             /// #endif
             if (!oldTab) {
+                dragElement.removeAttribute("style");
                 return;
             }
 
@@ -412,9 +400,10 @@ export class Wnd {
                 /// #if !BROWSER
                 setTabPosition();
                 /// #endif
+                dragElement.removeAttribute("style");
                 return;
             }
-
+            dragElement.removeAttribute("style");
             if (targetWndElement.contains(document.querySelector(`[data-id="${tabData.id}"]`))) {
                 return;
             }
@@ -426,6 +415,45 @@ export class Wnd {
             }
         });
     }
+
+    private isPointWithinLines(x: number, y: number, line1: { k: number, b: number }, line2: {
+        k: number,
+        b: number
+    }): boolean {
+        const y1 = line1.k * x + line1.b;
+        const y2 = line2.k * x + line2.b;
+        return (y >= Math.min(y1, y2) && y <= Math.max(y1, y2));
+    }
+
+    private updateDragElement(event: DragEvent, rect: DOMRect, dragElement: HTMLElement) {
+        const height = rect.height;
+        const width = rect.width;
+        const x = event.clientX - rect.left;
+        const y = event.clientY - rect.top;
+        if (x < width / 5 && this.isPointWithinLines(x, y, {
+            // 左上角 (0.1w, 0); (0.2w, 0.15h)
+            k: 1.5 * height / width, b: -0.15 * height
+        }, {
+            // 左下角 (0.04w, h); (0.2w, 0.8h)
+            k: -1.25 * height / width, b: 1.05 * height
+        })) {
+            dragElement.setAttribute("style", "height:100%;width:50%;right:50%;bottom:0;left:0;top:0");
+        } else if (x > width * 0.8 && this.isPointWithinLines(x, y, {
+            // 右上角 (0.9w, 0); (0.8w, 0.15h)
+            k: -1.5 * height / width, b: 1.35 * height
+        }, {
+            // 右下角 (0.96w, h); (0.8w, 0.8h)
+            k: 1.25 * height / width, b: -0.2 * height
+        })) {
+            dragElement.setAttribute("style", "height:100%;width:50%;right:0;bottom:0;left:50%;top:0");
+        } else if (y < height * .15) {
+            dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:50%;left:0;top:0");
+        } else if (y > height * .8) {
+            dragElement.setAttribute("style", "height:50%;width:100%;right:0;bottom:0;left:0;top:50%");
+        } else {
+            dragElement.setAttribute("style", "height:100%;width:100%;right:0;bottom:0;left:0;top:0");
+        }
+    };
 
     public showHeading() {
         const currentElement = this.headersElement.querySelector(".item--focus") as HTMLElement;

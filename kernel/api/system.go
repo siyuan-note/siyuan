@@ -28,7 +28,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/gin-gonic/gin"
-	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -266,8 +265,15 @@ func exportConf(c *gin.Context) {
 		return
 	}
 
+	data, err := gulu.JSON.MarshalJSON(model.Conf)
+	if err != nil {
+		logging.LogErrorf("export conf failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
 	clonedConf := &model.AppConf{}
-	if err := copier.CopyWithOption(clonedConf, model.Conf, copier.Option{IgnoreEmpty: false, DeepCopy: true}); err != nil {
+	if err = gulu.JSON.UnmarshalJSON(data, clonedConf); err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -305,7 +311,7 @@ func exportConf(c *gin.Context) {
 	clonedConf.CloudRegion = 0
 	clonedConf.DataIndexState = 0
 
-	data, err := gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
+	data, err = gulu.JSON.MarshalIndentJSON(clonedConf, "", "  ")
 	if err != nil {
 		logging.LogErrorf("export conf failed: %s", err)
 		ret.Code = -1
@@ -461,12 +467,19 @@ func importConf(c *gin.Context) {
 		return
 	}
 
-	if err = copier.CopyWithOption(model.Conf, importedConf, copier.Option{IgnoreEmpty: true, DeepCopy: true}); err != nil {
-		logging.LogErrorf("import conf failed: %s", err)
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
+	model.Conf.FileTree = importedConf.FileTree
+	model.Conf.Tag = importedConf.Tag
+	model.Conf.Editor = importedConf.Editor
+	model.Conf.Export = importedConf.Export
+	model.Conf.Graph = importedConf.Graph
+	model.Conf.UILayout = importedConf.UILayout
+	model.Conf.System = importedConf.System
+	model.Conf.Keymap = importedConf.Keymap
+	model.Conf.Search = importedConf.Search
+	model.Conf.Flashcard = importedConf.Flashcard
+	model.Conf.AI = importedConf.AI
+	model.Conf.Bazaar = importedConf.Bazaar
+	model.Conf.Save()
 
 	logging.LogInfof("imported conf")
 }
@@ -563,6 +576,9 @@ func setAccessAuthCode(c *gin.Context) {
 	if model.MaskedAccessAuthCode == aac {
 		aac = model.Conf.AccessAuthCode
 	}
+
+	aac = strings.TrimSpace(aac)
+	aac = util.RemoveInvalid(aac)
 
 	model.Conf.AccessAuthCode = aac
 	model.Conf.Save()

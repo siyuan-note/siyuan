@@ -1,7 +1,7 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
-import {readText, writeText} from "./compatibility";
+import {readText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
 /// #endif
@@ -95,7 +95,6 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
-        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
@@ -166,7 +165,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     }
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
-        writeText("");
+        return;
     }
     /// #endif
     if (localFiles.length === 0) {
@@ -272,7 +271,6 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
         }
     }
     uploadLocalFiles(localFiles, protyle, true);
-    writeText("");
 };
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
@@ -412,6 +410,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
             e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
             e.setAttribute("updated", newId.split("-")[0]);
+            e.removeAttribute("refcount");
             isBlock = true;
         });
         if (nodeElement.classList.contains("table")) {

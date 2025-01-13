@@ -1916,6 +1916,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	var blockIcon string
 	if !isDetached {
 		blockIcon, addingBlockContent = getNodeAvBlockText(node)
+		addingBlockContent = util.UnescapeHTML(addingBlockContent)
 	}
 
 	// 检查是否重复添加相同的块
@@ -3136,6 +3137,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
 					bindBlockAv(tx, avID, val.BlockID)
+					val.Block.Content = util.UnescapeHTML(val.Block.Content)
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
@@ -3143,6 +3145,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
 						val.Block.Content = blockText
+						val.Block.Content = util.UnescapeHTML(val.Block.Content)
 					} else {
 						if blockText == content {
 							updateStaticText = false

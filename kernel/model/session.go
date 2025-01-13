@@ -96,6 +96,9 @@ func LoginAuth(c *gin.Context) {
 	}
 
 	authCode := arg["authCode"].(string)
+	authCode = strings.TrimSpace(authCode)
+	authCode = util.RemoveInvalid(authCode)
+
 	if Conf.AccessAuthCode != authCode {
 		ret.Code = -1
 		ret.Msg = Conf.Language(83)
@@ -437,7 +440,6 @@ func ControlConcurrency(c *gin.Context) {
 		strings.HasPrefix(reqPath, "/appearance/") ||
 		strings.HasPrefix(reqPath, "/export/") ||
 		strings.HasPrefix(reqPath, "/history/") ||
-
 		strings.HasPrefix(reqPath, "/api/query/") ||
 		strings.HasPrefix(reqPath, "/api/search/") ||
 		strings.HasPrefix(reqPath, "/api/network/") ||

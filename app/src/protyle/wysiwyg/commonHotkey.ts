@@ -255,7 +255,8 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let starIndex: number;
-    if (nodeElements[nodeElements.length - 1].getAttribute("data-subtype") === "o") {
+    if (nodeElements[nodeElements.length - 1].classList.contains("li") &&
+        nodeElements[nodeElements.length - 1].getAttribute("data-subtype") === "o") {
         starIndex = parseInt(nodeElements[nodeElements.length - 1].getAttribute("data-marker"), 10);
     }
     nodeElements.reverse().forEach((item, index) => {

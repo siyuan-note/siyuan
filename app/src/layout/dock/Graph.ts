@@ -305,7 +305,7 @@ export class Graph extends Model {
                 } else if (target.classList.contains("block__icon")) {
                     const dataType = target.getAttribute("data-type");
                     if (dataType === "min") {
-                        getDockByType(this.type === "global" ? "globalGraph" : "graph").toggleModel(this.type === "global" ? "globalGraph" : "graph");
+                        getDockByType(this.type === "global" ? "globalGraph" : "graph").toggleModel(this.type === "global" ? "globalGraph" : "graph", false, true);
                     } else if (dataType === "menu") {
                         if (target.classList.contains("ft__primary")) {
                             target.classList.remove("ft__primary");
@@ -755,7 +755,7 @@ export class Graph extends Model {
                         isBacklink: false,
                         x: params.event.center.x,
                         y: params.event.center.y,
-                        nodeIds: [node.id],
+                        refDefs: [{refID: node.id}]
                     }));
                 } else {
                     checkFold(node.id, (zoomIn, action: TProtyleAction[]) => {

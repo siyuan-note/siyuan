@@ -157,6 +157,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (Constants.KEYCODELIST[event.keyCode] === "\\" ||
                 // 德语
                 event.key === "\\" ||
+                // Mac 日文-罗马字 https://github.com/siyuan-note/siyuan/issues/13725
+                (event.key === "," && event.keyCode === 229) ||
                 // windows 中文
                 (event.code === "Backslash" && event.key === "Process" && event.keyCode === 229)) {
                 protyle.hint.enableSlash = false;
@@ -1569,14 +1571,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length === 1 && selectsElement[0].getAttribute("data-type") === "NodeSuperBlock") {
                 if (selectsElement[0].getAttribute("data-sb-layout") === "col") {
                     const oldHTML = selectsElement[0].outerHTML;
-                    selectsElement[0].setAttribute("data-sb-layout", "row")
+                    selectsElement[0].setAttribute("data-sb-layout", "row");
                     selectsElement[0].setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                     updateTransaction(protyle, selectsElement[0].getAttribute("data-node-id"), selectsElement[0].outerHTML, oldHTML);
                 } else {
-                    range.insertNode(document.createElement("wbr"))
+                    range.insertNode(document.createElement("wbr"));
                     const sbData = cancelSB(protyle, selectsElement[0]);
                     transaction(protyle, sbData.doOperations, sbData.undoOperations);
-                    focusByWbr(protyle.wysiwyg.element, range)
+                    focusByWbr(protyle.wysiwyg.element, range);
                 }
                 return;
             }
@@ -1598,14 +1600,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (selectsElement.length === 1 && selectsElement[0].getAttribute("data-type") === "NodeSuperBlock") {
                 if (selectsElement[0].getAttribute("data-sb-layout") === "row") {
                     const oldHTML = selectsElement[0].outerHTML;
-                    selectsElement[0].setAttribute("data-sb-layout", "col")
+                    selectsElement[0].setAttribute("data-sb-layout", "col");
                     selectsElement[0].setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                     updateTransaction(protyle, selectsElement[0].getAttribute("data-node-id"), selectsElement[0].outerHTML, oldHTML);
                 } else {
-                    range.insertNode(document.createElement("wbr"))
+                    range.insertNode(document.createElement("wbr"));
                     const sbData = cancelSB(protyle, selectsElement[0]);
                     transaction(protyle, sbData.doOperations, sbData.undoOperations);
-                    focusByWbr(protyle.wysiwyg.element, range)
+                    focusByWbr(protyle.wysiwyg.element, range);
                 }
                 return;
             }
@@ -1773,7 +1775,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     app: protyle.app,
                     isBacklink: false,
                     targetElement: refElement,
-                    nodeIds: [id],
+                    refDefs: [{refID: id}]
                 }));
                 event.preventDefault();
                 event.stopPropagation();

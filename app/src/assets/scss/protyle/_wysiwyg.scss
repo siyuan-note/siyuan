@@ -185,6 +185,17 @@
         &--order::after {
           border-radius: var(--b3-border-radius);
         }
+
+        ~ .h1,
+        ~ .h2,
+        ~ .h3,
+        ~ .h4,
+        ~ .h5,
+        ~ .h6 {
+          [spellcheck] {
+            min-height: unset;
+          }
+        }
       }
     }
 

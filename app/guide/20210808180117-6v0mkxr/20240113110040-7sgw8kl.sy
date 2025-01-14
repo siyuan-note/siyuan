@@ -6,7 +6,8 @@
 		"icon": "1f4f1",
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
-		"updated": "20240119205358"
+		"type": "doc",
+		"updated": "20250114213934"
 	},
 	"Children": [
 		{
@@ -53,7 +54,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-rugjxcf",
-				"updated": "20240113110114"
+				"updated": "20250114213934"
 			},
 			"Children": [
 				{
@@ -82,7 +83,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110114-2r0390j",
-				"updated": "20240113110151"
+				"updated": "20250114213934"
 			},
 			"Children": [
 				{
@@ -136,6 +137,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "Huawei"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114213931-fxnfiur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250114213931-fxnfiur",
+						"updated": "20250114213934"
+					},
+					"Children": [
+						{
+							"ID": "20250114213931-76n4b06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114213931-76n4b06",
+								"updated": "20250114213934"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Honor"
 								}
 							]
 						}

@@ -127,7 +127,7 @@ export class Gutter {
             }
 
             const ghostElement = document.createElement("div");
-            ghostElement.className = protyle.wysiwyg.element.className;
+            ghostElement.className = protyle.wysiwyg.element.className + " dragghost";
             selectElements.forEach(item => {
                 const type = item.getAttribute("data-type");
                 if (item.querySelector("iframe")) {

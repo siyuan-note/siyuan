@@ -141,7 +141,7 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            if (selectElements[0].classList.contains("li") && selectElements[0].getAttribute("data-subtype") === "u") {
+            if (selectElements[0].classList.contains("li")) {
                 const actionElement = selectElements[0].querySelector(".protyle-action");
                 event.dataTransfer.setDragImage(ghostElement, actionElement.clientWidth / 2, actionElement.clientHeight / 2);
             } else {

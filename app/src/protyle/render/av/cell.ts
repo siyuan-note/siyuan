@@ -396,7 +396,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     }
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {
-        html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].querySelector(".av__celltext").textContent}</textarea>`;
+        html = `<textarea ${style} spellcheck="false" class="b3-text-field"></textarea>`;
     } else if (type === "url") {
         html = `<textarea ${style} spellcheck="false" class="b3-text-field">${cellElements[0].firstElementChild.getAttribute("data-href")}</textarea>`;
     } else if (type === "number") {
@@ -429,6 +429,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const avMaskElement = document.querySelector(".av__mask");
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
+        if (["text", "email", "phone", "block", "template"].includes(type)) {
+            inputElement.value = cellElements[0].querySelector(".av__celltext").textContent;
+        }
         inputElement.select();
         inputElement.focus();
         if (type === "template") {

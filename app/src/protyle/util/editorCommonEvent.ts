@@ -9,9 +9,9 @@ import {
 } from "./hasClosest";
 import {Constants} from "../../constants";
 import {paste} from "./paste";
-import {cancelSB, genEmptyElement, genSBElement, getLangByType, insertEmptyBlock} from "../../block/util";
+import {cancelSB, genEmptyElement, genSBElement, insertEmptyBlock} from "../../block/util";
 import {transaction, turnsIntoOneTransaction} from "../wysiwyg/transaction";
-import {getContenteditableElement, getTopAloneElement} from "../wysiwyg/getBlock";
+import {getTopAloneElement} from "../wysiwyg/getBlock";
 import {updateListOrder} from "../wysiwyg/list";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {onGet} from "./onGet";

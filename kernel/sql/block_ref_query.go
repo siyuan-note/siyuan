@@ -141,7 +141,7 @@ func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 func QueryRootBlockRefCount() (ret map[string]int) {
 	ret = map[string]int{}
 
-	rows, err := query("SELECT def_block_root_id, COUNT(*) AS ref_cnt FROM refs GROUP BY def_block_root_id")
+	rows, err := query("SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
@@ -362,9 +362,9 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs []string) {
 	var rows *sql.Rows
 	var err error
 	if containChildren {
-		rows, err = query("SELECT block_id FROM refs WHERE def_block_root_id = ?", defID)
+		rows, err = query("SELECT DISTINCT block_id FROM refs WHERE def_block_root_id = ?", defID)
 	} else {
-		rows, err = query("SELECT block_id FROM refs WHERE def_block_id = ?", defID)
+		rows, err = query("SELECT DISTINCT block_id FROM refs WHERE def_block_id = ?", defID)
 	}
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)

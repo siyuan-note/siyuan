@@ -383,8 +383,10 @@ export class WYSIWYG {
                         this.emojiToMd(tempElement);
                     }
                     html = tempElement.innerHTML;
+                    textPlain = range.toString();
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
+                    textPlain = selectImgElement.querySelector("img").getAttribute("data-src");
                 } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 复制粗体等字体中的一部分
@@ -400,6 +402,7 @@ export class WYSIWYG {
                     }
                     spanElement.textContent = range.toString();
                     html = spanElement.outerHTML;
+                    textPlain = range.toString();
                 } else {
                     tempElement.append(range.cloneContents());
                     this.emojiToMd(tempElement);
@@ -415,6 +418,8 @@ export class WYSIWYG {
                         textPlain = tempElement.textContent.replace(Constants.ZWSP, "").replace(/\n$/, "");
                     } else if (hasClosestByMatchTag(range.startContainer, "CODE")) {
                         textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
+                    } else {
+                        textPlain = range.toString();
                     }
                 }
             }

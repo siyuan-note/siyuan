@@ -93,7 +93,7 @@ func statTree(tree *parse.Tree) (ret *util.BlockStatResult) {
 	blockCount := 0
 	var databaseBlockNodes []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-		if !entering {
+		if !entering || tree.Root == n {
 			return ast.WalkContinue
 		}
 

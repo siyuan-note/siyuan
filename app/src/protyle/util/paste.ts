@@ -5,7 +5,7 @@ import {readText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
 /// #endif
-import {hasClosestBlock} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {getEditorRange} from "./selection";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
@@ -171,6 +171,13 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     if (localFiles.length === 0) {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0)
+                if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
+                    insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+                    return;
+                }
+            }
             // 对一些内置需要解析的 HTML 标签进行内部转移 Improve sub/sup pasting as plain text https://github.com/siyuan-note/siyuan/issues/12155
             textPlain = textPlain.replace(/<sub>/g, "__@sub@__").replace(/<\/sub>/g, "__@/sub@__");
             textPlain = textPlain.replace(/<sup>/g, "__@sup@__").replace(/<\/sup>/g, "__@/sup@__");
@@ -394,10 +401,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        textPlain = textPlain.replace(/\u200D```/g, "```");
-        textPlain = textPlain.replace(/```/g, "\u200D```");
-
-        insertHTML(textPlain, protyle);
+        insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
         // 编辑器内部粘贴

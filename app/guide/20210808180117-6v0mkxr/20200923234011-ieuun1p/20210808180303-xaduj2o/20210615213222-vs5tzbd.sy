@@ -6,7 +6,7 @@
 		"id": "20210615213222-vs5tzbd",
 		"title": "Data history",
 		"type": "doc",
-		"updated": "20240402174245"
+		"updated": "20250115153528"
 	},
 	"Children": [
 		{
@@ -544,7 +544,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501135308-2rn9rgb",
-				"updated": "20220615120407"
+				"updated": "20250115153512"
 			},
 			"Children": [
 				{
@@ -559,7 +559,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135308-3azjqzh",
-				"updated": "20220830230739"
+				"updated": "20250115153512"
 			},
 			"Children": [
 				{
@@ -571,7 +571,7 @@
 					},
 					"Properties": {
 						"id": "20220501135308-itmzgsj",
-						"updated": "20220830230739"
+						"updated": "20250115153512"
 					},
 					"Children": [
 						{
@@ -579,7 +579,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135308-yvsiton",
-								"updated": "20220830230739"
+								"updated": "20250115153512"
 							},
 							"Children": [
 								{
@@ -593,16 +593,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " button on the top toolbar or "
+									"Data": "​ button on the top toolbar or "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+H"
+									"TextMarkTextContent": "Alt"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to open the data history interface, switch to the "
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to open the data history interface, switch to the "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -611,7 +620,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " tab, if no historical data is displayed , you can try "
+									"Data": "​ tab, if no historical data is displayed , you can try "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -620,7 +629,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " of this interface"
+									"Data": "​ of this interface"
 								}
 							]
 						}
@@ -1324,7 +1333,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120602-wp2lnbq",
-				"updated": "20220615120602"
+				"updated": "20250115153528"
 			},
 			"Children": [
 				{
@@ -1341,7 +1350,7 @@
 			},
 			"Properties": {
 				"id": "20220615120602-5r3nl34",
-				"updated": "20220625231856"
+				"updated": "20250115153528"
 			},
 			"Children": [
 				{
@@ -1355,7 +1364,7 @@
 					},
 					"Properties": {
 						"id": "20220615120602-a20qin2",
-						"updated": "20220625231856"
+						"updated": "20250115153528"
 					},
 					"Children": [
 						{
@@ -1363,7 +1372,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615120602-k0xs8n5",
-								"updated": "20220625231856"
+								"updated": "20250115153528"
 							},
 							"Children": [
 								{
@@ -1377,16 +1386,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " button on the top toolbar or "
+									"Data": "​ button on the top toolbar or "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+H"
+									"TextMarkTextContent": "Alt"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " to open the data history interface"
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to open the data history interface"
 								}
 							]
 						}

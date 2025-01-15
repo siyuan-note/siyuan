@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230506205948-yah52eb",
 		"title": "Plugins",
-		"updated": "20230820184257"
+		"type": "doc",
+		"updated": "20250115152404"
 	},
 	"Children": [
 		{
@@ -68,7 +69,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210937-yel1yei",
-				"updated": "20230506210937"
+				"updated": "20250115152404"
 			},
 			"Children": [
 				{
@@ -82,7 +83,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210937-v1ki1ir",
-				"updated": "20230506211116"
+				"updated": "20250115152404"
 			},
 			"Children": [
 				{
@@ -97,6 +98,15 @@
 				{
 					"Type": "NodeText",
 					"Data": "​. You can enable or disable plugins in "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Settings"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",

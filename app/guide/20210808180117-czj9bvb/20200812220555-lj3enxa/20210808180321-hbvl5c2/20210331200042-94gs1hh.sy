@@ -6,7 +6,7 @@
 		"id": "20210331200042-94gs1hh",
 		"title": "超链接",
 		"type": "doc",
-		"updated": "20220407101632"
+		"updated": "20250115153419"
 	},
 	"Children": [
 		{
@@ -127,7 +127,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210331200402-sk21ug4",
-				"updated": "20210331200839"
+				"updated": "20250115153419"
 			},
 			"Children": [
 				{
@@ -146,7 +146,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210331200839-18k56cs",
-				"updated": "20220407101632"
+				"updated": "20250115153419"
 			},
 			"Children": [
 				{
@@ -432,7 +432,7 @@
 					},
 					"Properties": {
 						"id": "20210331201016-h8i10b1",
-						"updated": "20220407101632"
+						"updated": "20250115153419"
 					},
 					"Children": [
 						{
@@ -440,12 +440,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210331201016-k6nnbcd",
-								"updated": "20220407101632"
+								"updated": "20250115153419"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "块标菜单 - 复制 - 复制块超链接"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "块标菜单"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制块超链接"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

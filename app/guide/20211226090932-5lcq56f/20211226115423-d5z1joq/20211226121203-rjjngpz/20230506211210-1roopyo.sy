@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230506211210-1roopyo",
 		"title": "插件",
-		"updated": "20230820184231"
+		"type": "doc",
+		"updated": "20250115152340"
 	},
 	"Children": [
 		{
@@ -76,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506211224-q293o5x",
-				"updated": "20230506211224"
+				"updated": "20250115152340"
 			},
 			"Children": [
 				{
@@ -90,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506211224-uqq704u",
-				"updated": "20230512195538"
+				"updated": "20250115152340"
 			},
 			"Children": [
 				{
@@ -109,7 +110,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "插件集市"
+					"TextMarkTextContent": "設置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "集市"
 				},
 				{
 					"Type": "NodeText",

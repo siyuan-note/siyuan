@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20250101093504"
+		"updated": "20250115152026"
 	},
 	"Children": [
 		{
@@ -45,7 +45,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208115136-9g2b46l",
-				"updated": "20240208115157"
+				"updated": "20250115152026"
 			},
 			"Children": [
 				{
@@ -60,7 +60,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240208115415-bvq6noy",
-				"updated": "20240208164823"
+				"updated": "20250115152026"
 			},
 			"Children": [
 				{
@@ -137,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20240208115523-6cy1bjq",
-						"updated": "20240208120741"
+						"updated": "20250115152026"
 					},
 					"Children": [
 						{
@@ -160,7 +160,7 @@
 							"ListData": {},
 							"Properties": {
 								"id": "20240208115529-u91catr",
-								"updated": "20240208120741"
+								"updated": "20250115152026"
 							},
 							"Children": [
 								{
@@ -199,7 +199,7 @@
 									},
 									"Properties": {
 										"id": "20240208115626-nvhu91r",
-										"updated": "20240208120741"
+										"updated": "20250115152026"
 									},
 									"Children": [
 										{
@@ -207,7 +207,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20240208115626-5tboobu",
-												"updated": "20240208120741"
+												"updated": "20250115152026"
 											},
 											"Children": [
 												{
@@ -216,7 +216,7 @@
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "code",
+													"TextMarkType": "kbd",
 													"TextMarkTextContent": "添加到数据库"
 												},
 												{
@@ -634,7 +634,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240818174119-3zag9wr",
-				"updated": "20240818174633"
+				"updated": "20250115145300"
 			},
 			"Children": [
 				{
@@ -653,7 +653,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818174124-ab1x2an",
-				"updated": "20240818174633"
+				"updated": "20250115145300"
 			},
 			"Children": [
 				{
@@ -663,7 +663,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",

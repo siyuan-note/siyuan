@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20240818175946"
+		"updated": "20250115153225"
 	},
 	"Children": [
 		{
@@ -900,7 +900,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090624-9qgquxh"
+				"id": "20210104090624-9qgquxh",
+				"updated": "20250115153225"
 			},
 			"Children": [
 				{
@@ -936,7 +937,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-hq3v2ah"
+				"id": "20210104090624-hq3v2ah",
+				"updated": "20250115153225"
 			},
 			"Children": [
 				{
@@ -1008,12 +1010,22 @@
 			"ID": "20210104090624-6d9n8n5",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-6d9n8n5"
+				"id": "20210104090624-6d9n8n5",
+				"updated": "20250115153225"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在一个段落后直接回车会形成新的段落。"
+					"Data": "在一个段落后直接 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 会形成新的段落。"
 				}
 			]
 		},
@@ -1341,7 +1353,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20240818175946"
+				"updated": "20250115145222"
 			},
 			"Children": [
 				{
@@ -1539,7 +1551,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818173939-j0bcrw6",
-				"updated": "20240818175946"
+				"updated": "20250115145222"
 			},
 			"Children": [
 				{
@@ -1549,7 +1561,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
@@ -2299,7 +2320,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-n9anlgh",
-				"updated": "20240818173849"
+				"updated": "20250115145347"
 			},
 			"Children": [
 				{
@@ -2399,7 +2420,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-5p4i03b",
-				"updated": "20240818173849"
+				"updated": "20250115145347"
 			},
 			"Children": [
 				{
@@ -2409,7 +2430,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",

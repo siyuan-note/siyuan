@@ -6,7 +6,7 @@
 		"id": "20201204181006-7bkppue",
 		"title": "模板片段",
 		"type": "doc",
-		"updated": "20241225192538"
+		"updated": "20250115153028"
 	},
 	"Children": [
 		{
@@ -1351,7 +1351,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091309-h71ogwf"
+				"id": "20210104091309-h71ogwf",
+				"updated": "20250115153028"
 			},
 			"Children": [
 				{
@@ -1369,7 +1370,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091309-l9wcdtk",
-				"updated": "20210428221604"
+				"updated": "20250115153028"
 			},
 			"Children": [
 				{
@@ -1378,12 +1379,21 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "/"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 选择模板来触发模板搜索，找到需要插入的模板后回车即可。"
+					"Data": "​ 选择模板来触发模板搜索，找到需要插入的模板后 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回车"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可。"
 				}
 			]
 		},

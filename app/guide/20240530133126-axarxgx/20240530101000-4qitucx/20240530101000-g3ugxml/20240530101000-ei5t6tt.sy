@@ -7,7 +7,7 @@
 		"id": "20240530101000-ei5t6tt",
 		"title": "人工知能",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115153833"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"Properties": {
 				"ID": "20240530101000-9rofw67",
 				"id": "20240530101000-78iawbc",
-				"updated": "20240530101000"
+				"updated": "20250115153833"
 			},
 			"Children": [
 				{
@@ -76,7 +76,7 @@
 			"Properties": {
 				"ID": "20240530101000-1kqjrxs",
 				"id": "20240530101000-ag9sb0b",
-				"updated": "20240530101000"
+				"updated": "20250115153833"
 			},
 			"Children": [
 				{
@@ -173,16 +173,15 @@
 					"Properties": {
 						"ID": "20240530101000-omszf90",
 						"id": "20240530101000-qtjo1bc",
-						"updated": "20240530101000"
+						"updated": "20250115153833"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-ntri2px",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-5a33y7n",
 								"id": "20240530101000-ntri2px",
-								"updated": "20240530101000"
+								"updated": "20250115153833"
 							},
 							"Children": [
 								{
@@ -192,7 +191,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "/AI Chat"
+									"TextMarkTextContent": "/AIライティング"
 								},
 								{
 									"Type": "NodeText",

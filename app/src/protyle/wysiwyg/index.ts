@@ -96,6 +96,7 @@ import {openLink} from "../../editor/openLink";
 import {mathRender} from "../render/mathRender";
 import {editAssetItem} from "../render/av/asset";
 import {img3115} from "../../boot/compatibleVersion";
+import {globalClickHideMenu} from "../../boot/globalEvent/click";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -2590,6 +2591,7 @@ export class WYSIWYG {
                 hasClosestByClassName(event.target, "iframe");
             if (!event.shiftKey && !ctrlIsPressed && selectElement) {
                 selectElement.classList.add("protyle-wysiwyg--select");
+                globalClickHideMenu(event.target);
                 event.stopPropagation();
                 return;
             }

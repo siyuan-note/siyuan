@@ -6,7 +6,8 @@
 		"icon": "1f5c2",
 		"id": "20230429115206-ob8nl8t",
 		"title": "術語表",
-		"updated": "20230429120526"
+		"type": "doc",
+		"updated": "20250115163227"
 	},
 	"Children": [
 		{
@@ -207,7 +208,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115509-rfzye0g",
-				"updated": "20230429115509"
+				"updated": "20250115163209"
 			},
 			"Children": [
 				{
@@ -355,7 +356,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115509-rl1jlhc",
-				"updated": "20230429120526"
+				"updated": "20250115163209"
 			},
 			"Children": [
 				{
@@ -365,7 +366,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⋮"
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
@@ -840,7 +841,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115527-jjq4vik",
-				"updated": "20230429115527"
+				"updated": "20250115163227"
 			},
 			"Children": [
 				{
@@ -868,7 +869,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115527-o2we8gd",
-				"updated": "20230429115634"
+				"updated": "20250115163227"
 			},
 			"Children": [
 				{
@@ -878,7 +879,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+點擊"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "點擊"
 				},
 				{
 					"Type": "NodeText",

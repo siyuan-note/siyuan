@@ -6,7 +6,7 @@
 		"id": "20200924100744-br924ar",
 		"title": "Assets",
 		"type": "doc",
-		"updated": "20241027164345"
+		"updated": "20250115152723"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-v2rmiaq",
-				"updated": "20220824172803"
+				"updated": "20250115152723"
 			},
 			"Children": [
 				{
@@ -86,7 +86,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220824172815-ckivl7c",
-				"updated": "20220902220108"
+				"updated": "20250115152723"
 			},
 			"Children": [
 				{
@@ -98,7 +98,7 @@
 					},
 					"Properties": {
 						"id": "20220824172815-q1oeusj",
-						"updated": "20220902220108"
+						"updated": "20250115152714"
 					},
 					"Children": [
 						{
@@ -106,22 +106,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172815-fqyy0l6",
-								"updated": "20220902220108"
+								"updated": "20250115152714"
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "Copy as an asset and insert: Copy a picture or file as a resource file and insert, shortcut key "
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Copy as an asset and insert"
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ": Copy a picture or file as a resource file and insert, shortcut key "
+									"Data": "​+"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+V"
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -136,7 +144,7 @@
 					},
 					"Properties": {
 						"id": "20220824172815-0lsclx1",
-						"updated": "20220902220045"
+						"updated": "20250115152723"
 					},
 					"Children": [
 						{
@@ -144,26 +152,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172815-dqfasin",
-								"updated": "20220902220045"
+								"updated": "20250115152723"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Use file:// absolute path and link"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": Insert a picture or file into a hyperlink as a local absolute path, shortcut key "
+									"Data": "Use "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+V"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file://"
 								},
 								{
 									"Type": "NodeText",
-									"Data": ", or hold down "
+									"Data": "​ absolute path and link: Insert a picture or file into a hyperlink as a local absolute path, shortcut key "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​, or hold down "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -172,7 +202,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " and drag in"
+									"Data": "​ and drag in"
 								}
 							]
 						}

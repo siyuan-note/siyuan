@@ -6,7 +6,7 @@
 		"id": "20200924101200-gss5vee",
 		"title": "Navigate in the Content Block",
 		"type": "doc",
-		"updated": "20221105220127"
+		"updated": "20250115164053"
 	},
 	"Children": [
 		{
@@ -242,7 +242,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20200924101210-zwf8ags"
+				"id": "20200924101210-zwf8ags",
+				"updated": "20250115164053"
 			},
 			"Children": [
 				{
@@ -281,7 +282,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428225309-l9hqxpz",
-				"updated": "20210428225516"
+				"updated": "20250115164053"
 			},
 			"Children": [
 				{
@@ -290,12 +291,12 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and click on the node: jump to the node."
+					"Data": "​ and click on the node: jump to the node."
 				}
 			]
 		},

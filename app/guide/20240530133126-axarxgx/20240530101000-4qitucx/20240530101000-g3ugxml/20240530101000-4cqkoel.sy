@@ -7,7 +7,7 @@
 		"id": "20240530101000-4cqkoel",
 		"title": "ドキュメントの公開",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115162339"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"Properties": {
 				"ID": "20240530101000-yqjf2u6",
 				"id": "20240530101000-ta337sv",
-				"updated": "20240530101000"
+				"updated": "20250115162339"
 			},
 			"Children": [
 				{
@@ -74,7 +74,7 @@
 			"Properties": {
 				"ID": "20240530101000-4zayyl0",
 				"id": "20240530101000-0nu3aou",
-				"updated": "20240530101000"
+				"updated": "20250115162339"
 			},
 			"Children": [
 				{
@@ -117,16 +117,15 @@
 					"Properties": {
 						"ID": "20240530101000-4kifiue",
 						"id": "20240530101000-kfp6mgd",
-						"updated": "20240530101000"
+						"updated": "20250115162339"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-lt35ct2",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-cl0dp3u",
 								"id": "20240530101000-lt35ct2",
-								"updated": "20240530101000"
+								"updated": "20250115162339"
 							},
 							"Children": [
 								{
@@ -135,7 +134,7 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
+									"TextMarkType": "kbd",
 									"TextMarkTextContent": "︙"
 								},
 								{

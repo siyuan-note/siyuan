@@ -7,7 +7,7 @@
 		"id": "20240530101000-vejnh1k",
 		"title": "クエリ構文",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115150339"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-tyyk26i",
 				"id": "20240530101000-omyfbt2",
-				"updated": "20240530101000"
+				"updated": "20250115150339"
 			},
 			"Children": [
 				{
@@ -30,9 +30,8 @@
 			"ID": "20240530101000-cdbpnhl",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-ijtqlit",
 				"id": "20240530101000-cdbpnhl",
-				"updated": "20240530101000"
+				"updated": "20250115150339"
 			},
 			"Children": [
 				{
@@ -42,7 +41,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+P"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
 				},
 				{
 					"Type": "NodeText",

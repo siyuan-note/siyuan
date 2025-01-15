@@ -6,7 +6,8 @@
 		"icon": "1f5c2",
 		"id": "20230429115711-ejbts4s",
 		"title": "Glossary",
-		"updated": "20230429120517"
+		"type": "doc",
+		"updated": "20250115163213"
 	},
 	"Children": [
 		{
@@ -207,7 +208,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429115912-b97gvan",
-				"updated": "20230429115912"
+				"updated": "20250115163213"
 			},
 			"Children": [
 				{
@@ -355,7 +356,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429115912-zd5p7jl",
-				"updated": "20230429120505"
+				"updated": "20250115163213"
 			},
 			"Children": [
 				{
@@ -365,7 +366,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⋮"
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
@@ -840,7 +841,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429120050-i338ss7",
-				"updated": "20230429120139"
+				"updated": "20250115151002"
 			},
 			"Children": [
 				{
@@ -868,7 +869,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429120050-7kwyta0",
-				"updated": "20230429120517"
+				"updated": "20250115151002"
 			},
 			"Children": [
 				{
@@ -878,7 +879,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+Click"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Click"
 				},
 				{
 					"Type": "NodeText",

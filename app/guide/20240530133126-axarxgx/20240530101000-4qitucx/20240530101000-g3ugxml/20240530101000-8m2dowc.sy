@@ -7,7 +7,7 @@
 		"id": "20240530101000-8m2dowc",
 		"title": "プラグイン",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115152435"
 	},
 	"Children": [
 		{
@@ -70,7 +70,7 @@
 			"Properties": {
 				"ID": "20240530101000-ofwsgnj",
 				"id": "20240530101000-qt554cl",
-				"updated": "20240530101000"
+				"updated": "20250115152435"
 			},
 			"Children": [
 				{
@@ -83,9 +83,8 @@
 			"ID": "20240530101000-7g50y4t",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-l5eyr23",
 				"id": "20240530101000-7g50y4t",
-				"updated": "20240530101000"
+				"updated": "20250115152435"
 			},
 			"Children": [
 				{
@@ -100,6 +99,15 @@
 				{
 					"Type": "NodeText",
 					"Data": "​ フォルダに配置されます。有効と無効の切り替えは、"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "設定"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",

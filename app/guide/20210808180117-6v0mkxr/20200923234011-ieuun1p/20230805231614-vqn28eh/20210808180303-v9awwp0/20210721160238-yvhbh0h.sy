@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20210721160238-yvhbh0h",
 		"title": "Assets hosting",
-		"updated": "20230621111510"
+		"type": "doc",
+		"updated": "20250115151337"
 	},
 	"Children": [
 		{
@@ -28,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721160254-4t8mham",
-				"updated": "20210721160254"
+				"updated": "20250115151337"
 			},
 			"Children": [
 				{
@@ -45,7 +46,7 @@
 			},
 			"Properties": {
 				"id": "20210721160254-2ssi3ws",
-				"updated": "20220317224741"
+				"updated": "20250115151337"
 			},
 			"Children": [
 				{
@@ -59,7 +60,7 @@
 					},
 					"Properties": {
 						"id": "20210721160254-kqzcayi",
-						"updated": "20220317224741"
+						"updated": "20250115151337"
 					},
 					"Children": [
 						{
@@ -67,7 +68,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20210721160254-ynqg7sy",
-								"updated": "20220317224741"
+								"updated": "20250115151337"
 							},
 							"Children": [
 								{
@@ -77,16 +78,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "..."
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " in the More menu and select "
+									"Data": "​ in the More menu and select "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "Upload asset files to cloud"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

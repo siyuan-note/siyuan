@@ -82,17 +82,6 @@
     // https://ld246.com/article/1636204769623  test $\rightarrow$ test
   }
 
-  mark,
-  span[data-type~="mark"] {
-    background-color: var(--b3-protyle-inline-mark-background);
-    color: var(--b3-protyle-inline-mark-color);
-
-    &.mark--hl {
-      background-color: var(--b3-theme-primary-lighter);
-      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
-    }
-  }
-
   kbd,
   span[data-type~="kbd"] {
     padding: 2px 4px;
@@ -120,6 +109,17 @@
   span[data-type~="inline-memo"] {
     background-color: var(--b3-card-info-background);
     border-bottom: 2px solid var(--b3-card-info-color);
+  }
+
+  mark,
+  span[data-type~="mark"] {
+    background-color: var(--b3-protyle-inline-mark-background);
+    color: var(--b3-protyle-inline-mark-color);
+
+    &.mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
+    }
   }
 
   blockquote {

@@ -1019,16 +1019,6 @@ data-type="navigation-root" data-path="/">
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
-            if (filePath === item.path) {
-                this.selectItem(data.box, filePath, undefined, setStorage);
-            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
-                fetchPost("/api/filetree/listDocsByPath", {
-                    notebook: data.box,
-                    path: item.path
-                }, response => {
-                    this.selectItem(response.data.box, filePath, response.data, setStorage);
-                });
-            }
         });
         if (fileHTML === "") {
             return;
@@ -1046,6 +1036,18 @@ data-type="navigation-root" data-path="/">
             emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        data.files.forEach((item: IFile) => {
+            if (filePath === item.path) {
+                this.selectItem(data.box, filePath, undefined, setStorage);
+            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
+                fetchPost("/api/filetree/listDocsByPath", {
+                    notebook: data.box,
+                    path: item.path
+                }, response => {
+                    this.selectItem(response.data.box, filePath, response.data, setStorage);
+                });
+            }
+        });
         if (setStorage) {
             this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
         }

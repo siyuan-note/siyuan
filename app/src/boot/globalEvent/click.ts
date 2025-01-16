@@ -1,9 +1,5 @@
 import {getAllModels} from "../../layout/getAll";
-import {
-    hasClosestByAttribute,
-    hasClosestByClassName,
-    hasTopClosestByClassName
-} from "../../protyle/util/hasClosest";
+import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName} from "../../protyle/util/hasClosest";
 import {hideAllElements} from "../../protyle/ui/hideElements";
 import {isWindow} from "../../util/functions";
 import {writeText} from "../../protyle/util/compatibility";
@@ -19,7 +15,7 @@ export const globalClickHideMenu = (element: HTMLElement) => {
             window.siyuan.menus.menu.remove();
         }
     }
-}
+};
 
 export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
     cancelDrag();

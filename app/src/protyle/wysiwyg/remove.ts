@@ -545,7 +545,7 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
         transaction(protyle, doOperations, undoOperations);
         if (listElement.parentElement.classList.contains("sb") &&
             listElement.parentElement.getAttribute("data-sb-layout") === "col") {
-            const selectsElement: Element[] = []
+            const selectsElement: Element[] = [];
             let previousElement: Element = listElement;
             while (previousElement) {
                 selectsElement.push(previousElement);

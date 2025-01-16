@@ -230,6 +230,8 @@ type FileInfo struct {
 	isdir bool
 }
 
+var listDocTreeLock = sync.Map{}
+
 func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")
@@ -237,6 +239,21 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	//defer pprof.StopCPUProfile()
 
 	ret = []*File{}
+
+	// 同一个路径条件不允许并发请求，主要是为了性能考虑，并发请求的话会导致缓存穿透
+	listLockKey := boxID + listPath + strconv.Itoa(sortMode) + strconv.FormatBool(flashcard) + strconv.FormatBool(showHidden) + strconv.Itoa(maxListCount)
+	if v, ok := listDocTreeLock.Load(listLockKey); ok {
+		v.(*sync.Mutex).Lock()
+		defer v.(*sync.Mutex).Unlock()
+	} else {
+		mu := &sync.Mutex{}
+		mu.Lock()
+		listDocTreeLock.Store(listLockKey, mu)
+		defer func() {
+			mu.Unlock()
+			listDocTreeLock.Delete(listLockKey)
+		}()
+	}
 
 	var deck *riff.Deck
 	var deckBlockIDs []string
@@ -353,7 +370,7 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	}
 	elapsed = time.Now().Sub(start).Milliseconds()
 	if 500 < elapsed {
-		logging.LogWarnf("build docs [%d] elapsed [%dms]", len(docs), elapsed)
+		logging.LogWarnf("list doc tree [%s] build docs [%d] elapsed [%dms]", listPath, len(docs), elapsed)
 	}
 
 	start = time.Now()

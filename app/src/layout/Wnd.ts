@@ -324,7 +324,7 @@ export class Wnd {
         });
         let elementDragCounter = 0;
         this.element.addEventListener("dragenter", (event: DragEvent & { target: HTMLElement }) => {
-            elementDragCounter++
+            elementDragCounter++;
             if (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
                 const tabHeadersElement = hasClosestByClassName(event.target, "layout-tab-bar");
                 if (tabHeadersElement) {
@@ -339,12 +339,12 @@ export class Wnd {
         });
         //  dragElement dragleave 后还会触发 dragenter https://github.com/siyuan-note/siyuan/issues/13753
         this.element.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
-           elementDragCounter--
+            elementDragCounter--;
             if (elementDragCounter === 0) {
                 dragElement.classList.add("fn__none");
                 dragElement.removeAttribute("style");
             }
-        })
+        });
 
         dragElement.addEventListener("dragover", (event: DragEvent & { layerX: number, layerY: number }) => {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {

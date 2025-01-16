@@ -240,21 +240,6 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 
 	ret = []*File{}
 
-	// 同一个路径条件不允许并发请求，主要是为了性能考虑，并发请求的话会导致缓存穿透
-	listLockKey := boxID + listPath + strconv.Itoa(sortMode) + strconv.FormatBool(flashcard) + strconv.FormatBool(showHidden) + strconv.Itoa(maxListCount)
-	if v, ok := listDocTreeLock.Load(listLockKey); ok {
-		v.(*sync.Mutex).Lock()
-		defer v.(*sync.Mutex).Unlock()
-	} else {
-		mu := &sync.Mutex{}
-		mu.Lock()
-		listDocTreeLock.Store(listLockKey, mu)
-		defer func() {
-			mu.Unlock()
-			listDocTreeLock.Delete(listLockKey)
-		}()
-	}
-
 	var deck *riff.Deck
 	var deckBlockIDs []string
 	if flashcard {

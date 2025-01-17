@@ -430,7 +430,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
     const inputElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
     if (inputElement) {
         if (["text", "email", "phone", "block", "template"].includes(type)) {
-            inputElement.value = cellElements[0].querySelector(".av__celltext").textContent;
+            inputElement.value = cellElements[0].querySelector(".av__celltext")?.textContent || "";
         }
         inputElement.select();
         inputElement.focus();

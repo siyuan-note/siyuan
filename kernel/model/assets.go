@@ -830,6 +830,12 @@ func UnusedAssets() (ret []string) {
 			toRemoves = append(toRemoves, asset)
 			continue
 		}
+
+		if strings.HasSuffix(asset, "android-notification-texts.txt") {
+			// 排除 Android 通知文本
+			toRemoves = append(toRemoves, asset)
+			continue
+		}
 	}
 
 	// 排除数据库中引用的资源文件

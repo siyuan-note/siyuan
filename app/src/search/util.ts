@@ -1019,17 +1019,21 @@ const renderNextSearchMark = (options: {
         if (options.edit.protyle.highlight.rangeIndex >= options.edit.protyle.highlight.ranges.length) {
             options.edit.protyle.highlight.rangeIndex = 0;
         }
-        let rangeTop;
+        let currentRange: Range;
         options.edit.protyle.highlight.ranges.forEach((item, index) => {
             if (options.edit.protyle.highlight.rangeIndex === index) {
                 options.edit.protyle.highlight.markHL.add(item);
-                rangeTop = item.getBoundingClientRect().top;
+                currentRange = item
             } else {
                 options.edit.protyle.highlight.mark.add(item);
             }
         });
-        if (typeof rangeTop === "number") {
-            options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + rangeTop - contentRect.top - contentRect.height / 2;
+        if (currentRange) {
+            if (!currentRange.toString()) {
+                highlightById(options.edit.protyle, options.id);
+            } else {
+                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+            }
         }
         return;
     }
@@ -1102,8 +1106,7 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
-                            const blockElement = hasClosestBlock(options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].startContainer);
-                            if (blockElement && blockElement.getAttribute("data-node-id") !== options.id) {
+                            if (!options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].toString()) {
                                 highlightById(options.edit.protyle, options.id);
                             } else {
                                 options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;

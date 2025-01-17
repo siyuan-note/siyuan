@@ -7,7 +7,7 @@
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
 		"type": "doc",
-		"updated": "20250114215441"
+		"updated": "20250117171914"
 	},
 	"Children": [
 		{
@@ -560,7 +560,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250114215310-k9lnjrc",
-				"updated": "20250114215441"
+				"updated": "20250117171914"
 			},
 			"Children": [
 				{
@@ -605,7 +605,7 @@
 			},
 			"Properties": {
 				"id": "20250114215310-h1tgrnv",
-				"updated": "20250114215441"
+				"updated": "20250117171914"
 			},
 			"Children": [
 				{
@@ -619,7 +619,7 @@
 					},
 					"Properties": {
 						"id": "20250114215310-uhglsyt",
-						"updated": "20250114215441"
+						"updated": "20250117171914"
 					},
 					"Children": [
 						{
@@ -627,7 +627,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250114215310-z7geibq",
-								"updated": "20250114215441"
+								"updated": "20250117171914"
 							},
 							"Children": [
 								{
@@ -646,7 +646,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "workspace/assets/"
+									"TextMarkTextContent": "workspace/data/assets/"
 								},
 								{
 									"Type": "NodeText",

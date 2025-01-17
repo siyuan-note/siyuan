@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20250114215620"
+		"updated": "20250117171922"
 	},
 	"Children": [
 		{
@@ -286,7 +286,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20250114215535-x0zo9js",
-				"updated": "20250114215620"
+				"updated": "20250117171922"
 			},
 			"Children": [
 				{
@@ -331,7 +331,7 @@
 			},
 			"Properties": {
 				"id": "20250114215535-5igrtp8",
-				"updated": "20250114215612"
+				"updated": "20250117171922"
 			},
 			"Children": [
 				{
@@ -345,7 +345,7 @@
 					},
 					"Properties": {
 						"id": "20250114215535-a0e9b4c",
-						"updated": "20250114215612"
+						"updated": "20250117171922"
 					},
 					"Children": [
 						{
@@ -353,7 +353,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20250114215535-2lxc7ib",
-								"updated": "20250114215612"
+								"updated": "20250117171922"
 							},
 							"Children": [
 								{
@@ -363,7 +363,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "workspace/assets/"
+									"TextMarkTextContent": "workspace/data/assets/"
 								},
 								{
 									"Type": "NodeText",

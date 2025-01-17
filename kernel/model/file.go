@@ -230,8 +230,6 @@ type FileInfo struct {
 	isdir bool
 }
 
-var listDocTreeLock = sync.Map{}
-
 func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden bool, maxListCount int) (ret []*File, totals int, err error) {
 	//os.MkdirAll("pprof", 0755)
 	//cpuProfile, _ := os.Create("pprof/cpu_profile_list_doc_tree")

@@ -192,6 +192,7 @@ interface Window {
         writeImageClipboard(uri: string): void
         readClipboard(): string
         getBlockURL(): string
+        getLocalFileSystemPath(): string
     }
     JSHarmony: {
         openExternal(url: string): void

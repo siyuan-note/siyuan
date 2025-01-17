@@ -524,7 +524,7 @@ export const repos = {
         const syncIntervalElement = repos.element.querySelector("#syncInterval") as HTMLInputElement;
         syncIntervalElement.addEventListener("change", () => {
             let interval = parseInt(syncIntervalElement.value);
-            if (30 > interval) {
+            if (30 > interval && window.siyuan.config.sync.provider != 4) {
                 interval = 30;
             }
             if (43200 < interval) {

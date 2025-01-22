@@ -333,7 +333,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__space"></span>
                 <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.date}</span>
                 <span class="fn__space--small"></span>
-                <input type="date" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
+                <input type="date" max="9999-12-31" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>

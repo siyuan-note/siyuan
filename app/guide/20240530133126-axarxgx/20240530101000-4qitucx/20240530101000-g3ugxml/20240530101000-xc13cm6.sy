@@ -7,7 +7,7 @@
 		"id": "20240530101000-xc13cm6",
 		"title": "ブックマークとタグ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115151944"
 	},
 	"Children": [
 		{
@@ -17,7 +17,7 @@
 			"Properties": {
 				"ID": "20240530101000-pvnwpym",
 				"id": "20240530101000-hprjkt6",
-				"updated": "20240530101000"
+				"updated": "20250115151931"
 			},
 			"Children": [
 				{
@@ -45,9 +45,8 @@
 			"ID": "20240530101000-knmtutw",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-qeng3uu",
 				"id": "20240530101000-knmtutw",
-				"updated": "20240530101000"
+				"updated": "20250115151931"
 			},
 			"Children": [
 				{
@@ -57,11 +56,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt+3"
+					"TextMarkTextContent": "Alt"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​/"
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -81,7 +89,7 @@
 			"Properties": {
 				"ID": "20240530101000-jxde0hd",
 				"id": "20240530101000-hm4v83l",
-				"updated": "20240530101000"
+				"updated": "20250115151944"
 			},
 			"Children": [
 				{
@@ -169,9 +177,8 @@
 			"ID": "20240530101000-hyy7lip",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-9q9x1pb",
 				"id": "20240530101000-hyy7lip",
-				"updated": "20240530101000"
+				"updated": "20250115151944"
 			},
 			"Children": [
 				{
@@ -181,11 +188,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt+4"
+					"TextMarkTextContent": "Alt"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​/"
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ / "
 				},
 				{
 					"Type": "NodeTextMark",

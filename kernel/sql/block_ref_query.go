@@ -141,7 +141,7 @@ func QueryRootChildrenRefCount(defRootID string) (ret map[string]int) {
 func QueryRootBlockRefCount() (ret map[string]int) {
 	ret = map[string]int{}
 
-	rows, err := query("SELECT def_block_root_id, COUNT(*) AS ref_cnt FROM refs GROUP BY def_block_root_id")
+	rows, err := query("SELECT def_block_root_id, COUNT(DISTINCT block_id) AS ref_cnt FROM refs GROUP BY def_block_root_id")
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
 		return
@@ -315,6 +315,29 @@ func queryDefIDsByNameAlias(keyword string, excludeIDs []string) (ret []string) 
 	return
 }
 
+func QueryChildRefDefIDsByRootDefID(rootDefID string) (ret map[string][]string) {
+	ret = map[string][]string{}
+	rows, err := query("SELECT block_id, def_block_id FROM refs WHERE def_block_root_id =  ?", rootDefID)
+	if err != nil {
+		logging.LogErrorf("sql query failed: %s", err)
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var defID, refID string
+		if err = rows.Scan(&defID, &refID); err != nil {
+			logging.LogErrorf("query scan field failed: %s", err)
+			return
+		}
+		if nil == ret[defID] {
+			ret[defID] = []string{refID}
+		} else {
+			ret[defID] = append(ret[defID], refID)
+		}
+	}
+	return
+}
+
 func QueryChildDefIDsByRootDefID(rootDefID string) (ret []string) {
 	ret = []string{}
 	rows, err := query("SELECT DISTINCT(def_block_id) FROM refs WHERE def_block_root_id = ?", rootDefID)
@@ -334,14 +357,14 @@ func QueryChildDefIDsByRootDefID(rootDefID string) (ret []string) {
 	return
 }
 
-func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []string) {
+func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs []string) {
 	refIDs = []string{}
 	var rows *sql.Rows
 	var err error
 	if containChildren {
-		rows, err = query("SELECT block_id, content FROM refs WHERE def_block_root_id = ?", defID)
+		rows, err = query("SELECT DISTINCT block_id FROM refs WHERE def_block_root_id = ?", defID)
 	} else {
-		rows, err = query("SELECT block_id, content FROM refs WHERE def_block_id = ?", defID)
+		rows, err = query("SELECT DISTINCT block_id FROM refs WHERE def_block_id = ?", defID)
 	}
 	if err != nil {
 		logging.LogErrorf("sql query failed: %s", err)
@@ -349,13 +372,12 @@ func QueryRefIDsByDefID(defID string, containChildren bool) (refIDs, refTexts []
 	}
 	defer rows.Close()
 	for rows.Next() {
-		var id, content string
-		if err = rows.Scan(&id, &content); err != nil {
+		var id string
+		if err = rows.Scan(&id); err != nil {
 			logging.LogErrorf("query scan field failed: %s", err)
 			return
 		}
 		refIDs = append(refIDs, id)
-		refTexts = append(refTexts, content)
 	}
 	return
 }

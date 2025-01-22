@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226121332-irgblss",
 		"title": "資料文件圖庫",
-		"updated": "20230630142403"
+		"type": "doc",
+		"updated": "20250115151323"
 	},
 	"Children": [
 		{
@@ -28,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121407-ka3cqan",
-				"updated": "20211226010854"
+				"updated": "20250115151323"
 			},
 			"Children": [
 				{
@@ -45,7 +46,7 @@
 			},
 			"Properties": {
 				"id": "20211226121407-iocuon0",
-				"updated": "20230630142403"
+				"updated": "20250115151323"
 			},
 			"Children": [
 				{
@@ -59,7 +60,7 @@
 					},
 					"Properties": {
 						"id": "20220407085934-xbaj5uv",
-						"updated": "20220407090016"
+						"updated": "20250115151323"
 					},
 					"Children": [
 						{
@@ -67,7 +68,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220407085934-94nitto",
-								"updated": "20220407090016"
+								"updated": "20250115151323"
 							},
 							"Children": [
 								{
@@ -77,16 +78,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "..."
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 更多菜單中選擇 "
+									"Data": "​ 更多菜單中選擇 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "上傳資料檔到雲端"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

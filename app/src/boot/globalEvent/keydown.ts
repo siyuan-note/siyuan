@@ -74,6 +74,7 @@ import {globalCommand} from "./command/global";
 import {duplicateCompletely} from "../../protyle/render/av/action";
 import {copyTextByType} from "../../protyle/toolbar/util";
 import {onlyProtyleCommand} from "./command/protyle";
+import {cancelDrag} from "./dragover";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1395,6 +1396,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (event.key === "Escape" && !event.isComposing) {
+        cancelDrag();
         const imgPreviewElement = document.querySelector(".protyle-img");
         if (imgPreviewElement) {
             imgPreviewElement.remove();

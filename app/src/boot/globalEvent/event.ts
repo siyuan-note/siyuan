@@ -19,6 +19,7 @@ import {Tab} from "../../layout/Tab";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openFileById} from "../../editor/util";
 import {checkFold} from "../../util/noRelyPCFunction";
+import {hideAllElements} from "../../protyle/ui/hideElements";
 
 export const initWindowEvent = (app: App) => {
     document.body.addEventListener("mouseleave", () => {
@@ -54,6 +55,13 @@ export const initWindowEvent = (app: App) => {
         } else if (event.button === 4) {
             event.preventDefault();
             goForward(app);
+        }
+    });
+
+    window.addEventListener("mousedown", (event) => {
+        // protyle.toolbar 点击空白处时进行隐藏
+        if (!hasClosestByClassName(event.target as Element, "protyle-toolbar")) {
+            hideAllElements(["toolbar"]);
         }
     });
 

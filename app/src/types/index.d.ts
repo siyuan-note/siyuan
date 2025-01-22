@@ -217,7 +217,12 @@ interface Window {
     destroyTheme(): Promise<void>
 }
 
-interface filesPath {
+interface IRefDefs {
+    refID: string,
+    defIDs?: string[]
+}
+
+interface IFilesPath {
     notebookId: string,
     openPaths: string[]
 }
@@ -234,7 +239,7 @@ interface ISaveLayout {
     name: string,
     layout: IObject
     time: number
-    filesPaths: filesPath[]
+    filesPaths: IFilesPath[]
 }
 
 interface IWorkspace {

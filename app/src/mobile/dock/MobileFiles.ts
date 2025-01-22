@@ -314,7 +314,7 @@ export class MobileFiles extends Model {
         } else {
             counterElement.classList.add("fn__none");
         }
-        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: filesPath) => {
+        window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
             item.openPaths.forEach((openPath) => {
                 this.selectItem(item.notebookId, openPath, undefined, false);
             });
@@ -684,9 +684,9 @@ export class MobileFiles extends Model {
     }
 
     private getOpenPaths() {
-        const filesPaths: filesPath[] = [];
+        const filesPaths: IFilesPath[] = [];
         this.element.querySelectorAll(".b3-list[data-url]").forEach((item: HTMLElement) => {
-            const notebookPaths: filesPath = {
+            const notebookPaths: IFilesPath = {
                 notebookId: item.getAttribute("data-url"),
                 openPaths: []
             };

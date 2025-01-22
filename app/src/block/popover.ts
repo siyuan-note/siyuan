@@ -176,7 +176,7 @@ export const initBlockPopover = (app: App) => {
             }
         }, Constants.TIMEOUT_INPUT);
         timeout = window.setTimeout(() => {
-            if (!getTarget(event, aElement)) {
+            if (!getTarget(event, aElement) || isTouchDevice()) {
                 return;
             }
             clearTimeout(timeoutHide);
@@ -334,22 +334,23 @@ export const showPopover = async (app: App, showRef = false) => {
     if (!popoverTargetElement || window.siyuan.menus.menu.data?.isSameNode(popoverTargetElement)) {
         return;
     }
-    let ids: string[];
-    let defIds: string[];
+    let refDefs: IRefDefs[];
+    let originalRefBlockIDs: IObject;
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {
-        // backlink/util/hint/正文标题 上的弹层
+        // backlink/util/hint 上的弹层
         if (showRef) {
             const postResponse = await fetchSyncPost("/api/block/getRefIDs", {id: dataId});
-            ids = postResponse.data.refIDs;
-            defIds = postResponse.data.defIDs;
+            refDefs = postResponse.data.refDefs;
+            originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         } else {
             if (dataId.startsWith("[")) {
-                ids = JSON.parse(dataId);
+                JSON.parse(dataId).forEach((item: string) => {
+                    refDefs.push({refID: item});
+                });
             } else {
-                ids = [dataId];
+                refDefs = [{refID: dataId}];
             }
-            defIds = JSON.parse(popoverTargetElement.getAttribute("data-defids") || "[]");
         }
     } else if (popoverTargetElement.getAttribute("data-type")?.indexOf("virtual-block-ref") > -1) {
         const nodeElement = hasClosestBlock(popoverTargetElement);
@@ -358,18 +359,18 @@ export const showPopover = async (app: App, showRef = false) => {
                 anchor: popoverTargetElement.textContent,
                 excludeIDs: [nodeElement.getAttribute("data-node-id")]
             });
-            ids = postResponse.data;
+            refDefs = postResponse.data.refDefs;
         }
     } else if (popoverTargetElement.getAttribute("data-type")?.split(" ").includes("a")) {
         // 以思源协议开头的链接
-        ids = [getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))];
+        refDefs = [{refID: getIdFromSYProtocol(popoverTargetElement.getAttribute("data-href"))}];
     } else if (popoverTargetElement.dataset.type === "url") {
         // 在 database 的 url 列中以思源协议开头的链接
-        ids = [getIdFromSYProtocol(popoverTargetElement.textContent.trim())];
+        refDefs = [{refID: getIdFromSYProtocol(popoverTargetElement.textContent.trim())}];
     } else if (popoverTargetElement.dataset.popoverUrl) {
         // 镜像数据库
         const postResponse = await fetchSyncPost(popoverTargetElement.dataset.popoverUrl, {avID: popoverTargetElement.dataset.avId});
-        ids = postResponse.data;
+        refDefs = postResponse.data.refDefs;
     } else {
         // pdf
         let targetId;
@@ -380,7 +381,9 @@ export const showPopover = async (app: App, showRef = false) => {
         } else if (popoverTargetElement.classList.contains("pdf__rect")) {
             const relationIds = popoverTargetElement.getAttribute("data-relations");
             if (relationIds) {
-                ids = relationIds.split(",");
+                relationIds.split(",").forEach((item: string) => {
+                    refDefs.push({refID: item});
+                });
                 url = "";
             } else {
                 targetId = popoverTargetElement.getAttribute("data-node-id");
@@ -392,15 +395,19 @@ export const showPopover = async (app: App, showRef = false) => {
         }
         if (url) {
             const postResponse = await fetchSyncPost(url, {id: targetId});
-            ids = postResponse.data.refIDs;
-            defIds = postResponse.data.defIDs;
+            refDefs = postResponse.data.refDefs;
+            originalRefBlockIDs = postResponse.data.originalRefBlockIDs;
         }
+    }
+
+    if (refDefs.length === 0) {
+        return;
     }
 
     let hasPin = false;
     window.siyuan.blockPanels.find((item) => {
         if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "true"
-            && JSON.stringify(ids) === JSON.stringify(item.nodeIds)) {
+            && JSON.stringify(refDefs) === JSON.stringify(item.refDefs)) {
             hasPin = true;
             return true;
         }
@@ -412,8 +419,8 @@ export const showPopover = async (app: App, showRef = false) => {
             app,
             targetElement: popoverTargetElement,
             isBacklink: showRef || popoverTargetElement.classList.contains("protyle-attr--refcount") || popoverTargetElement.classList.contains("counter"),
-            nodeIds: ids,
-            defIds,
+            refDefs,
+            originalRefBlockIDs,
         }));
     }
     // 不能清除，否则ctrl 后 shift 就 无效 popoverTargetElement = undefined;

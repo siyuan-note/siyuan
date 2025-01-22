@@ -6,7 +6,7 @@
 		"id": "20220628204454-hhxohv5",
 		"title": "Optimize typography",
 		"type": "doc",
-		"updated": "20240506230917"
+		"updated": "20250115151312"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628215200-efn43ah",
-				"updated": "20220628215200"
+				"updated": "20250115151312"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628215200-11bzo6r",
-				"updated": "20220628215200"
+				"updated": "20250115151312"
 			},
 			"Children": [
 				{
@@ -86,16 +86,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the "
+					"Data": "​ in the "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu in the upper right corner of the editor. After processing, a space will be automatically inserted before and after the following elements in the document:"
+					"Data": "​ menu in the upper right corner of the editor. After processing, a space will be automatically inserted before and after the following elements in the document:"
 				}
 			]
 		},

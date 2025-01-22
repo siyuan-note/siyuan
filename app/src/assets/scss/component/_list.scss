@@ -7,9 +7,47 @@
   &--background .b3-list-item {
     border-radius: var(--b3-border-radius);
 
-    &:hover:not(.b3-list-item--focus):not(.dragover):not(.dragover__top):not(.dragover__bottom),
-    &--focus:not(.dragover):not(.dragover__top):not(.dragover__bottom) {
+    &:hover:not(.b3-list-item--focus):not(.dragover):not(.dragover__current):not(.dragover__top):not(.dragover__bottom),
+    &--focus {
       background-color: var(--b3-list-hover);
+    }
+
+    &.dragover,
+    &.dragover__top,
+    &.dragover__bottom {
+      cursor: copy;
+    }
+
+    &.dragover::after {
+      background-color: var(--b3-theme-primary-lightest);
+      position: absolute;
+      height: 100%;
+      content: " ";
+      top: 0;
+      z-index: 3;
+      pointer-events: none;
+      width: calc(100% - var(--file-toggle-width));
+      left: var(--file-toggle-width);
+    }
+
+    &.dragover__top::after,
+    &.dragover__bottom::after {
+      content: "";
+      position: absolute;
+      height: 4px;
+      width: calc(100% - var(--file-toggle-width));
+      left: var(--file-toggle-width);
+      background-color: var(--b3-theme-primary-lighter);
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    &.dragover__top::after {
+      top: -3px;
+    }
+
+    &.dragover__bottom::after {
+      bottom: -2px;
     }
   }
 

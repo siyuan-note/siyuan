@@ -1,11 +1,11 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
-import {readText, writeText} from "./compatibility";
+import {readText} from "./compatibility";
 /// #if !BROWSER
 import {clipboard} from "electron";
 /// #endif
-import {hasClosestBlock} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {getEditorRange} from "./selection";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
@@ -95,7 +95,6 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
 
 export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
     try {
-        // * _ [ ] ! \ ` < > & ~ { } ( ) = # $ ^ | .
         let clipText = await readText();
         // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
         clipText = clipText.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
@@ -166,12 +165,19 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     }
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
-        writeText("");
+        return;
     }
     /// #endif
     if (localFiles.length === 0) {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
+            if (getSelection().rangeCount > 0) {
+                const range = getSelection().getRangeAt(0);
+                if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
+                    insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+                    return;
+                }
+            }
             // 对一些内置需要解析的 HTML 标签进行内部转移 Improve sub/sup pasting as plain text https://github.com/siyuan-note/siyuan/issues/12155
             textPlain = textPlain.replace(/<sub>/g, "__@sub@__").replace(/<\/sub>/g, "__@/sub@__");
             textPlain = textPlain.replace(/<sup>/g, "__@sup@__").replace(/<\/sup>/g, "__@/sup@__");
@@ -272,7 +278,6 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
         }
     }
     uploadLocalFiles(localFiles, protyle, true);
-    writeText("");
 };
 
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent) & { target: HTMLElement }) => {
@@ -396,10 +401,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {
         // https://github.com/siyuan-note/siyuan/issues/13552
-        textPlain = textPlain.replace(/\u200D```/g, "```");
-        textPlain = textPlain.replace(/```/g, "\u200D```");
-
-        insertHTML(textPlain, protyle);
+        insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
         return;
     } else if (siyuanHTML) {
         // 编辑器内部粘贴
@@ -412,6 +414,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             e.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
             e.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
             e.setAttribute("updated", newId.split("-")[0]);
+            e.removeAttribute("refcount");
             isBlock = true;
         });
         if (nodeElement.classList.contains("table")) {

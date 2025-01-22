@@ -1,6 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol, bindEditEvent, duplicateCol, getColIconByType, getEditHTML, removeCol} from "./col";
+import {addCol, bindEditEvent, duplicateCol, getColIconByType, getColNameByType, getEditHTML, removeCol} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
@@ -874,13 +874,25 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "updateColType") {
                     if (target.dataset.newType !== target.dataset.oldType) {
-                        const name = (avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement).value;
-                        data.view.columns.find((item: IAVColumn) => item.id === options.colId).type = target.dataset.newType as TAVCol;
+                        const nameElement = avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
+                        const name = nameElement.value;
+                        let newName = name;
+                        data.view.columns.find((item: IAVColumn) => {
+                            if (item.id === options.colId) {
+                                item.type = target.dataset.newType as TAVCol;
+                                if (getColNameByType(target.dataset.oldType as TAVCol) === name) {
+                                    newName = getColNameByType(target.dataset.newType as TAVCol);
+                                    item.name = newName;
+                                }
+                                return true;
+                            }
+                        });
+
                         transaction(options.protyle, [{
                             action: "updateAttrViewCol",
                             id: options.colId,
                             avID,
-                            name,
+                            name: newName,
                             type: target.dataset.newType as TAVCol,
                         }], [{
                             action: "updateAttrViewCol",

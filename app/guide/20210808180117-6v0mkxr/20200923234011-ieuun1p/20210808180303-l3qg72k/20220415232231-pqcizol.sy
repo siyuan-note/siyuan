@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220415232231-pqcizol",
 		"title": "Query syntax",
-		"updated": "20230820184820"
+		"type": "doc",
+		"updated": "20250115150346"
 	},
 	"Children": [
 		{
@@ -14,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232239-abvrkg2",
-				"updated": "20220415232239"
+				"updated": "20250115150346"
 			},
 			"Children": [
 				{
@@ -28,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232239-xvsiw7v",
-				"updated": "20220415232347"
+				"updated": "20250115150346"
 			},
 			"Children": [
 				{
@@ -38,11 +39,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+P"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " supports advanced search through query syntax, in order to implement some logical operations, such as the query syntax that contains the keyword "
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ supports advanced search through query syntax, in order to implement some logical operations, such as the query syntax that contains the keyword "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -51,7 +61,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " and does not contain the keyword "
+					"Data": "​ and does not contain the keyword "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -60,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " is "
+					"Data": "​ is "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -69,7 +79,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "."
+					"Data": "​."
 				}
 			]
 		},

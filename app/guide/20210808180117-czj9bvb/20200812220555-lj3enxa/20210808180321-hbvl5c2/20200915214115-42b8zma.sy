@@ -6,7 +6,7 @@
 		"id": "20200915214115-42b8zma",
 		"title": "资源文件",
 		"type": "doc",
-		"updated": "20241027164443"
+		"updated": "20250115152751"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201210194734-lr6v0s2",
-				"updated": "20220824171919"
+				"updated": "20250115152740"
 			},
 			"Children": [
 				{
@@ -86,7 +86,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220824172203-etwu4qu",
-				"updated": "20220902215702"
+				"updated": "20250115152740"
 			},
 			"Children": [
 				{
@@ -98,7 +98,7 @@
 					},
 					"Properties": {
 						"id": "20220824172204-xxh346y",
-						"updated": "20220824172527"
+						"updated": "20250115152736"
 					},
 					"Children": [
 						{
@@ -106,22 +106,30 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172204-fct1t0t",
-								"updated": "20220824172527"
+								"updated": "20250115152736"
 							},
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "复制为资源文件并插入：将图片或文件复制为资源文件并插入，快捷键 "
+								},
+								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "复制为资源文件并插入"
+									"TextMarkTextContent": "Ctrl"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "：将图片或文件复制为资源文件并插入，快捷键 "
+									"Data": "​+"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+V"
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -136,7 +144,7 @@
 					},
 					"Properties": {
 						"id": "20220824172403-agsj358",
-						"updated": "20220902215702"
+						"updated": "20250115152740"
 					},
 					"Children": [
 						{
@@ -144,26 +152,48 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220824172403-0fkrw8o",
-								"updated": "20220902215702"
+								"updated": "20250115152740"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "使用 file:// 绝对路径并链接"
-								},
-								{
 									"Type": "NodeText",
-									"Data": "：将图片或文件以本地绝对路径方式插入超链接，快捷键 "
+									"Data": "使用 "
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+V"
+									"TextMarkType": "code",
+									"TextMarkTextContent": "file://"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "，或者按住 "
+									"Data": "​ 绝对路径并链接：将图片或文件以本地绝对路径方式插入超链接，快捷键 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，或者按住 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -172,7 +202,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 后拖入"
+									"Data": "​ 后拖入"
 								}
 							]
 						}
@@ -508,7 +538,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230604115545-plxx5iu",
-				"updated": "20230604115551"
+				"updated": "20250115152751"
 			},
 			"Children": [
 				{
@@ -522,12 +552,12 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230604115552-qqg9s4j",
-				"updated": "20230604115947"
+				"updated": "20250115152751"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在"
+					"Data": "在 "
 				},
 				{
 					"Type": "NodeTextMark",

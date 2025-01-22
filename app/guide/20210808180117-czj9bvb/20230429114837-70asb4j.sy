@@ -6,7 +6,8 @@
 		"icon": "1f5c2",
 		"id": "20230429114837-70asb4j",
 		"title": "术语表",
-		"updated": "20230429120400"
+		"type": "doc",
+		"updated": "20250115163216"
 	},
 	"Children": [
 		{
@@ -243,7 +244,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-q6cq7i0",
-				"updated": "20230429092949"
+				"updated": "20250115163216"
 			},
 			"Children": [
 				{
@@ -387,7 +388,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429114837-h68659d",
-				"updated": "20230429094041"
+				"updated": "20250115163216"
 			},
 			"Children": [
 				{
@@ -397,7 +398,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⋮"
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
@@ -890,7 +891,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20230429114837-7grcqq5",
-				"updated": "20230429105016"
+				"updated": "20250115163119"
 			},
 			"Children": [
 				{
@@ -918,7 +919,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230429114837-ohe6zol",
-				"updated": "20230429113218"
+				"updated": "20250115163119"
 			},
 			"Children": [
 				{
@@ -928,7 +929,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+点击"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "点击"
 				},
 				{
 					"Type": "NodeText",

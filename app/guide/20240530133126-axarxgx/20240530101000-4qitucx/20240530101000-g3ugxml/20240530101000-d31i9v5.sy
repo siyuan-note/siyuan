@@ -7,7 +7,7 @@
 		"id": "20240530101000-d31i9v5",
 		"title": "インポートとエクスポート",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115150934"
 	},
 	"Children": [
 		{
@@ -421,7 +421,7 @@
 			"Properties": {
 				"ID": "20240530101000-muh0lww",
 				"id": "20240530101000-jiji166",
-				"updated": "20240530101000"
+				"updated": "20250115150934"
 			},
 			"Children": [
 				{
@@ -437,7 +437,7 @@
 			"Properties": {
 				"ID": "20240530101000-j0qj7jj",
 				"id": "20240530101000-76aygoj",
-				"updated": "20240530101000"
+				"updated": "20250115150934"
 			},
 			"Children": [
 				{
@@ -450,9 +450,8 @@
 			"ID": "20240530101000-9rwwmuv",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-o91uhwt",
 				"id": "20240530101000-9rwwmuv",
-				"updated": "20240530101000"
+				"updated": "20250115150934"
 			},
 			"Children": [
 				{
@@ -461,8 +460,17 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "Ctrl+C"
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "C"
 				},
 				{
 					"Type": "NodeText",

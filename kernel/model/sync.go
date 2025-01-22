@@ -212,7 +212,7 @@ func syncData(exit, byHand bool) {
 	}
 
 	if 1 == Conf.Sync.Mode && nil != webSocketConn && Conf.Sync.Perception && dataChanged {
-		// 如果处于自动同步模式且不是又 WS 触发的同步，则通知其他设备上的内核进行同步
+		// 如果处于自动同步模式且不是由 WS 触发的同步，则通知其他设备上的内核进行同步
 		request := map[string]interface{}{
 			"cmd":    "synced",
 			"synced": Conf.Sync.Synced,
@@ -495,6 +495,13 @@ func SetSyncProviderLocal(local *conf.Local) (err error) {
 		return
 	}
 
+	if util.IsSubPath(absPath, util.WorkspaceDir) {
+		msg := fmt.Sprintf("endpoint [%s] is parent of workspace", local.Endpoint)
+		logging.LogErrorf(msg)
+		err = errors.New(fmt.Sprintf(Conf.Language(77), msg))
+		return
+	}
+
 	local.Timeout = util.NormalizeTimeout(local.Timeout)
 	local.ConcurrentReqs = util.NormalizeConcurrentReqs(local.ConcurrentReqs, conf.ProviderLocal)
 
@@ -648,7 +655,7 @@ func formatRepoErrorMsg(err error) string {
 		msgLowerCase := strings.ToLower(msg)
 		if strings.Contains(msgLowerCase, "permission denied") || strings.Contains(msg, "access is denied") {
 			msg = Conf.Language(33)
-		} else if strings.Contains(msgLowerCase, "region was not a valid DNS name") {
+		} else if strings.Contains(msgLowerCase, "region was not a valid") {
 			msg = Conf.language(254)
 		} else if strings.Contains(msgLowerCase, "device or resource busy") || strings.Contains(msg, "is being used by another") {
 			msg = fmt.Sprintf(Conf.Language(85), err)

@@ -6,7 +6,7 @@
 		"id": "20211226122707-8cr09co",
 		"title": "資料歷史",
 		"type": "doc",
-		"updated": "20240402174257"
+		"updated": "20250115153525"
 	},
 	"Children": [
 		{
@@ -512,7 +512,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220501135134-b9ixet3",
-				"updated": "20220615120024"
+				"updated": "20250115153515"
 			},
 			"Children": [
 				{
@@ -527,7 +527,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220501135134-lh5drjl",
-				"updated": "20220830230728"
+				"updated": "20250115153515"
 			},
 			"Children": [
 				{
@@ -539,7 +539,7 @@
 					},
 					"Properties": {
 						"id": "20220501135134-nkzl4wl",
-						"updated": "20220830230728"
+						"updated": "20250115153515"
 					},
 					"Children": [
 						{
@@ -547,7 +547,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220501135134-n7t2zfn",
-								"updated": "20220830230728"
+								"updated": "20250115153515"
 							},
 							"Children": [
 								{
@@ -561,16 +561,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 按鈕或者 "
+									"Data": "​ 按鈕或者 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+H"
+									"TextMarkTextContent": "Alt"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 可打開資料歷史界面，切換到 "
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可打開資料歷史界面，切換到 "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -579,12 +588,16 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 分頁，如果沒有歷史資料顯示，可以試下該界面的 "
+									"Data": "​ 分頁，如果沒有歷史資料顯示，可以試下該界面的 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "重建索引"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}
@@ -1288,7 +1301,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220615120134-165fbc0",
-				"updated": "20220615120134"
+				"updated": "20250115153525"
 			},
 			"Children": [
 				{
@@ -1305,7 +1318,7 @@
 			},
 			"Properties": {
 				"id": "20220615120134-rfk9khd",
-				"updated": "20220625231923"
+				"updated": "20250115153525"
 			},
 			"Children": [
 				{
@@ -1319,7 +1332,7 @@
 					},
 					"Properties": {
 						"id": "20220615120134-1uthigi",
-						"updated": "20220625231923"
+						"updated": "20250115153525"
 					},
 					"Children": [
 						{
@@ -1327,7 +1340,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20220615120134-7n3iucn",
-								"updated": "20220625231923"
+								"updated": "20250115153525"
 							},
 							"Children": [
 								{
@@ -1341,16 +1354,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 按鈕或者 "
+									"Data": "​ 按鈕或者 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Alt+H"
+									"TextMarkTextContent": "Alt"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 可打開資料歷史界面"
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "H"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 可打開資料歷史界面"
 								}
 							]
 						}

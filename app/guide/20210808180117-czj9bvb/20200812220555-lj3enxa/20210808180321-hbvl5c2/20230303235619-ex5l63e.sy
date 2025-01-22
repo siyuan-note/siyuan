@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230303235619-ex5l63e",
 		"title": "人工智能",
-		"updated": "20230324161605"
+		"type": "doc",
+		"updated": "20250115153728"
 	},
 	"Children": [
 		{
@@ -53,7 +54,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230303235744-d5gf0ti",
-				"updated": "20230303235749"
+				"updated": "20250115153728"
 			},
 			"Children": [
 				{
@@ -70,7 +71,7 @@
 			},
 			"Properties": {
 				"id": "20230303235749-kurfjky",
-				"updated": "20230324161605"
+				"updated": "20250115153728"
 			},
 			"Children": [
 				{
@@ -162,7 +163,7 @@
 					},
 					"Properties": {
 						"id": "20230303235958-fxi5kan",
-						"updated": "20230324161605"
+						"updated": "20250115153728"
 					},
 					"Children": [
 						{
@@ -170,7 +171,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230303235958-1ksxnm3",
-								"updated": "20230324161605"
+								"updated": "20250115153728"
 							},
 							"Children": [
 								{
@@ -180,7 +181,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "/AI Chat"
+									"TextMarkTextContent": "/AI 编写"
 								},
 								{
 									"Type": "NodeText",

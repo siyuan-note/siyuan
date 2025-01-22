@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20230820183402"
+		"updated": "20250115163022"
 	},
 	"Children": [
 		{
@@ -910,7 +910,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708111330-n2z718x",
-				"updated": "20220708111330"
+				"updated": "20250115163022"
 			},
 			"Children": [
 				{
@@ -925,7 +925,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220708111330-a0zn0bb",
-				"updated": "20220708111330"
+				"updated": "20250115163022"
 			},
 			"Children": [
 				{
@@ -1001,7 +1001,7 @@
 					},
 					"Properties": {
 						"id": "20220708111330-bslu8jv",
-						"updated": "20220708111330"
+						"updated": "20250115163022"
 					},
 					"Children": [
 						{
@@ -1026,7 +1026,7 @@
 							},
 							"Properties": {
 								"id": "20220708111330-pdaci5v",
-								"updated": "20220708111330"
+								"updated": "20250115163022"
 							},
 							"Children": [
 								{
@@ -1040,7 +1040,7 @@
 									},
 									"Properties": {
 										"id": "20220708111330-iw5l8s4",
-										"updated": "20220708111330"
+										"updated": "20250115163022"
 									},
 									"Children": [
 										{
@@ -1048,7 +1048,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111330-r231m35",
-												"updated": "20220708111330"
+												"updated": "20250115163022"
 											},
 											"Children": [
 												{
@@ -1062,16 +1062,16 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 或者直接在文件系統上複製 "
+													"Data": "​ 或者直接在文件系統上複製 "
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
+													"TextMarkType": "code",
 													"TextMarkTextContent": "工作空間/data/"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " 文件夾"
+													"Data": "​ 文件夾"
 												}
 											]
 										}

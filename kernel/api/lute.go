@@ -58,12 +58,6 @@ func html2BlockDOM(c *gin.Context) {
 
 	dom := arg["dom"].(string)
 	luteEngine := util.NewLute()
-	luteEngine.SetSup(true)
-	luteEngine.SetSub(true)
-	luteEngine.SetMark(true)
-	luteEngine.SetGFMStrikethrough(true)
-	luteEngine.SetInlineAsterisk(true)
-	luteEngine.SetInlineUnderscore(true)
 	luteEngine.SetHTMLTag2TextMark(true)
 	markdown, withMath, err := model.HTML2Markdown(dom, luteEngine)
 	if err != nil {

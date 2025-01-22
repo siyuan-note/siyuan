@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
-		"updated": "20230820102920"
+		"type": "doc",
+		"updated": "20250115145500"
 	},
 	"Children": [
 		{
@@ -238,7 +239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220623200754-u00gfsg",
-				"updated": "20230630092343"
+				"updated": "20250115145500"
 			},
 			"Children": [
 				{
@@ -534,7 +535,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230420185856-fpkt2wv",
-				"updated": "20230420190022"
+				"updated": "20250115145500"
 			},
 			"Children": [
 				{
@@ -592,7 +593,7 @@
 					},
 					"Properties": {
 						"id": "20230420185856-jg6anpy",
-						"updated": "20230420190022"
+						"updated": "20250115145500"
 					},
 					"Children": [
 						{
@@ -600,7 +601,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420185856-nh72xao",
-								"updated": "20230420190022"
+								"updated": "20250115145500"
 							},
 							"Children": [
 								{
@@ -610,7 +611,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Enter"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -619,7 +629,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+點擊"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點擊"
 								},
 								{
 									"Type": "NodeText",

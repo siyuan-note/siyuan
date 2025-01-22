@@ -1775,7 +1775,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     app: protyle.app,
                     isBacklink: false,
                     targetElement: refElement,
-                    nodeIds: [id],
+                    refDefs: [{refID: id}]
                 }));
                 event.preventDefault();
                 event.stopPropagation();

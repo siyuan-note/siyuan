@@ -9,7 +9,7 @@ import {
     hasNextSibling,
     hasPreviousSibling
 } from "./getBlock";
-import {transaction, turnsIntoTransaction, updateTransaction} from "./transaction";
+import {transaction, turnsIntoOneTransaction, turnsIntoTransaction, updateTransaction} from "./transaction";
 import {cancelSB, genEmptyElement} from "../../block/util";
 import {listOutdent, updateListOrder} from "./list";
 import {setFold, zoomOut} from "../../menus/protyle";
@@ -543,6 +543,24 @@ const removeLi = (protyle: IProtyle, blockElement: Element, range: Range, isDele
             id: listElement.getAttribute("data-node-id"),
         });
         transaction(protyle, doOperations, undoOperations);
+        if (listElement.parentElement.classList.contains("sb") &&
+            listElement.parentElement.getAttribute("data-sb-layout") === "col") {
+            const selectsElement: Element[] = [];
+            let previousElement: Element = listElement;
+            while (previousElement) {
+                selectsElement.push(previousElement);
+                if (undoOperations[0].id === previousElement.getAttribute("data-node-id")) {
+                    break;
+                }
+                previousElement = previousElement.previousElementSibling;
+            }
+            turnsIntoOneTransaction({
+                protyle,
+                selectsElement: selectsElement.reverse(),
+                type: "BlocksMergeSuperBlock",
+                level: "row"
+            });
+        }
         focusByWbr(protyle.wysiwyg.element, range);
         return;
     }

@@ -6,7 +6,7 @@
 		"id": "20211226123302-akitvb1",
 		"title": "導入和導出",
 		"type": "doc",
-		"updated": "20240426184612"
+		"updated": "20250115151219"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223850-m1y2b2z",
-				"updated": "20220317223850"
+				"updated": "20250115150844"
 			},
 			"Children": [
 				{
@@ -30,7 +30,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185953-vjaca7x",
-				"updated": "20220511185955"
+				"updated": "20250115150844"
 			},
 			"Children": [
 				{
@@ -119,7 +119,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240426184604-4ldk0w4",
-				"updated": "20240426184612"
+				"updated": "20250115150844"
 			},
 			"Children": [
 				{
@@ -160,7 +160,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 等），請開啟"
+					"Data": "​ 等），請開啟 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -197,7 +197,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220511185951-ewyusg9",
-				"updated": "20220511185951"
+				"updated": "20250115150840"
 			},
 			"Children": [
 				{
@@ -211,7 +211,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220511185951-brwja06",
-				"updated": "20230630111847"
+				"updated": "20250115150840"
 			},
 			"Children": [
 				{
@@ -221,11 +221,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "設置 "
+					"TextMarkTextContent": "設置"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​- "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -404,7 +404,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223850-ar008cn",
-				"updated": "20220317223850"
+				"updated": "20250115151217"
 			},
 			"Children": [
 				{
@@ -419,7 +419,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-0vrngm6",
-				"updated": "20220317223850"
+				"updated": "20250115151217"
 			},
 			"Children": [
 				{
@@ -433,7 +433,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-j82n6m0",
-				"updated": "20220317223850"
+				"updated": "20250115151023"
 			},
 			"Children": [
 				{
@@ -443,11 +443,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+C"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 即可，剪切板中是標準 Markdown 文字。"
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "C"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可，剪切板中是標準 Markdown 文字。"
 				}
 			]
 		},
@@ -456,7 +465,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-eh0bi4u",
-				"updated": "20230630112012"
+				"updated": "20250115151217"
 			},
 			"Children": [
 				{
@@ -466,7 +475,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
@@ -498,7 +507,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223850-k4b4s53",
-				"updated": "20220317223850"
+				"updated": "20250115151219"
 			},
 			"Children": [
 				{
@@ -512,7 +521,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223850-d79osla",
-				"updated": "20220317224502"
+				"updated": "20250115151219"
 			},
 			"Children": [
 				{
@@ -526,16 +535,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 或者編輯器分頁右上角的 "
+					"Data": "​ 或者編輯器分頁右上角的 "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 菜單中選擇 "
+					"Data": "​ 菜單中選擇 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -544,7 +553,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "："
+					"Data": "​："
 				}
 			]
 		},

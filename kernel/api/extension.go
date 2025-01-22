@@ -123,12 +123,7 @@ func extensionCopy(c *gin.Context) {
 	}
 
 	luteEngine := util.NewLute()
-	luteEngine.SetSup(true)
-	luteEngine.SetSub(true)
-	luteEngine.SetMark(true)
-	luteEngine.SetGFMStrikethrough(true)
-	luteEngine.SetInlineAsterisk(true)
-	luteEngine.SetInlineUnderscore(true)
+	luteEngine.SetHTMLTag2TextMark(true)
 	var md string
 	var withMath bool
 	if nil != form.Value["href"] {

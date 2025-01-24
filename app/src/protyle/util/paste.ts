@@ -227,7 +227,25 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
 };
 
-export const pasteText = (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
+export const pasteText = async (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {
+    if (protyle && protyle.app && protyle.app.plugins) {
+        for (let i = 0; i < protyle.app.plugins.length; i++) {
+            const response: IObject = await new Promise((resolve) => {
+                const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
+                    protyle,
+                    resolve,
+                    textHTML: "",
+                    textPlain: textPlain,
+                    siyuanHTML: "",
+                    files: []
+                });
+                if (emitResult) {
+                    resolve(undefined);
+                }
+            });
+        }
+    }
+
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
         // 粘贴在代码位置

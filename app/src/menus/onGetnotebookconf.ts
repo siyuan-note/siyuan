@@ -30,7 +30,7 @@ export const genNotebookOption = (id: string, notebookId?: string) => {
         if (helpIds.includes(item.id) || item.id === notebookId) {
             return;
         }
-        html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${item.name}</option>`;
+        html += `<option value="${item.id}" ${id === item.id ? "selected" : ""}>${escapeHtml(item.name)}</option>`;
     });
     return html;
 };

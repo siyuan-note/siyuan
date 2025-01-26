@@ -104,9 +104,8 @@ html {
   border-bottom: .5px solid var(--b3-border-color);
 
   &--browser {
-    padding-left: 0;
-    margin-left: env(titlebar-area-x, 0);
-    width: env(titlebar-area-width, 100%);
+    padding-left: env(titlebar-area-x, 0);
+    padding-right: calc(100% - env(titlebar-area-width, 100%) - env(titlebar-area-x, 0));
     height: env(titlebar-area-height, 32px);
   }
 

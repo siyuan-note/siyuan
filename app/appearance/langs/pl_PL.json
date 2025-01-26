@@ -1584,6 +1584,7 @@
     "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]",
     "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność. Zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Dodaj</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignoruj</button>",
     "253": "Kompresja pliku [%s], proszę czekać...",
-    "254": "[Region ID] Nieprawidłowy identyfikator regionu, proszę zapoznać się z dokumentacją dostawcy usług S3 w celu skonfigurowania identyfikatora regionu"
+    "254": "[Region ID] Nieprawidłowy identyfikator regionu, proszę zapoznać się z dokumentacją dostawcy usług S3 w celu skonfigurowania identyfikatora regionu",
+    "255": "Docelowa strona włączyła ochronę przed hotlinkowaniem, [%d] zasobów nie można pobrać"
   }
 }

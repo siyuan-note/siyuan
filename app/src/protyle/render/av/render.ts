@@ -300,7 +300,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
                     setTimeout(() => {
                         stickyRow(e, editRect, "top");
-                    }, Constants.TIMEOUT_LOAD)
+                    }, Constants.TIMEOUT_LOAD);
                 }
                 if (footerTransform) {
                     (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;

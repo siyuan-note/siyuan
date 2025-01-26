@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230104152135-1iei0xa",
 		"title": "Share document",
-		"updated": "20230621111843"
+		"type": "doc",
+		"updated": "20250115162330"
 	},
 	"Children": [
 		{
@@ -53,7 +54,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230104152142-ffu9ddj",
-				"updated": "20230104152142"
+				"updated": "20250115162330"
 			},
 			"Children": [
 				{
@@ -68,7 +69,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230104152142-5whzbmo",
-				"updated": "20230104152204"
+				"updated": "20250115162330"
 			},
 			"Children": [
 				{
@@ -108,7 +109,7 @@
 					},
 					"Properties": {
 						"id": "20230104152142-r0zanmc",
-						"updated": "20230104152204"
+						"updated": "20250115162330"
 					},
 					"Children": [
 						{
@@ -116,7 +117,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230104152142-9hf2y34",
-								"updated": "20230104152159"
+								"updated": "20250115162330"
 							},
 							"Children": [
 								{
@@ -125,8 +126,8 @@
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "code",
-									"TextMarkTextContent": "..."
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",

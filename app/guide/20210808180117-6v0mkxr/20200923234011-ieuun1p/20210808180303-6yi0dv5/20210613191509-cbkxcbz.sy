@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20210613191509-cbkxcbz",
 		"title": "Content Block Attribute",
-		"updated": "20210613191548"
+		"type": "doc",
+		"updated": "20250115150122"
 	},
 	"Children": [
 		{
@@ -213,7 +214,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210613191548-65gd8yo",
-				"updated": "20210613191548"
+				"updated": "20250115150122"
 			},
 			"Children": [
 				{
@@ -227,7 +228,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210613191548-7p2bvoq",
-				"updated": "20210613191746"
+				"updated": "20250115150122"
 			},
 			"Children": [
 				{
@@ -236,21 +237,21 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "code kbd",
 					"TextMarkTextContent": "Block icon menu"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " -"
+					"Data": "​ -"
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "code kbd",
 					"TextMarkTextContent": "Attribute"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", and only English letters and Arabic numerals are allowed in the attribute name (such as "
+					"Data": "​, and only English letters and Arabic numerals are allowed in the attribute name (such as "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -259,7 +260,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", "
+					"Data": "​, "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -268,7 +269,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "). After setting, SiYuan will automatically prefix the attribute name with "
+					"Data": "​). After setting, SiYuan will automatically prefix the attribute name with "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -277,7 +278,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " to distinguish built-in attributes from custom attributes."
+					"Data": "​ to distinguish built-in attributes from custom attributes."
 				}
 			]
 		},

@@ -6,7 +6,7 @@
 		"id": "20200910201551-h4twhas",
 		"title": "书签和标签",
 		"type": "doc",
-		"updated": "20240220134721"
+		"updated": "20250115151954"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091316-ltmnzg9"
+				"id": "20210104091316-ltmnzg9",
+				"updated": "20250115151951"
 			},
 			"Children": [
 				{
@@ -46,7 +47,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091316-5vwheuz",
-				"updated": "20240220134714"
+				"updated": "20250115151951"
 			},
 			"Children": [
 				{
@@ -56,7 +57,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt+3"
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "3"
 				},
 				{
 					"Type": "NodeText",
@@ -78,7 +88,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104091316-zxotarc"
+				"id": "20210104091316-zxotarc",
+				"updated": "20250115151954"
 			},
 			"Children": [
 				{
@@ -158,7 +169,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104091316-gt0utcz",
-				"updated": "20240220134721"
+				"updated": "20250115151954"
 			},
 			"Children": [
 				{
@@ -168,7 +179,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Alt+4"
+					"TextMarkTextContent": "Alt"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "4"
 				},
 				{
 					"Type": "NodeText",

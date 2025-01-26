@@ -7,7 +7,7 @@
 		"id": "20240530101000-1m5un7l",
 		"title": "アセット",
 		"type": "doc",
-		"updated": "20241027164357"
+		"updated": "20250115152709"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"Properties": {
 				"ID": "20240530101000-o6et1uc",
 				"id": "20240530101000-m11xu1w",
-				"updated": "20240530101000"
+				"updated": "20250115152709"
 			},
 			"Children": [
 				{
@@ -88,7 +88,7 @@
 			"Properties": {
 				"ID": "20240530101000-d60jz2e",
 				"id": "20240530101000-5cag8jh",
-				"updated": "20240530101000"
+				"updated": "20250115152709"
 			},
 			"Children": [
 				{
@@ -101,31 +101,34 @@
 					"Properties": {
 						"ID": "20240530101000-mdon5fr",
 						"id": "20240530101000-fizmlwu",
-						"updated": "20240530101000"
+						"updated": "20250115152703"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-9muhrpx",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-fhnzvac",
 								"id": "20240530101000-9muhrpx",
-								"updated": "20240530101000"
+								"updated": "20250115152703"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "アセットとして挿入"
-								},
-								{
 									"Type": "NodeText",
-									"Data": ": 画像やファイルをリソースファイルとして挿入します。ショートカットキーは "
+									"Data": "アセットとして挿入: 画像やファイルをリソースファイルとして挿入します。ショートカットキーは "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+V"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
 								},
 								{
 									"Type": "NodeText",
@@ -145,45 +148,52 @@
 					"Properties": {
 						"ID": "20240530101000-gmhitsq",
 						"id": "20240530101000-1783z3v",
-						"updated": "20240530101000"
+						"updated": "20250115152709"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-g0g7vya",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-fpwk2gx",
 								"id": "20240530101000-g0g7vya",
-								"updated": "20240530101000"
+								"updated": "20250115152709"
 							},
 							"Children": [
 								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": "絶対パス ("
+									"Type": "NodeText",
+									"Data": "絶対パス ("
 								},
 								{
 									"Type": "NodeTextMark",
-									"TextMarkType": "strong code",
+									"TextMarkType": "code",
 									"TextMarkTextContent": "file://"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​"
-								},
-								{
-									"Type": "NodeTextMark",
-									"TextMarkType": "strong",
-									"TextMarkTextContent": ") によるリンク"
-								},
-								{
-									"Type": "NodeText",
-									"Data": ": 画像やファイルをローカルの絶対パスとしてハイパーリンクに挿入します。ショートカットキーは "
+									"Data": "​) によるリンク: 画像やファイルをローカルの絶対パスとしてハイパーリンクに挿入します。ショートカットキーは "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Shift+V"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "V"
 								},
 								{
 									"Type": "NodeText",

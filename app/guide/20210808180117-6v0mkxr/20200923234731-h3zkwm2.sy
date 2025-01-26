@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20230820183340"
+		"updated": "20250115163037"
 	},
 	"Children": [
 		{
@@ -913,7 +913,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220708111435-xmj42q4",
-				"updated": "20220708111439"
+				"updated": "20250115163037"
 			},
 			"Children": [
 				{
@@ -928,7 +928,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20220708111435-a2z4tpd",
-				"updated": "20220708111614"
+				"updated": "20250115163037"
 			},
 			"Children": [
 				{
@@ -1004,7 +1004,7 @@
 					},
 					"Properties": {
 						"id": "20220708111435-ptoqng0",
-						"updated": "20220708111603"
+						"updated": "20250115163037"
 					},
 					"Children": [
 						{
@@ -1029,7 +1029,7 @@
 							},
 							"Properties": {
 								"id": "20220708111435-w2hbl28",
-								"updated": "20220708111603"
+								"updated": "20250115163037"
 							},
 							"Children": [
 								{
@@ -1043,7 +1043,7 @@
 									},
 									"Properties": {
 										"id": "20220708111435-nev43mp",
-										"updated": "20220708111435"
+										"updated": "20250115163037"
 									},
 									"Children": [
 										{
@@ -1051,7 +1051,7 @@
 											"Type": "NodeParagraph",
 											"Properties": {
 												"id": "20220708111435-zrahxh3",
-												"updated": "20220708111435"
+												"updated": "20250115163037"
 											},
 											"Children": [
 												{
@@ -1065,16 +1065,16 @@
 												},
 												{
 													"Type": "NodeText",
-													"Data": " or directly copy the "
+													"Data": "​ or directly copy the "
 												},
 												{
 													"Type": "NodeTextMark",
-													"TextMarkType": "kbd",
+													"TextMarkType": "code",
 													"TextMarkTextContent": "workspace/data/"
 												},
 												{
 													"Type": "NodeText",
-													"Data": " folder on the file system"
+													"Data": "​ folder on the file system"
 												}
 											]
 										}

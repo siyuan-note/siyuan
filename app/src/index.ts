@@ -37,9 +37,7 @@ export class App {
     public appId: string;
 
     constructor() {
-        /// #if BROWSER
         registerServiceWorker(`${Constants.SERVICE_WORKER_PATH}?v=${Constants.SIYUAN_VERSION}`);
-        /// #endif
         addBaseURL();
 
         this.appId = Constants.SIYUAN_APPID;

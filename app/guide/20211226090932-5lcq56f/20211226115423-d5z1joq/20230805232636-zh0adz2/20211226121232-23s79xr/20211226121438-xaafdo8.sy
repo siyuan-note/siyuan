@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
-		"updated": "20231120213316"
+		"type": "doc",
+		"updated": "20250115162655"
 	},
 	"Children": [
 		{
@@ -52,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-g3niy0i",
-				"updated": "20211226010158"
+				"updated": "20250115162655"
 			},
 			"Children": [
 				{
@@ -204,7 +205,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230220103637-v3wy8lv",
-				"updated": "20230220103721"
+				"updated": "20250115162655"
 			},
 			"Children": [
 				{
@@ -244,7 +245,7 @@
 					},
 					"Properties": {
 						"id": "20230220103640-opmw3uo",
-						"updated": "20230220103640"
+						"updated": "20250115162655"
 					},
 					"Children": [
 						{
@@ -252,7 +253,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230220103640-gpbn39m",
-								"updated": "20230220103641"
+								"updated": "20250115162655"
 							},
 							"Children": [
 								{
@@ -262,7 +263,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導出 - Data"
+									"TextMarkTextContent": "導出 Data"
 								},
 								{
 									"Type": "NodeText",
@@ -271,7 +272,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "導入 - Data"
+									"TextMarkTextContent": "導入 Data"
 								},
 								{
 									"Type": "NodeText",

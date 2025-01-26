@@ -7,8 +7,9 @@ export const registerServiceWorker = (
         updateViaCache: "all",
     },
 ) => {
-
-    if (!("serviceWorker" in window.navigator)
+    /// #if BROWSER
+    if (window.webkit?.messageHandlers || window.JSAndroid || window.JSHarmony ||
+        !("serviceWorker" in window.navigator)
         || !("caches" in window)
         || !("fetch" in window)
         || navigator.serviceWorker == null
@@ -22,6 +23,7 @@ export const registerServiceWorker = (
         .then(registration => {
             registration.update();
         }).catch(e => {
-            console.debug(`Registration failed with ${e}`);
-        });
+        console.debug(`Registration failed with ${e}`);
+    });
+    /// #endif
 };

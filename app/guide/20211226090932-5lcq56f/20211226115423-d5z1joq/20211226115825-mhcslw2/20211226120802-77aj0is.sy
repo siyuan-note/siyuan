@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226120802-77aj0is",
 		"title": "内容塊屬性",
-		"updated": "20211226120833"
+		"type": "doc",
+		"updated": "20250115150102"
 	},
 	"Children": [
 		{
@@ -214,7 +215,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120833-347kbz5",
-				"updated": "20211226000642"
+				"updated": "20250115150102"
 			},
 			"Children": [
 				{
@@ -228,7 +229,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226120833-a02rthr",
-				"updated": "20211226000642"
+				"updated": "20250115150102"
 			},
 			"Children": [
 				{
@@ -237,21 +238,21 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "塊標菜單"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "code kbd",
 					"TextMarkTextContent": "屬性"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 進行設置，屬性名僅允許使用英文字母和阿拉伯數字（例如 "
+					"Data": "​ 進行設置，屬性名僅允許使用英文字母和阿拉伯數字（例如 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -260,7 +261,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "、"
+					"Data": "​、"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -269,7 +270,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "）。設置後，思源會自動在屬性名前加上前綴 "
+					"Data": "​）。設置後，思源會自動在屬性名前加上前綴 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -278,7 +279,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，以區分內置屬性和自定義屬性。"
+					"Data": "​，以區分內置屬性和自定義屬性。"
 				}
 			]
 		},

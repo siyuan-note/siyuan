@@ -6,7 +6,7 @@
 		"id": "20220628204444-9n0y9h2",
 		"title": "优化排版",
 		"type": "doc",
-		"updated": "20240506230814"
+		"updated": "20250115151317"
 	},
 	"Children": [
 		{
@@ -68,7 +68,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628205558-6krkd89",
-				"updated": "20220628205611"
+				"updated": "20250115151317"
 			},
 			"Children": [
 				{
@@ -92,45 +92,30 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628205611-ikc5gy0",
-				"updated": "20220628205851"
+				"updated": "20250115151317"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "在编辑器右上角 ",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "在编辑器右上角 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 菜单中选择 ",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "​ 菜单中选择 "
 				},
 				{
 					"Type": "NodeTextMark",
-					"Properties": {
-						"id": ""
-					},
 					"TextMarkType": "kbd",
 					"TextMarkTextContent": "优化排版"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，处理完成后文档中的如下元素前后会被自动插入一个空格：",
-					"Properties": {
-						"id": ""
-					}
+					"Data": "​，处理完成后文档中的如下元素前后会被自动插入一个空格："
 				}
 			]
 		},

@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230808120347-mw3qrwy",
 		"title": "资源文件图床",
-		"updated": "20220408192950"
+		"type": "doc",
+		"updated": "20250115151416"
 	},
 	"Children": [
 		{
@@ -28,7 +29,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-soszgko",
-				"updated": "20210721154746"
+				"updated": "20250115151416"
 			},
 			"Children": [
 				{
@@ -45,7 +46,7 @@
 			},
 			"Properties": {
 				"id": "20230808120347-7xqohup",
-				"updated": "20220317224624"
+				"updated": "20250115151416"
 			},
 			"Children": [
 				{
@@ -59,7 +60,7 @@
 					},
 					"Properties": {
 						"id": "20230808120347-x7ay8gk",
-						"updated": "20220317224624"
+						"updated": "20250115151416"
 					},
 					"Children": [
 						{
@@ -67,7 +68,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230808120347-syf4oz0",
-								"updated": "20220317224624"
+								"updated": "20250115151416"
 							},
 							"Children": [
 								{
@@ -77,16 +78,20 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "..."
+									"TextMarkTextContent": "︙"
 								},
 								{
 									"Type": "NodeText",
-									"Data": " 更多菜单中选择 "
+									"Data": "​ 更多菜单中选择 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "上传资源文件到云端图床"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

@@ -20,7 +20,6 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
             });
         }
 
-
         // 准备一个数组来保存所有文本节点
         const textNodes: Node[] = [];
         const textNodesSize: number[] = [];
@@ -74,6 +73,20 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
                 startIndex = endIndex;
             }
         });
+
+        // 没有匹配到关键字，但是有高亮块时，需将其添加进去
+        if (!isSetHL && hlBlockElement) {
+            const startIndex = text.indexOf(hlBlockElement.textContent);
+            if (startIndex > -1) {
+                const range = new Range();
+                let currentNodeIndex = 0;
+                while (textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
+                    currentNodeIndex++;
+                }
+                range.setStart(textNodes[currentNodeIndex], 0);
+                rangeIndexes.push({range, startIndex, isCurrent: true});
+            }
+        }
 
         rangeIndexes.sort((b, a) => {
             if (a.startIndex > b.startIndex) {

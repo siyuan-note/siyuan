@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20220415232129-shpzg6r",
 		"title": "查詢語法",
-		"updated": "20230820184809"
+		"type": "doc",
+		"updated": "20250115150514"
 	},
 	"Children": [
 		{
@@ -14,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-xmz5ru1",
-				"updated": "20220415232130"
+				"updated": "20250115150350"
 			},
 			"Children": [
 				{
@@ -28,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-5qj6u53",
-				"updated": "20220415232309"
+				"updated": "20250115150350"
 			},
 			"Children": [
 				{
@@ -38,11 +39,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+P"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 支持通過查詢語法（Query Syntax）進行高級搜索，以便實現一些邏輯操作，比如包含關鍵字 "
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "P"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 支持通過查詢語法（Query Syntax）進行高級搜索，以便實現一些邏輯操作，比如包含關鍵字 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -51,7 +61,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 並且不包含關鍵字 "
+					"Data": "​ 並且不包含關鍵字 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -60,7 +70,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 的查詢語法為 "
+					"Data": "​ 的查詢語法為 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -69,7 +79,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "。"
+					"Data": "​。"
 				}
 			]
 		},
@@ -952,7 +962,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220415232130-1juhjxd",
-				"updated": "20220415234759"
+				"updated": "20250115150514"
 			},
 			"Children": [
 				{
@@ -990,7 +1000,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220415232130-kdii2n4",
-				"updated": "20220415232130"
+				"updated": "20250115150514"
 			},
 			"Children": [
 				{
@@ -1000,11 +1010,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "code",
-					"TextMarkTextContent": "MATCH '{content name alias memo}:\" + query"
+					"TextMarkTextContent": "MATCH '{content name alias memo}:\u0026quot; + query"
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，"
+					"Data": "​，"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1013,7 +1023,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 即用戶輸入部分，對於"
+					"Data": "​ 即用戶輸入部分，對於"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1032,7 +1042,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 是通過 "
+					"Data": "​ 是通過 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1041,16 +1051,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " -"
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": " 搜索"
+					"TextMarkTextContent": "搜索"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " - "
+					"Data": "​ - "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -1059,7 +1069,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 生成的。"
+					"Data": "​ 生成的。"
 				}
 			]
 		},

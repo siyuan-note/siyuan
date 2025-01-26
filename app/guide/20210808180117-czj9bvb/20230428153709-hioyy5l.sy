@@ -7,7 +7,7 @@
 		"id": "20230428153709-hioyy5l",
 		"title": "社区资源",
 		"type": "doc",
-		"updated": "20240906162641"
+		"updated": "20230428161325"
 	},
 	"Children": [
 		{
@@ -527,7 +527,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230428161034-wh3fgdb",
-				"updated": "20240906162641"
+				"updated": "20230428161325"
 			},
 			"Children": [
 				{
@@ -542,7 +542,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230428160143-kwwryq7",
-				"updated": "20240906162641"
+				"updated": "20230428161325"
 			},
 			"Children": [
 				{
@@ -662,54 +662,6 @@
 									"TextMarkTextContent": "思源笔记教程合辑"
 								}
 							]
-						}
-					]
-				}
-			]
-		},
-		{
-			"ID": "20240906161940-4upofp4",
-			"Type": "NodeList",
-			"ListData": {},
-			"Properties": {
-				"id": "20240906161940-4upofp4",
-				"updated": "20240906162012"
-			},
-			"Children": [
-				{
-					"ID": "20240906162000-vk53e4i",
-					"Type": "NodeListItem",
-					"ListData": {
-						"BulletChar": 42,
-						"Marker": "Kg=="
-					},
-					"Properties": {
-						"id": "20240906162000-vk53e4i",
-						"updated": "20240906162012"
-					},
-					"Children": [
-						{
-							"ID": "20240906162000-ahu86x3",
-							"Type": "NodeParagraph",
-							"Properties": {
-								"id": "20240906162000-ahu86x3",
-								"updated": "20240906162012"
-							},
-							"Children": [
-								{
-									"Type": "NodeText",
-									"Data": "思源笔记基础支持"
-								}
-							]
-						},
-						{
-							"ID": "20240906162024-dyh9t05",
-							"Type": "NodeHeading",
-							"HeadingLevel": 1,
-							"Properties": {
-								"id": "20240906162024-dyh9t05",
-								"updated": "20240906162024"
-							}
 						}
 					]
 				}

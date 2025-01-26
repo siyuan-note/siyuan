@@ -6,7 +6,7 @@
 		"id": "20200924100808-j9sddk9",
 		"title": "Import and Export",
 		"type": "doc",
-		"updated": "20240426184519"
+		"updated": "20250115151428"
 	},
 	"Children": [
 		{
@@ -408,7 +408,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220317223639-0fnf9vp",
-				"updated": "20220317223644"
+				"updated": "20250115151427"
 			},
 			"Children": [
 				{
@@ -423,7 +423,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-g5061h8",
-				"updated": "20220317223647"
+				"updated": "20250115151427"
 			},
 			"Children": [
 				{
@@ -437,7 +437,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223639-hrd8l6o",
-				"updated": "20220317223639"
+				"updated": "20250115151031"
 			},
 			"Children": [
 				{
@@ -447,11 +447,20 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+C"
+					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": ", and the clipboard is standard Markdown text."
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "C"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​, and the clipboard is standard Markdown text."
 				}
 			]
 		},
@@ -460,7 +469,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223639-w6wj4mq",
-				"updated": "20220317224518"
+				"updated": "20250115151427"
 			},
 			"Children": [
 				{
@@ -474,7 +483,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " from "
+					"Data": "​ from "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -483,16 +492,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " in the "
+					"Data": "​ in the "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu in the upper right corner of the editor tab before copying."
+					"Data": "​ menu in the upper right corner of the editor tab before copying."
 				}
 			]
 		},
@@ -502,7 +511,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220317223639-8217o1r",
-				"updated": "20220317223639"
+				"updated": "20250115151428"
 			},
 			"Children": [
 				{
@@ -516,7 +525,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220317223639-otxjla4",
-				"updated": "20220317224527"
+				"updated": "20250115151428"
 			},
 			"Children": [
 				{
@@ -530,7 +539,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " or select "
+					"Data": "​ or select "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -539,16 +548,16 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " from the "
+					"Data": "​ from the "
 				},
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " menu in the upper right corner of the editor tab:"
+					"Data": "​ menu in the upper right corner of the editor tab:"
 				}
 			]
 		},

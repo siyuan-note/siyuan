@@ -8,7 +8,7 @@
 		"id": "20240530101000-flot1gj",
 		"title": "パフォーマンスの最適化",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115145306"
 	},
 	"Children": [
 		{
@@ -421,7 +421,7 @@
 			"Properties": {
 				"ID": "20240530101000-utjkzhs",
 				"id": "20240530101000-9doivgv",
-				"updated": "20240530101000"
+				"updated": "20250115145306"
 			},
 			"Children": [
 				{
@@ -604,7 +604,7 @@
 			"Properties": {
 				"ID": "20240530101000-a31p89i",
 				"id": "20240530101000-1jefsa2",
-				"updated": "20240530101000"
+				"updated": "20250115145306"
 			},
 			"Children": [
 				{
@@ -617,16 +617,15 @@
 					"Properties": {
 						"ID": "20240530101000-hc7uin5",
 						"id": "20240530101000-1bhwsgl",
-						"updated": "20240530101000"
+						"updated": "20250115145306"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-vtehvyh",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-px1i1m8",
 								"id": "20240530101000-vtehvyh",
-								"updated": "20240530101000"
+								"updated": "20250115145306"
 							},
 							"Children": [
 								{
@@ -637,7 +636,25 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd strong",
-									"TextMarkTextContent": "Shift+Enter"
+									"TextMarkTextContent": "Shift"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "strong",
+									"TextMarkTextContent": "+"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd strong",
+									"TextMarkTextContent": "Enter"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								},
 								{
 									"Type": "NodeTextMark",

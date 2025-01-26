@@ -6,7 +6,7 @@
 		"id": "20200813131152-0wk5akh",
 		"title": "在内容块中遨游",
 		"type": "doc",
-		"updated": "20221105215950"
+		"updated": "20250115164127"
 	},
 	"Children": [
 		{
@@ -231,7 +231,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090757-xwom8ia"
+				"id": "20210104090757-xwom8ia",
+				"updated": "20250115164127"
 			},
 			"Children": [
 				{
@@ -263,7 +264,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210428225151-3kj13k3",
-				"updated": "20210428225504"
+				"updated": "20250115164127"
 			},
 			"Children": [
 				{
@@ -272,12 +273,12 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "Ctrl"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 单击节点：跳转到该节点。"
+					"Data": "​ 单击节点：跳转到该节点。"
 				}
 			]
 		},

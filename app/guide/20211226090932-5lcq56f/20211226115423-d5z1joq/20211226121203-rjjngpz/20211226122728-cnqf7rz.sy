@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20211226122728-cnqf7rz",
 		"title": "超連結",
-		"updated": "20220407101637"
+		"type": "doc",
+		"updated": "20250115153431"
 	},
 	"Children": [
 		{
@@ -118,7 +119,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122740-u3u7oza",
-				"updated": "20211226012956"
+				"updated": "20250115153431"
 			},
 			"Children": [
 				{
@@ -133,7 +134,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226122740-ndxef8x",
-				"updated": "20220407101637"
+				"updated": "20250115153431"
 			},
 			"Children": [
 				{
@@ -415,7 +416,7 @@
 					},
 					"Properties": {
 						"id": "20211226122740-32793j4",
-						"updated": "20220407101637"
+						"updated": "20250115153431"
 					},
 					"Children": [
 						{
@@ -423,12 +424,39 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20211226122740-0ub46as",
-								"updated": "20220407101637"
+								"updated": "20250115153431"
 							},
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "塊標菜單 - 複製 - 複製塊超連結"
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "塊標菜單"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ - "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製塊超連結"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

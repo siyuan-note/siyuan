@@ -7,7 +7,7 @@
 		"id": "20240530101000-uxno1yp",
 		"title": "コンテンツブロックの参照",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115145444"
 	},
 	"Children": [
 		{
@@ -274,7 +274,7 @@
 			"Properties": {
 				"ID": "20240530101000-j9s9jy7",
 				"id": "20240530101000-k5rp4xa",
-				"updated": "20240530101000"
+				"updated": "20250115145444"
 			},
 			"Children": [
 				{
@@ -564,7 +564,7 @@
 			"Properties": {
 				"ID": "20240530101000-h0tinst",
 				"id": "20240530101000-xyetie0",
-				"updated": "20240530101000"
+				"updated": "20250115145444"
 			},
 			"Children": [
 				{
@@ -625,16 +625,15 @@
 					"Properties": {
 						"ID": "20240530101000-wje8t7e",
 						"id": "20240530101000-rtu2oun",
-						"updated": "20240530101000"
+						"updated": "20250115145444"
 					},
 					"Children": [
 						{
 							"ID": "20240530101000-gufqr40",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-pghf396",
 								"id": "20240530101000-gufqr40",
-								"updated": "20240530101000"
+								"updated": "20250115145444"
 							},
 							"Children": [
 								{
@@ -644,7 +643,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+Enter"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Enter"
 								},
 								{
 									"Type": "NodeText",
@@ -653,7 +661,16 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Ctrl+クリック"
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "クリック"
 								},
 								{
 									"Type": "NodeText",

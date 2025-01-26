@@ -172,7 +172,7 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
         navigator.clipboard.readText().then(textPlain => {
             if (getSelection().rangeCount > 0) {
-                const range = getSelection().getRangeAt(0)
+                const range = getSelection().getRangeAt(0);
                 if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
                     insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
                     return;

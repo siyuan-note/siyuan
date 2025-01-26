@@ -296,7 +296,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 						changedAv = true
 					}
 					if newContent != blockValue.Block.Content {
-						blockValue.Block.Content = newContent
+						blockValue.Block.Content = util.UnescapeHTML(newContent)
 						changedAv = true
 					}
 					break

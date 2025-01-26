@@ -8,7 +8,7 @@
 		"id": "20240530101000-mpln2lp",
 		"title": "用語集",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250115163249"
 	},
 	"Children": [
 		{
@@ -926,7 +926,7 @@
 			"Properties": {
 				"ID": "20240530101000-n230loy",
 				"id": "20240530101000-b4l3ltr",
-				"updated": "20240530101000"
+				"updated": "20250115163249"
 			},
 			"Children": [
 				{
@@ -954,9 +954,8 @@
 			"ID": "20240530101000-0svfhj0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-36oyvlu",
 				"id": "20240530101000-0svfhj0",
-				"updated": "20240530101000"
+				"updated": "20250115163249"
 			},
 			"Children": [
 				{
@@ -966,7 +965,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+クリック"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "クリック"
 				},
 				{
 					"Type": "NodeText",

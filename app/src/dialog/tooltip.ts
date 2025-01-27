@@ -16,7 +16,7 @@ export const showTooltip = (message: string, target: Element, tooltipClasses?: s
 
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div id="tooltip" class="${className}">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
         if (messageElement.className !== className) {

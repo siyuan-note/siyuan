@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -177,6 +178,14 @@ func extensionCopy(c *gin.Context) {
 
 	var tree *parse.Tree
 	if "" == md {
+		// 通过正则将 <iframe>.*</iframe> 标签中间包含的换行去掉
+		regx, _ := regexp.Compile(`(?i)<iframe[^>]*>([\s\S]*?)<\/iframe>`)
+		dom = regx.ReplaceAllStringFunc(dom, func(s string) string {
+			s = strings.ReplaceAll(s, "\n", "")
+			s = strings.ReplaceAll(s, "\r", "")
+			return s
+		})
+
 		tree, withMath = model.HTML2Tree(dom, luteEngine)
 		if nil == tree {
 			md, withMath, _ = model.HTML2Markdown(dom, luteEngine)

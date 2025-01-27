@@ -6,7 +6,8 @@
 		"icon": "1f4f1",
 		"id": "20240113110500-dz2ae4n",
 		"title": "行動端 App",
-		"updated": "20240119205404"
+		"type": "doc",
+		"updated": "20250117171906"
 	},
 	"Children": [
 		{
@@ -15,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-8s7tp6d",
-				"updated": "20240113110513"
+				"updated": "20250114214225"
 			},
 			"Children": [
 				{
@@ -29,12 +30,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110513-7dv2nyk",
-				"updated": "20240113110531"
+				"updated": "20250114214225"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "思源筆記提供了 Android 端和 iOS 端 App，已經上架部分手機應用程式商店，請在應用程式商店中搜尋 "
+					"Data": "思源筆記提供了 Android 端、iOS 端和鴻蒙端 App，已經上架部分手機應用程式商店，請在應用程式商店中搜尋 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "思源筆記"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 或 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -53,7 +63,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-zvmefnd",
-				"updated": "20240113110513"
+				"updated": "20250114214031"
 			},
 			"Children": [
 				{
@@ -82,7 +92,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110513-s2ty09e",
-				"updated": "20240113110513"
+				"updated": "20250114214031"
 			},
 			"Children": [
 				{
@@ -136,6 +146,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "華為"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114214031-9ozq42n",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250114214031-9ozq42n",
+						"updated": "20250114214031"
+					},
+					"Children": [
+						{
+							"ID": "20250114214031-aku7467",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114214031-aku7467",
+								"updated": "20250114214031"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "榮耀"
 								}
 							]
 						}
@@ -370,7 +408,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110513-pxc89dc",
-				"updated": "20240113110513"
+				"updated": "20250114215505"
 			},
 			"Children": [
 				{
@@ -513,6 +551,165 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250114215505-lg1uhjx",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20250114215505-lg1uhjx",
+				"updated": "20250117171906"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android 端自訂通知"
+				}
+			]
+		},
+		{
+			"ID": "20250114215505-fhrh4h0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215505-fhrh4h0",
+				"updated": "20250114215505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "為了盡量保活後台運行，思源會定時發送通知，預設的通知內容是一些開發團隊喜歡的歌詞。"
+				}
+			]
+		},
+		{
+			"ID": "20250114215505-v559536",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215505-v559536",
+				"updated": "20250114215505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "如果需要自訂它，請按以下步驟操作："
+				}
+			]
+		},
+		{
+			"ID": "20250114215505-0k51ynd",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20250114215505-0k51ynd",
+				"updated": "20250117171906"
+			},
+			"Children": [
+				{
+					"ID": "20250114215505-kgwvae6",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20250114215505-kgwvae6",
+						"updated": "20250117171906"
+					},
+					"Children": [
+						{
+							"ID": "20250114215505-cayyq7g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215505-cayyq7g",
+								"updated": "20250117171906"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在桌面端 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "工作空間/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 資料夾下建立一個名為 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 的文字文件，其中每一行會作為通知的文本"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114215505-y572ade",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20250114215505-y572ade",
+						"updated": "20250114215523"
+					},
+					"Children": [
+						{
+							"ID": "20250114215505-kbmum62",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215505-kbmum62",
+								"updated": "20250114215523"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "透過"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20211226121438-xaafdo8",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "資料同步"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "將其同步到 Android 端"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20250114215505-8w2wnfo",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215505-8w2wnfo",
+				"updated": "20250114215505"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "完成這兩個步驟以後通知就會使用自訂的文字。"
 				}
 			]
 		}

@@ -289,7 +289,7 @@ func setWorkspaceDir(c *gin.Context) {
 		// 改进判断工作空间路径实现 https://github.com/siyuan-note/siyuan/issues/7569
 		installDirLower := strings.ToLower(filepath.Dir(util.WorkingDir))
 		pathLower := strings.ToLower(path)
-		if strings.HasPrefix(pathLower, installDirLower) && util.IsSubPath(installDirLower, pathLower) {
+		if strings.HasPrefix(pathLower, installDirLower) && (util.IsSubPath(installDirLower, pathLower) || filepath.Clean(installDirLower) == filepath.Clean(pathLower)) {
 			ret.Code = -1
 			ret.Msg = model.Conf.Language(98)
 			ret.Data = map[string]interface{}{"closeTimeout": 5000}

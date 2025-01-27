@@ -6,7 +6,7 @@
 		"id": "20220628204420-ui79vkt",
 		"title": "最佳化排版",
 		"type": "doc",
-		"updated": "20240506230836"
+		"updated": "20250115151305"
 	},
 	"Children": [
 		{
@@ -58,7 +58,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220628215506-9htzcqy",
-				"updated": "20220628215506"
+				"updated": "20250115151305"
 			},
 			"Children": [
 				{
@@ -72,7 +72,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220628215506-xbslfaz",
-				"updated": "20220628215506"
+				"updated": "20250115151305"
 			},
 			"Children": [
 				{
@@ -82,11 +82,11 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "..."
+					"TextMarkTextContent": "︙"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 菜單中選擇 "
+					"Data": "​ 菜單中選擇 "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -95,7 +95,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "，處理完成後文檔中的如下元素前後會被自動插入一個空格："
+					"Data": "​，處理完成後文檔中的如下元素前後會被自動插入一個空格："
 				}
 			]
 		},

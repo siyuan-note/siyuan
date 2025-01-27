@@ -19,4 +19,4 @@ export const cancelDrag = () => {
         ghostElement.remove();
         document.onmousemove = null;
     }
-}
+};

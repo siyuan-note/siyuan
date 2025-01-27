@@ -25,7 +25,7 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
             try {
-                renderElement.innerHTML = `<img src=${window.siyuan.config.editor.plantUMLServePath}${window.plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}">`;
+                renderElement.innerHTML = `<object type="image/svg+xml" data="${window.siyuan.config.editor.plantUMLServePath}${window.plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}"/>`;
                 renderElement.classList.remove("ft__error");
                 e.setAttribute("data-render", "true");
             } catch (error) {

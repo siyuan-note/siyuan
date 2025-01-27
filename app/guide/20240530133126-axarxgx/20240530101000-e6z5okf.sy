@@ -8,7 +8,7 @@
 		"id": "20240530101000-e6z5okf",
 		"title": "モバイルアプリ",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250117171922"
 	},
 	"Children": [
 		{
@@ -18,7 +18,7 @@
 			"Properties": {
 				"ID": "20240530101000-peznsnc",
 				"id": "20240530101000-2nn9stf",
-				"updated": "20240530101000"
+				"updated": "20250114214341"
 			},
 			"Children": [
 				{
@@ -31,23 +31,13 @@
 			"ID": "20240530101000-pnwqee0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-ysty1wf",
 				"id": "20240530101000-pnwqee0",
-				"updated": "20240530101000"
+				"updated": "20250114214341"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan は Android と iOS のアプリも提供しています。アプリストアで "
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "code",
-					"TextMarkTextContent": "SiYuan"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​ を検索してください。"
+					"Data": "SiYuan は Android、iOS、HarmonyOS アプリを提供しており、一部のモバイル アプリ ストアに掲載されています。アプリ ストアで「思源笔记」または「SiYuan」を検索してください。"
 				}
 			]
 		},
@@ -131,7 +121,7 @@
 			"Properties": {
 				"ID": "20240530101000-yx7xlm6",
 				"id": "20240530101000-zx8lkgl",
-				"updated": "20240530101000"
+				"updated": "20250114215535"
 			},
 			"Children": [
 				{
@@ -291,12 +281,159 @@
 			]
 		},
 		{
-			"ID": "20240530101000-wps7kn8",
+			"ID": "20250114215535-x0zo9js",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20250114215535-x0zo9js",
+				"updated": "20250117171922"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Android でのカスタム通知"
+				}
+			]
+		},
+		{
+			"ID": "20250114215535-1m8nzmu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-qpexeys",
-				"id": "20240530101000-wps7kn8"
-			}
+				"id": "20250114215535-1m8nzmu",
+				"updated": "20250114215620"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "バックグラウンドでの動作を可能な限り維持するために、SiYuan は定期的に通知を送信します。デフォルトの通知内容は、開発チームが気に入っている歌詞です。"
+				}
+			]
+		},
+		{
+			"ID": "20250114215535-942fbf3",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215535-942fbf3",
+				"updated": "20250114215535"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "カスタマイズする必要がある場合は、以下の手順に従ってください。"
+				}
+			]
+		},
+		{
+			"ID": "20250114215535-5igrtp8",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20250114215535-5igrtp8",
+				"updated": "20250117171922"
+			},
+			"Children": [
+				{
+					"ID": "20250114215535-a0e9b4c",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20250114215535-a0e9b4c",
+						"updated": "20250117171922"
+					},
+					"Children": [
+						{
+							"ID": "20250114215535-2lxc7ib",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215535-2lxc7ib",
+								"updated": "20250117171922"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "デスクトップの "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ フォルダに "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ という名前のテキストファイルを作成します。各行は通知のテキストになります。"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114215535-gcwij08",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20250114215535-gcwij08",
+						"updated": "20250114215604"
+					},
+					"Children": [
+						{
+							"ID": "20250114215535-hfrsfi9",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215535-hfrsfi9",
+								"updated": "20250114215604"
+							},
+							"Children": [
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20240530101000-wo49zvq",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "データ同期"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "を介してAndroid側に同期します。"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20250114215535-0a2tswh",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215535-0a2tswh",
+				"updated": "20250114215535"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "これら 2 つの手順を完了すると、通知にはカスタマイズしたテキストが使用されるようになります。"
+				}
+			]
 		}
 	]
 }

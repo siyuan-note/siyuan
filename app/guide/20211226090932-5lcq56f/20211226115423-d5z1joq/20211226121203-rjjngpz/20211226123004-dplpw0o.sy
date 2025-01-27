@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20241225192757"
+		"updated": "20250115153115"
 	},
 	"Children": [
 		{
@@ -1315,7 +1315,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-3wiifft",
-				"updated": "20211228104256"
+				"updated": "20250115153115"
 			},
 			"Children": [
 				{
@@ -1329,7 +1329,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226123024-wtjurrr",
-				"updated": "20211228104309"
+				"updated": "20250115153115"
 			},
 			"Children": [
 				{
@@ -1338,12 +1338,21 @@
 				},
 				{
 					"Type": "NodeTextMark",
-					"TextMarkType": "code",
+					"TextMarkType": "kbd",
 					"TextMarkTextContent": "/"
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 選擇範本來觸發範本搜索，找到需要插入的範本後Enter即可。"
+					"Data": "​ 選擇範本來觸發範本搜索，找到需要插入的範本後 "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "回車"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ 即可。"
 				}
 			]
 		},

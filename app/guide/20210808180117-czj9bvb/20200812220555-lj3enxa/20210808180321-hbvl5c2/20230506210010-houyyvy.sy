@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230506210010-houyyvy",
 		"title": "插件",
-		"updated": "20230820184204"
+		"type": "doc",
+		"updated": "20250115152320"
 	},
 	"Children": [
 		{
@@ -76,7 +77,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230506210021-04aesus",
-				"updated": "20230506210021"
+				"updated": "20250115152320"
 			},
 			"Children": [
 				{
@@ -90,7 +91,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230506210021-tk7w2m5",
-				"updated": "20230506210853"
+				"updated": "20250115152320"
 			},
 			"Children": [
 				{
@@ -109,7 +110,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "插件集市"
+					"TextMarkTextContent": "设置"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ - "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "集市"
 				},
 				{
 					"Type": "NodeText",

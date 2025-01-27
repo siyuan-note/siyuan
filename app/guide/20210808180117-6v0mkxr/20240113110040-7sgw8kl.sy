@@ -6,7 +6,8 @@
 		"icon": "1f4f1",
 		"id": "20240113110040-7sgw8kl",
 		"title": "Mobile App",
-		"updated": "20240119205358"
+		"type": "doc",
+		"updated": "20250117171914"
 	},
 	"Children": [
 		{
@@ -15,7 +16,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-xav9o1n",
-				"updated": "20240113110114"
+				"updated": "20250114214300"
 			},
 			"Children": [
 				{
@@ -29,12 +30,21 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240113110114-j6okyut",
-				"updated": "20240113110129"
+				"updated": "20250114214300"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "SiYuan provides Android and iOS apps, which are already available in some mobile app stores. Please search for "
+					"Data": "SiYuan provides Android, iOS and HarmonyOS apps, and has been listed on some mobile app stores. Please search for "
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "code",
+					"TextMarkTextContent": "思源笔记"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​ or "
 				},
 				{
 					"Type": "NodeTextMark",
@@ -53,7 +63,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-rugjxcf",
-				"updated": "20240113110114"
+				"updated": "20250114213934"
 			},
 			"Children": [
 				{
@@ -82,7 +92,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240113110114-2r0390j",
-				"updated": "20240113110151"
+				"updated": "20250114213934"
 			},
 			"Children": [
 				{
@@ -136,6 +146,34 @@
 								{
 									"Type": "NodeText",
 									"Data": "Huawei"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114213931-fxnfiur",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250114213931-fxnfiur",
+						"updated": "20250114213934"
+					},
+					"Children": [
+						{
+							"ID": "20250114213931-76n4b06",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114213931-76n4b06",
+								"updated": "20250114213934"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Honor"
 								}
 							]
 						}
@@ -370,7 +408,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240113110114-3h7r74i",
-				"updated": "20240113110333"
+				"updated": "20250114215310"
 			},
 			"Children": [
 				{
@@ -513,6 +551,161 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250114215310-k9lnjrc",
+			"Type": "NodeHeading",
+			"HeadingLevel": 2,
+			"Properties": {
+				"id": "20250114215310-k9lnjrc",
+				"updated": "20250117171914"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "Custom notifications on Android"
+				}
+			]
+		},
+		{
+			"ID": "20250114215310-4r03n8k",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215310-4r03n8k",
+				"updated": "20250114215321"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "In order to keep the background running as much as possible, SiYuan will send notifications regularly. The default notification content is some lyrics that the development team likes."
+				}
+			]
+		},
+		{
+			"ID": "20250114215310-7wh4al0",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215310-7wh4al0",
+				"updated": "20250114215348"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "If you need to customize it, please follow the steps below:"
+				}
+			]
+		},
+		{
+			"ID": "20250114215310-h1tgrnv",
+			"Type": "NodeList",
+			"ListData": {
+				"Typ": 1
+			},
+			"Properties": {
+				"id": "20250114215310-h1tgrnv",
+				"updated": "20250117171914"
+			},
+			"Children": [
+				{
+					"ID": "20250114215310-uhglsyt",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "MS4=",
+						"Num": 1
+					},
+					"Properties": {
+						"id": "20250114215310-uhglsyt",
+						"updated": "20250117171914"
+					},
+					"Children": [
+						{
+							"ID": "20250114215310-z7geibq",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215310-z7geibq",
+								"updated": "20250117171914"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Create a text file named "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "android-notification-texts.txt"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ in the desktop "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "workspace/data/assets/"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ folder, where each line will be used as the text of the notification"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250114215310-6sdvtuo",
+					"Type": "NodeListItem",
+					"ListData": {
+						"Typ": 1,
+						"Delimiter": 46,
+						"Marker": "Mi4=",
+						"Num": 2
+					},
+					"Properties": {
+						"id": "20250114215310-6sdvtuo",
+						"updated": "20250114215417"
+					},
+					"Children": [
+						{
+							"ID": "20250114215310-dzbod4g",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250114215310-dzbod4g",
+								"updated": "20250114215417"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "Synchronize it to the Android side through "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "block-ref",
+									"TextMarkBlockRefID": "20210721112206-mhr9wxi",
+									"TextMarkBlockRefSubtype": "d",
+									"TextMarkTextContent": "Data sync"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20250114215310-pqgvvof",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250114215310-pqgvvof",
+				"updated": "20250114215310"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "After completing these two steps, the notification will use the customized text."
 				}
 			]
 		}

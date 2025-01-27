@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20240818180047"
+		"updated": "20250115145231"
 	},
 	"Children": [
 		{
@@ -1623,7 +1623,7 @@
 			"Properties": {
 				"ID": "20240530101000-1iwbq48",
 				"id": "20240530101000-riwihza",
-				"updated": "20240818180047"
+				"updated": "20250115145206"
 			},
 			"Children": [
 				{
@@ -1868,7 +1868,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818180047-hluqmta",
-				"updated": "20240818180047"
+				"updated": "20250115145206"
 			},
 			"Children": [
 				{
@@ -1878,7 +1878,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
@@ -2182,7 +2191,7 @@
 			"Properties": {
 				"ID": "20240530101000-opc0x0f",
 				"id": "20240530101000-qkndmzb",
-				"updated": "20240818175720"
+				"updated": "20250115145231"
 			},
 			"Children": [
 				{
@@ -2412,9 +2421,8 @@
 			"ID": "20240530101000-knbkfqu",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-1gm8h13",
 				"id": "20240530101000-knbkfqu",
-				"updated": "20240818175720"
+				"updated": "20250115145231"
 			},
 			"Children": [
 				{
@@ -2424,7 +2432,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",
@@ -2922,7 +2939,7 @@
 			"Properties": {
 				"ID": "20240530101000-xaefotq",
 				"id": "20240530101000-y5kx7kx",
-				"updated": "20240818175723"
+				"updated": "20250115145227"
 			},
 			"Children": [
 				{
@@ -3069,9 +3086,8 @@
 			"ID": "20240530101000-68p4w33",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"ID": "20240530101000-cbgit73",
 				"id": "20240530101000-68p4w33",
-				"updated": "20240818175723"
+				"updated": "20250115145227"
 			},
 			"Children": [
 				{
@@ -3081,7 +3097,16 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift+Enter"
+					"TextMarkTextContent": "Shift"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "Enter"
 				},
 				{
 					"Type": "NodeText",

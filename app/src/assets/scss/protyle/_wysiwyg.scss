@@ -179,14 +179,18 @@
         &::after {
           content: "";
           position: absolute;
-          border-radius: 50%;
           top: 50%;
-          transition: var(--b3-transition);
           left: 50%;
+          height: max(14px, var(--b3-font-size-editor));
+          width: max(14px, var(--b3-font-size-editor));
+          margin: min(-7px, -1 * var(--b3-font-size-editor) / 2) 0 0 min(-7px, -1 * var(--b3-font-size-editor) / 2);
+          border-radius: 50%;
+          transition: var(--b3-transition);
         }
 
         svg {
           width: 34px;
+          height: max(14px, var(--b3-font-size-editor) - 8px);
           display: block;
           z-index: 1;
           position: relative;

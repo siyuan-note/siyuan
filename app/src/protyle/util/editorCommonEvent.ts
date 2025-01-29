@@ -32,6 +32,7 @@ import {zoomOut} from "../../menus/protyle";
 import {webUtils} from "electron";
 /// #endif
 import {addDragFill} from "../render/av/cell";
+import {processClonePHElement} from "../render/util";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -816,6 +817,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
             } else if (target.classList.contains("protyle-action")) {
+                const ghostElement = document.createElement("div");
+                ghostElement.className = protyle.wysiwyg.element.className + " dragghost";
+                ghostElement.append(processClonePHElement(target.parentElement.cloneNode(true) as Element));
+                ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
+                document.body.append(ghostElement);
+                event.dataTransfer.setDragImage(ghostElement, target.clientWidth / 2, target.clientHeight / 2);
+                setTimeout(() => {
+                    ghostElement.remove();
+                });
+
                 window.siyuan.dragElement = protyle.wysiwyg.element;
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeListItem${Constants.ZWSP}${target.parentElement.getAttribute("data-subtype")}${Constants.ZWSP}${[target.parentElement.getAttribute("data-node-id")]}`,
                     protyle.wysiwyg.element.innerHTML);

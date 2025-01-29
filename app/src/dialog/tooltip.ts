@@ -1,5 +1,4 @@
 import {isMobile} from "../util/functions";
-import {Constants} from "../constants";
 
 export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {
@@ -14,17 +13,22 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     let messageElement = document.getElementById("tooltip");
     if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);
+        document.body.insertAdjacentHTML("beforeend", `<div id="tooltip" class="${className}">${message}</div>`);
         messageElement = document.getElementById("tooltip");
     } else {
+        let needsRemoveStyle = false;
         if (messageElement.className !== className) {
             messageElement.className = className;
+            needsRemoveStyle = true;
         }
         if (messageElement.innerHTML !== message) {
             messageElement.innerHTML = message;
+            needsRemoveStyle = true;
         }
-        // 避免原本的 top 和 left 影响计算
-        messageElement.removeAttribute("style");
+        if (needsRemoveStyle) {
+            // 避免原本的 top 和 left 影响计算
+            Object.assign(messageElement.style, { top: "0", left: "0" });
+        }
     }
 
     let left = targetRect.left;
@@ -53,6 +57,10 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     } else if (position?.endsWith("top")) {
         // 编辑器动态滚动条
         top = targetRect.top - messageElement.clientHeight;
+    } else if (position === "west") {
+        // 关联字段选项
+        top = targetRect.top + (parseInt(position) || 0);
+        left = targetRect.left - messageElement.clientWidth - 8;
     }
 
     const topHeight = position === "parentE" ? top : targetRect.top;
@@ -60,12 +68,8 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
-    // 避免原本的 top 和 left 影响计算
-    messageElement.style.top = "0px";
-    messageElement.style.left = "0px";
-
     if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
+        messageElement.style.top = ((position === "parentE" || position === "west" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
     } else {
         messageElement.style.top = top + "px";
     }
@@ -84,6 +88,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 export const hideTooltip = () => {
     const messageElement = document.getElementById("tooltip");
     if (messageElement) {
-        messageElement.remove();
+        messageElement.classList.add("fn__none");
     }
 };

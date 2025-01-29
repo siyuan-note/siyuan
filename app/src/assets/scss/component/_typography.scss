@@ -82,17 +82,6 @@
     // https://ld246.com/article/1636204769623  test $\rightarrow$ test
   }
 
-  mark,
-  span[data-type~="mark"] {
-    background-color: var(--b3-protyle-inline-mark-background);
-    color: var(--b3-protyle-inline-mark-color);
-
-    &.mark--hl {
-      background-color: var(--b3-theme-primary-lighter);
-      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
-    }
-  }
-
   kbd,
   span[data-type~="kbd"] {
     padding: 2px 4px;
@@ -120,6 +109,17 @@
   span[data-type~="inline-memo"] {
     background-color: var(--b3-card-info-background);
     border-bottom: 2px solid var(--b3-card-info-color);
+  }
+
+  mark,
+  span[data-type~="mark"] {
+    background-color: var(--b3-protyle-inline-mark-background);
+    color: var(--b3-protyle-inline-mark-color);
+
+    &.mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
+    }
   }
 
   blockquote {
@@ -153,9 +153,7 @@
   h5,
   h6 {
     padding: 4px;
-    margin: 4px 0;
-    font-weight: 600;
-    line-height: 1.25;
+    margin: 2px 0;
   }
 
   .h1,
@@ -163,28 +161,23 @@
   .h3,
   .h4,
   .h5,
-  .h6 {
+  .h6,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     font-weight: 600;
-
-    &[data-node-id] [spellcheck] {
-      min-height: 1.625em;
-    }
+    line-height: 1.25;
   }
 
-  h1 {
-    padding: .3em 4px;
-    font-size: 1.75em;
-  }
-
+  h1,
   .h1 {
     font-size: 1.75em;
   }
 
-  h2 {
-    padding: .3em 4px;
-    font-size: 1.55em;
-  }
-
+  h2,
   .h2 {
     font-size: 1.55em;
   }
@@ -318,8 +311,7 @@
       }
 
       .protyle-action__language {
-        position: absolute;
-        left: 1em;
+        margin-left: 1em;
         opacity: 0;
         transition: var(--b3-transition);
       }

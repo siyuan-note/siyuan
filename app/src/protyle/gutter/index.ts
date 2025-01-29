@@ -129,8 +129,8 @@ export class Gutter {
             const ghostElement = document.createElement("div");
             ghostElement.className = protyle.wysiwyg.element.className;
             selectElements.forEach(item => {
-                const type = item.getAttribute("data-type");
                 if (item.querySelector("iframe")) {
+                    const type = item.getAttribute("data-type");
                     const embedElement = genEmptyElement();
                     embedElement.classList.add("protyle-wysiwyg--select");
                     getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
@@ -145,7 +145,6 @@ export class Gutter {
             setTimeout(() => {
                 ghostElement.remove();
             });
-
             buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,

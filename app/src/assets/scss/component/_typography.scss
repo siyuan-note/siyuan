@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'JetBrainsMono-Regular';
-  /* webpackIgnore: true */
+  /*! /* webpackIgnore: true */
   src: url(../../../appearance/fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
 
@@ -170,6 +170,10 @@
   h6 {
     font-weight: 600;
     line-height: 1.25;
+
+    & > [spellcheck] {
+      min-height: 1.25em;
+    }
   }
 
   h1,

@@ -234,15 +234,19 @@ export const pasteText = async (protyle: IProtyle, textPlain: string, nodeElemen
                 const emitResult = protyle.app.plugins[i].eventBus.emit("paste", {
                     protyle,
                     resolve,
-                    textHTML: "",
-                    textPlain: textPlain,
-                    siyuanHTML: "",
+                    textHTML: textPlain,
+                    textPlain,
+                    siyuanHTML: textPlain,
                     files: []
                 });
                 if (emitResult) {
                     resolve(undefined);
                 }
             });
+
+            if (response?.textPlain) {
+                textPlain = response.textPlain;
+            }
         }
     }
 

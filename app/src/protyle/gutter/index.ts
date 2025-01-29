@@ -127,7 +127,7 @@ export class Gutter {
             }
 
             const ghostElement = document.createElement("div");
-            ghostElement.className = protyle.wysiwyg.element.className + " dragghost";
+            ghostElement.className = protyle.wysiwyg.element.className;
             selectElements.forEach(item => {
                 if (item.querySelector("iframe")) {
                     const type = item.getAttribute("data-type");
@@ -141,16 +141,10 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            if (selectElements[0].classList.contains("li")) {
-                const actionElement = selectElements[0].querySelector(".protyle-action");
-                event.dataTransfer.setDragImage(ghostElement, actionElement.clientWidth / 2, actionElement.clientHeight / 2);
-            } else {
-                event.dataTransfer.setDragImage(ghostElement, 0, 0);
-            }
+            event.dataTransfer.setDragImage(ghostElement, 0, 0);
             setTimeout(() => {
                 ghostElement.remove();
             });
-
             buttonElement.style.opacity = "0.1";
             window.siyuan.dragElement = avElement as HTMLElement || protyle.wysiwyg.element;
             event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}${buttonElement.getAttribute("data-type")}${Constants.ZWSP}${buttonElement.getAttribute("data-subtype")}${Constants.ZWSP}${selectIds}${Constants.ZWSP}${window.siyuan.config.system.workspaceDir}`,

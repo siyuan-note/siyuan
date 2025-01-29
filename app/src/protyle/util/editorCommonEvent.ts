@@ -818,11 +818,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.preventDefault();
             } else if (target.classList.contains("protyle-action")) {
                 const ghostElement = document.createElement("div");
-                ghostElement.className = protyle.wysiwyg.element.className + " dragghost";
+                ghostElement.className = protyle.wysiwyg.element.className;
                 ghostElement.append(processClonePHElement(target.parentElement.cloneNode(true) as Element));
                 ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${target.parentElement.clientWidth}px;padding:0;`);
                 document.body.append(ghostElement);
-                event.dataTransfer.setDragImage(ghostElement, target.clientWidth / 2, target.clientHeight / 2);
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
                 setTimeout(() => {
                     ghostElement.remove();
                 });

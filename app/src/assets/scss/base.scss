@@ -385,5 +385,12 @@ html {
   }
 }
 
+.dragghost [data-node-id] {
+  &.protyle-wysiwyg--select::after,
+  &.protyle-wysiwyg--hl::after {
+    display: none;
+  }
+}
+
 // 需放置最后，否则 https://github.com/siyuan-note/siyuan/issues/7056
 @import "util/responsive";

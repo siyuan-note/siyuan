@@ -127,10 +127,10 @@ export class Gutter {
             }
 
             const ghostElement = document.createElement("div");
-            ghostElement.className = protyle.wysiwyg.element.className;
+            ghostElement.className = protyle.wysiwyg.element.className + " dragghost";
             selectElements.forEach(item => {
-                const type = item.getAttribute("data-type");
                 if (item.querySelector("iframe")) {
+                    const type = item.getAttribute("data-type");
                     const embedElement = genEmptyElement();
                     embedElement.classList.add("protyle-wysiwyg--select");
                     getContenteditableElement(embedElement).innerHTML = `<svg class="svg"><use xlink:href="${buttonElement.querySelector("use").getAttribute("xlink:href")}"></use></svg> ${getLangByType(type)}`;
@@ -141,7 +141,12 @@ export class Gutter {
             });
             ghostElement.setAttribute("style", `position:fixed;opacity:.1;width:${selectElements[0].clientWidth}px;padding:0;`);
             document.body.append(ghostElement);
-            event.dataTransfer.setDragImage(ghostElement, 0, 0);
+            if (selectElements[0].classList.contains("li")) {
+                const actionElement = selectElements[0].querySelector(".protyle-action");
+                event.dataTransfer.setDragImage(ghostElement, actionElement.clientWidth / 2, actionElement.clientHeight / 2);
+            } else {
+                event.dataTransfer.setDragImage(ghostElement, 0, 0);
+            }
             setTimeout(() => {
                 ghostElement.remove();
             });

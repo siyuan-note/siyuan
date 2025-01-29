@@ -291,9 +291,10 @@ export const setInlineStyle = async (set = true) => {
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
-.protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:${height + 8}px;}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ [data-type="NodeHeading"] {line-height:${height + 8}px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ [data-type="NodeHeading"] > [spellcheck] {min-height:${height + 8}px}
 .protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
-.protyle-wysiwyg [data-node-id] [spellcheck] {min-height:${height}px;}
+.protyle-wysiwyg [data-node-id]:not(data-type="NodeHeading") [spellcheck] {min-height:${height}px;}
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
 .protyle-wysiwyg .table,

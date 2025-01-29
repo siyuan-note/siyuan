@@ -166,6 +166,17 @@
         align-items: center;
         word-break: keep-all;
 
+        // https://github.com/siyuan-note/siyuan/issues/2803
+        & ~ .h1,
+        & ~ .h2,
+        & ~ .h3,
+        & ~ .h4,
+        & ~ .h5,
+        & ~ .h6 {
+          padding-top: 0;
+          padding-bottom: 0;
+        }
+
         &::after {
           content: "";
           position: absolute;
@@ -184,17 +195,6 @@
 
         &--order::after {
           border-radius: var(--b3-border-radius);
-        }
-
-        ~ .h1,
-        ~ .h2,
-        ~ .h3,
-        ~ .h4,
-        ~ .h5,
-        ~ .h6 {
-          [spellcheck] {
-            min-height: unset;
-          }
         }
       }
     }
@@ -230,20 +230,6 @@
         & > div .protyle-attr--refcount {
           position: initial;
           margin-left: 4px;
-        }
-
-        /* 选中块的高亮覆盖 margin */
-        &> .protyle-wysiwyg--select:not(.sb)::after,
-        &> .protyle-wysiwyg--hl:not(.sb)::after{
-          height: calc(100% + 4px);
-          top: -2px;
-        }
-
-        /* 选中块的高亮覆盖 border 和 margin */
-        &> .protyle-wysiwyg--select.render-node[data-type="NodeBlockQueryEmbed"]::after,
-        &> .protyle-wysiwyg--hl.render-node[data-type="NodeBlockQueryEmbed"]::after{
-          height: calc(100% + 6px);
-          top: -3px;
         }
       }
     }
@@ -326,7 +312,7 @@
 
         /* 选中块的高亮覆盖 border */
         &.protyle-wysiwyg--select::after,
-        &.protyle-wysiwyg--hl::after{
+        &.protyle-wysiwyg--hl::after {
           width: calc(100% + 2px);
           height: calc(100% + 2px);
           left: -1px;

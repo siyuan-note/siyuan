@@ -31,13 +31,12 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         }
     }
 
-    let left = targetRect.left;
-    let top = targetRect.bottom;
-
     // position: parentE; parentW; ${number}parentW; ${number}bottom;
     // right; right${number}bottom; right${number}top; top;
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
+
+    let top, left;
 
     if (position?.startsWith("right")) {
         // block icon and background icon
@@ -53,15 +52,18 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         top = parentRect.top + (parseInt(position) || 8);
         left = parentRect.left - messageElement.clientWidth;
     } else if (position?.endsWith("bottom")) {
-        top += parseInt(position.replace("right", "").replace("left", ""));
+        top = targetRect.bottom + parseInt(position.replace("right", "").replace("left", ""));
     } else if (position?.endsWith("top")) {
-        // 编辑器动态滚动条
+        // 数据库视图、编辑器动态滚动条
         top = targetRect.top - messageElement.clientHeight;
     } else if (position === "west") {
         // 关联字段选项
         top = targetRect.top + (parseInt(position) || 0);
         left = targetRect.left - messageElement.clientWidth - 8;
     }
+
+    top = top >= 0 ? top : targetRect.bottom;
+    left = left >= 0 ? left : targetRect.left;
 
     const topHeight = position === "parentE" ? top : targetRect.top;
     const bottomHeight = window.innerHeight - top;

@@ -180,14 +180,18 @@
         &::after {
           content: "";
           position: absolute;
-          border-radius: 50%;
           top: 50%;
-          transition: var(--b3-transition);
           left: 50%;
+          height: max(14px, 1em);
+          width: max(14px, 1em);
+          margin: min(-7px, -.5em) 0 0 min(-7px, -.5em);
+          border-radius: 50%;
+          transition: var(--b3-transition);
         }
 
         svg {
           width: 34px;
+          height: max(14px, 1em - 8px);
           display: block;
           z-index: 1;
           position: relative;

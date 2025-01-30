@@ -344,7 +344,7 @@
 .protyle-title {
   margin: 34px 16px 0 24px;
   position: relative;
-  font-size: 16px;
+  font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
   padding-left: 2px;
   border-radius: var(--b3-border-radius);

@@ -291,10 +291,10 @@ export const setInlineStyle = async (set = true) => {
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
-.protyle-wysiwyg [data-node-id].li > .protyle-action ~ [data-type="NodeHeading"] {line-height:${height + 8}px}
-.protyle-wysiwyg [data-node-id].li > .protyle-action ~ [data-type="NodeHeading"] > [spellcheck] {min-height:${height + 8}px}
+/* 列表项后的内容和列表项对齐 https://github.com/siyuan-note/siyuan/issues/2803 */
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div {line-height:${height}px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div > [spellcheck] {min-height:${height}px}
 .protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
-.protyle-wysiwyg [data-node-id]:not([data-type="NodeHeading"]) > [spellcheck] {min-height:${height}px;}
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
 .protyle-wysiwyg .table,

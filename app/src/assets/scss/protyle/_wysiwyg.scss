@@ -66,7 +66,8 @@
       box-shadow: 2px 0 0 0 var(--b3-protyle-inline-mark-background) inset;
     }
 
-    [spellcheck] {
+    & > [spellcheck] {
+      min-height: 1.625em;
       word-break: break-word;
       // https://github.com/siyuan-note/siyuan/issues/10483
       white-space: break-spaces;
@@ -165,17 +166,6 @@
         display: flex;
         align-items: center;
         word-break: keep-all;
-
-        // https://github.com/siyuan-note/siyuan/issues/2803
-        & ~ .h1,
-        & ~ .h2,
-        & ~ .h3,
-        & ~ .h4,
-        & ~ .h5,
-        & ~ .h6 {
-          padding-top: 0;
-          padding-bottom: 0;
-        }
 
         &::after {
           content: "";

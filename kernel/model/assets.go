@@ -75,6 +75,16 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
+func DocAssets(rootID string) (ret []string, err error) {
+	tree, err := LoadTreeByBlockID(rootID)
+	if err != nil {
+		return
+	}
+
+	ret = assetsLinkDestsInTree(tree)
+	return
+}
+
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
@@ -963,6 +973,15 @@ func MissingAssets() (ret []string) {
 
 			if strings.HasSuffix(dest, "/") {
 				continue
+			}
+
+			if strings.Contains(strings.ToLower(dest), ".pdf/") {
+				if idx := strings.LastIndex(dest, "/"); -1 < idx {
+					if ast.IsNodeIDPattern(dest[idx+1:]) {
+						// PDF 标注不计入 https://github.com/siyuan-note/siyuan/issues/13891
+						continue
+					}
+				}
 			}
 
 			if "" == assetsPathMap[dest] {

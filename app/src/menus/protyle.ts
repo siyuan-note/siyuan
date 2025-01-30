@@ -1498,7 +1498,10 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(linkElement.outerHTML));
+            const range = document.createRange();
+            range.selectNode(linkElement);
+            focusByRange(range);
+            document.execCommand("copy");
         }
     }).element);
     if (protyle.disabled) {

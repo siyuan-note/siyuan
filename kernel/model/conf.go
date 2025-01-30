@@ -494,6 +494,8 @@ func InitConf() {
 	if "" != util.AccessAuthCode {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
+	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
+	Conf.AccessAuthCode = util.RemoveInvalid(Conf.AccessAuthCode)
 
 	Conf.LocalIPs = util.GetLocalIPs()
 

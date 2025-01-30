@@ -95,6 +95,8 @@ func Boot() {
 	ServerPort = *port
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
+	AccessAuthCode = strings.TrimSpace(AccessAuthCode)
+	AccessAuthCode = RemoveInvalid(AccessAuthCode)
 	Container = ContainerStd
 	if RunInContainer {
 		Container = ContainerDocker

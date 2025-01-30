@@ -1478,7 +1478,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     return true;
                 }
             });
-            if (isSelf) {
+            if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
                 return;
             }
             if (isInEmbedBlock(targetElement)) {

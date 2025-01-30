@@ -1023,7 +1023,7 @@ const renderNextSearchMark = (options: {
         options.edit.protyle.highlight.ranges.forEach((item, index) => {
             if (options.edit.protyle.highlight.rangeIndex === index) {
                 options.edit.protyle.highlight.markHL.add(item);
-                currentRange = item
+                currentRange = item;
             } else {
                 options.edit.protyle.highlight.mark.add(item);
             }
@@ -1115,7 +1115,7 @@ export const getArticle = (options: {
                             } else {
                                 highlightById(options.edit.protyle, options.id);
                             }
-                        }
+                        };
                         highlightKeys();
                         const observer = new ResizeObserver(() => {
                             highlightKeys();

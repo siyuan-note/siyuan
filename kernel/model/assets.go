@@ -75,6 +75,16 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
+func DocAssets(rootID string) (ret []string, err error) {
+	tree, err := LoadTreeByBlockID(rootID)
+	if err != nil {
+		return
+	}
+
+	ret = assetsLinkDestsInTree(tree)
+	return
+}
+
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {

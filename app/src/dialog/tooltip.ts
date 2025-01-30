@@ -10,26 +10,13 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         return;
     }
 
-    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
-    let messageElement = document.getElementById("tooltip");
-    if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div id="tooltip" class="${className}">${message}</div>`);
-        messageElement = document.getElementById("tooltip");
-    } else {
-        let needsRemoveStyle = false;
-        if (messageElement.className !== className) {
-            messageElement.className = className;
-            needsRemoveStyle = true;
-        }
-        if (messageElement.innerHTML !== message) {
-            messageElement.innerHTML = message;
-            needsRemoveStyle = true;
-        }
-        if (needsRemoveStyle) {
-            // 避免原本的 top 和 left 影响计算
-            Object.assign(messageElement.style, { top: "0", left: "0" });
-        }
-    }
+    const tooltipElement = document.getElementById("tooltip");
+    const clonedTooltip = tooltipElement.cloneNode(true) as HTMLElement;
+    clonedTooltip.id  = "clonedTooltip";
+    clonedTooltip.removeAttribute("style");
+    clonedTooltip.className = "tooltip";
+    clonedTooltip.innerHTML = message;
+    document.body.append(clonedTooltip);
 
     // position: parentE; parentW; ${number}parentW; ${number}bottom;
     // right; right${number}bottom; right${number}top; top;
@@ -40,7 +27,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     if (position?.startsWith("right")) {
         // block icon and background icon
-        left = targetRect.right - messageElement.clientWidth;
+        left = targetRect.right - clonedTooltip.clientWidth;
     }
 
     if (position === "parentE") {
@@ -50,46 +37,61 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     } else if (position?.endsWith("parentW")) {
         // 数据库属性视图
         top = parentRect.top + (parseInt(position) || 8);
-        left = parentRect.left - messageElement.clientWidth;
+        left = parentRect.left - clonedTooltip.clientWidth;
     } else if (position?.endsWith("bottom")) {
-        top = targetRect.bottom + parseInt(position.replace("right", "").replace("left", ""));
+        top = targetRect.bottom + parseInt(position.replace("right", ""));
     } else if (position?.endsWith("top")) {
         // 数据库视图、编辑器动态滚动条
-        top = targetRect.top - messageElement.clientHeight;
-    } else if (position === "west") {
+        top = targetRect.top - clonedTooltip.clientHeight;
+    } else if (position === "directLeft") {
         // 关联字段选项
         top = targetRect.top + (parseInt(position) || 0);
-        left = targetRect.left - messageElement.clientWidth - 8;
+        left = targetRect.left - clonedTooltip.clientWidth - 8;
     }
 
+    // 确保不会超出屏幕
     top = top >= 0 ? top : targetRect.bottom;
     left = left >= 0 ? left : targetRect.left;
 
     const topHeight = position === "parentE" ? top : targetRect.top;
     const bottomHeight = window.innerHeight - top;
 
-    messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
+    clonedTooltip.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
-    if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        messageElement.style.top = ((position === "parentE" || position === "west" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
+    if (top + clonedTooltip.clientHeight > window.innerHeight && topHeight > bottomHeight) {
+        clonedTooltip.style.top = ((position === "parentE" || position === "directLeft" ? parentRect.bottom : targetRect.top) - clonedTooltip.clientHeight) + "px";
     } else {
-        messageElement.style.top = top + "px";
+        clonedTooltip.style.top = top + "px";
     }
 
-    if (left + messageElement.clientWidth > window.innerWidth) {
+    if (left + clonedTooltip.clientWidth > window.innerWidth) {
         if (position === "parentE") {
-            messageElement.style.left = (parentRect.left - 8 - messageElement.clientWidth) + "px";
+            clonedTooltip.style.left = (parentRect.left - 8 - clonedTooltip.clientWidth) + "px";
         } else {
-            messageElement.style.left = (window.innerWidth - 1 - messageElement.clientWidth) + "px";
+            clonedTooltip.style.left = (window.innerWidth - 1 - clonedTooltip.clientWidth) + "px";
         }
     } else {
-        messageElement.style.left = Math.max(0, left) + "px";
+        clonedTooltip.style.left = Math.max(0, left) + "px";
     }
+
+    const cloneStyle = clonedTooltip.getAttribute("style");
+    if (tooltipElement.getAttribute("style") !== cloneStyle) {
+        tooltipElement.setAttribute("style", cloneStyle);
+    }
+    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
+    if (tooltipElement.className !== className) {
+        tooltipElement.className = className;
+    }
+    if (tooltipElement.innerHTML !== clonedTooltip.innerHTML) {
+        tooltipElement.innerHTML = clonedTooltip.innerHTML;
+    }
+
+    clonedTooltip.remove();
 };
 
 export const hideTooltip = () => {
-    const messageElement = document.getElementById("tooltip");
-    if (messageElement) {
-        messageElement.classList.add("fn__none");
+    const tooltipElement = document.getElementById("tooltip");
+    if (tooltipElement && !tooltipElement.classList.contains("fn__none")) {
+        tooltipElement.classList.add("fn__none");
     }
 };

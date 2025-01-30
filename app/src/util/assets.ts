@@ -296,7 +296,7 @@ export const setInlineStyle = async (set = true) => {
 .protyle-wysiwyg [data-node-id].li > .protyle-action::after {height: ${window.siyuan.config.editor.fontSize}px;width: ${window.siyuan.config.editor.fontSize}px;margin:-${window.siyuan.config.editor.fontSize / 2}px 0 0 -${window.siyuan.config.editor.fontSize / 2}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action svg {height: ${Math.max(14, window.siyuan.config.editor.fontSize - 8)}px}
 .protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
-.protyle-wysiwyg [data-node-id]:not(data-type="NodeHeading") [spellcheck] {min-height:${height}px;}
+.protyle-wysiwyg [data-node-id]:not([data-type="NodeHeading"]) > [spellcheck] {min-height:${height}px;}
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
 .protyle-wysiwyg .table,

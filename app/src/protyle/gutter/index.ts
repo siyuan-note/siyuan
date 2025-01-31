@@ -114,7 +114,13 @@ export class Gutter {
                     selectIds.push(itemId);
                 }));
                 if (!selectedIncludeGutter) {
-                    const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`);
+                    let gutterNodeElement;
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${gutterId}"]`)).find(item => {
+                        if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
+                            gutterNodeElement = item;
+                            return true;
+                        }
+                    });
                     if (gutterNodeElement) {
                         selectElements.forEach((item => {
                             item.classList.remove("protyle-wysiwyg--select");

@@ -19,13 +19,20 @@ import {moveResize} from "../../dialog/moveResize";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
-    protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
-    if (protyle.options.render.background) {
-        protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
+
+    const protyleTopElement = document.createElement("div");
+    const shouldAddBackground = protyle.options.render.background;
+    const shouldAddTitle = protyle.options.render.title;
+    if (shouldAddBackground) {
+        protyleTopElement.appendChild(protyle.background.element);
     }
-    if (protyle.options.render.title) {
-        protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
+    if (shouldAddTitle) {
+        protyleTopElement.appendChild(protyle.title.element);
     }
+    if (shouldAddBackground || shouldAddTitle) {
+        protyle.contentElement.appendChild(protyleTopElement);
+    }
+
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         scrollEvent(protyle, protyle.contentElement);

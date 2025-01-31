@@ -334,7 +334,7 @@ export const showPopover = async (app: App, showRef = false) => {
     if (!popoverTargetElement || window.siyuan.menus.menu.data?.isSameNode(popoverTargetElement)) {
         return;
     }
-    let refDefs: IRefDefs[];
+    let refDefs: IRefDefs[] = [];
     let originalRefBlockIDs: IObject;
     const dataId = popoverTargetElement.getAttribute("data-id");
     if (dataId) {

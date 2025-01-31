@@ -198,6 +198,7 @@ export class Gutter {
                             }
                         }
                     });
+                    buttonElement.parentElement.querySelector("[data-type='fold'] > svg")?.setAttribute("style", `width: 10px${hasFold ? ";transform:rotate(90deg)" : ""}`);
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.children).forEach((ulElement) => {
@@ -346,6 +347,7 @@ export class Gutter {
                             }
                         }
                     });
+                    buttonElement.parentElement.querySelector("[data-type='fold'] > svg")?.setAttribute("style", `width: 10px${hasFold ? ";transform:rotate(90deg)" : ""}`);
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {

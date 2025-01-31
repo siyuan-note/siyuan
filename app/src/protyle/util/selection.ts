@@ -114,8 +114,10 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     hideElements(["select"], protyle);
     const ids: string [] = [];
     Array.from(protyle.wysiwyg.element.children).forEach(item => {
-        item.classList.add("protyle-wysiwyg--select");
-        ids.push(item.getAttribute("data-node-id"));
+        if (item.hasAttribute("data-node-id")) {
+            item.classList.add("protyle-wysiwyg--select");
+            ids.push(item.getAttribute("data-node-id"));
+        }
     });
     countBlockWord(ids, protyle.block.rootID);
 };

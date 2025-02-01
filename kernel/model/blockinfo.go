@@ -585,6 +585,7 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 				}
 
 				name = gulu.Str.SubStr(renderBlockText(b, excludeTypes, true), maxNameLen)
+				name = util.UnescapeHTML(name)
 				name = util.EscapeHTML(name)
 				ret = append([]*BlockPath{{
 					ID:      b.ID,

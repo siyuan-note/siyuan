@@ -1,6 +1,6 @@
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {focusBlock, focusByWbr, focusSideBlock, getEditorRange} from "../util/selection";
-import {getContenteditableElement, getTopAloneElement} from "./getBlock";
+import {getContenteditableElement, getFirstBlock, getTopAloneElement} from "./getBlock";
 import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
@@ -142,7 +142,9 @@ const promiseTransaction = () => {
                 if (protyle.options.backlinkData) {
                     const updateElements: Element[] = [];
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
-                        if (!isInEmbedBlock(item)) {
+                        if (!isInEmbedBlock(item) &&
+                            // 当前操作块不再进行操作，否则光标丢失 https://github.com/siyuan-note/siyuan/issues/13946
+                            !item.contains(range.startContainer)) {
                             updateElements.push(item);
                             return;
                         }
@@ -150,14 +152,14 @@ const promiseTransaction = () => {
                     let hasFind = false;
                     if (operation.previousID && updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
-                            if (!isInEmbedBlock(item)) {
+                            if (!isInEmbedBlock(item) && !item.nextElementSibling.contains(range.startContainer)) {
                                 item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                                 hasFind = true;
                             }
                         });
                     } else if (updateElements.length > 0) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
-                            if (!isInEmbedBlock(item)) {
+                            if (!isInEmbedBlock(item) && !getFirstBlock(item).contains(range.startContainer)) {
                                 // 列表特殊处理
                                 if (item.firstElementChild?.classList.contains("protyle-action")) {
                                     item.firstElementChild.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));

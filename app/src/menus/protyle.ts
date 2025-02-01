@@ -1518,10 +1518,11 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             icon: "iconCut",
             label: window.siyuan.languages.cut,
             click() {
-                writeText(protyle.lute.BlockDOM2StdMd(linkElement.outerHTML));
+                const range = document.createRange();
+                range.selectNode(linkElement);
+                focusByRange(range);
+                document.execCommand("cut");
 
-                linkElement.insertAdjacentHTML("afterend", "<wbr>");
-                linkElement.remove();
                 nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
                 updateTransaction(protyle, id, nodeElement.outerHTML, html);
                 focusByWbr(nodeElement, protyle.toolbar.range);

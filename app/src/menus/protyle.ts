@@ -60,6 +60,7 @@ import {getFirstBlock} from "../protyle/wysiwyg/getBlock";
 import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
+import {hideTooltip} from "../dialog/tooltip";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -1374,6 +1375,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     if (!nodeElement) {
         return;
     }
+    hideTooltip();
     hideElements(["util", "toolbar", "hint"], protyle);
     const id = nodeElement.getAttribute("data-node-id");
     let html = nodeElement.outerHTML;

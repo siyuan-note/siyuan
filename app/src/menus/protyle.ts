@@ -1522,11 +1522,6 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 range.selectNode(linkElement);
                 focusByRange(range);
                 document.execCommand("cut");
-
-                nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
-                updateTransaction(protyle, id, nodeElement.outerHTML, html);
-                focusByWbr(nodeElement, protyle.toolbar.range);
-                html = nodeElement.outerHTML;
             }
         }).element);
         window.siyuan.menus.menu.append(new MenuItem({

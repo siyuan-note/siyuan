@@ -114,8 +114,8 @@ export class Gutter {
                     selectIds.push(itemId);
                 }));
                 if (!selectedIncludeGutter) {
-                    let gutterNodeElement;
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${gutterId}"]`)).find(item => {
+                    let gutterNodeElement: HTMLElement;
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${gutterId}"]`)).find((item: HTMLElement) => {
                         if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
                             gutterNodeElement = item;
                             return true;

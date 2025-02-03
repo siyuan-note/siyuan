@@ -20,17 +20,14 @@ export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
 
-    const protyleTopElement = document.createElement("div");
-    const shouldAddBackground = protyle.options.render.background;
-    const shouldAddTitle = protyle.options.render.title;
-    if (shouldAddBackground) {
-        protyleTopElement.appendChild(protyle.background.element);
-    }
-    if (shouldAddTitle) {
-        protyleTopElement.appendChild(protyle.title.element);
-    }
-    if (shouldAddBackground || shouldAddTitle) {
-        protyle.contentElement.appendChild(protyleTopElement);
+    if (protyle.options.render.background || protyle.options.render.title) {
+        protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
+        if (protyle.options.render.background) {
+            protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
+        }
+        if (protyle.options.render.title) {
+            protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
+        }
     }
 
     protyle.contentElement.appendChild(protyle.wysiwyg.element);

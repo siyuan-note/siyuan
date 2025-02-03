@@ -511,6 +511,10 @@
     transition: var(--b3-background-transition);
   }
 
+  &--hidden ::selection {
+    background-color: transparent;
+  }
+
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;

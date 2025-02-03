@@ -484,7 +484,6 @@ export class Gutter {
         this.element.addEventListener("mousewheel", (event) => {
             hideElements(["gutter"], protyle);
             event.stopPropagation();
-            event.preventDefault();
         }, {passive: true});
     }
 

@@ -808,12 +808,6 @@ export class WYSIWYG {
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) &&
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
-                    if (moveTarget.classList.contains("table__select")) {
-                        moveTarget.classList.add("fn__none");
-                        const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-                        moveTarget.classList.remove("fn__none");
-                        moveTarget = hasClosestByMatchTag(pointElement, "TH") || hasClosestByMatchTag(pointElement, "TD");
-                    }
                     if (moveTarget && moveTarget.isSameNode(target)) {
                         tableBlockElement.querySelector(".table__select").removeAttribute("style");
                         tableBlockElement.classList.remove("protyle-wysiwyg--hidden");
@@ -875,7 +869,7 @@ export class WYSIWYG {
                             }
                         });
                         tableBlockElement.classList.add("protyle-wysiwyg--hidden");
-                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;`);
+                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;pointer-events:none;`);
                         moveCellElement = moveTarget;
                     }
                     return;

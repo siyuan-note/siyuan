@@ -58,7 +58,7 @@ export class Scroll {
         this.parentElement.addEventListener("mousewheel", (event: WheelEvent) => {
             if (protyle.contentElement.scrollTop + event.deltaY < protyle.contentElement.clientHeight) {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
-                protyle.contentElement.style.width = (protyle.contentElement.clientWidth) + "px";
+                protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
                 protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {

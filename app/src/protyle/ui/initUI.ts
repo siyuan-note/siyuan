@@ -79,7 +79,6 @@ export const initUI = (protyle: IProtyle) => {
         if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
             return;
         }
-        event.preventDefault();
         event.stopPropagation();
         if (event.deltaY < 0) {
             if (window.siyuan.config.editor.fontSize < 72) {
@@ -113,7 +112,7 @@ export const initUI = (protyle: IProtyle) => {
                 });
             });
         }, Constants.TIMEOUT_LOAD);
-    }, {passive: false});
+    }, {passive: true});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||

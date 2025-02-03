@@ -56,28 +56,9 @@ export class Scroll {
             }
         });
         this.parentElement.addEventListener("mousewheel", (event: WheelEvent) => {
-            if (protyle.contentElement.scrollTop + event.deltaY < protyle.contentElement.clientHeight) {
-                // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
-                protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
-                protyle.contentElement.style.overflow = "hidden";
-                protyle.wysiwyg.element.setAttribute("data-top", protyle.contentElement.scrollTop.toString());
-                fetchPost("/api/filetree/getDoc", {
-                    id: protyle.wysiwyg.element.firstElementChild.getAttribute("data-node-id"),
-                    mode: 1,
-                    size: window.siyuan.config.editor.dynamicLoadBlocks,
-                }, getResponse => {
-                    protyle.contentElement.style.overflow = "";
-                    protyle.contentElement.style.width = "";
-                    onGet({
-                        data: getResponse,
-                        protyle,
-                        action: [Constants.CB_GET_BEFORE, Constants.CB_GET_UNCHANGEID],
-                    });
-                    protyle.contentElement.scrollTop += event.deltaY;
-                });
-                return;
+            if (event.deltaY !== 0) {
+                protyle.contentElement.scrollTop += event.deltaY;
             }
-            protyle.contentElement.scrollTop += event.deltaY;
         }, {passive: true});
     }
 

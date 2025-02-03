@@ -10,7 +10,6 @@
   top: 30px;
   width: 16px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
-  pointer-events: none;
 
   svg {
     height: 16px;
@@ -25,7 +24,6 @@
     opacity: 0;
     cursor: pointer;
     color: var(--b3-border-color);
-    pointer-events: auto;
 
     &:hover {
       color: var(--b3-theme-on-surface);
@@ -53,7 +51,6 @@
     top: calc(50% - 8px);
     transform: rotate(90deg);
     z-index: 1;
-    pointer-events: auto;
 
     .b3-slider {
       width: var(--b3-dynamicscroll-width);

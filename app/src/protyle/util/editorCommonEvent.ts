@@ -817,6 +817,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 window.siyuan.dragElement = undefined;
                 event.preventDefault();
             } else if (target.classList.contains("protyle-action")) {
+                target.parentElement.classList.add("protyle-wysiwyg--select");
                 const ghostElement = document.createElement("div");
                 ghostElement.className = protyle.wysiwyg.element.className;
                 ghostElement.append(processClonePHElement(target.parentElement.cloneNode(true) as Element));

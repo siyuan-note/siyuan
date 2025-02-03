@@ -61,7 +61,8 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
             }
         } else {
             position = getSelectionOffset(editElement, nodeElement, range);
-            if (position.start !== 0 || position.end !== editElement.textContent.length) {
+            const isCode = editElement.parentElement.classList.contains("hljs");
+            if (position.start !== 0 || position.end !== (!isCode ? editElement.textContent.length : editElement.textContent.length - 1)) {
                 // 全选后 rang 不对 https://ld246.com/article/1654848722251
                 let firstChild = editElement.firstChild;
                 while (firstChild) {
@@ -97,6 +98,9 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
                         }
                         lastChild = lastChild.lastChild as HTMLElement;
                     }
+                }
+                if (isCode && lastChild.textContent?.charAt(lastChild.textContent.length - 1) === "\n") {
+                    range.setEnd(range.endContainer, lastChild.textContent.length - 1);
                 }
                 // 列表回车后，左键全选无法选中
                 focusByRange(range);

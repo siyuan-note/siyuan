@@ -115,10 +115,18 @@ export const initUI = (protyle: IProtyle) => {
     }, {passive: true});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
-        // 选中文本或块时，禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
-        if (protyle.disabled || window.getSelection().toString().length > 0 || event.target.querySelector(".protyle-wysiwyg--select") ||
+        if (protyle.disabled ||
+            // 选中块时，禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
+            protyle.contentElement.querySelector(".protyle-wysiwyg--select") ||
             (!event.target.classList.contains("protyle-content") && !event.target.classList.contains("protyle-wysiwyg"))) {
             return;
+        }
+        // 选中文本禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
+        if (window.getSelection().rangeCount > 0) {
+            const currentRange = window.getSelection().getRangeAt(0);
+            if (currentRange.toString() !== "" && protyle.wysiwyg.element.contains(currentRange.startContainer)) {
+                return;
+            }
         }
         const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
         const range = document.createRange();

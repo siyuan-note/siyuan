@@ -2321,7 +2321,7 @@ export class Gutter {
                 if (isShow) {
                     type = nodeElement.getAttribute("data-type");
                 }
-                const dataNodeId = nodeElement.getAttribute("data-node-id");
+                let dataNodeId = nodeElement.getAttribute("data-node-id");
                 if (type === "NodeAttributeView" && target) {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header")) {
@@ -2354,6 +2354,7 @@ export class Gutter {
                     if (!topElement.isSameNode(nodeElement) && type !== "NodeHeading") {
                         nodeElement = topElement;
                         type = nodeElement.getAttribute("data-type");
+                        dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
                 if (type === "NodeListItem" && index === 1 && !isShow) {
@@ -2365,10 +2366,15 @@ export class Gutter {
                 if (protyle.disabled) {
                     gutterTip = this.gutterTip.split("<br>").splice(0, 2).join("<br>");
                 }
+
+                let popoverHTML = ""
+                if (protyle.options.backlinkData) {
+                    popoverHTML = `class="popover__block" data-id="${dataNodeId}"`
+                }
                 const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${gutterTip}" 
-data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
+data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
-    <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
+    <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;
                 if (isShow) {
                     html = buttonHTML + html;

@@ -204,7 +204,6 @@ export class Gutter {
                             }
                         }
                     });
-                    buttonElement.parentElement.querySelector("[data-type='fold'] > svg")?.setAttribute("style", `width: 10px${hasFold ? ";transform:rotate(90deg)" : ""}`);
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.children).forEach((ulElement) => {
@@ -353,7 +352,7 @@ export class Gutter {
                             }
                         }
                     });
-                    buttonElement.parentElement.querySelector("[data-type='fold'] > svg")?.setAttribute("style", `width: 10px${hasFold ? ";transform:rotate(90deg)" : ""}`);
+                    (buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement).style.transform = hasFold ? "rotate(90deg)" : "";
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
@@ -378,7 +377,11 @@ export class Gutter {
                     });
                     transaction(protyle, doOperations, undoOperations);
                 } else {
-                    setFold(protyle, foldElement);
+                    const hasFold = setFold(protyle, foldElement);
+                    const foldArrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement
+                    if (hasFold !== -1 && foldArrowElement) {
+                        foldArrowElement.style.transform = hasFold === 0 ? "rotate(90deg)" : "";
+                    }
                 }
                 foldElement.classList.remove("protyle-wysiwyg--hl");
             } else if (window.siyuan.shiftIsPressed && !protyle.disabled) {

@@ -453,6 +453,9 @@ export class Files extends Model {
                 }
             });
             window.siyuan.dragElement = undefined;
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            });
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {

@@ -511,7 +511,7 @@
     transition: var(--b3-background-transition);
   }
 
-  &--hidden ::selection {
+  &--hiderange ::selection {
     background-color: transparent;
   }
 

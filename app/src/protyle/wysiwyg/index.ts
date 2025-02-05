@@ -440,6 +440,7 @@ export class WYSIWYG {
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
+            protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
             if (event.button === 2 || window.siyuan.ctrlIsPressed) {
                 // 右键
                 return;
@@ -729,7 +730,6 @@ export class WYSIWYG {
                 tableBlockElement = hasClosestBlock(target);
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
-                    tableBlockElement.classList.remove("protyle-wysiwyg--hidden");
                     window.siyuan.menus.menu.remove();
                     event.stopPropagation();
                 }
@@ -811,9 +811,15 @@ export class WYSIWYG {
                 // table cell select
                 if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) &&
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
+                    if (moveTarget.classList.contains("table__select")) {
+                        moveTarget.classList.add("fn__none");
+                        const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
+                        moveTarget.classList.remove("fn__none");
+                        moveTarget = hasClosestByMatchTag(pointElement, "TH") || hasClosestByMatchTag(pointElement, "TD");
+                    }
                     if (moveTarget && moveTarget.isSameNode(target)) {
                         tableBlockElement.querySelector(".table__select").removeAttribute("style");
-                        tableBlockElement.classList.remove("protyle-wysiwyg--hidden");
+                        protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                         moveCellElement = moveTarget;
                         return false;
                     }
@@ -871,8 +877,8 @@ export class WYSIWYG {
                                 width = item.offsetLeft + item.clientWidth - left;
                             }
                         });
-                        tableBlockElement.classList.add("protyle-wysiwyg--hidden");
-                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;pointer-events:none;`);
+                        protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
+                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;`);
                         moveCellElement = moveTarget;
                     }
                     return;
@@ -1049,12 +1055,13 @@ export class WYSIWYG {
                 if (moveEvent.clientY <= y && !endLastElement) {
                     endLastElement = selectElements[selectElements.length - 1];
                 }
-                if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
-                    protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hidden");
+                if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
+                    !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
+                    protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 } else {
-                    protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hidden");
+                    protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
                             item.classList.add("protyle-wysiwyg--select");
@@ -2181,7 +2188,6 @@ export class WYSIWYG {
                 this.preventClick = false;
                 return;
             }
-            protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hidden");
             protyle.app.plugins.forEach(item => {
                 item.eventBus.emit("click-editorcontent", {
                     protyle,

@@ -274,9 +274,9 @@ export class Outline extends Model {
                     return;
                 }
                 const selectRect = selectItem.getBoundingClientRect();
-                if (moveEvent.clientY > selectRect.bottom - 10) {
+                if (moveEvent.clientY > selectRect.top + selectRect.height * 3 / 4) {
                     selectItem.classList.add("dragover__bottom");
-                } else if (moveEvent.clientY < selectRect.top + 10) {
+                } else if (moveEvent.clientY < selectRect.bottom - selectRect.height * 3 / 4) {
                     selectItem.classList.add("dragover__top");
                 } else {
                     selectItem.classList.add("dragover");

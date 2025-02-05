@@ -208,8 +208,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                 }
             }];
             workspaceSubMenu.push({id: "separator_1", type: "separator"});
+            const workspaceDir = window.siyuan.config.system.workspaceDir;
             response.data.forEach((item: IWorkspace) => {
-                workspaceSubMenu.push(workspaceItem(item) as IMenu);
+                workspaceSubMenu.push(workspaceItem(item, workspaceDir) as IMenu);
             });
             /// #else
             workspaceSubMenu = [{
@@ -532,16 +533,27 @@ const openWorkspace = (workspace: string) => {
     /// #endif
 };
 
-const workspaceItem = (item: IWorkspace) => {
-    /// #if !BROWSER
-    return {
-        label: `<div aria-label="${item.path}" class="fn__ellipsis ariaLabel" style="max-width: 256px">
-    ${originalPath().basename(item.path)}
-</div>`,
-        current: !item.closed,
-        iconHTML: "",
-        type: "submenu",
-        submenu: [{
+const workspaceItem = (item: IWorkspace, workspaceDir: string) => {
+    let submenu: any[];
+    if (item.path === workspaceDir) {
+        submenu = [{
+            id: "showInFolder",
+            icon: "iconFolder",
+            label: window.siyuan.languages.showInFolder,
+            click() {
+                showFileInFolder(item.path);
+            }
+        }, {
+            id: "copyPath",
+            icon: "iconCopy",
+            label: window.siyuan.languages.copyPath,
+            click() {
+                writeText(item.path);
+                showMessage(window.siyuan.languages.copied);
+            }
+        }];
+    } else {
+        submenu = [{
             id: "openBy",
             icon: "iconOpenWindow",
             label: window.siyuan.languages.openBy,
@@ -570,7 +582,14 @@ const workspaceItem = (item: IWorkspace) => {
             click() {
                 fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
             }
-        }],
+        }];
+    }
+    return {
+        label: `<div aria-label="${item.path}" class="fn__ellipsis ariaLabel" style="max-width: 256px">${originalPath().basename(item.path)}</div>`,
+        current: !item.closed,
+        iconHTML: "",
+        type: "submenu",
+        submenu,
         click() {
             openWorkspace(item.path);
         },

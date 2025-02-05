@@ -518,16 +518,17 @@ export class Files extends Model {
                 ) &&
                 // 防止文档拖拽到笔记本外
                 !(!sourceOnlyRoot && targetType === "navigation-root")) {
-                const nodeRect = (liElement as HTMLElement).getBoundingClientRect();
+                const nodeRect = liElement.getBoundingClientRect();
+                const dragHeight = nodeRect.height * .36;
                 if (targetType === "navigation-root" && sourceOnlyRoot) {
                     if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                         (liElement as HTMLElement).classList.add("dragover__bottom");
                     } else {
                         (liElement as HTMLElement).classList.add("dragover__top");
                     }
-                } else if (event.clientY > nodeRect.top + nodeRect.height * 3 / 4) {
+                } else if (event.clientY > nodeRect.bottom - dragHeight) {
                     (liElement as HTMLElement).classList.add("dragover__bottom");
-                } else if (event.clientY < nodeRect.bottom - nodeRect.height * 3 / 4) {
+                } else if (event.clientY < nodeRect.top + dragHeight) {
                     (liElement as HTMLElement).classList.add("dragover__top");
                 }
                 event.preventDefault();

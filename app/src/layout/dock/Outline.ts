@@ -274,9 +274,10 @@ export class Outline extends Model {
                     return;
                 }
                 const selectRect = selectItem.getBoundingClientRect();
-                if (moveEvent.clientY > selectRect.top + selectRect.height * 3 / 4) {
+                const dragHeight = selectRect.height * .36;
+                if (moveEvent.clientY > selectRect.bottom - dragHeight) {
                     selectItem.classList.add("dragover__bottom");
-                } else if (moveEvent.clientY < selectRect.bottom - selectRect.height * 3 / 4) {
+                } else if (moveEvent.clientY < selectRect.top + dragHeight) {
                     selectItem.classList.add("dragover__top");
                 } else {
                     selectItem.classList.add("dragover");

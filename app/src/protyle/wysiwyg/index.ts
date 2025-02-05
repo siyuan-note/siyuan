@@ -416,15 +416,13 @@ export class WYSIWYG {
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
                     const codeBlockElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock");
+                    textPlain = tempElement.textContent;
                     if (codeBlockElement) {
-                        textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
                         if (range.endContainer.textContent.length === range.endOffset &&
                             (range.endContainer.parentElement.getAttribute("spellcheck") ? !range.endContainer.nextSibling : !range.endContainer.parentElement.nextSibling)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
-                    } else if (hasClosestByMatchTag(range.startContainer, "CODE")) {
-                        textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
-                    } else {
+                    } else if (!hasClosestByMatchTag(range.startContainer, "CODE")) {
                         textPlain = range.toString();
                     }
                 }

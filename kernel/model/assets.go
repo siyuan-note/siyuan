@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -379,7 +378,7 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 			if p := filepath.ToSlash(path); strings.HasSuffix(p, relativePath) {
 				if gulu.File.IsExist(path) {
 					ret = path
-					return io.EOF
+					return fs.SkipAll
 				}
 			}
 			return nil
@@ -393,7 +392,6 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 			return
 		}
 	}
-
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 

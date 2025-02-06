@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Aggiungi</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignora</button>",
     "253": "Compressione del file [%s], attendere prego...",
     "254": "[Region ID] ID regione non corretto, si prega di consultare la documentazione del fornitore di servizi S3 per configurare l'ID regione",
-    "255": "Il sito di destinazione ha abilitato la protezione hotlink, quindi non è possibile scaricare [%d] risorse"
+    "255": "Il sito di destinazione ha abilitato la protezione hotlink, quindi non è possibile scaricare [%d] risorse",
+    "256": "Il percorso specificato [%s] ha un percorso di spazio di lavoro padre [%s]"
   }
 }

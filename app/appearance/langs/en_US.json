@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Add</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignore</button>",
     "253": "Compressing file [%s], please wait...",
     "254": "[Region ID] Incorrect Region ID, please refer to the S3 service provider's documentation to configure the Region ID",
-    "255": "The target site has enabled hotlink protection, so it is not possible to download [%d] resources"
+    "255": "The target site has enabled hotlink protection, so it is not possible to download [%d] resources",
+    "256": "The specified path [%s] has a parent workspace path [%s]"
   }
 }

@@ -178,7 +178,7 @@ export class Outline extends Model {
                             break;
                     }
                     break;
-                } else if (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons")) {
+                } else if (this.blockId && (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons"))) {
                     openFileById({
                         app: options.app,
                         id: this.blockId,

@@ -2158,7 +2158,8 @@ export class WYSIWYG {
             }
 
             // 按下方向键后块高亮跟随光标移动 https://github.com/siyuan-note/siyuan/issues/8918
-            if ((event.key === "ArrowLeft" || event.key === "ArrowRight") &&
+            if ((event.key === "ArrowLeft" || event.key === "ArrowRight" ||
+                    event.key === "Alt" || event.key === "Shift") &&    // 选中后 alt+shift+arrowRight 会导致光标和选中块不一致
                 nodeElement && !nodeElement.classList.contains("protyle-wysiwyg--select")) {
                 const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let containRange = false;

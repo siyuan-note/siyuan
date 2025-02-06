@@ -504,13 +504,13 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
         event.preventDefault();
         return true;
     }
-    if (!isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
+    if (range && !isFileFocus && matchHotKey(window.siyuan.config.keymap.editor.general.copyBlockRef.custom, event)) {
         event.preventDefault();
         event.stopPropagation();
-        if (hasClosestByClassName(range?.startContainer, "protyle-title")) {
+        if (hasClosestByClassName(range.startContainer, "protyle-title")) {
             copyTextByType([protyle.block.rootID], "ref");
         } else {
-            const nodeElement = hasClosestBlock(range?.startContainer);
+            const nodeElement = hasClosestBlock(range.startContainer);
             if (!nodeElement) {
                 return false;
             }
@@ -519,9 +519,9 @@ const editKeydown = (app: App, event: KeyboardEvent) => {
                 copyPNGByLink(selectImgElement.querySelector("img").getAttribute("src"));
                 return true;
             }
-            const selectBlocks = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectBlocks.length !== 0) {
-                copyTextByType(Array.from(selectBlocks).map(item => item.getAttribute("data-node-id")), "ref");
+            const ids = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select")).map(item => item.getAttribute("data-node-id"));
+            if (ids.length > 0) {
+                copyTextByType(ids, "ref");
                 return true;
             }
             if (range.toString() !== "") {

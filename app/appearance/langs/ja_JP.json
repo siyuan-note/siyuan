@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender は、カーネルを誤って削除したり、データを削除したり、パフォーマンスを大幅に低下させたりする可能性があります。SiYuan のインストールパスとワークスペースパスを除外リストに追加することをお勧めします<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">追加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">無視</button>",
     "253": "ファイル [%s] を圧縮しています、お待ちください...",
     "254": "[Region ID] リージョンIDが正しくありません。S3サービスプロバイダーのドキュメントを参照してリージョンIDを設定してください",
-    "255": "ターゲットサイトはホットリンク保護を有効にしているため、[%d] 個のリソースをダウンロードできません"
+    "255": "ターゲットサイトはホットリンク保護を有効にしているため、[%d] 個のリソースをダウンロードできません",
+    "256": "指定されたパス [%s] の親にワークスペースパス [%s] が存在します"
   }
 }

@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.2
-        version: 2.1.2(electron@33.3.2)
+        version: 2.1.2(electron@33.4.0)
     devDependencies:
       '@types/node':
         specifier: ^18.13.0
@@ -34,8 +34,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.5
       electron:
-        specifier: 33.3.2
-        version: 33.3.2
+        specifier: 33.4.0
+        version: 33.4.0
       electron-builder:
         specifier: 25.1.8
         version: 25.1.8(electron-builder-squirrel-windows@25.0.5)
@@ -1145,8 +1145,8 @@ packages:
   electron-to-chromium@1.5.39:
     resolution: {integrity: sha512-4xkpSR6CjuiaNyvwiWDI85N9AxsvbPawB8xc7yzLPonYTuP19BVgYweKyUMFtHEZgIcHWMt1ks5Cqx2m+6/Grg==}
 
-  electron@33.3.2:
-    resolution: {integrity: sha512-2pWr0frM9UrZGX1d7eoFdMROw10h2vXIWJmXdjwlKnSWWUm18GCrEOUeDUr+IMgz5EjO7JM7FQDHDMApeMgHyg==}
+  electron@33.4.0:
+    resolution: {integrity: sha512-AO+Q/ygWwKKs+JtNEFgfS5ntjG3TA2HX7s4IEbiYi6lktaocuLP2oScG1/mmKRuUWoOcow2RRsf995L2mM4bvQ==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2834,9 +2834,9 @@ snapshots:
       - bluebird
       - supports-color
 
-  '@electron/remote@2.1.2(electron@33.3.2)':
+  '@electron/remote@2.1.2(electron@33.4.0)':
     dependencies:
-      electron: 33.3.2
+      electron: 33.4.0
 
   '@electron/universal@2.0.1':
     dependencies:
@@ -4012,7 +4012,7 @@ snapshots:
 
   electron-to-chromium@1.5.39: {}
 
-  electron@33.3.2:
+  electron@33.4.0:
     dependencies:
       '@electron/get': 2.0.2
       '@types/node': 20.14.5

@@ -341,3 +341,13 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 func IsAbsPathInWorkspace(absPath string) bool {
 	return IsSubPath(WorkspaceDir, absPath)
 }
+
+// IsWorkspaceDir 判断指定目录是否是工作空间目录。
+func IsWorkspaceDir(dir string) bool {
+	conf := filepath.Join(dir, "conf", "conf.json")
+	data, err := os.ReadFile(conf)
+	if nil != err {
+		return false
+	}
+	return strings.Contains(string(data), "kernelVersion")
+}

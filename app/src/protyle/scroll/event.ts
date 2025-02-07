@@ -71,7 +71,7 @@ export const scrollEvent = (protyle: IProtyle, element: HTMLElement) => {
             if (element.scrollTop < element.clientHeight &&
                 protyle.wysiwyg.element.firstElementChild.getAttribute("data-eof") !== "1") {
                 // 禁用滚动时会产生抖动 https://ld246.com/article/1666717094418
-                protyle.contentElement.style.width = (protyle.contentElement.clientWidth) + "px";
+                protyle.contentElement.style.width = (protyle.contentElement.offsetWidth) + "px";
                 protyle.contentElement.style.overflow = "hidden";
                 protyle.wysiwyg.element.setAttribute("data-top", element.scrollTop.toString());
                 fetchPost("/api/filetree/getDoc", {

@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender kann fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den SiYuan-Installationspfad und den Arbeitsbereichspfad zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Hinzufügen</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorieren</button>",
     "253": "Datei [%s] wird komprimiert, bitte warten...",
     "254": "[Region ID] Falsche Regions-ID, bitte konsultieren Sie die Dokumentation des S3-Dienstanbieters zur Konfiguration der Regions-ID",
-    "255": "Die Zielseite hat den Hotlink-Schutz aktiviert, daher ist es nicht möglich, [%d] Ressourcen herunterzuladen"
+    "255": "Die Zielseite hat den Hotlink-Schutz aktiviert, daher ist es nicht möglich, [%d] Ressourcen herunterzuladen",
+    "256": "Der angegebene Pfad [%s] hat einen übergeordneten Arbeitsbereichspfad [%s]"
   }
 }

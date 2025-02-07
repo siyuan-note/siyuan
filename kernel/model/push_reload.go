@@ -154,9 +154,8 @@ func refreshRefCount(rootID, blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	var refIDs []string
+	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
 	if isDoc {
-		refIDs = sql.QueryRefIDsByDefID(bt.ID, isDoc)
 		rootRefIDs = refIDs
 	} else {
 		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)

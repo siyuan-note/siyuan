@@ -453,6 +453,9 @@ export class Files extends Model {
                 }
             });
             window.siyuan.dragElement = undefined;
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            });
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
@@ -516,13 +519,19 @@ export class Files extends Model {
                 // 防止文档拖拽到笔记本外
                 !(!sourceOnlyRoot && targetType === "navigation-root")) {
                 const nodeRect = liElement.getBoundingClientRect();
-                if (event.clientY > nodeRect.top + 20) {
-                    liElement.classList.add("dragover__bottom");
-                    event.preventDefault();
-                } else if (event.clientY < nodeRect.bottom - 20) {
-                    liElement.classList.add("dragover__top");
-                    event.preventDefault();
+                const dragHeight = nodeRect.height * .36;
+                if (targetType === "navigation-root" && sourceOnlyRoot) {
+                    if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                        (liElement as HTMLElement).classList.add("dragover__bottom");
+                    } else {
+                        (liElement as HTMLElement).classList.add("dragover__top");
+                    }
+                } else if (event.clientY > nodeRect.bottom - dragHeight) {
+                    (liElement as HTMLElement).classList.add("dragover__bottom");
+                } else if (event.clientY < nodeRect.top + dragHeight) {
+                    (liElement as HTMLElement).classList.add("dragover__top");
                 }
+                event.preventDefault();
             }
             if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
                 (targetType === "navigation-root" && sourceOnlyRoot)) {

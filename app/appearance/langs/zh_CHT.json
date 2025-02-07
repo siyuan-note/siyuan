@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender 可能會誤殺內核、誤刪數據和嚴重降低運行性能，建議將思源安裝路徑和工作空間路徑添加到排除列表<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">添加</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">忽略</button>",
     "253": "正在壓縮文件 [%s]，請稍等...",
     "254": "[Region ID] 不正確，請參考 S3 服務提供商的文檔配置地域 ID",
-    "255": "目標站點啟用了防盜鏈，[%d] 個資源無法下載"
+    "255": "目標站點啟用了防盜鏈，[%d] 個資源無法下載",
+    "256": "指定的路徑 [%s] 父級存在工作空間路徑 [%s]"
   }
 }

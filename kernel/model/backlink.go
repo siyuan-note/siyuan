@@ -483,6 +483,10 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	}
 	paragraphParents := sql.GetBlocks(paragraphParentIDs)
 	for _, p := range paragraphParents {
+		if nil == p {
+			continue
+		}
+
 		if "i" == p.Type || "h" == p.Type {
 			linkRefs = append(linkRefs, fromSQLBlock(p, keyword, beforeLen))
 			processedParagraphs.Add(p.ID)
@@ -589,6 +593,10 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	originalRefBlockIDs = map[string]string{}
 	processedParagraphs := hashset.New()
 	for _, parent := range paragraphParents {
+		if nil == parent {
+			continue
+		}
+
 		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
 			refBlock := parentRefParagraphs[parent.ID]
 			if nil == refBlock {

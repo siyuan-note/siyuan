@@ -709,6 +709,16 @@ func NewLute() (ret *lute.Lute) {
 	return
 }
 
+func EnableLuteInlineSyntax(luteEngine *lute.Lute) {
+	luteEngine.SetInlineAsterisk(true)
+	luteEngine.SetInlineUnderscore(true)
+	luteEngine.SetSup(true)
+	luteEngine.SetSub(true)
+	luteEngine.SetTag(true)
+	luteEngine.SetInlineMath(true)
+	luteEngine.SetGFMStrikethrough(true)
+}
+
 func (conf *AppConf) Save() {
 	if util.ReadOnly {
 		return

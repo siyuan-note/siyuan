@@ -1585,6 +1585,7 @@
     "252": "\uD83D\uDEA8 Microsoft Defender peut supprimer par erreur le noyau, supprimer des données et réduire considérablement les performances. Il est recommandé d'ajouter le chemin d'installation et l'espace de travail de SiYuan à la liste des exclusions<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Ajouter</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorer</button>",
     "253": "Compression du fichier [%s], veuillez patienter...",
     "254": "[Region ID] ID de région incorrect, veuillez consulter la documentation du fournisseur de services S3 pour configurer l'ID de région",
-    "255": "Le site cible a activé la protection contre le hotlinking, il est donc impossible de télécharger [%d] ressources"
+    "255": "Le site cible a activé la protection contre le hotlinking, il est donc impossible de télécharger [%d] ressources",
+    "256": "Le chemin spécifié [%s] contient un chemin d'espace de travail parent [%s]"
   }
 }

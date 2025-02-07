@@ -55,6 +55,11 @@ export class Scroll {
                 this.setIndex(protyle);
             }
         });
+        this.parentElement.addEventListener("mousewheel", (event: WheelEvent) => {
+            if (event.deltaY !== 0) {
+                protyle.contentElement.scrollTop += event.deltaY;
+            }
+        }, {passive: true});
     }
 
     private setIndex(protyle: IProtyle) {

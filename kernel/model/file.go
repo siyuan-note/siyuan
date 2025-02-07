@@ -1036,13 +1036,7 @@ func CreateWithMarkdown(tags, boxID, hPath, md, parentID, id string, withMath bo
 	luteEngine.SetHTMLTag2TextMark(true)
 	if strings.HasPrefix(clippingHref, "https://ld246.com/article/") || strings.HasPrefix(clippingHref, "https://liuyun.io/article/") {
 		// 改进链滴剪藏 https://github.com/siyuan-note/siyuan/issues/13117
-		luteEngine.SetInlineAsterisk(true)
-		luteEngine.SetInlineUnderscore(true)
-		luteEngine.SetSup(true)
-		luteEngine.SetSub(true)
-		luteEngine.SetTag(true)
-		luteEngine.SetInlineMath(true)
-		luteEngine.SetGFMStrikethrough(true)
+		EnableLuteInlineSyntax(luteEngine)
 	}
 	dom := luteEngine.Md2BlockDOM(md, false)
 	retID, err = createDocsByHPath(box.ID, hPath, dom, parentID, id)

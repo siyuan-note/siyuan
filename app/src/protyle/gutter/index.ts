@@ -114,7 +114,13 @@ export class Gutter {
                     selectIds.push(itemId);
                 }));
                 if (!selectedIncludeGutter) {
-                    const gutterNodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${gutterId}"]`);
+                    let gutterNodeElement: HTMLElement;
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${gutterId}"]`)).find((item: HTMLElement) => {
+                        if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
+                            gutterNodeElement = item;
+                            return true;
+                        }
+                    });
                     if (gutterNodeElement) {
                         selectElements.forEach((item => {
                             item.classList.remove("protyle-wysiwyg--select");
@@ -346,6 +352,7 @@ export class Gutter {
                             }
                         }
                     });
+                    (buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement).style.transform = hasFold ? "rotate(90deg)" : "";
                     const doOperations: IOperation[] = [];
                     const undoOperations: IOperation[] = [];
                     Array.from(foldElement.parentElement.children).find((listItemElement) => {
@@ -370,7 +377,11 @@ export class Gutter {
                     });
                     transaction(protyle, doOperations, undoOperations);
                 } else {
-                    setFold(protyle, foldElement);
+                    const hasFold = setFold(protyle, foldElement);
+                    const foldArrowElement = buttonElement.parentElement.querySelector("[data-type='fold'] > svg") as HTMLElement;
+                    if (hasFold !== -1 && foldArrowElement) {
+                        foldArrowElement.style.transform = hasFold === 0 ? "rotate(90deg)" : "";
+                    }
                 }
                 foldElement.classList.remove("protyle-wysiwyg--hl");
             } else if (window.siyuan.shiftIsPressed && !protyle.disabled) {
@@ -478,7 +489,6 @@ export class Gutter {
         this.element.addEventListener("mousewheel", (event) => {
             hideElements(["gutter"], protyle);
             event.stopPropagation();
-            event.preventDefault();
         }, {passive: true});
     }
 
@@ -2316,7 +2326,7 @@ export class Gutter {
                 if (isShow) {
                     type = nodeElement.getAttribute("data-type");
                 }
-                const dataNodeId = nodeElement.getAttribute("data-node-id");
+                let dataNodeId = nodeElement.getAttribute("data-node-id");
                 if (type === "NodeAttributeView" && target) {
                     const rowElement = hasClosestByClassName(target, "av__row");
                     if (rowElement && !rowElement.classList.contains("av__row--header")) {
@@ -2349,6 +2359,7 @@ export class Gutter {
                     if (!topElement.isSameNode(nodeElement) && type !== "NodeHeading") {
                         nodeElement = topElement;
                         type = nodeElement.getAttribute("data-type");
+                        dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
                 if (type === "NodeListItem" && index === 1 && !isShow) {
@@ -2360,10 +2371,15 @@ export class Gutter {
                 if (protyle.disabled) {
                     gutterTip = this.gutterTip.split("<br>").splice(0, 2).join("<br>");
                 }
+
+                let popoverHTML = "";
+                if (protyle.options.backlinkData) {
+                    popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
+                }
                 const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${gutterTip}" 
-data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${nodeElement.getAttribute("data-node-id")}">
+data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
-    <span ${protyle.disabled ? "" : 'draggable="true"'}></span>
+    <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;
                 if (isShow) {
                     html = buttonHTML + html;

@@ -624,6 +624,10 @@ func buildBacklinkListItemRefs(refDefs []*RefDefs) (originalRefBlockIDs map[stri
 	luteEngine := util.NewLute()
 	processedParagraphs := hashset.New()
 	for _, parent := range paragraphParents {
+		if nil == parent {
+			continue
+		}
+
 		if "NodeListItem" == parent.Type || "NodeBlockquote" == parent.Type || "NodeSuperBlock" == parent.Type {
 			refBlock := parentRefParagraphs[parent.ID]
 			if nil == refBlock {

@@ -580,6 +580,7 @@ func Preview(id string) (retStdHTML string) {
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, true, true, &map[string]*parse.Tree{})
 	luteEngine := NewLute()
+	EnableLuteInlineSyntax(luteEngine)
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
 	md := treenode.FormatNode(tree.Root, luteEngine)

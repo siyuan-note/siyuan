@@ -416,9 +416,8 @@ export class WYSIWYG {
                         html = tempElement.innerHTML;
                     }
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
-                    const codeBlockElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock");
                     textPlain = tempElement.textContent;
-                    if (codeBlockElement) {
+                    if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
                         if (range.endContainer.textContent.length === range.endOffset &&
                             (range.endContainer.parentElement.getAttribute("spellcheck") ? !range.endContainer.nextSibling : !range.endContainer.parentElement.nextSibling)) {
                             textPlain = textPlain.replace(/\n$/, "");

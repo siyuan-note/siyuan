@@ -1059,9 +1059,7 @@ export class WYSIWYG {
                     !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
                     protyle.selectElement.style.backgroundColor = "transparent";
-                    protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 } else {
-                    protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
                             item.classList.add("protyle-wysiwyg--select");

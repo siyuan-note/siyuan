@@ -41,7 +41,7 @@ import {
     getNextBlock,
     getTopAloneElement,
     hasNextSibling,
-    hasPreviousSibling,
+    hasPreviousSibling, isEndOfBlock,
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
@@ -418,8 +418,7 @@ export class WYSIWYG {
                     // 不能使用 commonAncestorContainer https://ld246.com/article/1643282894693
                     textPlain = tempElement.textContent;
                     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock")) {
-                        if (range.endContainer.textContent.length === range.endOffset &&
-                            (range.endContainer.parentElement.getAttribute("spellcheck") ? !range.endContainer.nextSibling : !range.endContainer.parentElement.nextSibling)) {
+                        if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
                     } else if (!hasClosestByMatchTag(range.startContainer, "CODE")) {
@@ -2155,8 +2154,7 @@ export class WYSIWYG {
             }
 
             // 按下方向键后块高亮跟随光标移动 https://github.com/siyuan-note/siyuan/issues/8918
-            if ((event.key === "ArrowLeft" || event.key === "ArrowRight" ||
-                    event.key === "Alt" || event.key === "Shift") &&    // 选中后 alt+shift+arrowRight 会导致光标和选中块不一致
+            if ((event.key === "ArrowLeft" || event.key === "ArrowRight") &&
                 nodeElement && !nodeElement.classList.contains("protyle-wysiwyg--select")) {
                 const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
                 let containRange = false;

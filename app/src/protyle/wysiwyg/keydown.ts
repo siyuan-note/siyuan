@@ -28,7 +28,7 @@ import {
     getPreviousBlock,
     getTopAloneElement,
     hasNextSibling,
-    hasPreviousSibling,
+    hasPreviousSibling, isEndOfBlock,
     isNotEditBlock,
 } from "./getBlock";
 import {matchHotKey} from "../util/hotKey";
@@ -328,12 +328,28 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
-        if (matchHotKey("⇧←", event) || matchHotKey("⇧→", event)) {
+
+        if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 event.stopPropagation();
                 event.preventDefault();
                 return;
+            }
+
+            if (!range.toString()) {
+                if (event.key === "ArrowRight" && isEndOfBlock(range)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                const nodeEditableElement = getContenteditableElement(nodeElement)
+                const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
+                if (position.start === 0 && event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
             }
         }
 

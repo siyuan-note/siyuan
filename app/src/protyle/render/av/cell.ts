@@ -12,7 +12,7 @@ import {getColIconByType} from "./col";
 import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
-import {pathPosix} from "../../../util/pathName";
+import {getAssetName, pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
@@ -631,6 +631,11 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                 let link = protyle.lute.GetLinkDest(value);
                 let name = "";
                 let imgSrc = "";
+                // https://github.com/siyuan-note/siyuan/issues/13892
+                if (!link && value.startsWith("assets/")) {
+                    link = value;
+                    name = getAssetName(value) + pathPosix().extname(value);
+                }
                 if (html) {
                     const tempElement = document.createElement("template");
                     tempElement.innerHTML = html;

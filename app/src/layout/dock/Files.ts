@@ -519,7 +519,7 @@ export class Files extends Model {
                 // 防止文档拖拽到笔记本外
                 !(!sourceOnlyRoot && targetType === "navigation-root")) {
                 const nodeRect = liElement.getBoundingClientRect();
-                const dragHeight = nodeRect.height * .36;
+                const dragHeight = nodeRect.height * .2;
                 if (targetType === "navigation-root" && sourceOnlyRoot) {
                     if (event.clientY > nodeRect.top + nodeRect.height / 2) {
                         (liElement as HTMLElement).classList.add("dragover__bottom");

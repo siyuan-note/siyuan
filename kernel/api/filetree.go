@@ -744,14 +744,9 @@ func createDailyNote(c *gin.Context) {
 		}
 		evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast)
 		evt.AppId = app
-		name := path.Base(p)
-		files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 		evt.Data = map[string]interface{}{
-			"box":   box,
-			"path":  p,
-			"files": files,
-			"name":  name,
-			"id":    tree.Root.ID,
+			"box":  box,
+			"path": p,
 		}
 		evt.Callback = arg["callback"]
 		util.PushEvent(evt)

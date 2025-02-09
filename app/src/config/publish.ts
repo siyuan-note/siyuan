@@ -1,5 +1,5 @@
-import {hasClosestByMatchTag} from "../protyle/util/hasClosest";
 import {fetchPost} from "../util/fetch";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
 
 export const publish = {
     element: undefined as Element,
@@ -153,7 +153,7 @@ export const publish = {
             .querySelectorAll("input")
             .forEach(input => {
                 input.addEventListener("change", () => {
-                    const li = hasClosestByMatchTag(input, "LI");
+                    const li = hasClosestByTag(input, "LI");
                     if (li) {
                         const index = parseInt(li.dataset.index);
                         const name = input.dataset.name as keyof Config.IPublishAuthAccount;
@@ -170,7 +170,7 @@ export const publish = {
             .querySelectorAll('.block__icon[data-action="remove"]')
             .forEach(remove => {
                 remove.addEventListener("click", () => {
-                    const li = hasClosestByMatchTag(remove, "LI");
+                    const li = hasClosestByTag(remove, "LI");
                     if (li) {
                         const index = parseInt(li.dataset.index);
                         window.siyuan.config.publish.auth.accounts.splice(index, 1);

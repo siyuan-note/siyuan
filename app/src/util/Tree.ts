@@ -1,10 +1,10 @@
 import {getIconByType} from "../editor/getIcon";
-import {hasClosestByMatchTag, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isMobile} from "./functions";
 import {mathRender} from "../protyle/render/mathRender";
 import {unicode2Emoji} from "../emoji";
 import {Constants} from "../constants";
 import {escapeAriaLabel} from "./escape";
+import {hasClosestByTag} from "../protyle/util/hasClosest";
 
 export class Tree {
     public element: HTMLElement;
@@ -224,7 +224,7 @@ data-def-path="${item.defPath}">
                 }
                 if (target.classList.contains("b3-list-item__action") && this.click) {
                     // 移动端书签父节点删除按钮
-                    const liElement = hasClosestByMatchTag(target, "LI");
+                    const liElement = hasClosestByTag(target, "LI");
                     if (liElement) {
                         this.click(liElement, event);
                     }

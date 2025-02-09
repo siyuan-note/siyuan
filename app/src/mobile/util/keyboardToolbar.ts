@@ -2,8 +2,7 @@ import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName,
-    hasClosestByMatchTag
+    hasClosestByClassName, hasClosestByTag,
 } from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
@@ -532,7 +531,7 @@ export const initKeyboardToolbar = () => {
             }
             return;
         }
-        const buttonElement = hasClosestByMatchTag(target, "BUTTON");
+        const buttonElement = hasClosestByTag(target, "BUTTON");
         if (!buttonElement || buttonElement.getAttribute("disabled")) {
             return;
         }

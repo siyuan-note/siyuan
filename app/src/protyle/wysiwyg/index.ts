@@ -2,8 +2,7 @@ import {getTextStar, paste, pasteText} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName,
-    hasClosestByMatchTag,
+    hasClosestByClassName, hasClosestByTag,
     hasTopClosestByClassName,
     isInEmbedBlock,
 } from "../util/hasClosest";
@@ -421,7 +420,7 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
-                    } else if (!hasClosestByMatchTag(range.startContainer, "CODE")) {
+                    } else if (!hasClosestByTag(range.startContainer, "CODE")) {
                         textPlain = range.toString();
                     }
                 }
@@ -721,7 +720,7 @@ export class WYSIWYG {
             }
             // table cell select
             let tableBlockElement: HTMLElement | false;
-            const targetCellElemet = hasClosestByMatchTag(target, "TH") || hasClosestByMatchTag(target, "TD");
+            const targetCellElemet = hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD");
             if (targetCellElemet) {
                 target = targetCellElemet;
             }
@@ -814,7 +813,7 @@ export class WYSIWYG {
                         moveTarget.classList.add("fn__none");
                         const pointElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
                         moveTarget.classList.remove("fn__none");
-                        moveTarget = hasClosestByMatchTag(pointElement, "TH") || hasClosestByMatchTag(pointElement, "TD");
+                        moveTarget = hasClosestByTag(pointElement, "TH") || hasClosestByTag(pointElement, "TD");
                     }
                     if (moveTarget && moveTarget.isSameNode(target)) {
                         tableBlockElement.querySelector(".table__select").removeAttribute("style");
@@ -1634,7 +1633,7 @@ export class WYSIWYG {
                             if (nodeElement.classList.contains("av")) {
                                 updateAVName(protyle, nodeElement);
                             } else if (nodeElement.classList.contains("table")) {
-                                parentElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+                                parentElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
                             } else {
                                 parentElement = getContenteditableElement(nodeElement);
                             }
@@ -1655,7 +1654,7 @@ export class WYSIWYG {
                 html = tempElement.innerHTML;
                 // https://github.com/siyuan-note/siyuan/issues/10722
                 if (hasClosestByAttribute(range.startContainer, "data-type", "NodeCodeBlock") ||
-                    hasClosestByMatchTag(range.startContainer, "CODE")) {
+                    hasClosestByTag(range.startContainer, "CODE")) {
                     textPlain = tempElement.textContent.replace(Constants.ZWSP, "");
                 }
                 // https://github.com/siyuan-note/siyuan/issues/4321

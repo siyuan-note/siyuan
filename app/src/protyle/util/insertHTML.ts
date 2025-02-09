@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "./hasClosest";
 import * as dayjs from "dayjs";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
@@ -290,7 +290,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     fixTableRange(range);
     let tableInlineHTML;
     if (hasClosestByAttribute(range.startContainer, "data-type", "NodeTable") && !isBlock) {
-        if (hasClosestByMatchTag(range.startContainer, "TABLE")) {
+        if (hasClosestByTag(range.startContainer, "TABLE")) {
             tableInlineHTML = protyle.lute.BlockDOM2InlineBlockDOM(html);
         } else {
             // https://github.com/siyuan-note/siyuan/issues/9411

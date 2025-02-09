@@ -772,7 +772,8 @@ export class Files extends Model {
             if (!liElement) {
                 const dirname = pathPosix().dirname(currentPath);
                 if (dirname === "/") {
-                    currentPath = dirname;
+                    this.getLeaf(treeElement.firstElementChild, notebookId, true);
+                    break;
                 } else {
                     currentPath = dirname + ".sy";
                 }

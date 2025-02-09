@@ -696,7 +696,7 @@ func createDoc(c *gin.Context) {
 
 	model.FlushTxQueue()
 
-	pushCreateEvt := true
+	pushCreateEvt := false
 	pushCreateEvtArg := arg["pushCreateEvt"]
 	if nil != pushCreateEvtArg {
 		pushCreateEvt = pushCreateEvtArg.(bool)
@@ -838,7 +838,7 @@ func createDocWithMd(c *gin.Context) {
 
 	model.FlushTxQueue()
 
-	pushCreateEvt := true
+	pushCreateEvt := false
 	pushCreateEvtArg := arg["pushCreateEvt"]
 	if nil != pushCreateEvtArg {
 		pushCreateEvt = pushCreateEvtArg.(bool)

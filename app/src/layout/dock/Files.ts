@@ -766,7 +766,7 @@ export class Files extends Model {
             return;
         }
         let currentPath = filePath;
-        let liElement
+        let liElement;
         while (!liElement) {
             liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
             if (!liElement) {
@@ -777,7 +777,7 @@ export class Files extends Model {
                     currentPath = dirname + ".sy";
                 }
             } else {
-                liElement.querySelector(".fn__hidden").classList.remove("fn__hidden");
+                liElement.querySelector(".fn__hidden")?.classList.remove("fn__hidden");
                 break;
             }
         }

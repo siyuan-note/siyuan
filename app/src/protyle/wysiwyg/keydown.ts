@@ -342,7 +342,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.stopPropagation();
                     return;
                 }
-                const nodeEditableElement = getContenteditableElement(nodeElement)
+                const nodeEditableElement = getContenteditableElement(nodeElement);
                 const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
                 if (position.start === 0 && event.key === "ArrowLeft") {
                     event.preventDefault();

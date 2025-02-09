@@ -168,7 +168,7 @@ export const isEndOfBlock = (range: Range) => {
         return  false;
     }
 
-    let nextSibling = range.endContainer
+    let nextSibling = range.endContainer;
     while (nextSibling) {
         if (hasNextSibling(nextSibling)) {
             return false;
@@ -176,12 +176,12 @@ export const isEndOfBlock = (range: Range) => {
             if (nextSibling.parentElement.getAttribute("spellcheck")) {
                 return true;
             }
-            nextSibling = nextSibling.parentElement
+            nextSibling = nextSibling.parentElement;
         }
     }
 
     return true;
-}
+};
 
 export const hasPreviousSibling = (element: Node) => {
     let previousSibling = element.previousSibling;

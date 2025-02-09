@@ -695,8 +695,16 @@ func createDoc(c *gin.Context) {
 	}
 
 	model.FlushTxQueue()
-	box := model.Conf.Box(notebook)
-	pushCreate(box, p, arg)
+
+	pushCreateEvt := true
+	pushCreateEvtArg := arg["pushCreateEvt"]
+	if nil != pushCreateEvtArg {
+		pushCreateEvt = pushCreateEvtArg.(bool)
+	}
+	if pushCreateEvt {
+		box := model.Conf.Box(notebook)
+		pushCreate(box, p, arg)
+	}
 
 	ret.Data = map[string]interface{}{
 		"id": tree.Root.ID,
@@ -829,10 +837,17 @@ func createDocWithMd(c *gin.Context) {
 	ret.Data = id
 
 	model.FlushTxQueue()
-	box := model.Conf.Box(notebook)
-	b, _ := model.GetBlock(id, nil)
-	p := b.Path
-	pushCreate(box, p, arg)
+
+	pushCreateEvt := true
+	pushCreateEvtArg := arg["pushCreateEvt"]
+	if nil != pushCreateEvtArg {
+		pushCreateEvt = pushCreateEvtArg.(bool)
+	}
+	if pushCreateEvt {
+		box := model.Conf.Box(notebook)
+		b, _ := model.GetBlock(id, nil)
+		pushCreate(box, b.Path, arg)
+	}
 }
 
 func getDocCreateSavePath(c *gin.Context) {

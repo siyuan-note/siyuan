@@ -458,7 +458,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                         notebookId,
                         currentPath: pathPosix().dirname(pathString),
                         paths,
-                        useSavePath: false
+                        useSavePath: false,
+                        pushCreateEvt: true,
                     });
                 }
             }).element);
@@ -481,7 +482,8 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                         notebookId,
                         currentPath: pathPosix().dirname(pathString),
                         paths,
-                        useSavePath: false
+                        useSavePath: false,
+                        pushCreateEvt: true,
                     });
                 }
             }).element);

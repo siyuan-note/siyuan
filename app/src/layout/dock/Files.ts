@@ -308,7 +308,8 @@ export class Files extends Model {
                                     app: options.app,
                                     notebookId,
                                     currentPath: pathString,
-                                    useSavePath: false
+                                    useSavePath: false,
+                                    pushCreateEvt: true,
                                 });
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({

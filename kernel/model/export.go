@@ -576,11 +576,11 @@ func Preview(id string) (retStdHTML string) {
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
-		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, true, true, &map[string]*parse.Tree{})
 	luteEngine := NewLute()
-	EnableLuteInlineSyntax(luteEngine)
+	enableLuteInlineSyntax(luteEngine)
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
 	md := treenode.FormatNode(tree.Root, luteEngine)

@@ -709,7 +709,7 @@ func NewLute() (ret *lute.Lute) {
 	return
 }
 
-func EnableLuteInlineSyntax(luteEngine *lute.Lute) {
+func enableLuteInlineSyntax(luteEngine *lute.Lute) {
 	luteEngine.SetInlineAsterisk(true)
 	luteEngine.SetInlineUnderscore(true)
 	luteEngine.SetSup(true)

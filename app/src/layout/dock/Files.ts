@@ -85,8 +85,14 @@ export class Files extends Model {
                         case "removeDoc":
                             this.onRemove(data);
                             break;
-                        case "createdailynote":
                         case "create":
+                            if (data.data.listDocTree) {
+                                this.selectItem(data.data.box.id, data.data.path);
+                            } else {
+                                this.updateItemArrow(data.data.box.id, data.data.path);
+                            }
+                            break;
+                        case "createdailynote":
                         case "heading2doc":
                         case "li2doc":
                             this.selectItem(data.data.box.id, data.data.path);
@@ -751,6 +757,29 @@ export class Files extends Model {
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
             liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+        }
+    }
+
+    private updateItemArrow(notebookId: string, filePath: string) {
+        const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
+        if (!treeElement) {
+            return;
+        }
+        let currentPath = filePath;
+        let liElement
+        while (!liElement) {
+            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
+            if (!liElement) {
+                const dirname = pathPosix().dirname(currentPath);
+                if (dirname === "/") {
+                    currentPath = dirname;
+                } else {
+                    currentPath = dirname + ".sy";
+                }
+            } else {
+                liElement.querySelector("fn__hidden").classList.remove("fn__hidden");
+                break;
+            }
         }
     }
 

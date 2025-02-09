@@ -695,16 +695,8 @@ func createDoc(c *gin.Context) {
 	}
 
 	model.FlushTxQueue()
-
-	pushCreateEvt := false
-	pushCreateEvtArg := arg["pushCreateEvt"]
-	if nil != pushCreateEvtArg {
-		pushCreateEvt = pushCreateEvtArg.(bool)
-	}
-	if pushCreateEvt {
-		box := model.Conf.Box(notebook)
-		pushCreate(box, p, arg)
-	}
+	box := model.Conf.Box(notebook)
+	pushCreate(box, p, arg)
 
 	ret.Data = map[string]interface{}{
 		"id": tree.Root.ID,
@@ -837,17 +829,9 @@ func createDocWithMd(c *gin.Context) {
 	ret.Data = id
 
 	model.FlushTxQueue()
-
-	pushCreateEvt := false
-	pushCreateEvtArg := arg["pushCreateEvt"]
-	if nil != pushCreateEvtArg {
-		pushCreateEvt = pushCreateEvtArg.(bool)
-	}
-	if pushCreateEvt {
-		box := model.Conf.Box(notebook)
-		b, _ := model.GetBlock(id, nil)
-		pushCreate(box, b.Path, arg)
-	}
+	box := model.Conf.Box(notebook)
+	b, _ := model.GetBlock(id, nil)
+	pushCreate(box, b.Path, arg)
 }
 
 func getDocCreateSavePath(c *gin.Context) {
@@ -1157,9 +1141,16 @@ func getDoc(c *gin.Context) {
 
 func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
+	listDocTree := false
+	listDocTreeArg := arg["listDocTree"]
+	if nil != listDocTreeArg {
+		listDocTree = listDocTreeArg.(bool)
+	}
+
 	evt.Data = map[string]interface{}{
-		"box":  box,
-		"path": p,
+		"box":         box,
+		"path":        p,
+		"listDocTree": listDocTree,
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)

@@ -1925,8 +1925,24 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 	}
 }
 
-func ExportMarkdownContent(id string) (hPath, exportedMd string) {
-	return exportMarkdownContent(id, ".md", Conf.Export.BlockRefMode, nil, true, &map[string]*parse.Tree{})
+func ExportMarkdownContent(id string, refMode, embedMode int, addYfm bool) (hPath, exportedMd string) {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	tree := prepareExportTree(bt)
+	hPath = tree.HPath
+	exportedMd = exportMarkdownContent0(tree, "", false,
+		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
+		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
+		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
+		Conf.Export.AddTitle, nil, true, &map[string]*parse.Tree{})
+	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
+	if addYfm {
+		exportedMd = yfm(docIAL) + exportedMd
+	}
+	return
 }
 
 func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []string, singleFile bool, treeCache *map[string]*parse.Tree) (hPath, exportedMd string) {

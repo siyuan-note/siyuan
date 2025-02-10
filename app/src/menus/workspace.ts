@@ -549,7 +549,7 @@ const workspaceItem = (item: IWorkspace) => {
             writeText(item.path);
             showMessage(window.siyuan.languages.copied);
         }
-    }]
+    }];
     if (item.path !== window.siyuan.config.system.workspaceDir) {
         submenu.splice(0, 0, {
             id: "openBy",
@@ -558,7 +558,7 @@ const workspaceItem = (item: IWorkspace) => {
             click() {
                 openWorkspace(item.path);
             }
-        })
+        });
         if (item.closed) {
             submenu.push({
                 id: "removeWorkspaceTip",

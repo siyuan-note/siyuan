@@ -5,7 +5,7 @@ import {
     hasPreviousSibling,
     isNotEditBlock
 } from "../wysiwyg/getBlock";
-import {hasClosestByAttribute, hasClosestByMatchTag} from "./hasClosest";
+import {hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
 
@@ -28,8 +28,8 @@ export const fixTableRange = (range: Range) => {
     if (range.toString() !== "" && tableElement && range.commonAncestorContainer.nodeType !== 3) {
         const parentTag = (range.commonAncestorContainer as Element).tagName;
         if (parentTag !== "TH" && parentTag !== "TD") {
-            const startCellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
-            const endCellElement = hasClosestByMatchTag(range.endContainer, "TD") || hasClosestByMatchTag(range.endContainer, "TH");
+            const startCellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
+            const endCellElement = hasClosestByTag(range.endContainer, "TD") || hasClosestByTag(range.endContainer, "TH");
             if (!startCellElement && !endCellElement) {
                 const cellElement = tableElement.querySelector("th") || tableElement.querySelector("td");
                 range.setStart(cellElement.firstChild, 0);
@@ -48,7 +48,7 @@ export const selectAll = (protyle: IProtyle, nodeElement: Element, range: Range)
     if (editElement) {
         let position;
         if (editElement.tagName === "TABLE") {
-            const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+            const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
             if (cellElement) {
                 position = getSelectionOffset(cellElement, nodeElement, range);
                 if (position.start !== 0 || position.end !== cellElement.textContent.length) {

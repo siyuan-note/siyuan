@@ -163,6 +163,26 @@ export const hasNextSibling = (element: Node) => {
     return false;
 };
 
+export const isEndOfBlock = (range: Range) => {
+    if (range.endContainer.textContent.length !== range.endOffset) {
+        return  false;
+    }
+
+    let nextSibling = range.endContainer;
+    while (nextSibling) {
+        if (hasNextSibling(nextSibling)) {
+            return false;
+        } else {
+            if (nextSibling.parentElement.getAttribute("spellcheck")) {
+                return true;
+            }
+            nextSibling = nextSibling.parentElement;
+        }
+    }
+
+    return true;
+};
+
 export const hasPreviousSibling = (element: Node) => {
     let previousSibling = element.previousSibling;
     while (previousSibling) {

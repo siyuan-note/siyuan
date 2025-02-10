@@ -1,4 +1,8 @@
-import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
+import {
+    hasClosestByClassName,
+    hasClosestByTag,
+    hasTopClosestByTag
+} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
@@ -63,8 +67,14 @@ export class MobileFiles extends Model {
                         case "removeDoc":
                             this.onRemove(data);
                             break;
-                        case "createdailynote":
                         case "create":
+                            if (data.data.listDocTree) {
+                                this.selectItem(data.data.box.id, data.data.path);
+                            } else {
+                                this.updateItemArrow(data.data.box.id, data.data.path);
+                            }
+                            break;
+                        case "createdailynote":
                         case "heading2doc":
                         case "li2doc":
                             this.onMkdir(data.data);
@@ -201,7 +211,8 @@ export class MobileFiles extends Model {
                                     app,
                                     notebookId,
                                     currentPath: pathString,
-                                    useSavePath: false
+                                    useSavePath: false,
+                                    listDocTree: true,
                                 });
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);
@@ -260,6 +271,29 @@ export class MobileFiles extends Model {
             window.siyuan.menus.menu.append(new MenuItem(item).element);
         });
         window.siyuan.menus.menu.fullscreen("bottom");
+    }
+
+    private updateItemArrow(notebookId: string, filePath: string) {
+        const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
+        if (!treeElement) {
+            return;
+        }
+        let currentPath = filePath;
+        let liElement;
+        while (!liElement) {
+            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
+            if (!liElement) {
+                const dirname = pathPosix().dirname(currentPath);
+                if (dirname === "/") {
+                    currentPath = dirname;
+                } else {
+                    currentPath = dirname + ".sy";
+                }
+            } else {
+                liElement.querySelector(".fn__hidden")?.classList.remove("fn__hidden");
+                break;
+            }
+        }
     }
 
     private genNotebook(item: INotebook) {

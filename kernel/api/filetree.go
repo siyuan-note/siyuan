@@ -231,24 +231,12 @@ func heading2Doc(c *gin.Context) {
 	}
 
 	model.FlushTxQueue()
-	luteEngine := util.NewLute()
-	tree, err := filesys.LoadTree(targetNotebook, targetPath, luteEngine)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
 
-	name := path.Base(targetPath)
 	box := model.Conf.Box(targetNotebook)
-	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt := util.NewCmdResult("heading2doc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":            box,
 		"path":           targetPath,
-		"files":          files,
-		"name":           name,
-		"id":             tree.Root.ID,
 		"srcRootBlockID": srcRootBlockID,
 	}
 	evt.Callback = arg["callback"]
@@ -283,24 +271,12 @@ func li2Doc(c *gin.Context) {
 	}
 
 	model.FlushTxQueue()
-	luteEngine := util.NewLute()
-	tree, err := filesys.LoadTree(targetNotebook, targetPath, luteEngine)
-	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		return
-	}
 
-	name := path.Base(targetPath)
 	box := model.Conf.Box(targetNotebook)
-	files, _, _ := model.ListDocTree(targetNotebook, path.Dir(targetPath), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 	evt := util.NewCmdResult("li2doc", 0, util.PushModeBroadcast)
 	evt.Data = map[string]interface{}{
 		"box":            box,
 		"path":           targetPath,
-		"files":          files,
-		"name":           name,
-		"id":             tree.Root.ID,
 		"srcRootBlockID": srcRootBlockID,
 	}
 	evt.Callback = arg["callback"]
@@ -679,7 +655,7 @@ func duplicateDoc(c *gin.Context) {
 	notebook := tree.Box
 	box := model.Conf.Box(notebook)
 	model.DuplicateDoc(tree)
-	pushCreate(box, tree.Path, tree.ID, arg)
+	pushCreate(box, tree.Path, arg)
 
 	ret.Data = map[string]interface{}{
 		"id":       tree.Root.ID,
@@ -720,7 +696,7 @@ func createDoc(c *gin.Context) {
 
 	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
-	pushCreate(box, p, tree.Root.ID, arg)
+	pushCreate(box, p, arg)
 
 	ret.Data = map[string]interface{}{
 		"id": tree.Root.ID,
@@ -768,14 +744,9 @@ func createDailyNote(c *gin.Context) {
 		}
 		evt := util.NewCmdResult("createdailynote", 0, util.PushModeBroadcast)
 		evt.AppId = app
-		name := path.Base(p)
-		files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
 		evt.Data = map[string]interface{}{
-			"box":   box,
-			"path":  p,
-			"files": files,
-			"name":  name,
-			"id":    tree.Root.ID,
+			"box":  box,
+			"path": p,
 		}
 		evt.Callback = arg["callback"]
 		util.PushEvent(evt)
@@ -855,8 +826,7 @@ func createDocWithMd(c *gin.Context) {
 	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
 	b, _ := model.GetBlock(id, nil)
-	p := b.Path
-	pushCreate(box, p, id, arg)
+	pushCreate(box, b.Path, arg)
 }
 
 func getDocCreateSavePath(c *gin.Context) {
@@ -1164,16 +1134,18 @@ func getDoc(c *gin.Context) {
 	}
 }
 
-func pushCreate(box *model.Box, p, treeID string, arg map[string]interface{}) {
+func pushCreate(box *model.Box, p string, arg map[string]interface{}) {
 	evt := util.NewCmdResult("create", 0, util.PushModeBroadcast)
-	name := path.Base(p)
-	files, _, _ := model.ListDocTree(box.ID, path.Dir(p), util.SortModeUnassigned, false, false, model.Conf.FileTree.MaxListCount)
+	listDocTree := false
+	listDocTreeArg := arg["listDocTree"]
+	if nil != listDocTreeArg {
+		listDocTree = listDocTreeArg.(bool)
+	}
+
 	evt.Data = map[string]interface{}{
-		"box":   box,
-		"path":  p,
-		"files": files,
-		"name":  name,
-		"id":    treeID,
+		"box":         box,
+		"path":        p,
+		"listDocTree": listDocTree,
 	}
 	evt.Callback = arg["callback"]
 	util.PushEvent(evt)

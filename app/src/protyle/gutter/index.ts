@@ -1,7 +1,6 @@
 import {
     hasClosestBlock,
     hasClosestByClassName,
-    hasClosestByMatchTag,
     hasClosestByTag,
     hasTopClosestByClassName,
     isInEmbedBlock
@@ -1539,7 +1538,7 @@ export class Gutter {
             if (!tableElement.contains(range.startContainer)) {
                 range = getEditorRange(tableElement.querySelector("th"));
             }
-            const cellElement = hasClosestByMatchTag(range.startContainer, "TD") || hasClosestByMatchTag(range.startContainer, "TH");
+            const cellElement = hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH");
             if (cellElement) {
                 window.siyuan.menus.menu.append(new MenuItem({id: "separator_table", type: "separator"}).element);
                 window.siyuan.menus.menu.append(new MenuItem({

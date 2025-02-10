@@ -300,7 +300,7 @@ func setWorkspaceDir(c *gin.Context) {
 	// 检查路径是否在已有的工作空间路径中
 	pathIsWorkspace := util.IsWorkspaceDir(path)
 	if !pathIsWorkspace {
-		for p := filepath.Dir(path); "" != p; p = filepath.Dir(p) {
+		for p := filepath.Dir(path); !util.IsRootPath(p); p = filepath.Dir(p) {
 			if util.IsWorkspaceDir(p) {
 				ret.Code = -1
 				ret.Msg = fmt.Sprintf(model.Conf.Language(256), path, p)

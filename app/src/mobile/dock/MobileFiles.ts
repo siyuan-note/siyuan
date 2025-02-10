@@ -212,7 +212,7 @@ export class MobileFiles extends Model {
                                     notebookId,
                                     currentPath: pathString,
                                     useSavePath: false,
-                                    pushCreateEvt: true,
+                                    listDocTree: true,
                                 });
                             } else if (type === "more-root") {
                                 initNavigationMenu(app, target.parentElement);

@@ -315,7 +315,7 @@ export class Files extends Model {
                                     notebookId,
                                     currentPath: pathString,
                                     useSavePath: false,
-                                    pushCreateEvt: true,
+                                    listDocTree: true,
                                 });
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({

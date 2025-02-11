@@ -715,7 +715,7 @@ ${genHintItemHTML(item)}
                     if (ids[1] === plugin.name) {
                         plugin.protyleSlash.find((slash) => {
                             if (slash.id === ids[2]) {
-                                slash.callback(protyle.getInstance());
+                                slash.callback(protyle.getInstance(), nodeElement);
                                 return true;
                             }
                         });

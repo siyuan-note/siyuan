@@ -62,7 +62,7 @@
     background-color: var(--b3-menu-background);
     z-index: 5;
     overflow: auto;
-    max-height: 402px;
+    max-height: min(402px, 40vh);
     // 不能使用，否则 hint emoji 出现双滚动条 box-sizing: border-box;
     padding: 8px 0;
     display: flex;

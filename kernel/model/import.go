@@ -866,8 +866,16 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					return ast.WalkContinue
 				}
 
-				dest = strings.ReplaceAll(dest, "%20", " ")
-				dest = strings.ReplaceAll(dest, "%5C", "/")
+				absolutePath := filepath.Join(localPath, dest)
+				newAbsolutePath := absolutePath
+
+				decodedDest := string(html.DecodeDestination([]byte(dest)))
+				if decodedDest != dest {
+					dest = decodedDest
+					newAbsolutePath = filepath.Join(localPath, dest)
+					gulu.File.Copy(absolutePath, newAbsolutePath)
+				}
+
 				if ast.NodeLinkDest == n.Type {
 					n.Tokens = []byte(dest)
 				} else {
@@ -878,6 +886,10 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				}
 				dest = filepath.ToSlash(dest)
 				if "" == dest {
+					return ast.WalkContinue
+				}
+
+				if !gulu.File.IsExist(newAbsolutePath) {
 					return ast.WalkContinue
 				}
 
@@ -988,8 +1000,16 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return ast.WalkContinue
 			}
 
-			dest = strings.ReplaceAll(dest, "%20", " ")
-			dest = strings.ReplaceAll(dest, "%5C", "/")
+			absolutePath := filepath.Join(filepath.Dir(localPath), dest)
+			newAbsolutePath := absolutePath
+
+			decodedDest := string(html.DecodeDestination([]byte(dest)))
+			if decodedDest != dest {
+				dest = decodedDest
+				newAbsolutePath = filepath.Join(filepath.Dir(localPath), dest)
+				gulu.File.Copy(absolutePath, newAbsolutePath)
+			}
+
 			if ast.NodeLinkDest == n.Type {
 				n.Tokens = []byte(dest)
 			} else {
@@ -1003,25 +1023,21 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				return ast.WalkContinue
 			}
 
-			absolutePath := filepath.Join(filepath.Dir(localPath), dest)
-			exist := gulu.File.IsExist(absolutePath)
-			if !exist {
-				absolutePath = filepath.Join(filepath.Dir(localPath), string(html.DecodeDestination([]byte(dest))))
-				exist = gulu.File.IsExist(absolutePath)
+			if !gulu.File.IsExist(newAbsolutePath) {
+				return ast.WalkContinue
 			}
-			if exist {
-				name := filepath.Base(absolutePath)
-				name = util.AssetName(name)
-				assetTargetPath := filepath.Join(assetDirPath, name)
-				if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
-					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
-					return ast.WalkContinue
-				}
-				if ast.NodeLinkDest == n.Type {
-					n.Tokens = []byte("assets/" + name)
-				} else {
-					n.TextMarkAHref = "assets/" + name
-				}
+
+			name := filepath.Base(newAbsolutePath)
+			name = util.AssetName(name)
+			assetTargetPath := filepath.Join(assetDirPath, name)
+			if err = filelock.Copy(newAbsolutePath, assetTargetPath); err != nil {
+				logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", newAbsolutePath, assetTargetPath, err)
+				return ast.WalkContinue
+			}
+			if ast.NodeLinkDest == n.Type {
+				n.Tokens = []byte("assets/" + name)
+			} else {
+				n.TextMarkAHref = "assets/" + name
 			}
 			return ast.WalkContinue
 		})

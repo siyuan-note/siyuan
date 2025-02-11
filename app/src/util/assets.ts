@@ -78,6 +78,13 @@ export const loadAssets = (data: Config.IAppearance) => {
         }
     });
     /// #endif
+
+    /// #if BROWSER
+    if (!window.webkit?.messageHandlers && !window.JSAndroid && !window.JSHarmony &&
+        ("serviceWorker" in window.navigator) && ("caches" in window) && ("fetch" in window) && navigator.serviceWorker) {
+        document.head.insertAdjacentHTML("afterbegin", `<meta name="theme-color" content="${getComputedStyle(document.body).getPropertyValue("--b3-toolbar-background").trim()}">`);
+    }
+    /// #endif
     setCodeTheme();
 
     const themeScriptElement = document.getElementById("themeScript");
@@ -281,14 +288,13 @@ export const setInlineStyle = async (set = true) => {
 }`;
         }
     }
-    style += `.b3-typography, .protyle-wysiwyg, .protyle-title {font-size:${window.siyuan.config.editor.fontSize}px !important}
+    style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
-.protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h1, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h2, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h3, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h4, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h5, .protyle-wysiwyg [data-node-id].li > .protyle-action ~ .h6 {line-height:${height + 8}px;}
-.protyle-wysiwyg [data-node-id].li > .protyle-action::after {height: ${window.siyuan.config.editor.fontSize}px;width: ${window.siyuan.config.editor.fontSize}px;margin:-${window.siyuan.config.editor.fontSize / 2}px 0 0 -${window.siyuan.config.editor.fontSize / 2}px}
-.protyle-wysiwyg [data-node-id].li > .protyle-action svg {height: ${Math.max(14, window.siyuan.config.editor.fontSize - 8)}px}
-.protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 8}px);top:${(height + 8)}px}
-.protyle-wysiwyg [data-node-id] [spellcheck] {min-height:${height}px;}
+/* 列表项后的内容和列表项对齐 https://github.com/siyuan-note/siyuan/issues/2803 */
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div {line-height:${height}px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div > [spellcheck] {min-height:${height}px}
+.protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
 .protyle-wysiwyg .p,
 .protyle-wysiwyg .code-block .hljs,
 .protyle-wysiwyg .table,

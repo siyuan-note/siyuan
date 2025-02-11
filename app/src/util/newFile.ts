@@ -81,6 +81,7 @@ export const newFile = (optios: {
     useSavePath: boolean,
     name?: string,
     afterCB?: (id: string, title: string) => void
+    listDocTree?: boolean
 }) => {
     if (getOpenNotebookCount() === 0) {
         showMessage(window.siyuan.languages.newFileTip);
@@ -102,7 +103,8 @@ export const newFile = (optios: {
                     notebook: data.data.box,
                     path: createPath,
                     // 根目录时无法确定 parentID
-                    markdown: ""
+                    markdown: "",
+                    listDocTree: optios.listDocTree
                 }, response => {
                     if (optios.afterCB) {
                         optios.afterCB(response.data, pathPosix().basename(createPath));
@@ -127,7 +129,8 @@ export const newFile = (optios: {
                         notebook: data.data.box,
                         path: createPath,
                         parentID: getDisplayName(optios.currentPath, true, true),
-                        markdown: ""
+                        markdown: "",
+                        listDocTree: optios.listDocTree
                     }, response => {
                         if (optios.afterCB) {
                             optios.afterCB(response.data, pathPosix().basename(createPath));
@@ -154,7 +157,8 @@ export const newFile = (optios: {
                 fetchPost("/api/filetree/createDocWithMd", {
                     notebook: data.data.box,
                     path: createPath,
-                    markdown: ""
+                    markdown: "",
+                    listDocTree: optios.listDocTree
                 }, response => {
                     if (optios.afterCB) {
                         optios.afterCB(response.data, pathPosix().basename(createPath));
@@ -182,7 +186,8 @@ export const newFile = (optios: {
                 path: newPath,
                 title,
                 md: "",
-                sorts: optios.paths
+                sorts: optios.paths,
+                listDocTree: optios.listDocTree
             }, () => {
                 if (optios.afterCB) {
                     optios.afterCB(id, title);

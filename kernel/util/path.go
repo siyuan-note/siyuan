@@ -23,6 +23,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"runtime"
 	"sort"
 	"strings"
 	"time"
@@ -340,4 +341,33 @@ func GetAbsPathInWorkspace(relPath string) (string, error) {
 
 func IsAbsPathInWorkspace(absPath string) bool {
 	return IsSubPath(WorkspaceDir, absPath)
+}
+
+// IsWorkspaceDir 判断指定目录是否是工作空间目录。
+func IsWorkspaceDir(dir string) bool {
+	conf := filepath.Join(dir, "conf", "conf.json")
+	data, err := os.ReadFile(conf)
+	if nil != err {
+		return false
+	}
+	return strings.Contains(string(data), "kernelVersion")
+}
+
+// IsRootPath checks if the given path is a root path.
+func IsRootPath(path string) bool {
+	if path == "" {
+		return false
+	}
+
+	// Clean the path to remove any trailing slashes
+	cleanPath := filepath.Clean(path)
+
+	// Check if the path is the root path based on the operating system
+	if runtime.GOOS == "windows" {
+		// On Windows, root paths are like "C:\", "D:\", etc.
+		return len(cleanPath) == 3 && cleanPath[1] == ':' && cleanPath[2] == '\\'
+	} else {
+		// On Unix-like systems, the root path is "/"
+		return cleanPath == "/"
+	}
 }

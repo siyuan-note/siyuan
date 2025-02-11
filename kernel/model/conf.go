@@ -494,6 +494,8 @@ func InitConf() {
 	if "" != util.AccessAuthCode {
 		Conf.AccessAuthCode = util.AccessAuthCode
 	}
+	Conf.AccessAuthCode = strings.TrimSpace(Conf.AccessAuthCode)
+	Conf.AccessAuthCode = util.RemoveInvalid(Conf.AccessAuthCode)
 
 	Conf.LocalIPs = util.GetLocalIPs()
 
@@ -705,6 +707,16 @@ func NewLute() (ret *lute.Lute) {
 	})
 	ret.PutEmojis(customEmojiMap)
 	return
+}
+
+func enableLuteInlineSyntax(luteEngine *lute.Lute) {
+	luteEngine.SetInlineAsterisk(true)
+	luteEngine.SetInlineUnderscore(true)
+	luteEngine.SetSup(true)
+	luteEngine.SetSub(true)
+	luteEngine.SetTag(true)
+	luteEngine.SetInlineMath(true)
+	luteEngine.SetGFMStrikethrough(true)
 }
 
 func (conf *AppConf) Save() {

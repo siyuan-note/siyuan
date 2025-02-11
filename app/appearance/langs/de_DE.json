@@ -1045,10 +1045,10 @@
   "md2": "Codeblock-Ligatur",
   "md3": "Nach der Aktivierung wird die Ligatur im Codeblock angezeigt",
   "md4": "Nach der Aktivierung den Beginn der Absätze automatisch einrücken, um traditionellen chinesischen Setzgewohnheiten zu entsprechen",
-  "md7": "Ob das Netzwerkbild-Eckzeichen angezeigt werden soll",
+  "md7": "Netzwerkbildsymbol",
   "md8": "Nach der Aktivierung wird, wenn das Bild eine Webdatei (kein lokales Asset) ist, ein Eckzeichen angezeigt",
   "md9": "Virtuelle Referenz-Stichwort-Einschlussliste",
-  "md12": "Ob Lesezeichen, Name, Alias, Memo und Referenzanzahl angezeigt werden sollen",
+  "md12": "Lesezeichen, Namen, Aliase, Notizen und Referenzanzahl",
   "md16": "Nach der Aktivierung wird, wenn solche Informationen vorhanden sind, dies auf der oberen rechten Seite des Blocks angezeigt",
   "md27": "Codeblock-Zeilennummer",
   "md28": "Nach der Aktivierung zeigt der Codeblock die Zeilennummer an (Bitte beachten Sie, dass die Aktivierung die Leistung des Editors beeinträchtigen kann)",
@@ -1584,6 +1584,8 @@
     "251": "Insgesamt ungenutzte Assets [%d], hier nur [%d] aufgeführt",
     "252": "\uD83D\uDEA8 Microsoft Defender kann fälschlicherweise den Kernel löschen, Daten löschen und die Leistung erheblich verringern. Es wird empfohlen, den SiYuan-Installationspfad und den Arbeitsbereichspfad zur Ausschlussliste hinzuzufügen<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Hinzufügen</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignorieren</button>",
     "253": "Datei [%s] wird komprimiert, bitte warten...",
-    "254": "[Region ID] Falsche Regions-ID, bitte konsultieren Sie die Dokumentation des S3-Dienstanbieters zur Konfiguration der Regions-ID"
+    "254": "[Region ID] Falsche Regions-ID, bitte konsultieren Sie die Dokumentation des S3-Dienstanbieters zur Konfiguration der Regions-ID",
+    "255": "Die Zielseite hat den Hotlink-Schutz aktiviert, daher ist es nicht möglich, [%d] Ressourcen herunterzuladen",
+    "256": "Der angegebene Pfad [%s] hat einen übergeordneten Arbeitsbereichspfad [%s]"
   }
 }

@@ -1,6 +1,6 @@
 @font-face {
   font-family: 'JetBrainsMono-Regular';
-  /* webpackIgnore: true */
+  /*! /* webpackIgnore: true */
   src: url(../../../appearance/fonts/JetBrainsMono-2.304/JetBrainsMono-Regular.woff2) format('woff2');
 }
 
@@ -9,6 +9,7 @@
   font-variant-ligatures: no-common-ligatures;
   display: flex;
   flex-direction: column;
+  font-size: var(--b3-font-size-editor);
   font-family: var(--b3-font-family-protyle);
 
   img {
@@ -82,17 +83,6 @@
     // https://ld246.com/article/1636204769623  test $\rightarrow$ test
   }
 
-  mark,
-  span[data-type~="mark"] {
-    background-color: var(--b3-protyle-inline-mark-background);
-    color: var(--b3-protyle-inline-mark-color);
-
-    &.mark--hl {
-      background-color: var(--b3-theme-primary-lighter);
-      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
-    }
-  }
-
   kbd,
   span[data-type~="kbd"] {
     padding: 2px 4px;
@@ -122,6 +112,17 @@
     border-bottom: 2px solid var(--b3-card-info-color);
   }
 
+  mark,
+  span[data-type~="mark"] {
+    background-color: var(--b3-protyle-inline-mark-background);
+    color: var(--b3-protyle-inline-mark-color);
+
+    &.mark--hl {
+      background-color: var(--b3-theme-primary-lighter);
+      box-shadow: 0 0 0 .5px var(--b3-theme-on-background);
+    }
+  }
+
   blockquote {
     position: relative;
   }
@@ -146,33 +147,43 @@
     flex-direction: column;
   }
 
-  .h1,
   h1,
-  .h2,
   h2,
-  .h3,
   h3,
-  .h4,
   h4,
-  .h5,
   h5,
-  .h6,
   h6 {
     padding: 4px;
-    margin: 4px 0;
-    font-weight: 600;
-    line-height: 1.25;
+    margin: 2px 0;
   }
 
   .h1,
-  h1 {
-    padding: .3em 4px;
+  .h2,
+  .h3,
+  .h4,
+  .h5,
+  .h6,
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-weight: 600;
+    line-height: 1.25;
+
+    & > [spellcheck] {
+      min-height: 1.25em;
+    }
+  }
+
+  h1,
+  .h1 {
     font-size: 1.75em;
   }
 
-  .h2,
-  h2 {
-    padding: .3em 4px;
+  h2,
+  .h2 {
     font-size: 1.55em;
   }
 
@@ -281,7 +292,7 @@
   }
 
   .code-block:not(pre) {
-    margin: 1em 0;
+    margin: 2px 0;
     box-sizing: border-box;
 
     .protyle-action {
@@ -299,8 +310,13 @@
         align-self: center;
       }
 
-      .protyle-icon,
+      .protyle-icon {
+        opacity: 0;
+        transition: var(--b3-transition);
+      }
+
       .protyle-action__language {
+        margin-left: 1em;
         opacity: 0;
         transition: var(--b3-transition);
       }
@@ -467,8 +483,6 @@
 
   .iframe {
     text-align: center;
-    padding: 4px;
-    margin: 4px 0;
   }
 }
 

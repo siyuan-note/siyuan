@@ -178,7 +178,7 @@ export class Outline extends Model {
                             break;
                     }
                     break;
-                } else if (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons")) {
+                } else if (this.blockId && (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons"))) {
                     openFileById({
                         app: options.app,
                         id: this.blockId,
@@ -274,9 +274,10 @@ export class Outline extends Model {
                     return;
                 }
                 const selectRect = selectItem.getBoundingClientRect();
-                if (moveEvent.clientY > selectRect.bottom - 10) {
+                const dragHeight = selectRect.height * .2;
+                if (moveEvent.clientY > selectRect.bottom - dragHeight) {
                     selectItem.classList.add("dragover__bottom");
-                } else if (moveEvent.clientY < selectRect.top + 10) {
+                } else if (moveEvent.clientY < selectRect.top + dragHeight) {
                     selectItem.classList.add("dragover__top");
                 } else {
                     selectItem.classList.add("dragover");

@@ -19,13 +19,17 @@ import {moveResize} from "../../dialog/moveResize";
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
     protyle.contentElement.className = "protyle-content";
-    protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
-    if (protyle.options.render.background) {
-        protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
+
+    if (protyle.options.render.background || protyle.options.render.title) {
+        protyle.contentElement.innerHTML = '<div class="protyle-top"></div>';
+        if (protyle.options.render.background) {
+            protyle.contentElement.firstElementChild.appendChild(protyle.background.element);
+        }
+        if (protyle.options.render.title) {
+            protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
+        }
     }
-    if (protyle.options.render.title) {
-        protyle.contentElement.firstElementChild.appendChild(protyle.title.element);
-    }
+
     protyle.contentElement.appendChild(protyle.wysiwyg.element);
     if (!protyle.options.action.includes(Constants.CB_GET_HISTORY)) {
         scrollEvent(protyle, protyle.contentElement);
@@ -75,7 +79,6 @@ export const initUI = (protyle: IProtyle) => {
         if (!window.siyuan.config.editor.fontSizeScrollZoom || (isMacOS && !event.metaKey) || (!isMacOS && !event.ctrlKey) || event.deltaX !== 0) {
             return;
         }
-        event.preventDefault();
         event.stopPropagation();
         if (event.deltaY < 0) {
             if (window.siyuan.config.editor.fontSize < 72) {
@@ -109,19 +112,28 @@ export const initUI = (protyle: IProtyle) => {
                 });
             });
         }, Constants.TIMEOUT_LOAD);
-    }, {passive: false});
+    }, {passive: true});
     protyle.contentElement.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
         // wysiwyg 元素下方点击无效果 https://github.com/siyuan-note/siyuan/issues/12009
         if (protyle.disabled ||
+            // 选中块时，禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
+            protyle.contentElement.querySelector(".protyle-wysiwyg--select") ||
             (!event.target.classList.contains("protyle-content") && !event.target.classList.contains("protyle-wysiwyg"))) {
             return;
+        }
+        // 选中文本禁止添加空块 https://github.com/siyuan-note/siyuan/issues/13905
+        if (window.getSelection().rangeCount > 0) {
+            const currentRange = window.getSelection().getRangeAt(0);
+            if (currentRange.toString() !== "" && protyle.wysiwyg.element.contains(currentRange.startContainer)) {
+                return;
+            }
         }
         const lastRect = protyle.wysiwyg.element.lastElementChild.getBoundingClientRect();
         const range = document.createRange();
         if (event.y > lastRect.bottom) {
             const lastEditElement = getContenteditableElement(getLastBlock(protyle.wysiwyg.element.lastElementChild));
             if (!lastEditElement ||
-                (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
+                (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem" && !protyle.options.backlinkData) ||
                 (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== "")) {
                 const emptyElement = genEmptyElement(false, false);
                 protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);

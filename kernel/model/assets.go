@@ -20,7 +20,6 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
-	"io"
 	"io/fs"
 	"mime"
 	"net/http"
@@ -75,6 +74,16 @@ func DocImageAssets(rootID string) (ret []string, err error) {
 	return
 }
 
+func DocAssets(rootID string) (ret []string, err error) {
+	tree, err := LoadTreeByBlockID(rootID)
+	if err != nil {
+		return
+	}
+
+	ret = assetsLinkDestsInTree(tree)
+	return
+}
+
 func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err error) {
 	tree, err := LoadTreeByBlockID(rootID)
 	if err != nil {
@@ -98,6 +107,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		EnableInsecureSkipVerify().
 		SetProxy(httpclient.ProxyFromEnvironment)
 
+	forbiddenCount := 0
 	destNodes := getRemoteAssetsLinkDestsInTree(tree, onlyImg)
 	for _, destNode := range destNodes {
 		dests := getRemoteAssetsLinkDests(destNode, onlyImg)
@@ -172,6 +182,10 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 					request.SetHeader("Referer", originalURL) // 改进浏览器剪藏扩展转换本地图片成功率 https://github.com/siyuan-note/siyuan/issues/7464
 				}
 				resp, reqErr := request.Get(u)
+				if http.StatusForbidden == resp.StatusCode || http.StatusUnauthorized == resp.StatusCode {
+					forbiddenCount++
+				}
+
 				if strings.Contains(strings.ToLower(resp.GetContentType()), "text/html") {
 					// 忽略超链接网页 `Convert network assets to local` no longer process webpage https://github.com/siyuan-note/siyuan/issues/9965
 					continue
@@ -242,14 +256,23 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		}
 	}
 
+	util.PushClearMsg(msgId)
 	if 0 < files {
-		util.PushUpdateMsg(msgId, Conf.Language(113), 7000)
+		msgId = util.PushMsg(Conf.Language(113), 7000)
 		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)
+
+		if 0 < forbiddenCount {
+			util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
+		}
 	} else {
-		util.PushUpdateMsg(msgId, Conf.Language(121), 3000)
+		if 0 < forbiddenCount {
+			util.PushErrMsg(fmt.Sprintf(Conf.Language(255), forbiddenCount), 5000)
+		} else {
+			util.PushMsg(Conf.Language(121), 3000)
+		}
 	}
 	return
 }
@@ -355,7 +378,7 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 			if p := filepath.ToSlash(path); strings.HasSuffix(p, relativePath) {
 				if gulu.File.IsExist(path) {
 					ret = path
-					return io.EOF
+					return fs.SkipAll
 				}
 			}
 			return nil
@@ -369,7 +392,6 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 			return
 		}
 	}
-
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
@@ -830,6 +852,12 @@ func UnusedAssets() (ret []string) {
 			toRemoves = append(toRemoves, asset)
 			continue
 		}
+
+		if strings.HasSuffix(asset, "android-notification-texts.txt") {
+			// 排除 Android 通知文本
+			toRemoves = append(toRemoves, asset)
+			continue
+		}
 	}
 
 	// 排除数据库中引用的资源文件
@@ -943,6 +971,15 @@ func MissingAssets() (ret []string) {
 
 			if strings.HasSuffix(dest, "/") {
 				continue
+			}
+
+			if strings.Contains(strings.ToLower(dest), ".pdf/") {
+				if idx := strings.LastIndex(dest, "/"); -1 < idx {
+					if ast.IsNodeIDPattern(dest[idx+1:]) {
+						// PDF 标注不计入 https://github.com/siyuan-note/siyuan/issues/13891
+						continue
+					}
+				}
 			}
 
 			if "" == assetsPathMap[dest] {

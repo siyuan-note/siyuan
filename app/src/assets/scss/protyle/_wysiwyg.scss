@@ -67,6 +67,7 @@
     }
 
     [spellcheck] {
+      min-height: 1.625em;
       word-break: break-word;
       // https://github.com/siyuan-note/siyuan/issues/10483
       white-space: break-spaces;
@@ -166,27 +167,21 @@
         align-items: center;
         word-break: keep-all;
 
-        & ~ .h1,
-        & ~ .h2,
-        & ~ .h3,
-        & ~ .h4,
-        & ~ .h5,
-        & ~ .h6 {
-          padding-top: 0;
-          padding-bottom: 0;
-        }
-
         &::after {
           content: "";
           position: absolute;
-          border-radius: 50%;
           top: 50%;
-          transition: var(--b3-transition);
           left: 50%;
+          height: max(14px, 1em);
+          width: max(14px, 1em);
+          margin: min(-7px, -.5em) 0 0 min(-7px, -.5em);
+          border-radius: 50%;
+          transition: var(--b3-transition);
         }
 
         svg {
           width: 34px;
+          height: max(14px, 1em - 8px);
           display: block;
           z-index: 1;
           position: relative;
@@ -199,11 +194,13 @@
     }
 
     &.sb {
+      display: flex;
+      flex-direction: column;
       padding: 0;
       max-width: 100%;
 
       &[data-sb-layout="col"] {
-        display: flex;
+        flex-direction: row;
         flex-wrap: wrap;
         justify-content: space-between;
         column-gap: 1.5em;
@@ -307,6 +304,15 @@
         max-width: 100%;
         padding: 2px 4px;
 
+        /* 选中块的高亮覆盖 border */
+        &.protyle-wysiwyg--select::after,
+        &.protyle-wysiwyg--hl::after {
+          width: calc(100% + 2px);
+          height: calc(100% + 2px);
+          left: -1px;
+          top: -1px;
+        }
+
         // https://github.com/siyuan-note/siyuan/issues/8715 & https://ld246.com/article/1689063197687 第一点无法进行以下设置
         //.protyle-attr--refcount {right: 0;}
 
@@ -351,6 +357,7 @@
 
     &.table table {
       display: inline-block;
+      vertical-align: top;
     }
 
     .img {
@@ -504,6 +511,10 @@
     transition: var(--b3-background-transition);
   }
 
+  &--hiderange ::selection {
+    background-color: transparent;
+  }
+
   // https://github.com/siyuan-note/siyuan/issues/11589
   .hljs wbr {
     display: none;
@@ -523,8 +534,6 @@
   }
 
   div[data-type="NodeMathBlock"] {
-    margin-top: 0;
-    margin-bottom: 0;
     min-height: 62px !important;
   }
 

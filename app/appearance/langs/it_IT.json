@@ -1045,10 +1045,10 @@
   "md2": "Legatura del blocco di codice",
   "md3": "Dopo l'abilitazione, il blocco di codice mostrerà la legatura",
   "md4": "Dopo l'abilitazione, indenta automaticamente l'inizio dei paragrafi per conformarsi alle abitudini di impaginazione del cinese tradizionale",
-  "md7": "Mostrare il marchio d'angolo dell'immagine di rete",
+  "md7": "Icona immagine di rete",
   "md8": "Dopo l'abilitazione, se l'immagine è un file web (non un file di asset locale), verrà mostrato un marchio d'angolo",
   "md9": "Lista di inclusione delle parole chiave di riferimento virtuale",
-  "md12": "Visualizzare segnalibri, nome, alias, memo e conteggio riferimenti",
+  "md12": "Segnalibri, nomi, alias, note e conteggio dei riferimenti",
   "md16": "Dopo l'abilitazione, se ci sono tali informazioni, verranno visualizzate sul lato destro del blocco",
   "md27": "Numerazione delle righe del blocco di codice",
   "md28": "Dopo l'abilitazione, il blocco di codice mostrerà il numero di riga (Nota: l'abilitazione può ridurre le prestazioni dell'editor)",
@@ -1584,6 +1584,8 @@
     "251": "Totale risorse inutilizzate [%d], qui elencate solo [%d]",
     "252": "\uD83D\uDEA8 Microsoft Defender potrebbe eliminare erroneamente il kernel, eliminare i dati e ridurre significativamente le prestazioni. Si consiglia di aggiungere il percorso di installazione e lo spazio di lavoro di SiYuan all'elenco delle esclusioni<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Aggiungi</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignora</button>",
     "253": "Compressione del file [%s], attendere prego...",
-    "254": "[Region ID] ID regione non corretto, si prega di consultare la documentazione del fornitore di servizi S3 per configurare l'ID regione"
+    "254": "[Region ID] ID regione non corretto, si prega di consultare la documentazione del fornitore di servizi S3 per configurare l'ID regione",
+    "255": "Il sito di destinazione ha abilitato la protezione hotlink, quindi non è possibile scaricare [%d] risorse",
+    "256": "Il percorso specificato [%s] ha un percorso di spazio di lavoro padre [%s]"
   }
 }

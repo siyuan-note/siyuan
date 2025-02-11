@@ -1045,10 +1045,10 @@
   "md2": "Code block ligature",
   "md3": "After enabling, the code block will display the ligature",
   "md4": "After enabling, automatically indent the beginning of paragraphs to conform to traditional Chinese typesetting habits",
-  "md7": "Whether to display the network picture corner mark",
-  "md8": "After enabling, if the picture is a web file (non-local asset file), it will display a corner mark",
+  "md7": "Network image icon",
+  "md8": "After enabling, if the image is a web file (non-local asset file), it will display a corner mark",
   "md9": "Virtual Reference keyword inclusion list",
-  "md12": "Whether to display bookmark, name, alias, memo and reference count",
+  "md12": "Bookmark, name, alias, memo and reference count",
   "md16": "After enabling, if there is such information, it will be displayed on the upper right side of the block",
   "md27": "Code block line number",
   "md28": "After enabling, the code block will display the line number (Please note that enabling may reduce editor performance)",
@@ -1584,6 +1584,8 @@
     "251": "Total unused assets [%d], only [%d] listed here",
     "252": "\uD83D\uDEA8 Microsoft Defender may mistakenly delete the kernel, delete data, and significantly reduce performance. It is recommended to add the SiYuan installation path and workspace path to the exclusion list<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Add</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignore</button>",
     "253": "Compressing file [%s], please wait...",
-    "254": "[Region ID] Incorrect Region ID, please refer to the S3 service provider's documentation to configure the Region ID"
+    "254": "[Region ID] Incorrect Region ID, please refer to the S3 service provider's documentation to configure the Region ID",
+    "255": "The target site has enabled hotlink protection, so it is not possible to download [%d] resources",
+    "256": "The specified path [%s] has a parent workspace path [%s]"
   }
 }

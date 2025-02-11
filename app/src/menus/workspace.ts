@@ -534,6 +534,42 @@ const openWorkspace = (workspace: string) => {
 
 const workspaceItem = (item: IWorkspace) => {
     /// #if !BROWSER
+    const submenu = [{
+        id: "showInFolder",
+        icon: "iconFolder",
+        label: window.siyuan.languages.showInFolder,
+        click() {
+            showFileInFolder(item.path);
+        }
+    }, {
+        id: "copyPath",
+        icon: "iconCopy",
+        label: window.siyuan.languages.copyPath,
+        click() {
+            writeText(item.path);
+            showMessage(window.siyuan.languages.copied);
+        }
+    }];
+    if (item.path !== window.siyuan.config.system.workspaceDir) {
+        submenu.splice(0, 0, {
+            id: "openBy",
+            icon: "iconOpenWindow",
+            label: window.siyuan.languages.openBy,
+            click() {
+                openWorkspace(item.path);
+            }
+        });
+        if (item.closed) {
+            submenu.push({
+                id: "removeWorkspaceTip",
+                icon: "iconTrashcan",
+                label: window.siyuan.languages.removeWorkspaceTip,
+                click() {
+                    fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
+                }
+            });
+        }
+    }
     return {
         label: `<div aria-label="${item.path}" class="fn__ellipsis ariaLabel" style="max-width: 256px">
     ${originalPath().basename(item.path)}
@@ -541,36 +577,7 @@ const workspaceItem = (item: IWorkspace) => {
         current: !item.closed,
         iconHTML: "",
         type: "submenu",
-        submenu: [{
-            id: "openBy",
-            icon: "iconOpenWindow",
-            label: window.siyuan.languages.openBy,
-            click() {
-                openWorkspace(item.path);
-            }
-        }, {
-            id: "showInFolder",
-            icon: "iconFolder",
-            label: window.siyuan.languages.showInFolder,
-            click() {
-                showFileInFolder(item.path);
-            }
-        }, {
-            id: "copyPath",
-            icon: "iconCopy",
-            label: window.siyuan.languages.copyPath,
-            click() {
-                writeText(item.path);
-                showMessage(window.siyuan.languages.copied);
-            }
-        }, {
-            id: "removeWorkspaceTip",
-            icon: "iconTrashcan",
-            label: window.siyuan.languages.removeWorkspaceTip,
-            click() {
-                fetchPost("/api/system/removeWorkspaceDir", {path: item.path});
-            }
-        }],
+        submenu,
         click() {
             openWorkspace(item.path);
         },

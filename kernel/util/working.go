@@ -45,7 +45,7 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.1.20"
+	Ver       = "3.1.21"
 	IsInsider = false
 )
 
@@ -95,6 +95,8 @@ func Boot() {
 	ServerPort = *port
 	ReadOnly, _ = strconv.ParseBool(*readOnly)
 	AccessAuthCode = *accessAuthCode
+	AccessAuthCode = strings.TrimSpace(AccessAuthCode)
+	AccessAuthCode = RemoveInvalid(AccessAuthCode)
 	Container = ContainerStd
 	if RunInContainer {
 		Container = ContainerDocker

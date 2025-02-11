@@ -24,8 +24,9 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "onlySearchForDoc", "onlySearchForDocTip", "dynamicLoadBlocks", "dynamicLoadBlocksTip", "fontSizeScrollZoom", "fontSizeScrollZoomTip",
             "listItemDotNumberClickFocus", "listItemDotNumberClickFocusTip", "editorMarkdownInlineAsterisk", "editorMarkdownInlineUnderscore",
             "editorMarkdownInlineSup", "editorMarkdownInlineSupTip", "editorMarkdownInlineSub", "editorMarkdownInlineSubTip",
-            "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip", "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip",
-            "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "backlinkExpandCount", "backlinkExpandTip", "backmentionExpandCount", "backmentionExpandTip",
+            "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip",
+            "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip",
+            "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "backlinkExpandTip", "backmentionExpandTip",
             "backlinkContainChildren", "backlinkContainChildrenTip"
         ]),
 
@@ -51,7 +52,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
         getLang(["assets", "unreferencedAssets", "missingAssets"]),
 
         // 导出
-        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export9", "export11",
+        getLang(["paragraphBeginningSpace", "md4", "export", "export1", "export2", "export5", "export11",
             "export13", "export14", "export15", "export19", "export20", "ref", "blockEmbed", "export17", "export18",
             "export23", "export24", "export25", "export26", "export27", "export28", "export29"]),
 

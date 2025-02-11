@@ -1045,10 +1045,10 @@
   "md2": "Ligatura bloku kodu",
   "md3": "Po włączeniu, blok kodu wyświetli ligaturę",
   "md4": "Po włączeniu, automatycznie wcięj początek akapitów, aby dostosować się do tradycyjnych nawyków składania w języku chińskim",
-  "md7": "Czy wyświetlać znacznik rogu obrazu sieciowego",
+  "md7": "Ikona obrazu sieciowego",
   "md8": "Po włączeniu, jeśli obraz jest plikiem internetowym (nie lokalnym plikiem zasobu), zostanie wyświetlony znacznik rogu",
   "md9": "Lista słów kluczowych referencji wirtualnych",
-  "md12": "Czy wyświetlać zakładkę, nazwę, alias, notatkę i liczbę odniesień",
+  "md12": "Zakładki, nazwy, aliasy, notatki i liczba odwołań",
   "md16": "Po włączeniu, jeśli taka informacja jest dostępna, zostanie wyświetlona w prawym górnym rogu bloku",
   "md27": "Numer linii bloku kodu",
   "md28": "Po włączeniu, blok kodu wyświetli numer linii (Proszę pamiętać, że włączenie może obniżyć wydajność edytora)",
@@ -1584,6 +1584,8 @@
     "251": "Łączna liczba nieużywanych zasobów [%d], tutaj wymieniono tylko [%d]",
     "252": "\uD83D\uDEA8 Microsoft Defender może błędnie usunąć jądro, usunąć dane i znacznie obniżyć wydajność. Zaleca się dodanie ścieżki instalacji i przestrzeni roboczej SiYuan do listy wykluczeń<span class=\"fn__space\"></span><button id=\"addMicrosoftDefenderExclusion\" class=\"b3-button\">Dodaj</button><span class=\"fn__space\"></span><button id=\"ignoreAddMicrosoftDefenderExclusion\" class=\"b3-button b3-button--white\">Ignoruj</button>",
     "253": "Kompresja pliku [%s], proszę czekać...",
-    "254": "[Region ID] Nieprawidłowy identyfikator regionu, proszę zapoznać się z dokumentacją dostawcy usług S3 w celu skonfigurowania identyfikatora regionu"
+    "254": "[Region ID] Nieprawidłowy identyfikator regionu, proszę zapoznać się z dokumentacją dostawcy usług S3 w celu skonfigurowania identyfikatora regionu",
+    "255": "Docelowa strona włączyła ochronę przed hotlinkowaniem, [%d] zasobów nie można pobrać",
+    "256": "Określona ścieżka [%s] ma nadrzędną ścieżkę przestrzeni roboczej [%s]"
   }
 }

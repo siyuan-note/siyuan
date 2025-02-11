@@ -85,8 +85,14 @@ export class Files extends Model {
                         case "removeDoc":
                             this.onRemove(data);
                             break;
-                        case "createdailynote":
                         case "create":
+                            if (data.data.listDocTree) {
+                                this.selectItem(data.data.box.id, data.data.path);
+                            } else {
+                                this.updateItemArrow(data.data.box.id, data.data.path);
+                            }
+                            break;
+                        case "createdailynote":
                         case "heading2doc":
                         case "li2doc":
                             this.selectItem(data.data.box.id, data.data.path);
@@ -308,7 +314,8 @@ export class Files extends Model {
                                     app: options.app,
                                     notebookId,
                                     currentPath: pathString,
-                                    useSavePath: false
+                                    useSavePath: false,
+                                    listDocTree: true,
                                 });
                             } else if (type === "more-root") {
                                 initNavigationMenu(options.app, target.parentElement).popup({
@@ -453,6 +460,9 @@ export class Files extends Model {
                 }
             });
             window.siyuan.dragElement = undefined;
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+            });
         });
         this.element.addEventListener("dragover", (event: DragEvent & { target: HTMLElement }) => {
             if (window.siyuan.config.readonly || event.dataTransfer.types.includes(Constants.SIYUAN_DROP_TAB)) {
@@ -516,13 +526,19 @@ export class Files extends Model {
                 // 防止文档拖拽到笔记本外
                 !(!sourceOnlyRoot && targetType === "navigation-root")) {
                 const nodeRect = liElement.getBoundingClientRect();
-                if (event.clientY > nodeRect.top + 20) {
-                    liElement.classList.add("dragover__bottom");
-                    event.preventDefault();
-                } else if (event.clientY < nodeRect.bottom - 20) {
-                    liElement.classList.add("dragover__top");
-                    event.preventDefault();
+                const dragHeight = nodeRect.height * .2;
+                if (targetType === "navigation-root" && sourceOnlyRoot) {
+                    if (event.clientY > nodeRect.top + nodeRect.height / 2) {
+                        (liElement as HTMLElement).classList.add("dragover__bottom");
+                    } else {
+                        (liElement as HTMLElement).classList.add("dragover__top");
+                    }
+                } else if (event.clientY > nodeRect.bottom - dragHeight) {
+                    (liElement as HTMLElement).classList.add("dragover__bottom");
+                } else if (event.clientY < nodeRect.top + dragHeight) {
+                    (liElement as HTMLElement).classList.add("dragover__top");
                 }
+                event.preventDefault();
             }
             if (liElement.classList.contains("dragover__top") || liElement.classList.contains("dragover__bottom") ||
                 (targetType === "navigation-root" && sourceOnlyRoot)) {
@@ -741,6 +757,30 @@ export class Files extends Model {
         if (liElement) {
             liElement.setAttribute("data-count", data.data.subFileCount);
             liElement.querySelector(".ariaLabel")?.setAttribute("aria-label", this.genDocAriaLabel(data.data, escapeGreat));
+        }
+    }
+
+    private updateItemArrow(notebookId: string, filePath: string) {
+        const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
+        if (!treeElement) {
+            return;
+        }
+        let currentPath = filePath;
+        let liElement;
+        while (!liElement) {
+            liElement = treeElement.querySelector(`[data-path="${currentPath}"]`);
+            if (!liElement) {
+                const dirname = pathPosix().dirname(currentPath);
+                if (dirname === "/") {
+                    this.getLeaf(treeElement.firstElementChild, notebookId, true);
+                    break;
+                } else {
+                    currentPath = dirname + ".sy";
+                }
+            } else {
+                liElement.querySelector(".fn__hidden")?.classList.remove("fn__hidden");
+                break;
+            }
         }
     }
 
@@ -1019,16 +1059,6 @@ data-type="navigation-root" data-path="/">
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
-            if (filePath === item.path) {
-                this.selectItem(data.box, filePath, undefined, setStorage);
-            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
-                fetchPost("/api/filetree/listDocsByPath", {
-                    notebook: data.box,
-                    path: item.path
-                }, response => {
-                    this.selectItem(response.data.box, filePath, response.data, setStorage);
-                });
-            }
         });
         if (fileHTML === "") {
             return;
@@ -1046,6 +1076,18 @@ data-type="navigation-root" data-path="/">
             emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        data.files.forEach((item: IFile) => {
+            if (filePath === item.path) {
+                this.selectItem(data.box, filePath, undefined, setStorage);
+            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
+                fetchPost("/api/filetree/listDocsByPath", {
+                    notebook: data.box,
+                    path: item.path
+                }, response => {
+                    this.selectItem(response.data.box, filePath, response.data, setStorage);
+                });
+            }
+        });
         if (setStorage) {
             this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
         }

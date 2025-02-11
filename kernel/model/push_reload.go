@@ -154,9 +154,8 @@ func refreshRefCount(rootID, blockID string) {
 	isDoc := bt.ID == bt.RootID
 	var rootRefIDs []string
 	var refCount, rootRefCount int
-	var refIDs []string
+	refIDs := sql.QueryRefIDsByDefID(bt.ID, isDoc)
 	if isDoc {
-		refIDs = sql.QueryRefIDsByDefID(bt.ID, isDoc)
 		rootRefIDs = refIDs
 	} else {
 		rootRefIDs = sql.QueryRefIDsByDefID(bt.RootID, true)
@@ -296,7 +295,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 						changedAv = true
 					}
 					if newContent != blockValue.Block.Content {
-						blockValue.Block.Content = newContent
+						blockValue.Block.Content = util.UnescapeHTML(newContent)
 						changedAv = true
 					}
 					break

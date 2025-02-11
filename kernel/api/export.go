@@ -410,7 +410,22 @@ func exportMdContent(c *gin.Context) {
 		return
 	}
 
-	hPath, content := model.ExportMarkdownContent(id)
+	refMode := model.Conf.Export.BlockRefMode
+	if nil != arg["refMode"] {
+		refMode = arg["refMode"].(int)
+	}
+
+	embedMode := model.Conf.Export.BlockEmbedMode
+	if nil != arg["embedMode"] {
+		embedMode = arg["embedMode"].(int)
+	}
+
+	yfm := true
+	if nil != arg["yfm"] {
+		yfm = arg["yfm"].(bool)
+	}
+
+	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,
 		"content": content,

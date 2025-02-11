@@ -587,6 +587,7 @@ func Preview(id string) (retStdHTML string) {
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
 	fillThemeStyleVar(tree)
+	luteEngine.RenderOptions.ProtyleMarkNetImg = false
 	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
 
 	if footnotesDefBlock := tree.Root.ChildByType(ast.NodeFootnotesDefBlock); nil != footnotesDefBlock {

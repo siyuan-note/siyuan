@@ -208,7 +208,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             if (textJSON.length === 1 && textJSON[0].length === 1) {
                 updateCellsValue(protyle, blockElement as HTMLElement, text, cellElements, columns, html);
             } else {
-                let currentRowElement:Element;
+                let currentRowElement: Element;
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
                 textJSON.forEach((rowValue, rowIndex) => {
                     if (!currentRowElement) {
@@ -354,10 +354,13 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             // 表格内选中数学公式 https://ld246.com/article/1631708573504
             inlineMathElement.remove();
         } else if (range.startContainer.nodeType === 3 && range.startContainer.parentElement.getAttribute("data-type")?.indexOf("block-ref") > -1) {
-            // ref 选中处理 https://ld246.com/article/1629214377537
-            range.startContainer.parentElement.remove();
             // 选中 ref**bbb** 后 alt+[
             range.deleteContents();
+            // https://github.com/siyuan-note/siyuan/issues/14035
+            if (range.startContainer.nodeType !== 3 && range.startContainer.textContent === "") {
+                // ref 选中处理 https://ld246.com/article/1629214377537
+                (range.startContainer as HTMLElement).remove();
+            }
         } else {
             range.deleteContents();
         }

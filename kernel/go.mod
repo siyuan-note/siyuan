@@ -16,7 +16,7 @@ require (
 	github.com/ConradIrwin/font v0.2.1
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/PuerkitoBio/goquery v1.10.1
-	github.com/Xuanwo/go-locale v1.1.2
+	github.com/Xuanwo/go-locale v1.1.3
 	github.com/araddon/dateparse v0.0.0-20210429162001-6b43995a97de
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
@@ -56,7 +56,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20241111133259-a4122fabb196
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/sashabaranov/go-openai v1.36.1
+	github.com/sashabaranov/go-openai v1.37.0
 	github.com/shirou/gopsutil/v4 v4.25.1
 	github.com/siyuan-note/dejavu v0.0.0-20250212030218-d1f6e807449a
 	github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4
@@ -72,13 +72,13 @@ require (
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
 	github.com/xuri/excelize/v2 v2.9.0
-	golang.org/x/image v0.23.0
+	golang.org/x/image v0.24.0
 	golang.org/x/mobile v0.0.0-20250106192035-c31d5b91ecc3
 	golang.org/x/mod v0.23.0
 	golang.org/x/net v0.35.0
 	golang.org/x/sys v0.30.0
 	golang.org/x/text v0.22.0
-	golang.org/x/time v0.9.0
+	golang.org/x/time v0.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
@@ -117,7 +117,7 @@ require (
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/cloudflare/circl v1.6.0 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
-	github.com/dlclark/regexp2 v1.11.4 // indirect
+	github.com/dlclark/regexp2 v1.11.5 // indirect
 	github.com/dsnet/compress v0.0.1 // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/ebitengine/purego v0.8.2 // indirect
@@ -185,12 +185,12 @@ require (
 	github.com/xuri/nfp v0.0.0-20250111060730-82a408b9aa71 // indirect
 	github.com/yusufpapurcu/wmi v1.2.4 // indirect
 	go.uber.org/mock v0.5.0 // indirect
-	golang.org/x/arch v0.13.0 // indirect
+	golang.org/x/arch v0.14.0 // indirect
 	golang.org/x/crypto v0.33.0 // indirect
 	golang.org/x/exp v0.0.0-20250210185358-939b2ce775ac // indirect
 	golang.org/x/sync v0.11.0 // indirect
 	golang.org/x/tools v0.30.0 // indirect
-	google.golang.org/protobuf v1.36.4 // indirect
+	google.golang.org/protobuf v1.36.5 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 	modernc.org/fileutil v1.3.0 // indirect
 )

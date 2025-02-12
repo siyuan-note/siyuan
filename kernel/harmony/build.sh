@@ -1,6 +1,6 @@
 #!/bin/bash
 
-export OHOS_NDK_HOME=/mnt/f/ohos-sdk-windows_linux-public/linux/
+export OHOS_NDK_HOME=/mnt/f/ohos-sdk-windows_linux-public/linux
 export LOG_ADAPTOR_HOME=/mnt/f/log-adaptor
 
 export CC=$OHOS_NDK_HOME/native/llvm/bin/clang

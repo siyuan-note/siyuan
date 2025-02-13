@@ -62,6 +62,8 @@
   "autoLaunchMode0": "Do not launch automatically",
   "autoLaunchMode1": "Auto launch after booting",
   "autoLaunchMode2": "Auto launch and minimize the main interface after booting",
+  "editorMarkdownInlineMark": "Markdown inline mark syntax",
+  "editorMarkdownInlineMarkTip": "After enabling, the <code class='fn__code'>==foo==</code> inline mark syntax input will be supported",
   "editorMarkdownInlineStrikethrough": "Markdown inline strikethrough syntax",
   "editorMarkdownInlineStrikethroughTip": "After enabling, the <code class='fn__code'>~~foo~~</code> inline strikethrough syntax input will be supported",
   "editorMarkdownInlineSup": "Markdown inline superscript syntax",

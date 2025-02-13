@@ -62,6 +62,8 @@
   "autoLaunchMode0": "自動的に起動しない",
   "autoLaunchMode1": "システムの起動後に自動的に起動する",
   "autoLaunchMode2": "システムの起動後にインターフェースを最小化して自動的に起動する",
+  "editorMarkdownInlineMark": "Markdown インラインマークアップ構文",
+  "editorMarkdownInlineMarkTip": "<code class='fn__code'>==foo==</code> 形式のインラインマークアップ構文を有効にします",
   "editorMarkdownInlineStrikethrough": "Markdown 行内取り消し線の構文",
   "editorMarkdownInlineStrikethroughTip": "<code class='fn__code'>~~foo~~</code> 形式のインライン取り消し線構文を有効にします",
   "editorMarkdownInlineSup": "Markdown インライン上付き文字構文",

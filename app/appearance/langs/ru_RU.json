@@ -62,6 +62,8 @@
   "autoLaunchMode0": "Не запускать автоматически",
   "autoLaunchMode1": "Автозапуск после загрузки",
   "autoLaunchMode2": "Автозапуск и минимизация главного интерфейса после загрузки",
+  "editorMarkdownInlineMark": "Markdown синтаксис встроенной разметки",
+  "editorMarkdownInlineMarkTip": "После включения будет поддерживаться ввод синтаксиса встроенной разметки <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "Markdown синтаксис зачёркивания",
   "editorMarkdownInlineStrikethroughTip": "После включения будет поддерживаться ввод синтаксиса зачёркивания <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Markdown синтаксис для надстрочного индекса",

@@ -25,7 +25,7 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "listItemDotNumberClickFocus", "listItemDotNumberClickFocusTip", "editorMarkdownInlineAsterisk", "editorMarkdownInlineUnderscore",
             "editorMarkdownInlineSup", "editorMarkdownInlineSupTip", "editorMarkdownInlineSub", "editorMarkdownInlineSubTip",
             "editorMarkdownInlineTag", "editorMarkdownInlineTagTip", "editorMarkdownInlineMath", "editorMarkdownInlineMathTip",
-            "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip",
+            "editorMarkdownInlineStrikethrough", "editorMarkdownInlineStrikethroughTip", "editorMarkdownInlineMark", "editorMarkdownInlineMarkTip",
             "allowHTMLBLockScript", "allowHTMLBLockScriptTip", "backlinkExpandTip", "backmentionExpandTip",
             "backlinkContainChildren", "backlinkContainChildrenTip"
         ]),

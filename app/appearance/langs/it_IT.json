@@ -62,6 +62,8 @@
   "autoLaunchMode0": "Non avviare automaticamente",
   "autoLaunchMode1": "Avvio automatico dopo l'accensione",
   "autoLaunchMode2": "Avvio automatico e minimizzazione dell'interfaccia principale dopo l'accensione",
+  "editorMarkdownInlineMark": "Sintassi di marcatura inline di Markdown",
+  "editorMarkdownInlineMarkTip": "Dopo l'attivazione, sarà supportato l'inserimento della sintassi di marcatura inline <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "Sintassi di barratura in linea di Markdown",
   "editorMarkdownInlineStrikethroughTip": "Dopo l'attivazione, sarà supportato l'inserimento della sintassi di barratura in linea <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Sintassi Markdown per apice in linea",

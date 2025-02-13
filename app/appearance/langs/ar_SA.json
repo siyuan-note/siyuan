@@ -62,6 +62,8 @@
   "autoLaunchMode0": "عدم التشغيل تلقائيًا",
   "autoLaunchMode1": "التشغيل التلقائي بعد الإقلاع",
   "autoLaunchMode2": "التشغيل التلقائي وتقليل الواجهة الرئيسية بعد الإقلاع",
+  "editorMarkdownInlineMark": "صيغة العلامة المضمنة في Markdown",
+  "editorMarkdownInlineMarkTip": "بمجرد التمكين، سيتم دعم إدخال صيغة العلامة المضمنة <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "‫صياغة الشطب بخط داخل السطر في Markdown‬",
   "editorMarkdownInlineStrikethroughTip": "‫بعد التمكين, سيتم دعم إدخال ‪<code class='fn__code'>~~foo~~</code>‬ لإضافة شطب بخط داخل السطر‬",
   "editorMarkdownInlineSup": "‫صياغة النص المرتفع دخل السطر في Markdown‬",

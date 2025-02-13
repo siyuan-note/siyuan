@@ -21,7 +21,8 @@ const setEditor = (modelMainElement: Element) => {
         inlineSub: (modelMainElement.querySelector("#editorMarkdownInlineSub") as HTMLInputElement).checked,
         inlineTag: (modelMainElement.querySelector("#editorMarkdownInlineTag") as HTMLInputElement).checked,
         inlineMath: (modelMainElement.querySelector("#editorMarkdownInlineMath") as HTMLInputElement).checked,
-        inlineStrikethrough: (modelMainElement.querySelector("#editorMarkdownInlineStrikethrough") as HTMLInputElement).checked
+        inlineStrikethrough: (modelMainElement.querySelector("#editorMarkdownInlineStrikethrough") as HTMLInputElement).checked,
+        inlineMark: (modelMainElement.querySelector("#editorMarkdownInlineMark") as HTMLInputElement).checked
     };
     window.siyuan.config.editor.allowHTMLBLockScript = (modelMainElement.querySelector("#allowHTMLBLockScript") as HTMLInputElement).checked;
     window.siyuan.config.editor.dynamicLoadBlocks = dynamicLoadBlocks;
@@ -330,6 +331,14 @@ export const initEditor = () => {
     </div>
     <span class="fn__space"></span>
     <input class="b3-switch fn__flex-center" id="editorMarkdownInlineStrikethrough" type="checkbox"${window.siyuan.config.editor.markdown.inlineStrikethrough ? " checked" : ""}/>
+</label>
+<label class="fn__flex b3-label">
+    <div class="fn__flex-1">
+       ${window.siyuan.languages.editorMarkdownInlineMark}
+        <div class="b3-label__text">${window.siyuan.languages.editorMarkdownInlineMarkTip}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-switch fn__flex-center" id="editorMarkdownInlineMark" type="checkbox"${window.siyuan.config.editor.markdown.inlineMark ? " checked" : ""}/>
 </label>`,
         bindEvent(modelMainElement: HTMLElement) {
             modelMainElement.querySelector("#clearHistory").addEventListener("click", () => {

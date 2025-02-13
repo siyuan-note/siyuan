@@ -62,6 +62,8 @@
   "autoLaunchMode0": "不自动启动",
   "autoLaunchMode1": "开机后自动启动",
   "autoLaunchMode2": "开机后自动启动并最小化主界面",
+  "editorMarkdownInlineMark": "Markdown 行级标记语法",
+  "editorMarkdownInlineMarkTip": "启用后将支持 <code class='fn__code'>==foo==</code> 行级标记语法输入",
   "editorMarkdownInlineStrikethrough": "Markdown 行级删除线语法",
   "editorMarkdownInlineStrikethroughTip": "启用后将支持 <code class='fn__code'>~~foo~~</code> 行级删除线语法输入",
   "editorMarkdownInlineSup": "Markdown 行级上标语法",

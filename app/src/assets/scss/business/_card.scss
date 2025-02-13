@@ -83,6 +83,10 @@
         font-size: initial;
         font-weight: bold;
       }
+
+      &+ span[data-type~=mark]::before {
+        display: none;
+      }
     }
 
     &--hideli .list[custom-riff-decks] .li > .list,

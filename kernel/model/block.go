@@ -275,8 +275,7 @@ func GetUnfoldedParentID(id string) (parentID string) {
 		if "1" == parent.IALAttr("fold") {
 			firstFoldedParent = parent
 			parentID = firstFoldedParent.ID
-		}
-		if "1" != parent.IALAttr("fold") {
+		} else {
 			if nil != firstFoldedParent {
 				parentID = firstFoldedParent.ID
 			} else {
@@ -284,6 +283,9 @@ func GetUnfoldedParentID(id string) (parentID string) {
 			}
 			return
 		}
+	}
+	if "" == parentID {
+		parentID = id
 	}
 	return
 }

@@ -5,13 +5,15 @@
   background-color: transparent;
   padding: 0 4px;
 
-  &::-webkit-slider-runnable-track {
+  &::-webkit-slider-runnable-track,
+  &::-moz-range-track {
     -webkit-appearance: none;
     height: 2px;
     background-color: var(--b3-theme-primary-lighter);
   }
 
-  &::-webkit-slider-thumb {
+  &::-webkit-slider-thumb,
+  &::-moz-range-thumb {
     -webkit-appearance: none;
     width: 10px;
     height: 10px;
@@ -27,7 +29,8 @@
   &:hover {
     outline: none;
 
-    &::-webkit-slider-thumb {
+    &::-webkit-slider-thumb,
+    &::-moz-range-thumb {
       transform: scale(1.5);
     }
   }

@@ -57,7 +57,8 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
                 (window.siyuan.layout.leftDock.element.clientWidth > 0 || (window.siyuan.layout.leftDock.element.clientWidth === 0 && event.clientX < 8))) {
                 if (event.clientY > document.getElementById("toolbar").clientHeight &&
                     event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
-                    if (!hasClosestByClassName(event.target, "b3-menu") && !hasClosestByClassName(event.target, "protyle-toolbar") &&
+                    if (!hasClosestByClassName(event.target, "b3-menu") &&
+                        !hasClosestByClassName(event.target, "protyle-toolbar") &&
                         !hasClosestByClassName(event.target, "b3-dialog") &&
                         !hasClosestByClassName(event.target, "layout--float")) {
                         window.siyuan.layout.leftDock.showDock();
@@ -71,7 +72,9 @@ export const windowMouseMove = (event: MouseEvent & { target: HTMLElement }, mou
                 (window.siyuan.layout.rightDock.element.clientWidth > 0 || (window.siyuan.layout.rightDock.element.clientWidth === 0 && event.clientX > window.innerWidth - 8))) {
                 if (event.clientY > document.getElementById("toolbar").clientHeight &&
                     event.clientY < window.innerHeight - document.getElementById("status").clientHeight - document.getElementById("dockBottom").clientHeight) {
-                    if (!hasClosestByClassName(event.target, "layout--float") && !hasClosestByClassName(event.target, "protyle-toolbar") &&
+                    if (!hasClosestByClassName(event.target, "b3-menu") &&
+                        !hasClosestByClassName(event.target, "layout--float") &&
+                        !hasClosestByClassName(event.target, "protyle-toolbar") &&
                         !hasClosestByClassName(event.target, "b3-dialog")) {
                         window.siyuan.layout.rightDock.showDock();
                     }

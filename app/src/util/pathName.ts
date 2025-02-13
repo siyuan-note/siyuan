@@ -10,7 +10,7 @@ import {Constants} from "../constants";
 import {ipcRenderer} from "electron";
 /// #endif
 import {showMessage} from "../dialog/message";
-import {isOnlyMeta, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
+import {isOnlyMeta, isWindows, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
@@ -101,8 +101,11 @@ export const isLocalPath = (link: string) => {
         return true;
     }
 
-    const colonIdx = link.indexOf(":");
-    return 1 === colonIdx; // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
+    if (isWindows()) {
+        const colonIdx = link.indexOf(":");
+        return 1 === colonIdx; // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
+    }
+    return link.startsWith("/")
 };
 
 export const pathPosix = () => {

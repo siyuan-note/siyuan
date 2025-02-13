@@ -62,6 +62,8 @@
   "autoLaunchMode0": "No iniciar automáticamente",
   "autoLaunchMode1": "Inicio automático después del arranque",
   "autoLaunchMode2": "Iniciar automáticamente y minimizar la interfaz principal después del arranque",
+  "editorMarkdownInlineMark": "Sintaxis de marcado en línea de Markdown",
+  "editorMarkdownInlineMarkTip": "Una vez habilitado, se admitirá la entrada de la sintaxis de marcado en línea <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "Sintaxis de tachado en línea de Markdown",
   "editorMarkdownInlineStrikethroughTip": "Una vez habilitado, se admitirá la entrada de sintaxis de tachado en línea <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Sintaxis de superíndice en línea de Markdown",

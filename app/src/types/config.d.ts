@@ -328,6 +328,10 @@ declare namespace Config {
          * Whether to enable the inline strikethrough
          */
         inlineStrikethrough: boolean;
+        /**
+         * Whether to enable the inline mark
+         */
+        inlineMark: boolean;
     }
 
     /**

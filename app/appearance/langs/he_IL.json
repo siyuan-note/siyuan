@@ -62,6 +62,8 @@
   "autoLaunchMode0": "אל תצא אוטומטית",
   "autoLaunchMode1": "צא אוטומטית לאחר אתחול",
   "autoLaunchMode2": "צא אוטומטית ומזער את הממשק העיקרי לאחר אתחול",
+  "editorMarkdownInlineMark": "תחביר סימון שורת Markdown",
+  "editorMarkdownInlineMarkTip": "לאחר ההפעלה, ייתמך קלט תחביר סימון שורת <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "תחביר קו חוצה בשורת Markdown",
   "editorMarkdownInlineStrikethroughTip": "לאחר ההפעלה, ייתמך קלט תחביר קו חוצה בשורת <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "תחביר עליון בתוך Markdown",

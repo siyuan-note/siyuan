@@ -225,6 +225,7 @@ export const restoreLuteMarkdownSyntax = (protyle: IProtyle) => {
     protyle.lute.SetSup(window.siyuan.config.editor.markdown.inlineSup);
     protyle.lute.SetTag(window.siyuan.config.editor.markdown.inlineTag);
     protyle.lute.SetInlineUnderscore(window.siyuan.config.editor.markdown.inlineUnderscore);
+    protyle.lute.SetMark(window.siyuan.config.editor.markdown.inlineMark);
 };
 
 export const pasteText = async (protyle: IProtyle, textPlain: string, nodeElement: Element, toBlockDOM = true) => {

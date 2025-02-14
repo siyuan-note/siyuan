@@ -1050,7 +1050,7 @@
   "md7": "Icono de imagen de red",
   "md8": "Después de habilitarlo, si la imagen es un archivo de red (archivo de activos no locales), mostrará una marca de esquina",
   "md9": "Lista de inclusión de palabras clave de referencia virtual",
-  "md12": "Índice del bloque de contenido",
+  "md12": "Icono de esquina del bloque de contenido",
   "md16": "Mostrar en la esquina superior derecha los marcadores, nombres, alias, notas, el nombre de la base de datos vinculada y el recuento de referencias",
   "md27": "Número de línea del bloque de código",
   "md28": "Tras la habilitación, el bloque de código mostrará el número de línea (Tenga en cuenta que habilitarlo puede reducir el rendimiento del editor)",

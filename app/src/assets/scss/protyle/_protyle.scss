@@ -61,6 +61,12 @@
         background-color: var(--b3-border-color);
         box-shadow: none;
       }
+
+      &::-moz-range-track,
+      &::-moz-range-thumb {
+        background-color: var(--b3-border-color);
+        box-shadow: none;
+      }
     }
   }
 }

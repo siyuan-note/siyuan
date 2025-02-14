@@ -291,11 +291,14 @@
       font-size: 1em;
       line-height: 1.625;
       height: auto;
+      float: left;
 
       img {
         height: calc(1.625em - 8px);
         font-size: 1em;
         width: calc(1.625em - 8px);
+        float: left;
+        margin: 4px 0;
       }
     }
 

@@ -105,7 +105,7 @@ export const isLocalPath = (link: string) => {
         const colonIdx = link.indexOf(":");
         return 1 === colonIdx; // 冒号前面只有一个字符认为是 Windows 盘符而不是网络协议
     }
-    return link.startsWith("/")
+    return link.startsWith("/");
 };
 
 export const pathPosix = () => {

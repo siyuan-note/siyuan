@@ -153,7 +153,7 @@ export const isWin11 = async () => {
 
 export const isWindows = () => {
     return navigator.platform.toUpperCase().indexOf("WIN") > -1;
-}
+};
 
 export const isInAndroid = () => {
     return window.siyuan.config.system.container === "android" && window.JSAndroid;

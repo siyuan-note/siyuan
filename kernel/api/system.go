@@ -22,7 +22,6 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
-	"sync"
 	"time"
 
 	"github.com/88250/gulu"
@@ -166,7 +165,7 @@ func getEmojiConf(c *gin.Context) {
 	items := []map[string]interface{}{}
 	custom["items"] = items
 	if gulu.File.IsDir(customConfDir) {
-		model.CustomEmojis = sync.Map{}
+		model.ClearCustomEmojis()
 		customEmojis, err := os.ReadDir(customConfDir)
 		if err != nil {
 			logging.LogErrorf("read custom emojis failed: %s", err)
@@ -224,7 +223,7 @@ func addCustomEmoji(name string, items *[]map[string]interface{}) {
 	*items = append(*items, emoji)
 
 	imgSrc := "/emojis/" + name
-	model.CustomEmojis.Store(nameWithoutExt, imgSrc)
+	model.AddCustomEmoji(nameWithoutExt, imgSrc)
 }
 
 func checkUpdate(c *gin.Context) {

@@ -866,13 +866,13 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 					return ast.WalkContinue
 				}
 
-				absolutePath := filepath.Join(localPath, dest)
+				absolutePath := filepath.Join(currentDir, dest)
 				newAbsolutePath := absolutePath
 
 				decodedDest := string(html.DecodeDestination([]byte(dest)))
 				if decodedDest != dest {
 					dest = decodedDest
-					newAbsolutePath = filepath.Join(localPath, dest)
+					newAbsolutePath = filepath.Join(currentDir, dest)
 					gulu.File.Copy(absolutePath, newAbsolutePath)
 				}
 

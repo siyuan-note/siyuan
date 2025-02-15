@@ -62,6 +62,8 @@
   "autoLaunchMode0": "Nie uruchamiaj automatycznie",
   "autoLaunchMode1": "Uruchom automatycznie po włączeniu",
   "autoLaunchMode2": "Uruchom automatycznie i zminimalizuj główny interfejs po włączeniu",
+  "editorMarkdownInlineMark": "Składnia oznaczeń w Markdown",
+  "editorMarkdownInlineMarkTip": "Po włączeniu będzie obsługiwane wprowadzanie składni oznaczeń <code class='fn__code'>==foo==</code>",
   "editorMarkdownInlineStrikethrough": "Markdown składnia przekreślenia",
   "editorMarkdownInlineStrikethroughTip": "Po włączeniu będzie obsługiwane wprowadzanie składni przekreślenia <code class='fn__code'>~~foo~~</code>",
   "editorMarkdownInlineSup": "Składnia Markdown dla indeksów dolnych w tekście",

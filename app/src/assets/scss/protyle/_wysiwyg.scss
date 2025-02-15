@@ -526,6 +526,7 @@
     & > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
       cursor: pointer;
       @include text-clamp(1);
+      max-width: 25vw;
     }
   }
 

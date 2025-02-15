@@ -33,6 +33,7 @@ var MarkdownSettings = &Markdown{
 	InlineTag:           true,
 	InlineMath:          true,
 	InlineStrikethrough: true,
+	InlineMark:          true,
 }
 
 type Markdown struct {
@@ -43,6 +44,7 @@ type Markdown struct {
 	InlineTag           bool `json:"inlineTag"`           // 是否启用行级标签
 	InlineMath          bool `json:"inlineMath"`          // 是否启用行级公式
 	InlineStrikethrough bool `json:"inlineStrikethrough"` // 是否启用行级删除线
+	InlineMark          bool `json:"inlineMark"`          // 是否启用行级标记
 }
 
 func NewLute() (ret *lute.Lute) {
@@ -64,6 +66,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetTag(MarkdownSettings.InlineTag)
 	ret.SetInlineMath(MarkdownSettings.InlineMath)
 	ret.SetGFMStrikethrough(MarkdownSettings.InlineStrikethrough)
+	ret.SetMark(MarkdownSettings.InlineMark)
 	ret.SetInlineMathAllowDigitAfterOpenMarker(true)
 	ret.SetGFMStrikethrough1(false)
 	ret.SetFootnotes(false)

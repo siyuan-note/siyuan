@@ -62,6 +62,8 @@
   "autoLaunchMode0": "Nicht automatisch starten",
   "autoLaunchMode1": "Automatisch nach dem Booten starten",
   "autoLaunchMode2": "Automatisch starten und die Hauptoberfläche minimieren nach dem Booten",
+  "editorMarkdownInlineMark": "Markdown-Inline-Markup-Syntax",
+  "editorMarkdownInlineMarkTip": "Nach dem Aktivieren wird die Eingabe der Inline-Markup-Syntax <code class='fn__code'>==foo==</code> unterstützt",
   "editorMarkdownInlineStrikethrough": "Markdown Inline-Durchstreichsyntax",
   "editorMarkdownInlineStrikethroughTip": "Nach der Aktivierung wird die Eingabe der Inline-Durchstreichsyntax <code class='fn__code'>~~foo~~</code> unterstützt",
   "editorMarkdownInlineSup": "Markdown Inline-Hochstellungssyntax",

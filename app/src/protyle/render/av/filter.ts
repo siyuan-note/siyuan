@@ -426,7 +426,7 @@ export const setFilter = async (options: {
             <option value="0"${showToday ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
-        <input type="number" min="1" step="1" value="${options.filter.relativeDate?.count || 1}" class="b3-text-field fn__flex-1${showToday ? " fn__none" : ""}"/>
+        <input type="number" min="1" oninput="this.value = Math.max(this.value, 1)" step="1" value="${options.filter.relativeDate?.count || 1}" class="b3-text-field fn__flex-1${showToday ? " fn__none" : ""}"/>
         <span class="fn__space${showToday ? " fn__none" : ""}"></span>
         <select class="b3-select fn__flex-1">
             <option value="0"${options.filter.relativeDate?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>
@@ -449,7 +449,7 @@ export const setFilter = async (options: {
             <option value="0"${showToday2 ? " selected" : ""}>${window.siyuan.languages.current}</option>
         </select>
         <span class="fn__space"></span>
-        <input type="number" min="1" step="1" value="${options.filter.relativeDate2?.count || 1}" class="b3-text-field fn__flex-1${showToday2 ? " fn__none" : ""}"/>
+        <input type="number" min="1" step="1" oninput="this.value = Math.max(this.value, 1)" value="${options.filter.relativeDate2?.count || 1}" class="b3-text-field fn__flex-1${showToday2 ? " fn__none" : ""}"/>
         <span class="fn__space${showToday2 ? " fn__none" : ""}"></span>
         <select class="b3-select fn__flex-1">
             <option value="0"${options.filter.relativeDate2?.unit === 0 ? " selected" : ""}>${window.siyuan.languages.day}</option>

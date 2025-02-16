@@ -164,6 +164,11 @@ export class Title {
                 event.stopPropagation();
             }
         });
+        this.editElement.addEventListener("keyup", (event: KeyboardEvent) => {
+            this.editElement.querySelectorAll("br").forEach(item => {
+                item.remove()
+            })
+        })
         const iconElement = this.element.querySelector(".protyle-title__icon");
         iconElement.addEventListener("click", () => {
             if (window.siyuan.shiftIsPressed) {

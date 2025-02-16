@@ -592,7 +592,23 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
 		if RelativeDateDirectionBefore == direction {
-			if RelativeDateDirectionBefore == direction2 || RelativeDateDirectionAfter == direction2 {
+			if RelativeDateDirectionBefore == direction2 {
+				var leftStart, rightEnd time.Time
+				if otherValueStart.Before(otherValueStart2) {
+					leftStart = otherValueStart
+				} else {
+					leftStart = otherValueStart2
+				}
+				if otherValueEnd.Before(otherValueStart2) {
+					rightEnd = otherValueEnd
+				} else {
+					rightEnd = otherValueStart2
+				}
+				return (valueTime.After(leftStart) || valueTime.Equal(leftStart)) && (valueTime.Before(rightEnd) || valueTime.Equal(rightEnd))
+			} else if RelativeDateDirectionThis == direction2 {
+				return ((valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))) ||
+					((valueTime.After(otherValueStart2) || valueTime.Equal(otherValueStart2)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2)))
+			} else if RelativeDateDirectionAfter == direction2 {
 				var leftStart, rightEnd time.Time
 				if otherValueStart.Before(otherValueStart2) {
 					leftStart = otherValueStart
@@ -605,15 +621,12 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 					rightEnd = otherValueEnd
 				}
 				return (valueTime.After(leftStart) || valueTime.Equal(leftStart)) && (valueTime.Before(rightEnd) || valueTime.Equal(rightEnd))
-			} else if RelativeDateDirectionThis == direction2 {
-				return ((valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))) ||
-					((valueTime.After(otherValueStart2) || valueTime.Equal(otherValueStart2)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2)))
 			}
 		} else if RelativeDateDirectionThis == direction {
 			return ((valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))) ||
 				((valueTime.After(otherValueStart2) || valueTime.Equal(otherValueStart2)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2)))
 		} else if RelativeDateDirectionAfter == direction {
-			if RelativeDateDirectionBefore == direction2 || RelativeDateDirectionAfter == direction2 {
+			if RelativeDateDirectionBefore == direction2 {
 				var leftStart, rightEnd time.Time
 				if otherValueStart.Before(otherValueStart2) {
 					leftStart = otherValueStart
@@ -629,6 +642,19 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 			} else if RelativeDateDirectionThis == direction2 {
 				return ((valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))) ||
 					((valueTime.After(otherValueStart2) || valueTime.Equal(otherValueStart2)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2)))
+			} else if RelativeDateDirectionAfter == direction2 {
+				var leftStart, rightEnd time.Time
+				if otherValueEnd.Before(otherValueEnd2) {
+					leftStart = otherValueEnd
+				} else {
+					leftStart = otherValueEnd2
+				}
+				if otherValueEnd.After(otherValueEnd2) {
+					rightEnd = otherValueEnd
+				} else {
+					rightEnd = otherValueEnd2
+				}
+				return (valueTime.After(leftStart) || valueTime.Equal(leftStart)) && (valueTime.Before(rightEnd) || valueTime.Equal(rightEnd))
 			}
 		}
 		return false

@@ -66,6 +66,11 @@ export class Title {
             if (event.isComposing) {
                 return;
             }
+            if (this.editElement.textContent === "") {
+                this.editElement.querySelectorAll("br").forEach(item => {
+                    item.remove()
+                });
+            }
             this.rename(protyle);
         });
         this.editElement.addEventListener("compositionend", () => {
@@ -164,11 +169,6 @@ export class Title {
                 event.stopPropagation();
             }
         });
-        this.editElement.addEventListener("keyup", (event: KeyboardEvent) => {
-            this.editElement.querySelectorAll("br").forEach(item => {
-                item.remove()
-            })
-        })
         const iconElement = this.element.querySelector(".protyle-title__icon");
         iconElement.addEventListener("click", () => {
             if (window.siyuan.shiftIsPressed) {

@@ -118,7 +118,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	}
 
 	var toRemoves []string
-	for defID, _ := range invalidDefIDs {
+	for defID := range invalidDefIDs {
 		if _, ok := blockMap[defID]; ok {
 			toRemoves = append(toRemoves, defID)
 		}
@@ -148,7 +148,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 		delete(refBlockMap, toRemove)
 	}
 
-	for refID, _ := range refBlockMap {
+	for refID := range refBlockMap {
 		invalidBlockIDs = append(invalidBlockIDs, refID)
 	}
 	invalidBlockIDs = gulu.Str.RemoveDuplicatedElem(invalidBlockIDs)
@@ -596,6 +596,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					}
 
 					replaceNodeTokens(n, method, keyword, strings.TrimSpace(replacement), r)
+					if 1 > len(n.Tokens) {
+						unlinks = append(unlinks, n.Parent)
+					}
 				case ast.NodeLinkText:
 					if !replaceTypes["imgText"] {
 						return ast.WalkContinue
@@ -681,6 +684,15 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {
 									n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, strings.TrimSpace(replacement))
+								}
+							}
+
+							if "" == n.TextMarkAHref {
+								if "" == n.TextMarkTextContent {
+									unlinks = append(unlinks, n)
+								} else {
+									n.Type = ast.NodeText
+									n.Tokens = []byte(n.TextMarkTextContent)
 								}
 							}
 						}

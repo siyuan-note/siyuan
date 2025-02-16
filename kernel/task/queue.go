@@ -179,7 +179,7 @@ func StatusJob() {
 	queueLock.Lock()
 	for _, task := range taskQueue {
 		action := task.Action
-		if c := count[action]; 2 < c {
+		if c := count[action]; 7 < c {
 			logging.LogWarnf("too many tasks [%s], ignore show its status", action)
 			continue
 		}

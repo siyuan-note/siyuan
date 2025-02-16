@@ -330,7 +330,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			if nil != defTree {
 				defNode := treenode.GetNodeInTree(defTree, defID)
 				if nil != defNode {
-					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, 1*time.Second, refreshRefCount, defTree.ID, defNode.ID)
+					task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defTree.ID, defNode.ID)
 				}
 			}
 		}

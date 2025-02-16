@@ -40,7 +40,7 @@ export const readText = () => {
 };
 
 export const readClipboard = async () => {
-    const text: { textPlain?: string, textHTML?: string } = {}
+    const text: { textPlain?: string, textHTML?: string } = {};
     if (isInAndroid()) {
         text.textPlain = window.JSAndroid.readClipboard();
     } else if (isInHarmony()) {
@@ -58,7 +58,7 @@ export const readClipboard = async () => {
         }
     }
     return text;
-}
+};
 
 export const writeText = (text: string) => {
     let range: Range;

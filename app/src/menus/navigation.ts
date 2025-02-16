@@ -722,7 +722,7 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
         files = (getDockByType("file").data["file"] as Files);
         /// #endif
         const liElement = files.element.querySelector(`[data-path="${pathString}"]`);
-        liElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden")
+        liElement.querySelector(".b3-list-item__toggle").classList.remove("fn__hidden");
         files.getLeaf(liElement, notebookId, true);
         window.siyuan.menus.menu.remove();
     };

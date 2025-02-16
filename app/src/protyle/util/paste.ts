@@ -279,8 +279,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.items;
         }
     } else {
-        textHTML = event.textHTML
-        textPlain = event.textPlain
+        textHTML = event.textHTML;
+        textPlain = event.textPlain;
     }
 
     // Improve the pasting of selected text in PDF rectangular annotation https://github.com/siyuan-note/siyuan/issues/11629

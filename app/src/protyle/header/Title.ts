@@ -68,7 +68,7 @@ export class Title {
             }
             if (this.editElement.textContent === "") {
                 this.editElement.querySelectorAll("br").forEach(item => {
-                    item.remove()
+                    item.remove();
                 });
             }
             this.rename(protyle);

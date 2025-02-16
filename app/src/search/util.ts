@@ -235,7 +235,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     <div class="search__layout${unRefLocal.layout === 1 ? " search__layout--row" : ""}">
         <div id="searchUnRefList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
         <div class="search__drag"></div>
-        <div id="searchUnRefPreview" class="fn__flex-1 search__preview b3-typography"></div>
+        <div id="searchUnRefPreview" class="fn__flex-1 search__preview"></div>
     </div>
     <div class="search__tip${closeCB ? "" : " fn__none"}">
         <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}

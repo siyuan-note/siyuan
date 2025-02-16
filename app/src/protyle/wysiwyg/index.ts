@@ -729,6 +729,7 @@ export class WYSIWYG {
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
                     window.siyuan.menus.menu.remove();
+                    hideElements(["toolbar"], protyle);
                     event.stopPropagation();
                 }
                 // 后续拖拽操作写在多选节点中

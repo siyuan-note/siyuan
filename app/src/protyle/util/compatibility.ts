@@ -39,6 +39,27 @@ export const readText = () => {
     return navigator.clipboard.readText();
 };
 
+export const readClipboard = async () => {
+    const text: { textPlain?: string, textHTML?: string } = {}
+    if (isInAndroid()) {
+        text.textPlain = window.JSAndroid.readClipboard();
+    } else if (isInHarmony()) {
+        text.textPlain = window.JSHarmony.readClipboard();
+    }
+    const clipboardContents = await navigator.clipboard.read();
+    for (const item of clipboardContents) {
+        if (item.types.includes("text/html")) {
+            const blob = await item.getType("text/html");
+            text.textHTML = await blob.text();
+        }
+        if (item.types.includes("text/plain")) {
+            const blob = await item.getType("text/plain");
+            text.textPlain = await blob.text();
+        }
+    }
+    return text;
+}
+
 export const writeText = (text: string) => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
@@ -145,7 +166,7 @@ export const isWin11 = async () => {
     const ua = await (navigator as any).userAgentData.getHighEntropyValues(["platformVersion"]);
     if ((navigator as any).userAgentData.platform === "Windows") {
         if (parseInt(ua.platformVersion.split(".")[0]) >= 13) {
-           return true;
+            return true;
         }
     }
     return false;

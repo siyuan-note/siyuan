@@ -235,7 +235,17 @@ export class Title {
                 accelerator: "⌘V",
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
-                    document.execCommand("paste");
+                    if (document.queryCommandSupported("paste")) {
+                        document.execCommand("paste");
+                    } else {
+                        try {
+                            const text = await readText();
+                            document.execCommand("insertText", false, replaceFileName(text));
+                            this.rename(protyle);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

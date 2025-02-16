@@ -1,4 +1,4 @@
-import {getTextStar, paste, pasteText} from "../util/paste";
+import {getTextStar, paste} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -64,7 +64,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isMac, isOnlyMeta, readText} from "../util/compatibility";
+import {isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -1330,8 +1330,8 @@ export class WYSIWYG {
                                     document.execCommand("paste");
                                 } else if (tableBlockElement) {
                                     try {
-                                        const clipText = await readText();
-                                        pasteText(protyle, clipText, tableBlockElement);
+                                        const text = await readClipboard();
+                                        paste(protyle, Object.assign(text, {target: tableBlockElement as HTMLElement}));
                                     } catch (e) {
                                         console.log(e);
                                     }

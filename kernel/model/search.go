@@ -688,7 +688,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							}
 
 							if "" == n.TextMarkAHref {
-								unlinks = append(unlinks, n)
+								if "" == n.TextMarkTextContent {
+									unlinks = append(unlinks, n)
+								} else {
+									n.Type = ast.NodeText
+									n.Tokens = []byte(n.TextMarkTextContent)
+								}
 							}
 						}
 					} else if n.IsTextMarkType("em") {

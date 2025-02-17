@@ -462,6 +462,11 @@ export class Toolbar {
                             item.textContent !== Constants.ZWSP ||
                             // tag 会有零宽空格 https://github.com/siyuan-note/siyuan/issues/12922
                             (item.textContent === Constants.ZWSP && !rangeTypes.includes("img"))) {
+                            // ZWSP spin 后会在行内元素外 https://github.com/siyuan-note/siyuan/issues/13871
+                            if (item.textContent.startsWith(Constants.ZWSP)) {
+                                newNodes.push(document.createTextNode(Constants.ZWSP));
+                                item.textContent = item.textContent.substring(1);
+                            }
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
                             inlineElement.textContent = item.textContent;
@@ -485,6 +490,11 @@ export class Toolbar {
                         }
                         if (!types.includes("img")) {
                             types.push(type);
+                        }
+                        // 以下行内元素需用 ZWSP 开头 https://github.com/siyuan-note/siyuan/issues/13871
+                        if ((types.includes("code") || types.includes("tag") || types.includes("kbd")) &&
+                            !item.textContent.startsWith(Constants.ZWSP)) {
+                            item.insertAdjacentText("afterbegin", Constants.ZWSP);
                         }
                         // 上标和下标不能同时存在 https://github.com/siyuan-note/insider/issues/1049
                         if (type === "sub" && types.includes("sup")) {

@@ -309,6 +309,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     if (!blockElement) {
         return;
     }
+
     if (blockElement.classList.contains("av")) {
         range.deleteContents();
         processAV(range, html, protyle, blockElement as HTMLElement);
@@ -318,15 +319,17 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         processTable(range, html, protyle, blockElement)) {
         return;
     }
+
     let id = blockElement.getAttribute("data-node-id");
     range.insertNode(document.createElement("wbr"));
     let oldHTML = blockElement.outerHTML;
     const isNodeCodeBlock = blockElement.getAttribute("data-type") === "NodeCodeBlock";
+    const editableElement = getContenteditableElement(blockElement);
     if (!isBlock &&
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         // 代码块需保持至少一个 \n https://github.com/siyuan-note/siyuan/pull/13271#issuecomment-2502672155
-        if (isNodeCodeBlock && getContenteditableElement(blockElement).textContent === "") {
+        if (isNodeCodeBlock && editableElement.textContent === "") {
             html += "\n";
         }
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
@@ -385,10 +388,18 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     innerHTML = innerHTML.replace(/;;;lt;;;/g, "&lt;").replace(/;;;gt;;;/g, "&gt;");
     tempElement.innerHTML = innerHTML;
 
-    const editableElement = getContenteditableElement(blockElement);
+    // https://github.com/siyuan-note/siyuan/issues/14114
+    let heading2text = false;
+    if (isBlock && editableElement.textContent.replace(Constants.ZWSP, "") !== "" && tempElement.content.childElementCount === 1 &&
+        tempElement.content.firstChild.nodeType !== 3 &&
+        tempElement.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
+        isBlock = false;
+        heading2text = true
+    }
+
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
-        if (tempElement.content.firstChild.nodeType === 3 ||
+        if (tempElement.content.firstChild.nodeType === 3 || heading2text ||
             (tempElement.content.firstChild.nodeType !== 3 &&
                 ((tempElement.content.firstElementChild.classList.contains("p") && tempElement.content.childElementCount === 1) ||
                     tempElement.content.firstElementChild.tagName !== "DIV"))) {

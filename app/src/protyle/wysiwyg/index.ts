@@ -366,14 +366,13 @@ export class WYSIWYG {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
                 const selectTypes = protyle.toolbar.getCurrentType(range);
-                if ((selectTypes.length > 0 || range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") &&
-                    (
-                        (range.startContainer.nodeType === 3 && range.startContainer.parentElement.textContent === range.toString()) ||
-                        (range.startContainer.nodeType !== 3 && range.startContainer.textContent === range.toString())
-                    )) {
-                    if (range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") {
+                const spanElement = hasClosestByTag(range.startContainer, "SPAN");
+                const headingElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeHeading");
+                if ((selectTypes.length > 0 && spanElement && spanElement.textContent.replace(Constants.ZWSP, "") === range.toString()) ||
+                    (headingElement && headingElement.textContent.replace(Constants.ZWSP, "") === range.toString())) {
+                    if (headingElement) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
-                        tempElement.append(range.startContainer.parentElement.parentElement.cloneNode(true));
+                        tempElement.append(headingElement.cloneNode(true));
                     } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                         // 复制行内元素 https://github.com/siyuan-note/insider/issues/191
                         tempElement.append(range.startContainer.parentElement.cloneNode(true));
@@ -388,7 +387,8 @@ export class WYSIWYG {
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                     textPlain = selectImgElement.querySelector("img").getAttribute("data-src");
-                } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
+                } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 &&
+                    range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 复制粗体等字体中的一部分
                     const attributes = range.startContainer.parentElement.attributes;

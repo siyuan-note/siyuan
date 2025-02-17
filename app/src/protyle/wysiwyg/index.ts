@@ -202,6 +202,9 @@ export class WYSIWYG {
             inlineElement.tagName === "SPAN" &&
             inlineElement.textContent !== inputData &&
             !currentTypes.includes("search-mark") &&    // https://github.com/siyuan-note/siyuan/issues/7586
+            !currentTypes.includes("code") &&   // https://github.com/siyuan-note/siyuan/issues/13871
+            !currentTypes.includes("kbd") &&
+            !currentTypes.includes("tag") &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
             (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&

@@ -655,6 +655,7 @@ func duplicateDoc(c *gin.Context) {
 	notebook := tree.Box
 	box := model.Conf.Box(notebook)
 	model.DuplicateDoc(tree)
+	arg["listDocTree"] = true
 	pushCreate(box, tree.Path, arg)
 
 	ret.Data = map[string]interface{}{

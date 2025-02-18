@@ -144,7 +144,7 @@ func renderBlockText(node *ast.Node, excludeTypes []string, removeLineBreak bool
 	return
 }
 
-func fillBlockRefCount(nodes []*ast.Node) {
+func fillBlockRefCount(nodes []*ast.Node, minRefCount int) {
 	var defIDs []string
 	for _, n := range nodes {
 		ast.Walk(n, func(n *ast.Node, entering bool) ast.WalkStatus {
@@ -166,7 +166,7 @@ func fillBlockRefCount(nodes []*ast.Node) {
 				return ast.WalkContinue
 			}
 
-			if cnt := refCount[n.ID]; 0 < cnt {
+			if cnt := refCount[n.ID]; minRefCount < cnt {
 				n.SetIALAttr("refcount", strconv.Itoa(cnt))
 			}
 			return ast.WalkContinue

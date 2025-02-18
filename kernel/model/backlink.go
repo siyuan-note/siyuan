@@ -586,6 +586,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 			}
 		}
 	}
+	paragraphParentIDs = gulu.Str.RemoveDuplicatedElem(paragraphParentIDs)
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 

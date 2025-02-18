@@ -207,6 +207,7 @@ docker run -d \
 * `workspace_dir_host`: ホスト上のワークスペースフォルダーのパス
 * `workspace_dir_container`: コンテナ内のワークスペースフォルダーのパス、`--workspace` で指定されたものと同じ
 * `accessAuthCode`: アクセス認証コード（**必ず変更してください**、そうしないと誰でもデータにアクセスできます）
+  * また、`SIYUAN_ACCESS_AUTH_CODE` 環境変数を設定することで認証コードを指定することもできます。両方が設定されている場合、コマンドラインの値が優先されます。
 
 簡略化するために、ホストとコンテナでワークスペースフォルダーのパスを一致させることをお勧めします。たとえば、`workspace_dir_host` と `workspace_dir_container` の両方を `/siyuan/workspace` に設定します。対応する起動コマンドは次のようになります：
 

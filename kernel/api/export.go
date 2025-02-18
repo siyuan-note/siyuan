@@ -412,12 +412,12 @@ func exportMdContent(c *gin.Context) {
 
 	refMode := model.Conf.Export.BlockRefMode
 	if nil != arg["refMode"] {
-		refMode = arg["refMode"].(int)
+		refMode = int(arg["refMode"].(float64))
 	}
 
 	embedMode := model.Conf.Export.BlockEmbedMode
 	if nil != arg["embedMode"] {
-		embedMode = arg["embedMode"].(int)
+		embedMode = int(arg["embedMode"].(float64))
 	}
 
 	yfm := true

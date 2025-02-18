@@ -6,7 +6,7 @@
 		"id": "20211226121438-xaafdo8",
 		"title": "資料同步",
 		"type": "doc",
-		"updated": "20250115162655"
+		"updated": "20250218121017"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226121454-8vr6fgn",
-				"updated": "20211226010158"
+				"updated": "20250218121017"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20211226121454-2wnvrmj",
-				"updated": "20211228141310"
+				"updated": "20250218121017"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夾資料一致，包括資料文件、範本、小工具以及筆記本資料。"
+					"Data": "​ 文件夾資料一致，包括資源檔案、自訂圖示、外掛程式、程式碼片段、範本、掛件和文件資料。"
 				}
 			]
 		},

@@ -47,6 +47,11 @@ var Mode = "prod"
 const (
 	Ver       = "3.1.22"
 	IsInsider = false
+
+	// env vars as fallback for commandline parameters
+	SIYUAN_ACCESS_AUTH_CODE = "SIYUAN_ACCESS_AUTH_CODE"
+	SIYUAN_WORKSPACE        = "SIYUAN_WORKSPACE_PATH"
+	SIYUAN_LANG             = "SIYUAN_LANG"
 )
 
 var (
@@ -70,6 +75,19 @@ var (
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 )
 
+// If a commandline parameter is empty, fallback to the env var.
+//
+// "empty" means the parameter is not set or set to an empty string.
+// It returns a pointer to string, to be a drop-in replacement for
+// the commandline parameter itself.
+func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
+	if fromCLI == nil || "" == *fromCLI {
+		ret := os.Getenv(envVarName)
+		return &ret
+	}
+	return fromCLI
+}
+
 func Boot() {
 	initEnvVars()
 	IncBootProgress(3, "Booting kernel...")
@@ -87,6 +105,13 @@ func Boot() {
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
+	// Fallback to env vars if commandline args are not set
+	// valid only for CLI args that default to "", as the
+	// others have explicit (sane) defaults
+	workspacePath = coalesceToEnvVar(workspacePath, SIYUAN_WORKSPACE)
+	accessAuthCode = coalesceToEnvVar(accessAuthCode, SIYUAN_ACCESS_AUTH_CODE)
+	lang = coalesceToEnvVar(lang, SIYUAN_LANG)
+
 	if "" != *wdPath {
 		WorkingDir = *wdPath
 	}
@@ -102,10 +127,6 @@ func Boot() {
 	Container = ContainerStd
 	if RunInContainer {
 		Container = ContainerDocker
-		if "" == AccessAuthCode {
-			// Priority to commandline; if not set, look into env var
-			AccessAuthCode = SiyuanAccessAuthCodeViaEnvvar
-		}
 		if "" == AccessAuthCode { // Still empty?
 			interruptBoot := true
 

@@ -288,6 +288,29 @@ export const setInlineStyle = async (set = true) => {
 }`;
         }
     }
+    let rtlCSS = ''
+    if (window.siyuan.config.editor.rtl) {
+        rtlCSS = `.protyle-title__input,
+.protyle-wysiwyg .p,
+.protyle-wysiwyg .code-block .hljs,
+.protyle-wysiwyg .table,
+.protyle-wysiwyg .render-node protyle-html,
+.protyle-wysiwyg .render-node > div[spin="1"],
+.protyle-wysiwyg [data-type="NodeHeading"] {direction: rtl}
+.protyle-wysiwyg [data-node-id].li > .protyle-action {
+    right: 0;
+    left: auto;
+    direction: rtl;
+}
+.protyle-wysiwyg [data-node-id].li > [data-node-id] {
+    margin-right: 34px;
+    margin-left: 0;
+}
+.protyle-wysiwyg [data-node-id].li::before {
+    right: 17px;
+    left: auto;
+}`;
+    }
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
@@ -295,12 +318,7 @@ export const setInlineStyle = async (set = true) => {
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ div {line-height:${height}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ div > [spellcheck] {min-height:${height}px}
 .protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
-.protyle-wysiwyg .p,
-.protyle-wysiwyg .code-block .hljs,
-.protyle-wysiwyg .table,
-.protyle-wysiwyg .render-node protyle-html,
-.protyle-wysiwyg .render-node > div[spin="1"],
-.protyle-wysiwyg [data-type="NodeHeading"] {${window.siyuan.config.editor.rtl ? " direction: rtl;" : ""}}
+${rtlCSS}
 .protyle-wysiwyg [data-node-id] {${window.siyuan.config.editor.justify ? " text-align: justify;" : ""}}
 .protyle-wysiwyg .li {min-height:${height + 8}px}
 .protyle-gutters button svg {height:${height}px}`;

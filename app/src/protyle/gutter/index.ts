@@ -2446,7 +2446,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem) {
+        if (listItem && !window.siyuan.config.editor.rtl) {
             rect = listItem.firstElementChild.getBoundingClientRect();
             space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {

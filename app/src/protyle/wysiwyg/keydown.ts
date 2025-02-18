@@ -1198,6 +1198,30 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.rtl.custom, event)) {
+            let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement];
+            }
+            updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                e.style.direction = "rtl";
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.ltr.custom, event)) {
+            let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement];
+            }
+            updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                e.style.direction = "ltr";
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
 
         // esc
         if (event.key === "Escape") {

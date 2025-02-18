@@ -50,8 +50,9 @@ const (
 )
 
 var (
-	RunInContainer             = false // 是否运行在容器中
-	SiyuanAccessAuthCodeBypass = false // 是否跳过空访问授权码检查
+	RunInContainer                = false // 是否运行在容器中
+	SiyuanAccessAuthCodeBypass    = false // 是否跳过空访问授权码检查
+	SiyuanAccessAuthCodeViaEnvvar = ""    // Fallback auth code via env var (SIYUAN_ACCESS_AUTH_CODE)
 )
 
 func initEnvVars() {
@@ -60,6 +61,7 @@ func initEnvVars() {
 	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
 		SiyuanAccessAuthCodeBypass = false
 	}
+	SiyuanAccessAuthCodeViaEnvvar = os.Getenv("SIYUAN_ACCESS_AUTH_CODE")
 }
 
 var (
@@ -101,6 +103,10 @@ func Boot() {
 	if RunInContainer {
 		Container = ContainerDocker
 		if "" == AccessAuthCode {
+			// Priority to commandline; if not set, look into env var
+			AccessAuthCode = SiyuanAccessAuthCodeViaEnvvar
+		}
+		if "" == AccessAuthCode { // Still empty?
 			interruptBoot := true
 
 			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip checking empty access auth code https://github.com/siyuan-note/siyuan/issues/9709
@@ -111,7 +117,8 @@ func Boot() {
 
 			if interruptBoot {
 				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
-				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker")
+				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker\n")
+				fmt.Printf("or you can set the SIYUAN_ACCESS_AUTH_CODE env var")
 				os.Exit(1)
 			}
 		}

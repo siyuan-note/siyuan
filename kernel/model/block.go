@@ -902,7 +902,7 @@ func getEmbeddedBlock(trees map[string]*parse.Tree, sqlBlock *sql.Block, heading
 	}
 
 	// 嵌入块查询结果中显示块引用计数 https://github.com/siyuan-note/siyuan/issues/7191
-	fillBlockRefCount(nodes)
+	fillBlockRefCount(nodes, 1)
 
 	luteEngine := NewLute()
 	luteEngine.RenderOptions.ProtyleContenteditable = false // 不可编辑

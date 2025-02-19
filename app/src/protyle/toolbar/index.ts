@@ -603,7 +603,15 @@ export class Toolbar {
             this.range.setEnd(startContainer.lastChild, startContainer.lastChild.textContent.length);
             afterElement.append(this.range.extractContents());
             startContainer.after(afterElement);
-            this.range.setStartBefore(afterElement);
+            // https://github.com/siyuan-note/siyuan/issues/13871#issuecomment-2662855319
+            const firstTypes = startContainer.getAttribute("data-type").split(" ");
+            if (firstTypes.includes("code") || firstTypes.includes("tag") || firstTypes.includes("kbd")) {
+                afterElement.insertAdjacentText("beforebegin", Constants.ZWSP + Constants.ZWSP);
+                afterElement.insertAdjacentText("afterbegin", Constants.ZWSP);
+                this.range.setStart(afterElement.previousSibling, 1);
+            } else {
+                this.range.setStartBefore(afterElement);
+            }
             this.range.collapse(true);
         }
         for (let i = 0; i < newNodes.length; i++) {

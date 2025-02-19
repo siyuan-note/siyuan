@@ -56,7 +56,7 @@ export class Scroll {
             }
         });
         this.parentElement.addEventListener("mousewheel", (event: WheelEvent) => {
-            if (event.deltaY !== 0) {
+            if (event.deltaY !== 0 && protyle.scroll.lastScrollTop !== -1) {
                 protyle.contentElement.scrollTop += event.deltaY;
             }
         }, {passive: true});

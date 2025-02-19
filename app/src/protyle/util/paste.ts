@@ -128,7 +128,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
             .replace(/\|/g, "\\|")
             .replace(/\./g, "\\.");
         // 转义文本不能使用 DOM 结构 https://github.com/siyuan-note/siyuan/issues/11778
-        paste(protyle, {textPlain: clipText, target: nodeElement as HTMLElement});
+        paste(protyle, {textPlain: clipText, textHTML: "", target: nodeElement as HTMLElement});
     } catch (e) {
         console.log(e);
     }
@@ -496,7 +496,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         } else if (files && files.length > 0) {
             uploadFiles(protyle, files);
             return;
-        } else if (textPlain.trim() !== "" && files && files.length === 0) {
+        } else if (textPlain.trim() !== "" && (files && files.length === 0 || !files)) {
             if (range.toString() !== "") {
                 const firstLine = textPlain.split("\n")[0];
                 if (isDynamicRef(textPlain)) {

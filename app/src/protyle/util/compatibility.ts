@@ -40,7 +40,7 @@ export const readText = () => {
 };
 
 export const readClipboard = async () => {
-    const text: { textPlain?: string, textHTML?: string } = {};
+    const text = {textPlain: "", textHTML: ""};
     if (isInAndroid()) {
         text.textPlain = window.JSAndroid.readClipboard();
     } else if (isInHarmony()) {

@@ -790,8 +790,12 @@ export const bazaar = {
                                             return;
                                         }
                                     }
-                                    const linkElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
-                                    linkElement.href = linkElement.href + "1";
+                                    const defaultThemeElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
+                                    defaultThemeElement.href = defaultThemeElement.href + "1";
+                                    const themeElement = (document.getElementById("themeStyle") as HTMLLinkElement);
+                                    if (themeElement) {
+                                        themeElement.href = themeElement.href + "1";
+                                    }
                                 }
                             });
                         });

@@ -40,7 +40,11 @@ export const readText = () => {
 };
 
 export const readClipboard = async () => {
-    const text = {textPlain: "", textHTML: ""};
+    const text: {
+        textHTML?: string,
+        textPlain?: string,
+        files?: File,
+    } = {textPlain: "", textHTML: ""};
     if (isInAndroid()) {
         text.textPlain = window.JSAndroid.readClipboard();
     } else if (isInHarmony()) {
@@ -55,6 +59,10 @@ export const readClipboard = async () => {
         if (item.types.includes("text/plain")) {
             const blob = await item.getType("text/plain");
             text.textPlain = await blob.text();
+        }
+        if (item.types.includes("image/png")) {
+            const blob = await item.getType("image/png");
+            text.files = new File([blob], "image.png", {type: "image/png", lastModified: Date.now()});
         }
     }
     return text;

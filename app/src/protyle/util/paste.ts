@@ -255,6 +255,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
 export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | {
     textHTML?: string,
     textPlain?: string,
+    files?: FileList,
 }) & {
     target: HTMLElement
 }) => {
@@ -281,6 +282,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     } else {
         textHTML = event.textHTML;
         textPlain = event.textPlain;
+        files = event.files;
     }
 
     // Improve the pasting of selected text in PDF rectangular annotation https://github.com/siyuan-note/siyuan/issues/11629

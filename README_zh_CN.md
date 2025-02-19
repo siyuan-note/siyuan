@@ -211,7 +211,7 @@ docker run -d \
 * `PGID`: 自定义组 ID（可选，如果未提供，默认为 `1000`）
 * `workspace_dir_host`：宿主机上的工作空间文件夹路径
 * `workspace_dir_container`：容器内工作空间文件夹路径，和后面 `--workspace` 指定成一样的
-  * 另外，也可以通过 `SIYUAN_WORKSPACE_PATH` 环境变量设置授权码。如果两者都设置了，命令行的值将优先。
+  * 另外，也可以通过 `SIYUAN_WORKSPACE_PATH` 环境变量设置路径。如果两者都设置了，命令行的值将优先。
 * `accessAuthCode`：访问授权码，请**务必修改**，否则任何人都可以读写你的数据
   * 另外，也可以通过 `SIYUAN_ACCESS_AUTH_CODE` 环境变量设置授权码。如果两者都设置了，命令行的值将优先。
 

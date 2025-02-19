@@ -769,6 +769,7 @@ export const bazaar = {
                                     (window.siyuan.config.appearance.mode === 0 && window.siyuan.config.appearance.themeLight === dataObj.name) ||
                                     (window.siyuan.config.appearance.mode === 1 && window.siyuan.config.appearance.themeDark === dataObj.name)
                                 )) {
+                                    const currentTheme = window.siyuan.config.appearance.mode === 1 ? window.siyuan.config.appearance.themeDark : window.siyuan.config.appearance.themeLight;
                                     if (window.siyuan.config.appearance.themeJS) {
                                         if (window.destroyTheme) {
                                             try {
@@ -777,9 +778,8 @@ export const bazaar = {
                                             } catch (e) {
                                                 console.error("destroyTheme error: " + e);
                                             }
-                                            const themeScriptElement = document.getElementById("themeScript") as HTMLScriptElement;
-                                            themeScriptElement.remove();
-                                            addScript(themeScriptElement.src + "1", "themeScript");
+                                            document.getElementById("themeScript").remove();
+                                            addScript(`/appearance/themes/${currentTheme}/theme.js?v=${response.data.appearance.themeVer}`, "themeScript");
                                         } else {
                                             exportLayout({
                                                 cb() {
@@ -790,11 +790,11 @@ export const bazaar = {
                                             return;
                                         }
                                     }
-                                    const defaultThemeElement = (document.getElementById("themeDefaultStyle") as HTMLLinkElement);
-                                    defaultThemeElement.href = defaultThemeElement.href + "1";
-                                    const themeElement = (document.getElementById("themeStyle") as HTMLLinkElement);
-                                    if (themeElement) {
-                                        themeElement.href = themeElement.href + "1";
+                                    if ((window.siyuan.config.appearance.mode === 1 && currentTheme === "midnight") ||
+                                        (window.siyuan.config.appearance.mode !== 1 && currentTheme === "daylight")) {
+                                        (document.getElementById("themeDefaultStyle") as HTMLLinkElement).href = `/appearance/themes/${window.siyuan.config.appearance.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
+                                    } else {
+                                        (document.getElementById("themeStyle") as HTMLLinkElement).href = `/appearance/themes/${currentTheme}/theme.css?v=${response.data.appearance.themeVer}`;
                                     }
                                 }
                             });

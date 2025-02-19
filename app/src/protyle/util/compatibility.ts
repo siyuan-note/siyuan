@@ -43,7 +43,7 @@ export const readClipboard = async () => {
     const text: {
         textHTML?: string,
         textPlain?: string,
-        files?: File,
+        files?: File[],
     } = {textPlain: "", textHTML: ""};
     if (isInAndroid()) {
         text.textPlain = window.JSAndroid.readClipboard();
@@ -62,7 +62,7 @@ export const readClipboard = async () => {
         }
         if (item.types.includes("image/png")) {
             const blob = await item.getType("image/png");
-            text.files = new File([blob], "image.png", {type: "image/png", lastModified: Date.now()});
+            text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
         }
     }
     return text;

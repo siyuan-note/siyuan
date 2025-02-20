@@ -2449,7 +2449,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         if (listItem && !window.siyuan.config.editor.rtl) {
             const relTempRect = listItem.firstElementChild.getBoundingClientRect();
             if (relTempRect.right <= rect.right) {
-                rect = relTempRect
+                rect = relTempRect;
                 space = 0;
             }
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {

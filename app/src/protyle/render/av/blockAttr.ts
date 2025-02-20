@@ -394,7 +394,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         }
                     };
                     if (type !== "text") {
-                        const linkElement = item.parentElement.querySelector("a")
+                        const linkElement = item.parentElement.querySelector("a");
                         if (item.value) {
                             linkElement.setAttribute("href", (type === "url" ? "" : (type === "email" ? "mailto:" : "tel:")) + item.value);
                         } else {

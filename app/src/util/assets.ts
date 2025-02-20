@@ -288,7 +288,7 @@ export const setInlineStyle = async (set = true) => {
 }`;
         }
     }
-    let rtlCSS = ''
+    let rtlCSS = "";
     if (window.siyuan.config.editor.rtl) {
         rtlCSS = `.protyle-title__input,
 .protyle-wysiwyg .p,

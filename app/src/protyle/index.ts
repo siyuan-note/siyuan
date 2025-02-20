@@ -137,7 +137,7 @@ export class Protyle {
                                             item.update(response);
                                         });
                                     }
-                                })
+                                });
                             }
                             break;
                         case "refreshAttributeView":

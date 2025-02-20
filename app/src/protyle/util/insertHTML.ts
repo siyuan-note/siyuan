@@ -394,7 +394,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         tempElement.content.firstChild.nodeType !== 3 &&
         tempElement.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
         isBlock = false;
-        heading2text = true
+        heading2text = true;
     }
 
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部

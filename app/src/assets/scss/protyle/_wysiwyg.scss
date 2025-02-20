@@ -193,6 +193,27 @@
       }
     }
 
+    &[style*="direction: rtl"] {
+      .li > .protyle-action,
+      & > .protyle-action {
+        right: 0;
+        left: auto;
+        direction: rtl;
+      }
+
+      .li > [data-node-id],
+      & > [data-node-id] {
+        margin-right: 34px;
+        margin-left: 0;
+      }
+
+      .li::before,
+      &::before {
+        right: 17px;
+        left: auto;
+      }
+    }
+
     &.sb {
       display: flex;
       flex-direction: column;

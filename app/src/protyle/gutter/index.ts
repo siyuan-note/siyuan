@@ -2447,8 +2447,11 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
         if (listItem && !window.siyuan.config.editor.rtl) {
-            rect = listItem.firstElementChild.getBoundingClientRect();
-            space = 0;
+            const relTempRect = listItem.firstElementChild.getBoundingClientRect();
+            if (relTempRect.right <= rect.right) {
+                rect = relTempRect
+                space = 0;
+            }
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             rect = nodeElement.getBoundingClientRect();
             space = 0;

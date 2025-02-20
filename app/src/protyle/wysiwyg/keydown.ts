@@ -69,6 +69,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
+import {AIChat} from "../../ai/chat";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -1701,6 +1702,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectsElement = [nodeElement];
             }
             AIActions(selectsElement, protyle);
+            return;
+        }
+
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.aiWriting.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            AIChat(protyle, nodeElement);
             return;
         }
 

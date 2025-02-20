@@ -61,6 +61,17 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         });
         /// #endif
     }
+    /// #if !MOBILE
+    if ("darwin" !== window.siyuan.config.system.os) {
+        const windowControlsElement = document.getElementById("windowControls");
+        if (isFullscreen) {
+            windowControlsElement.style.zIndex = "";
+        } else {
+            window.siyuan.zIndex++;
+            windowControlsElement.style.zIndex = window.siyuan.zIndex.toString();
+        }
+    }
+    /// #endif
     if (btnElement) {
         if (isFullscreen) {
             btnElement.querySelector("use").setAttribute("xlink:href", "#iconFullscreen");

@@ -264,6 +264,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addItem({
+        id: "delete",
         label: window.siyuan.languages.delete,
         icon: "iconTrashcan",
         click() {

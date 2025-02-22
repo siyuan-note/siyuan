@@ -17,6 +17,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         return;
     }
     menu.addItem({
+        id: "rename",
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click() {
@@ -32,6 +33,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         }
     });
     menu.addItem({
+        id: "config",
         icon: "iconSettings",
         label: window.siyuan.languages.config,
         click() {
@@ -45,6 +47,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     });
     menu.addSeparator();
     menu.addItem({
+        id: "duplicate",
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
         click() {
@@ -67,6 +70,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     });
     if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length > 1) {
         menu.addItem({
+            id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             click() {

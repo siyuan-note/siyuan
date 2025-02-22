@@ -34,12 +34,15 @@ export class Menu {
         return this.menu.addItem(option);
     }
 
-    addSeparator(index?: number, ignore = false) {
+    addSeparator(index?: number, ignore = false, id?: string) {
         if (ignore) {
             return;
         }
         if (this.isOpen) {
             return;
+        }
+        if (id) {
+            return this.menu.addSeparator(index, id);
         }
         return this.menu.addSeparator(index);
     }

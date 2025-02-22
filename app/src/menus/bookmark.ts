@@ -19,6 +19,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
     const id = element.getAttribute("data-node-id");
     if (!id && !window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "rename",
             icon: "iconEdit",
             label: window.siyuan.languages.rename,
             click: () => {
@@ -57,6 +58,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
     }
     if (id) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             type: "submenu",
             icon: "iconCopy",
@@ -66,6 +68,7 @@ export const openBookmarkMenu = (element: HTMLElement, event: MouseEvent, bookma
 
     if (!window.siyuan.config.readonly) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "remove",
             icon: "iconTrashcan",
             label: window.siyuan.languages.remove,
             click: () => {

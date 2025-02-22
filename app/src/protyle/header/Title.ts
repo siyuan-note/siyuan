@@ -195,6 +195,7 @@ export class Title {
             const range = getEditorRange(this.editElement);
             if (range.toString() !== "") {
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "copy",
                     icon: "iconCopy",
                     accelerator: "⌘C",
                     label: window.siyuan.languages.copy,
@@ -204,6 +205,7 @@ export class Title {
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "cut",
                     icon: "iconCut",
                     accelerator: "⌘X",
                     label: window.siyuan.languages.cut,
@@ -216,6 +218,7 @@ export class Title {
                     }
                 }).element);
                 window.siyuan.menus.menu.append(new MenuItem({
+                    id: "delete",
                     icon: "iconTrashcan",
                     accelerator: "⌫",
                     label: window.siyuan.languages.delete,
@@ -230,6 +233,7 @@ export class Title {
                 }).element);
             }
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "paste",
                 label: window.siyuan.languages.paste,
                 icon: "iconPaste",
                 accelerator: "⌘V",
@@ -249,6 +253,7 @@ export class Title {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "pasteAsPlainText",
                 label: window.siyuan.languages.pasteAsPlainText,
                 accelerator: "⇧⌘V",
                 click: async () => {
@@ -265,6 +270,7 @@ export class Title {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "selectAll",
                 label: window.siyuan.languages.selectAll,
                 icon: "iconSelect",
                 accelerator: "⌘A",

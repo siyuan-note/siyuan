@@ -284,6 +284,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                     window.siyuan.menus.menu.remove();
                     if (response.data.length === 0) {
                         window.siyuan.menus.menu.append(new MenuItem({
+                            id: "emptyContent",
                             iconHTML: "",
                             label: window.siyuan.languages.emptyContent,
                             type: "readonly",
@@ -711,6 +712,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
+        id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",
         label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
@@ -724,6 +726,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 (src.endsWith(".pdf") && !src.startsWith("file://")))
         ) {
             submenu.push({
+                id: "insertRight",
                 icon: "iconLayoutRight",
                 label: window.siyuan.languages.insertRight,
                 accelerator: showAccelerator ? window.siyuan.languages.click : "",
@@ -732,6 +735,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
+                id: "openBy",
                 label: window.siyuan.languages.openBy,
                 icon: "iconOpen",
                 accelerator: showAccelerator ? "⌥" + window.siyuan.languages.click : "",
@@ -741,6 +745,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             });
             /// #if !BROWSER
             submenu.push({
+                id: "openByNewWindow",
                 label: window.siyuan.languages.openByNewWindow,
                 icon: "iconOpenWindow",
                 click() {
@@ -748,6 +753,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
+                id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
                 accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
@@ -756,6 +762,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
+                id: "useDefault",
                 label: window.siyuan.languages.useDefault,
                 accelerator: showAccelerator ? "⇧" + window.siyuan.languages.click : "",
                 click() {
@@ -766,6 +773,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         } else {
             /// #if !BROWSER
             submenu.push({
+                id: "useDefault",
                 label: window.siyuan.languages.useDefault,
                 accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click() {
@@ -773,6 +781,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
                 }
             });
             submenu.push({
+                id: "showInFolder",
                 icon: "iconFolder",
                 label: window.siyuan.languages.showInFolder,
                 accelerator: showAccelerator ? "⌘" + window.siyuan.languages.click : "",
@@ -782,6 +791,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
             });
             /// #else
             submenu.push({
+                id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",
                 label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
                 accelerator: showAccelerator ? window.siyuan.languages.click : "",
                 click: () => {
@@ -798,6 +808,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         }
         /// #if !BROWSER
         submenu.push({
+            id: "useDefault",
             label: window.siyuan.languages.useDefault,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
@@ -808,6 +819,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         });
         /// #else
         submenu.push({
+            id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",
             label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
             accelerator: showAccelerator ? window.siyuan.languages.click : "",
             click: () => {
@@ -821,6 +833,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
         return submenu;
     }
     window.siyuan.menus.menu.append(new MenuItem({
+        id: "openBy",
         label: window.siyuan.languages.openBy,
         icon: "iconOpen",
         submenu

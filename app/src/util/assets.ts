@@ -365,8 +365,16 @@ export const setCodeTheme = (cdn = Constants.PROTYLE_CDN) => {
 
 export const setMode = (modeElementValue: number) => {
     /// #if !MOBILE
+    let mode = modeElementValue;
+    if (modeElementValue === 2) {
+        if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+            mode = 1;
+        } else {
+            mode = 0;
+        }
+    }
     fetchPost("/api/setting/setAppearance", Object.assign({}, window.siyuan.config.appearance, {
-        mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+        mode,
         modeOS: modeElementValue === 2,
     }), async response => {
         if (window.siyuan.config.appearance.themeJS) {

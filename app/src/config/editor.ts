@@ -361,7 +361,7 @@ export const editor = {
             let fontFamilyHTML = `<option value="">${window.siyuan.languages.default}</option>`;
             fetchPost("/api/system/getSysFonts", {}, (response) => {
                 response.data.forEach((item: string) => {
-                    fontFamilyHTML += `<option value="${item}"${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
+                    fontFamilyHTML += `<option value="${item}" style='font-family:"${item}",var(--b3-font-family);'${window.siyuan.config.editor.fontFamily === item ? " selected" : ""}>${item}</option>`;
                 });
                 fontFamilyElement.innerHTML = fontFamilyHTML;
             });

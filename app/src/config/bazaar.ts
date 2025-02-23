@@ -685,6 +685,7 @@ export const bazaar = {
                                     try {
                                         await window.destroyTheme();
                                         window.destroyTheme = undefined;
+                                        document.getElementById("themeScript").remove();
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }
@@ -775,11 +776,11 @@ export const bazaar = {
                                             try {
                                                 await window.destroyTheme();
                                                 window.destroyTheme = undefined;
+                                                document.getElementById("themeScript").remove();
+                                                addScript(`/appearance/themes/${currentTheme}/theme.js?v=${response.data.appearance.themeVer}`, "themeScript");
                                             } catch (e) {
                                                 console.error("destroyTheme error: " + e);
                                             }
-                                            document.getElementById("themeScript").remove();
-                                            addScript(`/appearance/themes/${currentTheme}/theme.js?v=${response.data.appearance.themeVer}`, "themeScript");
                                         } else {
                                             exportLayout({
                                                 cb() {
@@ -869,6 +870,7 @@ export const bazaar = {
                                     try {
                                         await window.destroyTheme();
                                         window.destroyTheme = undefined;
+                                        document.getElementById("themeScript").remove();
                                     } catch (e) {
                                         console.error("destroyTheme error: " + e);
                                     }

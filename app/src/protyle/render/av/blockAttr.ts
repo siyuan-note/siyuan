@@ -127,15 +127,17 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "relation":
             value?.relation?.contents?.forEach((item) => {
-                if (item) {
-                    const rollupText = genAVRollupHTML(item);
-                    if (rollupText) {
-                        html += rollupText + ",&nbsp;";
+                if (item && item.block) {
+                    if (item?.isDetached) {
+                        html += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    } else {
+                        // data-block-id 用于更新 emoji
+                        html += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     }
                 }
             });
-            if (html && html.endsWith(",&nbsp;")) {
-                html = html.substring(0, html.length - 7);
+            if (html && html.endsWith(", ")) {
+                html = html.substring(0, html.length - 2);
             }
             break;
         case "rollup":

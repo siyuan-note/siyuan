@@ -382,7 +382,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     const tempElement = document.createElement("template");
 
     // https://github.com/siyuan-note/siyuan/issues/14162
-    if (html.startsWith("&gt;") && editableElement.textContent.replace(Constants.ZWSP, "") !== "" ) {
+    if (html.startsWith("&gt;") && editableElement.textContent.replace(Constants.ZWSP, "") !== "") {
         unSpinHTML = html;
     }
 
@@ -395,7 +395,8 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
 
     // https://github.com/siyuan-note/siyuan/issues/14114
     let heading2text = false;
-    if (isBlock && editableElement.textContent.replace(Constants.ZWSP, "") !== "" && tempElement.content.childElementCount === 1 &&
+    if (isBlock && (editableElement.textContent.replace(Constants.ZWSP, "") !== "" || blockElement.getAttribute("data-type") === "NodeHeading") &&
+        tempElement.content.childElementCount === 1 &&
         tempElement.content.firstChild.nodeType !== 3 &&
         tempElement.content.firstElementChild.getAttribute("data-type") === "NodeHeading") {
         isBlock = false;

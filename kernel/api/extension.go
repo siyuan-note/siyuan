@@ -78,6 +78,13 @@ func extensionCopy(c *gin.Context) {
 				continue
 			}
 		}
+		if strings.Contains(oName, "%") {
+			unescaped, _ := url.PathUnescape(oName)
+			if "" != unescaped {
+				oName = unescaped
+			}
+		}
+
 		u, _ := url.Parse(oName)
 		if "" == u.Path {
 			continue

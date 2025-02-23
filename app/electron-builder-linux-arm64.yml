@@ -19,10 +19,12 @@ linux:
   category: "Utility"
   executableName: "siyuan"
   desktop: {
-    "Name": "SiYuan",
-    "Comment": "Refactor your thinking",
-    "Type": "Application",
-    "Categories": "Utility;"
+    entry: {
+      Name: "SiYuan",
+      Comment: "Refactor your thinking",
+      Type: "Application",
+      Categories: "Utility;"
+    }
   }
   extraResources:
     - from: "kernel-linux-arm64"

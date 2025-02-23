@@ -588,7 +588,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					}
 
 					if replaceTextNode(n, method, keyword, replacement, r, luteEngine) {
-						unlinks = append(unlinks, n)
+						if nil != n.Parent && ast.NodeBackslash == n.Parent.Type {
+							unlinks = append(unlinks, n.Parent)
+						} else {
+							unlinks = append(unlinks, n)
+						}
 					}
 				case ast.NodeLinkDest:
 					if !replaceTypes["imgSrc"] {

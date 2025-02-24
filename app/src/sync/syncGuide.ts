@@ -150,7 +150,7 @@ export const syncGuide = (app?: App) => {
     /// #if MOBILE
     if (0 === window.siyuan.config.sync.provider) {
         if (needSubscribe()) {
-            return
+            return;
         }
     } else if (!isPaidUser()) {
         showMessage(window.siyuan.languages["_kernel"][214]);

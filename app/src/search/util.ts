@@ -1028,7 +1028,7 @@ const scrollToCurrent = (contentElement: HTMLElement,currentRange: Range, conten
             }
         }
     }
-}
+};
 
 const renderNextSearchMark = (options: {
     id: string,
@@ -1056,7 +1056,7 @@ const renderNextSearchMark = (options: {
             if (!currentRange.toString()) {
                 highlightById(options.edit.protyle, options.id);
             } else {
-                scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect)
+                scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
             }
         }
         return;
@@ -1130,12 +1130,12 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         const highlightKeys = () => {
-                            const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]
+                            const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex];
                             if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
                                 if (!currentRange.toString()) {
                                     highlightById(options.edit.protyle, options.id);
                                 } else {
-                                    scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect)
+                                    scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect);
                                 }
                             } else {
                                 highlightById(options.edit.protyle, options.id);

@@ -194,7 +194,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
     if (eventPath0 && eventPath0.nodeType !== 3 && eventPath0.classList.contains("av")) {
         // 数据库居中时光标在数据库侧边 https://github.com/siyuan-note/siyuan/issues/13853
         if (eventPath0.getAttribute("data-type") === "NodeAttributeView") {
-            const rowElement = hasClosestByClassName(document.elementFromPoint(eventPath0.firstElementChild.getBoundingClientRect().left + 10, event.clientY), "av__row")
+            const rowElement = hasClosestByClassName(document.elementFromPoint(eventPath0.firstElementChild.getBoundingClientRect().left + 10, event.clientY), "av__row");
             if (rowElement && !rowElement.classList.contains("av__row--header")) {
                 getAllEditor().find(item => {
                     if (item.protyle.wysiwyg.element.contains(eventPath0)) {

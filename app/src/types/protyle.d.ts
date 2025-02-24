@@ -125,9 +125,9 @@ interface ILuteOptions extends IMarkdownConfig {
 }
 
 declare class Viz {
-    constructor(worker: { worker: Worker });
+    public static instance(): Promise<Viz>;
 
-    renderSVGElement: (code: string) => Promise<any>;
+    renderSVGElement: (code: string) => SVGElement;
 }
 
 declare class Viewer {

@@ -396,12 +396,7 @@
     [contenteditable="false"] svg {
       border-radius: var(--b3-border-radius);
       max-width: 100%; // https://github.com/siyuan-note/siyuan/issues/11181
-
-      /* 由于会覆盖颜色，先移除看看有没有副作用 https://github.com/siyuan-note/siyuan/issues/7735
-      polygon {
-        fill: var(--b3-theme-on-primary);
-      }
-      */
+      height: 100%; // https://github.com/siyuan-note/siyuan/issues/13852
     }
   }
 

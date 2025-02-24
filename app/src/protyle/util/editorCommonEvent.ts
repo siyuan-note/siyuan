@@ -1289,11 +1289,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
-            const targetElement = hasClosestBlock(event.target);
-            if (targetElement) {
-                targetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                targetElement.removeAttribute("select-start");
-                targetElement.removeAttribute("select-end");
+            const targetAssitElement = hasClosestBlock(event.target);
+            if (targetAssitElement) {
+                targetAssitElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
+                targetAssitElement.removeAttribute("select-start");
+                targetAssitElement.removeAttribute("select-end");
+            } else {
+                // https://github.com/siyuan-note/siyuan/issues/14177
+                editorElement.querySelectorAll(".dragover__top, .protyle-wysiwyg--select, .dragover__bottom, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
+                    item.removeAttribute("select-start");
+                    item.removeAttribute("select-end");
+                });
             }
             event.preventDefault();
             return;

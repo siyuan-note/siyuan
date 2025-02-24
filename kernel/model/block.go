@@ -279,7 +279,7 @@ func GetUnfoldedParentID(id string) (parentID string) {
 			if nil != firstFoldedParent {
 				parentID = firstFoldedParent.ID
 			} else {
-				parentID = parent.ID
+				parentID = id
 			}
 			return
 		}

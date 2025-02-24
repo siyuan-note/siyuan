@@ -590,6 +590,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					if replaceTextNode(n, method, keyword, replacement, r, luteEngine) {
 						if nil != n.Parent && ast.NodeBackslash == n.Parent.Type {
 							unlinks = append(unlinks, n.Parent)
+
+							prev, next := n.Parent.Previous, n.Parent.Next
+							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
+								prev.Tokens = append(prev.Tokens, next.Tokens...)
+								unlinks = append(unlinks, next)
+							}
 						} else {
 							unlinks = append(unlinks, n)
 						}

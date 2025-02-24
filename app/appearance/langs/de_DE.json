@@ -1361,7 +1361,7 @@
     "26": "Bitte initialisieren Sie zuerst den Schlüssel des Daten-Repositorys in [Einstellungen - Über - Schlüssel des Daten-Repositorys]",
     "27": "Hochladen [%v]",
     "28": "Das Netzwerk ist abnormal, bitte versuchen Sie es später erneut",
-    "29": "Diese Funktion erfordert ein <a target='_blank' href='${url}'>bezahltes Abonnement</a> (Wenn Sie abonniert haben, bitte aktualisieren oder sich erneut anmelden in Einstellungen - Konto)",
+    "29": "Diese Funktion erfordert den Kauf eines <a target='_blank' href='${url}'>[Jahresabonnements]</a> (wenn Sie bereits gekauft haben, aktualisieren oder erneut anmelden in Einstellungen - Konto)",
     "30": "Fehler beim Abrufen der Cloud-Informationen",
     "31": "Die Kontenauthentifizierung ist fehlgeschlagen, bitte melden Sie sich erneut an",
     "32": "Fehler beim Entfernen des Cloud-Notizbuchs",

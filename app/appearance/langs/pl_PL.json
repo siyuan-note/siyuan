@@ -1361,7 +1361,7 @@
     "26": "Proszę najpierw zainicjować klucz repozytorium danych w [Ustawienia - O - Klucz repozytorium danych]",
     "27": "Przesyłanie [%v]",
     "28": "Sieć jest nieprawidłowa, proszę spróbować ponownie później",
-    "29": "Ta funkcjonalność wymaga <a target='_blank' href='${url}'>płatnej subskrypcji</a> (Jeśli subskrybowałeś, proszę odświeżyć lub zalogować się ponownie w ustawieniach - konto)",
+    "29": "Ta funkcja jest dostępna tylko po zakupie <a target='_blank' href='${url}'>[rocznej subskrypcji]</a> (jeśli już kupiłeś, odśwież lub zaloguj się ponownie w Ustawienia - Konto)",
     "30": "Nie udało się uzyskać informacji w chmurze",
     "31": "Autoryzacja konta nie powiodła się, proszę zalogować się ponownie",
     "32": "Nie udało się usunąć notatnika w chmurze",

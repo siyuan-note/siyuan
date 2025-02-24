@@ -102,16 +102,18 @@ export const loadAssets = (data: Config.IAppearance) => {
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
     if (iconDefaultScriptElement) {
-        iconDefaultScriptElement.remove();
-        let svgElement = document.body.firstElementChild;
-        while (svgElement.tagName === "svg") {
-            const currentSvgElement = svgElement;
-            svgElement = svgElement.nextElementSibling;
-            if (!currentSvgElement.getAttribute("data-name")) {
-                currentSvgElement.remove();
+        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
+            iconDefaultScriptElement.remove();
+            let svgElement = document.body.firstElementChild;
+            while (svgElement.tagName === "svg") {
+                const currentSvgElement = svgElement;
+                svgElement = svgElement.nextElementSibling;
+                if (!currentSvgElement.getAttribute("data-name")) {
+                    currentSvgElement.remove();
+                }
             }
+            loadThirdIcon(iconURL, data);
         }
-        loadThirdIcon(iconURL, data);
     } else {
         loadThirdIcon(iconURL, data);
     }

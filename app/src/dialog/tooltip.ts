@@ -49,7 +49,6 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         left = targetRect.left - clonedTooltip.clientWidth - 8;
     }
 
-    // 确保不会超出屏幕
     top = top >= 0 ? top : targetRect.bottom;
     left = left >= 0 ? left : targetRect.left;
 
@@ -59,26 +58,32 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     clonedTooltip.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
     if (top + clonedTooltip.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        clonedTooltip.style.top = ((position === "parentE" || position === "directLeft" ? parentRect.bottom : targetRect.top) - clonedTooltip.clientHeight) + "px";
-    } else {
-        clonedTooltip.style.top = top + "px";
+        top = (position === "parentE" || position === "directLeft" ? parentRect.bottom : targetRect.top) - clonedTooltip.clientHeight;
     }
 
     if (left + clonedTooltip.clientWidth > window.innerWidth) {
         if (position === "parentE") {
-            clonedTooltip.style.left = (parentRect.left - 8 - clonedTooltip.clientWidth) + "px";
+            left = parentRect.left - 8 - clonedTooltip.clientWidth;
         } else {
-            clonedTooltip.style.left = (window.innerWidth - 1 - clonedTooltip.clientWidth) + "px";
+            left = window.innerWidth - 1 - clonedTooltip.clientWidth;
         }
-    } else {
-        clonedTooltip.style.left = Math.max(0, left) + "px";
     }
 
+    // 确保不会超出屏幕
+    if (top < 0 || left < 0) {
+        top = targetRect.bottom;
+        left = targetRect.left;
+    }
+
+    clonedTooltip.style.top = top + "px";
+    clonedTooltip.style.left = left + "px";
+
     const cloneStyle = clonedTooltip.getAttribute("style");
+    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
+
     if (tooltipElement.getAttribute("style") !== cloneStyle) {
         tooltipElement.setAttribute("style", cloneStyle);
     }
-    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
     if (tooltipElement.className !== className) {
         tooltipElement.className = className;
     }

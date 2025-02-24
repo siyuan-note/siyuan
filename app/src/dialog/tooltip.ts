@@ -27,7 +27,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     if (position?.startsWith("right")) {
         // block icon and background icon
-        left = targetRect.right - clonedTooltip.clientWidth;
+        left = targetRect.right - clonedTooltip.clientWidth + 1;
     }
 
     if (position === "parentE") {
@@ -39,17 +39,17 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         top = parentRect.top + (parseInt(position) || 8);
         left = parentRect.left - clonedTooltip.clientWidth;
     } else if (position?.endsWith("bottom")) {
-        top = targetRect.bottom + parseInt(position.replace("right", ""));
+        top = targetRect.bottom + parseInt(position.replace("right", "")) + 1;
     } else if (position?.endsWith("top")) {
         // 数据库视图、编辑器动态滚动条
-        top = targetRect.top - clonedTooltip.clientHeight;
+        top = targetRect.top - clonedTooltip.clientHeight - 1;
     } else if (position === "directLeft") {
         // 关联字段选项
         top = targetRect.top + (parseInt(position) || 0);
-        left = targetRect.left - clonedTooltip.clientWidth - 8;
+        left = targetRect.left - clonedTooltip.clientWidth - 8 - 1;
     }
 
-    top = top >= 0 ? top : targetRect.bottom;
+    top = top >= 0 ? top : targetRect.bottom + 1;
     left = left >= 0 ? left : targetRect.left;
 
     const topHeight = position === "parentE" ? top : targetRect.top;
@@ -58,12 +58,12 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
     clonedTooltip.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
 
     if (top + clonedTooltip.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        top = (position === "parentE" || position === "directLeft" ? parentRect.bottom : targetRect.top) - clonedTooltip.clientHeight;
+        top = (position === "parentE" || position === "directLeft" ? parentRect.bottom : targetRect.top) - clonedTooltip.clientHeight - 1;
     }
 
     if (left + clonedTooltip.clientWidth > window.innerWidth) {
         if (position === "parentE") {
-            left = parentRect.left - 8 - clonedTooltip.clientWidth;
+            left = parentRect.left - 8 - clonedTooltip.clientWidth - 1;
         } else {
             left = window.innerWidth - 1 - clonedTooltip.clientWidth;
         }
@@ -71,7 +71,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     // 确保不会超出屏幕
     if (top < 0 || left < 0) {
-        top = targetRect.bottom;
+        top = targetRect.bottom + 1;
         left = targetRect.left;
     }
 

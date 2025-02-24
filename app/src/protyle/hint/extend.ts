@@ -27,7 +27,7 @@ const getHotkeyOrMarker = (hotkey: string, marker: string) => {
     } else if (marker) {
         return `<span class="b3-list-item__meta">${marker}</span>`;
     }
-    return ""
+    return "";
 };
 
 export const hintSlash = (key: string, protyle: IProtyle) => {

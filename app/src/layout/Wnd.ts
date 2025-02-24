@@ -232,7 +232,7 @@ export class Wnd {
             }
         });
 
-        this.headersElement.parentElement.addEventListener("dragend", (event) => {
+        this.headersElement.parentElement.addEventListener("dragend", () => {
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");
             });
@@ -338,7 +338,7 @@ export class Wnd {
             }
         });
         //  dragElement dragleave 后还会触发 dragenter https://github.com/siyuan-note/siyuan/issues/13753
-        this.element.addEventListener("dragleave", (event: DragEvent & { target: HTMLElement }) => {
+        this.element.addEventListener("dragleave", () => {
             elementDragCounter--;
             if (elementDragCounter === 0) {
                 dragElement.classList.add("fn__none");

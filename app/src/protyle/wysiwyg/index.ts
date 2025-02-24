@@ -18,7 +18,6 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
-import {genEmptyElement} from "../../block/util";
 import {previewDocImage} from "../preview/image";
 import {
     contentMenu,

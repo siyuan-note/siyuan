@@ -210,7 +210,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             } else {
                 let currentRowElement: Element;
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
-                textJSON.forEach((rowValue, rowIndex) => {
+                textJSON.forEach((rowValue) => {
                     if (!currentRowElement) {
                         currentRowElement = cellElements[0].parentElement;
                     } else {
@@ -220,7 +220,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         return true;
                     }
                     let cellElement: HTMLElement;
-                    rowValue.forEach((cellValue, cellIndex) => {
+                    rowValue.forEach((cellValue) => {
                         if (!cellElement) {
                             cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                         } else {

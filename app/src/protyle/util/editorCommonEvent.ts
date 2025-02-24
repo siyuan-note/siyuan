@@ -861,7 +861,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const targetElement = editorElement.querySelector(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top");
         if (targetElement) {
-            targetElement.classList.remove("protyle-wysiwyg--select", "dragover");
+            targetElement.classList.remove("dragover");
             targetElement.removeAttribute("select-start");
             targetElement.removeAttribute("select-end");
         }
@@ -922,7 +922,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const sourceIds: string [] = [];
                 const srcs: IOperationSrcs[] = [];
                 sourceElements.forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--select", "protyle-wysiwyg--hl");
+                    item.classList.remove("protyle-wysiwyg--hl");
                     item.removeAttribute("select-start");
                     item.removeAttribute("select-end");
                     // 反链提及有高亮，如果拖拽到正文的话，应移除

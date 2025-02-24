@@ -1,4 +1,4 @@
-import {getTextStar, paste, pasteText} from "../util/paste";
+import {getTextStar, paste} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -18,7 +18,6 @@ import {
 } from "../util/selection";
 import {Constants} from "../../constants";
 import {isMobile} from "../../util/functions";
-import {genEmptyElement} from "../../block/util";
 import {previewDocImage} from "../preview/image";
 import {
     contentMenu,
@@ -64,7 +63,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isMac, isOnlyMeta, readText} from "../util/compatibility";
+import {isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -202,6 +201,9 @@ export class WYSIWYG {
             inlineElement.tagName === "SPAN" &&
             inlineElement.textContent !== inputData &&
             !currentTypes.includes("search-mark") &&    // https://github.com/siyuan-note/siyuan/issues/7586
+            !currentTypes.includes("code") &&   // https://github.com/siyuan-note/siyuan/issues/13871
+            !currentTypes.includes("kbd") &&
+            !currentTypes.includes("tag") &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
             (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
@@ -366,14 +368,13 @@ export class WYSIWYG {
                 const tempElement = document.createElement("div");
                 // https://github.com/siyuan-note/siyuan/issues/5540
                 const selectTypes = protyle.toolbar.getCurrentType(range);
-                if ((selectTypes.length > 0 || range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") &&
-                    (
-                        (range.startContainer.nodeType === 3 && range.startContainer.parentElement.textContent === range.toString()) ||
-                        (range.startContainer.nodeType !== 3 && range.startContainer.textContent === range.toString())
-                    )) {
-                    if (range.startContainer.parentElement.parentElement.getAttribute("data-type") === "NodeHeading") {
+                const spanElement = hasClosestByTag(range.startContainer, "SPAN");
+                const headingElement = hasClosestByAttribute(range.startContainer, "data-type", "NodeHeading");
+                if ((selectTypes.length > 0 && spanElement && spanElement.textContent.replace(Constants.ZWSP, "") === range.toString()) ||
+                    (headingElement && headingElement.textContent.replace(Constants.ZWSP, "") === range.toString())) {
+                    if (headingElement) {
                         // 复制标题 https://github.com/siyuan-note/insider/issues/297
-                        tempElement.append(range.startContainer.parentElement.parentElement.cloneNode(true));
+                        tempElement.append(headingElement.cloneNode(true));
                     } else if (!["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                         // 复制行内元素 https://github.com/siyuan-note/insider/issues/191
                         tempElement.append(range.startContainer.parentElement.cloneNode(true));
@@ -388,7 +389,8 @@ export class WYSIWYG {
                 } else if (selectImgElement) {
                     html = selectImgElement.outerHTML;
                     textPlain = selectImgElement.querySelector("img").getAttribute("data-src");
-                } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 && range.startContainer.parentElement.tagName === "SPAN" &&
+                } else if (selectTypes.length > 0 && range.startContainer.nodeType === 3 &&
+                    range.startContainer.parentElement.tagName === "SPAN" &&
                     range.startContainer.parentElement.isSameNode(range.endContainer.parentElement)) {
                     // 复制粗体等字体中的一部分
                     const attributes = range.startContainer.parentElement.attributes;
@@ -729,6 +731,7 @@ export class WYSIWYG {
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
                     window.siyuan.menus.menu.remove();
+                    hideElements(["toolbar"], protyle);
                     event.stopPropagation();
                 }
                 // 后续拖拽操作写在多选节点中
@@ -807,7 +810,7 @@ export class WYSIWYG {
             documentSelf.onmousemove = (moveEvent: MouseEvent) => {
                 let moveTarget: boolean | HTMLElement = moveEvent.target as HTMLElement;
                 // table cell select
-                if (!protyle.disabled && tableBlockElement && tableBlockElement.contains(moveTarget) &&
+                if (tableBlockElement && tableBlockElement.contains(moveTarget) &&
                     !hasClosestByClassName(tableBlockElement, "protyle-wysiwyg__embed")) {
                     if (moveTarget.classList.contains("table__select")) {
                         moveTarget.classList.add("fn__none");
@@ -1080,7 +1083,7 @@ export class WYSIWYG {
                 });
                 protyle.selectElement.classList.add("fn__none");
                 protyle.selectElement.removeAttribute("style");
-                if (!protyle.disabled && tableBlockElement) {
+                if (tableBlockElement) {
                     // @ts-ignore
                     tableBlockElement.firstElementChild.style.webkitUserModify = "";
                     const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
@@ -1089,207 +1092,209 @@ export class WYSIWYG {
                             getSelection().getRangeAt(0).collapse(false);
                         }
                         window.siyuan.menus.menu.remove();
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            label: window.siyuan.languages.mergeCell,
-                            click: () => {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const colIndexList: number[] = [];
-                                    const colCount = tableBlockElement.querySelectorAll("th").length;
-                                    let fnNoneMax = 0;
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    let isTHead = false;
-                                    let isTBody = false;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement, index: number) => {
-                                        if (item.classList.contains("fn__none")) {
-                                            // 合并的元素中间有 fn__none 的元素
-                                            if (item.previousElementSibling && item.previousElementSibling.isSameNode(selectCellElements[selectCellElements.length - 1])) {
-                                                selectCellElements.push(item);
-                                                if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
-                                                    isTHead = true;
-                                                } else if (!isTBody && item.parentElement.parentElement.tagName === "TBODY") {
-                                                    isTBody = true;
-                                                }
-                                            } else {
-                                                if (index < fnNoneMax && colIndexList.includes((index + 1) % colCount)) {
+                        if (!protyle.disabled) {
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.mergeCell,
+                                click: () => {
+                                    if (tableBlockElement) {
+                                        const selectCellElements: HTMLTableCellElement[] = [];
+                                        const colIndexList: number[] = [];
+                                        const colCount = tableBlockElement.querySelectorAll("th").length;
+                                        let fnNoneMax = 0;
+                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        let isTHead = false;
+                                        let isTBody = false;
+                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement, index: number) => {
+                                            if (item.classList.contains("fn__none")) {
+                                                // 合并的元素中间有 fn__none 的元素
+                                                if (item.previousElementSibling && item.previousElementSibling.isSameNode(selectCellElements[selectCellElements.length - 1])) {
                                                     selectCellElements.push(item);
                                                     if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
                                                         isTHead = true;
                                                     } else if (!isTBody && item.parentElement.parentElement.tagName === "TBODY") {
                                                         isTBody = true;
                                                     }
+                                                } else {
+                                                    if (index < fnNoneMax && colIndexList.includes((index + 1) % colCount)) {
+                                                        selectCellElements.push(item);
+                                                        if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
+                                                            isTHead = true;
+                                                        } else if (!isTBody && item.parentElement.parentElement.tagName === "TBODY") {
+                                                            isTBody = true;
+                                                        }
+                                                    }
                                                 }
-                                            }
-                                        } else {
-                                            if (item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
-                                                selectCellElements.push(item);
-                                                if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
-                                                    isTHead = true;
-                                                } else if (!isTBody && item.parentElement.parentElement.tagName === "TBODY") {
-                                                    isTBody = true;
-                                                }
-                                                colIndexList.push((index + 1) % colCount);
-                                                // https://github.com/siyuan-note/insider/issues/1014
-                                                fnNoneMax = Math.max((item.rowSpan - 1) * colCount + index + 1, fnNoneMax);
-                                            }
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    const oldHTML = tableBlockElement.outerHTML;
-                                    let cellElement = selectCellElements[0];
-                                    let colSpan = cellElement.colSpan;
-                                    let index = 1;
-                                    while (cellElement.nextElementSibling && cellElement.nextElementSibling.isSameNode(selectCellElements[index])) {
-                                        cellElement = cellElement.nextElementSibling as HTMLTableCellElement;
-                                        if (!cellElement.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1007#issuecomment-1046195608
-                                            colSpan += cellElement.colSpan;
-                                        }
-                                        index++;
-                                    }
-                                    let html = "";
-                                    let rowElement: Element = selectCellElements[0].parentElement;
-                                    let rowSpan = selectCellElements[0].rowSpan;
-                                    selectCellElements.forEach((item, index) => {
-                                        let cellHTML = item.innerHTML.trim();
-                                        if (cellHTML.endsWith("<br>")) {
-                                            cellHTML = cellHTML.substr(0, cellHTML.length - 4);
-                                        }
-                                        html += cellHTML + ((!cellHTML || index === selectCellElements.length - 1) ? "" : "<br>");
-                                        if (index !== 0) {
-                                            if (!rowElement.isSameNode(item.parentElement)) {
-                                                if (!item.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1011
-                                                    rowSpan += item.rowSpan;
-                                                }
-                                                rowElement = item.parentElement;
-                                                if (selectCellElements[0].parentElement.parentElement.tagName === "THEAD" && item.parentElement.parentElement.tagName !== "THEAD") {
-                                                    selectCellElements[0].parentElement.parentElement.insertAdjacentElement("beforeend", item.parentElement);
-                                                }
-                                            }
-                                            item.classList.add("fn__none");
-                                            item.innerHTML = "";
-                                        }
-                                    });
-
-                                    // https://github.com/siyuan-note/insider/issues/1017
-                                    if (isTHead && isTBody) {
-                                        rowElement = rowElement.parentElement.nextElementSibling.firstElementChild;
-                                        while (rowElement && rowElement.parentElement.tagName !== "THEAD") {
-                                            let colSpanCount = 0;
-                                            let noneCount = 0;
-                                            Array.from(rowElement.children).forEach((item: HTMLTableCellElement) => {
-                                                colSpanCount += item.colSpan - 1;
-                                                if (item.classList.contains("fn__none")) {
-                                                    noneCount++;
-                                                }
-                                            });
-                                            if (colSpanCount !== noneCount) {
-                                                selectCellElements[0].parentElement.parentElement.insertAdjacentElement("beforeend", rowElement);
-                                                rowElement = rowElement.parentElement.nextElementSibling.firstElementChild;
                                             } else {
-                                                break;
+                                                if (item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                                    item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                                    selectCellElements.push(item);
+                                                    if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
+                                                        isTHead = true;
+                                                    } else if (!isTBody && item.parentElement.parentElement.tagName === "TBODY") {
+                                                        isTBody = true;
+                                                    }
+                                                    colIndexList.push((index + 1) % colCount);
+                                                    // https://github.com/siyuan-note/insider/issues/1014
+                                                    fnNoneMax = Math.max((item.rowSpan - 1) * colCount + index + 1, fnNoneMax);
+                                                }
+                                            }
+                                        });
+                                        tableSelectElement.removeAttribute("style");
+                                        const oldHTML = tableBlockElement.outerHTML;
+                                        let cellElement = selectCellElements[0];
+                                        let colSpan = cellElement.colSpan;
+                                        let index = 1;
+                                        while (cellElement.nextElementSibling && cellElement.nextElementSibling.isSameNode(selectCellElements[index])) {
+                                            cellElement = cellElement.nextElementSibling as HTMLTableCellElement;
+                                            if (!cellElement.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1007#issuecomment-1046195608
+                                                colSpan += cellElement.colSpan;
+                                            }
+                                            index++;
+                                        }
+                                        let html = "";
+                                        let rowElement: Element = selectCellElements[0].parentElement;
+                                        let rowSpan = selectCellElements[0].rowSpan;
+                                        selectCellElements.forEach((item, index) => {
+                                            let cellHTML = item.innerHTML.trim();
+                                            if (cellHTML.endsWith("<br>")) {
+                                                cellHTML = cellHTML.substr(0, cellHTML.length - 4);
+                                            }
+                                            html += cellHTML + ((!cellHTML || index === selectCellElements.length - 1) ? "" : "<br>");
+                                            if (index !== 0) {
+                                                if (!rowElement.isSameNode(item.parentElement)) {
+                                                    if (!item.classList.contains("fn__none")) { // https://github.com/siyuan-note/insider/issues/1011
+                                                        rowSpan += item.rowSpan;
+                                                    }
+                                                    rowElement = item.parentElement;
+                                                    if (selectCellElements[0].parentElement.parentElement.tagName === "THEAD" && item.parentElement.parentElement.tagName !== "THEAD") {
+                                                        selectCellElements[0].parentElement.parentElement.insertAdjacentElement("beforeend", item.parentElement);
+                                                    }
+                                                }
+                                                item.classList.add("fn__none");
+                                                item.innerHTML = "";
+                                            }
+                                        });
+
+                                        // https://github.com/siyuan-note/insider/issues/1017
+                                        if (isTHead && isTBody) {
+                                            rowElement = rowElement.parentElement.nextElementSibling.firstElementChild;
+                                            while (rowElement && rowElement.parentElement.tagName !== "THEAD") {
+                                                let colSpanCount = 0;
+                                                let noneCount = 0;
+                                                Array.from(rowElement.children).forEach((item: HTMLTableCellElement) => {
+                                                    colSpanCount += item.colSpan - 1;
+                                                    if (item.classList.contains("fn__none")) {
+                                                        noneCount++;
+                                                    }
+                                                });
+                                                if (colSpanCount !== noneCount) {
+                                                    selectCellElements[0].parentElement.parentElement.insertAdjacentElement("beforeend", rowElement);
+                                                    rowElement = rowElement.parentElement.nextElementSibling.firstElementChild;
+                                                } else {
+                                                    break;
+                                                }
                                             }
                                         }
-                                    }
 
-                                    // 合并背景色不会修改，需要等计算完毕
-                                    setTimeout(() => {
-                                        if (tableBlockElement) {
-                                            selectCellElements[0].innerHTML = html + "<wbr>";
-                                            selectCellElements[0].colSpan = colSpan;
-                                            selectCellElements[0].rowSpan = rowSpan;
-                                            focusByWbr(selectCellElements[0], document.createRange());
-                                            updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
-                                        }
-                                    });
+                                        // 合并背景色不会修改，需要等计算完毕
+                                        setTimeout(() => {
+                                            if (tableBlockElement) {
+                                                selectCellElements[0].innerHTML = html + "<wbr>";
+                                                selectCellElements[0].colSpan = colSpan;
+                                                selectCellElements[0].rowSpan = rowSpan;
+                                                focusByWbr(selectCellElements[0], document.createRange());
+                                                updateTransaction(protyle, tableBlockElement.getAttribute("data-node-id"), tableBlockElement.outerHTML, oldHTML);
+                                            }
+                                        });
+                                    }
                                 }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            icon: "iconAlignLeft",
-                            accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
-                            label: window.siyuan.languages.alignLeft,
-                            click: () => {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "left", getEditorRange(tableBlockElement));
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconAlignLeft",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
+                                label: window.siyuan.languages.alignLeft,
+                                click: () => {
+                                    if (tableBlockElement) {
+                                        const selectCellElements: HTMLTableCellElement[] = [];
+                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                            if (!item.classList.contains("fn__none") &&
+                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                                selectCellElements.push(item);
+                                            }
+                                        });
+                                        tableSelectElement.removeAttribute("style");
+                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "left", getEditorRange(tableBlockElement));
+                                    }
                                 }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            icon: "iconAlignCenter",
-                            accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
-                            label: window.siyuan.languages.alignCenter,
-                            click: () => {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "center", getEditorRange(tableBlockElement));
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconAlignCenter",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
+                                label: window.siyuan.languages.alignCenter,
+                                click: () => {
+                                    if (tableBlockElement) {
+                                        const selectCellElements: HTMLTableCellElement[] = [];
+                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                            if (!item.classList.contains("fn__none") &&
+                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                                selectCellElements.push(item);
+                                            }
+                                        });
+                                        tableSelectElement.removeAttribute("style");
+                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "center", getEditorRange(tableBlockElement));
+                                    }
                                 }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            icon: "iconAlignRight",
-                            accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
-                            label: window.siyuan.languages.alignRight,
-                            click: () => {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "right", getEditorRange(tableBlockElement));
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconAlignRight",
+                                accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
+                                label: window.siyuan.languages.alignRight,
+                                click: () => {
+                                    if (tableBlockElement) {
+                                        const selectCellElements: HTMLTableCellElement[] = [];
+                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                            if (!item.classList.contains("fn__none") &&
+                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                                selectCellElements.push(item);
+                                            }
+                                        });
+                                        tableSelectElement.removeAttribute("style");
+                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "right", getEditorRange(tableBlockElement));
+                                    }
                                 }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            icon: "",
-                            label: window.siyuan.languages.useDefaultAlign,
-                            click: () => {
-                                if (tableBlockElement) {
-                                    const selectCellElements: HTMLTableCellElement[] = [];
-                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
-                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                            (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
-                                            selectCellElements.push(item);
-                                        }
-                                    });
-                                    tableSelectElement.removeAttribute("style");
-                                    setTableAlign(protyle, selectCellElements, tableBlockElement, "", getEditorRange(tableBlockElement));
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "",
+                                label: window.siyuan.languages.useDefaultAlign,
+                                click: () => {
+                                    if (tableBlockElement) {
+                                        const selectCellElements: HTMLTableCellElement[] = [];
+                                        const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                            if (!item.classList.contains("fn__none") &&
+                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                                selectCellElements.push(item);
+                                            }
+                                        });
+                                        tableSelectElement.removeAttribute("style");
+                                        setTableAlign(protyle, selectCellElements, tableBlockElement, "", getEditorRange(tableBlockElement));
+                                    }
                                 }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                        }
                         window.siyuan.menus.menu.append(new MenuItem({
                             icon: "iconCopy",
                             accelerator: "⌘C",
@@ -1301,42 +1306,44 @@ export class WYSIWYG {
                                 }
                             }
                         }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            icon: "iconCut",
-                            accelerator: "⌘X",
-                            label: window.siyuan.languages.cut,
-                            click() {
-                                if (tableBlockElement) {
-                                    focusByRange(getEditorRange(tableBlockElement));
-                                    document.execCommand("cut");
-                                }
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            label: window.siyuan.languages.clear,
-                            icon: "iconTrashcan",
-                            accelerator: "⌦",
-                            click() {
-                                clearTableCell(protyle, tableBlockElement as HTMLElement);
-                            }
-                        }).element);
-                        window.siyuan.menus.menu.append(new MenuItem({
-                            label: window.siyuan.languages.paste,
-                            icon: "iconPaste",
-                            accelerator: "⌘V",
-                            async click() {
-                                if (document.queryCommandSupported("paste")) {
-                                    document.execCommand("paste");
-                                } else if (tableBlockElement) {
-                                    try {
-                                        const clipText = await readText();
-                                        pasteText(protyle, clipText, tableBlockElement);
-                                    } catch (e) {
-                                        console.log(e);
+                        if (!protyle.disabled) {
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                icon: "iconCut",
+                                accelerator: "⌘X",
+                                label: window.siyuan.languages.cut,
+                                click() {
+                                    if (tableBlockElement) {
+                                        focusByRange(getEditorRange(tableBlockElement));
+                                        document.execCommand("cut");
                                     }
                                 }
-                            }
-                        }).element);
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.clear,
+                                icon: "iconTrashcan",
+                                accelerator: "⌦",
+                                click() {
+                                    clearTableCell(protyle, tableBlockElement as HTMLElement);
+                                }
+                            }).element);
+                            window.siyuan.menus.menu.append(new MenuItem({
+                                label: window.siyuan.languages.paste,
+                                icon: "iconPaste",
+                                accelerator: "⌘V",
+                                async click() {
+                                    if (document.queryCommandSupported("paste")) {
+                                        document.execCommand("paste");
+                                    } else if (tableBlockElement) {
+                                        try {
+                                            const text = await readClipboard();
+                                            paste(protyle, Object.assign(text, {target: tableBlockElement as HTMLElement}));
+                                        } catch (e) {
+                                            console.log(e);
+                                        }
+                                    }
+                                }
+                            }).element);
+                        }
                         window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
                     }
                 }
@@ -1538,52 +1545,10 @@ export class WYSIWYG {
                         startContainer = nextSibling;
                     }
                 }
-                // 选中整个标题 https://github.com/siyuan-note/siyuan/issues/4329
                 const headElement = hasClosestByAttribute(startContainer, "data-type", "NodeHeading");
-                let isFoldHeading = false;
                 if (headElement && range.toString() === headElement.firstElementChild.textContent) {
-                    const doOperations: IOperation[] = [{
-                        action: "delete",
-                        id: headElement.getAttribute("data-node-id")
-                    }];
-                    const undoOperations: IOperation[] = [{
-                        action: "insert",
-                        id: headElement.getAttribute("data-node-id"),
-                        data: headElement.outerHTML,
-                        previousID: headElement.previousElementSibling?.getAttribute("data-node-id"),
-                        parentID: headElement.parentElement?.getAttribute("data-node-id") || protyle.block.parentID
-                    }];
-                    if (headElement.getAttribute("fold") === "1") {
-                        isFoldHeading = true;
-                        const headCloneElement = headElement.cloneNode(true) as HTMLElement;
-                        headCloneElement.removeAttribute("fold");
-                        tempElement.append(headCloneElement);
-                        undoOperations[0].data = headCloneElement.outerHTML;
-                        setFold(protyle, headElement, undefined, true);
-                    } else {
-                        if ((headElement.parentElement.childElementCount === 3 && headElement.parentElement.classList.contains("li")) ||
-                            (headElement.parentElement.childElementCount === 2 && (headElement.parentElement.classList.contains("bq") || headElement.parentElement.classList.contains("sb"))) ||
-                            (headElement.parentElement.childElementCount === 1 && headElement.parentElement.classList.contains("protyle-wysiwyg"))  // 全选剪切标题
-                        ) {
-                            // https://github.com/siyuan-note/siyuan/issues/4040
-                            const emptyId = Lute.NewNodeID();
-                            const emptyElement = genEmptyElement(false, false, emptyId);
-                            doOperations.push({
-                                id: emptyId,
-                                data: emptyElement.outerHTML,
-                                action: "insert",
-                                parentID: headElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
-                            });
-                            undoOperations.push({
-                                id: emptyId,
-                                action: "delete",
-                            });
-                            headElement.before(emptyElement);
-                        }
-                        focusSideBlock(headElement);
-                        tempElement.append(headElement);
-                    }
-                    transaction(protyle, doOperations, undoOperations);
+                    tempElement.insertAdjacentHTML("afterbegin", headElement.firstElementChild.innerHTML);
+                    headElement.firstElementChild.innerHTML = "";
                 } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
                     && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
@@ -1670,7 +1635,7 @@ export class WYSIWYG {
                     nodeElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
                     highlightRender(nodeElement);
                 }
-                if (nodeElement.parentElement.parentElement && !isFoldHeading && !nodeElement.classList.contains("av")) {
+                if (nodeElement.parentElement.parentElement && !nodeElement.classList.contains("av")) {
                     // 选中 heading 时，使用删除的 transaction
                     setInsertWbrHTML(nodeElement, range, protyle);
                     updateTransaction(protyle, id, protyle.wysiwyg.lastHTMLs[id] || nodeElement.outerHTML, oldHTML);

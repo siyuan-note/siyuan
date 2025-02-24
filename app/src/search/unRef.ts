@@ -72,6 +72,16 @@ export const openSearchUnRef = (element: HTMLElement, editor: Protyle) => {
             }
         };
     });
+    dragElement.addEventListener("dblclick", () => {
+        editor.protyle.element.style[localSearch.layout === 1 ? "width" : "height"] = "";
+        editor.protyle.element.classList.add("fn__flex-1");
+        const direction = localSearch.layout === 1 ? "lr" : "tb";
+        window.siyuan.storage[Constants.LOCAL_SEARCHUNREF][direction === "lr" ? "col" : "row"] = "";
+        setStorageVal(Constants.LOCAL_SEARCHUNREF, window.siyuan.storage[Constants.LOCAL_SEARCHUNREF]);
+        if (direction === "lr") {
+            resize(editor.protyle);
+        }
+    });
     getUnRefList(element, editor);
 };
 

@@ -586,6 +586,10 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 			}
 		}
 	}
+	refsCountDelta := len(paragraphParentIDs)
+	paragraphParentIDs = gulu.Str.RemoveDuplicatedElem(paragraphParentIDs)
+	refsCountDelta -= len(paragraphParentIDs)
+	refsCount -= refsCountDelta
 	sqlParagraphParents := sql.GetBlocks(paragraphParentIDs)
 	paragraphParents := fromSQLBlocks(&sqlParagraphParents, "", 12)
 
@@ -748,11 +752,11 @@ func buildTreeBackmention(defSQLBlock *sql.Block, refBlocks []*Block, keyword st
 		mentionKeywords = append(mentionKeywords, v.(string))
 	}
 	mentionKeywords = prepareMarkKeywords(mentionKeywords)
-	ret = searchBackmention(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen)
+	mentionKeywords, ret = searchBackmention(mentionKeywords, keyword, excludeBacklinkIDs, rootID, beforeLen)
 	return
 }
 
-func searchBackmention(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int) (ret []*Block) {
+func searchBackmention(mentionKeywords []string, keyword string, excludeBacklinkIDs *hashset.Set, rootID string, beforeLen int) (retMentionKeywords []string, ret []*Block) {
 	ret = []*Block{}
 	if 1 > len(mentionKeywords) {
 		return
@@ -825,6 +829,9 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		newText := markReplaceSpanWithSplit(text, mentionKeywords, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
 		if text != newText {
 			tmp = append(tmp, b)
+
+			k := gulu.Str.SubstringsBetween(newText, search.GetMarkSpanStart(search.MarkDataType), search.GetMarkSpanEnd())
+			retMentionKeywords = append(retMentionKeywords, k...)
 		} else {
 			// columnFilter 中的命名、别名和备注命中的情况
 			// 反链提及搜索范围增加命名、别名和备注 https://github.com/siyuan-note/siyuan/issues/7639
@@ -836,6 +843,8 @@ func searchBackmention(mentionKeywords []string, keyword string, excludeBacklink
 		}
 	}
 	blocks = tmp
+	retMentionKeywords = gulu.Str.RemoveDuplicatedElem(retMentionKeywords)
+	mentionKeywords = retMentionKeywords
 
 	mentionBlockMap := map[string]*Block{}
 	for _, block := range blocks {

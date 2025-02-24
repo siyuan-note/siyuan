@@ -554,8 +554,15 @@ func buildBlockBreadcrumb(node *ast.Node, excludeTypes []string, isEmbedBlock bo
 		name = util.UnescapeHTML(name)
 		name = util.EscapeHTML(name)
 
-		if !isEmbedBlock && parent == node {
-			name = ""
+		if !isEmbedBlock {
+			if parent == node {
+				name = ""
+			}
+		} else {
+			if ast.NodeDocument != parent.Type {
+				// 在嵌入块中隐藏最后一个非文档路径的面包屑中的文本 Hide text in breadcrumb of last non-document path in embed block https://github.com/siyuan-note/siyuan/issues/13866
+				name = ""
+			}
 		}
 
 		if add {

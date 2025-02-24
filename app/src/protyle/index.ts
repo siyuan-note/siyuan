@@ -128,6 +128,16 @@ export class Protyle {
                         case "reload":
                             if (data.data === this.protyle.block.rootID) {
                                 reloadProtyle(this.protyle, false);
+                                getAllModels().outline.forEach(item => {
+                                    if (item.blockId === data.data) {
+                                        fetchPost("/api/outline/getDocOutline", {
+                                            id: item.blockId,
+                                            preview: item.isPreview
+                                        }, response => {
+                                            item.update(response);
+                                        });
+                                    }
+                                });
                             }
                             break;
                         case "refreshAttributeView":

@@ -305,7 +305,7 @@ export const setKey = (isSync: boolean, cb?: () => void) => {
     <input class="b3-text-field fn__block ft__center" placeholder="${window.siyuan.languages.reEnterPassphrase}">
 </div>
 <div class="b3-dialog__action">
-    <label>
+    <label class="fn__flex">
         <input type="checkbox" class="b3-switch fn__flex-center">
         <span class="fn__space"></span>
         ${window.siyuan.languages.confirmPassword}

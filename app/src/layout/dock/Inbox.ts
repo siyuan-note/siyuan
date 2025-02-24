@@ -348,6 +348,7 @@ ${data.shorthandContent}
                         path: pathPosix().join(getDisplayName(toPath[0], false, true), Lute.NewNodeID() + ".sy"),
                         title: replaceFileName(response.data.shorthandTitle),
                         md: md,
+                        listDocTree: true,
                     }, () => {
                         this.remove(item);
                     });

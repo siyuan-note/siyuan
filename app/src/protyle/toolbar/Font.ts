@@ -338,7 +338,18 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
 
 export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) => {
     if (!textObj) {
-        return true;
+        // https://github.com/siyuan-note/siyuan/issues/14019
+        if (currentElement.nodeType !== 3 && sideElement.nodeType !== 3 &&
+            // 当为 span 时，都经过 isArrayEqual 判断
+            sideElement.style.color === currentElement.style.color &&
+            sideElement.style.webkitTextFillColor === currentElement.style.webkitTextFillColor &&
+            sideElement.style.webkitTextStroke === currentElement.style.webkitTextStroke &&
+            sideElement.style.textShadow === currentElement.style.textShadow &&
+            sideElement.style.backgroundColor === currentElement.style.backgroundColor &&
+            sideElement.style.fontSize === currentElement.style.fontSize) {
+            return true;
+        }
+        return false;
     }
     if (textObj.type === "inline-math" || textObj.type === "inline-memo" || textObj.type === "a") {
         return false;

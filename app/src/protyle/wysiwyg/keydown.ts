@@ -69,6 +69,7 @@ import {checkFold} from "../../util/noRelyPCFunction";
 import {AIActions} from "../../ai/actions";
 import {openLink} from "../../editor/openLink";
 import {onlyProtyleCommand} from "../../boot/globalEvent/command/protyle";
+import {AIChat} from "../../ai/chat";
 
 export const getContentByInlineHTML = (range: Range, cb: (content: string) => void) => {
     let html = "";
@@ -1198,6 +1199,30 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.rtl.custom, event)) {
+            let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement];
+            }
+            updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                e.style.direction = "rtl";
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
+        if (matchHotKey(window.siyuan.config.keymap.editor.general.ltr.custom, event)) {
+            let selectElements: HTMLElement[] = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0) {
+                selectElements = [nodeElement];
+            }
+            updateBatchTransaction(selectElements, protyle, (e: HTMLElement) => {
+                e.style.direction = "ltr";
+            });
+            event.stopPropagation();
+            event.preventDefault();
+            return;
+        }
 
         // esc
         if (event.key === "Escape") {
@@ -1677,6 +1702,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 selectsElement = [nodeElement];
             }
             AIActions(selectsElement, protyle);
+            return;
+        }
+
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.aiWriting.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            AIChat(protyle, nodeElement);
             return;
         }
 

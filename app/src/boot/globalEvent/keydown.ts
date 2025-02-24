@@ -51,7 +51,7 @@ import {openCard, openCardByData} from "../../card/openCard";
 import {lockScreen} from "../../dialog/processSystem";
 import {isWindow} from "../../util/functions";
 import {reloadProtyle} from "../../protyle/util/reload";
-import {fullscreen, updateReadonly} from "../../protyle/breadcrumb/action";
+import {fullscreen} from "../../protyle/breadcrumb/action";
 import {openRecentDocs} from "../../business/openRecentDocs";
 import {App} from "../../index";
 import {openBacklink, openGraph, openOutline, toggleDockBar} from "../../layout/dock/util";

@@ -19,10 +19,12 @@ linux:
   category: "Utility"
   executableName: "siyuan"
   desktop: {
-    "Name": "SiYuan",
-    "Comment": "Refactor your thinking",
-    "Type": "Application",
-    "Categories": "Utility;"
+    entry: {
+      Name: "SiYuan",
+      Comment: "Refactor your thinking",
+      Type: "Application",
+      Categories: "Utility;"
+    }
   }
   extraResources:
     - from: "kernel-linux-arm64"
@@ -61,7 +63,7 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
-  - from: "src/assets/fonts"
+  - from: "appearance/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"
   - from: "pandoc/pandoc-linux-arm64.zip"

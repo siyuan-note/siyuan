@@ -772,7 +772,9 @@ export class Files extends Model {
             if (!liElement) {
                 const dirname = pathPosix().dirname(currentPath);
                 if (dirname === "/") {
-                    this.getLeaf(treeElement.firstElementChild, notebookId, true);
+                    if (treeElement.firstElementChild.querySelector(".b3-list-item__arrow--open")) {
+                        this.getLeaf(treeElement.firstElementChild, notebookId, true);
+                    }
                     break;
                 } else {
                     currentPath = dirname + ".sy";

@@ -1098,10 +1098,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 let html = "";
                 for (let i = 0; i < ids.length; i++) {
+                    if (ids.length > 1) {
+                        html += "* ";
+                    }
                     const response = await fetchSyncPost("/api/block/getRefText", {id: ids[i]});
-                    html += protyle.lute.Md2BlockDOM(`((${ids[i]} '${response.data}'))`);
+                    html += `((${ids[i]} '${response.data}'))`;
+                    if (ids.length > 1 && i !== ids.length - 1) {
+                        html += "\n";
+                    }
                 }
-                insertHTML(html, protyle);
+                insertHTML(protyle.lute.Md2BlockDOM(html), protyle);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
                 const scrollTop = protyle.contentElement.scrollTop;
                 if (targetElement.classList.contains("av__row")) {

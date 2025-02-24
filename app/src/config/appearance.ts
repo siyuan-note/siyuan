@@ -171,9 +171,10 @@ export const appearance = {
         const themeLight = (appearance.element.querySelector("#themeLight") as HTMLSelectElement).value;
         const themeDark = (appearance.element.querySelector("#themeDark") as HTMLSelectElement).value;
         const modeElementValue = parseInt((appearance.element.querySelector("#mode") as HTMLSelectElement).value);
+        const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
         fetchPost("/api/setting/setAppearance", {
             icon: (appearance.element.querySelector("#icon") as HTMLSelectElement).value,
-            mode: modeElementValue === 2 ? window.siyuan.config.appearance.mode : modeElementValue,
+            mode: modeElementValue === 2 ? (OSTheme === "light" ? 0 : 1) : modeElementValue,
             modeOS: modeElementValue === 2,
             codeBlockThemeDark: (appearance.element.querySelector("#codeBlockThemeDark") as HTMLSelectElement).value,
             codeBlockThemeLight: (appearance.element.querySelector("#codeBlockThemeLight") as HTMLSelectElement).value,
@@ -187,36 +188,26 @@ export const appearance = {
             hideStatusBar: (appearance.element.querySelector("#hideStatusBar") as HTMLInputElement).checked,
         }, async response => {
             if (window.siyuan.config.appearance.themeJS) {
-                if (window.destroyTheme) {
-                    try {
-                        await window.destroyTheme();
-                        window.destroyTheme = undefined;
-                    } catch (e) {
-                        console.error("destroyTheme error: " + e);
-                    }
-                } else {
-                    if (!response.data.modeOS && (
-                        response.data.mode !== window.siyuan.config.appearance.mode ||
-                        window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                        window.siyuan.config.appearance.themeDark !== response.data.themeDark
-                    )) {
+                if (response.data.mode !== window.siyuan.config.appearance.mode ||
+                    (response.data.mode === window.siyuan.config.appearance.mode && (
+                            (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
+                            (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
+                    )
+                ) {
+                    if (window.destroyTheme) {
+                        try {
+                            await window.destroyTheme();
+                            window.destroyTheme = undefined;
+                            document.getElementById("themeScript").remove();
+                        } catch (e) {
+                            console.error("destroyTheme error: " + e);
+                        }
+                    } else {
                         exportLayout({
                             errorExit: false,
                             cb() {
                                 window.location.reload();
                             },
-                        });
-                        return;
-                    }
-                    const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                    if (response.data.modeOS && (
-                        (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
-                    )) {
-                        exportLayout({
-                            cb() {
-                                window.location.reload();
-                            },
-                            errorExit: false,
                         });
                         return;
                     }

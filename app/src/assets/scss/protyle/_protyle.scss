@@ -6,7 +6,7 @@
 .protyle-scroll {
   --b3-dynamicscroll-width: 200px;
   position: absolute;
-  right: 10px;
+  right: 12px;
   top: 30px;
   width: 16px;
   bottom: 9px; // 下图标 hover 时，需要留出一定的空间
@@ -58,6 +58,12 @@
 
       &::-webkit-slider-runnable-track,
       &::-webkit-slider-thumb {
+        background-color: var(--b3-border-color);
+        box-shadow: none;
+      }
+
+      &::-moz-range-track,
+      &::-moz-range-thumb {
         background-color: var(--b3-border-color);
         box-shadow: none;
       }
@@ -403,11 +409,11 @@
   }
 }
 
-table[contenteditable="false"] + .protyle-action__table {
+table[contenteditable="false"] + .protyle-action__table > .table__resize {
   display: none;
 }
 
-table[contenteditable="true"] + .protyle-action__table {
+table + .protyle-action__table {
   position: absolute;
   top: 4px;
   height: 0;

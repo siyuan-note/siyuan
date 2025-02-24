@@ -22,7 +22,7 @@ import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
 import {getIconByType} from "../editor/getIcon";
 import {unicode2Emoji} from "../emoji";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {hasClosestByClassName, hasClosestByTag} from "../protyle/util/hasClosest";
 import {isIPad, isNotCtrl, setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 import {newFileByName} from "../util/newFile";
 import {
@@ -1015,6 +1015,21 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     window.siyuan.menus.menu.remove();
 };
 
+const scrollToCurrent = (contentElement: HTMLElement,currentRange: Range, contentRect:DOMRect) => {
+    contentElement.scrollTop = contentElement.scrollTop + currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+    const tableElement = hasClosestByClassName(currentRange.startContainer, "table");
+    if (tableElement) {
+        const cellElement = hasClosestByTag(currentRange.startContainer, "TD") || hasClosestByTag(currentRange.startContainer, "TH");
+        if (cellElement) {
+            tableElement.firstElementChild.scrollLeft = cellElement.offsetLeft;
+            if (tableElement.getAttribute("custom-pinthead") === "true") {
+                contentElement.scrollTop = contentElement.scrollTop + tableElement.getBoundingClientRect().top - contentRect.top;
+                tableElement.querySelector("table").scrollTop = cellElement.offsetTop;
+            }
+        }
+    }
+}
+
 const renderNextSearchMark = (options: {
     id: string,
     edit: Protyle,
@@ -1041,7 +1056,7 @@ const renderNextSearchMark = (options: {
             if (!currentRange.toString()) {
                 highlightById(options.edit.protyle, options.id);
             } else {
-                options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect)
             }
         }
         return;
@@ -1115,11 +1130,12 @@ export const getArticle = (options: {
                 if (isSupportCSSHL()) {
                     searchMarkRender(options.edit.protyle, getResponse.data.keywords, options.id, () => {
                         const highlightKeys = () => {
-                            if (options.edit.protyle.highlight.ranges.length > 0 && options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]) {
-                                if (!options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].toString()) {
+                            const currentRange = options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex]
+                            if (options.edit.protyle.highlight.ranges.length > 0 && currentRange) {
+                                if (!currentRange.toString()) {
                                     highlightById(options.edit.protyle, options.id);
                                 } else {
-                                    options.edit.protyle.contentElement.scrollTop = options.edit.protyle.contentElement.scrollTop + options.edit.protyle.highlight.ranges[options.edit.protyle.highlight.rangeIndex].getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
+                                    scrollToCurrent(options.edit.protyle.contentElement, currentRange, contentRect)
                                 }
                             } else {
                                 highlightById(options.edit.protyle, options.id);

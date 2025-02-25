@@ -381,9 +381,9 @@ export const editor = {
                 fontMenu.open({
                     x: rect.left,
                     y: rect.bottom
-                })
+                });
             });
-        })
+        });
 
         editor.element.querySelector("#clearHistory").addEventListener("click", () => {
             confirmDialog(window.siyuan.languages.clearHistory, window.siyuan.languages.confirmClearHistory, () => {

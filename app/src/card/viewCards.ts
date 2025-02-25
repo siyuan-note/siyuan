@@ -264,7 +264,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span data-position="parentE" data-type="reset" data-id="${item.id}" class="b3-list-item__action ariaLabel" aria-label="${window.siyuan.languages.reset}">
     <svg><use xlink:href="#iconUndo"></use></svg>
 </span>
-<span data-position="parentE" data-type="remove" data-id="${item.id}" class="b3-list-item__action ariaLabel" aria-label="${window.siyuan.languages.removeDeck}">
+<span data-position="parentE" data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-list-item__action--warning ariaLabel" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
 </div>`;
@@ -273,7 +273,7 @@ ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
             // 块被删除的情况
             listHTML += `<div data-type="card-item" class="b3-list-item${isMobile() ? "" : " b3-list-item--hide-action"}">
 <span class="b3-list-item__text">${item.content}</span>
-<span data-position="parentE" data-type="remove" data-id="${item.id}" class="b3-list-item__action ariaLabel" aria-label="${window.siyuan.languages.removeDeck}">
+<span data-position="parentE" data-type="remove" data-id="${item.id}" class="b3-list-item__action b3-list-item__action--warning ariaLabel" aria-label="${window.siyuan.languages.removeDeck}">
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>
 </div>`;

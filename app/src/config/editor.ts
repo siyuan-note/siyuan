@@ -243,7 +243,7 @@ export const editor = {
         <div class="b3-label__text">${window.siyuan.languages.font1}</div>
     </div>
     <span class="fn__space"></span>
-    <input readonly id="fontFamily" class="b3-text-field fn__flex-center fn__size200" value="${window.siyuan.config.editor.fontFamily || window.siyuan.languages.default}"/>
+    <input readonly="readonly" placeholder="${window.siyuan.languages.default}" id="fontFamily" class="b3-text-field fn__flex-center fn__size200" style="font-family:'${window.siyuan.config.editor.fontFamily}',var(--b3-font-family);" value="${window.siyuan.config.editor.fontFamily}"/>
 </div>
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
@@ -364,7 +364,12 @@ export const editor = {
                     checked: window.siyuan.config.editor.fontFamily === "",
                     label: `<div style='var(--b3-font-family);'>${window.siyuan.languages.default}</div>`,
                     click: () => {
+                        if ("" === window.siyuan.config.editor.fontFamily) {
+                            return;
+                        }
                         fontFamilyElement.value = "";
+                        fontFamilyElement.style.fontFamily = "";
+                        setEditor();
                     }
                 });
                 response.data.forEach((item: string) => {
@@ -373,7 +378,12 @@ export const editor = {
                         checked: window.siyuan.config.editor.fontFamily === item,
                         label: `<div style='font-family:"${item}",var(--b3-font-family);'>${item}</div>`,
                         click: () => {
+                            if (item === window.siyuan.config.editor.fontFamily) {
+                                return;
+                            }
                             fontFamilyElement.value = item;
+                            fontFamilyElement.style.fontFamily = item + ",var(--b3-font-family)";
+                            setEditor();
                         }
                     });
                 });
@@ -452,9 +462,11 @@ export const editor = {
             });
         });
         editor.element.querySelectorAll("textarea.b3-text-field, input.b3-text-field, input.b3-slider").forEach((item) => {
-            item.addEventListener("blur", () => {
-                setEditor();
-            });
+            if (!item.getAttribute("readonly")) {
+                item.addEventListener("blur", () => {
+                    setEditor();
+                });
+            }
         });
         editor.element.querySelectorAll("input.b3-slider").forEach((item) => {
             item.addEventListener("input", (event) => {

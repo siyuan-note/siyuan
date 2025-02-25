@@ -522,7 +522,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         });
         if (rowElements.length === 1) {
             if (keyCellElement.getAttribute("data-detached") !== "true") {
-                menu.addSeparator(undefined, undefined, "1");
+                menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
                 id: "insertRowBefore",
@@ -570,7 +570,7 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
                     });
                 }
             });
-            menu.addSeparator(undefined, undefined, "2");
+            menu.addSeparator({id: "separator_2"});
             if (keyCellElement.getAttribute("data-detached") !== "true") {
                 menu.addItem({
                     id: "unbindBlock",

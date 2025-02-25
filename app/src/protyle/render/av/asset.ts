@@ -244,7 +244,7 @@ export const editAssetItem = (options: {
                 });
             }
         });
-        menu.addSeparator(undefined, undefined, "1");
+        menu.addSeparator({id: "separator_1"});
         menu.addItem({
             id: "copy",
             label: window.siyuan.languages.copy,
@@ -280,7 +280,7 @@ export const editAssetItem = (options: {
                 });
             }
         });
-        menu.addSeparator(undefined, undefined, "1");
+        menu.addSeparator({id: "separator_1"});
         menu.addItem({
             id: "copy",
             label: window.siyuan.languages.copy,
@@ -324,7 +324,7 @@ export const editAssetItem = (options: {
     }
     const openSubMenu = openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, true, false);
     if (type !== "file" || openSubMenu.length > 0) {
-        menu.addSeparator(undefined, undefined, "2");
+        menu.addSeparator({id: "separator_2"});
     }
     if (type !== "file") {
         menu.addItem({

@@ -761,7 +761,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
         }
     });
-    menu.addSeparator(undefined, undefined, "1");
+    menu.addSeparator({id: "separator_1"});
 
     // 行号 类型不参与 排序和筛选
     if (type !== "lineNumber") {
@@ -851,7 +851,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 }
             });
         }
-        menu.addSeparator(undefined, undefined, "2");
+        menu.addSeparator({id: "separator_2"});
     }
     menu.addItem({
         id: "insertColumnLeft",
@@ -1034,7 +1034,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 });
             }
         });
-        menu.addSeparator(undefined, undefined, "3");
+        menu.addSeparator({id: "separator_3"});
     }
     menu.addItem({
         id: "wrap",

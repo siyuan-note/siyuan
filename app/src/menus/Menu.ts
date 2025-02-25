@@ -84,13 +84,6 @@ export class Menu {
         }
     }
 
-    public addSeparator(index?: number, id?: string) {
-        if (id) {
-            return this.addItem({id: "separator_" + id, type: "separator", index});
-        }
-        return this.addItem({type: "separator", index});
-    }
-
     public addItem(option: IMenu) {
         const menuItem = new MenuItem(option);
         this.append(menuItem.element, option.index);
@@ -384,11 +377,11 @@ export class subMenu {
         this.menus = [];
     }
 
-    addSeparator(index?: number) {
+    addSeparator(index?: number, id?: string) {
         if (typeof index === "number") {
-            this.menus.splice(index, 0, {type: "separator"});
+            this.menus.splice(index, 0, {type: "separator", id});
         } else {
-            this.menus.push({type: "separator"});
+            this.menus.push({type: "separator", id});
         }
     }
 

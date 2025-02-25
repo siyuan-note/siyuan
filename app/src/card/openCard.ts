@@ -342,6 +342,7 @@ export const bindCardEvent = async (options: {
                 }
                 const menu = new Menu();
                 menu.addItem({
+                    id: "setDueTime",
                     icon: "iconClock",
                     label: window.siyuan.languages.setDueTime,
                     click() {
@@ -392,6 +393,7 @@ export const bindCardEvent = async (options: {
                 });
                 if (currentCard.state !== 0) {
                     menu.addItem({
+                        id: "reset",
                         icon: "iconRefresh",
                         label: window.siyuan.languages.reset,
                         click() {
@@ -426,6 +428,7 @@ export const bindCardEvent = async (options: {
                     });
                 }
                 menu.addItem({
+                    id: "removeRiffCard",
                     icon: "iconTrashcan",
                     label: `${window.siyuan.languages.remove} <b>${window.siyuan.languages.riffCard}</b>`,
                     click() {
@@ -448,6 +451,7 @@ export const bindCardEvent = async (options: {
                 });
                 menu.addSeparator();
                 menu.addItem({
+                    id: "forgetCountAndRevisionCountAndCardStatusAndLastReviewTime",
                     iconHTML: "",
                     type: "readonly",
                     label: `<div class="fn__flex">
@@ -484,6 +488,7 @@ export const bindCardEvent = async (options: {
             if (sticktabElement) {
                 const stickMenu = new Menu();
                 stickMenu.addItem({
+                    id: "insertRight",
                     icon: "iconLayoutRight",
                     label: window.siyuan.languages.insertRight,
                     click() {
@@ -508,6 +513,7 @@ export const bindCardEvent = async (options: {
                 });
                 /// #if !BROWSER
                 stickMenu.addItem({
+                    id: "openByNewWindow",
                     icon: "iconOpenWindow",
                     label: window.siyuan.languages.openByNewWindow,
                     click() {
@@ -557,6 +563,7 @@ export const bindCardEvent = async (options: {
                 fetchPost("/api/riff/getRiffDecks", {}, (response) => {
                     window.siyuan.menus.menu.remove();
                     window.siyuan.menus.menu.append(new MenuItem({
+                        id: "all",
                         iconHTML: "",
                         label: window.siyuan.languages.all,
                         click() {
@@ -566,6 +573,7 @@ export const bindCardEvent = async (options: {
                         },
                     }).element);
                     window.siyuan.menus.menu.append(new MenuItem({
+                        id: "fileTree",
                         iconHTML: "",
                         label: window.siyuan.languages.fileTree,
                         click() {

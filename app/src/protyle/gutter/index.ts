@@ -2160,7 +2160,7 @@ export class Gutter {
         });
         const width = firstElement.style.width.endsWith("%") ? parseInt(firstElement.style.width) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
-            id: "widthDrag",
+            id: "width",
             label: window.siyuan.languages.width,
             submenu: styles.concat([{
                 id: "widthDrag",

@@ -84,7 +84,10 @@ export class Menu {
         }
     }
 
-    public addSeparator(index?: number) {
+    public addSeparator(index?: number, id?: string) {
+        if (id) {
+            return this.addItem({id: "separator_" + id, type: "separator", index});
+        }
         return this.addItem({type: "separator", index});
     }
 

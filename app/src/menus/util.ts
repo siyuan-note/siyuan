@@ -14,6 +14,7 @@ import {checkFold} from "../util/noRelyPCFunction";
 
 export const exportAsset = (src: string) => {
     return {
+        id: "export",
         label: window.siyuan.languages.export,
         icon: "iconUpload",
         async click() {

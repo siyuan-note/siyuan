@@ -6,6 +6,7 @@ export const textMenu = (target: Element) => {
         return;
     }
     menu.addItem({
+        id: "copy",
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
@@ -20,6 +21,7 @@ export const textMenu = (target: Element) => {
         }
     });
     menu.addItem({
+        id: "selectAll",
         label: window.siyuan.languages.selectAll,
         icon: "iconSelect",
         click() {

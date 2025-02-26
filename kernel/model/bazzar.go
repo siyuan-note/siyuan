@@ -48,7 +48,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 		err := bazaar.InstallPlugin(plugin.RepoURL, plugin.RepoHash, filepath.Join(util.DataDir, "plugins", plugin.Name), Conf.System.ID)
 		if err != nil {
 			logging.LogErrorf("update plugin [%s] failed: %s", plugin.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), plugin.Name), 5000)
 			return
 		}
 
@@ -60,7 +60,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 		err := bazaar.InstallWidget(widget.RepoURL, widget.RepoHash, filepath.Join(util.DataDir, "widgets", widget.Name), Conf.System.ID)
 		if err != nil {
 			logging.LogErrorf("update widget [%s] failed: %s", widget.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), widget.Name), 5000)
 			return
 		}
 
@@ -72,7 +72,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 		err := bazaar.InstallIcon(icon.RepoURL, icon.RepoHash, filepath.Join(util.IconsPath, icon.Name), Conf.System.ID)
 		if err != nil {
 			logging.LogErrorf("update icon [%s] failed: %s", icon.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), icon.Name), 5000)
 			return
 		}
 
@@ -84,7 +84,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 		err := bazaar.InstallTemplate(template.RepoURL, template.RepoHash, filepath.Join(util.DataDir, "templates", template.Name), Conf.System.ID)
 		if err != nil {
 			logging.LogErrorf("update template [%s] failed: %s", template.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), template.Name), 5000)
 			return
 		}
 
@@ -96,7 +96,7 @@ func BatchUpdateBazaarPackages(frontend string) {
 		err := bazaar.InstallTheme(theme.RepoURL, theme.RepoHash, filepath.Join(util.ThemesPath, theme.Name), Conf.System.ID)
 		if err != nil {
 			logging.LogErrorf("update theme [%s] failed: %s", theme.Name, err)
-			util.PushErrMsg(fmt.Sprintf(Conf.language(238)), 5000)
+			util.PushErrMsg(fmt.Sprintf(Conf.language(238), theme.Name), 5000)
 			return
 		}
 

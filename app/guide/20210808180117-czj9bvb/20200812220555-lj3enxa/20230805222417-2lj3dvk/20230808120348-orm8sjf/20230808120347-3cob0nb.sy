@@ -6,7 +6,7 @@
 		"id": "20230808120347-3cob0nb",
 		"title": "数据同步",
 		"type": "doc",
-		"updated": "20250115162650"
+		"updated": "20250218120940"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230808120347-wx5cr4v",
-				"updated": "20210721103911"
+				"updated": "20250218120940"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20230808120347-q4v034g",
-				"updated": "20210721103854"
+				"updated": "20250218120940"
 			},
 			"Children": [
 				{
@@ -43,23 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " 文件夹数据一致，包括"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "资源文件"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "、模板、"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "挂件"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "以及笔记本数据。"
+					"Data": "​ 文件夹数据一致，包括资源文件、自定义图标、插件、代码片段、模板、挂件和文档数据。"
 				}
 			]
 		},

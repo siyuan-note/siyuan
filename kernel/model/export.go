@@ -269,7 +269,7 @@ func Export2Liandi(id string) (err error) {
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
 	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
-		".md", 4, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
+		".md", 3, 1, 1,
 		"#", "#",
 		"", "",
 		false, nil, true, &map[string]*parse.Tree{})
@@ -1490,11 +1490,6 @@ func ExportNotebookMarkdown(boxID string) (zipPath string) {
 func yfm(docIAL map[string]string) string {
 	// 导出 Markdown 文件时开头附上一些元数据 https://github.com/siyuan-note/siyuan/issues/6880
 
-	if !Conf.Export.MarkdownYFM {
-		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
-		return ""
-	}
-
 	buf := bytes.Buffer{}
 	buf.WriteString("---\n")
 	var title, created, updated, tags string
@@ -1959,7 +1954,10 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, defBlockIDs, singleFile, treeCache)
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
-	exportedMd = yfm(docIAL) + exportedMd
+	if Conf.Export.MarkdownYFM {
+		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
+		exportedMd = yfm(docIAL) + exportedMd
+	}
 	return
 }
 

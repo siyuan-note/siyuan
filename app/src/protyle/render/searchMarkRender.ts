@@ -2,7 +2,7 @@ import {Constants} from "../../constants";
 import {isInEmbedBlock} from "../util/hasClosest";
 
 export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: string | number, cb?: () => void) => {
-    if (!isSupportCSSHL() || !keys || keys.length === 0) {
+    if (!isSupportCSSHL() || ((!keys || keys.length === 0) && !hlId)) {
         return;
     }
     setTimeout(() => {
@@ -36,43 +36,44 @@ export const searchMarkRender = (protyle: IProtyle, keys: string[], hlId?: strin
 
         const text = protyle.wysiwyg.element.textContent;
         const rangeIndexes: { range: Range, startIndex: number, isCurrent: boolean }[] = [];
-
-        keys.forEach(key => {
-            if (!key) {
-                return;
-            }
-            let startIndex = 0;
-            let endIndex = 0;
-            let currentNodeIndex = 0;
-            while ((startIndex = text.indexOf(key, startIndex)) !== -1) {
-                const range = new Range();
-                endIndex = startIndex + key.length;
-                try {
-                    while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
-                        currentNodeIndex++;
-                    }
-                    let currentTextNode = textNodes[currentNodeIndex];
-                    range.setStart(currentTextNode, startIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
-
-                    while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
-                        currentNodeIndex++;
-                    }
-                    currentTextNode = textNodes[currentNodeIndex];
-                    range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
-
-                    let isCurrent = false;
-                    if (!isSetHL && hlBlockElement && hlBlockElement.contains(currentTextNode)) {
-                        isSetHL = true;
-                        isCurrent = true;
-                    }
-
-                    rangeIndexes.push({range, startIndex, isCurrent});
-                } catch (e) {
-                    console.error("searchMarkRender error:", e);
+        if (keys && keys.length > 0) {
+            keys.forEach(key => {
+                if (!key) {
+                    return;
                 }
-                startIndex = endIndex;
-            }
-        });
+                let startIndex = 0;
+                let endIndex = 0;
+                let currentNodeIndex = 0;
+                while ((startIndex = text.indexOf(key, startIndex)) !== -1) {
+                    const range = new Range();
+                    endIndex = startIndex + key.length;
+                    try {
+                        while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] <= startIndex) {
+                            currentNodeIndex++;
+                        }
+                        let currentTextNode = textNodes[currentNodeIndex];
+                        range.setStart(currentTextNode, startIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
+
+                        while (currentNodeIndex < textNodes.length && textNodesSize[currentNodeIndex] < endIndex) {
+                            currentNodeIndex++;
+                        }
+                        currentTextNode = textNodes[currentNodeIndex];
+                        range.setEnd(currentTextNode, endIndex - (currentNodeIndex ? textNodesSize[currentNodeIndex - 1] : 0));
+
+                        let isCurrent = false;
+                        if (!isSetHL && hlBlockElement && hlBlockElement.contains(currentTextNode)) {
+                            isSetHL = true;
+                            isCurrent = true;
+                        }
+
+                        rangeIndexes.push({range, startIndex, isCurrent});
+                    } catch (e) {
+                        console.error("searchMarkRender error:", e);
+                    }
+                    startIndex = endIndex;
+                }
+            });
+        }
 
         // 没有匹配到关键字，但是有高亮块时，需将其添加进去
         if (!isSetHL && hlBlockElement) {

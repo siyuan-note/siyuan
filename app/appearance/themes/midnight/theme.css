@@ -154,11 +154,6 @@
     --b3-graph-hl-point: #f3a92f;
     --b3-graph-hl-line: #4285f4;
 
-    /* 编辑器搜索颜色 */
-    --b3-protyle-search-background: #32593c;
-    --b3-protyle-search-border-color: #486a51;
-    --b3-protyle-search-current-background: #204282;
-
     /* 代码片段背景 */
     --b3-protyle-code-background: rgba(240, 246, 252, .15);
 

@@ -624,7 +624,7 @@ const configIsSame = (config: Config.IUILayoutTabSearchConfig, config2: Config.I
 export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTabSearchConfig[], config: Config.IUILayoutTabSearchConfig) => {
     fetchPost("/api/storage/getCriteria", {}, (response) => {
         let html = "";
-        response.data.forEach((item: Config.IUILayoutTabSearchConfig, index: number) => {
+        response.data.forEach((item: Config.IUILayoutTabSearchConfig) => {
             data.push(item);
             let isSame = false;
             if (configIsSame(item, config)) {

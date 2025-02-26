@@ -148,8 +148,11 @@ export const syncGuide = (app?: App) => {
         return;
     }
     /// #if MOBILE
-    if ((0 === window.siyuan.config.sync.provider && needSubscribe()) ||
-        (0 !== window.siyuan.config.sync.provider && !isPaidUser())) {
+    if (0 === window.siyuan.config.sync.provider) {
+        if (needSubscribe()) {
+            return;
+        }
+    } else if (!isPaidUser()) {
         showMessage(window.siyuan.languages["_kernel"][214]);
         return;
     }

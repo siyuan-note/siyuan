@@ -45,13 +45,19 @@ import (
 var Mode = "prod"
 
 const (
-	Ver       = "3.1.22"
+	Ver       = "3.1.23"
 	IsInsider = false
+
+	// env vars as fallback for commandline parameters
+	SIYUAN_ACCESS_AUTH_CODE = "SIYUAN_ACCESS_AUTH_CODE"
+	SIYUAN_WORKSPACE        = "SIYUAN_WORKSPACE_PATH"
+	SIYUAN_LANG             = "SIYUAN_LANG"
 )
 
 var (
-	RunInContainer             = false // 是否运行在容器中
-	SiyuanAccessAuthCodeBypass = false // 是否跳过空访问授权码检查
+	RunInContainer                = false // 是否运行在容器中
+	SiyuanAccessAuthCodeBypass    = false // 是否跳过空访问授权码检查
+	SiyuanAccessAuthCodeViaEnvvar = ""    // Fallback auth code via env var (SIYUAN_ACCESS_AUTH_CODE)
 )
 
 func initEnvVars() {
@@ -60,6 +66,7 @@ func initEnvVars() {
 	if SiyuanAccessAuthCodeBypass, err = strconv.ParseBool(os.Getenv("SIYUAN_ACCESS_AUTH_CODE_BYPASS")); err != nil {
 		SiyuanAccessAuthCodeBypass = false
 	}
+	SiyuanAccessAuthCodeViaEnvvar = os.Getenv("SIYUAN_ACCESS_AUTH_CODE")
 }
 
 var (
@@ -67,6 +74,19 @@ var (
 	bootDetails  string           // 启动细节描述
 	HttpServing  = false          // 是否 HTTP 伺服已经可用
 )
+
+// If a commandline parameter is empty, fallback to the env var.
+//
+// "empty" means the parameter is not set or set to an empty string.
+// It returns a pointer to string, to be a drop-in replacement for
+// the commandline parameter itself.
+func coalesceToEnvVar(fromCLI *string, envVarName string) *string {
+	if fromCLI == nil || "" == *fromCLI {
+		ret := os.Getenv(envVarName)
+		return &ret
+	}
+	return fromCLI
+}
 
 func Boot() {
 	initEnvVars()
@@ -85,6 +105,13 @@ func Boot() {
 	mode := flag.String("mode", "prod", "dev/prod")
 	flag.Parse()
 
+	// Fallback to env vars if commandline args are not set
+	// valid only for CLI args that default to "", as the
+	// others have explicit (sane) defaults
+	workspacePath = coalesceToEnvVar(workspacePath, SIYUAN_WORKSPACE)
+	accessAuthCode = coalesceToEnvVar(accessAuthCode, SIYUAN_ACCESS_AUTH_CODE)
+	lang = coalesceToEnvVar(lang, SIYUAN_LANG)
+
 	if "" != *wdPath {
 		WorkingDir = *wdPath
 	}
@@ -100,7 +127,7 @@ func Boot() {
 	Container = ContainerStd
 	if RunInContainer {
 		Container = ContainerDocker
-		if "" == AccessAuthCode {
+		if "" == AccessAuthCode { // Still empty?
 			interruptBoot := true
 
 			// Set the env `SIYUAN_ACCESS_AUTH_CODE_BYPASS=true` to skip checking empty access auth code https://github.com/siyuan-note/siyuan/issues/9709
@@ -111,7 +138,8 @@ func Boot() {
 
 			if interruptBoot {
 				// The access authorization code command line parameter must be set when deploying via Docker https://github.com/siyuan-note/siyuan/issues/9328
-				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker")
+				fmt.Printf("the access authorization code command line parameter (--accessAuthCode) must be set when deploying via Docker\n")
+				fmt.Printf("or you can set the SIYUAN_ACCESS_AUTH_CODE env var")
 				os.Exit(1)
 			}
 		}

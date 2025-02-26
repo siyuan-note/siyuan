@@ -1,9 +1,9 @@
-export const genIconHTML = (element?: false|HTMLElement) => {
+export const genIconHTML = (element?: false | HTMLElement) => {
     let enable = true;
     if (element) {
-        const readonly =  element.getAttribute("contenteditable");
+        const readonly = element.getAttribute("data-readonly");
         if (typeof readonly === "string") {
-            enable = element.getAttribute("contenteditable") === "true";
+            enable = readonly === "false";
         } else {
             return '<div class="protyle-icons"></div>';
         }
@@ -14,7 +14,7 @@ export const genIconHTML = (element?: false|HTMLElement) => {
 </div>`;
 };
 
-export const processClonePHElement = (item:Element) => {
+export const processClonePHElement = (item: Element) => {
     if (item.getAttribute("data-type") === "NodeHTMLBlock") {
         const phElement = item.querySelector("protyle-html");
         phElement.setAttribute("data-content", Lute.UnEscapeHTMLStr(phElement.getAttribute("data-content")));

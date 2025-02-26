@@ -17,7 +17,7 @@ import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
 import {Constants} from "../../constants";
-import {copyPlainText, openByMobile, readText, setStorageVal} from "../util/compatibility";
+import {copyPlainText, openByMobile, readClipboard, setStorageVal} from "../util/compatibility";
 import {upDownHint} from "../../util/upDownHint";
 import {highlightRender} from "../render/highlightRender";
 import {getContenteditableElement, hasNextSibling, hasPreviousSibling} from "../wysiwyg/getBlock";
@@ -43,7 +43,7 @@ import {mathRender} from "../render/mathRender";
 import {linkMenu} from "../../menus/protyle";
 import {addScript} from "../util/addScript";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {pasteAsPlainText, pasteEscaped, pasteText} from "../util/paste";
+import {paste, pasteAsPlainText, pasteEscaped} from "../util/paste";
 import {escapeHtml} from "../../util/escape";
 import {resizeSide} from "../../history/resizeSide";
 
@@ -462,6 +462,11 @@ export class Toolbar {
                             item.textContent !== Constants.ZWSP ||
                             // tag 会有零宽空格 https://github.com/siyuan-note/siyuan/issues/12922
                             (item.textContent === Constants.ZWSP && !rangeTypes.includes("img"))) {
+                            // ZWSP spin 后会在行内元素外 https://github.com/siyuan-note/siyuan/issues/13871
+                            if (item.textContent.startsWith(Constants.ZWSP)) {
+                                newNodes.push(document.createTextNode(Constants.ZWSP));
+                                item.textContent = item.textContent.substring(1);
+                            }
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
                             inlineElement.textContent = item.textContent;
@@ -485,6 +490,11 @@ export class Toolbar {
                         }
                         if (!types.includes("img")) {
                             types.push(type);
+                        }
+                        // 以下行内元素需用 ZWSP 开头 https://github.com/siyuan-note/siyuan/issues/13871
+                        if ((types.includes("code") || types.includes("tag") || types.includes("kbd")) &&
+                            !item.textContent.startsWith(Constants.ZWSP)) {
+                            item.insertAdjacentText("afterbegin", Constants.ZWSP);
                         }
                         // 上标和下标不能同时存在 https://github.com/siyuan-note/insider/issues/1049
                         if (type === "sub" && types.includes("sup")) {
@@ -593,7 +603,15 @@ export class Toolbar {
             this.range.setEnd(startContainer.lastChild, startContainer.lastChild.textContent.length);
             afterElement.append(this.range.extractContents());
             startContainer.after(afterElement);
-            this.range.setStartBefore(afterElement);
+            // https://github.com/siyuan-note/siyuan/issues/13871#issuecomment-2662855319
+            const firstTypes = startContainer.getAttribute("data-type").split(" ");
+            if (firstTypes.includes("code") || firstTypes.includes("tag") || firstTypes.includes("kbd")) {
+                afterElement.insertAdjacentText("beforebegin", Constants.ZWSP + Constants.ZWSP);
+                afterElement.insertAdjacentText("afterbegin", Constants.ZWSP);
+                this.range.setStart(afterElement.previousSibling, 1);
+            } else {
+                this.range.setStartBefore(afterElement);
+            }
             this.range.collapse(true);
         }
         for (let i = 0; i < newNodes.length; i++) {
@@ -1589,8 +1607,8 @@ ${item.name}
                     document.execCommand("paste");
                 } else {
                     try {
-                        const clipText = await readText();
-                        pasteText(protyle, clipText, nodeElement);
+                        const text = await readClipboard();
+                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
                     } catch (e) {
                         console.log(e);
                     }

@@ -1,5 +1,4 @@
 import {isMobile} from "../util/functions";
-import {Constants} from "../constants";
 
 export const showTooltip = (message: string, target: Element, tooltipClass?: string) => {
     if (isMobile()) {

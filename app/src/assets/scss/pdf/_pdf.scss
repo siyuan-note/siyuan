@@ -38,7 +38,7 @@
   }
 
   &__util {
-    z-index: 4;
+    z-index: 9999; // https://github.com/siyuan-note/siyuan/issues/13928
     padding: 8px;
 
     &--hide .pdf__util__hide {

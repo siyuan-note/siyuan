@@ -56,7 +56,7 @@ export class Scroll {
             }
         });
         this.parentElement.addEventListener("mousewheel", (event: WheelEvent) => {
-            if (event.deltaY !== 0) {
+            if (event.deltaY !== 0 && protyle.scroll.lastScrollTop !== -1) {
                 protyle.contentElement.scrollTop += event.deltaY;
             }
         }, {passive: true});
@@ -67,6 +67,7 @@ export class Scroll {
             return;
         }
         protyle.wysiwyg.element.setAttribute("data-top", protyle.wysiwyg.element.scrollTop.toString());
+        protyle.contentElement.style.overflow = "hidden";
         fetchPost("/api/filetree/getDoc", {
             index: parseInt(this.inputElement.value),
             id: protyle.block.parentID,
@@ -78,6 +79,9 @@ export class Scroll {
                 protyle,
                 action: [Constants.CB_GET_FOCUSFIRST, Constants.CB_GET_UNCHANGEID],
                 afterCB: () => {
+                    setTimeout(() => {
+                        protyle.contentElement.style.overflow = "";
+                    }, Constants.TIMEOUT_INPUT);    // 需和 onGet 中的 preventScroll 保持一致
                     showTooltip(this.element.getAttribute("aria-label"), this.element);
                 }
             });

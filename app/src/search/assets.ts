@@ -1,14 +1,12 @@
 import {Constants} from "../constants";
 import {fetchPost} from "../util/fetch";
-import {escapeAriaLabel, escapeHtml} from "../util/escape";
+import {escapeAriaLabel} from "../util/escape";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
 import {getQueryTip} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
-import {Menu} from "../plugin/Menu";
-import {hasClosestByClassName} from "../protyle/util/hasClosest";
 import {addClearButton} from "../util/addClearButton";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
@@ -70,7 +68,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
 <div class="search__layout${localSearch.layout === 1 ? " search__layout--row" : ""}">
     <div id="searchAssetList" class="fn__flex-1 search__list b3-list b3-list--background"></div>
     <div class="search__drag"></div>
-    <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px"></div>
+    <div id="searchAssetPreview" class="fn__flex-1 search__preview b3-typography" style="padding: 8px;box-sizing: border-box;"></div>
 </div>
 <div class="search__tip${isStick ? " fn__none" : ""}">
     <kbd>↑/↓/PageUp/PageDown</kbd> ${window.siyuan.languages.searchTip1}
@@ -124,15 +122,14 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     const dragElement = element.querySelector(".search__drag");
     dragElement.addEventListener("mousedown", (event: MouseEvent) => {
         const documentSelf = document;
-        const nextElement = dragElement.nextElementSibling as HTMLElement;
         const previousElement = dragElement.previousElementSibling as HTMLElement;
         const direction = localSearch.layout === 1 ? "lr" : "tb";
         const x = event[direction === "lr" ? "clientX" : "clientY"];
-        const previousSize = direction === "lr" ? previousElement.clientWidth : previousElement.clientHeight;
-        const nextSize = direction === "lr" ? nextElement.clientWidth : nextElement.clientHeight;
+        const previousSize = direction === "lr" ? previousElement.offsetWidth : previousElement.offsetHeight;
+        const nextSize = direction === "lr" ? previewElement.offsetWidth : previewElement.offsetHeight;
 
-        nextElement.classList.remove("fn__flex-1");
-        nextElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
+        previewElement.classList.remove("fn__flex-1");
+        previewElement.style[direction === "lr" ? "width" : "height"] = nextSize + "px";
         element.style.userSelect = "none";
         documentSelf.onmousemove = (moveEvent: MouseEvent) => {
             moveEvent.preventDefault();
@@ -142,7 +139,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             if (previousNowSize < 120 || nextNowSize < 120) {
                 return;
             }
-            nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
+            previewElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";
         };
 
         documentSelf.onmouseup = () => {
@@ -152,9 +149,16 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             documentSelf.ondragstart = null;
             documentSelf.onselectstart = null;
             documentSelf.onselect = null;
-            window.siyuan.storage[Constants.LOCAL_SEARCHASSET][direction === "lr" ? "col" : "row"] = nextElement[direction === "lr" ? "clientWidth" : "clientHeight"] + "px";
+            window.siyuan.storage[Constants.LOCAL_SEARCHASSET][direction === "lr" ? "col" : "row"] = previewElement[direction === "lr" ? "offsetWidth" : "offsetHeight"] + "px";
             setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
         };
+    });
+    dragElement.addEventListener("dblclick", () => {
+        previewElement.style[localSearch.layout === 1 ? "width" : "height"] = "";
+        previewElement.classList.add("fn__flex-1");
+        const direction = localSearch.layout === 1 ? "lr" : "tb";
+        window.siyuan.storage[Constants.LOCAL_SEARCHASSET][direction === "lr" ? "col" : "row"] = "";
+        setStorageVal(Constants.LOCAL_SEARCHASSET, window.siyuan.storage[Constants.LOCAL_SEARCHASSET]);
     });
     /// #endif
 };

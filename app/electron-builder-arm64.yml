@@ -67,6 +67,6 @@ extraResources:
   - from: "appearance/themes/daylight"
     to: "appearance/themes/daylight"
     filter: "!**/{.DS_Store,custom.css}"
-  - from: "src/assets/fonts"
+  - from: "appearance/fonts"
     to: "appearance/fonts"
     filter: "!**/{.DS_Store}"

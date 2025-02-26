@@ -118,7 +118,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 	}
 
 	var toRemoves []string
-	for defID, _ := range invalidDefIDs {
+	for defID := range invalidDefIDs {
 		if _, ok := blockMap[defID]; ok {
 			toRemoves = append(toRemoves, defID)
 		}
@@ -148,7 +148,7 @@ func ListInvalidBlockRefs(page, pageSize int) (ret []*Block, matchedBlockCount, 
 		delete(refBlockMap, toRemove)
 	}
 
-	for refID, _ := range refBlockMap {
+	for refID := range refBlockMap {
 		invalidBlockIDs = append(invalidBlockIDs, refID)
 	}
 	invalidBlockIDs = gulu.Str.RemoveDuplicatedElem(invalidBlockIDs)
@@ -588,7 +588,17 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					}
 
 					if replaceTextNode(n, method, keyword, replacement, r, luteEngine) {
-						unlinks = append(unlinks, n)
+						if nil != n.Parent && ast.NodeBackslash == n.Parent.Type {
+							unlinks = append(unlinks, n.Parent)
+
+							prev, next := n.Parent.Previous, n.Parent.Next
+							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
+								prev.Tokens = append(prev.Tokens, next.Tokens...)
+								unlinks = append(unlinks, next)
+							}
+						} else {
+							unlinks = append(unlinks, n)
+						}
 					}
 				case ast.NodeLinkDest:
 					if !replaceTypes["imgSrc"] {
@@ -596,6 +606,9 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					}
 
 					replaceNodeTokens(n, method, keyword, strings.TrimSpace(replacement), r)
+					if 1 > len(n.Tokens) {
+						unlinks = append(unlinks, n.Parent)
+					}
 				case ast.NodeLinkText:
 					if !replaceTypes["imgText"] {
 						return ast.WalkContinue
@@ -681,6 +694,15 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {
 									n.TextMarkAHref = r.ReplaceAllString(n.TextMarkAHref, strings.TrimSpace(replacement))
+								}
+							}
+
+							if "" == n.TextMarkAHref {
+								if "" == n.TextMarkTextContent {
+									unlinks = append(unlinks, n)
+								} else {
+									n.Type = ast.NodeText
+									n.Tokens = []byte(n.TextMarkTextContent)
 								}
 							}
 						}

@@ -66,6 +66,11 @@ export class Title {
             if (event.isComposing) {
                 return;
             }
+            if (this.editElement.textContent === "") {
+                this.editElement.querySelectorAll("br").forEach(item => {
+                    item.remove();
+                });
+            }
             this.rename(protyle);
         });
         this.editElement.addEventListener("compositionend", () => {
@@ -230,7 +235,17 @@ export class Title {
                 accelerator: "⌘V",
                 click: async () => {
                     focusByRange(getEditorRange(this.editElement));
-                    document.execCommand("paste");
+                    if (document.queryCommandSupported("paste")) {
+                        document.execCommand("paste");
+                    } else {
+                        try {
+                            const text = await readText();
+                            document.execCommand("insertText", false, replaceFileName(text));
+                            this.rename(protyle);
+                        } catch (e) {
+                            console.log(e);
+                        }
+                    }
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({

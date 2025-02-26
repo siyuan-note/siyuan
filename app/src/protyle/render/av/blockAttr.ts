@@ -107,12 +107,12 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "url":
             html = `<input value="${value.url.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a href="${value.url.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
+<a ${value.url.content ? `href="${value.url.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconLink"></use></svg></a>`;
             break;
         case "phone":
             html = `<input value="${value.phone.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a href="tel:${value.phone.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
+<a ${value.phone.content ? `href="tel:${value.phone.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconPhone"></use></svg></a>`;
             break;
         case "checkbox":
             html = `<svg class="av__checkbox"><use xlink:href="#icon${value.checkbox.checked ? "Check" : "Uncheck"}"></use></svg>`;
@@ -123,19 +123,21 @@ export const genAVValueHTML = (value: IAVCellValue) => {
         case "email":
             html = `<input value="${value.email.content}" class="b3-text-field b3-text-field--text fn__flex-1" placeholder="${window.siyuan.languages.empty}">
 <span class="fn__space"></span>
-<a href="mailto:${value.email.content}" target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
+<a ${value.email.content ? `href="mailto:${value.email.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
             value?.relation?.contents?.forEach((item) => {
-                if (item) {
-                    const rollupText = genAVRollupHTML(item);
-                    if (rollupText) {
-                        html += rollupText + ",&nbsp;";
+                if (item && item.block) {
+                    if (item?.isDetached) {
+                        html += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    } else {
+                        // data-block-id 用于更新 emoji
+                        html += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     }
                 }
             });
-            if (html && html.endsWith(",&nbsp;")) {
-                html = html.substring(0, html.length - 7);
+            if (html && html.endsWith(", ")) {
+                html = html.substring(0, html.length - 2);
             }
             break;
         case "rollup":
@@ -394,7 +396,12 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                         }
                     };
                     if (type !== "text") {
-                        item.parentElement.querySelector("a").setAttribute("href", (type === "url" ? "" : (type === "email" ? "mailto:" : "tel:")) + item.value);
+                        const linkElement = item.parentElement.querySelector("a");
+                        if (item.value) {
+                            linkElement.setAttribute("href", (type === "url" ? "" : (type === "email" ? "mailto:" : "tel:")) + item.value);
+                        } else {
+                            linkElement.removeAttribute("href");
+                        }
                     }
                 } else if (type === "number") {
                     if ("undefined" === item.value || !item.value) {

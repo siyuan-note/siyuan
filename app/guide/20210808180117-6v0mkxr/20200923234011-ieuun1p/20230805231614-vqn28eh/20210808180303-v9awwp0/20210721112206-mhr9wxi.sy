@@ -6,7 +6,7 @@
 		"id": "20210721112206-mhr9wxi",
 		"title": "Data sync",
 		"type": "doc",
-		"updated": "20250115162705"
+		"updated": "20250218121000"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210721112403-8no39l4",
-				"updated": "20210721112403"
+				"updated": "20250218121000"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210721112403-0ft3r91",
-				"updated": "20210721113101"
+				"updated": "20250218121000"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": " folder data consistent on multiple devices, including asset files, templates, widgets, and notebook data."
+					"Data": "​ folder data consistent on multiple devices, includes assets, custom icons, plugins, code snippets, templates, widgets, and document data."
 				}
 			]
 		},

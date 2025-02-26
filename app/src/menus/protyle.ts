@@ -24,11 +24,17 @@ import {transaction, updateTransaction} from "../protyle/wysiwyg/transaction";
 import {openMenu} from "./commonMenuItem";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {Constants} from "../constants";
-import {copyPlainText, readText, setStorageVal, updateHotkeyTip, writeText} from "../protyle/util/compatibility";
+import {
+    copyPlainText,
+    readClipboard,
+    setStorageVal,
+    updateHotkeyTip,
+    writeText
+} from "../protyle/util/compatibility";
 import {preventScroll} from "../protyle/scroll/preventScroll";
 import {onGet} from "../protyle/util/onGet";
 import {getAllModels} from "../layout/getAll";
-import {pasteAsPlainText, pasteEscaped, pasteText} from "../protyle/util/paste";
+import {paste, pasteAsPlainText, pasteEscaped} from "../protyle/util/paste";
 /// #if !MOBILE
 import {openFileById, updateBacklinkGraph} from "../editor/util";
 import {openGlobalSearch} from "../search/util";
@@ -784,8 +790,8 @@ export const contentMenu = (protyle: IProtyle, nodeElement: Element) => {
                     document.execCommand("paste");
                 } else {
                     try {
-                        const clipText = await readText();
-                        pasteText(protyle, clipText, nodeElement);
+                        const text = await readClipboard();
+                        paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
                     } catch (e) {
                         console.log(e);
                     }

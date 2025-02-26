@@ -291,11 +291,15 @@
       font-size: 1em;
       line-height: 1.625;
       height: auto;
+      margin: 0 5px 0 -5px;
+      vertical-align: top;
 
       img {
         height: calc(1.625em - 8px);
         font-size: 1em;
         width: calc(1.625em - 8px);
+        float: left;
+        margin: 4px 0;
       }
     }
 
@@ -367,12 +371,12 @@
       }
 
       img.av__cellheadericon {
-        height: calc(1.625em - 10px);
+        height: calc(1.625em - 8px);
       }
 
       .av__cellheadericon {
         height: 1.625em;
-        width: calc(1.625em - 10px);
+        width: calc(1.625em - 8px);
         color: var(--b3-theme-on-surface);
         margin: 0 5px 0 0;
         flex-shrink: 0;

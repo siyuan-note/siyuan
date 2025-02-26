@@ -37,6 +37,12 @@
   }
 }
 
+.clonedTooltip {
+  animation: unset;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .b3-tooltips {
   position: relative;
   cursor: pointer;

@@ -19,7 +19,7 @@ export class Scroll {
         this.parentElement.innerHTML = `<div class="protyle-scroll__up ariaLabel" data-position="right4top" aria-label="${updateHotkeyTip("⌘Home")}">
     <svg><use xlink:href="#iconUp"></use></svg>
 </div>
-<div class="fn__none protyle-scroll__bar ariaLabel" data-position="right18bottom" aria-label="Blocks 1/1">
+<div class="fn__none protyle-scroll__bar ariaLabel" data-position="right20bottom" aria-label="Blocks 1/1">
     <input class="b3-slider" type="range" max="1" min="1" step="1" value="1" />
 </div>
 <div class="protyle-scroll__down ariaLabel" data-position="right4bottom" aria-label="${updateHotkeyTip("⌘End")}">

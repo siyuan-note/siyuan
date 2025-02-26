@@ -23,5 +23,6 @@
     <div class="b3-menu__items"></div>
 </div>
 <div id="message" class="b3-snackbars"></div>
+<div id="tooltip" class="tooltip fn__none"></div>
 </body>
 </html>

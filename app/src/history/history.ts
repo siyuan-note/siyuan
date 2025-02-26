@@ -636,10 +636,10 @@ const bindEvent = (app: App, element: Element, dialog?: Dialog) => {
                                     ariaLabel = window.siyuan.languages.historyOutline;
                                 }
                                 html += `<li data-notebook-id="${docItem.notebook}" data-created="${created}" data-type="${typeElement.value === "2" ? "assets" : "doc"}" data-path="${docItem.path}" class="b3-list-item b3-list-item--hide-action" style="padding-left: 22px">
-    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6bottom" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
+    <span class="${opElement.value === "all" ? "" : "fn__none"}${chipClass}ariaLabel" data-position="6south" aria-label="${ariaLabel}">${docItem.op.substring(0, 1).toUpperCase()}</span>
     <span class="b3-list-item__text" title="${escapeAttr(docItem.title)}">${escapeHtml(docItem.title)}</span>
     <span class="fn__space"></span>
-    <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6bottom" aria-label="${window.siyuan.languages.rollback}">
+    <span class="b3-list-item__action ariaLabel" data-type="rollback" data-position="6south" aria-label="${window.siyuan.languages.rollback}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
 </li>`;

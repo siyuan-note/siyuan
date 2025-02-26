@@ -24,8 +24,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByAttribute(event.target, "data-type", "tab-header") ||
             hasClosestByAttribute(event.target, "data-type", "inline-memo") ||
             hasClosestByClassName(event.target, "av__calc--ashow") ||
-            hasClosestByClassName(event.target, "av__cell") ||
-            hasClosestByAttribute(event.target, "data-type", "setRelationCell");
+            hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tooltipClass = "";
             let tip = aElement.getAttribute("aria-label") || "";

@@ -132,7 +132,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
                 if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
                     element.classList.add("fn__none");
                 }
-                document.querySelector("#" + (element.getAttribute("data-position") === "right" ? "barPlugins" : "drag")).before(element);
+                document.querySelector("#" + (element.getAttribute("data-location") === "right" ? "barPlugins" : "drag")).before(element);
             }
         });
     }
@@ -140,7 +140,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     resizeTopBar();
     plugin.statusBarIcons.forEach(element => {
         const statusElement = document.getElementById("status");
-        if (element.getAttribute("data-position") === "right") {
+        if (element.getAttribute("data-location") === "right") {
             statusElement.insertAdjacentElement("beforeend", element);
         } else {
             statusElement.insertAdjacentElement("afterbegin", element);

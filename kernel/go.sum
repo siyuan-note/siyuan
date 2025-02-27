@@ -12,8 +12,8 @@ github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7 h1:MafIFwSS0x6A4
 github.com/88250/go-humanize v0.0.0-20240424102817-4f78fac47ea7/go.mod h1:HrKCCTin3YNDSLBD02K0AOljjV6eNwc3/zyEI+xyV1I=
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950 h1:Pa5hMiBceTVVqrYaDlLio2QSKbXMUmAZPbzCwT5eNCw=
 github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950/go.mod h1:NyWgC/yNuGj7Q9rpYnZvas74GogHl5/Z4A/KQRfk6bU=
-github.com/88250/gulu v1.2.3-0.20241212012748-c4dc08fe45ec h1:YsUSpByWJP+x8C+IT+C3QlFvU7ZQ6+E95SFd9+zy6QU=
-github.com/88250/gulu v1.2.3-0.20241212012748-c4dc08fe45ec/go.mod h1:c8uVw25vW2W4dhJ/j4iYsX5H1hc19spim266jO5x2hU=
+github.com/88250/gulu v1.2.3-0.20250227144607-7f4570b0d689 h1:39y5g7vnFAIcXhTN3IXPk7h2xBhC4a9hBTykDhHJqRY=
+github.com/88250/gulu v1.2.3-0.20250227144607-7f4570b0d689/go.mod h1:c8uVw25vW2W4dhJ/j4iYsX5H1hc19spim266jO5x2hU=
 github.com/88250/lute v1.7.7-0.20250224132053-4107c2bfa949 h1:uij2PUDgDSW0LJQnnCeQi2wvkn0DW2luW60H4qL88gs=
 github.com/88250/lute v1.7.7-0.20250224132053-4107c2bfa949/go.mod h1:WYyUw//5yVw9BJnoVjx7rI/3szsISxNZCYGOqTIrV0o=
 github.com/88250/pdfcpu v0.3.14-0.20241201033812-5a93b7586a01 h1:AcFe63RXjIh1XtX/dc4Es3U8bYKjlEkvavHd1nFBOHM=
@@ -379,8 +379,8 @@ github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4 h1:kJaw5L/e
 github.com/siyuan-note/encryption v0.0.0-20231219001248-1e028a4d13b4/go.mod h1:UYcCCY+0wh+GmUoDOaO63j1sV5lgy7laLAk1XhEiUis=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97/go.mod h1:1/nGgthl89FPA7GzAcEWKl6zRRnfgyTjzLZj9bW7kuw=
-github.com/siyuan-note/filelock v0.0.0-20250224041245-88354153eb6d h1:kChx/kKXM2smViMSp4PZVh2IOUbHWpErNgVs6fJjgXI=
-github.com/siyuan-note/filelock v0.0.0-20250224041245-88354153eb6d/go.mod h1:17uV2yLrvX+6DsqhIL1fFQpoP/IAdIEFbAu1LXRL4Xk=
+github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57 h1:gRFbRUgTFP+XcV6vfiblGB9oHI/UwzD7cSUNwE1TrpE=
+github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57/go.mod h1:oJhBKYrxS8WRsTZhOafG3FfGgCSOyxFzboBvQxcDX9s=
 github.com/siyuan-note/httpclient v0.0.0-20250224040600-375a71852c6d h1:OEcx0wRSoblqdHjSwpAM1m3DUoLCgrjcHCDJ0zZRG1Q=
 github.com/siyuan-note/httpclient v0.0.0-20250224040600-375a71852c6d/go.mod h1:j4Zgc9XK2hJc9Gbas3uQ6G6/URs0MHspF/a0hXA1Srw=
 github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742 h1:PPiRvQDZ6bhXqvQRkOLNyNICZ/gvDuDide6gswoGsAg=
@@ -457,8 +457,8 @@ golang.org/x/crypto v0.17.0/go.mod h1:gCAAfMLgwOJRpTjQ2zCCt2OcSfYMTeZVSRtQlPC7Nq
 golang.org/x/crypto v0.19.0/go.mod h1:Iy9bg/ha4yyC70EfRS8jz+B6ybOBKMaSxLj6P6oBDfU=
 golang.org/x/crypto v0.23.0/go.mod h1:CKFgDieR+mRhux2Lsu27y0fO304Db0wZe70UKqHu0v8=
 golang.org/x/crypto v0.31.0/go.mod h1:kDsLvtWBEx7MV9tJOj9bnXsPbxwJQ6csT/x4KIN4Ssk=
-golang.org/x/crypto v0.34.0 h1:+/C6tk6rf/+t5DhUketUbD1aNGqiSX3j15Z6xuIDlBA=
-golang.org/x/crypto v0.34.0/go.mod h1:dy7dXNW32cAb/6/PRuTNsix8T+vJAqvuIy5Bli/x0YQ=
+golang.org/x/crypto v0.35.0 h1:b15kiHdrGCHrP6LvwaQ3c03kgNhhiMgvlhxHQhmg2Xs=
+golang.org/x/crypto v0.35.0/go.mod h1:dy7dXNW32cAb/6/PRuTNsix8T+vJAqvuIy5Bli/x0YQ=
 golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa h1:t2QcU6V556bFjYgu4L6C+6VrCPyJZ+eyRsABUPs1mz4=
 golang.org/x/exp v0.0.0-20250218142911-aa4b98e5adaa/go.mod h1:BHOTPb3L19zxehTsLoJXVaTktb06DFgmdW6Wb9s8jqk=
 golang.org/x/image v0.0.0-20210628002857-a66eb6448b8d/go.mod h1:023OzeP/+EPmXeapQh35lcL3II3LrY8Ic+EFFKVhULM=

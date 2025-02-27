@@ -24,7 +24,10 @@ export class Menu {
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");
                     } else {
-                        this.remove();
+                        this.element.style.transform = "";
+                        setTimeout(() => {
+                            this.remove();
+                        }, Constants.TIMEOUT_DBLCLICK);
                     }
                     return;
                 }

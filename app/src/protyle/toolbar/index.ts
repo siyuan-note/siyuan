@@ -229,7 +229,7 @@ export class Toolbar {
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
-        if (!nodeElement) {
+        if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
         const endElement = hasClosestBlock(this.range.endContainer);

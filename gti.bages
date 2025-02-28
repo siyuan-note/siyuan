@@ -1,0 +1,4 @@
+void main(){
+pritn("Hello World"),
+print("shakib"),
+}

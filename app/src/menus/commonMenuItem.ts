@@ -23,6 +23,7 @@ import {renderAVAttribute} from "../protyle/render/av/blockAttr";
 import {openAssetNewWindow} from "../window/openNewWindow";
 import {escapeHtml} from "../util/escape";
 import {copyTextByType} from "../protyle/toolbar/util";
+import {hideElements} from "../protyle/ui/hideElements";
 
 const bindAttrInput = (inputElement: HTMLInputElement, id: string) => {
     inputElement.addEventListener("change", () => {
@@ -244,6 +245,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
 </div>`,
         destroyCallback() {
             focusByRange(range);
+            hideElements(["select"], protyle)
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);

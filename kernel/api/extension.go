@@ -238,6 +238,26 @@ func extensionCopy(c *gin.Context) {
 				if "" != assetPath {
 					dest.Tokens = []byte(assetPath)
 				}
+
+				// 检测 alt 和 title 格式，如果不是文本的话转换为文本 https://github.com/siyuan-note/siyuan/issues/14233
+				if linkText := n.ChildByType(ast.NodeLinkText); nil != linkText {
+					if inlineTree := parse.Inline("", linkText.Tokens, luteEngine.ParseOptions); nil != inlineTree && nil != inlineTree.Root && nil != inlineTree.Root.FirstChild {
+						if fc := inlineTree.Root.FirstChild.FirstChild; nil != fc {
+							if ast.NodeText != fc.Type {
+								linkText.Tokens = []byte(fc.Text())
+							}
+						}
+					}
+				}
+				if title := n.ChildByType(ast.NodeLinkTitle); nil != title {
+					if inlineTree := parse.Inline("", title.Tokens, luteEngine.ParseOptions); nil != inlineTree && nil != inlineTree.Root && nil != inlineTree.Root.FirstChild {
+						if fc := inlineTree.Root.FirstChild.FirstChild; nil != fc {
+							if ast.NodeText != fc.Type {
+								title.Tokens = []byte(fc.Text())
+							}
+						}
+					}
+				}
 			}
 		}
 		return ast.WalkContinue

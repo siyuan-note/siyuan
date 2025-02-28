@@ -50,23 +50,24 @@ export const readClipboard = async () => {
     } else if (isInHarmony()) {
         text.textPlain = window.JSHarmony.readClipboard();
     }
-    if (typeof navigator.clipboard === "undefined" || !navigator.clipboard.read) {
-        return text;
-    }
-    const clipboardContents = await navigator.clipboard.read();
-    for (const item of clipboardContents) {
-        if (item.types.includes("text/html")) {
-            const blob = await item.getType("text/html");
-            text.textHTML = await blob.text();
+
+    try {
+        const clipboardContents = await navigator.clipboard.read();
+        for (const item of clipboardContents) {
+            if (item.types.includes("text/html")) {
+                const blob = await item.getType("text/html");
+                text.textHTML = await blob.text();
+            }
+            if (item.types.includes("text/plain")) {
+                const blob = await item.getType("text/plain");
+                text.textPlain = await blob.text();
+            }
+            if (item.types.includes("image/png")) {
+                const blob = await item.getType("image/png");
+                text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
+            }
         }
-        if (item.types.includes("text/plain")) {
-            const blob = await item.getType("text/plain");
-            text.textPlain = await blob.text();
-        }
-        if (item.types.includes("image/png")) {
-            const blob = await item.getType("image/png");
-            text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
-        }
+    } catch (e) {
     }
     return text;
 };

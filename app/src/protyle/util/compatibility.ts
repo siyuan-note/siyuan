@@ -45,12 +45,6 @@ export const readClipboard = async () => {
         textPlain?: string,
         files?: File[],
     } = {textPlain: "", textHTML: ""};
-    if (isInAndroid()) {
-        text.textPlain = window.JSAndroid.readClipboard();
-    } else if (isInHarmony()) {
-        text.textPlain = window.JSHarmony.readClipboard();
-    }
-
     try {
         const clipboardContents = await navigator.clipboard.read();
         for (const item of clipboardContents) {
@@ -67,9 +61,17 @@ export const readClipboard = async () => {
                 text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
             }
         }
+        return text;
     } catch (e) {
+        if (isInAndroid()) {
+            text.textPlain = window.JSAndroid.readClipboard();
+            text.textHTML = window.JSAndroid.readHTMLClipboard();
+        } else if (isInHarmony()) {
+            text.textPlain = window.JSHarmony.readClipboard();
+            text.textHTML = window.JSHarmony.readHTMLClipboard();
+        }
+        return text;
     }
-    return text;
 };
 
 export const writeText = (text: string) => {

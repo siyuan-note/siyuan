@@ -191,6 +191,7 @@ interface Window {
         writeHTMLClipboard(text: string, html: string): void
         writeImageClipboard(uri: string): void
         readClipboard(): string
+        readHTMLClipboard(): string
         getBlockURL(): string
     }
     JSHarmony: {
@@ -199,6 +200,7 @@ interface Window {
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
         readClipboard(): string
+        readHTMLClipboard(): string
         returnDesktop(): void
     }
 

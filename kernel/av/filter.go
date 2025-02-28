@@ -644,10 +644,10 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 					((valueTime.After(otherValueStart2) || valueTime.Equal(otherValueStart2)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2)))
 			} else if RelativeDateDirectionAfter == direction2 {
 				var leftStart, rightEnd time.Time
-				if otherValueEnd.Before(otherValueEnd2) {
-					leftStart = otherValueEnd
+				if otherValueStart.Before(otherValueStart2) {
+					leftStart = otherValueStart
 				} else {
-					leftStart = otherValueEnd2
+					leftStart = otherValueStart2
 				}
 				if otherValueEnd.After(otherValueEnd2) {
 					rightEnd = otherValueEnd

@@ -245,7 +245,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 	}
 
-	destPath, parentHPath, err = getRollbackDockPath(boxID, workingDoc)
+	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath, workingDoc)
 	if err != nil {
 		return
 	}
@@ -338,12 +338,15 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	return nil
 }
 
-func getRollbackDockPath(boxID string, workingDoc *treenode.BlockTree) (destPath, parentHPath string, err error) {
-	var parentID, baseName string
+func getRollbackDockPath(boxID, historyPath string, workingDoc *treenode.BlockTree) (destPath, parentHPath string, err error) {
+	var parentID string
+	baseName := filepath.Base(historyPath)
 	var parentWorkingDoc *treenode.BlockTree
 	if nil != workingDoc {
-		baseName = path.Base(workingDoc.Path)
 		parentID = path.Base(path.Dir(workingDoc.Path))
+		parentWorkingDoc = treenode.GetBlockTree(parentID)
+	} else {
+		parentID = filepath.Base(filepath.Dir(historyPath))
 		parentWorkingDoc = treenode.GetBlockTree(parentID)
 	}
 

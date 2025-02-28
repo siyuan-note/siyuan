@@ -22,17 +22,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
 
     let left;
     let top;
-    if (position?.startsWith("right")) {
-        // right${number}bottom - target 右面底对齐; right${number}top - target 右面上对齐;
-        // scroll & background 无需调整
-        left = targetRect.right - messageElement.clientWidth;
-        if (position?.endsWith("bottom")) {
-            top = targetRect.bottom + parseInt(position.replace("right", "")) || 0;
-        } else if (position?.endsWith("top")) {
-            // 数据库视图、编辑器动态滚动条
-            top = targetRect.top - messageElement.clientHeight;
-        }
-    } else if (position === "parentE") {
+    if (position === "parentE") {
         // parentE: file tree and outline、backlink & viewcard
         top = Math.max(0, parentRect.top - (messageElement.clientHeight - parentRect.height) / 2);
         if (top > window.innerHeight - messageElement.clientHeight) {
@@ -52,27 +42,29 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         if (left < 0) {
             left = parentRect.right;
         }
-    } else if (position === "west") {
+    } else if (position?.endsWith("west")) {
         // west: gutter & 标题图标 & av relation
+        const positionDiff = parseInt(position) || 0.5;
         top = Math.max(0, targetRect.top - (messageElement.clientHeight - targetRect.height) / 2);
         if (top > window.innerHeight - messageElement.clientHeight) {
             top = window.innerHeight - messageElement.clientHeight;
         }
-        left = targetRect.left - messageElement.clientWidth;
+        left = targetRect.left - messageElement.clientWidth - positionDiff;
         if (left < 0) {
             left = targetRect.right;
         }
     } else if (position === "north") {
         // north: av 视图，列，多选描述
+        const positionDiff = 0.5;
         left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
-        top = targetRect.top - messageElement.clientHeight;
+        top = targetRect.top - messageElement.clientHeight - positionDiff;
         if (top < 0) {
             if (targetRect.top < window.innerHeight - targetRect.bottom) {
-                top = targetRect.bottom;
-                messageElement.style.maxHeight = (window.innerHeight - targetRect.bottom) + "px";
+                top = targetRect.bottom + positionDiff;
+                messageElement.style.maxHeight = (window.innerHeight - top) + "px";
             } else {
                 top = 0;
-                messageElement.style.maxHeight = targetRect.top + "px";
+                messageElement.style.maxHeight = (targetRect.top - positionDiff) + "px";
             }
         }
         if (left + messageElement.clientWidth > window.innerWidth) {
@@ -80,7 +72,7 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         }
     } else {
         // ${number}south & 默认值
-        const positionDiff = parseInt(position) || 0;
+        const positionDiff = parseInt(position) || 0.5;
         left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
         top = targetRect.bottom + positionDiff;
 

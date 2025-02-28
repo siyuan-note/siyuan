@@ -50,6 +50,9 @@ export const readClipboard = async () => {
     } else if (isInHarmony()) {
         text.textPlain = window.JSHarmony.readClipboard();
     }
+    if (typeof navigator.clipboard === "undefined" || !navigator.clipboard.read) {
+        return text;
+    }
     const clipboardContents = await navigator.clipboard.read();
     for (const item of clipboardContents) {
         if (item.types.includes("text/html")) {

@@ -177,22 +177,6 @@ ${padHTML}
                 item.classList.remove("protyle-wysiwyg--hl");
             });
         });
-        this.element.addEventListener("mouseover", (event) => {
-            if (!protyle.selectElement.classList.contains("fn__none")) {
-                return;
-            }
-            const target = event.target as HTMLElement;
-            const svgElement = hasClosestByAttribute(target, "data-node-id", null);
-            if (svgElement) {
-                protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--hl");
-                });
-                const nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${svgElement.getAttribute("data-node-id")}"]`);
-                if (nodeElement) {
-                    nodeElement.classList.add("protyle-wysiwyg--hl");
-                }
-            }
-        });
         this.element.addEventListener("mousewheel", (event: WheelEvent) => {
             this.element.scrollLeft = this.element.scrollLeft + event.deltaY;
         }, {passive: true});

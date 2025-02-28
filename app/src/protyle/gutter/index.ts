@@ -444,39 +444,6 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
         });
-        this.element.addEventListener("mouseover", (event: MouseEvent & { target: HTMLInputElement }) => {
-            const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement) {
-                return;
-            }
-            const type = buttonElement.getAttribute("data-type");
-            if (type === "fold" || type === "NodeAttributeViewRow") {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
-                });
-                return;
-            }
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
-                if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
-                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                        if (!item.isSameNode(hlItem)) {
-                            hlItem.classList.remove("protyle-wysiwyg--hl");
-                        }
-                        if (rowItem && !rowItem.isSameNode(hlItem)) {
-                            rowItem.classList.remove("av__row--hl");
-                        }
-                    });
-                    if (type === "NodeAttributeViewRowMenu") {
-                        rowItem.classList.add("av__row--hl");
-                    } else {
-                        item.classList.add("protyle-wysiwyg--hl");
-                    }
-                    return true;
-                }
-            });
-            event.preventDefault();
-        });
         this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
             Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
@@ -491,7 +458,7 @@ export class Gutter {
         }, {passive: true});
     }
 
-    private isMatchNode(item: Element) {
+    public isMatchNode(item: Element) {
         const itemRect = item.getBoundingClientRect();
         // 原本为4，由于 https://github.com/siyuan-note/siyuan/issues/12166 改为 6
         let gutterTop = this.element.getBoundingClientRect().top + 6;

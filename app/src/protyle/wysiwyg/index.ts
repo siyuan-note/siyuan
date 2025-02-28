@@ -1900,38 +1900,6 @@ export class WYSIWYG {
             }
         }, {passive: true});
 
-        let overAttr = false;
-        this.element.addEventListener("mouseover", (event: MouseEvent & { target: Element }) => {
-            const attrElement = hasClosestByClassName(event.target, "protyle-attr");
-            if (attrElement) {
-                overAttr = true;
-                attrElement.parentElement.classList.add("protyle-wysiwyg--hl");
-                return;
-            } else if (overAttr) {
-                const hlElement = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--hl");
-                if (hlElement) {
-                    hlElement.classList.remove("protyle-wysiwyg--hl");
-                }
-                overAttr = false;
-            }
-            if (hasClosestByClassName(event.target, "protyle-action") || !protyle.options.render.gutter) {
-                return;
-            }
-            const nodeElement = hasClosestBlock(event.target);
-            if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
-                // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 windowEvent 中的 mousemove 下处理
-                return;
-            }
-            if (nodeElement) {
-                const embedElement = isInEmbedBlock(nodeElement);
-                if (embedElement) {
-                    protyle.gutter.render(protyle, embedElement, this.element);
-                } else {
-                    protyle.gutter.render(protyle, nodeElement, this.element, event.target);
-                }
-            }
-        });
-
         this.element.addEventListener("paste", (event: ClipboardEvent & { target: HTMLElement }) => {
             // https://github.com/siyuan-note/siyuan/issues/11241
             if (event.target.localName === "input" && event.target.getAttribute("data-type") === "av-search") {

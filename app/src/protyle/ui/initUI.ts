@@ -14,6 +14,13 @@ import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
 /// #if !MOBILE
 import {moveResize} from "../../dialog/moveResize";
+import {
+    hasClosestBlock,
+    hasClosestByAttribute,
+    hasClosestByClassName,
+    hasClosestByTag,
+    isInEmbedBlock
+} from "../util/hasClosest";
 /// #endif
 
 export const initUI = (protyle: IProtyle) => {
@@ -164,6 +171,86 @@ export const initUI = (protyle: IProtyle) => {
             }
         }
     });
+    /// if !MOBILE
+    let overAttr = false;
+    protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {
+        // attr
+        const attrElement = hasClosestByClassName(event.target, "protyle-attr");
+        if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {
+            overAttr = true;
+            attrElement.parentElement.classList.add("protyle-wysiwyg--hl");
+            return;
+        } else if (overAttr) {
+            const hlElement = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--hl");
+            if (hlElement) {
+                hlElement.classList.remove("protyle-wysiwyg--hl");
+            }
+            overAttr = false;
+        }
+
+        const nodeElement = hasClosestBlock(event.target);
+        if (protyle.options.render.gutter && nodeElement) {
+            if (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
+                // 光标在列表下部应显示右侧的元素，而不是列表本身。放在 windowEvent 中的 mousemove 下处理
+                return;
+            }
+            const embedElement = isInEmbedBlock(nodeElement);
+            if (embedElement) {
+                protyle.gutter.render(protyle, embedElement, protyle.wysiwyg.element);
+            } else {
+                protyle.gutter.render(protyle, nodeElement, protyle.wysiwyg.element, event.target);
+            }
+            return;
+        }
+
+        // gutter
+        const buttonElement = hasClosestByTag(event.target, "BUTTON");
+        if (buttonElement && buttonElement.parentElement.classList.contains("protyle-gutters")) {
+            const type = buttonElement.getAttribute("data-type");
+            if (type === "fold" || type === "NodeAttributeViewRow") {
+                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
+                });
+                return;
+            }
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
+                if (!isInEmbedBlock(item) && protyle.gutter.isMatchNode(item)) {
+                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
+                        if (!item.isSameNode(hlItem)) {
+                            hlItem.classList.remove("protyle-wysiwyg--hl");
+                        }
+                        if (rowItem && !rowItem.isSameNode(hlItem)) {
+                            rowItem.classList.remove("av__row--hl");
+                        }
+                    });
+                    if (type === "NodeAttributeViewRowMenu") {
+                        rowItem.classList.add("av__row--hl");
+                    } else {
+                        item.classList.add("protyle-wysiwyg--hl");
+                    }
+                    return true;
+                }
+            });
+            event.preventDefault();
+            return;
+        }
+
+        // 面包屑
+        if (protyle.selectElement.classList.contains("fn__none")) {
+            const svgElement = hasClosestByAttribute(event.target, "data-node-id", null);
+            if (svgElement && svgElement.parentElement.classList.contains("protyle-breadcrumb__bar")) {
+                protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
+                    item.classList.remove("protyle-wysiwyg--hl");
+                });
+                const nodeElement = protyle.wysiwyg.element.querySelector(`[data-node-id="${svgElement.getAttribute("data-node-id")}"]`);
+                if (nodeElement) {
+                    nodeElement.classList.add("protyle-wysiwyg--hl");
+                }
+            }
+        }
+    });
+    /// endif
 };
 
 export const addLoading = (protyle: IProtyle, msg?: string) => {

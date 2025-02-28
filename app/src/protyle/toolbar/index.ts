@@ -1348,6 +1348,7 @@ export class Toolbar {
             }
             previewPath = currentPath;
             previewTemplate(previewPath, previewElement, protyle.block.parentID);
+            event.stopPropagation();
         });
         const inputElement = this.subElement.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {

@@ -30,6 +30,14 @@ export const openByMobile = (uri: string) => {
     }
 };
 
+export const externalFolderPickerMobile = () => {
+    if (isInAndroid()) {
+        return window.JSAndroid.getLocalFileSystemPath();
+    }
+
+    return null
+};
+
 export const readText = () => {
     if (isInAndroid()) {
         return window.JSAndroid.readClipboard();

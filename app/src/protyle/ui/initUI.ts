@@ -14,6 +14,7 @@ import {transaction} from "../wysiwyg/transaction";
 import {focusByRange} from "../util/selection";
 /// #if !MOBILE
 import {moveResize} from "../../dialog/moveResize";
+/// #endif
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -21,7 +22,6 @@ import {
     hasClosestByTag,
     isInEmbedBlock
 } from "../util/hasClosest";
-/// #endif
 
 export const initUI = (protyle: IProtyle) => {
     protyle.contentElement = document.createElement("div");
@@ -171,7 +171,6 @@ export const initUI = (protyle: IProtyle) => {
             }
         }
     });
-    /// if !MOBILE
     let overAttr = false;
     protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {
         // attr
@@ -237,6 +236,7 @@ export const initUI = (protyle: IProtyle) => {
         }
 
         // 面包屑
+        /// if !MOBILE
         if (protyle.selectElement.classList.contains("fn__none")) {
             const svgElement = hasClosestByAttribute(event.target, "data-node-id", null);
             if (svgElement && svgElement.parentElement.classList.contains("protyle-breadcrumb__bar")) {
@@ -249,8 +249,8 @@ export const initUI = (protyle: IProtyle) => {
                 }
             }
         }
+        /// #endif
     });
-    /// endif
 };
 
 export const addLoading = (protyle: IProtyle, msg?: string) => {

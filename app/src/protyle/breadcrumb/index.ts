@@ -171,7 +171,7 @@ ${padHTML}
                 target = target.parentElement;
             }
         });
-        /// if !MOBILE
+        /// #if !MOBILE
         element.addEventListener("mouseleave", () => {
             protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl");

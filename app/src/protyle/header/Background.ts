@@ -586,10 +586,16 @@ export class Background {
                 });
             }
         });
-        menu.element.querySelector(".b3-menu__items").setAttribute("style", "overflow: initial");
+        const itemsElement = menu.element.querySelector(".b3-menu__items")
+        itemsElement.setAttribute("style", "overflow: initial");
+        /// #if MOBILE
+        menu.fullscreen();
+        itemsElement.firstElementChild.setAttribute("style", "padding: 0 8px;height: 100%;");
+        /// #else
         const rect = target.getBoundingClientRect();
         menu.open({x: rect.left, y: rect.top + rect.height});
         menu.element.querySelector("input").focus();
+        /// #endif
     }
 
     private getTags(removeTag?: string) {

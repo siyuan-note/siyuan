@@ -176,6 +176,10 @@ export const initUI = (protyle: IProtyle) => {
         // attr
         const attrElement = hasClosestByClassName(event.target, "protyle-attr");
         if (attrElement && !attrElement.parentElement.classList.contains("protyle-title")) {
+            const hlElement = protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--hl");
+            if (hlElement) {
+                hlElement.classList.remove("protyle-wysiwyg--hl");
+            }
             overAttr = true;
             attrElement.parentElement.classList.add("protyle-wysiwyg--hl");
             return;
@@ -236,7 +240,7 @@ export const initUI = (protyle: IProtyle) => {
         }
 
         // 面包屑
-        /// if !MOBILE
+        /// #if !MOBILE
         if (protyle.selectElement.classList.contains("fn__none")) {
             const svgElement = hasClosestByAttribute(event.target, "data-node-id", null);
             if (svgElement && svgElement.parentElement.classList.contains("protyle-breadcrumb__bar")) {

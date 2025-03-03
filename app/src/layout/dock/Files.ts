@@ -1108,13 +1108,14 @@ data-type="navigation-root" data-path="/">
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
+
         if (isScroll) {
-            let offsetTop = target.offsetTop;
-            // https://github.com/siyuan-note/siyuan/issues/8749
-            if (target.parentElement.classList.contains("file-tree__sliderDown") && target.offsetParent) {
-                offsetTop = (target.offsetParent as HTMLElement).offsetTop;
-            }
-            this.element.scrollTop = offsetTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+            const targetRect = target.getBoundingClientRect();
+            const containerRect = this.element.getBoundingClientRect();
+            
+            const relativeTop = targetRect.top - containerRect.top + this.element.scrollTop;
+            
+            this.element.scrollTop = relativeTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
         }
     }
 

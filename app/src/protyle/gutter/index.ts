@@ -1373,6 +1373,7 @@ export class Gutter {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "turnInto" + (isCol ? "VLayout" : "HLayout"),
                 accelerator: window.siyuan.config.keymap.editor.general[isCol ? "vLayout" : "hLayout"].custom,
                 label: window.siyuan.languages.turnInto + " " + window.siyuan.languages[isCol ? "vLayout" : "hLayout"],
                 click() {

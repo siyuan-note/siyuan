@@ -1004,7 +1004,6 @@ export class Files extends Model {
 
     private setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {
-            console.log("setCurrent target is null so return");
             return;
         }
         this.element.querySelectorAll("li").forEach((liItem) => {

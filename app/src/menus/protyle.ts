@@ -1503,7 +1503,7 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
                 // https://github.com/siyuan-note/siyuan/issues/6798
                 let anchor = linkElement.textContent.replace(Constants.ZWSP, "");
                 if (!anchor && linkAddress) {
-                    anchor = linkAddress.replace("https://", "").replace("http://", "");
+                    anchor = decodeURIComponent(linkAddress.replace("https://", "").replace("http://", ""));
                     if (anchor.length > Constants.SIZE_LINK_TEXT_MAX) {
                         anchor = anchor.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
                     }

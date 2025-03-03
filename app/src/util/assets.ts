@@ -384,37 +384,26 @@ export const setMode = (modeElementValue: number) => {
         modeOS: modeElementValue === 2,
     }), async response => {
         if (window.siyuan.config.appearance.themeJS) {
-            if (window.destroyTheme) {
-                try {
-                    await window.destroyTheme();
-                    window.destroyTheme = undefined;
-                    document.getElementById("themeScript").remove();
-                } catch (e) {
-                    console.error("destroyTheme error: " + e);
-                }
-            } else {
-                if (!response.data.modeOS && (
-                    response.data.mode !== window.siyuan.config.appearance.mode ||
-                    window.siyuan.config.appearance.themeLight !== response.data.themeLight ||
-                    window.siyuan.config.appearance.themeDark !== response.data.themeDark
-                )) {
+            if (response.data.mode !== window.siyuan.config.appearance.mode ||
+                (response.data.mode === window.siyuan.config.appearance.mode && (
+                        (response.data.mode === 0 && window.siyuan.config.appearance.themeLight !== response.data.themeLight) ||
+                        (response.data.mode === 1 && window.siyuan.config.appearance.themeDark !== response.data.themeDark))
+                )
+            ) {
+                if (window.destroyTheme) {
+                    try {
+                        await window.destroyTheme();
+                        window.destroyTheme = undefined;
+                        document.getElementById("themeScript").remove();
+                    } catch (e) {
+                        console.error("destroyTheme error: " + e);
+                    }
+                } else {
                     exportLayout({
+                        errorExit: false,
                         cb() {
                             window.location.reload();
                         },
-                        errorExit: false,
-                    });
-                    return;
-                }
-                const OSTheme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-                if (response.data.modeOS && (
-                    (response.data.mode === 1 && OSTheme === "light") || (response.data.mode === 0 && OSTheme === "dark")
-                )) {
-                    exportLayout({
-                        cb() {
-                            window.location.reload();
-                        },
-                        errorExit: false,
                     });
                     return;
                 }

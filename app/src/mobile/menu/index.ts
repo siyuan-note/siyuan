@@ -28,6 +28,7 @@ import {newFile} from "../../util/newFile";
 import {afterLoadPlugin} from "../../plugin/loader";
 import {commandPanel} from "../../boot/globalEvent/command/panel";
 import {openTopBarMenu} from "../../plugin/openTopBarMenu";
+import {initFileTree} from "../settings/fileTree";
 
 export const popMenu = () => {
     activeBlur();
@@ -103,6 +104,9 @@ export const initRightMenu = (app: App) => {
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuEditor">
         <svg class="b3-menu__icon"><use xlink:href="#iconEdit"></use></svg><span class="b3-menu__label">${window.siyuan.languages.editor}</span>
     </div>
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuFileTree">
+        <svg class="b3-menu__icon"><use xlink:href="#iconFiles"></use></svg><span class="b3-menu__label">${window.siyuan.languages.fileTree}</span>
+    </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuRiffCard">
         <svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-menu__label">${window.siyuan.languages.riffCard}</span>
     </div>
@@ -174,6 +178,11 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuEditor") {
                 initEditor();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuFileTree") {
+                initFileTree();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

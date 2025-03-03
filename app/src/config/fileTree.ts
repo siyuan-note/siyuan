@@ -116,7 +116,7 @@ export const fileTree = {
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
             maxOpenTabCount: inputMaxOpenTabCount,
         }, response => {
-            fileTree.onSetfiletree(response.data);
+            window.siyuan.config.fileTree = response.data;
         });
     },
     bindEvent: () => {
@@ -127,8 +127,5 @@ export const fileTree = {
                 fileTree._send();
             });
         });
-    },
-    onSetfiletree: (fileTree: Config.IFileTree) => {
-        window.siyuan.config.fileTree = fileTree;
     }
 };

@@ -1110,12 +1110,8 @@ data-type="navigation-root" data-path="/">
         target.classList.add("b3-list-item--focus");
 
         if (isScroll) {
-            const targetRect = target.getBoundingClientRect();
-            const containerRect = this.element.getBoundingClientRect();
-            
-            const relativeTop = targetRect.top - containerRect.top + this.element.scrollTop;
-            
-            this.element.scrollTop = relativeTop - this.element.clientHeight / 2 - this.actionsElement.clientHeight;
+            const elementRect = this.element.getBoundingClientRect();
+            this.element.scrollTop = this.element.scrollTop + (target.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
     }
 

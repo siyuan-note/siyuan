@@ -45,6 +45,7 @@ export const openFileById = async (options: {
     keepCursor?: boolean
     zoomIn?: boolean
     removeCurrentTab?: boolean
+    openNewTab?: boolean
     afterOpen?: (model: Model) => void
 }) => {
     const response = await fetchSyncPost("/api/block/getBlockInfo", {id: options.id});
@@ -67,7 +68,8 @@ export const openFileById = async (options: {
         zoomIn: options.zoomIn,
         keepCursor: options.keepCursor,
         removeCurrentTab: options.removeCurrentTab,
-        afterOpen: options.afterOpen
+        afterOpen: options.afterOpen,
+        openNewTab: options.openNewTab
     });
 };
 
@@ -155,7 +157,7 @@ export const openFile = async (options: IOpenFileOptions) => {
         if (search) {
             return search.parent;
         }
-    } else if (!options.position) {
+    } else if (!options.position && !options.openNewTab) {
         let editor: Editor;
         let activeEditor: Editor;
         allModels.editor.find((item) => {

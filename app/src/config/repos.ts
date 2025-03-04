@@ -4,7 +4,7 @@ import {showMessage} from "../dialog/message";
 import {bindSyncCloudListEvent, getSyncCloudList} from "../sync/syncGuide";
 import {processSync} from "../dialog/processSystem";
 import {getCloudURL} from "./util/about";
-import {openByMobile} from "../protyle/util/compatibility";
+import {externalFolderPickerMobile, isInAndroid, openByMobile} from "../protyle/util/compatibility";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {isKernelInMobile} from "../util/functions";
 
@@ -180,13 +180,38 @@ const renderProvider = (provider: number) => {
     </button>
 </div>`;
     } else if (provider === 4) {
-        if (isKernelInMobile()) {
+        if (isKernelInMobile() && !isInAndroid()) {
             return `<div class="b3-label b3-label--inner">
     ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
     <div class="fn__hr"></div>
     <em>${window.siyuan.languages.proFeature}</em>
     <div class="fn__hr"></div>
     ${window.siyuan.languages.deviceNotSupport}
+</div>`;
+        }
+        else if (isInAndroid()) {
+        return `<div class="b3-label b3-label--inner">
+    ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
+    <div class="fn__hr"></div>
+    <em>${window.siyuan.languages.proFeature}</em>
+</div>
+<div class="b3-label b3-label--inner fn__flex">
+    <div class="fn__flex-center fn__size200">Endpoint</div>
+    <div class="fn__space"></div>
+    <div class="b3-form__icona fn__block">
+        <input id="endpoint" class="b3-text-field b3-form__icona-input" value="${window.siyuan.config.sync.local.endpoint}">
+        <svg class="b3-form__icona-icon" data-action="folderSelectionDialog"><use xlink:href="#iconFolder"></use></svg>
+    </div>
+</div>
+<div class="b3-label b3-label--inner fn__flex">
+    <div class="fn__flex-center fn__size200">Timeout (s)</div>
+    <div class="fn__space"></div>
+    <input id="timeout" class="b3-text-field fn__block" type="number" min="7" max="300" value="${window.siyuan.config.sync.local.timeout}">
+</div>
+<div class="b3-label b3-label--inner fn__flex">
+    <div class="fn__flex-center fn__size200">Concurrent Reqs</div>
+    <div class="fn__space"></div>
+    <input id="localConcurrentReqs" class="b3-text-field fn__block" type="number" min="1" max="1024" value="${window.siyuan.config.sync.local.concurrentReqs}">
 </div>`;
         }
         return `<div class="b3-label b3-label--inner">
@@ -622,6 +647,14 @@ export const repos = {
                     confirmDialog("♻️ " + window.siyuan.languages.cloudStoragePurge, `<div class="b3-typography">${window.siyuan.languages.cloudStoragePurgeConfirm}</div>`, () => {
                         fetchPost("/api/repo/purgeCloudRepo");
                     });
+                    break;
+                } else if (action === "folderSelectionDialog") {
+                    const selectedPath = externalFolderPickerMobile();
+                    const endpointInput = target.parentElement.querySelector("#endpoint") as HTMLInputElement;
+                    if (endpointInput && selectedPath) {
+                        endpointInput.value = selectedPath;
+                        endpointInput.dispatchEvent(new Event('blur'));
+                    }
                     break;
                 }
                 target = target.parentElement;

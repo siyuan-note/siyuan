@@ -1,5 +1,6 @@
 {
-  "localFlieSystem": "نظام الملفات المحلي",
+  "relativeFontSize": "نسبة إلى حجم خط المحرر",
+  "localFileSystem": "نظام الملفات المحلي",
   "deviceNotSupport": "الجهاز الحالي غير مدعوم",
   "second": "ثانية",
   "syncInterval": "الفاصل الزمني للمزامنة",

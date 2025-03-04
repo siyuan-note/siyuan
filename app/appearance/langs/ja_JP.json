@@ -1,5 +1,6 @@
 {
-  "localFlieSystem": "ローカルファイルシステム",
+  "relativeFontSize": "エディターのフォントサイズに対して",
+  "localFileSystem": "ローカルファイルシステム",
   "deviceNotSupport": "現在のデバイスはサポートされていません",
   "second": "秒",
   "syncInterval": "同期間隔",

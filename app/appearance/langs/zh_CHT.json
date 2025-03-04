@@ -1,5 +1,6 @@
 {
-  "localFlieSystem": "本地檔案系統",
+  "relativeFontSize": "相對於編輯器字號",
+  "localFileSystem": "本地檔案系統",
   "deviceNotSupport": "當前設備不支援",
   "second": "秒",
   "syncInterval": "同步間隔",

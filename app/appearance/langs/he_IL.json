@@ -1,5 +1,6 @@
 {
-  "localFlieSystem": "מערכת קבצים מקומית",
+  "relativeFontSize": "יחסית לגודל הגופן של העורך",
+  "localFileSystem": "מערכת קבצים מקומית",
   "deviceNotSupport": "המכשיר הנוכחי אינו נתמך",
   "second": "שנייה",
   "syncInterval": "מרווח סנכרון",

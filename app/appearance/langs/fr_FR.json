@@ -1,5 +1,6 @@
 {
-  "localFlieSystem": "Système de fichiers local",
+  "relativeFontSize": "par rapport à la taille de la police de l'éditeur",
+  "localFileSystem": "Système de fichiers local",
   "deviceNotSupport": "L'appareil actuel n'est pas pris en charge",
   "second": "seconde",
   "syncInterval": "intervalle de synchronisation",

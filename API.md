@@ -544,7 +544,7 @@ Move documents by `id`:
 
   ```json
   {
-    "id": "20210917220056-yxtyl7i"
+    "id": "20210808180320-fqgskfj"
   }
   ```
 
@@ -555,7 +555,10 @@ Move documents by `id`:
   {
     "code": 0,
     "msg": "",
-    "data": "/20210828150719-r8edxl2/20210917220056-yxtyl7i.sy"
+    "data": {
+    "notebook": "20210808180117-czj9bvb",
+    "path": "/20200812220555-lj3enxa/20210808180320-fqgskfj.sy"
+    }
   }
   ```
 

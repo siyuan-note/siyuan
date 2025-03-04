@@ -368,13 +368,16 @@ func getPathByID(c *gin.Context) {
 		return
 	}
 
-	_path, err := model.GetPathByID(id)
+	p, notebook, err := model.GetPathByID(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	ret.Data = _path
+	ret.Data = map[string]interface{}{
+		"path":     p,
+		"notebook": notebook,
+	}
 }
 
 func getFullHPathByID(c *gin.Context) {

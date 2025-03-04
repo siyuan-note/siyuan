@@ -96,7 +96,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         lastColorHTML += "</div>";
     }
     let textElement: HTMLElement;
-    let fontSize = "16px";
+    let fontSize = window.siyuan.config.editor.fontSize + "px";
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
     } else {
@@ -106,7 +106,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         }
     }
     if (textElement) {
-        fontSize = textElement.style.fontSize || "16px";
+        fontSize = textElement.style.fontSize || window.siyuan.config.editor.fontSize + "px";
     }
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
@@ -143,7 +143,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     ${window.siyuan.languages.fontSize}
     <span class="fn__flex-1"></span>
     <label class="fn__flex">
-        相对于编辑器字号
+        ${window.siyuan.languages.relativeFontSize}
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
     </label>
@@ -198,13 +198,15 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 
             fontSizePXElement.parentElement.classList.add("fn__none");
             fontSizeEMElement.parentElement.classList.remove("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
         } else {
-            const px = Math.round(parseInt(fontSizeEMElement.value) * 16);
+            const px = Math.round(parseFloat(fontSizeEMElement.value) * 16);
             fontSizePXElement.parentElement.setAttribute("aria-label", px + "px");
             fontSizePXElement.value = px.toString();
 
             fontSizePXElement.parentElement.classList.remove("fn__none");
             fontSizeEMElement.parentElement.classList.add("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
         }
     });
     fontSizePXElement.addEventListener("change", function () {

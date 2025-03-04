@@ -1719,7 +1719,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (item.element.contains(nodeElement)) {
                     return true;
                 }
-            })
+            });
             const id = nodeElement.getAttribute("data-node-id");
             checkFold(id, (zoomIn, action) => {
                 openFileById({

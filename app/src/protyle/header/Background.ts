@@ -586,7 +586,7 @@ export class Background {
                 });
             }
         });
-        const itemsElement = menu.element.querySelector(".b3-menu__items")
+        const itemsElement = menu.element.querySelector(".b3-menu__items");
         itemsElement.setAttribute("style", "overflow: initial");
         /// #if MOBILE
         menu.fullscreen();

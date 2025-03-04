@@ -8,7 +8,7 @@ import {setEditMode} from "../util/setEditMode";
 import {RecordMedia} from "../util/RecordMedia";
 import {hideMessage, showMessage} from "../../dialog/message";
 import {uploadFiles} from "../upload";
-import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasTopClosestByClassName} from "../util/hasClosest";
 import {needSubscribe} from "../../util/needSubscribe";
 import {isMobile} from "../../util/functions";
 import {zoomOut} from "../../menus/protyle";

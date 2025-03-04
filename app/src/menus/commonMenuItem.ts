@@ -245,7 +245,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
 </div>`,
         destroyCallback() {
             focusByRange(range);
-            hideElements(["select"], protyle)
+            hideElements(["select"], protyle);
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);

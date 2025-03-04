@@ -780,7 +780,7 @@ export class Files extends Model {
                     currentPath = dirname + ".sy";
                 }
             } else {
-                const hiddenElement = liElement.querySelector(".fn__hidden")
+                const hiddenElement = liElement.querySelector(".fn__hidden");
                 if (hiddenElement) {
                     hiddenElement.classList.remove("fn__hidden");
                 } else {

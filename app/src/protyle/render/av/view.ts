@@ -17,6 +17,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         return;
     }
     menu.addItem({
+        id: "rename",
         icon: "iconEdit",
         label: window.siyuan.languages.rename,
         click() {
@@ -32,6 +33,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
         }
     });
     menu.addItem({
+        id: "config",
         icon: "iconSettings",
         label: window.siyuan.languages.config,
         click() {
@@ -45,6 +47,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     });
     menu.addSeparator();
     menu.addItem({
+        id: "duplicate",
         icon: "iconCopy",
         label: window.siyuan.languages.duplicate,
         click() {
@@ -67,6 +70,7 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
     });
     if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length > 1) {
         menu.addItem({
+            id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             click() {
@@ -207,7 +211,7 @@ export const getViewHTML = (data: IAV) => {
             <span class="b3-menu__avemoji" data-type="update-view-icon">${view.icon ? unicode2Emoji(view.icon) : '<svg style="height: 14px;width: 14px"><use xlink:href="#iconTable"></use></svg>'}</span>
             <div class="b3-form__icona fn__block">
                 <input data-type="name" class="b3-text-field b3-form__icona-input" type="text" data-value="${escapeAttr(view.name)}">
-                <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+                <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${view.desc ? escapeAriaLabel(view.desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
             </div>
         </div>
         <div class="fn__none">

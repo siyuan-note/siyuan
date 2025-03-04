@@ -10,79 +10,88 @@ export const showTooltip = (message: string, target: Element, tooltipClass?: str
         return;
     }
 
-    const className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
-    let messageElement = document.getElementById("tooltip");
-    if (!messageElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div class="${className}" id="tooltip">${message}</div>`);
-        messageElement = document.getElementById("tooltip");
-    } else {
-        if (messageElement.className !== className) {
-            messageElement.className = className;
-        }
-        if (messageElement.innerHTML !== message) {
-            messageElement.innerHTML = message;
-        }
-        // 避免原本的 top 和 left 影响计算
-        messageElement.removeAttribute("style");
-    }
+    const messageElement = document.getElementById("tooltip");
+    messageElement.className = tooltipClass ? `tooltip tooltip--${tooltipClass}` : "tooltip";
+    messageElement.innerHTML = message;
+    // 避免原本的 top 和 left 影响计算
+    messageElement.removeAttribute("style");
 
-    let left = targetRect.left;
-    let top = targetRect.bottom;
 
-    // position: parentE; parentW; ${number}parentW; ${number}bottom;
-    // right; right${number}bottom; right${number}top; top;
     const position = target.getAttribute("data-position");
     const parentRect = target.parentElement.getBoundingClientRect();
 
-    if (position?.startsWith("right")) {
-        // block icon and background icon
-        left = targetRect.right - messageElement.clientWidth;
-    }
-
+    let left;
+    let top;
     if (position === "parentE") {
-        // file tree and outline、backlink
-        top = parentRect.top;
+        // parentE: file tree and outline、backlink & viewcard
+        top = Math.max(0, parentRect.top - (messageElement.clientHeight - parentRect.height) / 2);
+        if (top > window.innerHeight - messageElement.clientHeight) {
+            top = window.innerHeight - messageElement.clientHeight;
+        }
         left = parentRect.right + 8;
-    } else if (position?.endsWith("parentW")) {
-        // 数据库属性视图
-        top = parentRect.top + (parseInt(position) || 8);
+        if (left + messageElement.clientWidth > window.innerWidth) {
+            left = parentRect.left - messageElement.clientWidth - 8;
+        }
+    } else if (position === "parentW") {
+        // ${number}parentW: av 属性视图 & col & select
+        top = Math.max(0, parentRect.top - (messageElement.clientHeight - parentRect.height) / 2);
+        if (top > window.innerHeight - messageElement.clientHeight) {
+            top = window.innerHeight - messageElement.clientHeight;
+        }
         left = parentRect.left - messageElement.clientWidth;
-    } else if (position?.endsWith("bottom")) {
-        top += parseInt(position.replace("right", "").replace("left", ""));
-    } else if (position?.endsWith("top")) {
-        // 编辑器动态滚动条
-        top = targetRect.top - messageElement.clientHeight;
-    }
-
-    const topHeight = position === "parentE" ? top : targetRect.top;
-    const bottomHeight = window.innerHeight - top;
-
-    messageElement.style.maxHeight = Math.max(topHeight, bottomHeight) + "px";
-
-    // 避免原本的 top 和 left 影响计算
-    messageElement.style.top = "0px";
-    messageElement.style.left = "0px";
-
-    if (top + messageElement.clientHeight > window.innerHeight && topHeight > bottomHeight) {
-        messageElement.style.top = ((position === "parentE" ? parentRect.bottom : targetRect.top) - messageElement.clientHeight) + "px";
-    } else {
-        messageElement.style.top = top + "px";
-    }
-
-    if (left + messageElement.clientWidth > window.innerWidth) {
-        if (position === "parentE") {
-            messageElement.style.left = (parentRect.left - 8 - messageElement.clientWidth) + "px";
-        } else {
-            messageElement.style.left = (window.innerWidth - 1 - messageElement.clientWidth) + "px";
+        if (left < 0) {
+            left = parentRect.right;
+        }
+    } else if (position?.endsWith("west")) {
+        // west: gutter & 标题图标 & av relation
+        const positionDiff = parseInt(position) || 0.5;
+        top = Math.max(0, targetRect.top - (messageElement.clientHeight - targetRect.height) / 2);
+        if (top > window.innerHeight - messageElement.clientHeight) {
+            top = window.innerHeight - messageElement.clientHeight;
+        }
+        left = targetRect.left - messageElement.clientWidth - positionDiff;
+        if (left < 0) {
+            left = targetRect.right;
+        }
+    } else if (position === "north") {
+        // north: av 视图，列，多选描述
+        const positionDiff = 0.5;
+        left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
+        top = targetRect.top - messageElement.clientHeight - positionDiff;
+        if (top < 0) {
+            if (targetRect.top < window.innerHeight - targetRect.bottom) {
+                top = targetRect.bottom + positionDiff;
+                messageElement.style.maxHeight = (window.innerHeight - top) + "px";
+            } else {
+                top = 0;
+                messageElement.style.maxHeight = (targetRect.top - positionDiff) + "px";
+            }
+        }
+        if (left + messageElement.clientWidth > window.innerWidth) {
+            left = window.innerWidth - messageElement.clientWidth;
         }
     } else {
-        messageElement.style.left = Math.max(0, left) + "px";
+        // ${number}south & 默认值
+        const positionDiff = parseInt(position) || 0.5;
+        left = Math.max(0, targetRect.left - (messageElement.clientWidth - targetRect.width) / 2);
+        top = targetRect.bottom + positionDiff;
+
+        if (top + messageElement.clientHeight > window.innerHeight) {
+            if (targetRect.top - positionDiff > window.innerHeight - top) {
+                top = targetRect.top - positionDiff - messageElement.clientHeight;
+                messageElement.style.maxHeight = (targetRect.top - positionDiff) + "px";
+            } else {
+                messageElement.style.maxHeight = (window.innerHeight - top) + "px";
+            }
+        }
+        if (left + messageElement.clientWidth > window.innerWidth) {
+            left = window.innerWidth - messageElement.clientWidth;
+        }
     }
+    messageElement.style.top = top + "px";
+    messageElement.style.left = left + "px";
 };
 
 export const hideTooltip = () => {
-    const messageElement = document.getElementById("tooltip");
-    if (messageElement) {
-        messageElement.remove();
-    }
+    document.getElementById("tooltip").classList.add("fn__none");
 };

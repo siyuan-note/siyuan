@@ -229,7 +229,7 @@ export class Toolbar {
 
     public setInlineMark(protyle: IProtyle, type: string, action: "range" | "toolbar", textObj?: ITextOption) {
         const nodeElement = hasClosestBlock(this.range.startContainer);
-        if (!nodeElement) {
+        if (!nodeElement || nodeElement.getAttribute("data-type") === "NodeCodeBlock") {
             return;
         }
         const endElement = hasClosestBlock(this.range.endContainer);
@@ -446,6 +446,7 @@ export class Toolbar {
                     }
                 }
                 contents.childNodes.forEach((item: HTMLElement, index) => {
+                    let removeText = "";
                     if (item.nodeType === 3) {
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             type === previousElement.getAttribute("data-type") &&
@@ -466,6 +467,11 @@ export class Toolbar {
                             if (item.textContent.startsWith(Constants.ZWSP)) {
                                 newNodes.push(document.createTextNode(Constants.ZWSP));
                                 item.textContent = item.textContent.substring(1);
+                            }
+                            // https://github.com/siyuan-note/siyuan/issues/14204
+                            while (item.textContent.endsWith("\n")) {
+                                item.textContent = item.textContent.substring(0, item.textContent.length - 1);
+                                removeText += "\n";
                             }
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
@@ -587,6 +593,9 @@ export class Toolbar {
                         } else {
                             newNodes.push(item);
                         }
+                    }
+                    if (removeText) {
+                        newNodes.push(document.createTextNode(removeText));
                     }
                 });
             }
@@ -1339,6 +1348,7 @@ export class Toolbar {
             }
             previewPath = currentPath;
             previewTemplate(previewPath, previewElement, protyle.block.parentID);
+            event.stopPropagation();
         });
         const inputElement = this.subElement.querySelector("input");
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {

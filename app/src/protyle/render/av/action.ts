@@ -287,6 +287,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         const openSubmenus = openEditorTab(protyle.app, [blockId], undefined, undefined, true);
         openSubmenus.push({id: "separator_3", type: "separator"});
         openSubmenus.push({
+            id: "attr",
             icon: "iconAttr",
             label: window.siyuan.languages.attr,
             click: () => {
@@ -310,6 +311,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         }
     });
     const copyMenu: IMenu[] = [{
+        id: "copyKeyContent",
         iconHTML: "",
         label: window.siyuan.languages.copyKeyContent,
         click() {
@@ -474,6 +476,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     }
 
     menu.addItem({
+        id: "copy",
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         type: "submenu",
@@ -481,6 +484,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     });
     if (!protyle.disabled) {
         menu.addItem({
+            id: "addToDatabase",
             label: window.siyuan.languages.addToDatabase,
             icon: "iconDatabase",
             click() {
@@ -518,9 +522,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
         });
         if (rowElements.length === 1) {
             if (keyCellElement.getAttribute("data-detached") !== "true") {
-                menu.addSeparator();
+                menu.addSeparator({id: "separator_1"});
             }
             menu.addItem({
+                id: "insertRowBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages.insertRowBefore.replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
@@ -543,6 +548,7 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", `<span class="fn__spac
                 }
             });
             menu.addItem({
+                id: "insertRowAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
 ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}
@@ -564,9 +570,10 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
                     });
                 }
             });
-            menu.addSeparator();
+            menu.addSeparator({id: "separator_2"});
             if (keyCellElement.getAttribute("data-detached") !== "true") {
                 menu.addItem({
+                    id: "unbindBlock",
                     label: window.siyuan.languages.unbindBlock,
                     icon: "iconLinkOff",
                     click() {
@@ -578,6 +585,7 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
             }
         }
         menu.addItem({
+            id: "delete",
             icon: "iconTrashcan",
             label: window.siyuan.languages.delete,
             click() {
@@ -600,6 +608,7 @@ ${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space
             }
         });
         menu.addItem({
+            id: "fields",
             icon: "iconAttr",
             label: window.siyuan.languages.fields,
             type: "submenu",

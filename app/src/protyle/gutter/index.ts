@@ -444,39 +444,6 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
         });
-        this.element.addEventListener("mouseover", (event: MouseEvent & { target: HTMLInputElement }) => {
-            const buttonElement = hasClosestByTag(event.target, "BUTTON");
-            if (!buttonElement) {
-                return;
-            }
-            const type = buttonElement.getAttribute("data-type");
-            if (type === "fold" || type === "NodeAttributeViewRow") {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
-                    item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
-                });
-                return;
-            }
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
-                if (!isInEmbedBlock(item) && this.isMatchNode(item)) {
-                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
-                    Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                        if (!item.isSameNode(hlItem)) {
-                            hlItem.classList.remove("protyle-wysiwyg--hl");
-                        }
-                        if (rowItem && !rowItem.isSameNode(hlItem)) {
-                            rowItem.classList.remove("av__row--hl");
-                        }
-                    });
-                    if (type === "NodeAttributeViewRowMenu") {
-                        rowItem.classList.add("av__row--hl");
-                    } else {
-                        item.classList.add("protyle-wysiwyg--hl");
-                    }
-                    return true;
-                }
-            });
-            event.preventDefault();
-        });
         this.element.addEventListener("mouseleave", (event: MouseEvent & { target: HTMLInputElement }) => {
             Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(item => {
                 item.classList.remove("protyle-wysiwyg--hl", "av__row--hl");
@@ -491,7 +458,7 @@ export class Gutter {
         }, {passive: true});
     }
 
-    private isMatchNode(item: Element) {
+    public isMatchNode(item: Element) {
         const itemRect = item.getBoundingClientRect();
         // 原本为4，由于 https://github.com/siyuan-note/siyuan/issues/12166 改为 6
         let gutterTop = this.element.getBoundingClientRect().top + 6;
@@ -1406,6 +1373,7 @@ export class Gutter {
                 }
             }).element);
             window.siyuan.menus.menu.append(new MenuItem({
+                id: "turnInto" + (isCol ? "VLayout" : "HLayout"),
                 accelerator: window.siyuan.config.keymap.editor.general[isCol ? "vLayout" : "hLayout"].custom,
                 label: window.siyuan.languages.turnInto + " " + window.siyuan.languages[isCol ? "vLayout" : "hLayout"],
                 click() {
@@ -2160,7 +2128,7 @@ export class Gutter {
         });
         const width = firstElement.style.width.endsWith("%") ? parseInt(firstElement.style.width) : 0;
         window.siyuan.menus.menu.append(new MenuItem({
-            id: "widthDrag",
+            id: "width",
             label: window.siyuan.languages.width,
             submenu: styles.concat([{
                 id: "widthDrag",
@@ -2338,9 +2306,9 @@ export class Gutter {
                         } else if (rowElement.querySelector('[data-dtype="block"]')?.getAttribute("data-detached") === "true") {
                             iconAriaLabel = window.siyuan.languages.rowTip.substring(0, window.siyuan.languages.rowTip.lastIndexOf("<br"));
                         }
-                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
+                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="west" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
                         if (!protyle.disabled) {
-                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="right" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
+                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="west" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
                         }
                         break;
                     }
@@ -2377,7 +2345,7 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
-                const buttonHTML = `<button class="ariaLabel" data-position="right" aria-label="${gutterTip}" 
+                const buttonHTML = `<button class="ariaLabel" data-position="west" aria-label="${gutterTip}" 
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
@@ -2388,7 +2356,7 @@ data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" d
                 let foldHTML = "";
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
                     const fold = nodeElement.getAttribute("fold");
-                    foldHTML = `<button class="ariaLabel" data-position="right" aria-label="${window.siyuan.languages.fold}" 
+                    foldHTML = `<button class="ariaLabel" data-position="west" aria-label="${window.siyuan.languages.fold}" 
 data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold === "1" ? "" : ";transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
                 }
                 if (type === "NodeListItem" || type === "NodeList") {

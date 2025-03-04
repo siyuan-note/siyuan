@@ -210,6 +210,7 @@ export const editAssetItem = (options: {
     }
     if (type === "file") {
         menu.addItem({
+            id: "linkAndTitle",
             iconHTML: "",
             type: "readonly",
             label: `<div class="fn__flex">
@@ -243,8 +244,9 @@ export const editAssetItem = (options: {
                 });
             }
         });
-        menu.addSeparator();
+        menu.addSeparator({id: "separator_1"});
         menu.addItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
@@ -253,6 +255,7 @@ export const editAssetItem = (options: {
         });
     } else {
         menu.addItem({
+            id: "link",
             iconHTML: "",
             type: "readonly",
             label: `<div class="fn__flex">
@@ -277,8 +280,9 @@ export const editAssetItem = (options: {
                 });
             }
         });
-        menu.addSeparator();
+        menu.addSeparator({id: "separator_1"});
         menu.addItem({
+            id: "copy",
             label: window.siyuan.languages.copy,
             icon: "iconCopy",
             click() {
@@ -286,6 +290,7 @@ export const editAssetItem = (options: {
             }
         });
         menu.addItem({
+            id: "copyAsPNG",
             label: window.siyuan.languages.copyAsPNG,
             icon: "iconImage",
             click() {
@@ -294,6 +299,7 @@ export const editAssetItem = (options: {
         });
     }
     menu.addItem({
+        id: "delete",
         icon: "iconTrashcan",
         label: window.siyuan.languages.delete,
         click() {
@@ -307,6 +313,7 @@ export const editAssetItem = (options: {
     });
     if (linkAddress?.startsWith("assets/")) {
         menu.addItem({
+            id: "rename",
             label: window.siyuan.languages.rename,
             icon: "iconEdit",
             click() {
@@ -317,10 +324,11 @@ export const editAssetItem = (options: {
     }
     const openSubMenu = openMenu(options.protyle ? options.protyle.app : window.siyuan.ws.app, linkAddress, true, false);
     if (type !== "file" || openSubMenu.length > 0) {
-        menu.addSeparator();
+        menu.addSeparator({id: "separator_2"});
     }
     if (type !== "file") {
         menu.addItem({
+            id: "cardPreview",
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
@@ -330,6 +338,7 @@ export const editAssetItem = (options: {
     }
     if (openSubMenu.length > 0) {
         window.siyuan.menus.menu.append(new MenuItem({
+            id: "openBy",
             label: window.siyuan.languages.openBy,
             icon: "iconOpen",
             submenu: openSubMenu

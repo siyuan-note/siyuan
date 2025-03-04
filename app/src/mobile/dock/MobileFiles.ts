@@ -293,7 +293,12 @@ export class MobileFiles extends Model {
                     currentPath = dirname + ".sy";
                 }
             } else {
-                liElement.querySelector(".fn__hidden")?.classList.remove("fn__hidden");
+                const hiddenElement = liElement.querySelector(".fn__hidden");
+                if (hiddenElement) {
+                    hiddenElement.classList.remove("fn__hidden");
+                } else {
+                    this.getLeaf(liElement, notebookId, true);
+                }
                 break;
             }
         }

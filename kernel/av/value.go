@@ -945,7 +945,7 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	case KeyTypeNumber:
 		ret.Number = &ValueNumber{}
 	case KeyTypeDate:
-		ret.Date = &ValueDate{}
+		ret.Date = &ValueDate{IsNotTime: true}
 	case KeyTypeSelect:
 		ret.MSelect = []*ValueSelect{}
 	case KeyTypeMSelect:

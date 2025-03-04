@@ -36,14 +36,14 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         "var(--b3-font-color5)", "var(--b3-font-color6)", "var(--b3-font-color7)", "var(--b3-font-color8)",
         "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
         "var(--b3-font-color13)"].forEach((item) => {
-        colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
+        colorHTML += `<button ${item ? `class="color__square" style="color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="color">A</button>`;
     });
     let bgHTML = "";
     ["", "var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
         "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
         "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
         "var(--b3-font-background13)"].forEach((item) => {
-        bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
+        bgHTML += `<button ${item ? `class="color__square" style="background-color:${item}"` : `class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.default}"`} data-type="backgroundColor"></button>`;
     });
 
     const element = document.createElement("div");
@@ -69,10 +69,10 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
             const lastFontStatus = item.split(Constants.ZWSP);
             switch (lastFontStatus[0]) {
                 case "color":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.colorFont}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorFont}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
                 case "backgroundColor":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.colorPrimary}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.colorPrimary}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]}"` : ""} data-type="${lastFontStatus[0]}"></button>`;
                     break;
                 case "style2":
                     lastColorHTML += `<button data-type="${lastFontStatus[0]}" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>`;
@@ -86,7 +86,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
                     }
                     break;
                 case "style1":
-                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3bottom" aria-label="${window.siyuan.languages.color}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
+                    lastColorHTML += `<button class="color__square ariaLabel" data-position="3south" aria-label="${window.siyuan.languages.color}${lastFontStatus[1] ? "" : " " + window.siyuan.languages.default}" ${lastFontStatus[1] ? `style="background-color:${lastFontStatus[1]};color:${lastFontStatus[2]}"` : ""} data-type="${lastFontStatus[0]}">A</button>`;
                     break;
                 case "clear":
                     lastColorHTML += `<button style="height: 26px;display: flex;align-items: center;padding: 0 5px;" data-type="${lastFontStatus[0]}" class="protyle-font__style ariaLabel" aria-label="${window.siyuan.languages.clearFontStyle}"><svg class="svg--mid"><use xlink:href="#iconTrashcan"></use></svg></button>`;
@@ -113,7 +113,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 <div>${window.siyuan.languages.color}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex fn__flex-wrap">
-    <button class="color__square ariaLabel" data-position="3bottom" data-type="style1" aria-label="${window.siyuan.languages.default}">A</button>
+    <button class="color__square ariaLabel" data-position="3south" data-type="style1" aria-label="${window.siyuan.languages.default}">A</button>
     <button class="color__square" data-type="style1" style="color: var(--b3-card-error-color);background-color: var(--b3-card-error-background);">A</button>
     <button class="color__square" data-type="style1" style="color: var(--b3-card-warning-color);background-color: var(--b3-card-warning-background);">A</button>
     <button class="color__square" data-type="style1" style="color: var(--b3-card-info-color);background-color: var(--b3-card-info-background);">A</button>

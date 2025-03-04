@@ -24,7 +24,10 @@ export class Menu {
                     if (lastShowElements.length > 0) {
                         lastShowElements[lastShowElements.length - 1].classList.remove("b3-menu__item--show");
                     } else {
-                        this.remove();
+                        this.element.style.transform = "";
+                        setTimeout(() => {
+                            this.remove();
+                        }, Constants.TIMEOUT_DBLCLICK);
                     }
                     return;
                 }
@@ -82,10 +85,6 @@ export class Menu {
             !hasClosestByClassName(event.target as Element, "keyboard__bar")) {
             event.preventDefault();
         }
-    }
-
-    public addSeparator(index?: number) {
-        return this.addItem({type: "separator", index});
     }
 
     public addItem(option: IMenu) {
@@ -381,11 +380,11 @@ export class subMenu {
         this.menus = [];
     }
 
-    addSeparator(index?: number) {
+    addSeparator(index?: number, id?: string) {
         if (typeof index === "number") {
-            this.menus.splice(index, 0, {type: "separator"});
+            this.menus.splice(index, 0, {type: "separator", id});
         } else {
-            this.menus.push({type: "separator"});
+            this.menus.push({type: "separator", id});
         }
     }
 

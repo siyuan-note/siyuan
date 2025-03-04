@@ -27,7 +27,7 @@ export const initBlockPopover = (app: App) => {
             hasClosestByClassName(event.target, "av__cell");
         if (aElement) {
             let tooltipClass = "";
-            let tip = aElement.getAttribute("aria-label");
+            let tip = aElement.getAttribute("aria-label") || "";
             if (aElement.classList.contains("av__cell")) {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
@@ -65,10 +65,16 @@ export const initBlockPopover = (app: App) => {
                     }
                 }
             } else if (aElement.classList.contains("av__celltext--url")) {
-                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span><div class="fn__hr"></div>${aElement.getAttribute("data-name")}` : aElement.getAttribute("data-name");
+                const title = aElement.getAttribute("data-name") || "";
+                tip = tip ? `<span style="word-break: break-all">${tip.substring(0, Constants.SIZE_TITLE)}</span>${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}` : title;
                 tooltipClass = "href";
             } else if (aElement.classList.contains("av__calc--ashow") && aElement.clientWidth + 2 < aElement.scrollWidth) {
                 tip = aElement.lastChild.textContent + " " + aElement.firstElementChild.textContent;
+            } else if (aElement.getAttribute("data-type") === "setRelationCell") {
+                const childElement = aElement.querySelector(".b3-menu__label");
+                if (childElement && childElement.clientWidth < childElement.scrollWidth) {
+                    tip = childElement.textContent;
+                }
             }
             if (!tip) {
                 tip = aElement.getAttribute("data-inline-memo-content");
@@ -82,8 +88,6 @@ export const initBlockPopover = (app: App) => {
                 if (href) {
                     tip = `<span style="word-break: break-all">${href.substring(0, Constants.SIZE_TITLE)}</span>`;
                     tooltipClass = "href"; // 为超链接添加 class https://github.com/siyuan-note/siyuan/issues/11440#issuecomment-2119080691
-                } else {
-                    tip = "";
                 }
                 const title = aElement.getAttribute("data-title");
                 if (tip && isLocalPath(href) && !aElement.classList.contains("b3-tooltips")) {
@@ -91,18 +95,36 @@ export const initBlockPopover = (app: App) => {
                     fetchPost("/api/asset/statAsset", {path: href}, (response) => {
                         if (response.code === 1) {
                             if (title) {
-                                assetTip += '<div class="fn__hr"></div>' + title;
+                                assetTip += '<div class="fn__hr"></div><span>' + title + "</span>";
                             }
                         } else {
-                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div>' + title : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
+                            assetTip += ` ${response.data.hSize}${title ? '<div class="fn__hr"></div><span>' + title + "</span>" : ""}<br>${window.siyuan.languages.modifiedAt} ${response.data.hUpdated}<br>${window.siyuan.languages.createdAt} ${response.data.hCreated}`;
                         }
                         showTooltip(assetTip, aElement, tooltipClass);
                     });
                     tip = "";
                 } else if (title) {
-                    tip += '<div class="fn__hr"></div>' + title;
+                    tip += '<div class="fn__hr"></div><span>' + title + "</span>";
                 }
             }
+
+            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+            if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
+                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
+                    const boxData = response.data.boxInfo;
+                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
+                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
+                    if (notebookItemElement && scopeNotebookItemElement && notebookItemElement.isSameNode(scopeNotebookItemElement)) {
+                        showTooltip(tip, notebookItemElement);
+                    }
+                    if (scopeNotebookItemElement &&
+                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
+                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
+                        scopeNotebookItemElement.setAttribute("aria-label", tip);
+                    }
+                });
+            }
+
             if (tip && !aElement.classList.contains("b3-tooltips")) {
                 // https://github.com/siyuan-note/siyuan/issues/11294
                 try {
@@ -116,30 +138,11 @@ export const initBlockPopover = (app: App) => {
                 hideTooltip();
             }
         } else if (!aElement) {
-            notebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-            if (notebookItemElement && notebookItemElement.parentElement.getAttribute("data-type") === "navigation-root") {
-                showTooltip(notebookItemElement.getAttribute("aria-label") || "", notebookItemElement);
-                fetchPost("/api/notebook/getNotebookInfo", {notebook: notebookItemElement.parentElement.parentElement.getAttribute("data-url")}, (response) => {
-                    const boxData = response.data.boxInfo;
-                    const tip = `${boxData.name} <small class='ft__on-surface'>${boxData.hSize}</small>${boxData.docCount !== 0 ? window.siyuan.languages.includeSubFile.replace("x", boxData.docCount) : ""}<br>${window.siyuan.languages.modifiedAt} ${boxData.hMtime}<br>${window.siyuan.languages.createdAt} ${boxData.hCtime}`;
-
-                    const scopeNotebookItemElement = hasClosestByClassName(event.target, "b3-list-item__text");
-                    if (notebookItemElement && scopeNotebookItemElement && notebookItemElement.isSameNode(scopeNotebookItemElement)) {
-                        showTooltip(tip, notebookItemElement);
-                    }
-                    if (scopeNotebookItemElement &&
-                        scopeNotebookItemElement.parentElement.getAttribute("data-type") === "navigation-root" &&
-                        scopeNotebookItemElement.parentElement.parentElement.getAttribute("data-url") === boxData.id) {
-                        scopeNotebookItemElement.setAttribute("aria-label", tip);
-                    }
-                });
-            } else {
-                const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
-                if (!tipElement || (
-                    tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
-                )) {
-                    hideTooltip();
-                }
+            const tipElement = hasClosestByAttribute(event.target, "id", "tooltip", true);
+            if (!tipElement || (
+                tipElement && (tipElement.clientHeight >= tipElement.scrollHeight && tipElement.clientWidth >= tipElement.scrollWidth)
+            )) {
+                hideTooltip();
             }
         }
         if (window.siyuan.config.editor.floatWindowMode === 1 || window.siyuan.shiftIsPressed) {

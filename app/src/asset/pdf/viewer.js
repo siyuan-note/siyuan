@@ -19,6 +19,7 @@ import { LinkTarget } from "./pdf_link_service.js";
 import { PDFViewerApplication } from "./app.js";
 import {Constants} from "../../constants";
 import {initAnno} from "../anno";
+import {AnnotationEditorType} from "./pdfjs";
 
 /* eslint-disable-next-line no-unused-vars */
 const pdfjsVersion =
@@ -237,6 +238,7 @@ function webViewerLoad(file, element, pdfPage, annoId) {
   AppOptions.set("defaultUrl", file);
   AppOptions.set("cMapUrl", 'cmaps/');
   AppOptions.set("standardFontDataUrl", 'standard_fonts/');
+  AppOptions.set("annotationEditorMode", AnnotationEditorType.DISABLE);
   const pdf = new PDFViewerApplication(pdfPage)
   pdf.annoId = annoId
   const config = getViewerConfiguration(element);

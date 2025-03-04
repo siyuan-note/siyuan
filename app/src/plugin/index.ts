@@ -162,7 +162,7 @@ export class Plugin {
     public addTopBar(options: {
         icon: string,
         title: string,
-        position?: "right" | "left",
+        position?: "south" | "left",
         callback: (evt: MouseEvent) => void
     }) {
         if (!options.icon.startsWith("icon") && !options.icon.startsWith("<svg")) {
@@ -182,7 +182,7 @@ export class Plugin {
             iconElement.setAttribute("aria-label", options.title);
             iconElement.innerHTML = options.icon.startsWith("icon") ? `<svg><use xlink:href="#${options.icon}"></use></svg>` : options.icon;
             iconElement.addEventListener("click", options.callback);
-            iconElement.setAttribute("data-position", options.position || "right");
+            iconElement.setAttribute("data-location", options.position || "right");
         }
         this.topBarIcons.push(iconElement);
         return iconElement;
@@ -193,7 +193,7 @@ export class Plugin {
         position?: "right" | "left",
     }) {
         /// #if !MOBILE
-        options.element.setAttribute("data-position", options.position || "right");
+        options.element.setAttribute("data-location", options.position || "right");
         this.statusBarIcons.push(options.element);
         return options.element;
         /// #endif

@@ -1712,6 +1712,28 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        if (!event.repeat && matchHotKey(window.siyuan.config.keymap.editor.general.openInNewTab.custom, event)) {
+            event.preventDefault();
+            event.stopPropagation();
+            const blockPanel = window.siyuan.blockPanels.find(item => {
+                if (item.element.contains(nodeElement)) {
+                    return true;
+                }
+            });
+            const id = nodeElement.getAttribute("data-node-id");
+            checkFold(id, (zoomIn, action) => {
+                openFileById({
+                    app: protyle.app,
+                    id,
+                    action,
+                    zoomIn,
+                    openNewTab: true
+                });
+                blockPanel.destroy();
+            });
+            return;
+        }
+
         // tab 需等待 list 和 table 处理完成
         if (event.key === "Tab" && isNotCtrl(event) && !event.altKey) {
             event.preventDefault();

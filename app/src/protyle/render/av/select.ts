@@ -31,7 +31,7 @@ const filterSelectHTML = (key: string, options: {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
                 html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
-    <div class="fn__flex-1 ariaLabel" data-position="2parentW" aria-label="${airaLabel}">
+    <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
             <span class="fn__ellipsis">${escapeHtml(item.name)}</span>
         </span>
@@ -224,7 +224,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         label: `<div class="fn__hr"></div>
 <div class="b3-form__icona fn__block">
     <input class="b3-text-field b3-form__icona-input" type="text">
-    <svg data-position="top" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
+    <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
 </div>
 <div class="fn__none">
     <div class="fn__hr"></div>
@@ -264,6 +264,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         }
     });
     menu.addItem({
+        id: "delete",
         label: window.siyuan.languages.delete,
         icon: "iconTrashcan",
         click() {

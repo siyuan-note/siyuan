@@ -60,9 +60,27 @@ func extensionCopy(c *gin.Context) {
 		return
 	}
 
+	clippingSym := false
+	symArticleHref := ""
+	if nil != form.Value["href"] {
+		// 剪藏链滴帖子时直接使用 Markdown 接口的返回
+		// https://ld246.com/article/raw/1724850322251
+		symArticleHref = form.Value["href"][0]
+		if strings.HasPrefix(symArticleHref, "https://ld246.com/article/") || strings.HasPrefix(symArticleHref, "https://liuyun.io/article/") {
+			symArticleHref = strings.ReplaceAll(symArticleHref, "https://ld246.com/article/", "https://ld246.com/article/raw/")
+			symArticleHref = strings.ReplaceAll(symArticleHref, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
+			clippingSym = true
+		}
+	}
+
 	uploaded := map[string]string{}
 	for originalName, file := range form.File {
 		oName, err := url.PathUnescape(originalName)
+
+		if clippingSym && strings.Contains(oName, "img-loading.svg") {
+			continue
+		}
+
 		if err != nil {
 			if strings.Contains(originalName, "%u") {
 				originalName = strings.ReplaceAll(originalName, "%u", "\\u")
@@ -134,52 +152,47 @@ func extensionCopy(c *gin.Context) {
 	luteEngine.SetHTMLTag2TextMark(true)
 	var md string
 	var withMath bool
-	if nil != form.Value["href"] {
-		if href := form.Value["href"][0]; strings.HasPrefix(href, "https://ld246.com/article/") || strings.HasPrefix(href, "https://liuyun.io/article/") {
-			// 剪藏链滴帖子时直接使用 Markdown 接口的返回
-			// https://ld246.com/article/raw/1724850322251
-			href = strings.ReplaceAll(href, "https://ld246.com/article/", "https://ld246.com/article/raw/")
-			href = strings.ReplaceAll(href, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
-			resp, err := httpclient.NewCloudRequest30s().Get(href)
-			if err != nil {
-				logging.LogWarnf("get [%s] failed: %s", href, err)
-			} else {
-				bodyData, readErr := io.ReadAll(resp.Body)
-				if nil != readErr {
-					ret.Code = -1
-					ret.Msg = "read response body failed: " + readErr.Error()
-					return
-				}
 
-				md = string(bodyData)
-				luteEngine.SetIndentCodeBlock(true) // 链滴支持缩进代码块，因此需要开启
-				tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
-				ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-					if ast.NodeInlineMath == n.Type {
-						withMath = true
-						return ast.WalkStop
-					} else if ast.NodeCodeBlock == n.Type {
-						if !n.IsFencedCodeBlock {
-							// 将缩进代码块转换为围栏代码块
-							n.IsFencedCodeBlock = true
-							n.CodeBlockFenceChar = '`'
-							n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker})
-							n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
-							n.LastChild.InsertAfter(&ast.Node{Type: ast.NodeCodeBlockFenceCloseMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
-							code := n.ChildByType(ast.NodeCodeBlockCode)
-							if nil != code {
-								code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("    "))
-								code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n    "), []byte("\n"))
-								code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("\t"))
-								code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n\t"), []byte("\n"))
-							}
+	if clippingSym {
+		resp, err := httpclient.NewCloudRequest30s().Get(symArticleHref)
+		if err != nil {
+			logging.LogWarnf("get [%s] failed: %s", symArticleHref, err)
+		} else {
+			bodyData, readErr := io.ReadAll(resp.Body)
+			if nil != readErr {
+				ret.Code = -1
+				ret.Msg = "read response body failed: " + readErr.Error()
+				return
+			}
+
+			md = string(bodyData)
+			luteEngine.SetIndentCodeBlock(true) // 链滴支持缩进代码块，因此需要开启
+			tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+			ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if ast.NodeInlineMath == n.Type {
+					withMath = true
+					return ast.WalkStop
+				} else if ast.NodeCodeBlock == n.Type {
+					if !n.IsFencedCodeBlock {
+						// 将缩进代码块转换为围栏代码块
+						n.IsFencedCodeBlock = true
+						n.CodeBlockFenceChar = '`'
+						n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceInfoMarker})
+						n.PrependChild(&ast.Node{Type: ast.NodeCodeBlockFenceOpenMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
+						n.LastChild.InsertAfter(&ast.Node{Type: ast.NodeCodeBlockFenceCloseMarker, Tokens: []byte("```"), CodeBlockFenceLen: 3})
+						code := n.ChildByType(ast.NodeCodeBlockCode)
+						if nil != code {
+							code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("    "))
+							code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n    "), []byte("\n"))
+							code.Tokens = bytes.TrimPrefix(code.Tokens, []byte("\t"))
+							code.Tokens = bytes.ReplaceAll(code.Tokens, []byte("\n\t"), []byte("\n"))
 						}
 					}
-					return ast.WalkContinue
-				})
+				}
+				return ast.WalkContinue
+			})
 
-				md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
-			}
+			md, _ = lute.FormatNodeSync(tree.Root, luteEngine.ParseOptions, luteEngine.RenderOptions)
 		}
 	}
 
@@ -224,6 +237,26 @@ func extensionCopy(c *gin.Context) {
 				}
 				if "" != assetPath {
 					dest.Tokens = []byte(assetPath)
+				}
+
+				// 检测 alt 和 title 格式，如果不是文本的话转换为文本 https://github.com/siyuan-note/siyuan/issues/14233
+				if linkText := n.ChildByType(ast.NodeLinkText); nil != linkText {
+					if inlineTree := parse.Inline("", linkText.Tokens, luteEngine.ParseOptions); nil != inlineTree && nil != inlineTree.Root && nil != inlineTree.Root.FirstChild {
+						if fc := inlineTree.Root.FirstChild.FirstChild; nil != fc {
+							if ast.NodeText != fc.Type {
+								linkText.Tokens = []byte(fc.Text())
+							}
+						}
+					}
+				}
+				if title := n.ChildByType(ast.NodeLinkTitle); nil != title {
+					if inlineTree := parse.Inline("", title.Tokens, luteEngine.ParseOptions); nil != inlineTree && nil != inlineTree.Root && nil != inlineTree.Root.FirstChild {
+						if fc := inlineTree.Root.FirstChild.FirstChild; nil != fc {
+							if ast.NodeText != fc.Type {
+								title.Tokens = []byte(fc.Text())
+							}
+						}
+					}
 				}
 			}
 		}

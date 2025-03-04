@@ -72,7 +72,9 @@ func RemoveInvalid(text string) (ret string) {
 
 func RemoveInvalidRetainCtrl(text string) (ret string) {
 	ret = strings.ReplaceAll(text, "\u00A0", " ") // NBSP 转换为普通空格
-	ret = gulu.Str.RemoveZeroWidthCharacters(ret)
+	ret = gulu.Str.RemoveZeroWidthNoBreakSpace(ret)
+	ret = gulu.Str.RemoveZeroWidthSpace(ret)
+	// 不要移除零宽连字符，因为 emoji 需要 https://github.com/siyuan-note/siyuan/issues/14272
 	ret = gulu.Str.RemovePUA(ret)
 	return
 }

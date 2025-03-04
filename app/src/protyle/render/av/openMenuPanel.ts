@@ -96,7 +96,7 @@ export const openMenuPanel = (options: {
             }
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId, isCustomAttr});
         } else if (options.type === "date") {
-            html = getDateHTML(data.view, options.cellElements);
+            html = getDateHTML(options.cellElements);
         } else if (options.type === "rollup") {
             html = `<div class="b3-menu__items">${getRollupHTML({data, cellElements: options.cellElements})}</div>`;
         } else if (options.type === "relation") {

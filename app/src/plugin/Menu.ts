@@ -34,14 +34,27 @@ export class Menu {
         return this.menu.addItem(option);
     }
 
-    addSeparator(index?: number, ignore = false) {
-        if (ignore) {
+    addSeparator(options?: number | {
+        index?: number,
+        id?: string,
+        ignore?: boolean
+    }, ignoreParam = false) {
+        // 兼容 3.1.24 之前的版本  addSeparator(index?: number, ignore?: boolean): HTMLElement;
+        let id: string;
+        let index: number;
+        let ignore = false;
+        if (typeof options === "object") {
+            ignore = options.ignore || false;
+            index = options.index;
+            id = options.id;
+        } else if (typeof options === "number") {
+            index = options;
+            ignore = ignoreParam;
+        }
+        if (ignore || this.isOpen) {
             return;
         }
-        if (this.isOpen) {
-            return;
-        }
-        return this.menu.addSeparator(index);
+        return this.menu.addItem({id, type: "separator", index});
     }
 
     open(options: IPosition) {

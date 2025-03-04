@@ -465,6 +465,7 @@ export abstract class Constants {
                 rtl: {default: "", custom: ""},
                 ltr: {default: "", custom: ""},
                 aiWriting: {default: "", custom: ""},
+                openInNewTab: {default: "", custom: ""},
             },
             insert: {
                 appearance: {default: "⌥⌘X", custom: "⌥⌘X"},

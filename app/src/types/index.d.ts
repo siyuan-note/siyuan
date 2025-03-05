@@ -186,6 +186,7 @@ interface Window {
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
+        exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -196,6 +197,7 @@ interface Window {
     }
     JSHarmony: {
         openExternal(url: string): void
+        exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void

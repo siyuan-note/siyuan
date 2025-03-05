@@ -1,4 +1,6 @@
 {
+  "pleaseWait": "Attendere prego...",
+  "reconnectPrompt": "Dopo aver cambiato applicazione, ci vorrà un po' di tempo per ripristinare il funzionamento del kernel SiYuan. Attendere qualche secondo o fare clic sul pulsante \"Riprova\"",
   "relativeFontSize": "rispetto alla dimensione del carattere dell'editor",
   "localFileSystem": "File system locale",
   "deviceNotSupport": "Il dispositivo corrente non è supportato",

@@ -714,8 +714,8 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
-        id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",
-        label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+        id: isInAndroid() ? "useDefault" : "useBrowserView",
+        label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
             openByMobile(src);

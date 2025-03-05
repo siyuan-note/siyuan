@@ -219,7 +219,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         fontSizePXElement.parentElement.setAttribute("aria-label", fontSizePXElement.value + "px");
     });
     fontSizeEMElement.addEventListener("input", function () {
-        fontSizeEMElement.parentElement.setAttribute("aria-label", (parseFloat(fontSizeEMElement.value) * 100).toFixed(0) + "%")
+        fontSizeEMElement.parentElement.setAttribute("aria-label", (parseFloat(fontSizeEMElement.value) * 100).toFixed(0) + "%");
     });
     return element;
 };

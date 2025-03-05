@@ -178,7 +178,14 @@ interface Window {
     dataLayer: any[]
 
     siyuan: ISiyuan
-    webkit: any
+    webkit: {
+        messageHandlers: {
+            openLink:{postMessage: (url: string) => void}
+            startKernelFast:{postMessage: (url: string) => void}
+            changeStatusBar:{postMessage: (url: string) => void}
+            setClipboard:{postMessage: (url: string) => void}
+        }
+    }
     html2canvas: (element: Element, opitons: {
         useCORS: boolean,
         scale?: number

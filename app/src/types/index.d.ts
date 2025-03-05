@@ -194,6 +194,7 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         getBlockURL(): string
+        getLocalFileSystemPath(): string
     }
     JSHarmony: {
         openExternal(url: string): void

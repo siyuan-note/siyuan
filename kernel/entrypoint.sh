@@ -28,8 +28,11 @@ else
     adduser --uid "${PUID}" --ingroup "${group_name}" --disabled-password --gecos "" "${user_name}"
 fi
 
-# Parse command line arguments for --workspace option
+# Parse command line arguments for --workspace option or SIYUAN_WORKSPACE_PATH env variable
 # Store other arguments in ARGS for later use
+if [[ -n "${SIYUAN_WORKSPACE_PATH}" ]]; then
+    WORKSPACE_DIR="${SIYUAN_WORKSPACE_PATH}"
+fi
 ARGS=""
 while [[ "$#" -gt 0 ]]; do
     case $1 in

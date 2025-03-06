@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230106104645-o838uew",
 		"title": "工作空間",
-		"updated": "20230117000552"
+		"type": "doc",
+		"updated": "20250306083600"
 	},
 	"Children": [
 		{
@@ -110,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113932-sal9xjf",
-				"updated": "20230109113932"
+				"updated": "20250306083600"
 			},
 			"Children": [
 				{
@@ -125,7 +126,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113932-3g0ywic",
-				"updated": "20230117000552"
+				"updated": "20250306083600"
 			},
 			"Children": [
 				{
@@ -137,7 +138,7 @@
 					},
 					"Properties": {
 						"id": "20230109113932-w8e5hz3",
-						"updated": "20230117000552"
+						"updated": "20250306083600"
 					},
 					"Children": [
 						{
@@ -159,7 +160,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113932-8g1zoun",
-								"updated": "20230117000552"
+								"updated": "20250306083600"
 							},
 							"Children": [
 								{
@@ -169,16 +170,25 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=工作空間絕對路徑"
+									"TextMarkTextContent": "--workspace=\u0026quot;工作空間絕對路徑\u0026quot;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。比如 Windows 系統上可以復制多個快捷方式，並在每個快捷方式 - 屬性 - 目標後跟隨工作空間路徑參數，例如 "
+									"Data": "​（請使用 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=F:\\SiYuan"
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 將路徑包起來）。比如 Windows 系統上可以復制多個快捷方式，並在每個快捷方式 - 屬性 - 目標後跟隨工作空間路徑參數，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
 								},
 								{
 									"Type": "NodeText",

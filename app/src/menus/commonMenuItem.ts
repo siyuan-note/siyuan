@@ -245,7 +245,9 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
 </div>`,
         destroyCallback() {
             focusByRange(range);
-            hideElements(["select"], protyle);
+            if (protyle) {
+                hideElements(["select"], protyle);
+            }
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
@@ -264,7 +266,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                 target.classList.add("item--focus");
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "") {
+                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "" && protyle) {
                             renderAVAttribute(item, attrs.id, protyle);
                         }
                         item.classList.remove("fn__none");

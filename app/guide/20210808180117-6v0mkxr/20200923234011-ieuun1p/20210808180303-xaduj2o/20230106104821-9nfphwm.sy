@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230106104821-9nfphwm",
 		"title": "Workspace",
-		"updated": "20230117000549"
+		"type": "doc",
+		"updated": "20250306083914"
 	},
 	"Children": [
 		{
@@ -110,7 +111,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113955-ja8w7gp",
-				"updated": "20230109113959"
+				"updated": "20250306083914"
 			},
 			"Children": [
 				{
@@ -125,7 +126,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230109113955-471odxk",
-				"updated": "20230117000549"
+				"updated": "20250306083914"
 			},
 			"Children": [
 				{
@@ -137,7 +138,7 @@
 					},
 					"Properties": {
 						"id": "20230109113955-4p8sitz",
-						"updated": "20230117000549"
+						"updated": "20250306083853"
 					},
 					"Children": [
 						{
@@ -159,7 +160,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113955-f2iskk4",
-								"updated": "20230117000549"
+								"updated": "20250306083853"
 							},
 							"Children": [
 								{
@@ -169,16 +170,25 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=absolute-path-of-the-workspace"
+									"TextMarkTextContent": "--workspace=\u0026quot;Absolute-path-of-the-workspace\u0026quot;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​. For example, multiple shortcuts can be copied on a Windows system, and each Shortcut - Property - Target is followed by a workspace path parameter, such as "
+									"Data": "​(Please use "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=F:\\SiYuan"
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ to enclose the path). For example, multiple shortcuts can be copied on a Windows system, and each Shortcut - Property - Target is followed by a workspace path parameter, such as "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
 								},
 								{
 									"Type": "NodeText",
@@ -206,7 +216,7 @@
 					},
 					"Properties": {
 						"id": "20230109113955-gi1ao5j",
-						"updated": "20230109114043"
+						"updated": "20250306083914"
 					},
 					"Children": [
 						{
@@ -214,7 +224,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113955-hpw3tsz",
-								"updated": "20230109114043"
+								"updated": "20250306083914"
 							},
 							"Children": [
 								{
@@ -228,7 +238,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ in the right column"
+									"Data": "​ in the right colum panel"
 								}
 							]
 						}

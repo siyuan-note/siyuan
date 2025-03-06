@@ -7,7 +7,7 @@
 		"id": "20240530101000-4p096e8",
 		"title": "ワークスペース",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250306083820"
 	},
 	"Children": [
 		{
@@ -120,7 +120,7 @@
 			"Properties": {
 				"ID": "20240530101000-dy3las4",
 				"id": "20240530101000-c9x0nlh",
-				"updated": "20240530101000"
+				"updated": "20250306083820"
 			},
 			"Children": [
 				{
@@ -136,7 +136,7 @@
 			"Properties": {
 				"ID": "20240530101000-dhcolxj",
 				"id": "20240530101000-y2rv8ja",
-				"updated": "20240530101000"
+				"updated": "20250306083820"
 			},
 			"Children": [
 				{
@@ -149,7 +149,7 @@
 					"Properties": {
 						"ID": "20240530101000-req2wqr",
 						"id": "20240530101000-zwpmazv",
-						"updated": "20240530101000"
+						"updated": "20250306083820"
 					},
 					"Children": [
 						{
@@ -171,9 +171,8 @@
 							"ID": "20240530101000-bthacdl",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-s92r6b5",
 								"id": "20240530101000-bthacdl",
-								"updated": "20240530101000"
+								"updated": "20250306083820"
 							},
 							"Children": [
 								{
@@ -183,16 +182,25 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=ワークスペースの絶対パス"
+									"TextMarkTextContent": "--workspace=\u0026quot;ワークスペースの絶対パス\u0026quot;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​ を指定することを検討してください。たとえば、Windows で SiYuan のショートカットをいくつか作成して、各ショートカットのプロパティを開き、\"ショートカット\" タブの \"リンク先\" の後に "
+									"Data": "​ (パスを囲むには"
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=D:\\SiYuan"
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​を使用してください)を指定することを検討してください。たとえば、Windows で SiYuan のショートカットをいくつか作成して、各ショートカットのプロパティを開き、\"ショートカット\" タブの \"リンク先\" の後に "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
 								},
 								{
 									"Type": "NodeText",

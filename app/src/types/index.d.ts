@@ -138,6 +138,8 @@ interface Window {
         dispose(element: Element): void;
         getInstanceById(id: string): {
             resize: () => void
+            clear: () => void
+            getOption: () => { series: { type: string }[] }
         };
     }
     ABCJS: {
@@ -180,10 +182,10 @@ interface Window {
     siyuan: ISiyuan
     webkit: {
         messageHandlers: {
-            openLink:{postMessage: (url: string) => void}
-            startKernelFast:{postMessage: (url: string) => void}
-            changeStatusBar:{postMessage: (url: string) => void}
-            setClipboard:{postMessage: (url: string) => void}
+            openLink: { postMessage: (url: string) => void }
+            startKernelFast: { postMessage: (url: string) => void }
+            changeStatusBar: { postMessage: (url: string) => void }
+            setClipboard: { postMessage: (url: string) => void }
         }
     }
     html2canvas: (element: Element, opitons: {

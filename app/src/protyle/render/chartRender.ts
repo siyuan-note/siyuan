@@ -32,16 +32,20 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     }
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     try {
-                        window.echarts.dispose(renderElement);
+                        const chartInstance = window.echarts.getInstanceById(renderElement.getAttribute("_echarts_instance_"))
+                        const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
+                        if (chartInstance && chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
+                            chartInstance.clear();
+                        }
                         renderElement.classList.remove("ft__error");
                         renderElement.style.height = e.style.height;
-                        const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
                         window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                         e.setAttribute("data-render", "true");
                         if (!renderElement.textContent.endsWith(Constants.ZWSP)) {
                             renderElement.firstElementChild.insertAdjacentText("beforeend", Constants.ZWSP);
                         }
                     } catch (error) {
+                        window.echarts.dispose(renderElement);
                         renderElement.classList.add("ft__error");
                         renderElement.innerHTML = `echarts render error: <br>${error}`;
                     }

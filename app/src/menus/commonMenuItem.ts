@@ -257,7 +257,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {
-            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]');
+            target = dialog.element.querySelector(`.item--full[data-type="${event.detail}"]`);
         }
         while (!target.isSameNode(dialog.element)) {
             const type = target.dataset.action;
@@ -358,13 +358,15 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         }
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        if (focusName !== "av" && focusName === item.getAttribute("data-name")) {
+        if (focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
     if (focusName === "av") {
-        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "av"}));
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
+    } else if (focusName === "custom") {
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "custom"}));
     }
 };
 

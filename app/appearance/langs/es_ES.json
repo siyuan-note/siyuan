@@ -450,7 +450,7 @@
   "workspaceList": "Espacio de trabajo",
   "removeWorkspaceTip": "Quitar de los espacios de trabajo",
   "new": "Nuevo",
-  "share2LiandiConfirmTip": "¿Estás seguro de compartir este documento con comunidad?",
+  "share2LiandiConfirmTip": "¿Estás seguro de que deseas <b>publicar</b> este documento en la <a href=\"${accountServer}\" target=\"_blank\">comunidad</a>?<br>Después de la publicación, todos podrán ver este documento, asegúrate de que no contenga información confidencial",
   "share2Liandi": "Compartir con comunidad",
   "noDueCard": "¡Buen trabajo! No hay más tareas de revisión en este momento, ¡vuelve a comprobar más tarde!",
   "createDeck": "Crear mazo",

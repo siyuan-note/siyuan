@@ -450,7 +450,7 @@
   "workspaceList": "Obszary robocze",
   "removeWorkspaceTip": "Usuń z obszarów roboczych",
   "new": "Nowy",
-  "share2LiandiConfirmTip": "Czy na pewno chcesz udostępnić ten dokument społeczności?",
+  "share2LiandiConfirmTip": "Czy na pewno chcesz <b>opublikować</b> ten dokument w <a href=\"${accountServer}\" target=\"_blank\">społeczności</a>?<br>Po opublikowaniu wszyscy będą mogli zobaczyć ten dokument, upewnij się, że nie zawiera on poufnych informacji",
   "share2Liandi": "Udostępnij społeczności",
   "noDueCard": "Świetna robota! Obecnie nie ma więcej zadań do przeglądu, sprawdź później!",
   "createDeck": "Utwórz talię",

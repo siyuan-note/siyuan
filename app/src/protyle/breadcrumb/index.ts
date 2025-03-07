@@ -32,6 +32,7 @@ import {isInAndroid, isInHarmony, isIPad, isMac, updateHotkeyTip} from "../util/
 import {resize} from "../util/resize";
 import {listIndent, listOutdent} from "../wysiwyg/list";
 import {improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
+import {getCloudURL} from "../../config/util/about";
 
 export class Breadcrumb {
     public element: HTMLElement;
@@ -373,7 +374,8 @@ ${padHTML}
                         label: window.siyuan.languages.share2Liandi,
                         icon: "iconLiandi",
                         click() {
-                            confirmDialog("🚀 " + window.siyuan.languages.share2Liandi, window.siyuan.languages.share2LiandiConfirmTip, () => {
+                            confirmDialog("🤩 " + window.siyuan.languages.share2Liandi,
+                                window.siyuan.languages.share2LiandiConfirmTip.replace("${accountServer}", getCloudURL("")), () => {
                                 fetchPost("/api/export/export2Liandi", {id: protyle.block.parentID});
                             });
                         }

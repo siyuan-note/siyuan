@@ -450,7 +450,7 @@
   "workspaceList": "Arbeitsbereiche",
   "removeWorkspaceTip": "Aus Arbeitsbereichen entfernen",
   "new": "Neu",
-  "share2LiandiConfirmTip": "Sind Sie sicher, dass Sie dieses Dokument mit der Community teilen möchten?",
+  "share2LiandiConfirmTip": "Sind Sie sicher, dass Sie dieses Dokument <b>veröffentlichen</b> und in der <a href=\"${accountServer}\" target=\"_blank\">Community</a> teilen möchten?<br>Nach der Veröffentlichung können alle dieses Dokument einsehen, stellen Sie sicher, dass es keine vertraulichen Informationen enthält",
   "share2Liandi": "Mit der Community teilen",
   "noDueCard": "Großartige Arbeit! Momentan sind keine weiteren Überprüfungsaufgaben vorhanden, schauen Sie später wieder vorbei!",
   "createDeck": "Deck erstellen",

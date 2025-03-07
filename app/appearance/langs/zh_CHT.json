@@ -450,7 +450,7 @@
   "workspaceList": "工作空間",
   "removeWorkspaceTip": "從工作空間列表中移除",
   "new": "新建",
-  "share2LiandiConfirmTip": "確定將該文檔分享到社區嗎？",
+  "share2LiandiConfirmTip": "確定將該文檔<b>公開</b>分享到社區嗎？<br>公開分享後所有人都可以查看該文檔，請確保文檔內容不包含敏感信息",
   "share2Liandi": "分享到社區",
   "noDueCard": "幹得漂亮！目前已經沒有更多複習任務，過一會再來看看吧！",
   "createDeck": "建立卡包",

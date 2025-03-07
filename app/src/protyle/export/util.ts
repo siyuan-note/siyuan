@@ -64,20 +64,16 @@ export const exportImage = (id: string) => {
         (exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.height = "";
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         setTimeout(() => {
-            addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                window.html2canvas(exportDialog.element.querySelector(".b3-dialog__content"), {
-                    useCORS: true,
-                }).then((canvas) => {
-                    canvas.toBlob((blob: Blob) => {
-                        const formData = new FormData();
-                        formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
-                        formData.append("type", "image/png");
-                        fetchPost("/api/export/exportAsFile", formData, (response) => {
-                            openByMobile(response.data.file);
-                        });
-                        hideMessage(msgId);
-                        exportDialog.destroy();
+            addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
+                window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content")).then((blob) => {
+                    const formData = new FormData();
+                    formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
+                    formData.append("type", "image/png");
+                    fetchPost("/api/export/exportAsFile", formData, (response) => {
+                        openByMobile(response.data.file);
                     });
+                    hideMessage(msgId);
+                    exportDialog.destroy();
                 });
             });
         }, Constants.TIMEOUT_LOAD);
@@ -119,14 +115,11 @@ export const exportImage = (id: string) => {
                 if (window.siyuan.config.export.imageWatermarkStr.startsWith("http")) {
                     watermarkPreviewElement.setAttribute("style", `background-image: url(${window.siyuan.config.export.imageWatermarkStr});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
                 } else {
-                    addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
+                    addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
                         const width = Math.max(exportDialog.element.querySelector(".export-img").clientWidth / 3, 150);
                         watermarkPreviewElement.setAttribute("style", `width: ${width}px;height: ${width}px;display: flex;justify-content: center;align-items: center;color: var(--b3-border-color);font-size: 14px;`);
                         watermarkPreviewElement.innerHTML = `<div style="transform: rotate(-45deg)">${window.siyuan.config.export.imageWatermarkStr}</div>`;
-                        window.html2canvas(watermarkPreviewElement, {
-                            useCORS: true,
-                            scale: 1,
-                        }).then((canvas) => {
+                        window.htmlToImage.toCanvas(watermarkPreviewElement).then((canvas) => {
                             watermarkPreviewElement.innerHTML = "";
                             watermarkPreviewElement.setAttribute("style", `background-image: url(${canvas.toDataURL("image/png")});background-repeat: repeat;position: absolute;top: 0;left: 0;width: 100%;height: 100%;border-radius: var(--b3-border-radius-b);`);
                         });
@@ -139,23 +132,6 @@ export const exportImage = (id: string) => {
     };
     const refreshPreview = (response: IWebSocketData) => {
         previewElement.innerHTML = response.data.content;
-        // https://github.com/siyuan-note/siyuan/issues/9685
-        previewElement.querySelectorAll('[data-type~="mark"], [data-type~="u"], [data-type~="text"], [data-type~="code"], [data-type~="tag"], [data-type~="kbd"]').forEach((markItem: HTMLElement) => {
-            markItem.childNodes.forEach((item) => {
-                let spanHTML = "";
-                Array.from(item.textContent).forEach(str => {
-                    spanHTML += `<span style="${markItem.getAttribute("style") || ""};border-radius: 0;padding-left: 0;padding-right: 0;box-shadow: none;border-left:0;border-right:0;border-top:0" data-type="${markItem.getAttribute("data-type")}">${str}</span>`;
-                });
-                const templateElement = document.createElement("template");
-                templateElement.innerHTML = spanHTML;
-                item.after(templateElement.content);
-                item.remove();
-            });
-            if (markItem.childNodes.length > 0) {
-                markItem.setAttribute("style", "");
-                markItem.setAttribute("data-type", markItem.getAttribute("data-type").replace(/mark|u|text|code|tag|kbd/g, ""));
-            }
-        });
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
         if (response.data.attrs.memo) {
             previewElement.setAttribute("memo", response.data.attrs.memo);
@@ -178,26 +154,6 @@ export const exportImage = (id: string) => {
             if (item.clientWidth > item.parentElement.clientWidth) {
                 item.setAttribute("style", `margin-bottom:${item.parentElement.clientWidth * item.clientHeight / item.clientWidth - item.parentElement.clientHeight + 1}px;transform: scale(${item.parentElement.clientWidth / item.clientWidth});transform-origin: top left;`);
                 item.parentElement.style.overflow = "hidden";
-            }
-        });
-        previewElement.querySelectorAll(".li > .protyle-action > svg").forEach(item => {
-            const id = item.firstElementChild.getAttribute("xlink:href");
-            const symbolElements = document.querySelectorAll(id);
-            let viewBox = "0 0 32 32";
-            if (id === "#iconDot") {
-                viewBox = "0 0 20 20";
-            }
-            item.setAttribute("viewBox", viewBox);
-            item.innerHTML = symbolElements[symbolElements.length - 1].innerHTML;
-        });
-        previewElement.querySelectorAll(".img img").forEach((item: HTMLImageElement) => {
-            const imgSrc = item.getAttribute("src");
-            if (imgSrc.endsWith(".svg")) {
-                fetchGet(item.src, (response: string) => {
-                    item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;
-                });
-            } else if (imgSrc.startsWith("assets/")) {
-                item.src = location.origin + "/" + imgSrc;
             }
         });
         updateWatermark();

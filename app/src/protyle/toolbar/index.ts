@@ -999,8 +999,8 @@ export class Toolbar {
                 return;
             }
             setTimeout(() => {
-                addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                    window.html2canvas(renderElement, {useCORS: true}).then((canvas) => {
+                addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
+                    window.htmlToImage.toCanvas(renderElement).then((canvas) => {
                         canvas.toBlob((blob: Blob) => {
                             const formData = new FormData();
                             formData.append("file", blob);

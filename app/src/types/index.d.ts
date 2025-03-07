@@ -188,10 +188,10 @@ interface Window {
             setClipboard: { postMessage: (url: string) => void }
         }
     }
-    html2canvas: (element: Element, opitons: {
-        useCORS: boolean,
-        scale?: number
-    }) => Promise<any>;
+    htmlToImage: {
+        toCanvas:(element: Element) => Promise<HTMLCanvasElement>
+        toBlob:(element: Element) => Promise<Blob>
+    };
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void

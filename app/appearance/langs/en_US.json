@@ -450,7 +450,7 @@
   "workspaceList": "Workspaces",
   "removeWorkspaceTip": "Remove from Workspaces",
   "new": "New",
-  "share2LiandiConfirmTip": "Are you sure you want to <b>publish</b> this document to the community?<br>Once published, everyone will be able to view this document, please ensure it does not contain sensitive information",
+  "share2LiandiConfirmTip": "Are you sure you want to <b>publish</b> this document to the <a href=\"${accountServer}\" target=\"_blank\">community</a>?<br>Once published, everyone will be able to view this document, please ensure it does not contain sensitive information",
   "share2Liandi": "Share to community",
   "noDueCard": "Great job! There are no more review tasks at the moment, check back later!",
   "createDeck": "Create Deck",

@@ -949,6 +949,15 @@ export const zoomOut = (options: {
     if (typeof options.reload === "undefined") {
         options.reload = false;
     }
+    const blockPanelElement  = hasClosestByClassName(options.protyle.element, "block__popover", true);
+    if (blockPanelElement) {
+        const pingElement = blockPanelElement.querySelector('[data-type="pin"]');
+        if (pingElement && blockPanelElement.getAttribute("data-pin") !== "true") {
+            pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            pingElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");
+            blockPanelElement.setAttribute("data-pin", "true");
+        }
+    }
     const breadcrumbHLElement = options.protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
     if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id) {
         if (options.id === options.protyle.block.rootID) {

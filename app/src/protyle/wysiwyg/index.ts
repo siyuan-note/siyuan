@@ -205,7 +205,7 @@ export class WYSIWYG {
             !currentTypes.includes("kbd") &&
             !currentTypes.includes("tag") &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
-            (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
+            (currentTypes.includes("inline-memo") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
             inlineElement.textContent.length > inputData.length
         ) {

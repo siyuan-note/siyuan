@@ -3,7 +3,7 @@ import {escapeHtml} from "../../util/escape";
 import * as path from "path";
 /// #endif
 import {hideMessage, showMessage} from "../../dialog/message";
-import {fetchGet, fetchPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {addScript} from "../util/addScript";
 import {isMobile} from "../../util/functions";
@@ -156,16 +156,7 @@ export const exportImage = (id: string) => {
                 item.parentElement.style.overflow = "hidden";
             }
         });
-        previewElement.querySelectorAll(".img img").forEach((item: HTMLImageElement) => {
-            const imgSrc = item.getAttribute("src");
-            if (imgSrc.endsWith(".svg")) {
-                fetchGet(item.src, (response: string) => {
-                    item.src = `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(response)))}`;
-                });
-            } else if (imgSrc.startsWith("assets/")) {
-                item.src = location.origin + "/" + imgSrc;
-            }
-        });
+
         updateWatermark();
         btnsElement[0].removeAttribute("disabled");
         btnsElement[1].removeAttribute("disabled");

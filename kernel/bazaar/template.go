@@ -48,6 +48,11 @@ func Templates() (templates []*Template) {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
+	if 1 > len(bazaarIndex) {
+		return
+	}
+
+	requestFailed := false
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
@@ -63,15 +68,21 @@ func Templates() (templates []*Template) {
 			return
 		}
 
+		if requestFailed {
+			return
+		}
+
 		template := &Template{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/template.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(template).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get community template [%s] failed: %s", repoURL, innerErr)
+			requestFailed = true
 			return
 		}
 		if 200 != innerResp.StatusCode {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			requestFailed = true
 			return
 		}
 

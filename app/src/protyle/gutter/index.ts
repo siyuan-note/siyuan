@@ -2409,7 +2409,8 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         let marginHeight = 0;
         if (listItem && !window.siyuan.config.editor.rtl) {
             const relTempRect = listItem.firstElementChild.getBoundingClientRect();
-            if (relTempRect.right <= rect.right) {
+            // + 1 https://github.com/siyuan-note/siyuan/issues/14211
+            if (relTempRect.right <= rect.right + 1) {
                 rect = relTempRect;
                 space = 0;
             }

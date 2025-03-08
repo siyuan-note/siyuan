@@ -91,7 +91,6 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
                 text = text.slice(0, -1) + "\n";
             }
         });
-        text += blockElement.querySelector("[spellcheck]").textContent;
     } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);

@@ -355,7 +355,6 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 break;
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");
-                textElement.removeAttribute("data-subtype");
                 textElement.removeAttribute("data-content");
                 break;
         }

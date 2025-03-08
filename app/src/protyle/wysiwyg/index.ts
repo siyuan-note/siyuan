@@ -1318,7 +1318,7 @@ export class WYSIWYG {
                                             textPlain = textPlain.slice(0, -1) + "\n";
                                         }
                                     });
-                                    copyPlainText(textPlain);
+                                    copyPlainText(textPlain.slice(0, -1));
                                     focusBlock(tableBlockElement);
                                 }
                             }

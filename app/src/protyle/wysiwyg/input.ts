@@ -239,7 +239,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 focusBlock(blockElement);
             } else {
                 // https://github.com/siyuan-note/siyuan/issues/6087
-                realElement.querySelectorAll('[data-type="block-ref"][data-subtype="d"]').forEach(refItem => {
+                realElement.querySelectorAll('[data-type~="block-ref"][data-subtype="d"]').forEach(refItem => {
                     if (refItem.textContent === "") {
                         fetchPost("/api/block/getRefText", {id: refItem.getAttribute("data-id")}, (response) => {
                             refItem.innerHTML = response.data;

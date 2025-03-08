@@ -158,7 +158,7 @@ export const setRefDynamicText = (data: {
 }) => {
     getAllEditor().forEach(item => {
         // 不能对比 rootId，否则嵌入块中的锚文本无法更新
-        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
+        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type~="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
             item.innerHTML = data.refText;
         });
     });

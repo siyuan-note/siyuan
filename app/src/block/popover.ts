@@ -32,7 +32,7 @@ export const initBlockPopover = (app: App) => {
                 if (aElement.classList.contains("av__cell--header")) {
                     const textElement = aElement.querySelector(".av__celltext");
                     const desc = aElement.getAttribute("data-desc");
-                    if (textElement.scrollWidth > textElement.clientWidth + 2 || desc) {
+                    if (textElement.scrollWidth > textElement.clientWidth || desc) {
                         if (desc) {
                             tip = `${getCellText(aElement)}<div class='ft__on-surface'>${escapeAriaLabel(desc)}</div>`;
                         } else {

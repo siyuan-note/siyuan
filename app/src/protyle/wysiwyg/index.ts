@@ -63,7 +63,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
+import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -1295,6 +1295,34 @@ export class WYSIWYG {
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         }
+                        window.siyuan.menus.menu.append(new MenuItem({
+                            id: "copyPlainText",
+                            label: window.siyuan.languages.copyPlainText,
+                            click() {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    let textPlain = "";
+                                    selectCellElements.forEach((item, index) => {
+                                        textPlain += item.textContent.trim() + "\t";
+                                        if (!item.nextElementSibling || !selectCellElements[index + 1] ||
+                                            !item.nextElementSibling.isSameNode(selectCellElements[index + 1])) {
+                                            textPlain = textPlain.slice(0, -1) + "\n";
+                                        }
+                                    });
+                                    copyPlainText(textPlain);
+                                    focusBlock(tableBlockElement);
+                                }
+                            }
+                        }).element);
                         window.siyuan.menus.menu.append(new MenuItem({
                             icon: "iconCopy",
                             accelerator: "⌘C",

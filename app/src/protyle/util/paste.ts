@@ -82,7 +82,15 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock", "NodeTable"].includes(dataType)) {
+    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock"].includes(dataType)) {
+        text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if (dataType ==="NodeTable") {
+        blockElement.querySelectorAll("th, td").forEach((item) => {
+            text += item.textContent.trim() + "\t";
+            if (!item.nextElementSibling) {
+                text = text.slice(0, -1) + "\n";
+            }
+        });
         text += blockElement.querySelector("[spellcheck]").textContent;
     } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {

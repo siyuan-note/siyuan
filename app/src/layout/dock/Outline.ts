@@ -489,8 +489,6 @@ export class Outline extends Model {
             const targetRect = currentElement.getBoundingClientRect();
             const containerRect = this.element.getBoundingClientRect();
             const relativeTop = targetRect.top - containerRect.top + this.element.scrollTop;
-
-            console.log("1111", relativeTop, this.element.scrollTop, this.element.clientHeight);
             
             this.element.scrollTop = relativeTop - this.element.clientHeight / 2 - 30;
         }

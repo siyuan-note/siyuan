@@ -49,7 +49,11 @@ func Plugins(frontend string) (plugins []*Plugin) {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
+	if 1 > len(bazaarIndex) {
+		return
+	}
 
+	requestFailed := false
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(8, func(arg interface{}) {
@@ -65,15 +69,21 @@ func Plugins(frontend string) (plugins []*Plugin) {
 			return
 		}
 
+		if requestFailed {
+			return
+		}
+
 		plugin := &Plugin{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/plugin.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(plugin).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
+			requestFailed = true
 			return
 		}
 		if 200 != innerResp.StatusCode {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			requestFailed = true
 			return
 		}
 

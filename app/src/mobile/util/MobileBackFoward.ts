@@ -102,6 +102,11 @@ const focusStack = (backStack: IBackStack) => {
         setTimeout(() => {
             protyle.contentElement.scrollTop = backStack.scrollTop;
         }, Constants.TIMEOUT_LOAD);
+
+        protyle.app.plugins.forEach(item => {
+            item.eventBus.emit("switch-protyle", {protyle});
+            item.eventBus.emit("loaded-protyle-static", {protyle});
+        });
     });
 };
 

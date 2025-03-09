@@ -313,9 +313,7 @@ const renderPDF = async (id: string) => {
         })
         Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
-            item.style.width = "";
-            item.style.boxSizing = "border-box";
-            item.style.width = Math.min(item.clientWidth, width) + "px";
+            // 超级块内不能移除 width https://github.com/siyuan-note/siyuan/issues/14318
             item.removeAttribute('data-render');
         })
         previewElement.querySelectorAll('[data-type="NodeCodeBlock"][data-subtype="mermaid"] svg').forEach((item) => {

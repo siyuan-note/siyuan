@@ -790,7 +790,7 @@ export const openCardByData = async (app: App, cardsData: ICardData, cardType: T
             }
         }
     });
-    (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-background)";
+    (dialog.element.querySelector(".b3-dialog__scrim") as HTMLElement).style.backgroundColor = "var(--b3-theme-surface)";
     (dialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.maxWidth = "1024px";
     const editor = await bindCardEvent({
         app,

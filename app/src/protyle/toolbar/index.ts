@@ -567,11 +567,11 @@ export class Toolbar {
                         types = [...new Set(types)];
                         if (types.includes("block-ref") && item.getAttribute("data-subtype") === "d") {
                             // https://github.com/siyuan-note/siyuan/issues/14299
-                            if (previousElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                            if (previousElement && previousElement.getAttribute("data-id") === item.getAttribute("data-id")) {
                                 previousElement.setAttribute("data-subtype", "s");
                                 item.setAttribute("data-subtype", "s");
                             }
-                            if (nextElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                            if (nextElement && nextElement.getAttribute("data-id") === item.getAttribute("data-id")) {
                                 nextElement.setAttribute("data-subtype", "s");
                                 item.setAttribute("data-subtype", "s");
                             }

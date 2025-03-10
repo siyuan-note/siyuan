@@ -23,7 +23,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         }
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
         item.setAttribute("data-render", "true");
-        item.style.height = (item.clientHeight - 8) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
+        item.style.height = (item.clientHeight - 4) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
         item.innerHTML = `<div class="protyle-icons${isInEmbedBlock(item) ? " fn__none" : ""}">
     <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
     <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>

@@ -382,7 +382,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     } else {
         // 点击大纲产生滚动时会动态加载内容，最终导致定位不准确
         preventScroll(editor.editor.protyle);
-        editor.editor.protyle.observerLoad.disconnect();
+        editor.editor.protyle.observerLoad?.disconnect();
         if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {

@@ -244,6 +244,7 @@ func setFileAnnotation(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
 	model.IncSync()
 }
 

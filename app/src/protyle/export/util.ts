@@ -10,7 +10,7 @@ import {isMobile} from "../../util/functions";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
-import {openByMobile, setStorageVal} from "../util/compatibility";
+import {isIPhone, isSafari, openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
 import {isPaidUser} from "../../util/needSubscribe";
 
@@ -64,17 +64,22 @@ export const exportImage = (id: string) => {
         (exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.height = "";
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         setTimeout(() => {
-            addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
-                window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content")).then((blob) => {
-                    const formData = new FormData();
-                    formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
-                    formData.append("type", "image/png");
-                    fetchPost("/api/export/exportAsFile", formData, (response) => {
-                        openByMobile(response.data.file);
-                    });
-                    hideMessage(msgId);
-                    exportDialog.destroy();
+            addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(async () => {
+                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                if (isIPhone() || isSafari()) {
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                    blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                }
+                const formData = new FormData();
+                formData.append("file", blob, btnsElement[1].getAttribute("data-title"));
+                formData.append("type", "image/png");
+                fetchPost("/api/export/exportAsFile", formData, (response) => {
+                    openByMobile(response.data.file);
                 });
+                hideMessage(msgId);
+                exportDialog.destroy();
             });
         }, Constants.TIMEOUT_LOAD);
     });

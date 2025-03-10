@@ -485,12 +485,8 @@ export class Outline extends Model {
         }
         if (currentElement) {
             currentElement.classList.add("b3-list-item--focus");
-        
-            const targetRect = currentElement.getBoundingClientRect();
-            const containerRect = this.element.getBoundingClientRect();
-            const relativeTop = targetRect.top - containerRect.top + this.element.scrollTop;
-            
-            this.element.scrollTop = relativeTop - this.element.clientHeight / 2 - 30;
+            const elementRect = this.element.getBoundingClientRect();
+            this.element.scrollTop = this.element.scrollTop + (currentElement.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
     }
 

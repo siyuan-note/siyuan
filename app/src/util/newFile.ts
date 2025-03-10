@@ -248,7 +248,7 @@ export const newFileBySelect = (protyle: IProtyle, selectText: string, nodeEleme
         path: hPath,
         notebook: targetNotebookId
     }, (idResponse) => {
-        const refText = escapeHtml(newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen));
+        const refText = newFileName.substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen);
         if (idResponse.data && idResponse.data.length > 0) {
             protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                 type: "id",

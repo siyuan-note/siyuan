@@ -6,7 +6,7 @@
 		"id": "20211226120247-63nd8y5",
 		"title": "引用内容塊",
 		"type": "doc",
-		"updated": "20250115145500"
+		"updated": "20250311195912"
 	},
 	"Children": [
 		{
@@ -15,7 +15,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226120337-x5qwass",
-				"updated": "20211225232221"
+				"updated": "20250311195846"
 			},
 			"Children": [
 				{
@@ -29,7 +29,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220623200737-sx458du",
-				"updated": "20230630093355"
+				"updated": "20250311195846"
 			},
 			"Children": [
 				{
@@ -43,7 +43,7 @@
 				},
 				{
 					"Type": "NodeText",
-					"Data": "​ 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後Enter就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
+					"Data": "​ 後將觸發內容塊引用搜索，繼續輸入作為搜索關鍵字，在搜索結果中使用上下鍵選定後回車就可以完成內容塊的引用了。建立好內容塊引用後，鼠標懸浮在錨文字上後將彈出預覽浮層，展現被引用的內容塊（定義塊）。"
 				},
 				{
 					"Type": "NodeTextMark",
@@ -239,7 +239,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220623200754-u00gfsg",
-				"updated": "20250115145500"
+				"updated": "20250311195912"
 			},
 			"Children": [
 				{
@@ -535,7 +535,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230420185856-fpkt2wv",
-				"updated": "20250115145500"
+				"updated": "20250311195912"
 			},
 			"Children": [
 				{
@@ -547,7 +547,7 @@
 					},
 					"Properties": {
 						"id": "20230420185856-4v3g6nz",
-						"updated": "20230420190021"
+						"updated": "20250311195908"
 					},
 					"Children": [
 						{
@@ -555,7 +555,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420185856-tnhsmet",
-								"updated": "20230420190021"
+								"updated": "20250311195908"
 							},
 							"Children": [
 								{
@@ -565,7 +565,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回車"
 								},
 								{
 									"Type": "NodeText",
@@ -593,7 +593,7 @@
 					},
 					"Properties": {
 						"id": "20230420185856-jg6anpy",
-						"updated": "20250115145500"
+						"updated": "20250311195912"
 					},
 					"Children": [
 						{
@@ -601,7 +601,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230420185856-nh72xao",
-								"updated": "20250115145500"
+								"updated": "20250311195912"
 							},
 							"Children": [
 								{
@@ -620,7 +620,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "Enter"
+									"TextMarkTextContent": "回車"
 								},
 								{
 									"Type": "NodeText",

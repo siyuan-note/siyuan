@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20250115152038"
+		"updated": "20250311195932"
 	},
 	"Children": [
 		{
@@ -636,7 +636,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240818174403-xnbqd38",
-				"updated": "20250115145255"
+				"updated": "20250311195932"
 			},
 			"Children": [
 				{
@@ -655,7 +655,7 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20240818174421-v5il1as",
-				"updated": "20250115145255"
+				"updated": "20250311195932"
 			},
 			"Children": [
 				{
@@ -674,7 +674,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Enter"
+					"TextMarkTextContent": "回車"
 				},
 				{
 					"Type": "NodeText",

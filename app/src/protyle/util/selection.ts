@@ -392,7 +392,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     const editElement = getContenteditableElement(container);
     if (editElement) {
         container = editElement;
-    } else if (isNotEditBlock(container) || container.classList.contains("av")) {
+    } else if (isFocus && (isNotEditBlock(container) || container.classList.contains("av"))) {
         return focusBlock(container);
     }
     let startNode;
@@ -549,7 +549,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             setRange = true;
         } else if (type === "NodeBlockQueryEmbed") {
             genRenderFrame(element);
-            range.selectNodeContents(element.lastElementChild.previousElementSibling.firstChild);
+            range.setStart(element.lastElementChild.previousElementSibling.firstChild, 0);
             range.collapse(true);
             setRange = true;
         } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {

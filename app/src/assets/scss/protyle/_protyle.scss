@@ -409,6 +409,12 @@
   }
 }
 
+.protyle-cursor {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
 table[contenteditable="false"] + .protyle-action__table > .table__resize {
   display: none;
 }

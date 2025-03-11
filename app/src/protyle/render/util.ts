@@ -1,3 +1,6 @@
+import {isInEmbedBlock} from "../util/hasClosest";
+import {Constants} from "../../constants";
+
 export const genIconHTML = (element?: false | HTMLElement) => {
     let enable = true;
     if (element) {
@@ -13,6 +16,17 @@ export const genIconHTML = (element?: false | HTMLElement) => {
     <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last${enable ? "" : " protyle-icon--first"}"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div>`;
 };
+
+export const genRenderFrame = (renderElement:Element) => {
+    if (renderElement.querySelector(".protyle-icons")) {
+        return;
+    }
+    renderElement.insertAdjacentHTML("afterbegin",`<div class="protyle-icons${isInEmbedBlock(renderElement) ? " fn__none" : ""}">
+    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
+</div><div style="position: absolute;">${Constants.ZWSP}</div>`)
+}
 
 export const processClonePHElement = (item: Element) => {
     if (item.getAttribute("data-type") === "NodeHTMLBlock") {

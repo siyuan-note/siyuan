@@ -32,6 +32,16 @@ func NaturalCompare(str1, str2 string) bool {
 	return natsort.Compare(str1, str2)
 }
 
+func EmojiPinYinCompare(str1, str2 string) bool {
+	str1_ := strings.TrimSpace(RemoveEmojiInvisible(str1))
+	str2_ := strings.TrimSpace(RemoveEmojiInvisible(str2))
+	if str1_ == str2_ && 0 == len(str1_) {
+		// 全部都是 emoji 的情况按 emoji 字符串排序
+		return strings.Compare(str1, str2) < 0
+	}
+	return PinYinCompare(str1, str2)
+}
+
 func PinYinCompare(str1, str2 string) bool {
 	str1 = RemoveEmojiInvisible(str1)
 	str2 = RemoveEmojiInvisible(str2)

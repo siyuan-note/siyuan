@@ -68,7 +68,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			}
 
-			if util.PinYinCompare(value.Text.Content, other.Text.Content) {
+			if util.EmojiPinYinCompare(value.Text.Content, other.Text.Content) {
 				return -1
 			}
 			return 1
@@ -243,7 +243,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			}
 
-			if util.PinYinCompare(v1, v2) {
+			if util.EmojiPinYinCompare(v1, v2) {
 				return -1
 			}
 			return 1
@@ -266,7 +266,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			}
 
-			if util.PinYinCompare(value.Template.Content, other.Template.Content) {
+			if util.EmojiPinYinCompare(value.Template.Content, other.Template.Content) {
 				return -1
 			}
 			return 1
@@ -314,7 +314,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			}
 
-			if util.PinYinCompare(vContent, oContent) {
+			if util.EmojiPinYinCompare(vContent, oContent) {
 				return -1
 			}
 			return 1
@@ -352,7 +352,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 				return 0
 			}
 
-			if util.PinYinCompare(vContent, oContent) {
+			if util.EmojiPinYinCompare(vContent, oContent) {
 				return -1
 			}
 			return 1

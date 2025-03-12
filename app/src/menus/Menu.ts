@@ -354,6 +354,17 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (!currentElement) {
             return false;
         } else {
+            const subMenuElement = currentElement.querySelector(".b3-menu__submenu");
+            if (subMenuElement) {
+                currentElement.classList.remove("b3-menu__item--current");
+                currentElement.classList.add("b3-menu__item--show");
+                const actionMenuElement = getActionMenu(subMenuElement.firstElementChild.firstElementChild, true);
+                if (actionMenuElement) {
+                    actionMenuElement.classList.add("b3-menu__item--current");
+                }
+                window.siyuan.menus.menu.showSubMenu(subMenuElement);
+                return true;
+            }
             const textElement = currentElement.querySelector(".b3-text-field") as HTMLInputElement;
             const checkElement = currentElement.querySelector(".b3-switch") as HTMLInputElement;
             if (textElement) {

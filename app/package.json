@@ -18,13 +18,13 @@
     "build:export": "webpack --mode production --config webpack.export.js",
     "gen:types": "tsc -d",
     "start": "NODE_ENV=development electron ./electron/main.js",
-    "dist-appx": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
-    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
-    "dist-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
-    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
-    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
-    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never",
-    "dist-linux-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --linux --config electron-builder-linux-arm64.yml --publish=never"
+    "dist-appx": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
+    "dist": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
+    "dist-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
+    "dist-darwin": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
+    "dist-darwin-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
+    "dist-linux": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never",
+    "dist-linux-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --linux --config electron-builder-linux-arm64.yml --publish=never"
   },
   "keywords": [
     "markdown",

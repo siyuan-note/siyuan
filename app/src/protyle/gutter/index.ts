@@ -2282,10 +2282,10 @@ export class Gutter {
         let listItem;
         let hideParent = false;
         while (nodeElement) {
-            const isShow = !hideParent || (hideParent && nodeElement.getAttribute("fold") === "1");
+            const parentElement = hasClosestBlock(nodeElement.parentElement);
             if (!isInEmbedBlock(nodeElement)) {
                 let type;
-                if (isShow) {
+                if (!hideParent) {
                     type = nodeElement.getAttribute("data-type");
                 }
                 let dataNodeId = nodeElement.getAttribute("data-node-id");
@@ -2324,7 +2324,7 @@ export class Gutter {
                         dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
-                if (type === "NodeListItem" && index === 1 && !isShow) {
+                if (type === "NodeListItem" && index === 1) {
                     // 列表项中第一层不显示
                     html = "";
                 }
@@ -2343,7 +2343,7 @@ data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" d
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;
-                if (isShow) {
+                if (!hideParent) {
                     html = buttonHTML + html;
                 }
                 let foldHTML = "";
@@ -2365,13 +2365,19 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                     space += 8;
                 }
                 if (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) {
-                    // 前一个块存在时，只显示到当前层级，但需显示折叠块的块标
-                    // https://github.com/siyuan-note/siyuan/issues/2562 https://github.com/siyuan-note/siyuan/issues/2809
+                    // 前一个块存在时，只显示到当前层级
                     hideParent = true;
+                    // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
+                    if (parentElement && parentElement.getAttribute("fold") === "1") {
+                        return;
+                    }
+                    // 列表项中的引述块中的第二个段落块块标和引述块左侧样式重叠
+                    if (parentElement && parentElement.getAttribute("data-type") === "NodeBlockquote") {
+                        space += 8;
+                    }
                 }
             }
 
-            const parentElement = hasClosestBlock(nodeElement.parentElement);
             if (parentElement) {
                 nodeElement = parentElement;
             } else {
@@ -2407,13 +2413,9 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem && !window.siyuan.config.editor.rtl) {
-            const relTempRect = listItem.firstElementChild.getBoundingClientRect();
-            // + 1 https://github.com/siyuan-note/siyuan/issues/14211
-            if (relTempRect.right <= rect.right + 1) {
-                rect = relTempRect;
-                space = 0;
-            }
+        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
+            rect = listItem.firstElementChild.getBoundingClientRect();
+            space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             rect = nodeElement.getBoundingClientRect();
             space = 0;

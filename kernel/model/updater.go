@@ -150,9 +150,10 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
 		downloadPkgURLs = append(downloadPkgURLs, githubURL)
 	} else {
-		downloadPkgURLs = append(downloadPkgURLs, githubURL)
 		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
 		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)
+		downloadPkgURLs = append(downloadPkgURLs, githubURL)
+		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
 	}
 
 	checksums := result["checksums"].(map[string]interface{})

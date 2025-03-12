@@ -1577,8 +1577,11 @@ export class WYSIWYG {
                 if (headElement && range.toString() === headElement.firstElementChild.textContent) {
                     tempElement.insertAdjacentHTML("afterbegin", headElement.firstElementChild.innerHTML);
                     headElement.firstElementChild.innerHTML = "";
-                } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
-                    && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&
+                } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) &&
+                    range.startContainer.nodeType === 3 &&
+                    // 需使用 wholeText https://github.com/siyuan-note/siyuan/issues/14339
+                    range.endOffset === range.endContainer.wholeText.length &&
+                    range.startOffset === 0 &&
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素
                     tempElement.append(range.startContainer.parentElement);

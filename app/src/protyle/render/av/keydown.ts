@@ -1,5 +1,5 @@
 import {matchHotKey} from "../../util/hotKey";
-import {deleteRow, selectRow} from "./row";
+import {deleteRow, insertRows, selectRow} from "./row";
 import {addDragFill, cellScrollIntoView, popTextCell, updateCellsValue} from "./cell";
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
@@ -81,6 +81,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
                 newCellElement = selectCellElement.nextElementSibling;
             } else if (!selectCellElement.nextElementSibling && selectCellElement.parentElement.nextElementSibling) {
+                // pin
                 newCellElement = selectCellElement.parentElement.nextElementSibling;
             } else if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
                 newCellElement = nextRowElement.querySelector(".av__cell");
@@ -91,6 +92,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement.classList.add("av__cell--select");
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
+            } else if (event.key !== "ArrowRight") {
+                selectCellElement.classList.remove("av__cell--select", "av__cell--active");
+                selectCellElement.querySelector(".av__drag-fill")?.remove();
+                insertRows(nodeElement, protyle, 1, rowElement.getAttribute("data-id"));
             }
             event.preventDefault();
             return true;

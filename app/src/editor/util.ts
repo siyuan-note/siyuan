@@ -392,9 +392,10 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     editor.editor.protyle.toolbar.range = newRange;
                 }
                 scrollCenter(editor.editor.protyle, nodeElement, true);
-
                 const resizeObserver = new ResizeObserver(() => {
-                    scrollCenter(editor.editor.protyle, nodeElement, true);
+                    if (document.contains(nodeElement)) {
+                        scrollCenter(editor.editor.protyle, nodeElement, true);
+                    }
                 });
                 setTimeout(() => {
                     resizeObserver.disconnect();

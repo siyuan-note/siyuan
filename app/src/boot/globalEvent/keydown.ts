@@ -557,6 +557,9 @@ const fileTreeKeydown = (app: App, event: KeyboardEvent) => {
         return false;
     }
     const files = dockFile.data.file as Files;
+    if (typeof dockFile.data.file === "boolean") {
+        return true;
+    }
 
     if (matchHotKey(window.siyuan.config.keymap.general.selectOpen1.custom, event)) {
         event.preventDefault();

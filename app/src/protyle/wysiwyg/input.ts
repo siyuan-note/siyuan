@@ -22,7 +22,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
     if (blockElement.classList.contains("av")) {
         const avCursorElement = hasClosestByClassName(range.startContainer, "av__cursor");
         if (avCursorElement) {
-            range.startContainer.textContent = Constants.ZWSP;
+            avCursorElement.textContent = Constants.ZWSP;
         } else {
             updateAVName(protyle, blockElement);
         }

@@ -1189,6 +1189,8 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "addColOptionOrCell") {
+                    menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                    target.classList.add("b3-menu__item--current");
                     if (target.querySelector(".b3-menu__checked")) {
                         removeCellOption(options.protyle, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
                     } else {

@@ -307,10 +307,6 @@ ${html || genSelectItemHTML("empty")}`;
                 setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
                 event.preventDefault();
                 event.stopPropagation();
-            } else if (event.key === "Escape") {
-                options.menuElement.parentElement.remove();
-                event.preventDefault();
-                event.stopPropagation();
             }
         });
         inputElement.addEventListener("input", (event: InputEvent) => {

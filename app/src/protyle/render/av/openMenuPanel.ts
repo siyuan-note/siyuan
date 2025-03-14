@@ -151,6 +151,7 @@ export const openMenuPanel = (options: {
                 });
             } else if (options.type === "rollup") {
                 bindRollupData({protyle: options.protyle, data, menuElement});
+                (avPanelElement.querySelector(".b3-menu__item") as HTMLButtonElement).focus();
             }
             if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
@@ -969,7 +970,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchRollupCol") {
                     goSearchRollupCol({
-                        target,
+                        target: avPanelElement.querySelector('[data-type="goSearchRollupCol"]'),
                         data,
                         isRelation: true,
                         protyle: options.protyle,
@@ -980,7 +981,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchRollupTarget") {
                     goSearchRollupCol({
-                        target,
+                        target: avPanelElement.querySelector('[data-type="goSearchRollupTarget"]'),
                         data,
                         isRelation: false,
                         protyle: options.protyle,
@@ -990,7 +991,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupCalc") {
-                    openCalcMenu(options.protyle, target, {
+                    openCalcMenu(options.protyle, avPanelElement.querySelector('[data-type="goSearchRollupTarget"]'), {
                         data,
                         colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
                         blockID

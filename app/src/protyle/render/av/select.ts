@@ -589,7 +589,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         transaction(protyle, cellDoOperations, cellUndoOperations);
     }
     if (colData.type === "select") {
-        menuElement.parentElement.remove();
+        menuElement.parentElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
     } else {
         const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
         const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;

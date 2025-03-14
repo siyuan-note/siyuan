@@ -354,7 +354,7 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
         if (!currentElement) {
             return false;
         } else {
-            const subMenuElement = currentElement.querySelector(".b3-menu__submenu");
+            const subMenuElement = currentElement.querySelector(".b3-menu__submenu") as HTMLElement;
             if (subMenuElement) {
                 currentElement.classList.remove("b3-menu__item--current");
                 currentElement.classList.add("b3-menu__item--show");

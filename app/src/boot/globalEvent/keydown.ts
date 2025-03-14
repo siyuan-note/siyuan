@@ -75,6 +75,7 @@ import {duplicateCompletely} from "../../protyle/render/av/action";
 import {copyTextByType} from "../../protyle/toolbar/util";
 import {onlyProtyleCommand} from "./command/protyle";
 import {cancelDrag} from "./dragover";
+import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
 
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
@@ -1272,6 +1273,11 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
     }
 
     if (bindMenuKeydown(event)) {
+        event.preventDefault();
+        return;
+    }
+
+    if (bindAVPanelKeydown(event)) {
         event.preventDefault();
         return;
     }

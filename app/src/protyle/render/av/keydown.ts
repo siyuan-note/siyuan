@@ -4,6 +4,7 @@ import {addDragFill, cellScrollIntoView, popTextCell, updateCellsValue} from "./
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
+import {upDownHint} from "../../../util/upDownHint";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -199,3 +200,23 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     return false;
 };
 
+export const bindAVPanelKeydown = (event: KeyboardEvent) => {
+    const avPanelElement = document.querySelector(".av__panel");
+    if (avPanelElement && avPanelElement.querySelector('[data-type="goSearchRollupCol"]') &&
+        !avPanelElement.querySelector(".b3-text-field") &&
+        window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+        const menuElement = avPanelElement.querySelector(".b3-menu__items")
+        if (event.key === "Enter") {
+            const currentElement = menuElement.querySelector(".b3-menu__item--current");
+            if (currentElement) {
+                avPanelElement.dispatchEvent(new CustomEvent("click", {detail: currentElement.getAttribute("data-type")}));
+            }
+        } else if (event.key === "Escape") {
+            avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+        } else {
+            upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild)
+        }
+        return true;
+    }
+    return false;
+}

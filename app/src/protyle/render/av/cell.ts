@@ -79,7 +79,10 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         if (colType === "block" && textElement.dataset.id) {
             cellValue.block.id = textElement.dataset.id;
             if (textElement.previousElementSibling?.classList.contains("b3-menu__avemoji")) {
-                cellValue.block.icon = textElement.previousElementSibling.getAttribute("data-unicode");
+                const unicode = textElement.previousElementSibling.getAttribute("data-unicode")
+                if (unicode) {
+                    cellValue.block.icon = unicode;
+                }
             }
         }
     } else if (colType === "mSelect" || colType === "select") {
@@ -708,8 +711,6 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             };
             if (oldValue.block.icon) {
                 newValue.icon = oldValue.block.icon;
-            } else {
-                delete oldValue.block.icon;
             }
         }
         const cellValue = genCellValue(type, newValue);

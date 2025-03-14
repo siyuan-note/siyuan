@@ -1239,12 +1239,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     !protyle.toolbar.subElement.classList.contains("fn__none")) {
                     hideElements(["toolbar", "hint", "util"], protyle);
                     protyle.hint.enableExtend = false;
-                } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
-                    hideElements(["select"], protyle);
-                    countBlockWord([], protyle.block.rootID);
                 } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                     // 防止 ESC 时选中当前块
                     window.siyuan.menus.menu.remove();
+                } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
+                    hideElements(["select"], protyle);
+                    countBlockWord([], protyle.block.rootID);
                 } else {
                     hideElements(["select"], protyle);
                     range.collapse(false);
@@ -1749,11 +1749,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const oldHTML = nodeElement.outerHTML;
                 let text = "";
                 if (!event.shiftKey) {
-                    range.extractContents().textContent.split("\n").forEach((item) => {
+                    range.extractContents().textContent.split("\n").forEach((item: string) => {
                         text += tabSpace + item + "\n";
                     });
                 } else {
-                    range.extractContents().textContent.split("\n").forEach((item) => {
+                    range.extractContents().textContent.split("\n").forEach((item: string) => {
                         if (item.startsWith(tabSpace)) {
                             text += item.replace(tabSpace, "") + "\n";
                         } else {

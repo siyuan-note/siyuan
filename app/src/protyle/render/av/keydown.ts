@@ -20,7 +20,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     const selectCellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
     if (selectCellElement) {
         const rowElement = hasClosestByClassName(selectCellElement, "av__row");
-        if (!rowElement) {
+        if (!rowElement || rowElement.dataset.type === "ghost") {
             return false;
         }
         const avPanelElement = document.querySelector(".av__panel");

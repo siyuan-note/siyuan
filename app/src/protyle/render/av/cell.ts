@@ -708,6 +708,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             };
             if (oldValue.block.icon) {
                 newValue.icon = oldValue.block.icon;
+            } else {
+                delete oldValue.block.icon;
             }
         }
         const cellValue = genCellValue(type, newValue);

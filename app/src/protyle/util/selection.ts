@@ -135,7 +135,7 @@ export const getRangeByPoint = (x: number, y: number) => {
     return range;
 };
 
-export const getEditorRange = (element: Element) => {
+export const getEditorRange = (element: Element): Range => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
@@ -153,7 +153,10 @@ export const getEditorRange = (element: Element) => {
     }
 
     if (element.classList.contains("li") || element.classList.contains("list")) {
-        return getEditorRange(element.querySelector("[data-node-id]"));
+        const childElement = element.querySelector("[data-node-id]")
+        if (childElement) {
+            return getEditorRange(childElement);
+        }
     }
 
     // 代码块过长，在代码块的下一个块前删除，代码块会滚动到顶部，因粗需要 preventScroll
@@ -171,9 +174,9 @@ export const getEditorRange = (element: Element) => {
         if (!targetElement) {
             const type = element.getAttribute("data-type");
             if (type === "NodeThematicBreak") {
-                targetElement= element.firstElementChild;
+                targetElement = element.firstElementChild;
             } else if (type === "NodeBlockQueryEmbed") {
-               targetElement = element.lastElementChild.previousElementSibling?.firstChild;
+                targetElement = element.lastElementChild.previousElementSibling?.firstChild;
             } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
                 targetElement = element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild;
             } else if (type === "NodeVideo") {
@@ -575,8 +578,8 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             genRenderFrame(element);
             range.setStart(element.firstElementChild.lastElementChild.firstChild, 0);
             setRange = true;
-        }  else if (type ===  "NodeHTMLBlock") {
-            range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild.firstChild, 0);
+        } else if (type === "NodeHTMLBlock") {
+            range.setStart(element.lastElementChild.previousElementSibling.lastElementChild.firstChild, 0);
             range.collapse(true);
             setRange = true;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {

@@ -1248,7 +1248,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     protyle.hint.enableExtend = false;
                 } else if (!window.siyuan.menus.menu.element.classList.contains("fn__none")) {
                     // 防止 ESC 时选中当前块
-                    window.siyuan.menus.menu.remove();
+                    window.siyuan.menus.menu.remove(true);
                 } else if (nodeElement.classList.contains("protyle-wysiwyg--select")) {
                     hideElements(["select"], protyle);
                     countBlockWord([], protyle.block.rootID);

@@ -1418,7 +1418,7 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
                 window.siyuan.menus.menu.element.style.zIndex < (window.siyuan.dialogs[0].element.querySelector(".b3-dialog") as HTMLElement).style.zIndex) {
                 // 窗口高于菜单时，先关闭窗口，如 av 修改列 icon 时
             } else {
-                window.siyuan.menus.menu.remove();
+                window.siyuan.menus.menu.remove(true);
                 return;
             }
         }

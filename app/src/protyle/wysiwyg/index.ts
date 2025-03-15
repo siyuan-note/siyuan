@@ -1580,7 +1580,7 @@ export class WYSIWYG {
                 } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) &&
                     range.startContainer.nodeType === 3 &&
                     // 需使用 wholeText https://github.com/siyuan-note/siyuan/issues/14339
-                    range.endOffset === range.endContainer.wholeText.length &&
+                    range.endOffset === (range.endContainer as Text).wholeText.length &&
                     range.startOffset === 0 &&
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素

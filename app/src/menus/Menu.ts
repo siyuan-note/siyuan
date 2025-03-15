@@ -97,7 +97,16 @@ export class Menu {
         window.removeEventListener(isMobile() ? "touchmove" : this.wheelEvent, this.preventDefault, false);
     }
 
-    public remove() {
+    public remove(isKeyEvent = false) {
+        if (isKeyEvent) {
+            const subElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--show");
+            if (subElement) {
+                subElement.classList.remove("b3-menu__item--show");
+                subElement.classList.add("b3-menu__item--current");
+                subElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                return;
+            }
+        }
         if (window.siyuan.menus.menu.removeCB) {
             window.siyuan.menus.menu.removeCB();
             window.siyuan.menus.menu.removeCB = undefined;

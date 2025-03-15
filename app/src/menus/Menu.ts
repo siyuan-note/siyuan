@@ -99,8 +99,9 @@ export class Menu {
 
     public remove(isKeyEvent = false) {
         if (isKeyEvent) {
-            const subElement = window.siyuan.menus.menu.element.querySelector(".b3-menu__item--show");
-            if (subElement) {
+            const subElements = window.siyuan.menus.menu.element.querySelectorAll(".b3-menu__item--show");
+            if (subElements.length > 0) {
+                const subElement = subElements[subElements.length - 1];
                 subElement.classList.remove("b3-menu__item--show");
                 subElement.classList.add("b3-menu__item--current");
                 subElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");

@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/cache"
 	"github.com/siyuan-note/siyuan/kernel/sql"
@@ -161,6 +162,20 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		err = ErrBlockNotFound
 		return
 	}
+
+	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
+	historyDir, err := GetHistoryDir(HistoryOpUpdate)
+	if nil != err {
+		logging.LogErrorf("get history dir failed: %s", err)
+		return
+	}
+	historyPath := filepath.Join(historyDir, srcTree.Box, srcTree.Path)
+	absPath := filepath.Join(util.DataDir, srcTree.Box, srcTree.Path)
+	if err = filelock.Copy(absPath, historyPath); err != nil {
+		logging.LogErrorf("backup [path=%s] to history [%s] failed: %s", absPath, historyPath, err)
+		return
+	}
+	indexHistoryDir(filepath.Base(historyDir), util.NewLute())
 
 	// 移动前先删除引用 https://github.com/siyuan-note/siyuan/issues/7819
 	sql.DeleteRefsTreeQueue(srcTree)

@@ -304,18 +304,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 	}
 	for _, nodeID := range duplicatedIDs {
-		node := nodes[nodeID]
-		node.ID = ast.NewNodeID()
-		node.SetIALAttr("id", node.ID)
-		created := util.TimeFromID(node.ID)
-		updated := node.IALAttr("updated")
-		if "" == updated {
-			updated = created
-		}
-		if updated < created {
-			updated = created
-		}
-		node.SetIALAttr("updated", updated)
+		treenode.ResetNodeID(nodes[nodeID])
 	}
 
 	// 仅重新索引该文档，不进行全量索引

@@ -204,8 +204,7 @@ func resetDuplicateBlocksOnFileSys() {
 
 				if "" == n.ID {
 					needOverwrite = true
-					n.ID = ast.NewNodeID()
-					n.SetIALAttr("id", n.ID)
+					treenode.ResetNodeID(n)
 					return ast.WalkContinue
 				}
 
@@ -225,8 +224,7 @@ func resetDuplicateBlocksOnFileSys() {
 
 				// 其他情况，重置节点 ID
 				needOverwrite = true
-				n.ID = ast.NewNodeID()
-				n.SetIALAttr("id", n.ID)
+				treenode.ResetNodeID(n)
 				needRefreshUI = true
 				return ast.WalkContinue
 			})

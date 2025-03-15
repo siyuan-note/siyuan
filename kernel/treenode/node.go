@@ -34,6 +34,28 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func ResetNodeID(node *ast.Node) {
+	if nil == node {
+		return
+	}
+
+	node.ID = ast.NewNodeID()
+	node.SetIALAttr("id", node.ID)
+	resetUpdatedByID(node)
+}
+
+func resetUpdatedByID(node *ast.Node) {
+	created := util.TimeFromID(node.ID)
+	updated := node.IALAttr("updated")
+	if "" == updated {
+		updated = created
+	}
+	if updated < created {
+		updated = created
+	}
+	node.SetIALAttr("updated", updated)
+}
+
 func GetEmbedBlockRef(embedNode *ast.Node) (blockRefID string) {
 	if nil == embedNode || ast.NodeBlockQueryEmbed != embedNode.Type {
 		return

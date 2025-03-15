@@ -281,10 +281,10 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 
 	if pathID := util.GetTreeID(p); pathID != ret.Root.ID {
 		needFix = true
+		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
 		ret.Root.ID = pathID
 		ret.ID = pathID
 		ret.Root.SetIALAttr("id", ret.ID)
-		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
 	}
 
 	if needFix {

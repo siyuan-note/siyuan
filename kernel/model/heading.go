@@ -162,6 +162,9 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 		return
 	}
 
+	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
+	generateOpTypeHistory(srcTree, HistoryOpUpdate)
+
 	// 移动前先删除引用 https://github.com/siyuan-note/siyuan/issues/7819
 	sql.DeleteRefsTreeQueue(srcTree)
 	sql.DeleteRefsTreeQueue(targetTree)

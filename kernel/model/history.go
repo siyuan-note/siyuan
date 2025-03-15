@@ -237,9 +237,9 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	srcPath := historyPath
 	var destPath, parentHPath string
-	id := util.GetTreeID(historyPath)
-	workingDoc := treenode.GetBlockTree(id)
-	if nil != workingDoc {
+	rootID := util.GetTreeID(historyPath)
+	workingDoc := treenode.GetBlockTree(rootID)
+	if nil != workingDoc && "d" == workingDoc.Type {
 		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
 			return
 		}
@@ -247,10 +247,6 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 
 	destPath, parentHPath, err = getRollbackDockPath(boxID, historyPath, workingDoc)
 	if err != nil {
-		return
-	}
-
-	if err = filelock.CopyNewtimes(srcPath, destPath); err != nil {
 		return
 	}
 
@@ -283,14 +279,47 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	tree.Path = filepath.ToSlash(strings.TrimPrefix(destPath, util.DataDir+string(os.PathSeparator)+boxID))
 	tree.HPath = parentHPath + "/" + tree.Root.IALAttr("title")
 
+	// 重置重复的块 ID https://github.com/siyuan-note/siyuan/issues/14358
+	if nil != workingDoc {
+		treenode.RemoveBlockTreesByRootID(rootID)
+	}
+	nodes := map[string]*ast.Node{}
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+
+		nodes[n.ID] = n
+		return ast.WalkContinue
+	})
+	var ids []string
+	for nodeID, _ := range nodes {
+		ids = append(ids, nodeID)
+	}
+	idMap := treenode.ExistBlockTrees(ids)
+	var duplicatedIDs []string
+	for nodeID, exist := range idMap {
+		if exist {
+			duplicatedIDs = append(duplicatedIDs, nodeID)
+		}
+	}
+	for _, nodeID := range duplicatedIDs {
+		node := nodes[nodeID]
+		treenode.ResetNodeID(node)
+		if ast.NodeDocument == node.Type {
+			tree.ID = node.ID
+			tree.Path = tree.Path[:strings.LastIndex(tree.Path, "/")] + "/" + node.ID + ".sy"
+		}
+	}
+
 	// 仅重新索引该文档，不进行全量索引
 	// Reindex only the current document after rolling back the document https://github.com/siyuan-note/siyuan/issues/12320
-	treenode.RemoveBlockTree(id)
-	treenode.IndexBlockTree(tree)
-	sql.RemoveTreeQueue(id)
-	sql.IndexTreeQueue(tree)
+	sql.RemoveTreeQueue(rootID)
+	if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
+		return
+	}
 	util.PushReloadFiletree()
-	util.PushReloadProtyle(id)
+	util.PushReloadProtyle(rootID)
 	util.PushMsg(Conf.Language(102), 3000)
 
 	IncSync()
@@ -303,12 +332,12 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	go func() {
 		sql.FlushQueue()
 
-		tree, _ = LoadTreeByBlockID(id)
+		tree, _ = LoadTreeByBlockID(rootID)
 		if nil == tree {
 			return
 		}
 
-		refreshProtyle(id)
+		refreshProtyle(rootID)
 
 		// 刷新页签名
 		refText := getNodeRefText(tree.Root)

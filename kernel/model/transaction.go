@@ -308,6 +308,9 @@ func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrCodeBlockNotFound, id: id}
 	}
 
+	// 生成文档历史 https://github.com/siyuan-note/siyuan/issues/14359
+	generateOpTypeHistory(srcTree, HistoryOpUpdate)
+
 	var headingChildren []*ast.Node
 	if isMovingFoldHeading := ast.NodeHeading == srcNode.Type && "1" == srcNode.IALAttr("fold"); isMovingFoldHeading {
 		headingChildren = treenode.HeadingChildren(srcNode)

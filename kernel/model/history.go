@@ -239,7 +239,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	var destPath, parentHPath string
 	rootID := util.GetTreeID(historyPath)
 	workingDoc := treenode.GetBlockTree(rootID)
-	if nil != workingDoc {
+	if nil != workingDoc && "d" == workingDoc.Type {
 		if err = filelock.Remove(filepath.Join(util.DataDir, boxID, workingDoc.Path)); err != nil {
 			return
 		}
@@ -304,7 +304,12 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 		}
 	}
 	for _, nodeID := range duplicatedIDs {
-		treenode.ResetNodeID(nodes[nodeID])
+		node := nodes[nodeID]
+		treenode.ResetNodeID(node)
+		if ast.NodeDocument == node.Type {
+			tree.ID = node.ID
+			tree.Path = tree.Path[:strings.LastIndex(tree.Path, "/")] + "/" + node.ID + ".sy"
+		}
 	}
 
 	// 仅重新索引该文档，不进行全量索引

@@ -16,7 +16,7 @@ import {
     processSync,
     progressBackgroundTask,
     progressLoading,
-    progressStatus, reloadEmbedBlock,
+    progressStatus,
     reloadSync,
     setDefRefCount,
     setRefDynamicText,
@@ -66,9 +66,6 @@ export class App {
                                 break;
                             case "setRefDynamicText":
                                 setRefDynamicText(data.data);
-                                break;
-                            case "reloadEmbedBlock":
-                                reloadEmbedBlock(data.data);
                                 break;
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);

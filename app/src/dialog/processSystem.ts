@@ -165,20 +165,6 @@ export const setRefDynamicText = (data: {
     });
 };
 
-export const reloadEmbedBlock = (data: {
-    "embedBlockID": string,
-    "rootID": string
-}) => {
-    getAllEditor().forEach(editor => {
-        if (editor.protyle.block.rootID === data.rootID) {
-            editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.embedBlockID}"]`).forEach(item => {
-                item.removeAttribute("data-render");
-                blockRender(editor.protyle, item);
-            });
-        }
-    });
-};
-
 export const setDefRefCount = (data: {
     "blockID": string,
     "refCount": number,

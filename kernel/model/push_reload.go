@@ -233,8 +233,15 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 
 				// 推送动态锚文本节点刷新
 				for _, defNode := range changedDefNodes {
-					if "ref-d" == defNode.refType {
+					switch defNode.refType {
+					case "ref-d":
 						task.AppendAsyncTaskWithDelay(task.SetRefDynamicText, 200*time.Millisecond, util.PushSetRefDynamicText, refTreeID, n.ID, defNode.id, defNode.refText)
+					case "embed":
+						go func() {
+							time.Sleep(100 * time.Millisecond)
+							sql.FlushQueue()
+							task.AppendAsyncTaskWithDelay(task.ReloadEmbedBlock, 200*time.Millisecond, util.PushReloadEmbedBlock, refTreeID, n.ID)
+						}()
 					}
 				}
 				return ast.WalkContinue

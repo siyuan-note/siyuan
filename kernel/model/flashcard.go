@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
+	"github.com/open-spaced-repetition/go-fsrs/v3"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -432,6 +433,21 @@ func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, tot
 		b.RiffCard = getRiffCard(cards[i].(*riff.FSRSCard).C)
 	}
 	return
+}
+
+func getRiffCard(card *fsrs.Card) *RiffCard {
+	due := card.Due
+	if due.IsZero() {
+		due = time.Now()
+	}
+
+	return &RiffCard{
+		Due:        due,
+		Reps:       card.Reps,
+		Lapses:     card.Lapses,
+		State:      card.State,
+		LastReview: card.LastReview,
+	}
 }
 
 var (

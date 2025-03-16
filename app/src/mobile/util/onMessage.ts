@@ -2,7 +2,7 @@ import {openMobileFileById} from "../editor";
 import {
     processSync,
     progressLoading,
-    progressStatus,
+    progressStatus, reloadEmbedBlock,
     reloadSync, setDefRefCount, setRefDynamicText,
     transactionError
 } from "../../dialog/processSystem";
@@ -18,6 +18,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setRefDynamicText":
                 setRefDynamicText(data.data);
+                break;
+            case "reloadEmbedBlock":
+                reloadEmbedBlock(data.data);
                 break;
             case "reloadPlugin":
                 reloadPlugin(app, data.data);

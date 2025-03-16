@@ -180,7 +180,7 @@ const promiseTransaction = () => {
                 }
                 // 更新嵌入块
                 protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-                    if (item.querySelector(`[data-node-id="${operation.id}"]`)) {
+                    if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
                         item.removeAttribute("data-render");
                         blockRender(protyle, item);
                     }
@@ -676,13 +676,15 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 focusByWbr(protyle.wysiwyg.element, range);
             }
         }
-        // 更新 ws 嵌入块
-        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
-                item.removeAttribute("data-render");
-                blockRender(protyle, item);
-            }
-        });
+        // 更新 ws 嵌入块，undo 会在 transaction 中更新
+        if (!isUndo) {
+            protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+                if (item.querySelector(`[data-node-id="${operation.id}"],[data-node-id="${operation.parentID}"],[data-node-id="${operation.previousID}"]`)) {
+                    item.removeAttribute("data-render");
+                    blockRender(protyle, item);
+                }
+            });
+        }
         return;
     }
     if (operation.action === "insert") {

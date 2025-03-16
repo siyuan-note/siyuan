@@ -138,7 +138,6 @@ const (
 	ReloadProtyle                   = "task.reload.protyle"                // 重新加载编辑器
 	SetRefDynamicText               = "task.ref.setDynamicText"            // 设置引用的动态锚文本
 	SetDefRefCount                  = "task.def.setRefCount"               // 设置定义的引用计数
-	ReloadEmbedBlock                = "task.ref.reloadEmbedBlock"          // 重新加载嵌入块
 	UpdateIDs                       = "task.update.ids"                    // 更新 ID
 	PushMsg                         = "task.push.msg"                      // 推送消息
 )
@@ -159,7 +158,6 @@ var uniqueActions = []string{
 	ReloadProtyle,
 	SetRefDynamicText,
 	SetDefRefCount,
-	ReloadEmbedBlock,
 	UpdateIDs,
 }
 

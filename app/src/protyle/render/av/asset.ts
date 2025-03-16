@@ -71,7 +71,7 @@ ${contentHTML}
     });
     return `<div class="b3-menu__items">
     ${html}
-    <button data-type="addAssetExist" class="b3-menu__item">
+    <button data-type="addAssetExist" class="b3-menu__item b3-menu__item--current">
         <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg>
         <span class="b3-menu__label">${window.siyuan.languages.assets}</span>
     </button>

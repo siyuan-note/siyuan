@@ -173,7 +173,7 @@ export const getRollupHTML = (options: { data?: IAV, cellElements?: HTMLElement[
             }
         });
     }
-    return `<button class="b3-menu__item" data-type="goSearchRollupCol" data-old-value='${JSON.stringify(colData.rollup || {})}'>
+    return `<button class="b3-menu__item b3-menu__item--current" data-type="goSearchRollupCol" data-old-value='${JSON.stringify(colData.rollup || {})}'>
     <span class="b3-menu__label">${window.siyuan.languages.relation}</span>
     <span class="b3-menu__accelerator"></span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>

@@ -139,6 +139,7 @@ export const openMenuPanel = (options: {
                     cellElements: options.cellElements,
                     blockElement: options.blockElement
                 });
+                (avPanelElement.querySelector(".b3-menu__item") as HTMLButtonElement).focus();
                 setTimeout(() => {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
@@ -496,10 +497,13 @@ export const openMenuPanel = (options: {
         });
         avPanelElement.addEventListener("click", (event: MouseEvent) => {
             let type: string;
+            let target = event.target as HTMLElement;
             if (typeof event.detail === "string") {
                 type = event.detail;
+            } else if (typeof event.detail === "object") {
+                type = (event.detail as { type: string }).type;
+                target = (event.detail as { target: HTMLElement }).target;
             }
-            let target = event.target as HTMLElement;
             while (target && !target.isSameNode(avPanelElement) || type) {
                 type = target?.dataset.type || type;
                 if (type === "close") {
@@ -970,7 +974,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchRollupCol") {
                     goSearchRollupCol({
-                        target: avPanelElement.querySelector('[data-type="goSearchRollupCol"]'),
+                        target,
                         data,
                         isRelation: true,
                         protyle: options.protyle,
@@ -981,7 +985,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goSearchRollupTarget") {
                     goSearchRollupCol({
-                        target: avPanelElement.querySelector('[data-type="goSearchRollupTarget"]'),
+                        target,
                         data,
                         isRelation: false,
                         protyle: options.protyle,
@@ -991,7 +995,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goSearchRollupCalc") {
-                    openCalcMenu(options.protyle, avPanelElement.querySelector('[data-type="goSearchRollupTarget"]'), {
+                    openCalcMenu(options.protyle, target, {
                         data,
                         colId: options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id"),
                         blockID

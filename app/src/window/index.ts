@@ -62,7 +62,7 @@ class App {
                                 break;
                             case "reloadEmbedBlock":
                                 reloadEmbedBlock(data.data);
-                                break
+                                break;
                             case "reloadPlugin":
                                 reloadPlugin(this, data.data);
                                 break;

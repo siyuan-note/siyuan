@@ -31,7 +31,7 @@ export const genRenderFrame = (renderElement: Element) => {
     } else if (type==="NodeMathBlock") {
         renderElement.firstElementChild.innerHTML =  `<span></span><span class="protyle-cursor">${Constants.ZWSP}</span>`;
     }
-}
+};
 
 export const processClonePHElement = (item: Element) => {
     if (item.getAttribute("data-type") === "NodeHTMLBlock") {

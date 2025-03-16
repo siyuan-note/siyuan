@@ -65,12 +65,12 @@ export const exportImage = (id: string) => {
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
         setTimeout(() => {
             addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(async () => {
-                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
                 if (isIPhone() || isSafari()) {
-                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
-                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
-                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
-                    blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"))
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
+                    await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
+                    blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));
                 }
                 const formData = new FormData();
                 formData.append("file", blob, btnsElement[1].getAttribute("data-title"));

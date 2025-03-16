@@ -13,7 +13,6 @@ import {replaceFileName, validateName} from "../editor/rename";
 import {hideElements} from "../protyle/ui/hideElements";
 import {openMobileFileById} from "../mobile/editor";
 import {App} from "../index";
-import {escapeHtml} from "./escape";
 
 export const getNewFilePath = (useSavePath: boolean) => {
     let notebookId = "";

@@ -205,12 +205,12 @@ export const bindAVPanelKeydown = (event: KeyboardEvent) => {
     if (avPanelElement && window.siyuan.menus.menu.element.classList.contains("fn__none")) {
         if ((avPanelElement.querySelector('[data-type="goSearchRollupCol"]') && !avPanelElement.querySelector(".b3-text-field")) ||
             avPanelElement.querySelector('[data-type="addAssetExist"]')) {
-            const menuElement = avPanelElement.querySelector(".b3-menu__items")
+            const menuElement = avPanelElement.querySelector(".b3-menu__items");
             if (event.key === "Enter") {
                 const currentElement = menuElement.querySelector(".b3-menu__item--current");
                 if (currentElement) {
-                    const editElement = currentElement.querySelector('[data-type="editAssetItem"]')
-                    const uploadElement = currentElement.querySelector(".b3-form__upload")
+                    const editElement = currentElement.querySelector('[data-type="editAssetItem"]');
+                    const uploadElement = currentElement.querySelector(".b3-form__upload");
                     if (editElement) {
                         avPanelElement.dispatchEvent(new CustomEvent("click", {
                             detail: {
@@ -219,7 +219,7 @@ export const bindAVPanelKeydown = (event: KeyboardEvent) => {
                             }
                         }));
                     } else if (uploadElement) {
-                        uploadElement.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+                        uploadElement.dispatchEvent(new MouseEvent("click", {bubbles: true}));
                     } else {
                         avPanelElement.dispatchEvent(new CustomEvent("click", {
                             detail: {
@@ -232,10 +232,10 @@ export const bindAVPanelKeydown = (event: KeyboardEvent) => {
             } else if (event.key === "Escape") {
                 avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
             } else {
-                upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild)
+                upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild);
             }
             return true;
         }
     }
     return false;
-}
+};

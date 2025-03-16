@@ -32,7 +32,7 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     }
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     try {
-                        const chartInstance = window.echarts.getInstanceById(renderElement.getAttribute("_echarts_instance_"))
+                        const chartInstance = window.echarts.getInstanceById(renderElement.getAttribute("_echarts_instance_"));
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
                         if (chartInstance && chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
                             chartInstance.clear();

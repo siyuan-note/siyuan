@@ -153,7 +153,7 @@ export const getEditorRange = (element: Element): Range => {
     }
 
     if (element.classList.contains("li") || element.classList.contains("list")) {
-        const childElement = element.querySelector("[data-node-id]")
+        const childElement = element.querySelector("[data-node-id]");
         if (childElement) {
             return getEditorRange(childElement);
         }

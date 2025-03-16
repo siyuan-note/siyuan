@@ -457,15 +457,15 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "update") {
         // 缩放后仅更新局部 https://github.com/siyuan-note/siyuan/issues/14326
         if (updateElements.length === 0) {
-            const newUpdateElement = protyle.wysiwyg.element.firstElementChild
-            const newUpdateId = newUpdateElement.getAttribute("data-node-id")
+            const newUpdateElement = protyle.wysiwyg.element.firstElementChild;
+            const newUpdateId = newUpdateElement.getAttribute("data-node-id");
             const tempElement = document.createElement("template");
             tempElement.innerHTML = operation.data;
             const newTempElement = tempElement.content.querySelector(`[data-node-id="${newUpdateId}"]`);
             if (newTempElement) {
-                updateElements.push(newUpdateElement)
-                operation.data = newTempElement.outerHTML
-                operation.id = newUpdateId
+                updateElements.push(newUpdateElement);
+                operation.data = newTempElement.outerHTML;
+                operation.id = newUpdateId;
             }
         }
         if (updateElements.length > 0) {

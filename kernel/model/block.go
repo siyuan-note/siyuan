@@ -23,6 +23,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
@@ -76,21 +77,6 @@ type RiffCard struct {
 	LastReview time.Time  `json:"lastReview"`
 }
 
-func getRiffCard(card *fsrs.Card) *RiffCard {
-	due := card.Due
-	if due.IsZero() {
-		due = time.Now()
-	}
-
-	return &RiffCard{
-		Due:        due,
-		Reps:       card.Reps,
-		Lapses:     card.Lapses,
-		State:      card.State,
-		LastReview: card.LastReview,
-	}
-}
-
 func (block *Block) IsContainerBlock() bool {
 	switch block.Type {
 	case "NodeDocument", "NodeBlockquote", "NodeList", "NodeListItem", "NodeSuperBlock":
@@ -118,6 +104,46 @@ type Path struct {
 
 	Updated string `json:"updated"` // 更新时间
 	Created string `json:"created"` // 创建时间
+}
+
+func CheckBlockRef(ids []string) bool {
+	bts := treenode.GetBlockTrees(ids)
+
+	var rootIDs, blockIDs []string
+	for _, bt := range bts {
+		if "d" == bt.Type {
+			rootIDs = append(rootIDs, bt.ID)
+		} else {
+			blockIDs = append(blockIDs, bt.ID)
+		}
+	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+
+	existRef := func(refCounts map[string]int) bool {
+		for _, refCount := range refCounts {
+			if 0 < refCount {
+				return true
+			}
+		}
+		return false
+	}
+
+	for _, rootID := range rootIDs {
+		refCounts := sql.QueryRootChildrenRefCount(rootID)
+		if existRef(refCounts) {
+			return true
+		}
+	}
+
+	refCounts := sql.QueryRefCount(blockIDs)
+	if existRef(refCounts) {
+		return true
+	}
+
+	// TODO 还需要考虑容器块的子块引用计数 https://github.com/siyuan-note/siyuan/issues/13396
+
+	return false
 }
 
 type BlockTreeInfo struct {

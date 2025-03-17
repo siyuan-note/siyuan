@@ -272,7 +272,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
             item.querySelectorAll(`.protyle-wysiwyg__embed`).forEach(embedBlockItem => {
                 const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`)
                 if (newTempElement) {
-                    updateEmbedElements.push(embedBlockItem.firstElementChild)
+                    updateEmbedElements.push(embedBlockItem.querySelector('[data-node-id]'))
                     html = newTempElement.outerHTML
                 }
             });

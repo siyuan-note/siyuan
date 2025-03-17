@@ -1,5 +1,6 @@
 import {popSearch} from "./search";
 import {initAppearance} from "../settings/appearance";
+import {initAssets} from "../settings/assets";
 import {closePanel} from "../util/closePanel";
 import {mountHelp, newDailyNote, newNotebook} from "../../util/mount";
 import {repos} from "../../config/repos";
@@ -111,6 +112,9 @@ export const initRightMenu = (app: App) => {
         <svg class="b3-menu__icon"><use xlink:href="#iconRiffCard"></use></svg><span class="b3-menu__label">${window.siyuan.languages.riffCard}</span>
     </div>
     ${aiHTML}
+    <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAssets">
+        <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg><span class="b3-menu__label">${window.siyuan.languages.assets}</span>
+    </div>
     <div class="b3-menu__item${window.siyuan.config.readonly ? " fn__none" : ""}" id="menuAppearance">
         <svg class="b3-menu__icon"><use xlink:href="#iconTheme"></use></svg><span class="b3-menu__label">${window.siyuan.languages.appearance}</span>
     </div>
@@ -163,6 +167,11 @@ export const initRightMenu = (app: App) => {
                 break;
             } else if (target.id === "menuAppearance") {
                 initAppearance();
+                event.preventDefault();
+                event.stopPropagation();
+                break;
+            } else if (target.id === "menuAssets") {
+                initAssets();
                 event.preventDefault();
                 event.stopPropagation();
                 break;

@@ -263,7 +263,21 @@ const promiseTransaction = () => {
 
 const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     let updatedEmbed = false;
-    protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`).forEach((item) => {
+    const updateEmbedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`))
+    if (updateEmbedElements.length === 0) {
+        const tempElement = document.createElement("template");
+        tempElement.innerHTML = operation.data;
+        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+            item.querySelectorAll(`.protyle-wysiwyg__embed`).forEach(embedBlockItem => {
+                const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`)
+                if (newTempElement) {
+                    updateEmbedElements.push(embedBlockItem.firstElementChild)
+                    operation.data = newTempElement.outerHTML
+                }
+            });
+        });
+    }
+    updateEmbedElements.forEach((item) => {
         const tempElement = document.createElement("div");
         tempElement.innerHTML = operation.data;
         tempElement.querySelectorAll('[contenteditable="true"]').forEach(editItem => {

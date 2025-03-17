@@ -472,7 +472,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "update") {
         // 缩放后仅更新局部 https://github.com/siyuan-note/siyuan/issues/14326
         if (updateElements.length === 0) {
-            const newUpdateElement = protyle.wysiwyg.element.firstElementChild;
+            const newUpdateElement = protyle.wysiwyg.element.querySelector('[data-node-id]');
             const newUpdateId = newUpdateElement.getAttribute("data-node-id");
             const tempElement = document.createElement("template");
             tempElement.innerHTML = operation.data;

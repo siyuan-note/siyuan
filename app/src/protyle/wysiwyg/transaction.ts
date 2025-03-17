@@ -263,6 +263,7 @@ const promiseTransaction = () => {
 
 const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     let updatedEmbed = false;
+    let html = operation.data;
     const updateEmbedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`))
     if (updateEmbedElements.length === 0) {
         const tempElement = document.createElement("template");
@@ -272,14 +273,14 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
                 const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`)
                 if (newTempElement) {
                     updateEmbedElements.push(embedBlockItem.firstElementChild)
-                    operation.data = newTempElement.outerHTML
+                    html = newTempElement.outerHTML
                 }
             });
         });
     }
     updateEmbedElements.forEach((item) => {
         const tempElement = document.createElement("div");
-        tempElement.innerHTML = operation.data;
+        tempElement.innerHTML = html;
         tempElement.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
             editItem.setAttribute("contenteditable", "false");
         });

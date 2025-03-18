@@ -264,16 +264,16 @@ const promiseTransaction = () => {
 const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     let updatedEmbed = false;
     let html = operation.data;
-    const updateEmbedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`))
+    const updateEmbedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`));
     if (updateEmbedElements.length === 0) {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = operation.data;
         protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            item.querySelectorAll(`.protyle-wysiwyg__embed`).forEach(embedBlockItem => {
-                const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`)
+            item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
+                const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
                 if (newTempElement) {
-                    updateEmbedElements.push(embedBlockItem.querySelector('[data-node-id]'))
-                    html = newTempElement.outerHTML
+                    updateEmbedElements.push(embedBlockItem.querySelector("[data-node-id]"));
+                    html = newTempElement.outerHTML;
                 }
             });
         });
@@ -472,7 +472,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "update") {
         // 缩放后仅更新局部 https://github.com/siyuan-note/siyuan/issues/14326
         if (updateElements.length === 0) {
-            const newUpdateElement = protyle.wysiwyg.element.querySelector('[data-node-id]');
+            const newUpdateElement = protyle.wysiwyg.element.querySelector("[data-node-id]");
             const newUpdateId = newUpdateElement.getAttribute("data-node-id");
             const tempElement = document.createElement("template");
             tempElement.innerHTML = operation.data;

@@ -25,7 +25,6 @@ import {App} from "../index";
 import {saveScroll} from "../protyle/scroll/saveScroll";
 import {isInAndroid, isInHarmony, isInIOS, setStorageVal} from "../protyle/util/compatibility";
 import {Plugin} from "../plugin";
-import {blockRender} from "../protyle/render/blockRender";
 
 const updateTitle = (rootID: string, tab: Tab, protyle?: IProtyle) => {
     fetchPost("/api/block/getDocInfo", {

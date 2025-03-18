@@ -155,7 +155,7 @@ export const image = {
     <svg><use xlink:href="#iconTrashcan"></use></svg>
 </span>`;
         }
-        const isM = isMobile()
+        const isM = isMobile();
         data.forEach((item) => {
             const idx = item.indexOf("assets/");
             const dataPath = item.substr(idx);

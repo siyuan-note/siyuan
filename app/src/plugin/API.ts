@@ -20,7 +20,10 @@ import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
 import {getDockByType} from "../layout/tabUtil";
-import {getAllEditor, getAllModels} from "../layout/getAll";
+/// #if !MOBILE
+import {getAllModels} from "../layout/getAll";
+/// #endif
+import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 
@@ -213,7 +216,9 @@ export const API = {
     Menu,
     Setting,
     getAllEditor,
+    /// #if !MOBILE
     getAllModels,
+    /// #endif
     platformUtils,
     openSetting,
     openAttributePanel,

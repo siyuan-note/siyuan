@@ -59,8 +59,8 @@ export const getAllEditor = () => {
     return editors;
 };
 
+/// #if !MOBILE
 export const getAllModels = () => {
-    /// #if !MOBILE
     const models: IModels = {
         editor: [],
         graph: [],
@@ -110,7 +110,6 @@ export const getAllModels = () => {
         getTabs(window.siyuan.layout.layout);
     }
     return models;
-    /// #endif
 };
 
 export const getAllWnds = (layout: Layout, wnds: Wnd[]) => {
@@ -162,3 +161,4 @@ export const getAllDocks = () => {
     });
     return docks;
 };
+/// #endif

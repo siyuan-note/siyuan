@@ -224,6 +224,8 @@ interface Window {
 
     showKeyboardToolbar(height: number): void
 
+    IOSPurchase(data: string): void
+
     hideKeyboardToolbar(): void
 
     openFileByURL(URL: string): boolean

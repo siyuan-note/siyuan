@@ -28,6 +28,7 @@ import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
 import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
+import {IOSPurchase} from "../util/iOSPurchase";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -162,6 +163,7 @@ window.reconnectWebSocket = () => {
     window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
 };
 window.goBack = goBack;
+window.IOSPurchase = IOSPurchase;
 window.showKeyboardToolbar = (height) => {
     document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.outerHeight / 2 - 42).toString());
     showKeyboardToolbar();

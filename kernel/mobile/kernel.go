@@ -184,6 +184,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 
 	retCode = 0
 	retMsg = "verify app store transaction success"
+	logging.LogInfof(retMsg)
 	return
 }
 

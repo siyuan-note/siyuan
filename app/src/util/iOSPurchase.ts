@@ -25,6 +25,7 @@ export const processIOSPurchaseResponse = (code: number) => {
         // -6：Parameter error 参数错误
         // -7：AccountToken verification failed 校验 accountToken 失败
         // -8：Transaction verification failed 校验 transaction 失败
+        // -9：Unknown product 未知的商品
         let message = "";
         switch (code) {
             case -1:
@@ -50,6 +51,9 @@ export const processIOSPurchaseResponse = (code: number) => {
                 break;
             case -8:
                 message = "Transaction verification failed.";
+                break;
+            case -9:
+                message = "Unknown product.";
                 break;
         }
         showMessage(message, 0, "error");

@@ -87,6 +87,8 @@ func globalCopyFiles(c *gin.Context) {
 			return
 		}
 	}
+
+	model.IncSync()
 }
 
 func copyFile(c *gin.Context) {
@@ -132,6 +134,8 @@ func copyFile(c *gin.Context) {
 		ret.Data = map[string]interface{}{"closeTimeout": 5000}
 		return
 	}
+
+	model.IncSync()
 }
 
 func getFile(c *gin.Context) {
@@ -320,6 +324,8 @@ func renameFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	model.IncSync()
 }
 
 func removeFile(c *gin.Context) {
@@ -357,6 +363,8 @@ func removeFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	model.IncSync()
 }
 
 func putFile(c *gin.Context) {
@@ -442,6 +450,8 @@ func putFile(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	model.IncSync()
 }
 
 func millisecond2Time(t int64) time.Time {

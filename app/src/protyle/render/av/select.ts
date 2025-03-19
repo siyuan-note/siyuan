@@ -24,12 +24,13 @@ const filterSelectHTML = (key: string, options: {
         });
     }
     if (options) {
+        const currentName = document.querySelector(".av__panel .b3-menu__item--current")?.getAttribute("data-name") || "";
         options.forEach(item => {
             if (!key ||
                 (key.toLowerCase().indexOf(item.name.toLowerCase()) > -1 ||
                     item.name.toLowerCase().indexOf(key.toLowerCase()) > -1)) {
                 const airaLabel = item.desc ? `${escapeAriaLabel(item.name)}<div class='ft__on-surface'>${escapeAriaLabel(item.desc || "")}</div>` : "";
-                html += `<button data-type="addColOptionOrCell" class="b3-menu__item" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
+                html += `<button data-type="addColOptionOrCell" class="b3-menu__item${currentName === item.name ? " b3-menu__item--current" : ""}" data-name="${escapeAttr(item.name)}" data-desc="${escapeAttr(item.desc || "")}" draggable="true" data-color="${item.color}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="fn__flex-1 ariaLabel" data-position="parentW" aria-label="${airaLabel}">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">
@@ -46,6 +47,7 @@ const filterSelectHTML = (key: string, options: {
         });
     }
     if (!hasMatch && key) {
+        html = html.replace('class="b3-menu__item b3-menu__item--current"', 'class="b3-menu__item"');
         const colorIndex = (options?.length || 0) % 14 + 1;
         html = `<button data-type="addColOptionOrCell" class="b3-menu__item b3-menu__item--current" data-name="${key}" data-color="${colorIndex}">
 <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
@@ -56,6 +58,8 @@ const filterSelectHTML = (key: string, options: {
 </div>
 <span class="b3-menu__accelerator">${window.siyuan.languages.enterKey}</span>
 </button>${html}`;
+    } else if (html.indexOf("b3-menu__item--current") === -1) {
+        html = html.replace('class="b3-menu__item"', 'class="b3-menu__item b3-menu__item--current"');
     }
     return html;
 };
@@ -585,7 +589,7 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
         transaction(protyle, cellDoOperations, cellUndoOperations);
     }
     if (colData.type === "select") {
-        menuElement.parentElement.remove();
+        menuElement.parentElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
     } else {
         const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
         const oldChipsHeight = menuElement.querySelector(".b3-chips").clientHeight;

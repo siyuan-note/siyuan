@@ -254,6 +254,29 @@
       text-align: center;
     }
   }
+
+  .config-assets {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+
+    &__list {
+      overflow: auto;
+      flex: 1;
+    }
+
+    &__preview {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      overflow: auto;
+      flex: 1;
+      margin-top: 8px;
+      padding: 0 8px;
+    }
+  }
 }
 
 #menu {

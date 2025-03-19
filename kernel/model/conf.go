@@ -847,6 +847,7 @@ func (conf *AppConf) Language(num int) (ret string) {
 	ret = conf.language(num)
 	subscribeURL := util.GetCloudAccountServer() + "/subscribe/siyuan"
 	ret = strings.ReplaceAll(ret, "${url}", subscribeURL)
+	ret = strings.ReplaceAll(ret, "${accountServer}", util.GetCloudAccountServer())
 	return
 }
 

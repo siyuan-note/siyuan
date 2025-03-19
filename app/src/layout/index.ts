@@ -6,7 +6,6 @@ import {recordBeforeResizeTop} from "../protyle/util/resize";
 /// #if MOBILE
 // 检测移动端是否引入了桌面端的代码
 console.error("Need remove unused code");
-
 /// #endif
 
 export class Layout {

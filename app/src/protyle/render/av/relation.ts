@@ -207,7 +207,7 @@ export const toggleUpdateRelationBtn = (menuItemsElement: HTMLElement, avId: str
     }
 };
 
-const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string) => {
+const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string, isDetached?: boolean, text?: string, className?: string) => {
     if (type === "selected") {
         return `<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
 <span class="b3-menu__label fn__ellipsis ${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
@@ -224,7 +224,7 @@ const genSelectItemHTML = (type: "selected" | "empty" | "unselect", id?: string,
 </button>`;
     }
     if (type == "unselect") {
-        return `<button data-id="${id}" class="b3-menu__item ariaLabel" data-position="west" data-type="setRelationCell">
+        return `<button data-id="${id}" class="${className || "b3-menu__item ariaLabel"}" data-position="west" data-type="setRelationCell">
     <span class="b3-menu__label fn__ellipsis${isDetached ? "" : " popover__block"}" ${isDetached ? "" : 'style="color:var(--b3-protyle-inline-blockref-color)"'} data-id="${id}">${text}</span>
     <svg class="b3-menu__action"><use xlink:href="#iconAdd"></use></svg>
 </button>`;
@@ -305,10 +305,6 @@ ${html || genSelectItemHTML("empty")}`;
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (event.key === "Enter" && currentElement && currentElement.getAttribute("data-type") === "setRelationCell") {
                 setRelationCell(options.protyle, options.blockElement as HTMLElement, currentElement, options.cellElements);
-                event.preventDefault();
-                event.stopPropagation();
-            } else if (event.key === "Escape") {
-                options.menuElement.parentElement.remove();
                 event.preventDefault();
                 event.stopPropagation();
             }
@@ -392,7 +388,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
             newValue.blockIDs.splice(removeIndex, 1);
             newValue.contents.splice(removeIndex, 1);
             separatorElement.after(target);
-            target.outerHTML = genSelectItemHTML("unselect", targetId, !target.querySelector(".popover__block"), Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent));
+            target.outerHTML = genSelectItemHTML("unselect", targetId, !target.querySelector(".popover__block"), Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent), target.className);
         } else if (targetId) {
             newValue.blockIDs.push(targetId);
             newValue.contents.push({
@@ -404,7 +400,7 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
                 isDetached: !target.firstElementChild.getAttribute("style")
             });
             separatorElement.before(target);
-            target.outerHTML = `<button data-id="${targetId}" data-position="west" data-type="setRelationCell" class="b3-menu__item ariaLabel" 
+            target.outerHTML = `<button data-id="${targetId}" data-position="west" data-type="setRelationCell" class="${target.className}" 
 draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector(".popover__block"), Lute.EscapeHTMLStr(target.querySelector(".b3-menu__label").textContent))}</button>`;
             if (!separatorElement.nextElementSibling) {
                 separatorElement.insertAdjacentHTML("afterend", genSelectItemHTML("empty"));
@@ -438,10 +434,8 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
                 isDetached: true
             });
             separatorElement.insertAdjacentHTML("beforebegin", `<button data-id="${rowId}" data-position="west" data-type="setRelationCell" 
-class="b3-menu__item ariaLabel" draggable="true">${genSelectItemHTML("selected", rowId, true, Lute.EscapeHTMLStr(content))}</button>`);
+class="${target.className} ariaLabel" draggable="true">${genSelectItemHTML("selected", rowId, true, Lute.EscapeHTMLStr(content))}</button>`);
         }
-        menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
-        menuElement.querySelector(".b3-menu__items .b3-menu__item:not(.fn__none)").classList.add("b3-menu__item--current");
     }
     updateCellsValue(protyle, nodeElement, newValue, cellElements);
 };

@@ -1,10 +1,10 @@
-import {hasClosestByAttribute, hasTopClosestByClassName, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestByAttribute, hasTopClosestByClassName} from "../util/hasClosest";
 import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "./highlightRender";
-import {Constants} from "../../constants";
 import {genBreadcrumb, improveBreadcrumbAppearance} from "../wysiwyg/renderBacklink";
 import {avRender} from "./av/render";
+import {genRenderFrame} from "./util";
 
 export const blockRender = (protyle: IProtyle, element: Element, top?: number) => {
     let blockElements: Element[] = [];
@@ -23,12 +23,12 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         }
         // 需置于请求返回前，否则快速滚动会导致重复加载 https://ld246.com/article/1666857862494?r=88250
         item.setAttribute("data-render", "true");
-        item.style.height = (item.clientHeight - 8) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
-        item.innerHTML = `<div class="protyle-icons${isInEmbedBlock(item) ? " fn__none" : ""}">
-    <span aria-label="${window.siyuan.languages.refresh}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__reload protyle-icon--first"><svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-    <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
-</div>${item.lastElementChild.outerHTML}`;
+        genRenderFrame(item);
+        const embedElement = item.querySelector(".protyle-wysiwyg__embed");
+        if (embedElement) {
+            item.style.height = (item.clientHeight - 4) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
+            embedElement.remove();
+        }
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         let breadcrumb: boolean | string = item.getAttribute("breadcrumb");
         if (breadcrumb) {
@@ -112,13 +112,10 @@ const renderEmbed = (blocks: {
         html += `<div class="protyle-wysiwyg__embed" data-id="${blocksItem.block.id}">${breadcrumbHTML}${blocksItem.block.content}</div>`;
     });
     if (blocks.length > 0) {
-        item.lastElementChild.insertAdjacentHTML("beforebegin", html +
-            // 辅助上下移动时进行选中
-            `<div style="position: absolute;">${Constants.ZWSP}</div>`);
+        item.firstElementChild.insertAdjacentHTML("afterend", html);
         improveBreadcrumbAppearance(item.querySelector(".protyle-wysiwyg__embed"));
     } else {
-        item.lastElementChild.insertAdjacentHTML("beforebegin", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>
-<div style="position: absolute;">${Constants.ZWSP}</div>`);
+        item.firstElementChild.insertAdjacentHTML("afterend", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`);
     }
 
     processRender(item);

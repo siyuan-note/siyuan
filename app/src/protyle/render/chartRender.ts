@@ -32,11 +32,15 @@ export const chartRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
                     }
                     const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
                     try {
-                        renderElement.style.height = e.style.height;
+                        const chartInstance = window.echarts.getInstanceById(renderElement.getAttribute("_echarts_instance_"));
                         const option = await looseJsonParse(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));
+                        if (chartInstance && chartInstance.getOption().series[0]?.type !== option.series[0]?.type) {
+                            chartInstance.clear();
+                        }
+                        renderElement.classList.remove("ft__error");
+                        renderElement.style.height = e.style.height;
                         window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {width}).setOption(option);
                         e.setAttribute("data-render", "true");
-                        renderElement.classList.remove("ft__error");
                         if (!renderElement.textContent.endsWith(Constants.ZWSP)) {
                             renderElement.firstElementChild.insertAdjacentText("beforeend", Constants.ZWSP);
                         }

@@ -1,9 +1,10 @@
 import {matchHotKey} from "../../util/hotKey";
-import {deleteRow, selectRow} from "./row";
+import {deleteRow, insertRows, selectRow} from "./row";
 import {addDragFill, cellScrollIntoView, popTextCell, updateCellsValue} from "./cell";
 import {avContextmenu} from "./action";
 import {hasClosestByClassName} from "../../util/hasClosest";
 import {Constants} from "../../../constants";
+import {upDownHint} from "../../../util/upDownHint";
 
 export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyle: IProtyle) => {
     if (!nodeElement.classList.contains("av") || !window.siyuan.menus.menu.element.classList.contains("fn__none")) {
@@ -20,7 +21,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     const selectCellElement = nodeElement.querySelector(".av__cell--select") as HTMLElement;
     if (selectCellElement) {
         const rowElement = hasClosestByClassName(selectCellElement, "av__row");
-        if (!rowElement) {
+        if (!rowElement || rowElement.dataset.type === "ghost") {
             return false;
         }
         const avPanelElement = document.querySelector(".av__panel");
@@ -57,12 +58,16 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
         if (event.key === "ArrowLeft" || matchHotKey("⇧⇥", event)) {
             const previousRowElement = rowElement.previousElementSibling;
             if (selectCellElement.previousElementSibling && !selectCellElement.previousElementSibling.classList.contains("av__firstcol")) {
-                if (selectCellElement.previousElementSibling.classList.contains("av__cell")) {
-                    newCellElement = selectCellElement.previousElementSibling;
-                } else {
+                if (selectCellElement.previousElementSibling.classList.contains("av__colsticky")) {
                     newCellElement = selectCellElement.previousElementSibling.lastElementChild;
+                    if (newCellElement.classList.contains("av__firstcol")) {
+                        newCellElement = undefined;
+                    }
+                } else if (selectCellElement.previousElementSibling.classList.contains("av__cell")) {
+                    newCellElement = selectCellElement.previousElementSibling;
                 }
-            } else if (previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
+            }
+            if (!newCellElement && previousRowElement && !previousRowElement.classList.contains("av__row--header")) {
                 const previousCellElements = previousRowElement.querySelectorAll(".av__cell");
                 newCellElement = previousCellElements[previousCellElements.length - 1];
             }
@@ -81,6 +86,7 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
             if (selectCellElement.nextElementSibling && selectCellElement.nextElementSibling.classList.contains("av__cell")) {
                 newCellElement = selectCellElement.nextElementSibling;
             } else if (!selectCellElement.nextElementSibling && selectCellElement.parentElement.nextElementSibling) {
+                // pin
                 newCellElement = selectCellElement.parentElement.nextElementSibling;
             } else if (nextRowElement && !nextRowElement.classList.contains("av__row--footer")) {
                 newCellElement = nextRowElement.querySelector(".av__cell");
@@ -91,6 +97,10 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
                 newCellElement.classList.add("av__cell--select");
                 addDragFill(newCellElement);
                 cellScrollIntoView(nodeElement, newCellElement, false);
+            } else if (event.key !== "ArrowRight") {
+                selectCellElement.classList.remove("av__cell--select", "av__cell--active");
+                selectCellElement.querySelector(".av__drag-fill")?.remove();
+                insertRows(nodeElement, protyle, 1, rowElement.getAttribute("data-id"));
             }
             event.preventDefault();
             return true;
@@ -194,3 +204,42 @@ export const avKeydown = (event: KeyboardEvent, nodeElement: HTMLElement, protyl
     return false;
 };
 
+export const bindAVPanelKeydown = (event: KeyboardEvent) => {
+    const avPanelElement = document.querySelector(".av__panel");
+    if (avPanelElement && window.siyuan.menus.menu.element.classList.contains("fn__none")) {
+        if ((avPanelElement.querySelector('[data-type="goSearchRollupCol"]') && !avPanelElement.querySelector(".b3-text-field")) ||
+            avPanelElement.querySelector('[data-type="addAssetExist"]')) {
+            const menuElement = avPanelElement.querySelector(".b3-menu__items");
+            if (event.key === "Enter") {
+                const currentElement = menuElement.querySelector(".b3-menu__item--current");
+                if (currentElement) {
+                    const editElement = currentElement.querySelector('[data-type="editAssetItem"]');
+                    const uploadElement = currentElement.querySelector(".b3-form__upload");
+                    if (editElement) {
+                        avPanelElement.dispatchEvent(new CustomEvent("click", {
+                            detail: {
+                                type: editElement.getAttribute("data-type"),
+                                target: editElement
+                            }
+                        }));
+                    } else if (uploadElement) {
+                        uploadElement.dispatchEvent(new MouseEvent("click", {bubbles: true}));
+                    } else {
+                        avPanelElement.dispatchEvent(new CustomEvent("click", {
+                            detail: {
+                                type: currentElement.getAttribute("data-type"),
+                                target: currentElement
+                            }
+                        }));
+                    }
+                }
+            } else if (event.key === "Escape") {
+                avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
+            } else {
+                upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild);
+            }
+            return true;
+        }
+    }
+    return false;
+};

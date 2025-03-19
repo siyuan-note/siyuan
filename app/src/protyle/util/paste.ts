@@ -82,8 +82,16 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
     } else if (blockElement.classList.contains("render-node")) {
         // 需在嵌入块后，代码块前
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
-    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock", "NodeTable"].includes(dataType)) {
+    } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock"].includes(dataType)) {
         text += blockElement.querySelector("[spellcheck]").textContent;
+    } else if (dataType ==="NodeTable") {
+        blockElement.querySelectorAll("th, td").forEach((item) => {
+            text += item.textContent.trim() + "\t";
+            if (!item.nextElementSibling) {
+                text = text.slice(0, -1) + "\n";
+            }
+        });
+        text = text.slice(0, -1);
     } else if (!isNested && ["NodeBlockquote", "NodeList", "NodeSuperBlock", "NodeListItem"].includes(dataType)) {
         blockElement.querySelectorAll("[data-node-id]").forEach((item: HTMLElement) => {
             const nestedText = getPlainText(item, true);
@@ -459,8 +467,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 isHTML = true;
             }
 
-            if (textPlain && "" !== textPlain.trim() && textHTML.startsWith("<span") && -1 < textHTML.indexOf("white-space: pre;")) {
-                // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265
+            if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br"))) {
+                // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265 https://github.com/siyuan-note/siyuan/issues/14313
                 isHTML = false;
             }
         }

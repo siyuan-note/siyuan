@@ -382,6 +382,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
     } else {
         // 点击大纲产生滚动时会动态加载内容，最终导致定位不准确
         preventScroll(editor.editor.protyle);
+        editor.editor.protyle.observerLoad?.disconnect();
         if (options.action?.includes(Constants.CB_GET_HL)) {
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
@@ -391,6 +392,15 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     editor.editor.protyle.toolbar.range = newRange;
                 }
                 scrollCenter(editor.editor.protyle, nodeElement, true);
+                const resizeObserver = new ResizeObserver(() => {
+                    if (document.contains(nodeElement)) {
+                        scrollCenter(editor.editor.protyle, nodeElement, true);
+                    }
+                });
+                setTimeout(() => {
+                    resizeObserver.disconnect();
+                }, 1000 * 3);
+                resizeObserver.observe(editor.editor.protyle.wysiwyg.element);
             } else if (editor.editor.protyle.block.rootID === options.id) {
                 // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {

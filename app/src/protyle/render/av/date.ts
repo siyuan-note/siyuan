@@ -71,7 +71,7 @@ export const bindDateEvent = (options: {
                     hasEndDate: inputElements[2].checked,
                     isNotTime: !inputElements[3].checked,
                 }, options.cellElements);
-                document.querySelector(".av__panel")?.remove();
+                document.querySelector(".av__panel")?.dispatchEvent(new CustomEvent("click", {detail: "close"}));
             }
         });
     });

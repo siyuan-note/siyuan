@@ -16,7 +16,7 @@ import {Plugin} from "../plugin";
 import {App} from "../index";
 import {escapeAttr} from "../util/escape";
 import {uninstall} from "../plugin/uninstall";
-import {afterLoadPlugin, loadPlugin, loadPlugins} from "../plugin/loader";
+import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
 import {loadAssets} from "../util/assets";
 import {addScript} from "../protyle/util/addScript";
 
@@ -797,6 +797,16 @@ export const bazaar = {
                                     } else {
                                         (document.getElementById("themeStyle") as HTMLLinkElement).href = `/appearance/themes/${currentTheme}/theme.css?v=${response.data.appearance.themeVer}`;
                                     }
+                                } else if (bazaarType === "plugins") {
+                                    app.plugins.find((item: Plugin) => {
+                                        if (item.name === dataObj.name) {
+                                            reloadPlugin(app, {
+                                                upsertPlugins: [dataObj.name],
+                                                removePlugins: []
+                                            });
+                                            return true;
+                                        }
+                                    });
                                 }
                             });
                         });

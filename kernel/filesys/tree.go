@@ -278,6 +278,15 @@ func parseJSON2Tree(boxID, p string, jsonData []byte, luteEngine *lute.Lute) (re
 		needFix = true
 		logging.LogInfof("migrated tree [%s] from spec [%s] to [%s]", filePath, oldSpec, ret.Root.Spec)
 	}
+
+	if pathID := util.GetTreeID(p); pathID != ret.Root.ID {
+		needFix = true
+		logging.LogInfof("reset tree id from [%s] to [%s]", ret.Root.ID, pathID)
+		ret.Root.ID = pathID
+		ret.ID = pathID
+		ret.Root.SetIALAttr("id", ret.ID)
+	}
+
 	if needFix {
 		renderer := render.NewJSONRenderer(ret, luteEngine.RenderOptions)
 		data := renderer.Render()

@@ -63,7 +63,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
+import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -205,7 +205,7 @@ export class WYSIWYG {
             !currentTypes.includes("kbd") &&
             !currentTypes.includes("tag") &&
             range.toString() === "" && range.startContainer.nodeType === 3 &&
-            (currentTypes.includes("inline-memo") || currentTypes.includes("text") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
+            (currentTypes.includes("inline-memo") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
             !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset &&
             inlineElement.textContent.length > inputData.length
         ) {
@@ -1296,6 +1296,34 @@ export class WYSIWYG {
                             window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
                         }
                         window.siyuan.menus.menu.append(new MenuItem({
+                            id: "copyPlainText",
+                            label: window.siyuan.languages.copyPlainText,
+                            click() {
+                                if (tableBlockElement) {
+                                    const selectCellElements: HTMLTableCellElement[] = [];
+                                    const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
+                                    tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
+                                        if (!item.classList.contains("fn__none") &&
+                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
+                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                            selectCellElements.push(item);
+                                        }
+                                    });
+                                    let textPlain = "";
+                                    selectCellElements.forEach((item, index) => {
+                                        textPlain += item.textContent.trim() + "\t";
+                                        if (!item.nextElementSibling || !selectCellElements[index + 1] ||
+                                            !item.nextElementSibling.isSameNode(selectCellElements[index + 1])) {
+                                            textPlain = textPlain.slice(0, -1) + "\n";
+                                        }
+                                    });
+                                    copyPlainText(textPlain.slice(0, -1));
+                                    focusBlock(tableBlockElement);
+                                }
+                            }
+                        }).element);
+                        window.siyuan.menus.menu.append(new MenuItem({
                             icon: "iconCopy",
                             accelerator: "⌘C",
                             label: window.siyuan.languages.copy,
@@ -1549,8 +1577,11 @@ export class WYSIWYG {
                 if (headElement && range.toString() === headElement.firstElementChild.textContent) {
                     tempElement.insertAdjacentHTML("afterbegin", headElement.firstElementChild.innerHTML);
                     headElement.firstElementChild.innerHTML = "";
-                } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) && range.startContainer.nodeType === 3
-                    && range.endOffset === range.endContainer.textContent.length && range.startOffset === 0 &&
+                } else if (range.toString() !== "" && startContainer.isSameNode(range.endContainer) &&
+                    range.startContainer.nodeType === 3 &&
+                    // 需使用 wholeText https://github.com/siyuan-note/siyuan/issues/14339
+                    range.endOffset === (range.endContainer as Text).wholeText.length &&
+                    range.startOffset === 0 &&
                     !["DIV", "TD", "TH", "TR"].includes(range.startContainer.parentElement.tagName)) {
                     // 选中整个内联元素
                     tempElement.append(range.startContainer.parentElement);

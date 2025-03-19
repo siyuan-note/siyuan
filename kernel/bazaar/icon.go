@@ -47,6 +47,11 @@ func Icons() (icons []*Icon) {
 		return
 	}
 	bazaarIndex := getBazaarIndex()
+	if 1 > len(bazaarIndex) {
+		return
+	}
+
+	requestFailed := false
 	waitGroup := &sync.WaitGroup{}
 	lock := &sync.Mutex{}
 	p, _ := ants.NewPoolWithFunc(2, func(arg interface{}) {
@@ -62,15 +67,21 @@ func Icons() (icons []*Icon) {
 			return
 		}
 
+		if requestFailed {
+			return
+		}
+
 		icon := &Icon{}
 		innerU := util.BazaarOSSServer + "/package/" + repoURL + "/icon.json"
 		innerResp, innerErr := httpclient.NewBrowserRequest().SetSuccessResult(icon).Get(innerU)
 		if nil != innerErr {
 			logging.LogErrorf("get bazaar package [%s] failed: %s", repoURL, innerErr)
+			requestFailed = true
 			return
 		}
 		if 200 != innerResp.StatusCode {
 			logging.LogErrorf("get bazaar package [%s] failed: %d", innerU, innerResp.StatusCode)
+			requestFailed = true
 			return
 		}
 

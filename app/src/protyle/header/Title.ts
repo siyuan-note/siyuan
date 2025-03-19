@@ -49,6 +49,12 @@ export class Title {
             // 不能使用 range.insertNode，否则无法撤销
             let text = event.clipboardData.getData("text/siyuan");
             if (text) {
+                try {
+                    JSON.parse(text);
+                    text = event.clipboardData.getData("text/plain");
+                } catch (e) {
+                    // 不为数据库，保持 text 不变
+                }
                 text = protyle.lute.BlockDOM2Content(text);
             } else {
                 text = event.clipboardData.getData("text/plain");

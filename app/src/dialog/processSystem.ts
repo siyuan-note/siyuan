@@ -156,9 +156,9 @@ export const setRefDynamicText = (data: {
     "refText": string,
     "rootID": string
 }) => {
-    getAllEditor().forEach(item => {
+    getAllEditor().forEach(editor => {
         // 不能对比 rootId，否则嵌入块中的锚文本无法更新
-        item.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
+        editor.protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${data.blockID}"] span[data-type~="block-ref"][data-subtype="d"][data-id="${data.defBlockID}"]`).forEach(item => {
             item.innerHTML = data.refText;
         });
     });
@@ -253,20 +253,19 @@ export const kernelError = () => {
     if (document.querySelector("#errorLog")) {
         return;
     }
-    let iosReStart = "";
+    let title = `💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small>`;
+    let body = `<div>${window.siyuan.languages.kernelFault1}</div><div class="fn__hr"></div><div>${window.siyuan.languages.kernelFault2}</div>`;
     if (isInIOS()) {
-        iosReStart = `<div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;
+        title = `🍵 ${window.siyuan.languages.pleaseWait} <small>v${Constants.SIYUAN_VERSION}</small>`;
+        body = `<div>${window.siyuan.languages.reconnectPrompt}</div><div class="fn__hr"></div><div class="fn__flex"><div class="fn__flex-1"></div><button class="b3-button">${window.siyuan.languages.retry}</button></div>`;
     }
     const dialog = new Dialog({
         disableClose: true,
-        title: `💔 ${window.siyuan.languages.kernelFault0} <small>v${Constants.SIYUAN_VERSION}</small>`,
+        title: title,
         width: isMobile() ? "92vw" : "520px",
         content: `<div class="b3-dialog__content">
 <div class="ft__breakword">
-    <div>${window.siyuan.languages.kernelFault1}</div>
-    <div class="fn__hr"></div>
-    <div>${window.siyuan.languages.kernelFault2}</div>
-    ${iosReStart}
+    ${body}
 </div>
 </div>`
     });

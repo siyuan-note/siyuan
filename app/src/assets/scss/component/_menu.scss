@@ -47,6 +47,10 @@
     display: flex;
     flex-direction: column;
 
+    & .b3-menu__submenu .b3-menu__submenu {
+      top: 0;
+    }
+
     .b3-menu {
       &__submenu {
         top: 48px;

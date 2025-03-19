@@ -8,6 +8,7 @@ import {
 import {hasClosestByAttribute, hasClosestByTag} from "./hasClosest";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {hideElements} from "../ui/hideElements";
+import {genRenderFrame} from "../render/util";
 
 const selectIsEditor = (editor: Element, range?: Range) => {
     if (!range) {
@@ -134,7 +135,7 @@ export const getRangeByPoint = (x: number, y: number) => {
     return range;
 };
 
-export const getEditorRange = (element: Element) => {
+export const getEditorRange = (element: Element): Range => {
     let range: Range;
     if (getSelection().rangeCount > 0) {
         range = getSelection().getRangeAt(0);
@@ -150,8 +151,20 @@ export const getEditorRange = (element: Element) => {
             return range;
         }
     }
+
+    if (element.classList.contains("li") || element.classList.contains("list")) {
+        const childElement = element.querySelector("[data-node-id]");
+        if (childElement) {
+            return getEditorRange(childElement);
+        }
+    }
+
     // 代码块过长，在代码块的下一个块前删除，代码块会滚动到顶部，因粗需要 preventScroll
     (element as HTMLElement).focus({preventScroll: true});
+    if (!range) {
+        range = document.createRange();
+    }
+
     let targetElement;
     if (element.classList.contains("table")) {
         // 当光标不在表格区域中时表格无法被复制 https://ld246.com/article/1650510736504
@@ -159,13 +172,23 @@ export const getEditorRange = (element: Element) => {
     } else {
         targetElement = getContenteditableElement(element);
         if (!targetElement) {
-            targetElement = element;
+            const type = element.getAttribute("data-type");
+            if (type === "NodeThematicBreak") {
+                targetElement = element.firstElementChild;
+            } else if (type === "NodeBlockQueryEmbed") {
+                targetElement = element.lastElementChild.previousElementSibling?.firstChild;
+            } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
+                targetElement = element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild;
+            } else if (type === "NodeVideo") {
+                targetElement = element.firstElementChild.firstChild;
+            } else if (type === "NodeAudio") {
+                targetElement = element.firstElementChild.lastChild;
+            }
         } else if (targetElement.tagName === "TABLE") {
             // 文档中开头为表格，获取错误 https://ld246.com/article/1663408335459?r=88250
             targetElement = targetElement.querySelector("th") || element.querySelector("td");
         }
     }
-    range = targetElement.ownerDocument.createRange();
     range.setStart(targetElement || element, 0);
     range.collapse(true);
     return range;
@@ -391,7 +414,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     const editElement = getContenteditableElement(container);
     if (editElement) {
         container = editElement;
-    } else if (isNotEditBlock(container) || container.classList.contains("av")) {
+    } else if (isFocus && (isNotEditBlock(container) || container.classList.contains("av"))) {
         return focusBlock(container);
     }
     let startNode;
@@ -547,30 +570,23 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             range.selectNodeContents(element.firstElementChild);
             setRange = true;
         } else if (type === "NodeBlockQueryEmbed") {
-            if (element.lastElementChild.previousElementSibling?.firstChild) {
-                range.selectNodeContents(element.lastElementChild.previousElementSibling.firstChild);
-                range.collapse(true);
-            } else {
-                // https://github.com/siyuan-note/siyuan/issues/5267
-                range.selectNodeContents(element);
-                range.collapse(true);
-            }
+            genRenderFrame(element);
+            range.setStart(element.lastElementChild.previousElementSibling.firstChild, 0);
+            range.collapse(true);
             setRange = true;
-        } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
-            if (element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild) {
-                // https://ld246.com/article/1655714737572
-                range.selectNodeContents(element.lastElementChild.previousElementSibling.lastElementChild.firstChild);
-                range.collapse(true);
-            } else if (element.lastElementChild.previousElementSibling) {
-                range.selectNodeContents(element.lastElementChild.previousElementSibling);
-                range.collapse(true);
-            }
+        } else if (type === "NodeMathBlock") {
+            genRenderFrame(element);
+            range.setStart(element.firstElementChild.lastElementChild.firstChild, 0);
+            setRange = true;
+        } else if (type === "NodeHTMLBlock") {
+            range.setStart(element.lastElementChild.previousElementSibling.lastElementChild.firstChild, 0);
+            range.collapse(true);
             setRange = true;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {
             range.setStart(element, 0);
             setRange = true;
         } else if (type === "NodeVideo") {
-            range.setStart(element.firstElementChild, 0);
+            range.setStart(element.firstElementChild.firstChild, 0);
             setRange = true;
         } else if (type === "NodeAudio") {
             range.setStart(element.firstElementChild.lastChild, 0);

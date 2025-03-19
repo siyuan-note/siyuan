@@ -1213,13 +1213,14 @@ func GetHPathByID(id string) (hPath string, err error) {
 	return
 }
 
-func GetPathByID(id string) (path string, err error) {
+func GetPathByID(id string) (path, boxID string, err error) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
 	}
 
 	path = tree.Path
+	boxID = tree.Box
 	return
 }
 

@@ -164,11 +164,18 @@ export const hasNextSibling = (element: Node) => {
 };
 
 export const isEndOfBlock = (range: Range) => {
-    if (range.endContainer.textContent.length !== range.endOffset) {
-        return  false;
+    if (range.endContainer.nodeType === 3 &&
+        range.endContainer.textContent.length !== range.endOffset &&
+        range.endContainer.textContent !== Constants.ZWSP &&
+        range.endContainer.textContent !== "\n") {
+        return false;
     }
 
     let nextSibling = range.endContainer;
+    if (range.endContainer.nodeType !== 3 && range.endContainer.childNodes[range.endOffset]) {
+        nextSibling = range.endContainer.childNodes[range.endOffset];
+    }
+
     while (nextSibling) {
         if (hasNextSibling(nextSibling)) {
             return false;

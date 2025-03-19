@@ -30,6 +30,21 @@ export const openByMobile = (uri: string) => {
     }
 };
 
+export const exportByMobile = (uri: string) => {
+    if (!uri) {
+        return;
+    }
+    if (isInIOS()) {
+        openByMobile(uri);
+    } else if (isInAndroid()) {
+        window.JSAndroid.exportByDefault(uri);
+    } else if (isInHarmony()) {
+        window.JSHarmony.exportByDefault(uri);
+    } else {
+        window.open(uri);
+    }
+};
+
 export const readText = () => {
     if (isInAndroid()) {
         return window.JSAndroid.readClipboard();
@@ -163,6 +178,11 @@ export const isDisabledFeature = (feature: string): boolean => {
 
 export const isIPhone = () => {
     return navigator.userAgent.indexOf("iPhone") > -1;
+};
+
+export const isSafari = () => {
+    const userAgent = navigator.userAgent;
+    return userAgent.includes("Safari") && !userAgent.includes("Chrome") && !userAgent.includes("Chromium");
 };
 
 export const isIPad = () => {

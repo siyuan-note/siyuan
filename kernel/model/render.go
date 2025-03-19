@@ -345,6 +345,9 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 							inserts = append(inserts, subNode)
 						}
 					}
+					if 2 < len(n.KramdownIAL) && 0 < len(inserts) {
+						inserts[0].KramdownIAL = n.KramdownIAL
+					}
 					for _, insert := range inserts {
 						n.InsertBefore(insert)
 

@@ -17,7 +17,8 @@ import {Breadcrumb} from "./breadcrumb";
 import {
     onTransaction,
     transaction,
-    turnsIntoOneTransaction, turnsIntoTransaction,
+    turnsIntoOneTransaction,
+    turnsIntoTransaction,
     updateBatchTransaction,
     updateTransaction
 } from "./wysiwyg/transaction";
@@ -41,7 +42,9 @@ import {focusBlock, getEditorRange} from "./util/selection";
 import {hasClosestBlock} from "./util/hasClosest";
 import {setStorageVal} from "./util/compatibility";
 import {merge} from "./util/merge";
+/// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
+/// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 
@@ -128,6 +131,7 @@ export class Protyle {
                         case "reload":
                             if (data.data === this.protyle.block.rootID) {
                                 reloadProtyle(this.protyle, false);
+                                /// #if !MOBILE
                                 getAllModels().outline.forEach(item => {
                                     if (item.blockId === data.data) {
                                         fetchPost("/api/outline/getDocOutline", {
@@ -138,6 +142,7 @@ export class Protyle {
                                         });
                                     }
                                 });
+                                /// #endif
                             }
                             break;
                         case "refreshAttributeView":
@@ -159,12 +164,14 @@ export class Protyle {
                                     this.protyle.preview.render(this.protyle);
                                 } else if (options.backlinkData && ["delete", "move"].includes(item.action)) {
                                     // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
+                                    /// #if !MOBILE
                                     getAllModels().backlink.find(backlinkItem => {
                                         if (backlinkItem.element.contains(this.protyle.element)) {
                                             backlinkItem.refresh();
                                             return true;
                                         }
                                     });
+                                    /// #endif
                                     return true;
                                 } else {
                                     onTransaction(this.protyle, item, false);

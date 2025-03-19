@@ -23,6 +23,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -601,6 +602,120 @@ func updateBlock(c *gin.Context) {
 
 	ret.Data = transactions
 	broadcastTransactions(transactions)
+}
+
+func batchUpdateBlock(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	blocksArg := arg["blocks"].([]interface{})
+
+	type updateBlockArg struct {
+		ID       string
+		Data     string
+		DataType string
+		Block    *model.Block
+		Tree     *parse.Tree
+	}
+
+	var blocks []*updateBlockArg
+	luteEngine := util.NewLute()
+	for _, blockArg := range blocksArg {
+		blockMap := blockArg.(map[string]interface{})
+		id := blockMap["id"].(string)
+		if util.InvalidIDPattern(id, ret) {
+			return
+		}
+
+		data := blockMap["data"].(string)
+		dataType := blockMap["dataType"].(string)
+		if "markdown" == dataType {
+			var err error
+			data, err = dataBlockDOM(data, luteEngine)
+			if err != nil {
+				ret.Code = -1
+				ret.Msg = "data block DOM failed: " + err.Error()
+				return
+			}
+		}
+		tree := luteEngine.BlockDOM2Tree(data)
+		if nil == tree || nil == tree.Root || nil == tree.Root.FirstChild {
+			ret.Code = -1
+			ret.Msg = "parse tree failed"
+			return
+		}
+
+		block, err := model.GetBlock(id, nil)
+		if err != nil {
+			ret.Code = -1
+			ret.Msg = "get block failed: " + err.Error()
+			return
+		}
+
+		blocks = append(blocks, &updateBlockArg{
+			ID:       id,
+			Data:     data,
+			DataType: dataType,
+			Block:    block,
+			Tree:     tree,
+		})
+	}
+
+	var ops []*model.Operation
+	tx := &model.Transaction{}
+	transactions := []*model.Transaction{tx}
+	for _, upBlock := range blocks {
+		block := upBlock.Block
+		data := upBlock.Data
+		tree := upBlock.Tree
+		id := upBlock.ID
+		if "NodeDocument" == block.Type {
+			oldTree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
+			if err != nil {
+				ret.Code = -1
+				ret.Msg = "load tree failed: " + err.Error()
+				return
+			}
+			var toRemoves []*ast.Node
+
+			for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
+				toRemoves = append(toRemoves, n)
+				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID})
+			}
+			for _, n := range toRemoves {
+				n.Unlink()
+			}
+			ops = append(ops, &model.Operation{Action: "appendInsert", Data: data, ParentID: id})
+		} else {
+			if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
+				// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
+				tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
+				tree.Root.FirstChild.Unlink()                          // 删除列表
+				tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL
+			}
+			tree.Root.FirstChild.SetIALAttr("id", id)
+
+			data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+			ops = append(ops, &model.Operation{
+				Action: "update",
+				ID:     id,
+				Data:   data,
+			})
+		}
+	}
+
+	tx.DoOperations = ops
+	model.PerformTransactions(&transactions)
+	model.FlushTxQueue()
+
+	ret.Data = transactions
+	broadcastTransactions(transactions)
+
 }
 
 func deleteBlock(c *gin.Context) {

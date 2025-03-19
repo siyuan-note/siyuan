@@ -565,6 +565,17 @@ export class Toolbar {
                             });
                         }
                         types = [...new Set(types)];
+                        if (types.includes("block-ref") && item.getAttribute("data-subtype") === "d") {
+                            // https://github.com/siyuan-note/siyuan/issues/14299
+                            if (previousElement && previousElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                                previousElement.setAttribute("data-subtype", "s");
+                                item.setAttribute("data-subtype", "s");
+                            }
+                            if (nextElement && nextElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                                nextElement.setAttribute("data-subtype", "s");
+                                item.setAttribute("data-subtype", "s");
+                            }
+                        }
                         if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, previousElement, textObj)) {
@@ -999,8 +1010,8 @@ export class Toolbar {
                 return;
             }
             setTimeout(() => {
-                addScript("/stage/protyle/js/html2canvas.min.js?v=1.4.1", "protyleHtml2canvas").then(() => {
-                    window.html2canvas(renderElement, {useCORS: true}).then((canvas) => {
+                addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
+                    window.htmlToImage.toCanvas(renderElement).then((canvas) => {
                         canvas.toBlob((blob: Blob) => {
                             const formData = new FormData();
                             formData.append("file", blob);

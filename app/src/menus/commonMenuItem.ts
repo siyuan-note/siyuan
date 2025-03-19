@@ -245,7 +245,9 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
 </div>`,
         destroyCallback() {
             focusByRange(range);
-            hideElements(["select"], protyle);
+            if (protyle) {
+                hideElements(["select"], protyle);
+            }
         }
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_ATTR);
@@ -255,7 +257,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
     dialog.element.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         if (typeof event.detail === "string") {
-            target = dialog.element.querySelector('.item--full[data-type="NodeAttributeView"]');
+            target = dialog.element.querySelector(`.item--full[data-type="${event.detail}"]`);
         }
         while (!target.isSameNode(dialog.element)) {
             const type = target.dataset.action;
@@ -264,7 +266,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
                 target.classList.add("item--focus");
                 dialog.element.querySelectorAll(".custom-attr").forEach((item: HTMLElement) => {
                     if (item.dataset.type === target.dataset.type) {
-                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "") {
+                        if (item.dataset.type === "NodeAttributeView" && item.innerHTML === "" && protyle) {
                             renderAVAttribute(item, attrs.id, protyle);
                         }
                         item.classList.remove("fn__none");
@@ -356,13 +358,15 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         }
     });
     dialog.element.querySelectorAll(".b3-text-field").forEach((item: HTMLInputElement) => {
-        if (focusName !== "av" && focusName === item.getAttribute("data-name")) {
+        if (focusName !== "av" && focusName !== "custom" && focusName === item.getAttribute("data-name")) {
             item.focus();
         }
         bindAttrInput(item, attrs.id);
     });
     if (focusName === "av") {
-        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "av"}));
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "NodeAttributeView"}));
+    } else if (focusName === "custom") {
+        dialog.element.dispatchEvent(new CustomEvent("click", {detail: "custom"}));
     }
 };
 
@@ -714,8 +718,8 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     const submenu = [];
     /// #if MOBILE
     submenu.push({
-        id: isInAndroid() || isInHarmony() ? "useDefault" : "useBrowserView",
-        label: isInAndroid() || isInHarmony() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
+        id: isInAndroid() ? "useDefault" : "useBrowserView",
+        label: isInAndroid() ? window.siyuan.languages.useDefault : window.siyuan.languages.useBrowserView,
         accelerator: showAccelerator ? window.siyuan.languages.click : "",
         click: () => {
             openByMobile(src);

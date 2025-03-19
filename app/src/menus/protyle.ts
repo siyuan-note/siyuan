@@ -105,7 +105,7 @@ export const assetMenu = (protyle: IProtyle, position: IPosition, callback?: (ur
     menu.addItem({
         iconHTML: "",
         type: "readonly",
-        label: `<div class="fn__flex" style="max-height: 50vh">
+        label: `<div class="fn__flex" style="max-height: ${isMobile() ? "80" : "50"}vh">
 <div class="fn__flex-column" style="${isMobile() ? "width:100%" : "min-width: 260px;max-width:420px"}">
     <div class="fn__flex" style="margin: 0 8px 4px 8px">
         <input class="b3-text-field fn__flex-1"/>
@@ -222,11 +222,7 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
         id: "idAndAnchor",
         iconHTML: "",
         type: "readonly",
-        label: `<div>ID</div>
-<textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field" readonly>${refElement.getAttribute("data-id") || ""}</textarea>
-<div class="fn__hr"></div>
-<div>${window.siyuan.languages.anchor}</div>
-<textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>`,
+        label: `<div>ID</div><textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-field" readonly>${refElement.getAttribute("data-id") || ""}</textarea><div class="fn__hr"></div><div>${window.siyuan.languages.anchor}</div><textarea rows="1" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-field"></textarea>`,
         bind(menuItemElement) {
             menuItemElement.style.maxWidth = "none";
             anchorElement = menuItemElement.querySelectorAll(".b3-text-field")[1] as HTMLInputElement;
@@ -317,13 +313,16 @@ export const fileAnnotationRefMenu = (protyle: IProtyle, refElement: HTMLElement
             separatorPosition: "top",
         });
     }
-
+    /// #if MOBILE
+    window.siyuan.menus.menu.fullscreen();
+    /// #else
     const rect = refElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
         y: rect.top + 26,
         h: 26
     });
+    /// #endif
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     anchorElement.select();
@@ -677,12 +676,16 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         });
     }
 
+    /// #if MOBILE
+    window.siyuan.menus.menu.fullscreen();
+    /// #else
     const rect = element.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
         y: rect.top + 26,
         h: 26
     });
+    /// #endif
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.data = element;
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
@@ -946,6 +949,15 @@ export const zoomOut = (options: {
     if (typeof options.reload === "undefined") {
         options.reload = false;
     }
+    const blockPanelElement  = hasClosestByClassName(options.protyle.element, "block__popover", true);
+    if (blockPanelElement) {
+        const pingElement = blockPanelElement.querySelector('[data-type="pin"]');
+        if (pingElement && blockPanelElement.getAttribute("data-pin") !== "true") {
+            pingElement.setAttribute("aria-label", window.siyuan.languages.unpin);
+            pingElement.querySelector("use").setAttribute("xlink:href", "#iconUnpin");
+            blockPanelElement.setAttribute("data-pin", "true");
+        }
+    }
     const breadcrumbHLElement = options.protyle.breadcrumb?.element.querySelector(".protyle-breadcrumb__item--active");
     if (!options.reload && breadcrumbHLElement && breadcrumbHLElement.getAttribute("data-node-id") === options.id) {
         if (options.id === options.protyle.block.rootID) {
@@ -1073,26 +1085,19 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea>
-<div class="fn__hr"></div>
-<div class="fn__flex">
+</div><textarea spellcheck="false" style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field">${imgElement.getAttribute("src")}</textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>
-<div class="fn__hr"></div>
-<div class="fn__flex">
+</div><textarea style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.tooltipText}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" rows="1" class="b3-text-field"></textarea>`,
+</div><textarea style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
                 const textElements = element.querySelectorAll("textarea");
@@ -1211,7 +1216,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 id: "ocrResult",
                 iconHTML: "",
                 type: "readonly",
-                label: `<textarea spellcheck="false" data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
+                label: `<textarea spellcheck="false" data-type="ocr" style="margin: 4px 0" rows="1" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.ocrResult}"></textarea>`,
                 bind(element) {
                     element.style.maxWidth = "none";
                     fetchPost("/api/asset/getImageOCRText", {
@@ -1262,9 +1267,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 id: "widthInput",
                 iconHTML: "",
                 type: "readonly",
-                label: `<div class="fn__flex-center">
-<input class="b3-text-field" style="margin: 4px 8px 4px 0" value="${imgElement.parentElement.style.width.endsWith("px") ? parseInt(imgElement.parentElement.style.width) : ""}" type="number" placeholder="${window.siyuan.languages.width}">px
-</div>`,
+                label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" style="margin: 4px 8px 4px 0" value="${imgElement.parentElement.style.width.endsWith("px") ? parseInt(imgElement.parentElement.style.width) : ""}" type="number" placeholder="${window.siyuan.languages.width}"><span class="fn__flex-center">px</span></div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
@@ -1298,9 +1301,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     id: "widthDrag",
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.parentElement.style.width ? imgElement.parentElement.style.width.replace("vw", "%").replace("calc(", "").replace(" - 8px)", "") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${(imgElement.parentElement.style.width.indexOf("%") > -1 || imgElement.parentElement.style.width.endsWith("vw")) ? parseInt(imgElement.parentElement.style.width.replace("calc(", "")) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
-</div>`,
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.parentElement.style.width ? imgElement.parentElement.style.width.replace("vw", "%").replace("calc(", "").replace(" - 8px)", "") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${(imgElement.parentElement.style.width.indexOf("%") > -1 || imgElement.parentElement.style.width.endsWith("vw")) ? parseInt(imgElement.parentElement.style.width.replace("calc(", "")) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                     bind(element) {
                         rangeElement = element.querySelector("input");
                         rangeElement.addEventListener("input", () => {
@@ -1331,9 +1332,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                 id: "heightInput",
                 iconHTML: "",
                 type: "readonly",
-                label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${imgElement.style.height.endsWith("px") ? parseInt(imgElement.style.height) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}">px
-</div>`,
+                label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${imgElement.style.height.endsWith("px") ? parseInt(imgElement.style.height) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     inputElement.addEventListener("input", () => {
@@ -1367,9 +1366,7 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
                     id: "heightDrag",
                     iconHTML: "",
                     type: "readonly",
-                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.height ? imgElement.style.height.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${imgElement.style.height.endsWith("vh") ? parseInt(imgElement.style.height) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
-</div>`,
+                    label: `<div style="margin: 4px 0;" aria-label="${imgElement.style.height ? imgElement.style.height.replace("vh", "%") : window.siyuan.languages.default}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${imgElement.style.height.endsWith("vh") ? parseInt(imgElement.style.height) : 0}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                     bind(element) {
                         rangeHeightElement = element.querySelector("input");
                         rangeHeightElement.addEventListener("input", () => {
@@ -1413,8 +1410,11 @@ export const imgMenu = (protyle: IProtyle, range: Range, assetElement: HTMLEleme
             separatorPosition: "top",
         });
     }
-
+    /// #if MOBILE
+    window.siyuan.menus.menu.fullscreen();
+    /// #else
     window.siyuan.menus.menu.popup({x: position.clientX, y: position.clientY});
+    /// #endif
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (!protyle.disabled) {
@@ -1462,26 +1462,20 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea spellcheck="false" rows="1" style="margin:4px 0;width: ${isMobile() ? "200" : "360"}px" class="b3-text-field"></textarea>
-<div class="fn__hr"></div>
-<div class="fn__flex">
+</div><textarea spellcheck="false" rows="1" 
+style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.anchor}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>
-<div class="fn__hr"></div>
-<div class="fn__flex">
+</div><textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;" rows="1" class="b3-text-field"></textarea><div class="fn__hr"></div><div class="fn__flex">
     <span class="fn__flex-center">${window.siyuan.languages.title}</span>
     <span class="fn__space"></span>
     <span data-action="copy" class="block__icon block__icon--show b3-tooltips b3-tooltips__e fn__flex-center" aria-label="${window.siyuan.languages.copy}">
         <svg><use xlink:href="#iconCopy"></use></svg>
     </span>   
-</div>
-<textarea style="width: ${isMobile() ? "200" : "360"}px;margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
+</div><textarea style="width: ${isMobile() ? "100%" : "360px"};margin: 4px 0;" rows="1" class="b3-text-field"></textarea>`,
             bind(element) {
                 element.style.maxWidth = "none";
                 inputElements = element.querySelectorAll("textarea");
@@ -1682,12 +1676,17 @@ export const linkMenu = (protyle: IProtyle, linkElement: HTMLElement, focusText 
             separatorPosition: "top",
         });
     }
+    /// #if MOBILE
+    window.siyuan.menus.menu.fullscreen();
+    /// #else
     const rect = linkElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
         y: rect.top + 26,
         h: 26
     });
+    /// #endif
+
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     if (protyle.disabled) {
@@ -1735,7 +1734,7 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         id: "tag",
         iconHTML: "",
         type: "readonly",
-        label: `<input class="b3-text-field fn__size200" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">`,
+        label: `<input class="b3-text-field fn__block" style="margin: 4px 0" placeholder="${window.siyuan.languages.tag}">`,
         bind(element) {
             const inputElement = element.querySelector("input");
             inputElement.value = tagElement.textContent.replace(Constants.ZWSP, "");
@@ -1865,12 +1864,16 @@ export const tagMenu = (protyle: IProtyle, tagElement: HTMLElement) => {
         });
     }
 
+    /// #if MOBILE
+    window.siyuan.menus.menu.fullscreen();
+    /// #else
     const rect = tagElement.getBoundingClientRect();
     window.siyuan.menus.menu.popup({
         x: rect.left,
         y: rect.top + 26,
         h: 26
     });
+    /// #endif
     const popoverElement = hasTopClosestByClassName(protyle.element, "block__popover", true);
     window.siyuan.menus.menu.element.setAttribute("data-from", popoverElement ? popoverElement.dataset.level + "popover" : "app");
     window.siyuan.menus.menu.element.querySelector("input").select();
@@ -1968,7 +1971,7 @@ export const iframeMenu = (protyle: IProtyle, nodeElement: Element) => {
         id: "asset",
         iconHTML: "",
         type: "readonly",
-        label: `<textarea spellcheck="false" rows="1" class="b3-text-field fn__size200" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
+        label: `<textarea spellcheck="false" rows="1" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.link}" style="margin: 4px 0">${iframeElement.getAttribute("src") || ""}</textarea>`,
         bind(element) {
             element.style.maxWidth = "none";
             element.querySelector("textarea").addEventListener("change", (event) => {
@@ -2039,7 +2042,7 @@ export const videoMenu = (protyle: IProtyle, nodeElement: Element, type: string)
         id: "asset",
         iconHTML: "",
         type: "readonly",
-        label: `<textarea spellcheck="false" rows="1" style="margin: 4px 0" class="b3-text-field" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
+        label: `<textarea spellcheck="false" rows="1" style="margin: 4px 0" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.link}">${videoElement.getAttribute("src")}</textarea>`,
         bind(element) {
             element.style.maxWidth = "none";
             element.querySelector("textarea").addEventListener("change", (event) => {

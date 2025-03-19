@@ -501,6 +501,7 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 		return false
 	}
 
+	hits := map[string]bool{}
 	for _, keyword := range keywords {
 		if strings.Contains(strings.ToLower(pkg.DisplayName.Default), keyword) ||
 			strings.Contains(strings.ToLower(pkg.DisplayName.ZhCN), keyword) ||
@@ -512,16 +513,18 @@ func matchPackage(keywords []string, pkg *bazaar.Package) bool {
 			strings.Contains(strings.ToLower(pkg.Description.EnUS), keyword) ||
 			strings.Contains(strings.ToLower(path.Base(pkg.RepoURL)), keyword) ||
 			strings.Contains(strings.ToLower(pkg.Author), keyword) {
-			return true
+			hits[keyword] = true
+			continue
 		}
 
 		for _, pkgKeyword := range pkg.Keywords {
 			if strings.Contains(strings.ToLower(pkgKeyword), keyword) {
-				return true
+				hits[keyword] = true
+				break
 			}
 		}
 	}
-	return false
+	return len(hits) == len(keywords)
 }
 
 func getSearchKeywords(query string) (ret []string) {

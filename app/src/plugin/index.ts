@@ -388,6 +388,7 @@ export class Plugin {
     }) => {
         window.siyuan.blockPanels.push(new BlockPanel({
             app: this.app,
+            originalRefBlockIDs: options.originalRefBlockIDs,
             targetElement: options.targetElement,
             isBacklink: options.isBacklink,
             x: options.x,

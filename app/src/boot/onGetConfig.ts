@@ -179,8 +179,8 @@ export const initWindow = async (app: App) => {
             } catch (error) {
                 return;
             }
-            if (urlObj && urlObj.pathname.startsWith("//plugins/")) {
-                const pluginNameType = urlObj.pathname.replace("//plugins/", "");
+            if (urlObj && urlObj.hostname === "plugins") {
+                const pluginNameType = urlObj.pathname.split("/")[1];
                 if (!pluginNameType) {
                     return;
                 }

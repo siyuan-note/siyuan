@@ -1475,8 +1475,9 @@ export class Gutter {
                 icon: "iconCode",
                 submenu: [{
                     id: "height",
-                    label: `${window.siyuan.languages.height}<span class="fn__space"></span>
-<input style="margin: 4px 0;width: 84px" type="number" step="1" min="148" class="b3-text-field" value="${height ? parseInt(height) : "420"}">`,
+                    iconHTML: "",
+                    type: "readonly",
+                    label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${height ? parseInt(height) : "420"}" step="1" min="148" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
                     bind: (element) => {
                         element.querySelector("input").addEventListener("change", (event) => {
                             const newHeight = ((event.target as HTMLInputElement).value || "420") + "px";
@@ -2093,9 +2094,7 @@ export class Gutter {
             id: "widthInput",
             iconHTML: "",
             type: "readonly",
-            label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${firstElement.style.width.endsWith("px") ? parseInt(firstElement.style.width) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.width}"> px
-</div>`,
+            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstElement.style.width.endsWith("px") ? parseInt(firstElement.style.width) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.width}"><span class="fn__flex-center">px</span></div>`,
             bind: (element) => {
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("input", () => {
@@ -2134,9 +2133,7 @@ export class Gutter {
                 id: "widthDrag",
                 iconHTML: "",
                 type: "readonly",
-                label: `<div style="margin: 4px 0;"  aria-label="${firstElement.style.width.endsWith("px") ? firstElement.style.width : (firstElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
-</div>`,
+                label: `<div style="margin: 4px 0;" aria-label="${firstElement.style.width.endsWith("px") ? firstElement.style.width : (firstElement.style.width || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${width}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                 bind: (element) => {
                     rangeElement = element.querySelector("input");
                     rangeElement.addEventListener("input", () => {
@@ -2183,9 +2180,7 @@ export class Gutter {
             id: "heightInput",
             iconHTML: "",
             type: "readonly",
-            label: `<div class="fn__flex-center">
-<input class="b3-text-field" value="${firstElement.style.height.endsWith("px") ? parseInt(firstElement.style.height) : ""}" type="number" style="margin: 4px" placeholder="${window.siyuan.languages.height}"> px
-</div>`,
+            label: `<div class="fn__flex"><input class="b3-text-field fn__flex-1" value="${firstElement.style.height.endsWith("px") ? parseInt(firstElement.style.height) : ""}" type="number" style="margin: 4px 8px 4px 0" placeholder="${window.siyuan.languages.height}"><span class="fn__flex-center">px</span></div>`,
             bind: (element) => {
                 const inputElement = element.querySelector("input");
                 inputElement.addEventListener("input", () => {
@@ -2222,9 +2217,7 @@ export class Gutter {
             submenu: styles.concat([{
                 iconHTML: "",
                 type: "readonly",
-                label: `<div style="margin: 4px 0;"  aria-label="${firstElement.style.height.endsWith("px") ? firstElement.style.height : (firstElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n${isMobile() ? "" : " fn__size200"}">
-    <input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range">
-</div>`,
+                label: `<div style="margin: 4px 0;" aria-label="${firstElement.style.height.endsWith("px") ? firstElement.style.height : (firstElement.style.height || window.siyuan.languages.default)}" class="b3-tooltips b3-tooltips__n"><input style="box-sizing: border-box" value="${height}" class="b3-slider fn__block" max="100" min="1" step="1" type="range"></div>`,
                 bind: (element) => {
                     rangeElement = element.querySelector("input");
                     rangeElement.addEventListener("input", () => {
@@ -2289,10 +2282,10 @@ export class Gutter {
         let listItem;
         let hideParent = false;
         while (nodeElement) {
-            const isShow = !hideParent || (hideParent && nodeElement.getAttribute("fold") === "1");
+            const parentElement = hasClosestBlock(nodeElement.parentElement);
             if (!isInEmbedBlock(nodeElement)) {
                 let type;
-                if (isShow) {
+                if (!hideParent) {
                     type = nodeElement.getAttribute("data-type");
                 }
                 let dataNodeId = nodeElement.getAttribute("data-node-id");
@@ -2306,9 +2299,9 @@ export class Gutter {
                         } else if (rowElement.querySelector('[data-dtype="block"]')?.getAttribute("data-detached") === "true") {
                             iconAriaLabel = window.siyuan.languages.rowTip.substring(0, window.siyuan.languages.rowTip.lastIndexOf("<br"));
                         }
-                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="west" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
+                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="parentW" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
                         if (!protyle.disabled) {
-                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="west" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
+                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" class="ariaLabel" data-position="parentW" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
                         }
                         break;
                     }
@@ -2331,7 +2324,7 @@ export class Gutter {
                         dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
                 }
-                if (type === "NodeListItem" && index === 1 && !isShow) {
+                if (type === "NodeListItem" && index === 1) {
                     // 列表项中第一层不显示
                     html = "";
                 }
@@ -2345,18 +2338,18 @@ export class Gutter {
                 if (protyle.options.backlinkData) {
                     popoverHTML = `class="popover__block" data-id="${dataNodeId}"`;
                 }
-                const buttonHTML = `<button class="ariaLabel" data-position="west" aria-label="${gutterTip}" 
+                const buttonHTML = `<button class="ariaLabel" data-position="parentW" aria-label="${gutterTip}" 
 data-type="${type}" data-subtype="${nodeElement.getAttribute("data-subtype")}" data-node-id="${dataNodeId}">
     <svg><use xlink:href="#${getIconByType(type, nodeElement.getAttribute("data-subtype"))}"></use></svg>
     <span ${popoverHTML} ${protyle.disabled ? "" : 'draggable="true"'}></span>
 </button>`;
-                if (isShow) {
+                if (!hideParent) {
                     html = buttonHTML + html;
                 }
                 let foldHTML = "";
                 if (type === "NodeListItem" && nodeElement.childElementCount > 3 || type === "NodeHeading") {
                     const fold = nodeElement.getAttribute("fold");
-                    foldHTML = `<button class="ariaLabel" data-position="west" aria-label="${window.siyuan.languages.fold}" 
+                    foldHTML = `<button class="ariaLabel" data-position="parentW" aria-label="${window.siyuan.languages.fold}" 
 data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold === "1" ? "" : ";transform:rotate(90deg)"}"><use xlink:href="#iconPlay"></use></svg></button>`;
                 }
                 if (type === "NodeListItem" || type === "NodeList") {
@@ -2372,13 +2365,19 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                     space += 8;
                 }
                 if (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) {
-                    // 前一个块存在时，只显示到当前层级，但需显示折叠块的块标
-                    // https://github.com/siyuan-note/siyuan/issues/2562 https://github.com/siyuan-note/siyuan/issues/2809
+                    // 前一个块存在时，只显示到当前层级
                     hideParent = true;
+                    // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304
+                    if (parentElement && parentElement.getAttribute("fold") === "1") {
+                        return;
+                    }
+                    // 列表项中的引述块中的第二个段落块块标和引述块左侧样式重叠
+                    if (parentElement && parentElement.getAttribute("data-type") === "NodeBlockquote") {
+                        space += 8;
+                    }
                 }
             }
 
-            const parentElement = hasClosestBlock(nodeElement.parentElement);
             if (parentElement) {
                 nodeElement = parentElement;
             } else {
@@ -2414,12 +2413,9 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
         const contentTop = wysiwyg.parentElement.getBoundingClientRect().top;
         let rect = element.getBoundingClientRect();
         let marginHeight = 0;
-        if (listItem && !window.siyuan.config.editor.rtl) {
-            const relTempRect = listItem.firstElementChild.getBoundingClientRect();
-            if (relTempRect.right <= rect.right) {
-                rect = relTempRect;
-                space = 0;
-            }
+        if (listItem && !window.siyuan.config.editor.rtl && getComputedStyle(element).direction !== "rtl") {
+            rect = listItem.firstElementChild.getBoundingClientRect();
+            space = 0;
         } else if (nodeElement.getAttribute("data-type") === "NodeBlockQueryEmbed") {
             rect = nodeElement.getBoundingClientRect();
             space = 0;

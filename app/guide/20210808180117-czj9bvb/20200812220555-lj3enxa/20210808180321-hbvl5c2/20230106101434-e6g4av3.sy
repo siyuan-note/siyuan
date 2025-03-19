@@ -5,7 +5,8 @@
 	"Properties": {
 		"id": "20230106101434-e6g4av3",
 		"title": "工作空间",
-		"updated": "20230117000600"
+		"type": "doc",
+		"updated": "20250306083454"
 	},
 	"Children": [
 		{
@@ -109,7 +110,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20230109113547-eg7zbrh",
-				"updated": "20230109113551"
+				"updated": "20250306083454"
 			},
 			"Children": [
 				{
@@ -124,7 +125,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20230106104300-j6nj9t2",
-				"updated": "20230117000600"
+				"updated": "20250306083454"
 			},
 			"Children": [
 				{
@@ -136,7 +137,7 @@
 					},
 					"Properties": {
 						"id": "20230109113554-izjti9n",
-						"updated": "20230117000600"
+						"updated": "20250306083454"
 					},
 					"Children": [
 						{
@@ -158,7 +159,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20230109113909-5dp3vml",
-								"updated": "20230117000600"
+								"updated": "20250306083454"
 							},
 							"Children": [
 								{
@@ -168,16 +169,25 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=工作空间绝对路径"
+									"TextMarkTextContent": "--workspace=\u0026quot;工作空间绝对路径\u0026quot;"
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​。比如 Windows 系统上可以复制多个快捷方式，并在每个快捷方式 - 属性 - 目标后跟随工作空间路径参数，例如 "
+									"Data": "​（请使用 "
 								},
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "code",
-									"TextMarkTextContent": "--workspace=F:\\SiYuan"
+									"TextMarkTextContent": "\u0026quot;"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ 将路径包裹起来）。比如 Windows 系统上可以复制多个快捷方式，并在每个快捷方式 - 属性 - 目标后跟随工作空间路径参数，例如 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "--workspace=\u0026quot;F:\\SiYuan\u0026quot;"
 								},
 								{
 									"Type": "NodeText",

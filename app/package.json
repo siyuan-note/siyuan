@@ -1,6 +1,6 @@
 {
   "name": "SiYuan",
-  "version": "3.1.24",
+  "version": "3.1.25",
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
@@ -18,13 +18,13 @@
     "build:export": "webpack --mode production --config webpack.export.js",
     "gen:types": "tsc -d",
     "start": "NODE_ENV=development electron ./electron/main.js",
-    "dist-appx": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
-    "dist": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
-    "dist-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
-    "dist-darwin": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
-    "dist-darwin-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
-    "dist-linux": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never",
-    "dist-linux-arm64": "ELECTRON_MIRROR=https://cnpmjs.org/mirrors/electron/ electron-builder --arm64 --linux --config electron-builder-linux-arm64.yml --publish=never"
+    "dist-appx": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-appx-builder.yml",
+    "dist": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --config electron-builder.yml --publish=never",
+    "dist-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --config electron-builder-arm64.yml --publish=never",
+    "dist-darwin": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --mac --config electron-builder-darwin.yml --publish=never",
+    "dist-darwin-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --mac --config electron-builder-darwin-arm64.yml --publish=never",
+    "dist-linux": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --linux --config electron-builder-linux.yml --publish=never",
+    "dist-linux-arm64": "ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ electron-builder --arm64 --linux --config electron-builder-linux-arm64.yml --publish=never"
   },
   "keywords": [
     "markdown",
@@ -56,7 +56,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.5",
-    "electron": "33.4.2",
+    "electron": "34.3.3",
     "electron-builder": "26.0.9",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",

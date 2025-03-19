@@ -139,6 +139,7 @@ export const openMenuPanel = (options: {
                     cellElements: options.cellElements,
                     blockElement: options.blockElement
                 });
+                (avPanelElement.querySelector(".b3-menu__item") as HTMLButtonElement).focus();
                 setTimeout(() => {
                     setPosition(menuElement, cellRect.left, cellRect.bottom, cellRect.height);
                 }, Constants.TIMEOUT_LOAD);  // 等待加载
@@ -151,6 +152,7 @@ export const openMenuPanel = (options: {
                 });
             } else if (options.type === "rollup") {
                 bindRollupData({protyle: options.protyle, data, menuElement});
+                (avPanelElement.querySelector(".b3-menu__item") as HTMLButtonElement).focus();
             }
             if (["select", "date", "relation", "rollup"].includes(options.type)) {
                 const inputElement = menuElement.querySelector("input");
@@ -495,10 +497,13 @@ export const openMenuPanel = (options: {
         });
         avPanelElement.addEventListener("click", (event: MouseEvent) => {
             let type: string;
+            let target = event.target as HTMLElement;
             if (typeof event.detail === "string") {
                 type = event.detail;
+            } else if (typeof event.detail === "object") {
+                type = (event.detail as { type: string }).type;
+                target = (event.detail as { target: HTMLElement }).target;
             }
-            let target = event.target as HTMLElement;
             while (target && !target.isSameNode(avPanelElement) || type) {
                 type = target?.dataset.type || type;
                 if (type === "close") {
@@ -1184,11 +1189,15 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "setRelationCell") {
+                    menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                    target.classList.add("b3-menu__item--current");
                     setRelationCell(options.protyle, options.blockElement as HTMLElement, target, options.cellElements);
                     event.preventDefault();
                     event.stopPropagation();
                     break;
                 } else if (type === "addColOptionOrCell") {
+                    menuElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
+                    target.classList.add("b3-menu__item--current");
                     if (target.querySelector(".b3-menu__checked")) {
                         removeCellOption(options.protyle, options.cellElements, menuElement.querySelector(`.b3-chips .b3-chip[data-content="${escapeAttr(target.dataset.name)}"]`), options.blockElement);
                     } else {

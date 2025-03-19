@@ -279,12 +279,14 @@
     display: inline-block !important;
     position: absolute !important;
     width: 1px !important;
-    right: 8px !important;
+    left: 0 !important;
     outline: 0 !important;
     background: 0 0 !important;
     text-decoration: initial !important;
     text-shadow: initial !important;
     color: var(--b3-theme-background);
+    font-size: 12px !important;
+    overflow: hidden !important;
   }
 
   pre.code-block {

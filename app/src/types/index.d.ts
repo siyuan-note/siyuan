@@ -138,6 +138,8 @@ interface Window {
         dispose(element: Element): void;
         getInstanceById(id: string): {
             resize: () => void
+            clear: () => void
+            getOption: () => { series: { type: string }[] }
         };
     }
     ABCJS: {
@@ -178,14 +180,22 @@ interface Window {
     dataLayer: any[]
 
     siyuan: ISiyuan
-    webkit: any
-    html2canvas: (element: Element, opitons: {
-        useCORS: boolean,
-        scale?: number
-    }) => Promise<any>;
+    webkit: {
+        messageHandlers: {
+            openLink: { postMessage: (url: string) => void }
+            startKernelFast: { postMessage: (url: string) => void }
+            changeStatusBar: { postMessage: (url: string) => void }
+            setClipboard: { postMessage: (url: string) => void }
+        }
+    }
+    htmlToImage: {
+        toCanvas:(element: Element) => Promise<HTMLCanvasElement>
+        toBlob:(element: Element) => Promise<Blob>
+    };
     JSAndroid: {
         returnDesktop(): void
         openExternal(url: string): void
+        exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void
@@ -196,6 +206,7 @@ interface Window {
     }
     JSHarmony: {
         openExternal(url: string): void
+        exportByDefault(url: string): void
         changeStatusBarColor(color: string, mode: number): void
         writeClipboard(text: string): void
         writeHTMLClipboard(text: string, html: string): void

@@ -495,6 +495,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         selectNode.firstChild.after(document.createElement("wbr"));
         selectNode.firstChild.remove();
     }
+    if (selectNode.textContent === Constants.ZWSP) {
+        // https://github.com/siyuan-note/siyuan/issues/12273
+        selectNode.childNodes.forEach(item => {
+            if (item.nodeType === 3 && item.textContent === Constants.ZWSP) {
+                item.remove();
+            }
+        });
+    }
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
     if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&

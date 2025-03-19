@@ -199,6 +199,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/appendDailyNoteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, appendDailyNoteBlock)
 	ginServer.Handle("POST", "/api/block/prependDailyNoteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, prependDailyNoteBlock)
 	ginServer.Handle("POST", "/api/block/updateBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, updateBlock)
+	ginServer.Handle("POST", "/api/block/batchUpdateBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, batchUpdateBlock)
 	ginServer.Handle("POST", "/api/block/deleteBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, deleteBlock)
 	ginServer.Handle("POST", "/api/block/moveBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveBlock)
 	ginServer.Handle("POST", "/api/block/moveOutlineHeading", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveOutlineHeading)
@@ -213,6 +214,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/block/transferBlockRef", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, transferBlockRef)
 	ginServer.Handle("POST", "/api/block/getBlockSiblingID", model.CheckAuth, getBlockSiblingID)
 	ginServer.Handle("POST", "/api/block/getBlockTreeInfos", model.CheckAuth, getBlockTreeInfos)
+	ginServer.Handle("POST", "/api/block/checkBlockRef", model.CheckAuth, checkBlockRef)
 
 	ginServer.Handle("POST", "/api/file/getFile", model.CheckAuth, getFile)
 	ginServer.Handle("POST", "/api/file/putFile", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, putFile)

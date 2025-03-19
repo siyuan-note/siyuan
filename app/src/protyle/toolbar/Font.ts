@@ -96,7 +96,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         lastColorHTML += "</div>";
     }
     let textElement: HTMLElement;
-    let fontSize = "16px";
+    let fontSize = window.siyuan.config.editor.fontSize + "px";
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
     } else {
@@ -106,7 +106,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         }
     }
     if (textElement) {
-        fontSize = textElement.style.fontSize || "16px";
+        fontSize = textElement.style.fontSize || window.siyuan.config.editor.fontSize + "px";
     }
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
@@ -139,25 +139,23 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
-<div class="${disableFont ? " fn__none" : ""}">${window.siyuan.languages.fontSize}</div>
-<div class="fn__hr--small${disableFont ? " fn__none" : ""}"></div>
 <div class="fn__flex${disableFont ? " fn__none" : ""}">
-    <div class="fn__space--small"></div>
-    <select class="b3-select fn__block">
-        <option ${fontSize === "12px" ? "selected" : ""} value="12px">12px</option>
-        <option ${fontSize === "13px" ? "selected" : ""} value="13px">13px</option>
-        <option ${fontSize === "14px" ? "selected" : ""} value="14px">14px</option>
-        <option ${fontSize === "15px" ? "selected" : ""} value="15px">15px</option>
-        <option ${fontSize === "16px" ? "selected" : ""} value="16px">16px</option>
-        <option ${fontSize === "19px" ? "selected" : ""} value="19px">19px</option>
-        <option ${fontSize === "22px" ? "selected" : ""} value="22px">22px</option>
-        <option ${fontSize === "24px" ? "selected" : ""} value="24px">24px</option>
-        <option ${fontSize === "29px" ? "selected" : ""} value="29px">29px</option>
-        <option ${fontSize === "32px" ? "selected" : ""} value="32px">32px</option>
-        <option ${fontSize === "40px" ? "selected" : ""} value="40px">40px</option>
-        <option ${fontSize === "48px" ? "selected" : ""} value="48px">48px</option>
-    </select>
-    <div class="fn__space--small"></div>
+    ${window.siyuan.languages.fontSize}
+    <span class="fn__flex-1"></span>
+    <label class="fn__flex">
+        ${window.siyuan.languages.relativeFontSize}
+        <span class="fn__space"></span>
+        <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
+    </label>
+</div>
+<div class="${disableFont ? " fn__none" : ""}">
+    <div class="fn__hr"></div>
+    <div class="b3-tooltips b3-tooltips__n fn__flex${fontSize.endsWith("em") ? " fn__none" : ""}" aria-label="${fontSize}">   
+        <input class="b3-slider fn__block" id="fontSizePX" max="72" min="9" step="1" type="range" value="${parseInt(fontSize)}">
+    </div>
+    <div class="b3-tooltips b3-tooltips__n fn__flex${fontSize.endsWith("em") ? "" : " fn__none"}" aria-label="${parseFloat(fontSize) * 100}%">   
+        <input class="b3-slider fn__block" id="fontSizeEM" max="4.5" min="0.56" step="0.01" type="range" value="${parseFloat(fontSize)}">
+    </div>
 </div>
 <div class="fn__hr--b"></div>
 <div class="fn__flex">
@@ -188,8 +186,40 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
             target = target.parentElement;
         }
     });
-    element.querySelector("select").addEventListener("change", function (event: Event) {
-        fontEvent(protyle, nodeElements, "fontSize", (event.target as HTMLSelectElement).value);
+    const switchElement = element.querySelector(".b3-switch") as HTMLInputElement;
+    const fontSizePXElement = element.querySelector("#fontSizePX") as HTMLInputElement;
+    const fontSizeEMElement = element.querySelector("#fontSizeEM") as HTMLInputElement;
+    switchElement.addEventListener("change", function () {
+        if (switchElement.checked) {
+            // px -> em
+            const em = parseFloat((parseInt(fontSizePXElement.value) / 16).toFixed(2));
+            fontSizeEMElement.parentElement.setAttribute("aria-label", (em * 100).toString() + "%");
+            fontSizeEMElement.value = em.toString();
+
+            fontSizePXElement.parentElement.classList.add("fn__none");
+            fontSizeEMElement.parentElement.classList.remove("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+        } else {
+            const px = Math.round(parseFloat(fontSizeEMElement.value) * 16);
+            fontSizePXElement.parentElement.setAttribute("aria-label", px + "px");
+            fontSizePXElement.value = px.toString();
+
+            fontSizePXElement.parentElement.classList.remove("fn__none");
+            fontSizeEMElement.parentElement.classList.add("fn__none");
+            fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+        }
+    });
+    fontSizePXElement.addEventListener("change", function () {
+        fontEvent(protyle, nodeElements, "fontSize", fontSizePXElement.value + "px");
+    });
+    fontSizeEMElement.addEventListener("change", function () {
+        fontEvent(protyle, nodeElements, "fontSize", fontSizeEMElement.value + "em");
+    });
+    fontSizePXElement.addEventListener("input", function () {
+        fontSizePXElement.parentElement.setAttribute("aria-label", fontSizePXElement.value + "px");
+    });
+    fontSizeEMElement.addEventListener("input", function () {
+        fontSizeEMElement.parentElement.setAttribute("aria-label", (parseFloat(fontSizeEMElement.value) * 100).toFixed(0) + "%");
     });
     return element;
 };
@@ -325,7 +355,6 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
                 break;
             case "inline-memo":
                 textElement.removeAttribute("contenteditable");
-                textElement.removeAttribute("data-subtype");
                 textElement.removeAttribute("data-content");
                 break;
         }

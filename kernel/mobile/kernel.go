@@ -183,7 +183,7 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	}
 
 	retCode = 0
-	retMsg = "verify app store transaction success"
+	retMsg = fmt.Sprintf("verify app store transaction [%s] success", transactionID)
 	logging.LogInfof(retMsg)
 	return
 }

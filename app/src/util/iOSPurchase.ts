@@ -1,8 +1,13 @@
 import {showMessage} from "../dialog/message";
 import {fetchPost} from "./fetch";
 import {genUUID} from "./genID";
+import {progressLoading} from "../dialog/processSystem";
 
 export const processIOSPurchaseResponse = (code: number) => {
+    progressLoading({
+        code: 2,
+        msg: ""
+    });
     if (code === 0) {
         /// #if MOBILE
         document.querySelector("#modelMain").dispatchEvent(new CustomEvent("click", {
@@ -72,6 +77,10 @@ export const iOSPurchase = (productType: string) => {
                 productID = productType === "function" ? "00" : "02";
             }
             window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
+            progressLoading({
+                code: 1,
+                msg: ""
+            });
         });
     } else {
         showMessage(window.siyuan.languages.needLogin);

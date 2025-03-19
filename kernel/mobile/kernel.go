@@ -56,6 +56,7 @@ import (
 // -6：参数错误
 // -7：校验 accountToken 失败
 // -8：校验 transaction 失败
+// -9：未知的商品
 func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int) {
 	retCode = -2
 	retMsg := "unknown error"
@@ -165,6 +166,12 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int)
 	}
 	if -5 == result.Code {
 		retCode = -7
+		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
+		logging.LogErrorf(retMsg)
+		return
+	}
+	if -6 == result.Code {
+		retCode = -9
 		retMsg = fmt.Sprintf("verify app store transaction failed [code=%d, msg=%s]", result.Code, result.Msg)
 		logging.LogErrorf(retMsg)
 		return

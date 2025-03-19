@@ -56,9 +56,9 @@ import (
 // -6：参数错误
 // -7：校验 accountToken 失败
 // -8：校验 transaction 失败
-func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int, retMsg string) {
+func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int) {
 	retCode = -2
-	retMsg = "unknown error"
+	retMsg := "unknown error"
 
 	accountToken = strings.TrimSpace(accountToken)
 	transactionID = strings.TrimSpace(transactionID)

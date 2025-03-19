@@ -10,6 +10,7 @@ import {getCloudURL, getIndexURL} from "../../config/util/about";
 import {Dialog} from "../../dialog";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {Constants} from "../../constants";
+import {genUUID} from "../../util/genID";
 
 export const showAccountInfo = () => {
     const isIOS = isInIOS();
@@ -125,7 +126,14 @@ ${renewHTML}`;
                 let target = event.target as HTMLElement;
                 while (target && !target.isSameNode(modelMainElement)) {
                     if (target.getAttribute("data-action") === "iOSPay") {
-                        window.webkit.messageHandlers.purchase.postMessage(`${window.siyuan.user.userId}-${target.getAttribute("data-type")}-${window.siyuan.config.cloudRegion}`);
+                        // "6ba7b810-9dad-11d1-0001-377616491562"
+                        let productID = '0'
+                        if (window.siyuan.config.cloudRegion === 0) {
+                            productID = target.getAttribute("data-type") === "function" ? "0" : "1"
+                        } else {
+                            productID = target.getAttribute("data-type") === "function" ? "2" : "3"
+                        }
+                        window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
                         event.preventDefault();
                         event.stopPropagation()
                         break;

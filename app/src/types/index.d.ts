@@ -186,6 +186,7 @@ interface Window {
             startKernelFast: { postMessage: (url: string) => void }
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
+            purchase: { postMessage: (url: string) => void }
         }
     }
     htmlToImage: {

@@ -60,9 +60,33 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int,
 	retCode = -2
 	retMsg = "unknown error"
 
+	accountToken = strings.TrimSpace(accountToken)
+	transactionID = strings.TrimSpace(transactionID)
+	if "" == accountToken || "" == transactionID {
+		retCode = -6
+		retMsg = "invalid parameters"
+		logging.LogErrorf(retMsg)
+		return
+	}
+
+	if 36 != len(accountToken) {
+		retCode = -6
+		retMsg = fmt.Sprintf("invalid accountToken [%s]", accountToken)
+		logging.LogErrorf(retMsg)
+		return
+	}
+
 	if util.ContainerIOS != util.Container {
 		retCode = -3
 		retMsg = fmt.Sprintf("invalid container [%s]", util.Container)
+		logging.LogErrorf(retMsg)
+		return
+	}
+
+	user := model.Conf.GetUser()
+	if nil == user || "" == user.UserToken {
+		retCode = -4
+		retMsg = "account not logged in"
 		logging.LogErrorf(retMsg)
 		return
 	}
@@ -84,10 +108,17 @@ func VerifyAppStoreTransaction(accountToken, transactionID string) (retCode int,
 	}
 
 	userID := strings.ReplaceAll(accountToken[22:], "-", "")
+	if user.UserId != userID {
+		retCode = -5
+		retMsg = fmt.Sprintf("invalid user [userID=%s, accountToken=%s]", user.UserId, accountToken)
+		logging.LogErrorf(retMsg)
+		return
+	}
+
 	verifyURL := util.GetCloudServer() + "/apis/siyuan/verifyAppStoreTransaction"
 	result := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
-	resp, reqErr := request.SetSuccessResult(result).SetCookies(&http.Cookie{Name: "symphony", Value: model.Conf.GetUser().UserToken}).
+	resp, reqErr := request.SetSuccessResult(result).SetCookies(&http.Cookie{Name: "symphony", Value: user.UserToken}).
 		SetBody(map[string]string{"transactionId": transactionID, "accountToken": accountToken, "userId": userID}).Post(verifyURL)
 	if nil != reqErr {
 		retCode = -2

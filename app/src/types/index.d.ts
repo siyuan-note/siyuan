@@ -224,7 +224,7 @@ interface Window {
 
     showKeyboardToolbar(height: number): void
 
-    IOSPurchase(data: string): void
+    processIOSPurchaseResponse(code: number): void
 
     hideKeyboardToolbar(): void
 

@@ -1,6 +1,8 @@
 import {showMessage} from "../dialog/message";
+import {fetchPost} from "./fetch";
+import {genUUID} from "./genID";
 
-export const IOSPurchase = (code: number) => {
+export const processIOSPurchaseResponse = (code: number) => {
     if (code === 0) {
         /// #if MOBILE
         document.querySelector("#modelMain").dispatchEvent(new CustomEvent("click", {
@@ -48,3 +50,30 @@ export const IOSPurchase = (code: number) => {
         showMessage(message, 0, "error");
     }
 };
+
+export const iOSPurchase = (productType: string) => {
+    if (window.siyuan.user) {
+        fetchPost("/api/setting/getCloudUser", {
+            token: window.siyuan.user.userToken,
+        }, response => {
+            if (window.siyuan.user.userSiYuanOneTimePayStatus !== response.data.userSiYuanOneTimePayStatus ||
+                window.siyuan.user.userSiYuanProExpireTime !== response.data.userSiYuanProExpireTime ||
+                window.siyuan.user.userSiYuanSubscriptionPlan !== response.data.userSiYuanSubscriptionPlan ||
+                window.siyuan.user.userSiYuanSubscriptionType !== response.data.userSiYuanSubscriptionType ||
+                window.siyuan.user.userSiYuanSubscriptionStatus !== response.data.userSiYuanSubscriptionStatus) {
+                showMessage(window.siyuan.languages["_kernel"][19]);
+                return;
+            }
+            window.siyuan.user = response.data;
+            let productID;
+            if (window.siyuan.config.cloudRegion === 0) {
+                productID = productType === "function" ? "china00" : "china02";
+            } else {
+                productID = productType === "function" ? "00" : "02";
+            }
+            window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
+        });
+    } else {
+        showMessage(window.siyuan.languages.needLogin);
+    }
+}

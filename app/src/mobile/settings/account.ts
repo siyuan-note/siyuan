@@ -10,7 +10,7 @@ import {getCloudURL, getIndexURL} from "../../config/util/about";
 import {Dialog} from "../../dialog";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {Constants} from "../../constants";
-import {genUUID} from "../../util/genID";
+import {iOSPurchase} from "../../util/iOSPurchase";
 
 export const showAccountInfo = () => {
     const isIOS = isInIOS();
@@ -129,31 +129,7 @@ ${renewHTML}`;
                 }
                 while (target && !target.isSameNode(modelMainElement)) {
                     if (target.getAttribute("data-action") === "iOSPay") {
-                        if (window.siyuan.user) {
-                            fetchPost("/api/setting/getCloudUser", {
-                                token: window.siyuan.user.userToken,
-                            }, response => {
-                                if (window.siyuan.user.userSiYuanOneTimePayStatus !== response.data.userSiYuanOneTimePayStatus ||
-                                    window.siyuan.user.userSiYuanProExpireTime !== response.data.userSiYuanProExpireTime ||
-                                    window.siyuan.user.userSiYuanSubscriptionPlan !== response.data.userSiYuanSubscriptionPlan ||
-                                    window.siyuan.user.userSiYuanSubscriptionType !== response.data.userSiYuanSubscriptionType ||
-                                    window.siyuan.user.userSiYuanSubscriptionStatus !== response.data.userSiYuanSubscriptionStatus) {
-                                    showMessage(window.siyuan.languages["_kernel"][19]);
-                                    return;
-                                }
-                                window.siyuan.user = response.data;
-                                const productType = target.getAttribute("data-type");
-                                let productID;
-                                if (window.siyuan.config.cloudRegion === 0) {
-                                    productID = productType === "function" ? "0" : "1";
-                                } else {
-                                    productID = productType === "function" ? "2" : "3";
-                                }
-                                window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
-                            });
-                        } else {
-                            showMessage(window.siyuan.languages.needLogin);
-                        }
+                        iOSPurchase(target.getAttribute("data-type"));
                         event.preventDefault();
                         event.stopPropagation();
                         break;

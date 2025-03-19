@@ -115,7 +115,7 @@ const renderEmbed = (blocks: {
         item.firstElementChild.insertAdjacentHTML("afterend", html);
         improveBreadcrumbAppearance(item.querySelector(".protyle-wysiwyg__embed"));
     } else {
-        item.firstElementChild.insertAdjacentHTML("afterend", `<div class="ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`);
+        item.firstElementChild.insertAdjacentHTML("afterend", `<div class="protyle-wysiwyg__embed ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`);
     }
 
     processRender(item);

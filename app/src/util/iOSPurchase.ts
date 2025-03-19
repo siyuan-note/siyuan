@@ -85,4 +85,4 @@ export const iOSPurchase = (productType: string) => {
     } else {
         showMessage(window.siyuan.languages.needLogin);
     }
-}
+};

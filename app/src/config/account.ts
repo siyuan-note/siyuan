@@ -31,13 +31,13 @@ export const account = {
     element: undefined as Element,
     genHTML: (onlyPayHTML = false) => {
         const isIOS = isInIOS();
-        let payHTML
+        let payHTML;
         if (isIOS) {
             // 已付费
             if (window.siyuan.user?.userSiYuanOneTimePayStatus === 1) {
                 payHTML = `<button class="b3-button b3-button--big" data-action="iOSPay" data-type="subscribe">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account4}
-</button>`
+</button>`;
             } else {
                 payHTML = `<button class="b3-button b3-button--big" data-action="iOSPay" data-type="subscribe">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}
@@ -45,12 +45,12 @@ export const account = {
 <div class="fn__hr"></div>
 <button class="b3-button b3-button--success" data-action="iOSPay" data-type="function">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
-</button>`
+</button>`;
             }
         } else {
             payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user?.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
-</a>`
+</a>`;
         }
         payHTML += `<div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
@@ -253,12 +253,12 @@ ${renewHTML}
                             return;
                         }
                         window.siyuan.user = response.data;
-                        const productType = item.getAttribute("data-type")
-                        let productID
+                        const productType = item.getAttribute("data-type");
+                        let productID;
                         if (window.siyuan.config.cloudRegion === 0) {
-                            productID = productType === "function" ? "0" : "1"
+                            productID = productType === "function" ? "0" : "1";
                         } else {
-                            productID = productType === "function" ? "2" : "3"
+                            productID = productType === "function" ? "2" : "3";
                         }
                         window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
                     });

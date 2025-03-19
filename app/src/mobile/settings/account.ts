@@ -1,5 +1,5 @@
 import {openModel} from "../menu/model";
-import {isInIOS, isIPhone} from "../../protyle/util/compatibility";
+import {isInIOS} from "../../protyle/util/compatibility";
 import {fetchPost} from "../../util/fetch";
 import {closePanel} from "../util/closePanel";
 import {processSync} from "../../dialog/processSystem";
@@ -20,7 +20,7 @@ export const showAccountInfo = () => {
         if (window.siyuan.user?.userSiYuanOneTimePayStatus === 1) {
             payHTML = `<button class="b3-button b3-button--big" data-action="iOSPay" data-type="subscribe">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account4}
-</button>`
+</button>`;
         } else {
             payHTML = `<button class="b3-button b3-button--big" data-action="iOSPay" data-type="subscribe">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}
@@ -28,12 +28,12 @@ export const showAccountInfo = () => {
 <div class="fn__hr--b"></div>
 <button class="b3-button b3-button--success" data-action="iOSPay" data-type="function">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
-</button>`
+</button>`;
         }
     } else {
         payHTML = `<a class="b3-button b3-button--big" href="${getIndexURL("pricing.html")}" target="_blank">
     <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages[window.siyuan.user?.userSiYuanOneTimePayStatus === 1 ? "account4" : "account1"]}
-</a>`
+</a>`;
     }
     payHTML += `<div class="fn__hr--b"></div>
 <span class="b3-chip b3-chip--primary b3-chip--hover${(window.siyuan.user && window.siyuan.user.userSiYuanSubscriptionStatus === 2) ? " fn__none" : ""}" id="trialSub">
@@ -125,7 +125,7 @@ ${renewHTML}`;
             modelMainElement.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
                 if (typeof event.detail !== "number") {
-                    target = event.detail
+                    target = event.detail;
                 }
                 while (target && !target.isSameNode(modelMainElement)) {
                     if (target.getAttribute("data-action") === "iOSPay") {
@@ -142,12 +142,12 @@ ${renewHTML}`;
                                     return;
                                 }
                                 window.siyuan.user = response.data;
-                                const productType = target.getAttribute("data-type")
-                                let productID
+                                const productType = target.getAttribute("data-type");
+                                let productID;
                                 if (window.siyuan.config.cloudRegion === 0) {
-                                    productID = productType === "function" ? "0" : "1"
+                                    productID = productType === "function" ? "0" : "1";
                                 } else {
-                                    productID = productType === "function" ? "2" : "3"
+                                    productID = productType === "function" ? "2" : "3";
                                 }
                                 window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
                             });
@@ -155,7 +155,7 @@ ${renewHTML}`;
                             showMessage(window.siyuan.languages.needLogin);
                         }
                         event.preventDefault();
-                        event.stopPropagation()
+                        event.stopPropagation();
                         break;
                     } else if (target.id === "logout") {
                         fetchPost("/api/setting/logoutCloudUser", {}, () => {
@@ -164,8 +164,8 @@ ${renewHTML}`;
                             document.getElementById("menuAccount").innerHTML = `<svg class="b3-menu__icon"><use xlink:href="#iconAccount"></use></svg><span class="b3-menu__label">${window.siyuan.languages.login}</span>`;
                             processSync();
                         });
-                        event.preventDefault()
-                        event.stopPropagation()
+                        event.preventDefault();
+                        event.stopPropagation();
                         break;
                     } else if (target.id === "deactivateUser") {
                         const dialog = new Dialog({
@@ -175,8 +175,8 @@ ${renewHTML}`;
                         });
                         bindLoginEvent(dialog.element.querySelector(".b3-dialog__body"), true);
                         dialog.element.setAttribute("data-key", Constants.DIALOG_DEACTIVATEUSER);
-                        event.preventDefault()
-                        event.stopPropagation()
+                        event.preventDefault();
+                        event.stopPropagation();
                         break;
                     } else if (target.id === "trialSub") {
                         fetchPost("/api/account/startFreeTrial", {}, () => {
@@ -184,8 +184,8 @@ ${renewHTML}`;
                                 detail: modelMainElement.querySelector("#refresh")
                             }));
                         });
-                        event.preventDefault()
-                        event.stopPropagation()
+                        event.preventDefault();
+                        event.stopPropagation();
                         break;
                     } else if (target.id === "refresh") {
                         const svgElement = target.firstElementChild;
@@ -207,13 +207,13 @@ ${renewHTML}`;
                             }
                             processSync();
                         });
-                        event.preventDefault()
-                        event.stopPropagation()
+                        event.preventDefault();
+                        event.stopPropagation();
                         break;
                     }
                     target = target.parentElement;
                 }
-            })
+            });
         }
     });
 };

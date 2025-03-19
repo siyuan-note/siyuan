@@ -1,4 +1,4 @@
-export const IOSPurchase = (data:string) => {
+export const IOSPurchase = (data: string) => {
     /// #if MOBILE
     document.querySelector("#modelMain").dispatchEvent(new CustomEvent("click", {
         detail: document.querySelector("#modelMain #refresh")
@@ -6,4 +6,4 @@ export const IOSPurchase = (data:string) => {
     /// #else
     document.querySelector('.config__tab-container[data-name="account"] #refresh').dispatchEvent(new Event("click"));
     /// #endif
-}
+};

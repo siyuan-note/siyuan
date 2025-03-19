@@ -64,7 +64,7 @@ export const showAccountInfo = () => {
     ${window.siyuan.languages.account6} 
     ${Math.max(0, Math.floor((window.siyuan.user.userSiYuanProExpireTime - new Date().getTime()) / 1000 / 60 / 60 / 24))} 
     ${window.siyuan.languages.day} 
-    ${isIOS ? `<a href="javascript:void(0)" data-action="iOSPay" data-type="subscribe">${window.siyuan.languages.clickMeToRenew}</a>` : ` <a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>`}
+    ${isIOS ? `<a href="javascript:void(0)" data-action="iOSPay" data-type="subscribe">${window.siyuan.languages.clickMeToRenew}</a>` : `<a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>`}
 </div>`;
         if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
             subscriptionHTML = `<div class="b3-chip"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
@@ -124,16 +124,36 @@ ${renewHTML}`;
         bindEvent(modelMainElement: HTMLElement) {
             modelMainElement.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
+                if (typeof event.detail !== "number") {
+                    target = event.detail
+                }
                 while (target && !target.isSameNode(modelMainElement)) {
                     if (target.getAttribute("data-action") === "iOSPay") {
-                        // "6ba7b810-9dad-11d1-0001-377616491562"
-                        let productID = '0'
-                        if (window.siyuan.config.cloudRegion === 0) {
-                            productID = target.getAttribute("data-type") === "function" ? "0" : "1"
+                        if (window.siyuan.user) {
+                            fetchPost("/api/setting/getCloudUser", {
+                                token: window.siyuan.user.userToken,
+                            }, response => {
+                                if (window.siyuan.user.userSiYuanOneTimePayStatus !== response.data.userSiYuanOneTimePayStatus ||
+                                    window.siyuan.user.userSiYuanProExpireTime !== response.data.userSiYuanProExpireTime ||
+                                    window.siyuan.user.userSiYuanSubscriptionPlan !== response.data.userSiYuanSubscriptionPlan ||
+                                    window.siyuan.user.userSiYuanSubscriptionType !== response.data.userSiYuanSubscriptionType ||
+                                    window.siyuan.user.userSiYuanSubscriptionStatus !== response.data.userSiYuanSubscriptionStatus) {
+                                    showMessage(window.siyuan.languages["_kernel"][19]);
+                                    return;
+                                }
+                                window.siyuan.user = response.data;
+                                const productType = target.getAttribute("data-type")
+                                let productID
+                                if (window.siyuan.config.cloudRegion === 0) {
+                                    productID = productType === "function" ? "0" : "1"
+                                } else {
+                                    productID = productType === "function" ? "2" : "3"
+                                }
+                                window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
+                            });
                         } else {
-                            productID = target.getAttribute("data-type") === "function" ? "2" : "3"
+                            showMessage(window.siyuan.languages.needLogin);
                         }
-                        window.webkit.messageHandlers.purchase.postMessage(`${productID} ${genUUID().substring(0, 19)}${window.siyuan.config.cloudRegion}00${window.siyuan.user.userId.substring(0, 1)}-${window.siyuan.user.userId.substring(1)}`);
                         event.preventDefault();
                         event.stopPropagation()
                         break;
@@ -160,7 +180,9 @@ ${renewHTML}`;
                         break;
                     } else if (target.id === "trialSub") {
                         fetchPost("/api/account/startFreeTrial", {}, () => {
-                            modelMainElement.querySelector("#refresh").dispatchEvent(new Event("click"));
+                            modelMainElement.dispatchEvent(new CustomEvent("click", {
+                                detail: modelMainElement.querySelector("#refresh")
+                            }));
                         });
                         event.preventDefault()
                         event.stopPropagation()

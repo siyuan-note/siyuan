@@ -23,28 +23,28 @@ export const processIOSPurchaseResponse = (code: number) => {
         let message = "";
         switch (code) {
             case -1:
-                message = "Invalid cloud region";
+                message = "Invalid cloud region.";
                 break;
             case -2:
-                message = "Server communication failed, need to retry";
+                message = "Server communication failed, need to retry.";
                 break;
             case -3:
-                message = "Non-iOS device";
+                message = "Non-iOS device.";
                 break;
             case -4:
-                message = "Account not logged in";
+                message = "Account not logged in.";
                 break;
             case -5:
-                message = "Account status abnormal";
+                message = "Account status abnormal.";
                 break;
             case -6:
-                message = "Parameter error";
+                message = "Parameter error.";
                 break;
             case -7:
-                message = "AccountToken verification failed";
+                message = "AccountToken verification failed.";
                 break;
             case -8:
-                message = "Transaction verification failed";
+                message = "Transaction verification failed.";
                 break;
         }
         showMessage(message, 0, "error");

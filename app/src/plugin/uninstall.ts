@@ -66,6 +66,8 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             getAllEditor().forEach(editor => {
                 editor.protyle.toolbar.update(editor.protyle);
             });
+            // rm style
+            document.getElementById("pluginsStyle" + name)?.remove();
             return true;
         }
     });

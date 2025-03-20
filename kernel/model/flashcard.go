@@ -936,8 +936,7 @@ func (tx *Transaction) doAddFlashcards(operation *Operation) (ret *TxErr) {
 			continue
 		}
 
-		cardID := ast.NewNodeID()
-		deck.AddCard(cardID, blockID)
+		deck.AddCard(ast.NewNodeID(), blockID)
 	}
 
 	if err := deck.Save(); err != nil {

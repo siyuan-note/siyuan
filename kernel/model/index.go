@@ -362,21 +362,12 @@ func init() {
 func subscribeSQLEvents() {
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
-	//	if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container {
-	//		// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
-	//		return
-	//	}
 	//
 	//	msg := fmt.Sprintf(Conf.Language(89), current, total, blockCount, hash)
 	//	util.SetBootDetails(msg)
 	//	util.ContextPushMsg(context, msg)
 	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
-			// Android/iOS 端不显示数据索引和搜索索引状态提示 https://github.com/siyuan-note/siyuan/issues/6392
-			return
-		}
-
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)

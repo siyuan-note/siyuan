@@ -205,8 +205,8 @@ github.com/google/go-cmp v0.7.0/go.mod h1:pXiqmnSA92OHEEa9HXL2W4E7lf9JzCmGVUdgjX
 github.com/google/gofuzz v1.0.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
 github.com/google/gofuzz v1.2.0 h1:xRy4A+RhZaiKjJ1bPfwQ8sedCA+YS2YcCHW6ec7JMi0=
 github.com/google/gofuzz v1.2.0/go.mod h1:dBl0BpW6vV/+mYPU4Po3pmUjxk6FQPldtuIdl/M65Eg=
-github.com/google/pprof v0.0.0-20250315033105-103756e64e1d h1:tx51Lf+wdE+aavqH8TcPJoCjTf4cE8hrMzROghCely0=
-github.com/google/pprof v0.0.0-20250315033105-103756e64e1d/go.mod h1:vavhavw2zAxS5dIdcRluK6cSGGPlZynqzFM8NdvU144=
+github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e h1:ijClszYn+mADRFY17kjQEVQ1XRhq2/JR1M3sGqeJoxs=
+github.com/google/pprof v0.0.0-20250317173921-a4b03ec1a45e/go.mod h1:boTsfXsheKC2y+lKOCMpSfarhxDeIzfZG1jqGcPl3cA=
 github.com/google/uuid v1.6.0 h1:NIvaJDMOsjHA8n1jAhLSgzrAzy1Hgr+hNrb57e+94F0=
 github.com/google/uuid v1.6.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
 github.com/gopherjs/gopherjs v1.17.2 h1:fQnZVsXk8uxXIStYb0N4bGk7jeyTalG/wsZjQ25dO0g=
@@ -307,8 +307,8 @@ github.com/olahol/melody v1.2.1/go.mod h1:GgkTl6Y7yWj/HtfD48Q5vLKPVoZOH+Qqgfa7Cv
 github.com/olekukonko/tablewriter v0.0.0-20180506121414-d4647c9c7a84/go.mod h1:vsDQFd/mU46D+Z4whnwzcISnGGzXWMclvtLoiIKAKIo=
 github.com/olekukonko/tablewriter v0.0.5 h1:P2Ga83D34wi1o9J6Wh1mRuqd4mF/x/lgBS7N7AbDhec=
 github.com/olekukonko/tablewriter v0.0.5/go.mod h1:hPp6KlRPjbx+hW8ykQs1w3UBbZlj6HuIJcUGPhkA7kY=
-github.com/onsi/ginkgo/v2 v2.23.0 h1:FA1xjp8ieYDzlgS5ABTpdUDB7wtngggONc8a7ku2NqQ=
-github.com/onsi/ginkgo/v2 v2.23.0/go.mod h1:zXTP6xIp3U8aVuXN8ENK9IXRaTjFnpVB9mGmaSRvxnM=
+github.com/onsi/ginkgo/v2 v2.23.1 h1:Ox0cOPv/t8RzKJUfDo9ZKtRvBOJY369sFJnl00CjqwY=
+github.com/onsi/ginkgo/v2 v2.23.1/go.mod h1:zXTP6xIp3U8aVuXN8ENK9IXRaTjFnpVB9mGmaSRvxnM=
 github.com/onsi/gomega v1.36.2 h1:koNYke6TVk6ZmnyHrCXba/T/MoLBXFjeC1PtvYgw0A8=
 github.com/onsi/gomega v1.36.2/go.mod h1:DdwyADRjrc825LhMEkD76cHR5+pUnjhUN8GlHlRPHzY=
 github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1 h1:zKBIfL5ZmbJfSe4nXABkazrSw7BQufi5ghXTZWXsvq8=
@@ -386,8 +386,8 @@ github.com/siyuan-note/httpclient v0.0.0-20250316092039-cfab4d91f895 h1:uvBJpKio
 github.com/siyuan-note/httpclient v0.0.0-20250316092039-cfab4d91f895/go.mod h1:g2yaB+UNO6AW1oR8/0oWhcOPtrBGD+agGVM8laR7i2Q=
 github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742 h1:PPiRvQDZ6bhXqvQRkOLNyNICZ/gvDuDide6gswoGsAg=
 github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742/go.mod h1:uszawhOtHHcCLZN7CZDM40J/IiwprO2lJZP4Nf4FJ14=
-github.com/siyuan-note/riff v0.0.0-20241217095231-017015753318 h1:f85tgE/sYxCOvJSwmKlsVJO5NSSMsScZDJ+dhK0V+1o=
-github.com/siyuan-note/riff v0.0.0-20241217095231-017015753318/go.mod h1:y76kbfoAdNo04msO/YkoHZoxLIUF2J/CFP7abNN4LBc=
+github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b h1:PQGYhSUxjcll4M9tAIpPeZc4V4GtY+x0kc2K/aGpjbI=
+github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b/go.mod h1:afkzeVgkXWJkkp3LRDuBqUjv1z49+LDThOdwAsCP2Fw=
 github.com/spf13/cast v1.7.1 h1:cuNEagBQEHWN1FnbGEjCXL2szYEXqfJPbP2HNUaca9Y=
 github.com/spf13/cast v1.7.1/go.mod h1:ancEpBxwJDODSW/UG4rDrAqiKolqNNh2DX3mk86cAdo=
 github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf h1:pvbZ0lM0XWPBqUKqFU8cmavspvIl9nulOYwdy6IFRRo=

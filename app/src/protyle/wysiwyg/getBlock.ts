@@ -172,7 +172,7 @@ export const isEndOfBlock = (range: Range) => {
     }
 
     let nextSibling = range.endContainer;
-    if (range.endContainer.nodeType !== 3 && range.endContainer.childNodes[range.endOffset]) {
+    if (range.endContainer.nodeType !== 3) {
         nextSibling = range.endContainer.childNodes[range.endOffset];
     }
 

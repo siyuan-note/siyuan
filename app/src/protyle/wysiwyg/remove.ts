@@ -407,6 +407,8 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         range.selectNodeContents(previousLastEditElement);
         range.collapse(false);
         range.insertNode(leftNodes);
+        // 图片前删除到上一个文字块时，图片前有 zwsp
+        previousLastElement.outerHTML = protyle.lute.SpinBlockDOM(previousLastElement.outerHTML);
         removeElement.remove();
         // extractContents 内容过多时需要进行滚动条重置，否则位置会错位
         protyle.contentElement.scrollTop = scroll;

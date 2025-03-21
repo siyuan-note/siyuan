@@ -489,20 +489,14 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     }
     range.setEndAfter(editableElement.lastChild);
     newElement = genListItemElement(listItemElement, 0, false);
-    const selectNode = range.extractContents();
-    if (selectNode.firstChild.nodeType !== 3 && selectNode.firstChild.textContent === "") {
-        // 回车移除空元素 https://github.com/siyuan-note/insider/issues/480
-        selectNode.firstChild.after(document.createElement("wbr"));
-        selectNode.firstChild.remove();
-    }
-    if (selectNode.textContent === Constants.ZWSP) {
-        // https://github.com/siyuan-note/siyuan/issues/12273
-        selectNode.childNodes.forEach(item => {
-            if (item.nodeType === 3 && item.textContent === Constants.ZWSP) {
-                item.remove();
-            }
-        });
-    }
+    const newEditableElement = getContenteditableElement(newElement);
+    newEditableElement.appendChild(range.extractContents());
+    // 回车移除空元素 https://github.com/siyuan-note/insider/issues/480
+    // https://github.com/siyuan-note/siyuan/issues/12273
+    // 文字和图片中间回车后图片前需添加 zwsp
+    newEditableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(newEditableElement.parentElement.outerHTML);
+    listItemElement.insertAdjacentElement("afterend", newElement);
+    mathRender(newElement);
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
     if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
@@ -513,8 +507,6 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     if (editableElement?.lastElementChild?.classList.contains("img") && !hasNextSibling(editableElement?.lastElementChild)) {
         editableElement.insertAdjacentText("beforeend", Constants.ZWSP);
     }
-    getContenteditableElement(newElement).appendChild(selectNode);
-    listItemElement.insertAdjacentElement("afterend", newElement);
     if (listItemElement.getAttribute("data-subtype") === "o") {
         updateListOrder(listItemElement.parentElement);
     }

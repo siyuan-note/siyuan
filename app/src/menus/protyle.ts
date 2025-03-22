@@ -949,7 +949,7 @@ export const zoomOut = (options: {
     if (typeof options.reload === "undefined") {
         options.reload = false;
     }
-    const blockPanelElement  = hasClosestByClassName(options.protyle.element, "block__popover", true);
+    const blockPanelElement = hasClosestByClassName(options.protyle.element, "block__popover", true);
     if (blockPanelElement) {
         const pingElement = blockPanelElement.querySelector('[data-type="pin"]');
         if (pingElement && blockPanelElement.getAttribute("data-pin") !== "true") {
@@ -1026,6 +1026,18 @@ export const zoomOut = (options: {
                 setTimeout(() => {
                     resizeObserver.disconnect();
                 }, 1000 * 3);
+            } else if (!options.focusId) {
+                fetchPost("/api/filetree/getDoc", {
+                    id: options.protyle.block.rootID,
+                    size: window.siyuan.config.editor.dynamicLoadBlocks,
+                }, getFocusResponse => {
+                    onGet({
+                        data: getFocusResponse,
+                        protyle: options.protyle,
+                        action: options.isPushBack ? [Constants.CB_GET_FOCUS] : [Constants.CB_GET_FOCUS, Constants.CB_GET_UNUNDO],
+                    });
+                });
+                return;
             } else if (options.id === options.protyle.block.rootID) { // 聚焦返回后，该块是动态加载的，但是没加载出来
                 fetchPost("/api/filetree/getDoc", {
                     id: options.focusId,

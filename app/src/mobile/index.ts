@@ -127,11 +127,14 @@ class App {
             document.addEventListener("touchend", (event) => {
                 handleTouchEnd(event, siyuanApp);
             }, false);
-            window.addEventListener("keydown", (event) => {
-                mobileKeydown(siyuanApp, event);
+            window.addEventListener("keyup", () => {
+                window.siyuan.ctrlIsPressed = false;
+                window.siyuan.shiftIsPressed = false;
+                window.siyuan.altIsPressed = false;
             });
             // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259
             window.addEventListener("keydown", (event) => {
+                mobileKeydown(siyuanApp, event);
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
                     const editor = getCurrentEditor();

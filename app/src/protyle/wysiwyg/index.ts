@@ -2156,10 +2156,10 @@ export class WYSIWYG {
             });
             hideElements(["hint", "util"], protyle);
             const ctrlIsPressed = isOnlyMeta(event);
-            /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
                 const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
+                /// #if !MOBILE
                 if (breadcrumbId) {
                     if (ctrlIsPressed && !event.shiftKey && !event.altKey) {
                         checkFold(breadcrumbId, (zoomIn) => {
@@ -2177,10 +2177,15 @@ export class WYSIWYG {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);
                 }
+                /// #else
+                if (breadcrumbId) {
+                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                }
+                /// #endif
                 event.stopPropagation();
                 return;
             }
-            /// #endif
+
             if (!event.shiftKey) {
                 this.shiftStartElement = undefined;
             }

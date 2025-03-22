@@ -172,7 +172,7 @@ export const initUI = (protyle: IProtyle) => {
                     focusByRange(range);
                 }
             }
-        })
+        });
     });
     let overAttr = false;
     protyle.element.addEventListener("mouseover", (event: KeyboardEvent & { target: HTMLElement }) => {

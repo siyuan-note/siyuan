@@ -163,7 +163,7 @@ export class Menu {
                 this.element.style.transform = "translateY(-50vh)";
                 this.element.style.height = "50vh";
             } else {
-                this.element.style.transform = "translateY(-100vh)";
+                this.element.style.transform = "translateY(-100%)";
             }
         });
         this.element.lastElementChild.scrollTop = 0;

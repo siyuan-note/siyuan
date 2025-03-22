@@ -38,7 +38,7 @@ require (
 	github.com/go-ole/go-ole v1.3.0
 	github.com/goccy/go-json v0.10.5
 	github.com/gofrs/flock v0.12.1
-	github.com/golang-jwt/jwt/v5 v5.2.1
+	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
 	github.com/imroc/req/v3 v3.50.0

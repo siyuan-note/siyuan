@@ -327,7 +327,7 @@ export class Toolbar {
                     // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
                     let removeIndex = 0;
                     while (removeIndex < rangeTypes.length) {
-                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                        if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
                             rangeTypes.splice(removeIndex, 1);
                         } else {
                             ++removeIndex;
@@ -422,11 +422,15 @@ export class Toolbar {
                 if (isEndSpan) {
                     let removeIndex = 0;
                     while (removeIndex < rangeTypes.length) {
-                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                        if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
                             rangeTypes.splice(removeIndex, 1);
                         } else {
                             ++removeIndex;
                         }
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/14421
+                    if (rangeTypes.length === 0) {
+                        rangeTypes.push(type);
                     }
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));

@@ -87,7 +87,7 @@ func NewStdLute() (ret *lute.Lute) {
 	ret = lute.New()
 	ret.SetFootnotes(false)
 	ret.SetToC(false)
-	ret.SetIndentCodeBlock(false)
+	ret.SetIndentCodeBlock(true) // 导入 Markdown 时支持缩进代码块语法 Support indented code block syntax when importing Markdown https://github.com/siyuan-note/siyuan/issues/14429
 	ret.SetAutoSpace(false)
 	ret.SetHeadingID(false)
 	ret.SetSetext(false)

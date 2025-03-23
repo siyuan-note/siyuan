@@ -84,7 +84,7 @@ export const getPlainText = (blockElement: HTMLElement, isNested = false) => {
         text += Lute.UnEscapeHTMLStr(blockElement.getAttribute("data-content"));
     } else if (["NodeHeading", "NodeParagraph", "NodeCodeBlock"].includes(dataType)) {
         text += blockElement.querySelector("[spellcheck]").textContent;
-    } else if (dataType ==="NodeTable") {
+    } else if (dataType === "NodeTable") {
         blockElement.querySelectorAll("th, td").forEach((item) => {
             text += item.textContent.trim() + "\t";
             if (!item.nextElementSibling) {
@@ -178,40 +178,39 @@ export const pasteAsPlainText = async (protyle: IProtyle) => {
     /// #endif
     if (localFiles.length === 0) {
         // Inline-level elements support pasted as plain text https://github.com/siyuan-note/siyuan/issues/8010
-        navigator.clipboard.readText().then(textPlain => {
-            if (getSelection().rangeCount > 0) {
-                const range = getSelection().getRangeAt(0);
-                if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
-                    insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
-                    return;
-                }
+        let textPlain = await readText();
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            if (hasClosestByAttribute(range.startContainer, "data-type", "code") || hasClosestByClassName(range.startContainer, "hljs")) {
+                insertHTML(textPlain.replace(/\u200D```/g, "```").replace(/```/g, "\u200D```"), protyle);
+                return;
             }
-            // 对一些内置需要解析的 HTML 标签进行内部转移 Improve sub/sup pasting as plain text https://github.com/siyuan-note/siyuan/issues/12155
-            textPlain = textPlain.replace(/<sub>/g, "__@sub@__").replace(/<\/sub>/g, "__@/sub@__");
-            textPlain = textPlain.replace(/<sup>/g, "__@sup@__").replace(/<\/sup>/g, "__@/sup@__");
-            textPlain = textPlain.replace(/<kbd>/g, "__@kbd@__").replace(/<\/kbd>/g, "__@/kbd@__");
-            textPlain = textPlain.replace(/<u>/g, "__@u@__").replace(/<\/u>/g, "__@/u@__");
+        }
+        // 对一些内置需要解析的 HTML 标签进行内部转移 Improve sub/sup pasting as plain text https://github.com/siyuan-note/siyuan/issues/12155
+        textPlain = textPlain.replace(/<sub>/g, "__@sub@__").replace(/<\/sub>/g, "__@/sub@__");
+        textPlain = textPlain.replace(/<sup>/g, "__@sup@__").replace(/<\/sup>/g, "__@/sup@__");
+        textPlain = textPlain.replace(/<kbd>/g, "__@kbd@__").replace(/<\/kbd>/g, "__@/kbd@__");
+        textPlain = textPlain.replace(/<u>/g, "__@u@__").replace(/<\/u>/g, "__@/u@__");
 
-            // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
-            textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
+        // 删掉 <span data-type\="text".*>text</span> 标签，只保留文本
+        textPlain = textPlain.replace(/<span data-type="text".*?>(.*?)<\/span>/g, "$1");
 
-            // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
-            textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
+        // 对 HTML 标签进行内部转义，避免被 Lute 解析以后变为小写 https://github.com/siyuan-note/siyuan/issues/10620
+        textPlain = textPlain.replace(/</g, ";;;lt;;;").replace(/>/g, ";;;gt;;;");
 
-            // 反转义内置需要解析的 HTML 标签
-            textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");
-            textPlain = textPlain.replace(/__@sup@__/g, "<sup>").replace(/__@\/sup@__/g, "</sup>");
-            textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
-            textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
+        // 反转义内置需要解析的 HTML 标签
+        textPlain = textPlain.replace(/__@sub@__/g, "<sub>").replace(/__@\/sub@__/g, "</sub>");
+        textPlain = textPlain.replace(/__@sup@__/g, "<sup>").replace(/__@\/sup@__/g, "</sup>");
+        textPlain = textPlain.replace(/__@kbd@__/g, "<kbd>").replace(/__@\/kbd@__/g, "</kbd>");
+        textPlain = textPlain.replace(/__@u@__/g, "<u>").replace(/__@\/u@__/g, "</u>");
 
-            enableLuteMarkdownSyntax(protyle);
-            const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
-            restoreLuteMarkdownSyntax(protyle);
+        enableLuteMarkdownSyntax(protyle);
+        const content = protyle.lute.BlockDOM2EscapeMarkerContent(protyle.lute.Md2BlockDOM(textPlain));
+        restoreLuteMarkdownSyntax(protyle);
 
-            // insertHTML 会进行内部反转义
-            insertHTML(content, protyle, false, false, true);
-            filterClipboardHint(protyle, textPlain);
-        });
+        // insertHTML 会进行内部反转义
+        insertHTML(content, protyle, false, false, true);
+        filterClipboardHint(protyle, textPlain);
     }
 };
 

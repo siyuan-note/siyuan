@@ -27,7 +27,9 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
         const embedElement = item.querySelector(".protyle-wysiwyg__embed");
         if (embedElement) {
             item.style.height = (item.clientHeight - 4) + "px"; // 减少抖动 https://ld246.com/article/1668669380171
-            embedElement.remove();
+            item.querySelectorAll(".protyle-wysiwyg__embed").forEach((embedItem) => {
+              embedItem.remove();
+            });
         }
         const content = Lute.UnEscapeHTMLStr(item.getAttribute("data-content"));
         let breadcrumb: boolean | string = item.getAttribute("breadcrumb");

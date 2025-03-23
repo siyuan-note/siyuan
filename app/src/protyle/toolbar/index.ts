@@ -244,7 +244,8 @@ export class Toolbar {
 
         // https://github.com/siyuan-note/siyuan/issues/6501
         // https://github.com/siyuan-note/siyuan/issues/12877
-        if (rangeTypes.length === 1 && ["block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
+        if (rangeTypes.length === 1 &&
+            ["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
             return;
         }
         const selectText = this.range.toString();

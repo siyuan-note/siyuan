@@ -481,6 +481,12 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 updateElements.push(newUpdateElement);
                 operation.data = newTempElement.outerHTML;
                 operation.id = newUpdateId;
+                // https://github.com/siyuan-note/siyuan/issues/14326#issuecomment-2746140335
+                protyle.wysiwyg.element.childNodes.forEach((item, index) => {
+                    if (index !== 0) {
+                        item.remove();
+                    }
+                })
             }
         }
         if (updateElements.length > 0) {

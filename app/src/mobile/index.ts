@@ -166,6 +166,7 @@ window.reconnectWebSocket = () => {
     window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
 };
 window.goBack = goBack;
+window.showMessage = showMessage;
 window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 window.showKeyboardToolbar = (height) => {
     document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.outerHeight / 2 - 42).toString());

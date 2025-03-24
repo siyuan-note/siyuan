@@ -190,8 +190,8 @@ interface Window {
         }
     }
     htmlToImage: {
-        toCanvas:(element: Element) => Promise<HTMLCanvasElement>
-        toBlob:(element: Element) => Promise<Blob>
+        toCanvas: (element: Element) => Promise<HTMLCanvasElement>
+        toBlob: (element: Element) => Promise<Blob>
     };
     JSAndroid: {
         returnDesktop(): void
@@ -219,6 +219,8 @@ interface Window {
     Protyle: import("../protyle/method").default
 
     goBack(): void
+
+    showMessage(message: string, timeout: number, type: string, messageId?: string): void
 
     reconnectWebSocket(): void
 

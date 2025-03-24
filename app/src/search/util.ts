@@ -222,7 +222,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
         <span data-type="unRefNext" class="block__icon block__icon--show ariaLabel" data-position="9south" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
         <span class="fn__space"></span>
         <span id="searchUnRefResult" class="ft__selectnone"></span>
-        <span class="fn__flex-1"></span>
+        <span class="fn__flex-1${closeCB ? " resize__move" : ""}" style="min-height: 100%"></span>
         <span class="fn__space"></span>
         <span id="unRefMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9south">
             <svg><use xlink:href="#iconMore"></use></svg>

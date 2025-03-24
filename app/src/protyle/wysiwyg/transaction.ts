@@ -482,11 +482,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 operation.data = newTempElement.outerHTML;
                 operation.id = newUpdateId;
                 // https://github.com/siyuan-note/siyuan/issues/14326#issuecomment-2746140335
-                protyle.wysiwyg.element.childNodes.forEach((item, index) => {
-                    if (index !== 0) {
-                        item.remove();
-                    }
-                })
+                for (let i = 1; i < protyle.wysiwyg.element.childElementCount; i++) {
+                    protyle.wysiwyg.element.childNodes[i].remove();
+                    i--;
+                }
             }
         }
         if (updateElements.length > 0) {

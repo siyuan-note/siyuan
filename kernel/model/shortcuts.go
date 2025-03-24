@@ -20,6 +20,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/siyuan-note/logging"
@@ -70,7 +71,7 @@ func ShortcutsAppendToDailynote() {
 		}
 	}()
 
-	content := buff.String()
+	content := strings.TrimSpace(buff.String())
 	if 1 > len(content) {
 		return
 	}

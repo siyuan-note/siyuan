@@ -246,6 +246,7 @@ var (
 	ThemesPath         string        // 配置目录下的外观目录下的 themes/ 路径
 	IconsPath          string        // 配置目录下的外观目录下的 icons/ 路径
 	SnippetsPath       string        // 数据目录下的 snippets/ 路径
+	ShortcutsPath      string        // 用户家目录下的快捷方式目录路径 home/.config/siyuan/shortcuts/
 
 	UIProcessIDs = sync.Map{} // UI 进程 ID
 )
@@ -322,6 +323,7 @@ func initWorkspaceDir(workspaceArg string) {
 	AssetContentDBPath = filepath.Join(TempDir, "asset_content.db")
 	BlockTreeDBPath = filepath.Join(TempDir, "blocktree.db")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
+	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
 }
 
 func ReadWorkspacePaths() (ret []string, err error) {

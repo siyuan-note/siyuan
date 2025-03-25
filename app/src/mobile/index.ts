@@ -28,6 +28,7 @@ import {isNotEditBlock} from "../protyle/wysiwyg/getBlock";
 import {updateCardHV} from "../card/util";
 import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
+import {processIOSPurchaseResponse} from "../util/iOSPurchase";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -126,11 +127,14 @@ class App {
             document.addEventListener("touchend", (event) => {
                 handleTouchEnd(event, siyuanApp);
             }, false);
-            window.addEventListener("keydown", (event) => {
-                mobileKeydown(siyuanApp, event);
+            window.addEventListener("keyup", () => {
+                window.siyuan.ctrlIsPressed = false;
+                window.siyuan.shiftIsPressed = false;
+                window.siyuan.altIsPressed = false;
             });
             // 移动端删除键 https://github.com/siyuan-note/siyuan/issues/9259
             window.addEventListener("keydown", (event) => {
+                mobileKeydown(siyuanApp, event);
                 if (getSelection().rangeCount > 0) {
                     const range = getSelection().getRangeAt(0);
                     const editor = getCurrentEditor();
@@ -162,6 +166,8 @@ window.reconnectWebSocket = () => {
     window.siyuan.mobile.popEditor.protyle.ws.send("ping", {});
 };
 window.goBack = goBack;
+window.showMessage = showMessage;
+window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 window.showKeyboardToolbar = (height) => {
     document.getElementById("keyboardToolbar").setAttribute("data-keyboardheight", (height ? height : window.outerHeight / 2 - 42).toString());
     showKeyboardToolbar();

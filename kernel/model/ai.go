@@ -109,7 +109,9 @@ func chatGPTContinueWrite(msg string, contextMsgs []string, cloud bool) (ret str
 
 	ret = buf.String()
 	ret = strings.TrimSpace(ret)
-	retContextMsgs = append(retContextMsgs, msg, ret)
+	if "" != ret {
+		retContextMsgs = append(retContextMsgs, msg, ret)
+	}
 	return
 }
 

@@ -31,15 +31,27 @@ func ChatGPT(msg string, contextMsgs []string, c *openai.Client, model string, m
 	var reqMsgs []openai.ChatCompletionMessage
 
 	for _, ctxMsg := range contextMsgs {
+		if "" == ctxMsg {
+			continue
+		}
+
 		reqMsgs = append(reqMsgs, openai.ChatCompletionMessage{
 			Role:    "user",
 			Content: ctxMsg,
 		})
 	}
-	reqMsgs = append(reqMsgs, openai.ChatCompletionMessage{
-		Role:    "user",
-		Content: msg,
-	})
+
+	if "" != msg {
+		reqMsgs = append(reqMsgs, openai.ChatCompletionMessage{
+			Role:    "user",
+			Content: msg,
+		})
+	}
+
+	if 1 > len(reqMsgs) {
+		stop = true
+		return
+	}
 
 	req := openai.ChatCompletionRequest{
 		Model:       model,

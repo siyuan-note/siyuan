@@ -350,7 +350,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
             if (contentElement) {
                 const contentRect = contentElement.getBoundingClientRect();
                 if (cellRect.bottom > contentRect.bottom) {
-                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.top - contentRect.top - 33);
+                    contentElement.scrollTop = contentElement.scrollTop + (cellRect.bottom - contentRect.bottom);
                 }
             }
         }

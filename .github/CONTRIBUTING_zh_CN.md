@@ -16,11 +16,11 @@
 
 * macOS/Linux: 
  ```
- ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v34.3.3 -D
+ ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v34.3.4 -D
  ```
 * Windows:
     * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@v34.3.3 -D`
+    * `pnpm install electron@v34.3.4 -D`
 
 NPM 镜像：
 
@@ -30,7 +30,7 @@ NPM 镜像：
 
 桌面端进入 app 文件夹运行：
 
-* `pnpm install electron@v34.3.3 -D`
+* `pnpm install electron@v34.3.4 -D`
 * `pnpm run dev`
 * `pnpm run start`
 
@@ -57,7 +57,8 @@ NPM 镜像：
 ### Android
 
 * `cd kernel`
-* `gomobile bind --tags fts5 -ldflags '-s -w' -v -o kernel.aar -target='android/arm64' -androidapi 24 ./mobile/`
+* `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
+* `gomobile bind --tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target=android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony

@@ -164,6 +164,7 @@ func initWorkspaceDirMobile(workspaceBaseDir string) {
 	AssetContentDBPath = filepath.Join(TempDir, "asset_content.db")
 	BlockTreeDBPath = filepath.Join(TempDir, "blocktree.db")
 	SnippetsPath = filepath.Join(DataDir, "snippets")
+	ShortcutsPath = filepath.Join(userHomeConfDir, "shortcuts")
 
 	AppearancePath = filepath.Join(ConfDir, "appearance")
 	ThemesPath = filepath.Join(AppearancePath, "themes")

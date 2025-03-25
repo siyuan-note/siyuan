@@ -50,15 +50,15 @@
   }
 }
 
-@keyframes scale {
+@keyframes bottom2Top {
   0% {
-    transform: scaleY(1.3);
+    transform: translateY(60px);
     transform-origin: 0 0;
     opacity: 0;
   }
 
   100% {
-    transform: scaleY(1);
+    transform: translateY(0);
   }
 }
 

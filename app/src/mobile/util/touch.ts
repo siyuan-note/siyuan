@@ -175,7 +175,7 @@ export const handleTouchMove = (event: TouchEvent) => {
     }
 
     // 正在编辑时禁止滑动
-    if(!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
+    if (!document.querySelector("#keyboardToolbar").classList.contains("fn__none")) {
         return;
     }
     // 只读状态下选中内容时时禁止滑动
@@ -231,7 +231,8 @@ export const handleTouchMove = (event: TouchEvent) => {
             hasClosestByAttribute(target, "data-type", "NodeAttributeView") ||
             hasClosestByAttribute(target, "data-type", "NodeMathBlock") ||
             hasClosestByAttribute(target, "data-type", "NodeTable") ||
-            hasTopClosestByClassName(target, "list");
+            hasTopClosestByClassName(target, "list") ||
+            hasTopClosestByClassName(target, "protyle-breadcrumb__bar--nowrap");
         if (scrollElement) {
             if (scrollElement.classList.contains("table")) {
                 scrollElement = scrollElement.firstElementChild as HTMLElement;
@@ -248,16 +249,26 @@ export const handleTouchMove = (event: TouchEvent) => {
                     scrollElement = scrollElement.parentElement;
                 }
             }
-
-            if (scrollElement && (
-                (xDiff < 0 && scrollElement.scrollLeft > 0) ||
-                (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
-            )) {
-                scrollBlock = true;
-                return;
+            let noScroll = false;
+            if (scrollElement && scrollElement.scrollLeft === 0) {
+                scrollElement.scrollLeft = 1;
+                if (scrollElement.scrollLeft === 0) {
+                    noScroll = true;
+                } else {
+                    scrollElement.scrollLeft = 0;
+                }
             }
-            if (scrollBlock) {
-                return;
+            if (!noScroll) {
+                if (scrollElement && (
+                    (xDiff < 0 && scrollElement.scrollLeft > 0) ||
+                    (xDiff > 0 && scrollElement.clientWidth + scrollElement.scrollLeft < scrollElement.scrollWidth)
+                )) {
+                    scrollBlock = true;
+                    return;
+                }
+                if (scrollBlock) {
+                    return;
+                }
             }
         }
         if (isFirstMove) {

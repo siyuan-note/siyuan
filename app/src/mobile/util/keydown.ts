@@ -5,7 +5,8 @@ import {getCurrentEditor} from "../editor";
 import {filterHotkey} from "../../boot/globalEvent/commonHotkey";
 
 export const mobileKeydown = (app: App, event: KeyboardEvent) => {
-    if (filterHotkey(event, app)) {
+    // 移动端输入框默认填充无 event.key
+    if (!event.key || filterHotkey(event, app)) {
         return;
     }
     const protyle = getCurrentEditor().protyle;

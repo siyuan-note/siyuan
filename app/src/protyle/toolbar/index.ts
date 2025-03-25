@@ -244,7 +244,8 @@ export class Toolbar {
 
         // https://github.com/siyuan-note/siyuan/issues/6501
         // https://github.com/siyuan-note/siyuan/issues/12877
-        if (rangeTypes.length === 1 && ["block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
+        if (rangeTypes.length === 1 &&
+            ["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
             return;
         }
         const selectText = this.range.toString();
@@ -326,7 +327,7 @@ export class Toolbar {
                     // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
                     let removeIndex = 0;
                     while (removeIndex < rangeTypes.length) {
-                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                        if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
                             rangeTypes.splice(removeIndex, 1);
                         } else {
                             ++removeIndex;
@@ -421,11 +422,15 @@ export class Toolbar {
                 if (isEndSpan) {
                     let removeIndex = 0;
                     while (removeIndex < rangeTypes.length) {
-                        if (["inline-memo", "text", "block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                        if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
                             rangeTypes.splice(removeIndex, 1);
                         } else {
                             ++removeIndex;
                         }
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/14421
+                    if (rangeTypes.length === 0) {
+                        rangeTypes.push(type);
                     }
                 }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
@@ -567,11 +572,11 @@ export class Toolbar {
                         types = [...new Set(types)];
                         if (types.includes("block-ref") && item.getAttribute("data-subtype") === "d") {
                             // https://github.com/siyuan-note/siyuan/issues/14299
-                            if (previousElement && previousElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                            if (previousElement && previousElement.nodeType !== 3 && previousElement.getAttribute("data-id") === item.getAttribute("data-id")) {
                                 previousElement.setAttribute("data-subtype", "s");
                                 item.setAttribute("data-subtype", "s");
                             }
-                            if (nextElement && nextElement.getAttribute("data-id") === item.getAttribute("data-id")) {
+                            if (nextElement && nextElement.nodeType !== 3 && nextElement.getAttribute("data-id") === item.getAttribute("data-id")) {
                                 nextElement.setAttribute("data-subtype", "s");
                                 item.setAttribute("data-subtype", "s");
                             }

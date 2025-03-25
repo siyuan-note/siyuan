@@ -31,6 +31,7 @@ import {hideAllElements} from "./protyle/ui/hideElements";
 import {loadPlugins, reloadPlugin} from "./plugin/loader";
 import "./assets/scss/base.scss";
 import {reloadEmoji} from "./emoji";
+import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -208,4 +209,5 @@ window.openFileByURL = (openURL) => {
 window.showKeyboardToolbar = () => {
     // 防止 Pad 端报错
 };
+window.processIOSPurchaseResponse = processIOSPurchaseResponse;
 /// #endif

@@ -186,11 +186,12 @@ interface Window {
             startKernelFast: { postMessage: (url: string) => void }
             changeStatusBar: { postMessage: (url: string) => void }
             setClipboard: { postMessage: (url: string) => void }
+            purchase: { postMessage: (url: string) => void }
         }
     }
     htmlToImage: {
-        toCanvas:(element: Element) => Promise<HTMLCanvasElement>
-        toBlob:(element: Element) => Promise<Blob>
+        toCanvas: (element: Element) => Promise<HTMLCanvasElement>
+        toBlob: (element: Element) => Promise<Blob>
     };
     JSAndroid: {
         returnDesktop(): void
@@ -219,9 +220,13 @@ interface Window {
 
     goBack(): void
 
+    showMessage(message: string, timeout: number, type: string, messageId?: string): void
+
     reconnectWebSocket(): void
 
     showKeyboardToolbar(height: number): void
+
+    processIOSPurchaseResponse(code: number): void
 
     hideKeyboardToolbar(): void
 

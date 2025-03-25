@@ -722,9 +722,9 @@ export class WYSIWYG {
             }
             // table cell select
             let tableBlockElement: HTMLElement | false;
-            const targetCellElemet = hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD");
-            if (targetCellElemet) {
-                target = targetCellElemet;
+            const targetCellElement = hasClosestByTag(target, "TH") || hasClosestByTag(target, "TD");
+            if (targetCellElement) {
+                target = targetCellElement;
             }
             if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" || target.classList.contains("table__resize") || target.classList.contains("table__select")) {
                 tableBlockElement = hasClosestBlock(target);
@@ -732,6 +732,9 @@ export class WYSIWYG {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
                     window.siyuan.menus.menu.remove();
                     hideElements(["toolbar"], protyle);
+                    if (target.classList.contains("table__select")) {
+                        target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+                    }
                     event.stopPropagation();
                 }
                 // 后续拖拽操作写在多选节点中
@@ -2156,10 +2159,10 @@ export class WYSIWYG {
             });
             hideElements(["hint", "util"], protyle);
             const ctrlIsPressed = isOnlyMeta(event);
-            /// #if !MOBILE
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {
                 const breadcrumbId = backlinkBreadcrumbItemElement.getAttribute("data-id");
+                /// #if !MOBILE
                 if (breadcrumbId) {
                     if (ctrlIsPressed && !event.shiftKey && !event.altKey) {
                         checkFold(breadcrumbId, (zoomIn) => {
@@ -2177,10 +2180,15 @@ export class WYSIWYG {
                     // 引用标题时的更多加载
                     getBacklinkHeadingMore(backlinkBreadcrumbItemElement);
                 }
+                /// #else
+                if (breadcrumbId) {
+                    loadBreadcrumb(protyle, backlinkBreadcrumbItemElement);
+                }
+                /// #endif
                 event.stopPropagation();
                 return;
             }
-            /// #endif
+
             if (!event.shiftKey) {
                 this.shiftStartElement = undefined;
             }

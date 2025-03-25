@@ -371,7 +371,12 @@ export class Wnd {
             /// #if !BROWSER
             if (!oldTab) { // 从主窗口拖拽到页签新窗口
                 JSONToCenter(app, tabData, this);
-                oldTab = this.children[this.children.length - 1];
+                this.children.find(item => {
+                    if (item.headElement.getAttribute("data-activeTime") === tabData.activeTime) {
+                        oldTab = item;
+                        return true;
+                    }
+                });
                 ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "closetab", data: tabData.id});
                 ipcRenderer.send(Constants.SIYUAN_CMD, "focus");
             }

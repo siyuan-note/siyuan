@@ -82,7 +82,7 @@ func moveLocalShorthands(c *gin.Context) {
 	}
 	if "" == id {
 		ret.Code = 1
-		ret.Msg = "No local shorthands need to move"
+		ret.Msg = "No local shorthand need to move"
 		return
 	}
 

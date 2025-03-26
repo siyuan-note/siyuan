@@ -26,6 +26,7 @@ import {isTouchDevice} from "../../util/functions";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {hideTooltip, showTooltip} from "../../dialog/tooltip";
+import * as dayjs from "dayjs";
 
 export class Files extends Model {
     public element: HTMLElement;
@@ -322,6 +323,14 @@ export class Files extends Model {
                                     x: event.clientX,
                                     y: event.clientY
                                 });
+                            } else if (type === "addLocal") {
+                                fetchPost("/api/filetree/moveLocalShorthands", {
+                                    "notebook": notebookId,
+                                    "path": dayjs().format("YYYYMMDDHHmmss")
+                                });
+                                this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
+                                    item.remove();
+                                })
                             }
                         }
                         if (type === "more-file") {

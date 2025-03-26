@@ -9,12 +9,16 @@ import {
 import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
+import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
         switch (data.cmd) {
             case "setDefRefCount":
                 setDefRefCount(data.data);
+                break;
+            case "setLocalShorthandCount":
+                setLocalShorthandCount();
                 break;
             case "setRefDynamicText":
                 setRefDynamicText(data.data);

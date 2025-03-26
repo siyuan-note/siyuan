@@ -13,6 +13,7 @@ import {processRender} from "../util/processCode";
 import {isIPhone, isSafari, openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
 import {isPaidUser} from "../../util/needSubscribe";
+import {getCloudURL} from "../../config/util/about";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -105,7 +106,7 @@ export const exportImage = (id: string) => {
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark = watermarkElement.checked;
         if (watermarkElement.checked && !isPaidUser()) {
             watermarkElement.checked = false;
-            showMessage(window.siyuan.languages._kernel[214]);
+            showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         }
         updateWatermark();
     });

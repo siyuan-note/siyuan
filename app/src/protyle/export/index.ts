@@ -13,6 +13,7 @@ import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
 import {isPaidUser} from "../../util/needSubscribe";
+import {getCloudURL} from "../../config/util/about";
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
@@ -258,7 +259,7 @@ const renderPDF = async (id: string) => {
             </div>
             <span class="fn__hr"></span>
             <input id="watermark" class="b3-switch" type="checkbox" ${localData.watermark ? "checked" : ""}>
-            <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214]}</div>
+            <div style="display:none;font-size: 12px;margin-top: 12px;color: var(--b3-theme-on-surface);">${window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL(""))}</div>
         </label>
     </div>
     <div class="fn__flex" style="padding: 0 16px">

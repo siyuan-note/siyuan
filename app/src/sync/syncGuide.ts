@@ -10,6 +10,7 @@ import {openSetting} from "../config";
 /// #endif
 import {App} from "../index";
 import {Constants} from "../constants";
+import {getCloudURL} from "../config/util/about";
 
 export const addCloudName = (cloudPanelElement: Element) => {
     const dialog = new Dialog({
@@ -153,7 +154,7 @@ export const syncGuide = (app?: App) => {
             return;
         }
     } else if (!isPaidUser()) {
-        showMessage(window.siyuan.languages["_kernel"][214]);
+        showMessage(window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }
     /// #else
@@ -171,7 +172,7 @@ export const syncGuide = (app?: App) => {
         return;
     }
     if (0 !== window.siyuan.config.sync.provider && !isPaidUser() && app) {
-        showMessage(window.siyuan.languages["_kernel"][214]);
+        showMessage(window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL("")));
         return;
     }
     /// #endif

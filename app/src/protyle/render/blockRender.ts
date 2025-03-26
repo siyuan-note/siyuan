@@ -67,8 +67,8 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                         } else {
                             return;
                         }
-                    }).catch(() => {
-                        renderEmbed([], protyle, item, top);
+                    }).catch((e) => {
+                        renderEmbed([], protyle, item, top, e);
                     });
                 } else if (Array.isArray(includeIDs)) {
                     fetchPost("/api/search/getEmbedBlock", {
@@ -83,7 +83,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
                     return;
                 }
             } catch (e) {
-                renderEmbed([], protyle, item, top);
+                renderEmbed([], protyle, item, top, e);
             }
         } else {
             fetchPost("/api/search/searchEmbedBlock", {
@@ -102,7 +102,7 @@ export const blockRender = (protyle: IProtyle, element: Element, top?: number) =
 const renderEmbed = (blocks: {
     block: IBlock,
     blockPaths: IBreadcrumb[]
-}[], protyle: IProtyle, item: HTMLElement, top?: number) => {
+}[], protyle: IProtyle, item: HTMLElement, top?: number, errorTip?: string) => {
     const rotateElement = item.querySelector(".fn__rotate");
     if (rotateElement) {
         rotateElement.classList.remove("fn__rotate");
@@ -119,7 +119,7 @@ const renderEmbed = (blocks: {
         item.firstElementChild.insertAdjacentHTML("afterend", html);
         improveBreadcrumbAppearance(item.querySelector(".protyle-wysiwyg__embed"));
     } else {
-        item.firstElementChild.insertAdjacentHTML("afterend", `<div class="protyle-wysiwyg__embed ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${window.siyuan.languages.refExpired}</div>`);
+        item.firstElementChild.insertAdjacentHTML("afterend", `<div class="protyle-wysiwyg__embed ft__smaller ft__secondary b3-form__space--small" contenteditable="false">${errorTip || window.siyuan.languages.refExpired}</div>`);
     }
 
     processRender(item);

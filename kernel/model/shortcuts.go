@@ -27,15 +27,15 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func ShortcutsAppendToDailynote() {
-	dailynotesDir := filepath.Join(util.ShortcutsPath, "dailynotes")
-	if !gulu.File.IsDir(dailynotesDir) {
+func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err error) {
+	shorthandsDir := filepath.Join(util.ShortcutsPath, "shorthands")
+	if !gulu.File.IsDir(shorthandsDir) {
 		return
 	}
 
-	dir, err := os.ReadDir(dailynotesDir)
+	dir, err := os.ReadDir(shorthandsDir)
 	if nil != err {
-		logging.LogErrorf("read dir [%s] failed: %s", dailynotesDir, err)
+		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
 		return
 	}
 
@@ -50,7 +50,7 @@ func ShortcutsAppendToDailynote() {
 			continue
 		}
 
-		p := filepath.Join(dailynotesDir, entry.Name())
+		p := filepath.Join(shorthandsDir, entry.Name())
 		data, readErr := os.ReadFile(p)
 		if nil != readErr {
 			logging.LogErrorf("read file [%s] failed: %s", p, readErr)
@@ -59,22 +59,32 @@ func ShortcutsAppendToDailynote() {
 
 		buff.Write(bytes.TrimSpace(data))
 		buff.WriteString("\n\n")
-		logging.LogInfof("read dailynote [%s] content [%s]", p, data)
+		logging.LogInfof("read shorthand [%s] content [%s]", p, data)
 		toRemoves = append(toRemoves, p)
 	}
 
-	defer func() {
+	clearShorthand := func(toRemoves []string) {
 		for _, p := range toRemoves {
-			if err := os.Remove(p); nil != err {
-				logging.LogErrorf("remove file [%s] failed: %s", p, err)
+			if removeErr := os.Remove(p); nil != removeErr {
+				logging.LogErrorf("remove file [%s] failed: %s", p, removeErr)
 			}
 		}
-	}()
+	}
 
 	content := strings.TrimSpace(buff.String())
 	if 1 > len(content) {
+		clearShorthand(toRemoves)
 		return
 	}
 
-	logging.LogInfof("append dailynote content [%s]", content)
+	logging.LogInfof("shorthand content [%s]", content)
+
+	retID, err = CreateWithMarkdown("", boxID, hPath, content, parentID, id, false, "")
+	if nil != err {
+		logging.LogErrorf("create doc failed: %s", err)
+		return
+	}
+
+	clearShorthand(toRemoves)
+	return
 }

@@ -35,6 +35,59 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func moveLocalShorthands(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	var parentID string
+	parentIDArg := arg["parentID"]
+	if nil != parentIDArg {
+		parentID = parentIDArg.(string)
+	}
+
+	id := ast.NewNodeID()
+	idArg := arg["id"]
+	if nil != idArg {
+		id = idArg.(string)
+	}
+
+	hPath := arg["path"].(string)
+	baseName := path.Base(hPath)
+	dir := path.Dir(hPath)
+	r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
+	baseName = r.ReplaceAllString(baseName, "")
+	if 512 < utf8.RuneCountInString(baseName) {
+		baseName = gulu.Str.SubStr(baseName, 512)
+	}
+	hPath = path.Join(dir, baseName)
+	if !strings.HasPrefix(hPath, "/") {
+		hPath = "/" + hPath
+	}
+
+	id, err := model.MoveLocalShorthands(notebook, hPath, parentID, id)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = id
+
+	model.FlushTxQueue()
+	box := model.Conf.Box(notebook)
+	b, _ := model.GetBlock(id, nil)
+	pushCreate(box, b.Path, arg)
+}
+
 func listDocTree(c *gin.Context) {
 	// Add kernel API `/api/filetree/listDocTree` https://github.com/siyuan-note/siyuan/issues/10482
 

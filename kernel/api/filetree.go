@@ -80,6 +80,12 @@ func moveLocalShorthands(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+	if "" == id {
+		ret.Code = 1
+		ret.Msg = "No local shorthands need to move"
+		return
+	}
+
 	ret.Data = id
 
 	model.FlushTxQueue()

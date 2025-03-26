@@ -33,7 +33,7 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 		return
 	}
 
-	dir, err := os.ReadDir(shorthandsDir)
+	entries, err := os.ReadDir(shorthandsDir)
 	if nil != err {
 		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
 		return
@@ -41,7 +41,7 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 
 	buff := bytes.Buffer{}
 	var toRemoves []string
-	for _, entry := range dir {
+	for _, entry := range entries {
 		if entry.IsDir() {
 			continue
 		}
@@ -87,4 +87,36 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 
 	clearShorthand(toRemoves)
 	return
+}
+
+func WatchLocalShorthands() {
+	shorthandsDir := filepath.Join(util.ShortcutsPath, "shorthands")
+	if !gulu.File.IsDir(shorthandsDir) {
+		return
+	}
+
+	entries, err := os.ReadDir(shorthandsDir)
+	if nil != err {
+		logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, err)
+		return
+	}
+
+	shorthandCount := 0
+	for _, entry := range entries {
+		if entry.IsDir() {
+			continue
+		}
+
+		if filepath.Ext(entry.Name()) != ".md" {
+			continue
+		}
+
+		shorthandCount++
+	}
+
+	if 1 > shorthandCount {
+		return
+	}
+
+	util.PushLocalShorthandCount(shorthandCount)
 }

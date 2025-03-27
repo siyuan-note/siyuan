@@ -59,7 +59,6 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 
 		buff.Write(bytes.TrimSpace(data))
 		buff.WriteString("\n\n")
-		logging.LogInfof("read shorthand [%s] content [%s]", p, data)
 		toRemoves = append(toRemoves, p)
 	}
 
@@ -76,8 +75,6 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 		clearShorthand(toRemoves)
 		return
 	}
-
-	logging.LogInfof("shorthand content [%s]", content)
 
 	retID, err = CreateWithMarkdown("", boxID, hPath, content, parentID, id, false, "")
 	if nil != err {

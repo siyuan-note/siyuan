@@ -2195,6 +2195,9 @@ export class WYSIWYG {
             this.setEmptyOutline(protyle, event.target);
             const tableElement = hasClosestByClassName(event.target, "table");
             this.element.querySelectorAll(".table").forEach(item => {
+                if (item.tagName !== "DIV") {
+                    return;
+                }
                 if (!tableElement || !item.isSameNode(tableElement)) {
                     item.querySelector(".table__select").removeAttribute("style");
                 }

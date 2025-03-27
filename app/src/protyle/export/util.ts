@@ -62,7 +62,7 @@ export const exportImage = (id: string) => {
     });
     btnsElement[1].addEventListener("click", () => {
         const msgId = showMessage(window.siyuan.languages.exporting, 0);
-        const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement
+        const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement;
         containerElement.style.height = "";
         /// #if MOBILE
         containerElement.style.width = "100vw";

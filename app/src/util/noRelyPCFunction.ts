@@ -73,4 +73,4 @@ export const setLocalShorthandCount = () => {
     <svg><use xlink:href="#iconRiffCard"></use></svg>
 </span>`);
     });
-}
+};

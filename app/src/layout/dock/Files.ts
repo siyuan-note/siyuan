@@ -330,7 +330,7 @@ export class Files extends Model {
                                 });
                                 this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
                                     item.remove();
-                                })
+                                });
                             }
                         }
                         if (type === "more-file") {

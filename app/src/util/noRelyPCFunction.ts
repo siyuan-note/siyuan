@@ -61,7 +61,14 @@ export const setLocalShorthandCount = () => {
     }
     fileElement = (dockFile.data.file as Files).element;
     /// #endif
+    const helpIDs: string[] = [];
+    Object.keys(Constants.HELP_PATH).forEach((key) => {
+        helpIDs.push(Constants.HELP_PATH[key]);
+    });
     fileElement.childNodes.forEach((item: Element) => {
+        if (item.querySelector('[data-type="addLocal"]') || helpIDs.includes(item.getAttribute("data-url"))) {
+            return;
+        }
         item.querySelector('[data-type="more-root"]').insertAdjacentHTML("beforebegin", `<span data-type="addLocal" class="b3-list-item__action">
     <svg><use xlink:href="#iconRiffCard"></use></svg>
 </span>`);

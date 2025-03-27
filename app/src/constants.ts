@@ -232,7 +232,7 @@ export abstract class Constants {
     public static readonly TIMEOUT_COUNT = 1000;
 
     // id
-    public static readonly HELP_PATH = {
+    public static readonly HELP_PATH: { [key: string]: string } = {
         zh_CN: "20210808180117-czj9bvb",
         zh_CHT: "20211226090932-5lcq56f",
         ja_JP: "20240530133126-axarxgx",

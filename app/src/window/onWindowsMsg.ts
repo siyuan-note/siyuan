@@ -14,6 +14,14 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
         case "closetab":
             closeTab(ipcData);
             break;
+        case "resetTabsStyle":
+            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                item.classList.remove("layout-tab-bars--drag");
+                item.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(tabItem => {
+                    tabItem.remove();
+                });
+            });
+            break;
         case "lockscreen":
             exportLayout({
                 errorExit: false,

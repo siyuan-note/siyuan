@@ -11,6 +11,7 @@ import {hideTooltip, showTooltip} from "../dialog/tooltip";
 import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
+import {ipcRenderer} from "electron";
 /// #endif
 import {layoutToJSON, saveLayout} from "./util";
 
@@ -113,6 +114,7 @@ export class Tab {
                     if (document.body.contains(this.panelElement) &&
                         (event.clientX < 0 || event.clientY < 0 || event.clientX > window.innerWidth || event.clientY > window.innerHeight)) {
                         openNewWindow(this);
+                        ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle"});
                     }
                 }, Constants.TIMEOUT_LOAD); // 等待主进程发送关闭消息
                 /// #endif

@@ -1,8 +1,4 @@
-import {
-    hasClosestByClassName,
-    hasClosestByTag,
-    hasTopClosestByTag
-} from "../../protyle/util/hasClosest";
+import {hasClosestByClassName, hasClosestByTag, hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {escapeHtml} from "../../util/escape";
 import {Model} from "../../layout/Model";
 import {Constants} from "../../constants";
@@ -20,7 +16,6 @@ import {MenuItem} from "../../menus/Menu";
 import {App} from "../../index";
 import {refreshFileTree} from "../../dialog/processSystem";
 import {setStorageVal} from "../../protyle/util/compatibility";
-import * as dayjs from "dayjs";
 
 export class MobileFiles extends Model {
     public element: HTMLElement;
@@ -220,8 +215,7 @@ export class MobileFiles extends Model {
                                 window.siyuan.menus.menu.fullscreen("bottom");
                             } else if (type === "addLocal") {
                                 fetchPost("/api/filetree/moveLocalShorthands", {
-                                    "notebook": notebookId,
-                                    "path": dayjs().format("YYYY-MM-DD HH:mm:ss")
+                                    "notebook": notebookId
                                 });
                                 this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
                                     item.remove();

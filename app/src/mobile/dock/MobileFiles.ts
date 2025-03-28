@@ -221,7 +221,7 @@ export class MobileFiles extends Model {
                             } else if (type === "addLocal") {
                                 fetchPost("/api/filetree/moveLocalShorthands", {
                                     "notebook": notebookId,
-                                    "path": dayjs().format("YYYYMMDDHHmmss")
+                                    "path": dayjs().format("YYYY-MM-DD HH:mm:ss")
                                 });
                                 this.element.querySelectorAll('[data-type="addLocal"]').forEach(item => {
                                     item.remove();

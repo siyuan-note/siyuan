@@ -41,9 +41,28 @@ func MoveLocalShorthands(boxID, hPath, parentID, id string) (retID string, err e
 
 	buff := bytes.Buffer{}
 	var toRemoves []string
+	assetsDir := filepath.Join(util.DataDir, "assets")
 	for _, entry := range entries {
 		if entry.IsDir() {
-			continue
+			if "assets" == entry.Name() {
+				assetsEntries, readErr := os.ReadDir(filepath.Join(shorthandsDir, entry.Name()))
+				if nil != readErr {
+					logging.LogErrorf("read dir [%s] failed: %s", shorthandsDir, readErr)
+					continue
+				}
+				for _, assetEntry := range assetsEntries {
+					if assetEntry.IsDir() {
+						continue
+					}
+
+					p := filepath.Join(shorthandsDir, entry.Name(), assetEntry.Name())
+					assetWritePath := filepath.Join(assetsDir, assetEntry.Name())
+					if renameErr := os.Rename(p, assetWritePath); nil != renameErr {
+						logging.LogErrorf("rename file [%s] to [%s] failed: %s", p, assetWritePath, renameErr)
+						continue
+					}
+				}
+			}
 		}
 
 		if filepath.Ext(entry.Name()) != ".md" {

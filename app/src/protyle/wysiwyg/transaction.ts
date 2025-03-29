@@ -699,8 +699,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     }
                 });
                 document.querySelectorAll("wbr").forEach(item => {
-                    item.remove()
-                })
+                    item.remove();
+                });
             } else {
                 focusByWbr(protyle.wysiwyg.element, range);
             }

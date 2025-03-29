@@ -55,43 +55,33 @@ func moveLocalShorthands(c *gin.Context) {
 		parentID = parentIDArg.(string)
 	}
 
-	id := ast.NewNodeID()
-	idArg := arg["id"]
-	if nil != idArg {
-		id = idArg.(string)
+	var hPath string
+	hPathArg := arg["path"]
+	if nil != hPathArg {
+		hPath = arg["path"].(string)
+		baseName := path.Base(hPath)
+		dir := path.Dir(hPath)
+		r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
+		baseName = r.ReplaceAllString(baseName, "")
+		if 512 < utf8.RuneCountInString(baseName) {
+			baseName = gulu.Str.SubStr(baseName, 512)
+		}
+		hPath = path.Join(dir, baseName)
 	}
 
-	hPath := arg["path"].(string)
-	baseName := path.Base(hPath)
-	dir := path.Dir(hPath)
-	r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
-	baseName = r.ReplaceAllString(baseName, "")
-	if 512 < utf8.RuneCountInString(baseName) {
-		baseName = gulu.Str.SubStr(baseName, 512)
-	}
-	hPath = path.Join(dir, baseName)
-	if !strings.HasPrefix(hPath, "/") {
-		hPath = "/" + hPath
-	}
-
-	id, err := model.MoveLocalShorthands(notebook, hPath, parentID, id)
+	ids, err := model.MoveLocalShorthands(notebook, hPath, parentID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
 		return
 	}
-	if "" == id {
-		ret.Code = 1
-		ret.Msg = "No local shorthand need to move"
-		return
-	}
-
-	ret.Data = id
 
 	model.FlushTxQueue()
 	box := model.Conf.Box(notebook)
-	b, _ := model.GetBlock(id, nil)
-	pushCreate(box, b.Path, arg)
+	for _, id := range ids {
+		b, _ := model.GetBlock(id, nil)
+		pushCreate(box, b.Path, arg)
+	}
 }
 
 func listDocTree(c *gin.Context) {

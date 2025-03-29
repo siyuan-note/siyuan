@@ -649,9 +649,16 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 	}
 
 	newName = util.AssetName(newName + filepath.Ext(oldPath))
-	newPath = "assets/" + newName
-	if err = filelock.Copy(filepath.Join(util.DataDir, oldPath), filepath.Join(util.DataDir, newPath)); err != nil {
-		logging.LogErrorf("copy asset [%s] failed: %s", oldPath, err)
+	parentDir := path.Dir(oldPath)
+	newPath = path.Join(parentDir, newName)
+	oldAbsPath, getErr := GetAssetAbsPath(oldPath)
+	if getErr != nil {
+		logging.LogErrorf("get asset [%s] abs path failed: %s", oldPath, getErr)
+		return
+	}
+	newAbsPath := filepath.Join(filepath.Dir(oldAbsPath), newName)
+	if err = filelock.Copy(oldAbsPath, newAbsPath); err != nil {
+		logging.LogErrorf("copy asset [%s] failed: %s", oldAbsPath, err)
 		return
 	}
 

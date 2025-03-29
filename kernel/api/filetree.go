@@ -69,6 +69,8 @@ func moveLocalShorthands(c *gin.Context) {
 		hPath = path.Join(dir, baseName)
 	}
 
+	// TODO: 改造旧方案，去掉 hPath, parentID，改为使用文档树配置项 闪念速记存放位置，参考创建日记实现
+	// https://github.com/siyuan-note/siyuan/issues/14414
 	ids, err := model.MoveLocalShorthands(notebook, hPath, parentID)
 	if err != nil {
 		ret.Code = -1

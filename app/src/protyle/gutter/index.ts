@@ -2364,7 +2364,10 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                 if (type === "NodeBlockquote") {
                     space += 8;
                 }
-                if (nodeElement.isSameNode(wysiwyg.firstElementChild) ||
+                if ((
+                        !nodeElement.previousElementSibling &&
+                        (nodeElement.isSameNode(wysiwyg.firstElementChild) || nodeElement.parentElement.classList.contains("sb"))
+                    ) ||
                     (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id"))) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;

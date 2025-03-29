@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
-import {hasClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {setFold, zoomOut} from "../../menus/protyle";
 import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 /// #if !MOBILE
@@ -624,11 +624,6 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         return;
     }
     if (operation.action === "move") {
-        let range;
-        if (isUndo && getSelection().rangeCount > 0) {
-            range = getSelection().getRangeAt(0);
-            range.insertNode(document.createElement("wbr"));
-        }
         /// #if !MOBILE
         if (updateElements.length === 0) {
             // 打开两个相同的文档 A、A1，从 A 拖拽块 B 到 A1，在后续 ws 处理中，无法获取到拖拽出去的 B
@@ -649,6 +644,18 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             });
         }
         /// #endif
+        let range;
+        if (isUndo && getSelection().rangeCount > 0) {
+            range = getSelection().getRangeAt(0);
+            const rangeBlockElement = hasClosestBlock(range.startContainer);
+            if (rangeBlockElement) {
+                if (getContenteditableElement(rangeBlockElement)) {
+                    range.insertNode(document.createElement("wbr"));
+                } else {
+                    getContenteditableElement(updateElements[0]).insertAdjacentHTML("afterbegin", "<wbr>");
+                }
+            }
+        }
         let hasFind = false;
         if (operation.previousID && updateElements.length > 0) {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
@@ -691,7 +698,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                         return true;
                     }
                 });
-                document.querySelector("wbr")?.remove();
+                document.querySelectorAll("wbr").forEach(item => {
+                    item.remove()
+                })
             } else {
                 focusByWbr(protyle.wysiwyg.element, range);
             }

@@ -200,7 +200,9 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
     }
 
     if (!blockElement.previousElementSibling && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
-        range.insertNode(document.createElement("wbr"));
+        if (type !== "Delete") {
+            range.insertNode(document.createElement("wbr"));
+        }
         const blockParentElement = blockElement.parentElement;
         blockParentElement.insertAdjacentElement("beforebegin", blockElement);
         if (blockParentElement.childElementCount === 1) {
@@ -236,7 +238,11 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 parentID: blockParentElement.getAttribute("data-node-id")
             }]);
         }
-        focusByWbr(blockElement, range);
+        if (type === "Delete") {
+            moveToPrevious(blockElement, range, true);
+        } else {
+            focusByWbr(blockElement, range);
+        }
         return;
     }
 

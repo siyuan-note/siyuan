@@ -169,7 +169,7 @@ ${renewHTML}
         </div>
     </div>
 </div>
-<div class="config-account__center config-account__center--text${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}">
+<div class="config-account__center config-account__center--text">
     <div class="fn__flex-1 fn__hr--b"></div>
     ${subscriptionHTML}
     <div class="fn__flex-1 fn__hr--b"></div>

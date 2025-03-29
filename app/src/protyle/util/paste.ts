@@ -466,7 +466,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 isHTML = true;
             }
 
-            if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br"))) {
+            if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br")) && 0 > textHTML.indexOf("class=\"katex")) {
                 // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265 https://github.com/siyuan-note/siyuan/issues/14313
                 isHTML = false;
             }

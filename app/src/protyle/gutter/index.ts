@@ -2282,7 +2282,7 @@ export class Gutter {
         let listItem;
         let hideParent = false;
         while (nodeElement) {
-            const parentElement = hasClosestBlock(nodeElement.parentElement);
+            let parentElement = hasClosestBlock(nodeElement.parentElement);
             if (!isInEmbedBlock(nodeElement)) {
                 let type;
                 if (!hideParent) {
@@ -2320,6 +2320,7 @@ export class Gutter {
                     // 标题必须显示
                     if (!topElement.isSameNode(nodeElement) && type !== "NodeHeading") {
                         nodeElement = topElement;
+                        parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");
                         dataNodeId = nodeElement.getAttribute("data-node-id");
                     }
@@ -2364,11 +2365,7 @@ data-type="fold" style="cursor:inherit;"><svg style="width: 10px${fold && fold =
                 if (type === "NodeBlockquote") {
                     space += 8;
                 }
-                if ((
-                        !nodeElement.previousElementSibling &&
-                        (nodeElement.isSameNode(wysiwyg.firstElementChild) || nodeElement.parentElement.classList.contains("sb"))
-                    ) ||
-                    (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id"))) {
+                if (nodeElement.previousElementSibling && nodeElement.previousElementSibling.getAttribute("data-node-id")) {
                     // 前一个块存在时，只显示到当前层级
                     hideParent = true;
                     // 由于折叠块的第二个子块在界面上不显示，因此移除块标 https://github.com/siyuan-note/siyuan/issues/14304

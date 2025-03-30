@@ -104,9 +104,6 @@ export class Tab {
                 const tabElement = hasClosestByTag(event.target, "LI");
                 if (tabElement) {
                     tabElement.style.opacity = "1";
-                    document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach((item) => {
-                        item.remove();
-                    });
                 }
                 /// #if !BROWSER
                 // 拖拽到屏幕外
@@ -114,9 +111,16 @@ export class Tab {
                     if (document.body.contains(this.panelElement) &&
                         (event.clientX < 0 || event.clientY < 0 || event.clientX > window.innerWidth || event.clientY > window.innerHeight)) {
                         openNewWindow(this);
-                        ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle"});
                     }
                 }, Constants.TIMEOUT_LOAD); // 等待主进程发送关闭消息
+                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle"});
+                /// #else
+                document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
+                    item.classList.remove("layout-tab-bars--drag");
+                });
+                document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(tabItem => {
+                    tabItem.remove();
+                });
                 /// #endif
                 window.siyuan.dragElement = undefined;
                 if (event.dataTransfer.dropEffect === "none") {

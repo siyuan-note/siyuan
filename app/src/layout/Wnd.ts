@@ -232,16 +232,6 @@ export class Wnd {
             }
         });
 
-        this.headersElement.parentElement.addEventListener("dragend", () => {
-            document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
-                item.classList.remove("layout-tab-bars--drag");
-            });
-            // 窗口拖拽到新窗口时，不 drop 无法移除 clone 的元素
-            document.querySelectorAll(".layout-tab-bar li[data-clone='true']").forEach(item => {
-                item.remove();
-            });
-        });
-
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
         }) {

@@ -592,8 +592,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							unlinks = append(unlinks, n.Parent)
 
 							prev, next := n.Parent.Previous, n.Parent.Next
+							for ; prev != nil && ast.NodeText == prev.Type && prev.Tokens == nil; prev = prev.Previous {
+								// Tokens 为空的节点是之前处理过的节点，需要跳过
+							}
 							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
 								prev.Tokens = append(prev.Tokens, next.Tokens...)
+								next.Tokens = nil // 将 Tokens 设置为空，表示该节点已经被处理过
 								unlinks = append(unlinks, next)
 							}
 						} else {

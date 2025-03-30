@@ -469,6 +469,14 @@ func SetDynamicBlockRefText(blockRef *ast.Node, refText string) {
 		return
 	}
 
+	if ast.NodeBlockRef == blockRef.Type {
+		if refID := blockRef.ChildByType(ast.NodeBlockRefID); nil != refID {
+			refID.InsertAfter(&ast.Node{Type: ast.NodeBlockRefDynamicText, Tokens: []byte(refText)})
+			refID.InsertAfter(&ast.Node{Type: ast.NodeBlockRefSpace})
+		}
+		return
+	}
+
 	refText = strings.TrimSpace(refText)
 	if "" == refText {
 		refText = blockRef.TextMarkBlockRefID

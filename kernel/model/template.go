@@ -355,7 +355,6 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			nodesNeedAppendChild = append(nodesNeedAppendChild, n)
 		}
 
-		// 块引缺失锚文本情况下自动补全 https://github.com/siyuan-note/siyuan/issues/6087
 		if n.IsTextMarkType("block-ref") {
 			if refText := n.Text(); "" == refText {
 				refText = strings.TrimSpace(sql.GetRefText(n.TextMarkBlockRefID))
@@ -363,6 +362,17 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 					treenode.SetDynamicBlockRefText(n, refText)
 				} else {
 					unlinks = append(unlinks, n)
+				}
+			}
+		} else if ast.NodeBlockRef == n.Type {
+			if refText := n.Text(); "" == refText {
+				if refID := n.ChildByType(ast.NodeBlockRefID); nil != refID {
+					refText = strings.TrimSpace(sql.GetRefText(refID.TokensStr()))
+					if "" != refText {
+						treenode.SetDynamicBlockRefText(n, refText)
+					} else {
+						unlinks = append(unlinks, n)
+					}
 				}
 			}
 		} else if n.IsTextMarkType("inline-math") {

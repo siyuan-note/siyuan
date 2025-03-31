@@ -7,7 +7,7 @@
 		"id": "20240530101000-6x9ivi7",
 		"title": "テンプレートスニペット",
 		"type": "doc",
-		"updated": "20241225192831"
+		"updated": "20250331163729"
 	},
 	"Children": [
 		{
@@ -66,7 +66,7 @@
 			"Properties": {
 				"ID": "20240530101000-5nvn9ad",
 				"id": "20240530101000-pi05yzt",
-				"updated": "20241225192831"
+				"updated": "20250331163729"
 			},
 			"Children": [
 				{
@@ -226,7 +226,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20240530101000-by5hqnb",
-				"updated": "20241225192831"
+				"updated": "20250331163729"
 			},
 			"Children": [
 				{
@@ -432,7 +432,7 @@
 					},
 					"Properties": {
 						"id": "20240530101000-0y2zlji",
-						"updated": "20240530101000"
+						"updated": "20250331163729"
 					},
 					"Children": [
 						{
@@ -454,15 +454,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "をクエリしてブロックのリストを返します"
+									"Data": "​: この関数はデータベースをクエリしてブロックのリストを返します"
 								}
 							]
 						},
@@ -473,7 +465,7 @@
 							"Properties": {
 								"id": "20241213215628-5gixpmp",
 								"style": "line-height: 22px;",
-								"updated": "20241213215628"
+								"updated": "20250331163729"
 							},
 							"Children": [
 								{
@@ -485,7 +477,70 @@
 								},
 								{
 									"Type": "NodeCodeBlockCode",
-									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks :=queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+									"Data": ".action{$today := now | date \"20060102150405\"}\n.action{$blocks := queryBlocks \"SELECT * FROM blocks WHERE content LIKE '?' AND updated \u003e '?' LIMIT ?\" \"%foo%\" $today \"3\"}\n"
+								},
+								{
+									"Type": "NodeCodeBlockFenceCloseMarker",
+									"Data": "```"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250331163610-n3e9zft",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250331163610-n3e9zft",
+						"updated": "20250331163642"
+					},
+					"Children": [
+						{
+							"ID": "20250331163610-nbmwe90",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250331163610-nbmwe90",
+								"updated": "20250331163621"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "getBlock"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: この関数はブロックIDに基づいてデータベースを照会するために使用され、戻り値はブロックです"
+								}
+							]
+						},
+						{
+							"ID": "20250331163621-j4iofxv",
+							"Type": "NodeCodeBlock",
+							"IsFencedCodeBlock": true,
+							"Properties": {
+								"id": "20250331163621-j4iofxv",
+								"updated": "20250331163642"
+							},
+							"Children": [
+								{
+									"Type": "NodeCodeBlockFenceOpenMarker",
+									"Data": "```"
+								},
+								{
+									"Type": "NodeCodeBlockFenceInfoMarker"
+								},
+								{
+									"Type": "NodeCodeBlockCode",
+									"Data": ".action{getBlock \"20250331163610-n3e9zft\"}\n"
 								},
 								{
 									"Type": "NodeCodeBlockFenceCloseMarker",
@@ -526,15 +581,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "をクエリしてスパンのリストを返します"
+									"Data": "​: この関数はデータベースをクエリしてスパンのリストを返します"
 								}
 							]
 						},
@@ -598,15 +645,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: この関数は"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "データベース"
-								},
-								{
-									"Type": "NodeText",
-									"Data": "へのクエリに使用され、戻り値は結果セットです"
+									"Data": "​: この関数はデータベースへのクエリに使用され、戻り値は結果セットです"
 								}
 							]
 						},

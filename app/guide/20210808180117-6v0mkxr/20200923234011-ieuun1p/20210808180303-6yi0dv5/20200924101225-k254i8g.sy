@@ -6,7 +6,7 @@
 		"id": "20200924101225-k254i8g",
 		"title": "Content Block Type",
 		"type": "doc",
-		"updated": "20250330192605"
+		"updated": "20250330192550"
 	},
 	"Children": [
 		{
@@ -1794,7 +1794,7 @@
 		{
 			"ID": "20250330191912-6gqtj5b",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250330191912-6gqtj5b",
 				"updated": "20250330192550"

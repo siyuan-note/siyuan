@@ -191,7 +191,7 @@ export class Wnd {
             let oldTabHeaderElement = window.siyuan.dragElement;
             let exitDrag = false;
             Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
-                if (item.style?.opacity === "0.1") {
+                if (item.style?.opacity === "0.38") {
                     oldTabHeaderElement = item;
                     exitDrag = true;
                     return true;
@@ -207,7 +207,7 @@ export class Wnd {
                 return;
             } else if (!exitDrag && !oldTabHeaderElement) { // 拖拽到新窗口
                 oldTabHeaderElement = document.createElement("li");
-                oldTabHeaderElement.style.opacity = "0.1";
+                oldTabHeaderElement.style.opacity = "0.38";
                 oldTabHeaderElement.innerHTML = '<svg class="svg"><use xlink:href="#iconFile"></use></svg>';
                 oldTabHeaderElement.setAttribute("data-clone", "true");
                 it.firstElementChild.append(oldTabHeaderElement);
@@ -274,7 +274,7 @@ export class Wnd {
             }
 
             const nextTabHeaderElement = (Array.from(it.firstElementChild.childNodes).find((item: HTMLElement) => {
-                if (item.style?.opacity === "0.1") {
+                if (item.style?.opacity === "0.38") {
                     return true;
                 }
             }) as HTMLElement)?.nextElementSibling;

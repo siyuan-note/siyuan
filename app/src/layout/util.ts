@@ -842,7 +842,7 @@ export const addResize = (obj: Layout | Wnd) => {
             documentSelf.ondragstart = () => {
                 // 文件树拖拽会产生透明效果
                 document.querySelectorAll(".sy__file .b3-list-item").forEach((item: HTMLElement) => {
-                    if (item.style.opacity === "0.1") {
+                    if (item.style.opacity === "0.38") {
                         item.style.opacity = "";
                     }
                 });

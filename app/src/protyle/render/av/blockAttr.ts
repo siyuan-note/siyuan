@@ -218,7 +218,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
             element.addEventListener("dragstart", (event: DragEvent) => {
                 const target = event.target as HTMLElement;
                 window.siyuan.dragElement = target.parentElement;
-                window.siyuan.dragElement.style.opacity = ".1";
+                window.siyuan.dragElement.style.opacity = ".38";
                 dragBlockElement = hasClosestBlock(window.siyuan.dragElement) as HTMLElement;
 
                 const ghostElement = document.createElement("div");

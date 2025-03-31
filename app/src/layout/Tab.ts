@@ -50,7 +50,7 @@ export class Tab {
                 event.stopPropagation();
                 event.preventDefault();
                 const dragElement = Array.from(this.headElement.parentElement.childNodes).find((item: HTMLElement) => {
-                    if (item.style?.opacity === "0.1") {
+                    if (item.style?.opacity === "0.38") {
                         return true;
                     }
                 });
@@ -96,7 +96,7 @@ export class Tab {
                     layoutToJSON(this, modeJSON);
                     event.dataTransfer.setData(Constants.SIYUAN_DROP_TAB, JSON.stringify(modeJSON));
                     event.dataTransfer.dropEffect = "move";
-                    tabElement.style.opacity = "0.1";
+                    tabElement.style.opacity = "0.38";
                     window.siyuan.dragElement = this.headElement;
                 }
             });

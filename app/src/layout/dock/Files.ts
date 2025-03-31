@@ -435,7 +435,7 @@ export class Files extends Model {
                 const ghostElement = document.createElement("ul");
                 selectElements.forEach((item: HTMLElement, index) => {
                     ghostElement.append(item.cloneNode(true));
-                    item.style.opacity = "0.1";
+                    item.style.opacity = "0.38";
                     const itemNodeId = item.dataset.nodeId ||
                         item.dataset.path; // 拖拽笔记本时值不能为空，否则 drop 就不会继续排序
                     if (itemNodeId) {

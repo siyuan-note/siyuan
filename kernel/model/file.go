@@ -1080,6 +1080,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	FlushTxQueue()
 
+	hPath = util.TrimSpaceInPath(hPath)
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	if nil != existRoot {
 		existed = true

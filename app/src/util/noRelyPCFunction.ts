@@ -6,6 +6,7 @@ import {pathPosix} from "./pathName";
 /// #if !MOBILE
 import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
+import {Tag} from "../layout/dock/Tag";
 /// #endif
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
@@ -31,7 +32,15 @@ export const renameTag = (labelName: string) => {
     inputElement.focus();
     inputElement.select();
     btnsElement[1].addEventListener("click", () => {
-        fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
+        fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value}, () => {
+            dialog.destroy();
+            /// #if MOBILE
+            window.siyuan.mobile.docks.tag.update();
+            /// #else
+            const dockTag = getDockByType("tag");
+            (dockTag.data.tag as Tag).update();
+            /// #endif
+        });
     });
 };
 

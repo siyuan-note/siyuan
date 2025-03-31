@@ -6,7 +6,7 @@
 		"id": "20211226120147-ib6yy3i",
 		"title": "內容塊類型",
 		"type": "doc",
-		"updated": "20250330191635"
+		"updated": "20250330184030"
 	},
 	"Children": [
 		{
@@ -1737,7 +1737,7 @@
 		{
 			"ID": "20250330183637-4bl34no",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250330183637-4bl34no",
 				"updated": "20250330184030"

@@ -7,7 +7,7 @@
 		"id": "20240530101000-35bbvcx",
 		"title": "コンテンツブロックの種類",
 		"type": "doc",
-		"updated": "20250330192734"
+		"updated": "20250330192711"
 	},
 	"Children": [
 		{
@@ -1861,7 +1861,7 @@
 		{
 			"ID": "20250330192102-eq3j7o6",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250330192102-eq3j7o6",
 				"updated": "20250330192711"

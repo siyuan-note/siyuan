@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20250330191720"
+		"updated": "20250330191713"
 	},
 	"Children": [
 		{
@@ -1782,7 +1782,7 @@
 		{
 			"ID": "20250330183345-n3cc5zy",
 			"Type": "NodeHeading",
-			"HeadingLevel": 2,
+			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20250330183345-n3cc5zy",
 				"updated": "20250330191713"

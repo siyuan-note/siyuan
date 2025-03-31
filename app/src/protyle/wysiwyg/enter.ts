@@ -126,7 +126,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
 
     // bq
     if (editableElement.textContent.replace(Constants.ZWSP, "").replace("\n", "") === "" &&
-        blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") && blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
+        blockElement.nextElementSibling && blockElement.nextElementSibling.classList.contains("protyle-attr") &&
+        blockElement.parentElement.getAttribute("data-type") === "NodeBlockquote") {
         range.insertNode(document.createElement("wbr"));
         const topElement = getTopEmptyElement(blockElement);
         const blockId = blockElement.getAttribute("data-node-id");
@@ -204,11 +205,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         removeEmptyNode(newElement);
         return true;
     }
-    const wbrElement = document.createElement("wbr");
-    range.insertNode(wbrElement);
+    range.insertNode(document.createElement("wbr"));
     const html = blockElement.outerHTML;
-    wbrElement.remove();
-
     if (range.toString() !== "") {
         // 选中数学公式后回车取消选中 https://github.com/siyuan-note/siyuan/issues/12637#issuecomment-2381106949
         const mathElement = hasClosestByAttribute(range.startContainer, "data-type", "inline-math");
@@ -219,19 +217,24 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 range.setEnd(nextSibling, nextSibling.textContent.startsWith(Constants.ZWSP) ? 1 : 0);
                 range.collapse(false);
             }
+            mathElement.querySelector("wbr")?.remove();
             return true;
         }
         range.extractContents();
+        range.insertNode(document.createElement("wbr"));
     }
     if (editableElement.lastChild) {
         range.setEndAfter(editableElement.lastChild);
     }
-
     const id = blockElement.getAttribute("data-node-id");
     const newElement = document.createElement("div");
     newElement.appendChild(genEmptyElement(false, false));
     const newEditableElement = newElement.querySelector('[contenteditable="true"]');
     newEditableElement.appendChild(range.extractContents());
+    const selectWbrElement = newEditableElement.querySelector("wbr");
+    if (selectWbrElement && selectWbrElement.parentElement.tagName === "SPAN" && selectWbrElement.parentElement.innerHTML === "<wbr>") {
+        selectWbrElement.parentElement.outerHTML = "<wbr>";
+    }
     const newHTML = newEditableElement.innerHTML.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
     if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
@@ -323,7 +326,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             level: "row"
         });
     }
-    focusBlock(currentElement);
+    focusByWbr(currentElement, range);
     scrollCenter(protyle);
     return true;
 };
@@ -492,7 +495,9 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
         range.extractContents();
         range.insertNode(document.createElement("wbr"));
     }
-    range.setEndAfter(editableElement.lastChild);
+    if (editableElement.lastChild) {
+        range.setEndAfter(editableElement.lastChild);
+    }
     newElement = genListItemElement(listItemElement, 0, false);
     const newEditableElement = getContenteditableElement(newElement);
     newEditableElement.appendChild(range.extractContents());

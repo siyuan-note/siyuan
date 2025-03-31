@@ -2641,6 +2641,13 @@ export class WYSIWYG {
                 if (attrElement) {
                     newRange = setLastNodeRange(attrElement.previousElementSibling, newRange, false);
                 }
+                // https://github.com/siyuan-note/siyuan/issues/14481
+                const inlineMathElement = hasClosestByAttribute(newRange.startContainer, "data-type", "inline-math");
+                if (inlineMathElement) {
+                    newRange.setEndAfter(inlineMathElement);
+                    newRange.collapse(false);
+                    focusByRange(newRange);
+                }
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {
                     protyle.toolbar.render(protyle, newRange);

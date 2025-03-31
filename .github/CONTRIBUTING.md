@@ -42,9 +42,11 @@ Note: In the development environment, the kernel process will not be automatical
 ### Desktop
 
 * `cd kernel`
-* `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Windows: `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel.exe"`
+* Linux/macOS: `go build --tags "fts5" -o "../app/kernel/SiYuan-Kernel"`
 * `cd ../app/kernel`
-* `./SiYuan-Kernel.exe --wd=.. --mode=dev`
+* Windows: `./SiYuan-Kernel.exe --wd=.. --mode=dev`
+* Linux/macOS: `./SiYuan-Kernel --wd=.. --mode=dev`
 
 ### iOS
 

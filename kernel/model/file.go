@@ -1785,6 +1785,7 @@ func removeInvisibleCharsInTitle(title string) string {
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)
 	title = strings.ReplaceAll(title, "__@ZWJ@__", string(gulu.ZWJ))
+	title = strings.TrimSpace(title)
 	return title
 }
 

@@ -394,20 +394,20 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             (editableElement.textContent.endsWith(Constants.ZWSP) ? 1 : 0)) {
             // 段末换行，在子列表中插入
             range.insertNode(document.createElement("wbr"));
-            const html = subListElement.outerHTML;
+            const html = listItemElement.outerHTML;
             blockElement.querySelector("wbr").remove();
             newElement = genListItemElement(subListElement.firstElementChild, -1, true);
             subListElement.firstElementChild.before(newElement);
             if (subListElement.getAttribute("data-subtype") === "o") {
                 updateListOrder(subListElement);
             }
-            updateTransaction(protyle, subListElement.getAttribute("data-node-id"), subListElement.outerHTML, html);
+            updateTransaction(protyle, listItemElement.getAttribute("data-node-id"), listItemElement.outerHTML, html);
             focusByWbr(listItemElement, range);
             scrollCenter(protyle);
         } else {
             // 文字中间换行
             range.insertNode(document.createElement("wbr"));
-            const listItemHTMl = listItemElement.outerHTML;
+            const listItemHTML = listItemElement.outerHTML;
             const html = listItemElement.parentElement.outerHTML;
             if (range.toString() !== "") {
                 range.extractContents();
@@ -417,6 +417,10 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
             newElement = genListItemElement(listItemElement, 0, false);
             const newEditElement = getContenteditableElement(newElement);
             newEditElement.appendChild(range.extractContents());
+            const subWbrElement = newEditElement.querySelector("wbr");
+            if (subWbrElement && subWbrElement.parentElement.tagName === "SPAN" && subWbrElement.parentElement.innerHTML === "<wbr>") {
+                subWbrElement.parentElement.outerHTML = "<wbr>";
+            }
             let subListNextElement = subListElement.nextElementSibling;
             newElement.lastElementChild.before(subListElement);
             // https://github.com/siyuan-note/siyuan/issues/13016
@@ -443,7 +447,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                     id: newElement.getAttribute("data-node-id"),
                 }, {
                     action: "update",
-                    data: listItemHTMl,
+                    data: listItemHTML,
                     id: listItemElement.getAttribute("data-node-id")
                 }]);
             } else {
@@ -482,6 +486,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
                 range.setEnd(nextSibling, nextSibling.textContent.startsWith(Constants.ZWSP) ? 1 : 0);
                 range.collapse(false);
             }
+            mathElement.querySelector("wbr")?.remove();
             return true;
         }
         range.extractContents();
@@ -491,6 +496,10 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     newElement = genListItemElement(listItemElement, 0, false);
     const newEditableElement = getContenteditableElement(newElement);
     newEditableElement.appendChild(range.extractContents());
+    const selectWbrElement = newEditableElement.querySelector("wbr");
+    if (selectWbrElement && selectWbrElement.parentElement.tagName === "SPAN" && selectWbrElement.parentElement.innerHTML === "<wbr>") {
+        selectWbrElement.parentElement.outerHTML = "<wbr>";
+    }
     // 回车移除空元素 https://github.com/siyuan-note/insider/issues/480
     // https://github.com/siyuan-note/siyuan/issues/12273
     // 文字和图片中间回车后图片前需添加 zwsp

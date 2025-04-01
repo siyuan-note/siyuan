@@ -284,6 +284,9 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         tempElement.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
             editItem.setAttribute("contenteditable", "false");
         });
+        tempElement.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
+            selectItem.classList.remove("protyle-wysiwyg--select");
+        })
         const wbrElement = tempElement.querySelector("wbr");
         if (wbrElement) {
             wbrElement.remove();

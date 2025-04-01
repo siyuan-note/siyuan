@@ -99,9 +99,7 @@ export class Tab {
                     tabElement.style.opacity = "0.38";
                     window.siyuan.dragElement = this.headElement;
                 }
-                if (isWindow() && this.headElement.getBoundingClientRect().top <= 0) {
-                    ((this.headElement.parentElement.parentElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement).style as CSSStyleDeclarationElectron).WebkitAppRegion = "";
-                }
+                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "removeRegionStyle"});
             });
             this.headElement.addEventListener("dragend", (event: DragEvent & { target: HTMLElement }) => {
                 const tabElement = hasClosestByTag(event.target, "LI");
@@ -116,7 +114,7 @@ export class Tab {
                         openNewWindow(this);
                     }
                 }, Constants.TIMEOUT_LOAD); // 等待主进程发送关闭消息
-                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle"});
+                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "rmDragStyle"});
                 /// #else
                 document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                     item.classList.remove("layout-tab-bars--drag");
@@ -139,9 +137,7 @@ export class Tab {
                         }
                     });
                 }
-                if (isWindow() && this.headElement.getBoundingClientRect().top <= 0) {
-                    ((this.headElement.parentElement.parentElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement).style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
-                }
+                ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "addRegionStyle"});
             });
         }
 

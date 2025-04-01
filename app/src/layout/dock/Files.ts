@@ -471,7 +471,7 @@ export class Files extends Model {
             });
             window.siyuan.dragElement = undefined;
             /// #if !BROWSER
-            ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle"});
+            ipcRenderer.send(Constants.SIYUAN_SEND_WINDOWS, {cmd: "resetTabsStyle", data: "rmDragStyle"});
             /// #else
             document.querySelectorAll(".layout-tab-bars--drag").forEach(item => {
                 item.classList.remove("layout-tab-bars--drag");

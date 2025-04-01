@@ -25,7 +25,7 @@ export const onWindowsMsg = (ipcData: IWebSocketData) => {
                     tabItem.remove();
                 });
             } else if (isWindow()) {
-                document.querySelectorAll(".layout-tab-bar--readonly > .fn__flex-1").forEach((item: HTMLElement) => {
+                document.querySelectorAll(".layout-tab-bar--readonly .fn__flex-1").forEach((item: HTMLElement) => {
                     if (item.getBoundingClientRect().top <= 0) {
                         if (ipcData.data === "addRegionStyle") {
                             (item.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";

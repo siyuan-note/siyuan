@@ -231,7 +231,6 @@ export class Wnd {
                 }
             }
         });
-
         this.headersElement.parentElement.addEventListener("drop", function (event: DragEvent & {
             target: HTMLElement
         }) {

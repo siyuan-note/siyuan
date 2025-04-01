@@ -18,11 +18,9 @@ export const setTabPosition = () => {
         const dragElement = headerElement.querySelector(".item--readonly .fn__flex-1") as HTMLElement;
         if (rect.top <= 0) {
             dragElement.style.height = dragElement.parentElement.clientHeight + "px";
-            // @ts-ignore
-            dragElement.style.WebkitAppRegion = "drag";
+            (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "drag";
         } else {
-            // @ts-ignore
-            dragElement.style.WebkitAppRegion = "";
+            (dragElement.style as CSSStyleDeclarationElectron).WebkitAppRegion = "";
         }
         const headersLastElement = headerElement.lastElementChild as HTMLElement;
         if ("darwin" === window.siyuan.config.system.os) {

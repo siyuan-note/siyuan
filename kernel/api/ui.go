@@ -25,6 +25,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func reloadFiletree(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.PushReloadFiletree()
+}
+
 func reloadProtyle(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -49,4 +56,11 @@ func reloadAttributeView(c *gin.Context) {
 
 	id := arg["id"].(string)
 	model.ReloadAttrView(id)
+}
+
+func reloadUI(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.ReloadUI()
 }

@@ -473,6 +473,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/archive/zip", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, zip)
 	ginServer.Handle("POST", "/api/archive/unzip", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, unzip)
 
-	ginServer.Handle("POST", "/api/editor/reloadAttributeView", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadAttributeView)
-	ginServer.Handle("POST", "/api/editor/reloadProtyle", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadProtyle)
+	ginServer.Handle("POST", "/api/ui/reloadUI", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadUI)
+	ginServer.Handle("POST", "/api/ui/reloadAttributeView", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadAttributeView)
+	ginServer.Handle("POST", "/api/ui/reloadProtyle", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadProtyle)
+	ginServer.Handle("POST", "/api/ui/reloadFiletree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, reloadFiletree)
 }

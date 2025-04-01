@@ -277,7 +277,6 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 			}
 		}
 	}
-
 	return
 }
 

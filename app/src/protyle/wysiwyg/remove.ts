@@ -20,7 +20,7 @@ import {scrollCenter} from "../../util/highlightById";
 import {isMobile} from "../../util/functions";
 import {mathRender} from "../render/mathRender";
 
-export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
+export const removeBlock = async (protyle: IProtyle, blockElement: Element, range: Range, type: "Delete" | "Backspace" | "remove") => {
     // 删除后，防止滚动条滚动后调用 get 请求，因为返回的请求已查找不到内容块了
     preventScroll(protyle);
     const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
@@ -181,7 +181,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         }
         if (deletes.length > 0) {
             if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && topParentElement.childElementCount === 2) {
-                const sbData = cancelSB(protyle, topParentElement);
+                const sbData = await cancelSB(protyle, topParentElement);
                 transaction(protyle, deletes.concat(sbData.doOperations), sbData.undoOperations.concat(inserts.reverse()));
             } else {
                 transaction(protyle, deletes, inserts.reverse());
@@ -351,7 +351,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
                 blockElement.remove();
                 // 取消超级块
                 if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
-                    const sbData = cancelSB(protyle, parentElement);
+                    const sbData = await cancelSB(protyle, parentElement);
                     transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
                 } else {
                     transaction(protyle, doOperations, undoOperations);
@@ -428,7 +428,7 @@ export const removeBlock = (protyle: IProtyle, blockElement: Element, range: Ran
         });
     }
     if (parentElement.getAttribute("data-type") === "NodeSuperBlock" && parentElement.childElementCount === 2) {
-        const sbData = cancelSB(protyle, parentElement);
+        const sbData = await cancelSB(protyle, parentElement);
         transaction(protyle, doOperations.concat(sbData.doOperations), sbData.undoOperations.concat(undoOperations));
     } else {
         transaction(protyle, doOperations, undoOperations);

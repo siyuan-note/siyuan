@@ -7,11 +7,11 @@ import {scrollCenter} from "../util/highlightById";
 import {Constants} from "../constants";
 import {hideElements} from "../protyle/ui/hideElements";
 import {blockRender} from "../protyle/render/blockRender";
-import {fetchPost} from "../util/fetch";
+import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
 
-export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
+export const cancelSB = async (protyle: IProtyle, nodeElement: Element) => {
     const doOperations: IOperation[] = [];
     const undoOperations: IOperation[] = [];
     let previousId = nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined;
@@ -21,12 +21,23 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
     const id = nodeElement.getAttribute("data-node-id");
     const sbElement = nodeElement.cloneNode() as HTMLElement;
     sbElement.innerHTML = nodeElement.lastElementChild.outerHTML;
+    let parentID = nodeElement.parentElement.getAttribute("data-node-id");
+    // 缩放和反链需要接口获取
+    if (!previousId && !parentID) {
+        if (protyle.block.showAll || protyle.options.backlinkData) {
+            const idData = await fetchSyncPost("/api/block/getBlockSiblingID", {id});
+            previousId = idData.data.previous;
+            parentID = idData.data.parent;
+        } else {
+            parentID = protyle.block.rootID;
+        }
+    }
     undoOperations.push({
         action: "insert",
         id,
         data: sbElement.outerHTML,
         previousID: nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined,
-        parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+        parentID,
     });
     Array.from(nodeElement.children).forEach((item, index) => {
         if (index === nodeElement.childElementCount - 1) {
@@ -46,7 +57,7 @@ export const cancelSB = (protyle: IProtyle, nodeElement: Element) => {
             action: "move",
             id: item.getAttribute("data-node-id"),
             previousID: previousId,
-            parentID: nodeElement.parentElement.getAttribute("data-node-id") || protyle.block.parentID
+            parentID,
         });
         undoOperations.push({
             action: "move",

@@ -1365,8 +1365,8 @@ export class Gutter {
                 id: "cancelSuperBlock",
                 label: window.siyuan.languages.cancel + " " + window.siyuan.languages.superBlock,
                 accelerator: window.siyuan.config.keymap.editor.general[isCol ? "hLayout" : "vLayout"].custom,
-                click() {
-                    const sbData = cancelSB(protyle, nodeElement);
+                async click() {
+                    const sbData = await cancelSB(protyle, nodeElement);
                     transaction(protyle, sbData.doOperations, sbData.undoOperations);
                     focusBlock(protyle.wysiwyg.element.querySelector(`[data-node-id="${sbData.previousId}"]`));
                     hideElements(["gutter"], protyle);

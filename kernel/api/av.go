@@ -27,19 +27,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func reloadAttributeView(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	id := arg["id"].(string)
-	model.ReloadAttrView(id)
-}
-
 func duplicateAttributeViewBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

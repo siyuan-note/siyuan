@@ -109,7 +109,7 @@ func RemoveTag(label string) (err error) {
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
 	for _, id := range reloadTreeIDs {
-		refreshProtyle(id)
+		ReloadProtyle(id)
 	}
 
 	updateAttributeViewBlockText(updateNodes)
@@ -208,7 +208,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	reloadTreeIDs = gulu.Str.RemoveDuplicatedElem(reloadTreeIDs)
 	for _, id := range reloadTreeIDs {
-		refreshProtyle(id)
+		ReloadProtyle(id)
 	}
 
 	updateAttributeViewBlockText(updateNodes)

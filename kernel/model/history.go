@@ -337,7 +337,7 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 			return
 		}
 
-		refreshProtyle(rootID)
+		ReloadProtyle(rootID)
 
 		// 刷新页签名
 		refText := getNodeRefText(tree.Root)

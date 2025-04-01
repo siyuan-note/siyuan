@@ -130,6 +130,9 @@
 
       & > [data-node-id] {
         margin-left: 34px;
+      }
+
+      & > [data-node-id]:not(.p):not(.code-block) {
         padding-right: 0;
       }
 

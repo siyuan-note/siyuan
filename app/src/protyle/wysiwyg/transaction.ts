@@ -264,23 +264,9 @@ const promiseTransaction = () => {
 
 const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     let updatedEmbed = false;
-    let html = operation.data;
-    const updateEmbedElements = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-type="NodeBlockQueryEmbed"] [data-node-id="${operation.id}"]`));
-    if (updateEmbedElements.length === 0) {
+
+    const updateHTML = (item: Element, html: string) => {
         const tempElement = document.createElement("template");
-        tempElement.innerHTML = operation.data;
-        protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
-            item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
-                const newTempElement = tempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
-                if (newTempElement) {
-                    updateEmbedElements.push(embedBlockItem.querySelector("[data-node-id]"));
-                    html = newTempElement.outerHTML;
-                }
-            });
-        });
-    }
-    updateEmbedElements.forEach((item) => {
-        const tempElement = document.createElement("div");
         tempElement.innerHTML = html;
         tempElement.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
             editItem.setAttribute("contenteditable", "false");
@@ -294,6 +280,24 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         }
         item.outerHTML = tempElement.innerHTML;
         updatedEmbed = true;
+    }
+
+    const allTempElement = document.createElement("template");
+    allTempElement.innerHTML = operation.data;
+    protyle.wysiwyg.element.querySelectorAll('[data-type="NodeBlockQueryEmbed"]').forEach((item) => {
+        const matchElement = item.querySelectorAll(`[data-node-id="${operation.id}"]`);
+        if (matchElement.length > 0) {
+            matchElement.forEach(embedItem => {
+                updateHTML(embedItem, operation.data);
+            })
+        } else {
+            item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
+                const newTempElement = allTempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
+                if (newTempElement) {
+                    updateHTML(embedBlockItem.querySelector("[data-node-id]"), newTempElement.outerHTML);
+                }
+            });
+        }
     });
     if (updatedEmbed) {
         processRender(protyle.wysiwyg.element);

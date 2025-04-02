@@ -26,6 +26,7 @@ import {getAllModels} from "../layout/getAll";
 import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
+import {globalCommand} from "../boot/globalEvent/command/global";
 
 let openTab;
 let openWindow;
@@ -222,4 +223,5 @@ export const API = {
     platformUtils,
     openSetting,
     openAttributePanel,
+    globalCommand,
 };

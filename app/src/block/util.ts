@@ -36,7 +36,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
         action: "insert",
         id,
         data: sbElement.outerHTML,
-        previousID: nodeElement.previousElementSibling ? nodeElement.previousElementSibling.getAttribute("data-node-id") : undefined,
+        previousID: previousId,
         parentID,
     });
     Array.from(nodeElement.children).forEach((item, index) => {

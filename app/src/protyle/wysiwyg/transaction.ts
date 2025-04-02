@@ -142,11 +142,12 @@ const promiseTransaction = () => {
                 if (protyle.options.backlinkData) {
                     const updateElements: Element[] = [];
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
-                        if (!isInEmbedBlock(item) &&
-                            // 当前操作块不再进行操作，否则光标丢失 https://github.com/siyuan-note/siyuan/issues/13946
-                            !item.contains(range.startContainer)) {
-                            updateElements.push(item);
-                            return;
+                        if (!isInEmbedBlock(item)) {
+                            const topElement = hasTopClosestByAttribute(item, "data-node-id", null);
+                            if (topElement && !topElement.contains(range.startContainer)) {
+                                // 当前操作块不再进行操作，否则光标丢失 https://github.com/siyuan-note/siyuan/issues/13946
+                                updateElements.push(item);
+                            }
                         }
                     });
                     let hasFind = false;
@@ -666,12 +667,22 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         let hasFind = false;
         if (operation.previousID && updateElements.length > 0) {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
-                if (!isInEmbedBlock(item)) {
-                    item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+            const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)
+            if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
+                // 反链面板删除超级块中的最后一个段落块后撤销重做
+                const blockElement = hasTopClosestByAttribute(range.startContainer, "data-node-id", null)
+                if (blockElement) {
+                    blockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                     hasFind = true;
                 }
-            });
+            } else {
+                previousElement.forEach(item => {
+                    if (!isInEmbedBlock(item)) {
+                        item.after(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                        hasFind = true;
+                    }
+                });
+            }
         } else if (updateElements.length > 0) {
             const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
@@ -735,17 +746,27 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
     if (operation.action === "insert") {
         const cursorElements = [];
         if (operation.previousID) {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
-                const embedElement = isInEmbedBlock(item);
-                if (embedElement) {
-                    // https://github.com/siyuan-note/siyuan/issues/5524
-                    embedElement.removeAttribute("data-render");
-                    blockRender(protyle, embedElement);
-                } else {
-                    item.insertAdjacentHTML("afterend", operation.data);
-                    cursorElements.push(item.nextElementSibling);
+            const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
+            if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
+                // 反链面板删除超级块中的最后一个段落块后撤销
+                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer)
+                if (blockElement) {
+                    blockElement.insertAdjacentHTML("beforebegin", operation.data);
+                    cursorElements.push(blockElement.previousElementSibling);
                 }
-            });
+            } else {
+                previousElement.forEach(item => {
+                    const embedElement = isInEmbedBlock(item);
+                    if (embedElement) {
+                        // https://github.com/siyuan-note/siyuan/issues/5524
+                        embedElement.removeAttribute("data-render");
+                        blockRender(protyle, embedElement);
+                    } else {
+                        item.insertAdjacentHTML("afterend", operation.data);
+                        cursorElements.push(item.nextElementSibling);
+                    }
+                });
+            }
         } else if (operation.nextID) {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.nextID}"]`)).forEach(item => {
                 const embedElement = isInEmbedBlock(item);
@@ -759,7 +780,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 }
             });
         } else {
-            const parentElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`));
+            const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);
                 cursorElements.push(protyle.wysiwyg.element.firstElementChild);

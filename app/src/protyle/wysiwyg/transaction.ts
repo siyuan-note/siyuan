@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {blockRender} from "../render/blockRender";
 import {processRender} from "../util/processCode";
 import {highlightRender} from "../render/highlightRender";
-import {hasClosestBlock, hasClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasTopClosestByAttribute, isInEmbedBlock} from "../util/hasClosest";
 import {setFold, zoomOut} from "../../menus/protyle";
 import {disabledProtyle, enableProtyle, onGet} from "../util/onGet";
 /// #if !MOBILE
@@ -194,6 +194,7 @@ const promiseTransaction = () => {
                     if (operation.previousID) {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)).forEach(item => {
                             if (item.nextElementSibling?.getAttribute("data-node-id") !== operation.id &&
+                                !item.contains(range.startContainer) && // 当前操作块不再进行操作
                                 !hasClosestByAttribute(item, "data-node-id", operation.id) && // 段落转列表会在段落后插入新列表
                                 !isInEmbedBlock(item)) {
                                 item.insertAdjacentHTML("afterend", operation.data);
@@ -668,11 +669,19 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 }
             });
         } else if (updateElements.length > 0) {
+            const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                 hasFind = true;
+            } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
+                // 反链面板删除超级块中的段落块后撤销再重做 https://github.com/siyuan-note/siyuan/issues/14496#issuecomment-2771372486
+                const topBlockElement = hasTopClosestByAttribute(getSelection().getRangeAt(0).startContainer, "data-node-id", null)
+                if (topBlockElement) {
+                    topBlockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
+                    hasFind = true;
+                }
             } else {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                parentElement.forEach(item => {
                     if (!isInEmbedBlock(item)) {
                         // 列表特殊处理
                         if (item.firstElementChild?.classList.contains("protyle-action")) {

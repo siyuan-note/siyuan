@@ -268,10 +268,10 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
     const updateHTML = (item: Element, html: string) => {
         const tempElement = document.createElement("template");
         tempElement.innerHTML = html;
-        tempElement.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
+        tempElement.content.querySelectorAll('[contenteditable="true"]').forEach(editItem => {
             editItem.setAttribute("contenteditable", "false");
         });
-        tempElement.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
+        tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
             selectItem.classList.remove("protyle-wysiwyg--select");
         })
         const wbrElement = tempElement.querySelector("wbr");

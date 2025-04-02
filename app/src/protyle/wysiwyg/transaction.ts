@@ -746,11 +746,19 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 }
             });
         } else {
+            const parentElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`));
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.insertAdjacentHTML("afterbegin", operation.data);
                 cursorElements.push(protyle.wysiwyg.element.firstElementChild);
+            } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
+                // 反链面板删除超级块中的段落块后撤销
+                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer)
+                if (blockElement) {
+                    blockElement.insertAdjacentHTML("beforebegin", operation.data);
+                    cursorElements.push(blockElement.previousElementSibling);
+                }
             } else {
-                Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
+                parentElement.forEach(item => {
                     if (!isInEmbedBlock(item)) {
                         // 列表特殊处理
                         if (item.firstElementChild?.classList.contains("protyle-action")) {

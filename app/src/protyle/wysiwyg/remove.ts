@@ -181,7 +181,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         }
         if (deletes.length > 0) {
             if (topParentElement && topParentElement.getAttribute("data-type") === "NodeSuperBlock" && topParentElement.childElementCount === 2) {
-                const sbData = await cancelSB(protyle, topParentElement);
+                const sbData = await cancelSB(protyle, topParentElement, range);
                 transaction(protyle, deletes.concat(sbData.doOperations), sbData.undoOperations.concat(inserts.reverse()));
             } else {
                 transaction(protyle, deletes, inserts.reverse());

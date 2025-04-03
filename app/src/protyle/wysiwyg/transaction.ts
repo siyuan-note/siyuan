@@ -123,7 +123,7 @@ const promiseTransaction = () => {
             if (operation.action === "delete" || operation.action === "append") {
                 if (protyle.options.backlinkData) {
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
-                        if (!isInEmbedBlock(item)) {
+                        if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
                             item.remove();
                         }
                     });
@@ -204,7 +204,7 @@ const promiseTransaction = () => {
                         });
                     } else {
                         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)).forEach(item => {
-                            if (!isInEmbedBlock(item)) {
+                            if (!isInEmbedBlock(item) && !item.contains(range.startContainer)) {
                                 // 列表特殊处理
                                 if (item.firstElementChild && item.firstElementChild.classList.contains("protyle-action") &&
                                     item.firstElementChild.nextElementSibling.getAttribute("data-node-id") !== operation.id) {

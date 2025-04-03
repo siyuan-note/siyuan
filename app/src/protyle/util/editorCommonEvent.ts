@@ -535,7 +535,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             /// #if !MOBILE
             const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
             if (otherProtyleElement) {
-                const allEditor = getAllEditor()
+                const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
                     if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
@@ -738,7 +738,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             /// #if !MOBILE
             const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
             if (otherProtyleElement) {
-                const allEditor = getAllEditor()
+                const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
                     if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);

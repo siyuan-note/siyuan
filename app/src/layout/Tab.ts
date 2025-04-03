@@ -8,7 +8,7 @@ import {escapeGreat, escapeHtml} from "../util/escape";
 import {unicode2Emoji} from "../emoji";
 import {fetchPost} from "../util/fetch";
 import {hideTooltip, showTooltip} from "../dialog/tooltip";
-import {isTouchDevice, isWindow} from "../util/functions";
+import {isTouchDevice} from "../util/functions";
 /// #if !BROWSER
 import {openNewWindow} from "../window/openNewWindow";
 import {ipcRenderer} from "electron";

@@ -46,7 +46,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
                 id,
             });
             if (range) {
-                getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>")
+                getContenteditableElement(nodeElement).insertAdjacentHTML("afterbegin", "<wbr>");
             }
             nodeElement.lastElementChild.remove();
             // 超级块中的 html 块需要反转义再赋值 https://github.com/siyuan-note/siyuan/issues/13155

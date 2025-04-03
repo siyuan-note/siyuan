@@ -274,14 +274,14 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         });
         tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
             selectItem.classList.remove("protyle-wysiwyg--select");
-        })
+        });
         const wbrElement = tempElement.querySelector("wbr");
         if (wbrElement) {
             wbrElement.remove();
         }
         item.outerHTML = tempElement.innerHTML;
         updatedEmbed = true;
-    }
+    };
 
     const allTempElement = document.createElement("template");
     allTempElement.innerHTML = operation.data;
@@ -290,7 +290,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         if (matchElement.length > 0) {
             matchElement.forEach(embedItem => {
                 updateHTML(embedItem, operation.data);
-            })
+            });
         } else {
             item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
                 const newTempElement = allTempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
@@ -667,10 +667,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         let hasFind = false;
         if (operation.previousID && updateElements.length > 0) {
-            const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`)
+            const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
             if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的最后一个段落块后撤销重做
-                const blockElement = hasTopClosestByAttribute(range.startContainer, "data-node-id", null)
+                const blockElement = hasTopClosestByAttribute(range.startContainer, "data-node-id", null);
                 if (blockElement) {
                     blockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                     hasFind = true;
@@ -684,13 +684,13 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 });
             }
         } else if (updateElements.length > 0) {
-            const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`)
+            const parentElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.parentID}"]`);
             if (!protyle.options.backlinkData && operation.parentID === protyle.block.parentID) {
                 protyle.wysiwyg.element.prepend(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                 hasFind = true;
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的段落块后撤销再重做 https://github.com/siyuan-note/siyuan/issues/14496#issuecomment-2771372486
-                const topBlockElement = hasTopClosestByAttribute(getSelection().getRangeAt(0).startContainer, "data-node-id", null)
+                const topBlockElement = hasTopClosestByAttribute(getSelection().getRangeAt(0).startContainer, "data-node-id", null);
                 if (topBlockElement) {
                     topBlockElement.before(processClonePHElement(updateElements[0].cloneNode(true) as Element));
                     hasFind = true;
@@ -749,7 +749,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
             if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的最后一个段落块后撤销
-                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer)
+                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
                 if (blockElement) {
                     blockElement.insertAdjacentHTML("beforebegin", operation.data);
                     cursorElements.push(blockElement.previousElementSibling);
@@ -786,7 +786,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 cursorElements.push(protyle.wysiwyg.element.firstElementChild);
             } else if (parentElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的段落块后撤销
-                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer)
+                const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
                 if (blockElement) {
                     blockElement.insertAdjacentHTML("beforebegin", operation.data);
                     cursorElements.push(blockElement.previousElementSibling);

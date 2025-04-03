@@ -667,8 +667,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					} else if n.IsTextMarkType("a") {
 						if replaceTypes["aText"] {
 							if 0 == method {
-								if strings.Contains(n.TextMarkTextContent, keyword) {
-									n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
+								content := util.UnescapeHTML(n.TextMarkTextContent)
+								if strings.Contains(content, escapedKey) {
+									n.TextMarkTextContent = strings.ReplaceAll(content, escapedKey, replacement)
+								} else if strings.Contains(content, keyword) {
+									n.TextMarkTextContent = strings.ReplaceAll(content, keyword, replacement)
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkTextContent) {
@@ -683,8 +686,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 						if replaceTypes["aTitle"] {
 							if 0 == method {
-								if strings.Contains(n.TextMarkATitle, keyword) {
-									n.TextMarkATitle = strings.ReplaceAll(n.TextMarkATitle, keyword, replacement)
+								title := util.UnescapeHTML(n.TextMarkATitle)
+								if strings.Contains(title, escapedKey) {
+									n.TextMarkATitle = strings.ReplaceAll(title, escapedKey, replacement)
+								} else if strings.Contains(n.TextMarkATitle, keyword) {
+									n.TextMarkATitle = strings.ReplaceAll(title, keyword, replacement)
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkATitle) {
@@ -695,8 +701,11 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 						if replaceTypes["aHref"] {
 							if 0 == method {
-								if strings.Contains(n.TextMarkAHref, keyword) {
-									n.TextMarkAHref = strings.ReplaceAll(n.TextMarkAHref, keyword, strings.TrimSpace(replacement))
+								href := util.UnescapeHTML(n.TextMarkAHref)
+								if strings.Contains(href, escapedKey) {
+									n.TextMarkAHref = strings.ReplaceAll(href, escapedKey, util.EscapeHTML(replacement))
+								} else if strings.Contains(href, keyword) {
+									n.TextMarkAHref = strings.ReplaceAll(href, keyword, strings.TrimSpace(replacement))
 								}
 							} else if 3 == method {
 								if nil != r && r.MatchString(n.TextMarkAHref) {

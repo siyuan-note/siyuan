@@ -271,7 +271,7 @@ export class Protyle {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
                 // 为了满足 eventPath0.style.paddingLeft 从而显示块标 https://github.com/siyuan-note/siyuan/issues/11578
-                this.protyle.wysiwyg.element.style.paddingLeft = "16px";
+                this.protyle.wysiwyg.element.style.padding = "4px 16px 4px 24px";
                 return;
             }
             if (!options.blockId) {

@@ -719,7 +719,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "em")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "em")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -729,7 +729,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "strong")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "strong")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -739,7 +739,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "kbd")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "kbd")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -748,7 +748,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "mark")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "mark")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -758,7 +758,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "s")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "s")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -768,7 +768,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sub")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sub")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -777,7 +777,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "sup")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sup")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -786,7 +786,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "tag")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "tag")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -795,7 +795,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "u")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "u")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -844,7 +844,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, replacement, r, "text")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "text")
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -926,14 +926,16 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	return
 }
 
-func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword string, replacement string, r *regexp.Regexp, typ string) {
+func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string) {
 	if 0 == method {
 		if "tag" == typ {
 			keyword = strings.TrimPrefix(keyword, "#")
 			keyword = strings.TrimSuffix(keyword, "#")
 		}
 
-		if strings.Contains(n.TextMarkTextContent, keyword) {
+		if strings.Contains(n.TextMarkTextContent, escapedKey) {
+			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, escapedKey, util.EscapeHTML(replacement))
+		} else if strings.Contains(n.TextMarkTextContent, keyword) {
 			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 		}
 	} else if 3 == method {

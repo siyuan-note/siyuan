@@ -188,7 +188,7 @@ func InstalledWidgets() (ret []*Widget) {
 			continue
 		}
 
-		widget.PreferredReadme, _ = renderREADME(widget.URL, readme)
+		widget.PreferredReadme, _ = renderLocalREADME("/widgets/"+dirName+"/", readme)
 		widget.Outdated = isOutdatedWidget(widget, bazaarWidgets)
 		ret = append(ret, widget)
 	}

@@ -412,6 +412,7 @@ export class Wnd {
                 return;
             }
             if (targetWnd) {
+                recordBeforeResizeTop();
                 targetWnd.headersElement.append(oldTab.headElement);
                 targetWnd.headersElement.parentElement.classList.remove("fn__none");
                 targetWnd.moveTab(oldTab);

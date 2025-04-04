@@ -9385,7 +9385,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "E"
+									"TextMarkTextContent": "D"
 								},
 								{
 									"Type": "NodeText",
@@ -9394,7 +9394,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥E"
+									"TextMarkTextContent": "⌥D"
 								},
 								{
 									"Type": "NodeText",
@@ -11338,16 +11338,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "M"
+					"TextMarkTextContent": "O"
 				},
 				{
 					"Type": "NodeText",
@@ -11356,7 +11347,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⇧⌘M"
+					"TextMarkTextContent": "⌘O"
 				},
 				{
 					"Type": "NodeText",
@@ -12477,7 +12468,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "退出搜素"
+									"Data": "退出搜索"
 								}
 							]
 						},
@@ -13311,7 +13302,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文本选则工具"
+									"Data": "文本选择工具"
 								}
 							]
 						},

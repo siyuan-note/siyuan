@@ -274,6 +274,7 @@ export const copyTab = (app: App, tab: Tab) => {
                             if (copyResizeTopElement) {
                                 const newElement = editor.protyle.wysiwyg.element.querySelector(`[data-node-id="${copyResizeTopElement.getAttribute("data-node-id")}"]`)
                                 if (newElement) {
+                                    editor.protyle.observerLoad?.disconnect();
                                     newElement.scrollIntoView();
                                     editor.protyle.contentElement.scrollTop += newElement.getBoundingClientRect().top - parseInt(copyResizeTopElement.getAttribute("data-resize-top"));
                                 }

@@ -9348,7 +9348,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "E"
+									"TextMarkTextContent": "D"
 								},
 								{
 									"Type": "NodeText",
@@ -9357,7 +9357,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥E"
+									"TextMarkTextContent": "⌥D"
 								},
 								{
 									"Type": "NodeText",
@@ -11326,7 +11326,19 @@
 						"id": ""
 					},
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Ctrl+Shift+M"
+					"TextMarkTextContent": "Ctrl"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​+"
+				},
+				{
+					"Type": "NodeTextMark",
+					"Properties": {
+						"id": ""
+					},
+					"TextMarkType": "kbd",
+					"TextMarkTextContent": "O"
 				},
 				{
 					"Type": "NodeText",
@@ -11341,7 +11353,7 @@
 						"id": ""
 					},
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⇧⌘M"
+					"TextMarkTextContent": "⌘O"
 				},
 				{
 					"Type": "NodeText",

@@ -21,7 +21,7 @@ export class Editor extends Model {
         rootId: string,
         mode?: TEditorMode,
         action?: TProtyleAction[],
-        afterInitProtyle: (editor: Protyle) => void,
+        afterInitProtyle?: (editor: Protyle) => void,
     }) {
         super({
             app: options.app,
@@ -40,7 +40,7 @@ export class Editor extends Model {
         action?: TProtyleAction[]
         rootId: string,
         mode?: TEditorMode,
-        afterInitProtyle: (editor: Protyle) => void,
+        afterInitProtyle?: (editor: Protyle) => void,
     }) {
         this.editor = new Protyle(this.app, this.element, {
             action: options.action || [],

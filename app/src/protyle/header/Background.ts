@@ -569,7 +569,7 @@ export class Background {
                             }
                         });
                         if (!hasKey && response.data.k) {
-                            searchHTML = `<div class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div>` + searchHTML;
+                            searchHTML = `<div class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
                         }
                         listElement.innerHTML = searchHTML;
                     });

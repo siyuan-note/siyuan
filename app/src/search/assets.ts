@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {escapeAriaLabel} from "../util/escape";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
-import {getQueryTip} from "./util";
+import {genQueryHTML} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
@@ -57,9 +57,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             <svg><use xlink:href="#iconRefresh"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="assetSyntaxCheck" aria-label="${getQueryTip(localSearch.method)}" class="block__icon ariaLabel" data-position="9south">
-            <svg><use xlink:href="#iconRegex"></use></svg>
-        </span>
+        ${genQueryHTML(localSearch.method, "assetSyntaxCheck")}
         <span class="fn__space"></span>
         <span id="assetFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel" data-position="9south">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -280,7 +278,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchAssetMethod");
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconExact",
         label: window.siyuan.languages.keyword,
         current: method === 0,
         click() {
@@ -289,7 +287,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconQuote",
         label: window.siyuan.languages.querySyntax,
         current: method === 1,
         click() {
@@ -298,7 +296,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconRegex",
         label: window.siyuan.languages.regex,
         current: method === 3,
         click() {

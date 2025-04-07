@@ -276,7 +276,7 @@ export const copyTab = (app: App, tab: Tab) => {
                                 if (newElement) {
                                     editor.protyle.observerLoad?.disconnect();
                                     newElement.scrollIntoView();
-                                    editor.protyle.contentElement.scrollTop += newElement.getBoundingClientRect().top - parseInt(copyResizeTopElement.getAttribute("data-resize-top"));
+                                    editor.protyle.contentElement.scrollTop += parseInt(copyResizeTopElement.getAttribute("data-resize-top"));
                                 }
                             }
                         }

@@ -193,6 +193,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         }
 
         hideElements(["util"], protyle);
+        /// #if !MOBILE
         if (!sideElement) {
             const backlinkElement = hasClosestByClassName(protyle.element, "sy__backlink", true);
             if (backlinkElement) {
@@ -211,6 +212,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
             }
         }
+        /// #endif
         return;
     }
     const blockType = blockElement.getAttribute("data-type");

@@ -194,11 +194,11 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
 
         hideElements(["util"], protyle);
         if (!sideElement) {
-            const backlinkElement = hasClosestByClassName(protyle.element, "sy__backlink", true)
+            const backlinkElement = hasClosestByClassName(protyle.element, "sy__backlink", true);
             if (backlinkElement) {
                 const backLinkTab = getInstanceById(backlinkElement.getAttribute("data-id"), window.siyuan.layout.layout);
                 if (backLinkTab instanceof Tab && backLinkTab.model instanceof Backlink) {
-                    const editors = backLinkTab.model.editors
+                    const editors = backLinkTab.model.editors;
                     editors.find((item, index) => {
                         if (item.protyle.element.isSameNode(protyle.element)) {
                             item.destroy();

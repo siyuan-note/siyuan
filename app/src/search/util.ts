@@ -86,14 +86,6 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
 
 // closeCB 不存在为页签搜索
 export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement, closeCB?: () => void) => {
-    let methodText = window.siyuan.languages.keyword;
-    if (config.method === 1) {
-        methodText = window.siyuan.languages.querySyntax;
-    } else if (config.method === 2) {
-        methodText = "SQL";
-    } else if (config.method === 3) {
-        methodText = window.siyuan.languages.regex;
-    }
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {

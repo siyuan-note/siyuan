@@ -154,7 +154,7 @@ export const insertRowAbove = (protyle: IProtyle, range: Range, cellElement: HTM
     if (cellElement.parentElement.parentElement.tagName === "THEAD" && !cellElement.parentElement.previousElementSibling) {
         cellElement.parentElement.parentElement.insertAdjacentHTML("beforebegin", `<thead><tr>${rowHTML}</tr></thead>`);
         newRowElememt = nodeElement.querySelector("thead tr");
-        cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML);
+        cellElement.parentElement.parentElement.nextElementSibling.insertAdjacentHTML("afterbegin", cellElement.parentElement.parentElement.innerHTML.replace(/<th/g, "<td").replace(/<\/th>/g, "</td>"));
         cellElement.parentElement.parentElement.remove();
     } else {
         cellElement.parentElement.insertAdjacentHTML("beforebegin", `<tr>${rowHTML}</tr>`);

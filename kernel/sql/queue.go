@@ -23,6 +23,7 @@ import (
 	"path"
 	"runtime/debug"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/88250/lute/parse"
@@ -63,15 +64,21 @@ func ClearQueue() {
 	operationQueue = nil
 }
 
+var flushingTx = atomic.Bool{}
+
 func FlushQueue() {
 	ops := getOperations()
 	total := len(ops)
-	if 1 > total {
+	if 1 > total && !flushingTx.Load() {
 		return
 	}
 
 	txLock.Lock()
-	defer txLock.Unlock()
+	flushingTx.Store(true)
+	defer func() {
+		flushingTx.Store(false)
+		txLock.Unlock()
+	}()
 
 	start := time.Now()
 

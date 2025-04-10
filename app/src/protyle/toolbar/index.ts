@@ -242,12 +242,21 @@ export class Toolbar {
         }
         const rangeTypes = this.getCurrentType(this.range);
 
-        // https://github.com/siyuan-note/siyuan/issues/6501
-        // https://github.com/siyuan-note/siyuan/issues/12877
-        if (rangeTypes.length === 1 &&
-            ["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
-            return;
+        if (rangeTypes.length === 1) {
+            // https://github.com/siyuan-note/siyuan/issues/6501
+            // https://github.com/siyuan-note/siyuan/issues/12877
+            if (["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
+                return;
+            }
+            // https://github.com/siyuan-note/siyuan/issues/14534
+            if (rangeTypes[0] === "text" && type === "text" && textObj && this.range.startContainer.nodeType === 3 && this.range.startContainer.isSameNode(this.range.endContainer)) {
+                const selectParentElement = this.range.startContainer.parentElement;
+                if (selectParentElement && hasSameTextStyle(null, selectParentElement, textObj)) {
+                    return;
+                }
+            }
         }
+
         const selectText = this.range.toString();
         fixTableRange(this.range);
         let previousElement: HTMLElement;

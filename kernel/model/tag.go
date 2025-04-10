@@ -305,6 +305,8 @@ func SearchTags(keyword string) (ret []string) {
 	ret = []string{}
 	defer logging.Recover() // 定位 无法添加题头图标签 https://github.com/siyuan-note/siyuan/issues/6756
 
+	sql.FlushQueue()
+
 	labels := labelBlocksByKeyword(keyword)
 	for label := range labels {
 		_, t := search.MarkText(label, keyword, 1024, Conf.Search.CaseSensitive)

@@ -766,3 +766,10 @@
     }
   }
 }
+
+// export pdf 中需要使用 https://github.com/siyuan-note/siyuan/issues/14548
+.protyle-cursor {
+  position: absolute;
+  right: 0;
+  top: 0;
+}

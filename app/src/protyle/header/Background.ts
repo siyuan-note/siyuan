@@ -543,8 +543,10 @@ export class Background {
                     }
                     upDownHint(listElement, event);
                     if (event.key === "Enter") {
-                        const currentElement = listElement.querySelector(".b3-list-item--focus");
-                        this.addTags(currentElement ? currentElement.textContent.trim() : inputElement.value.trim(), protyle, () => {
+                        const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                        this.addTags(currentElement ?
+                            (currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim()) :
+                            inputElement.value.trim(), protyle, () => {
                             inputElement.value = "";
                             inputElement.dispatchEvent(new CustomEvent("input"));
                         });
@@ -585,6 +587,7 @@ export class Background {
                         protyle, () => {
                             inputElement.value = "";
                             inputElement.dispatchEvent(new CustomEvent("input"));
+                            inputElement.focus();
                         });
                 });
             }

@@ -104,7 +104,7 @@ func refreshDocInfo0(tree *parse.Tree, size uint64) {
 	task.AppendAsyncTaskWithDelay(task.ReloadProtyle, 500*time.Millisecond, util.PushReloadDocInfo, docInfo)
 }
 
-func refreshProtyle(rootID string) {
+func ReloadProtyle(rootID string) {
 	// 刷新关联的引用
 	defTree, _ := LoadTreeByBlockID(rootID)
 	if nil != defTree {

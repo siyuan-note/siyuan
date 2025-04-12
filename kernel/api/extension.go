@@ -76,6 +76,7 @@ func extensionCopy(c *gin.Context) {
 	uploaded := map[string]string{}
 	for originalName, file := range form.File {
 		oName, err := url.PathUnescape(originalName)
+		unescaped := oName
 
 		if clippingSym && strings.Contains(oName, "img-loading.svg") {
 			continue
@@ -145,7 +146,7 @@ func extensionCopy(c *gin.Context) {
 			break
 		}
 
-		uploaded[oName] = "assets/" + fName
+		uploaded[unescaped] = "assets/" + fName
 	}
 
 	luteEngine := util.NewLute()

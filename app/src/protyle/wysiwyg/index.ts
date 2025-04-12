@@ -2195,6 +2195,9 @@ export class WYSIWYG {
             this.setEmptyOutline(protyle, event.target);
             const tableElement = hasClosestByClassName(event.target, "table");
             this.element.querySelectorAll(".table").forEach(item => {
+                if (item.tagName !== "DIV") {
+                    return;
+                }
                 if (!tableElement || !item.isSameNode(tableElement)) {
                     item.querySelector(".table__select").removeAttribute("style");
                 }
@@ -2637,6 +2640,13 @@ export class WYSIWYG {
                 const attrElement = hasClosestByClassName(newRange.endContainer, "protyle-attr");
                 if (attrElement) {
                     newRange = setLastNodeRange(attrElement.previousElementSibling, newRange, false);
+                }
+                // https://github.com/siyuan-note/siyuan/issues/14481
+                const inlineMathElement = hasClosestByAttribute(newRange.startContainer, "data-type", "inline-math");
+                if (inlineMathElement) {
+                    newRange.setEndAfter(inlineMathElement);
+                    newRange.collapse(false);
+                    focusByRange(newRange);
                 }
                 /// #if !MOBILE
                 if (newRange.toString().replace(Constants.ZWSP, "") !== "") {

@@ -13,6 +13,7 @@ import {processRender} from "../util/processCode";
 import {isIPhone, isSafari, openByMobile, setStorageVal} from "../util/compatibility";
 import {showFileInFolder} from "../../util/pathName";
 import {isPaidUser} from "../../util/needSubscribe";
+import {getCloudURL} from "../../config/util/about";
 
 export const afterExport = (exportPath: string, msgId: string) => {
     /// #if !BROWSER
@@ -31,7 +32,7 @@ export const exportImage = (id: string) => {
         title: window.siyuan.languages.exportAsImage,
         content: `<div class="b3-dialog__content" style="${isMobile() ? "padding:8px;" : ""};background-color: var(--b3-theme-background)">
     <div style="${isMobile() ? "margin: 8px 0" : "padding: 48px;margin: 8px 0"}" class="export-img">
-        <div ${isMobile() ? 'style="padding:8px"':""} class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}"></div>
+        <div ${isMobile() ? 'style="padding:8px"' : ""} class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}"></div>
         <div class="export-img__watermark"></div>
     </div>
 </div>
@@ -61,7 +62,11 @@ export const exportImage = (id: string) => {
     });
     btnsElement[1].addEventListener("click", () => {
         const msgId = showMessage(window.siyuan.languages.exporting, 0);
-        (exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement).style.height = "";
+        const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement;
+        containerElement.style.height = "";
+        /// #if MOBILE
+        containerElement.style.width = "100vw";
+        /// #endif
         const contentElement = exportDialog.element.querySelector(".b3-dialog__content") as HTMLElement;
         contentElement.style.overflow = "hidden";
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
@@ -105,7 +110,7 @@ export const exportImage = (id: string) => {
         window.siyuan.storage[Constants.LOCAL_EXPORTIMG].watermark = watermarkElement.checked;
         if (watermarkElement.checked && !isPaidUser()) {
             watermarkElement.checked = false;
-            showMessage(window.siyuan.languages._kernel[214]);
+            showMessage(window.siyuan.languages._kernel[214].replaceAll("${accountServer}", getCloudURL("")));
         }
         updateWatermark();
     });

@@ -47,6 +47,7 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
+import {genEmptyElement} from "../block/util";
 
 export class Protyle {
 
@@ -175,6 +176,19 @@ export class Protyle {
                                     return true;
                                 } else {
                                     onTransaction(this.protyle, item, false);
+                                    // 反链面板移除元素后，文档为空
+                                    if (this.protyle.wysiwyg.element.childElementCount === 0) {
+                                        const newID = Lute.NewNodeID();
+                                        const emptyElement = genEmptyElement(false, false, newID);
+                                        this.protyle.wysiwyg.element.append(emptyElement);
+                                        transaction(this.protyle, [{
+                                            action: "insert",
+                                            data: emptyElement.outerHTML,
+                                            id: newID,
+                                            parentID: this.protyle.block.parentID
+                                        }]);
+                                        this.protyle.undo.clear();
+                                    }
                                 }
                             });
                             break;
@@ -271,7 +285,7 @@ export class Protyle {
                 this.protyle.block.rootID = options.blockId;
                 renderBacklink(this.protyle, options.backlinkData);
                 // 为了满足 eventPath0.style.paddingLeft 从而显示块标 https://github.com/siyuan-note/siyuan/issues/11578
-                this.protyle.wysiwyg.element.style.paddingLeft = "16px";
+                this.protyle.wysiwyg.element.style.padding = "4px 16px 4px 24px";
                 return;
             }
             if (!options.blockId) {

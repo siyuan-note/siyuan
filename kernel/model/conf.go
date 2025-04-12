@@ -215,7 +215,8 @@ func InitConf() {
 	if 32 < Conf.FileTree.MaxOpenTabCount {
 		Conf.FileTree.MaxOpenTabCount = 32
 	}
-	Conf.FileTree.DocCreateSavePath = strings.TrimSpace(Conf.FileTree.DocCreateSavePath)
+	Conf.FileTree.DocCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.DocCreateSavePath)
+	Conf.FileTree.RefCreateSavePath = util.TrimSpaceInPath(Conf.FileTree.RefCreateSavePath)
 	util.UseSingleLineSave = Conf.FileTree.UseSingleLineSave
 
 	util.CurrentCloudRegion = Conf.CloudRegion
@@ -845,8 +846,6 @@ func (conf *AppConf) GetClosedBoxes() (ret []*Box) {
 
 func (conf *AppConf) Language(num int) (ret string) {
 	ret = conf.language(num)
-	subscribeURL := util.GetCloudAccountServer() + "/subscribe/siyuan"
-	ret = strings.ReplaceAll(ret, "${url}", subscribeURL)
 	ret = strings.ReplaceAll(ret, "${accountServer}", util.GetCloudAccountServer())
 	return
 }

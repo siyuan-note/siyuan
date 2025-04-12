@@ -1518,6 +1518,17 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		retBlocks = SelectBlocksRawStmt(stmt, 1, 512)
 		return
 	}
+	(*templateFuncMap)["getBlock"] = func(arg any) (retBlock *Block) {
+		switch v := arg.(type) {
+		case string:
+			retBlock = GetBlock(v)
+		case map[string]interface{}:
+			if id, ok := v["id"]; ok {
+				retBlock = GetBlock(id.(string))
+			}
+		}
+		return
+	}
 	(*templateFuncMap)["querySpans"] = func(stmt string, args ...string) (retSpans []*Span) {
 		for _, arg := range args {
 			stmt = strings.Replace(stmt, "?", arg, 1)

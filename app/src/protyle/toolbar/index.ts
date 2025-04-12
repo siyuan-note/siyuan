@@ -616,6 +616,7 @@ export class Toolbar {
                 });
             }
         }
+
         if (this.range.startContainer.nodeType !== 3 && (this.range.startContainer as HTMLElement).tagName === "SPAN" &&
             this.range.startContainer.isSameNode(this.range.endContainer) && !isEndSpan) {
             // 切割元素
@@ -693,7 +694,7 @@ export class Toolbar {
                         currentNewNode.after(document.createTextNode(Constants.ZWSP));
                     }
                 } else if (currentNewNode.nodeType === 3 && ["code", "tag", "kbd", "clear"].includes(type)) {
-                    const currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;
+                    let currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;
                     let previousIsCTK = false;
                     if (currentPreviousSibling) {
                         if (currentPreviousSibling.nodeType === 1) {
@@ -705,7 +706,7 @@ export class Toolbar {
                             currentPreviousSibling.textContent = currentPreviousSibling.textContent.substring(0, currentPreviousSibling.textContent.length - 1);
                         }
                     }
-                    const currentNextSibling = hasNextSibling(currentNewNode) as HTMLElement;
+                    let currentNextSibling = hasNextSibling(currentNewNode) as HTMLElement;
                     let nextIsCTK = false;
                     if (currentNextSibling) {
                         if (currentNextSibling.nodeType === 1) {
@@ -723,14 +724,30 @@ export class Toolbar {
                                 currentNewNode.textContent = Constants.ZWSP + currentNewNode.textContent;
                             }
                         } else if (currentNewNode.textContent.startsWith(Constants.ZWSP)) {
-                            currentNewNode.textContent = currentNewNode.textContent.substring(1);
+                            currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;
+                            if (currentPreviousSibling.nodeType === 1) {
+                                const currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ");
+                                if (!currentPreviousSiblingTypes.includes("code") && !currentPreviousSiblingTypes.includes("tag") && !currentPreviousSiblingTypes.includes("kbd")) {
+                                    currentNewNode.textContent = currentNewNode.textContent.substring(1);
+                                }
+                            } else {
+                                currentNewNode.textContent = currentNewNode.textContent.substring(1);
+                            }
                         }
                         if (nextIsCTK) {
                             if (!currentNextSibling.textContent.startsWith(Constants.ZWSP)) {
                                 currentNextSibling.textContent = Constants.ZWSP + currentNextSibling.textContent;
                             }
                         } else if (currentNewNode.textContent.endsWith(Constants.ZWSP)) {
-                            currentNewNode.textContent = currentNewNode.textContent.substring(0, currentNewNode.textContent.length - 1);
+                            currentNextSibling = hasNextSibling(currentNewNode) as HTMLElement;
+                            if (currentNextSibling.nodeType === 1) {
+                                const currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ");
+                                if (!currentNextSiblingTypes.includes("code") && !currentNextSiblingTypes.includes("tag") && !currentNextSiblingTypes.includes("kbd")) {
+                                    currentNewNode.textContent = currentNewNode.textContent.substring(0, currentNewNode.textContent.length - 1);
+                                }
+                            } else {
+                                currentNewNode.textContent = currentNewNode.textContent.substring(0, currentNewNode.textContent.length - 1);
+                            }
                         }
                     }
                 }

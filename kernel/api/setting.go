@@ -399,14 +399,14 @@ func setFiletree(c *gin.Context) {
 		return
 	}
 
-	fileTree.RefCreateSavePath = strings.TrimSpace(fileTree.RefCreateSavePath)
+	fileTree.RefCreateSavePath = util.TrimSpaceInPath(fileTree.RefCreateSavePath)
 	if "" != fileTree.RefCreateSavePath {
 		if !strings.HasSuffix(fileTree.RefCreateSavePath, "/") {
 			fileTree.RefCreateSavePath += "/"
 		}
 	}
 
-	fileTree.DocCreateSavePath = strings.TrimSpace(fileTree.DocCreateSavePath)
+	fileTree.DocCreateSavePath = util.TrimSpaceInPath(fileTree.DocCreateSavePath)
 
 	if 1 > fileTree.MaxOpenTabCount {
 		fileTree.MaxOpenTabCount = 8

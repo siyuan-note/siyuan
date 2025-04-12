@@ -35,6 +35,57 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func moveLocalShorthands(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	notebook := arg["notebook"].(string)
+	if util.InvalidIDPattern(notebook, ret) {
+		return
+	}
+
+	var parentID string
+	parentIDArg := arg["parentID"]
+	if nil != parentIDArg {
+		parentID = parentIDArg.(string)
+	}
+
+	var hPath string
+	hPathArg := arg["path"]
+	if nil != hPathArg {
+		hPath = arg["path"].(string)
+		baseName := path.Base(hPath)
+		dir := path.Dir(hPath)
+		r, _ := regexp.Compile("\r\n|\r|\n|\u2028|\u2029|\t|/")
+		baseName = r.ReplaceAllString(baseName, "")
+		if 512 < utf8.RuneCountInString(baseName) {
+			baseName = gulu.Str.SubStr(baseName, 512)
+		}
+		hPath = path.Join(dir, baseName)
+	}
+
+	// TODO: 改造旧方案，去掉 hPath, parentID，改为使用文档树配置项 闪念速记存放位置，参考创建日记实现
+	// https://github.com/siyuan-note/siyuan/issues/14414
+	ids, err := model.MoveLocalShorthands(notebook, hPath, parentID)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.FlushTxQueue()
+	box := model.Conf.Box(notebook)
+	for _, id := range ids {
+		b, _ := model.GetBlock(id, nil)
+		pushCreate(box, b.Path, arg)
+	}
+}
+
 func listDocTree(c *gin.Context) {
 	// Add kernel API `/api/filetree/listDocTree` https://github.com/siyuan-note/siyuan/issues/10482
 

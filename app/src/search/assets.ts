@@ -3,7 +3,7 @@ import {fetchPost} from "../util/fetch";
 import {escapeAriaLabel} from "../util/escape";
 import {setStorageVal, updateHotkeyTip} from "../protyle/util/compatibility";
 /// #if !MOBILE
-import {getQueryTip} from "./util";
+import {genQueryHTML} from "./util";
 /// #endif
 import {MenuItem} from "../menus/Menu";
 import {Dialog} from "../dialog";
@@ -11,6 +11,7 @@ import {addClearButton} from "../util/addClearButton";
 import {isPaidUser} from "../util/needSubscribe";
 import {showMessage} from "../dialog/message";
 import {saveAssetKeyList} from "./toggleHistory";
+import {getCloudURL} from "../config/util/about";
 
 export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     /// #if !MOBILE
@@ -32,6 +33,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
     <span class="fn__space"></span>
     <span data-type="assetNext" class="block__icon block__icon--show ariaLabel" data-position="9south" disabled="disabled" aria-label="${window.siyuan.languages.nextLabel}"><svg><use xlink:href='#iconRight'></use></svg></span>
     <span class="fn__space"></span>
+    <span id="searchAssetResult" class="ft__selectnone"></span>
     <span class="fn__flex-1${!isStick ? " resize__move" : ""}" style="min-height: 100%"></span>
     <span class="fn__space"></span>
     <span id="assetMore" aria-label="${window.siyuan.languages.more}" class="block__icon block__icon--show ariaLabel" data-position="9south">
@@ -55,9 +57,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             <svg><use xlink:href="#iconRefresh"></use></svg>
         </span>
         <span class="fn__space"></span>
-        <span id="assetSyntaxCheck" aria-label="${getQueryTip(localSearch.method)}" class="block__icon ariaLabel" data-position="9south">
-            <svg><use xlink:href="#iconRegex"></use></svg>
-        </span>
+        ${genQueryHTML(localSearch.method, "assetSyntaxCheck")}
         <span class="fn__space"></span>
         <span id="assetFilter" aria-label="${window.siyuan.languages.type}" class="block__icon ariaLabel" data-position="9south">
             <svg><use xlink:href="#iconFilter"></use></svg>
@@ -170,7 +170,7 @@ export const assetInputEvent = (element: Element, localSearch?: ISearchAssetOpti
         element.querySelector(".search__drag")?.classList.add("fn__none");
         element.querySelector("#searchAssetPreview").classList.add("fn__none");
         element.querySelector("#searchAssetList").innerHTML = `<div class="search__empty">
-    ${window.siyuan.languages["_kernel"][214]}
+    ${window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL(""))}
 </div>`;
         return;
     }
@@ -278,7 +278,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
     window.siyuan.menus.menu.remove();
     window.siyuan.menus.menu.element.setAttribute("data-name", "searchAssetMethod");
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconExact",
         label: window.siyuan.languages.keyword,
         current: method === 0,
         click() {
@@ -287,7 +287,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconQuote",
         label: window.siyuan.languages.querySyntax,
         current: method === 1,
         click() {
@@ -296,7 +296,7 @@ export const assetMethodMenu = (target: HTMLElement, cb: () => void) => {
         }
     }).element);
     window.siyuan.menus.menu.append(new MenuItem({
-        iconHTML: "",
+        icon: "iconRegex",
         label: window.siyuan.languages.regex,
         current: method === 3,
         click() {
@@ -450,7 +450,7 @@ export const assetMoreMenu = (target: Element, element: Element, cb: () => void)
         label: window.siyuan.languages.rebuildIndex,
         click() {
             if (!isPaidUser()) {
-                showMessage(window.siyuan.languages["_kernel"][214]);
+                showMessage(window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL("")));
                 return;
             }
             element.parentElement.querySelector(".fn__loading--top").classList.remove("fn__none");

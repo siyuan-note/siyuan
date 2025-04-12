@@ -38,6 +38,15 @@ var (
 	UserAgent = "SiYuan/" + Ver
 )
 
+func TrimSpaceInPath(p string) string {
+	p = strings.ReplaceAll(p, "\\", "/")
+	parts := strings.Split(p, "/")
+	for i, part := range parts {
+		parts[i] = strings.TrimSpace(part)
+	}
+	return strings.Join(parts, "/")
+}
+
 func GetTreeID(treePath string) string {
 	if strings.Contains(treePath, "\\") {
 		return strings.TrimSuffix(filepath.Base(treePath), ".sy")

@@ -73,9 +73,17 @@ export const showAccountInfo = () => {
         if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
             // 订阅试用
             subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
-${renewHTML}`;
+${renewHTML}<div class="fn__hr--b"></div>`;
         } else {
-            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
+            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>
+${renewHTML}<div class="fn__hr--b"></div>`;
+        }
+        if (window.siyuan.user.userSiYuanOneTimePayStatus === 0) {
+            subscriptionHTML += !isIOS ? `<button class="b3-button b3-button--success" data-action="iOSPay" data-type="function">
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
+</button>` : `<a class="b3-button b3-button--success" href="${getIndexURL("pricing.html")}" target="_blank">
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
+</a>`;
         }
     } else {
         if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {

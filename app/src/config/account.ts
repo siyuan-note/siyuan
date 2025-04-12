@@ -90,7 +90,7 @@ ${genSVGBG()}
                 userTitlesHTML += "</div>";
             }
             let subscriptionHTML = "";
-            let activeSubscriptionHTML = `<div class="b3-form__icon fn__block">
+            let activeSubscriptionHTML = isIOS ? "" : `<div class="b3-form__icon fn__block">
    <svg class="ft__secondary b3-form__icon-icon"><use xlink:href="#iconVIP"></use></svg>
    <input class="b3-text-field fn__block b3-form__icon-input" style="padding-right: 44px;" placeholder="${window.siyuan.languages.activationCodePlaceholder}">
    <button id="activationCode" class="b3-button b3-button--text" style="position: absolute;right: 0;top: 0;">${window.siyuan.languages.confirm}</button>
@@ -115,10 +115,17 @@ ${genSVGBG()}
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
                     // 订阅试用
                     subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
-${renewHTML}
-<div class="fn__hr--b"></div>`;
+${renewHTML}<div class="fn__hr--b"></div>`;
                 } else {
-                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>${renewHTML}`;
+                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>
+${renewHTML}<div class="fn__hr--b"></div>`;
+                }
+                if (window.siyuan.user.userSiYuanOneTimePayStatus === 0) {
+                    subscriptionHTML += isIOS ? `<button class="b3-button b3-button--success" data-action="iOSPay" data-type="function">
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
+</button>` : `<a class="b3-button b3-button--success" href="${getIndexURL("pricing.html")}" target="_blank">
+    <svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}
+</a>`;
                 }
             } else {
                 if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
@@ -169,7 +176,7 @@ ${renewHTML}
         </div>
     </div>
 </div>
-<div class="config-account__center config-account__center--text${window.siyuan.config.system.container === "ios" ? " fn__none" : ""}">
+<div class="config-account__center config-account__center--text">
     <div class="fn__flex-1 fn__hr--b"></div>
     ${subscriptionHTML}
     <div class="fn__flex-1 fn__hr--b"></div>
@@ -307,7 +314,7 @@ ${renewHTML}
                 });
             });
             const activationCodeElement = element.querySelector("#activationCode");
-            activationCodeElement.addEventListener("click", () => {
+            activationCodeElement?.addEventListener("click", () => {
                 const activationCodeInput = (activationCodeElement.previousElementSibling as HTMLInputElement);
                 fetchPost("/api/account/checkActivationcode", {data: activationCodeInput.value}, (response) => {
                     if (0 !== response.code) {

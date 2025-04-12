@@ -528,23 +528,24 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
         // 拖拽后，sb 只剩下一个元素
         if (isSameDoc) {
-            const sbData = cancelSB(protyle, oldSourceParentElement);
+            const sbData = await cancelSB(protyle, oldSourceParentElement);
             doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
             undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
         } else {
             /// #if !MOBILE
             const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
             if (otherProtyleElement) {
-                getAllEditor().find(item => {
-                    if (item.protyle.element.isSameNode(otherProtyleElement)) {
-                        const otherSbData = cancelSB(item.protyle, oldSourceParentElement);
+                const allEditor = getAllEditor();
+                for (let i = 0; i < allEditor.length; i++) {
+                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                        const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
                         // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
-                        item.protyle.undo.clear();
+                        allEditor[i].protyle.undo.clear();
                         return true;
                     }
-                });
+                }
             }
             /// #endif
         }
@@ -730,23 +731,23 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("sb") && oldSourceParentElement.childElementCount === 2) {
         // 拖拽后，sb 只剩下一个元素
         if (isSameDoc) {
-            const sbData = cancelSB(protyle, oldSourceParentElement);
+            const sbData = await cancelSB(protyle, oldSourceParentElement);
             doOperations.push(sbData.doOperations[0], sbData.doOperations[1]);
             undoOperations.splice(0, 0, sbData.undoOperations[0], sbData.undoOperations[1]);
         } else {
             /// #if !MOBILE
             const otherProtyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
             if (otherProtyleElement) {
-                getAllEditor().find(item => {
-                    if (item.protyle.element.isSameNode(otherProtyleElement)) {
-                        const otherSbData = cancelSB(item.protyle, oldSourceParentElement);
+                const allEditor = getAllEditor();
+                for (let i = 0; i < allEditor.length; i++) {
+                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                        const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
                         // 需清空操作栈，否则撤销到移动出去的块的操作会抛异常
-                        item.protyle.undo.clear();
-                        return true;
+                        allEditor[i].protyle.undo.clear();
                     }
-                });
+                }
             }
             /// #endif
         }

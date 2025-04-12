@@ -61,7 +61,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         lastColorHTML = `<div class="fn__flex">
     ${window.siyuan.languages.lastUsed}
     <span class="fn__space"></span>
-    <kbd class="fn__kbd fn__flex-center">${updateHotkeyTip(window.siyuan.config.keymap.editor.insert.lastUsed.custom)}</kbd>
+    <kbd class="fn__kbd fn__flex-center${window.siyuan.config.keymap.editor.insert.lastUsed.custom ? "" : " fn__none"}">${updateHotkeyTip(window.siyuan.config.keymap.editor.insert.lastUsed.custom)}</kbd>
 </div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex fn__flex-wrap" style="align-items: center">`;

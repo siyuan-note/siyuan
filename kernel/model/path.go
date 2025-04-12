@@ -40,6 +40,7 @@ func createDocsByHPath(boxID, hPath, content, parentID, id string) (retID string
 	retID = id
 
 	hPath = strings.TrimSuffix(hPath, ".sy")
+	hPath = util.TrimSpaceInPath(hPath)
 	if "" != parentID {
 		// The save path is incorrect when creating a sub-doc by ref in a doc with the same name https://github.com/siyuan-note/siyuan/issues/8138
 		// 在指定了父文档 ID 的情况下优先查找父文档

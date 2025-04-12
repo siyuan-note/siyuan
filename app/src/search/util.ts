@@ -86,14 +86,6 @@ export const openGlobalSearch = (app: App, text: string, replace: boolean, searc
 
 // closeCB 不存在为页签搜索
 export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, element: HTMLElement, closeCB?: () => void) => {
-    let methodText = window.siyuan.languages.keyword;
-    if (config.method === 1) {
-        methodText = window.siyuan.languages.querySyntax;
-    } else if (config.method === 2) {
-        methodText = "SQL";
-    } else if (config.method === 3) {
-        methodText = window.siyuan.languages.regex;
-    }
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {
@@ -157,9 +149,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span> 
             <span class="fn__space"></span>
-            <span id="searchSyntaxCheck" aria-label="${window.siyuan.languages.searchMethod} ${methodText}" class="block__icon ariaLabel" data-position="9south">
-                <svg><use xlink:href="#iconRegex"></use></svg>
-            </span>
+            ${genQueryHTML(config.method, "searchSyntaxCheck")}
             <span class="fn__space"></span>
             <span id="searchReplace" aria-label="${window.siyuan.languages.replace}" class="block__icon ariaLabel" data-position="9south">
                 <svg><use xlink:href="#iconReplace"></use></svg>
@@ -739,7 +729,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 break;
             } else if (target.id === "assetSyntaxCheck") {
                 assetMethodMenu(target, () => {
-                    element.querySelector("#assetSyntaxCheck").setAttribute("aria-label", getQueryTip(localSearch.method));
+                    element.querySelector("#assetSyntaxCheck").outerHTML = genQueryHTML(localSearch.method, "assetSyntaxCheck");
                     assetInputEvent(assetsElement, localSearch);
                     setStorageVal(Constants.LOCAL_SEARCHASSET, localSearch);
                 });
@@ -748,7 +738,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                 break;
             } else if (target.id === "searchSyntaxCheck") {
                 queryMenu(config, () => {
-                    element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(config.method));
+                    element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(config.method, "searchSyntaxCheck");
                     config.page = 1;
                     inputEvent(element, config, edit, true);
                 });
@@ -932,23 +922,30 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     return {edit, unRefEdit};
 };
 
-export const getQueryTip = (method: number) => {
-    let methodTip = window.siyuan.languages.searchMethod + " ";
+export const genQueryHTML = (method: number, id: string) => {
+    let methodTip = "";
+    let methodIcon = "";
     switch (method) {
         case 0:
-            methodTip += window.siyuan.languages.keyword;
+            methodTip = window.siyuan.languages.keyword;
+            methodIcon = "Exact";
             break;
         case 1:
-            methodTip += window.siyuan.languages.querySyntax;
+            methodTip = window.siyuan.languages.querySyntax;
+            methodIcon = "Quote";
             break;
         case 2:
-            methodTip += "SQL";
+            methodTip = "SQL";
+            methodIcon = "Database";
             break;
         case 3:
-            methodTip += window.siyuan.languages.regex;
+            methodTip = window.siyuan.languages.regex;
+            methodIcon = "Regex";
             break;
     }
-    return methodTip;
+    return `<span id="${id}" aria-label="${window.siyuan.languages.searchMethod} ${methodTip}" class="block__icon ariaLabel" data-position="9south">
+    <svg><use xlink:href="#icon${methodIcon}"></use></svg>
+</span>`;
 };
 
 export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchConfig, config: Config.IUILayoutTabSearchConfig,
@@ -1007,7 +1004,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
         (element.querySelector("#searchInput") as HTMLInputElement).value = item.k;
     }
     (element.querySelector("#replaceInput") as HTMLInputElement).value = item.r;
-    element.querySelector("#searchSyntaxCheck").setAttribute("aria-label", getQueryTip(item.method));
+    element.querySelector("#searchSyntaxCheck").outerHTML = genQueryHTML(item.method, "searchSyntaxCheck");
     Object.assign(config, item);
     window.siyuan.storage[Constants.LOCAL_SEARCHDATA] = Object.assign({}, config);
     setStorageVal(Constants.LOCAL_SEARCHDATA, window.siyuan.storage[Constants.LOCAL_SEARCHDATA]);
@@ -1015,7 +1012,7 @@ export const updateConfig = (element: Element, item: Config.IUILayoutTabSearchCo
     window.siyuan.menus.menu.remove();
 };
 
-const scrollToCurrent = (contentElement: HTMLElement,currentRange: Range, contentRect:DOMRect) => {
+const scrollToCurrent = (contentElement: HTMLElement, currentRange: Range, contentRect: DOMRect) => {
     contentElement.scrollTop = contentElement.scrollTop + currentRange.getBoundingClientRect().top - contentRect.top - contentRect.height / 2;
     const tableElement = hasClosestByClassName(currentRange.startContainer, "table");
     if (tableElement) {

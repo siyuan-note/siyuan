@@ -258,7 +258,7 @@ data-def-path="${item.defPath}">
             if (liElement) {
                 event.dataTransfer.setData("text/html", liElement.outerHTML);
                 // 设置了的话 drop 就无法监听 alt event.dataTransfer.dropEffect = "move";
-                liElement.style.opacity = "0.1";
+                liElement.style.opacity = "0.38";
                 window.siyuan.dragElement = liElement;
             }
         });

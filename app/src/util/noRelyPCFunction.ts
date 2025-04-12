@@ -3,6 +3,11 @@ import {fetchPost} from "./fetch";
 import {isMobile} from "./functions";
 import {Constants} from "../constants";
 import {pathPosix} from "./pathName";
+/// #if !MOBILE
+import {getDockByType} from "../layout/tabUtil";
+import {Files} from "../layout/dock/Files";
+import {Tag} from "../layout/dock/Tag";
+/// #endif
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
 export const renameTag = (labelName: string) => {
@@ -27,7 +32,15 @@ export const renameTag = (labelName: string) => {
     inputElement.focus();
     inputElement.select();
     btnsElement[1].addEventListener("click", () => {
-        fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value});
+        fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value}, () => {
+            dialog.destroy();
+            /// #if MOBILE
+            window.siyuan.mobile.docks.tag.update();
+            /// #else
+            const dockTag = getDockByType("tag");
+            (dockTag.data.tag as Tag).update();
+            /// #endif
+        });
     });
 };
 
@@ -43,5 +56,30 @@ export const checkFold = (id: string, cb: (zoomIn: boolean, action: TProtyleActi
         cb(foldResponse.data.isFolded,
             foldResponse.data.isFolded ? [Constants.CB_GET_FOCUS, Constants.CB_GET_ALL] : [Constants.CB_GET_FOCUS, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL],
             foldResponse.data.isRoot);
+    });
+};
+
+export const setLocalShorthandCount = () => {
+    let fileElement;
+    /// #if MOBILE
+    fileElement = window.siyuan.mobile.docks.file.element;
+    /// #else
+    const dockFile = getDockByType("file");
+    if (!dockFile) {
+        return false;
+    }
+    fileElement = (dockFile.data.file as Files).element;
+    /// #endif
+    const helpIDs: string[] = [];
+    Object.keys(Constants.HELP_PATH).forEach((key) => {
+        helpIDs.push(Constants.HELP_PATH[key]);
+    });
+    fileElement.childNodes.forEach((item: Element) => {
+        if (item.querySelector('[data-type="addLocal"]') || helpIDs.includes(item.getAttribute("data-url"))) {
+            return;
+        }
+        item.querySelector('[data-type="more-root"]').insertAdjacentHTML("beforebegin", `<span data-type="addLocal" class="b3-list-item__action">
+    <svg><use xlink:href="#iconRiffCard"></use></svg>
+</span>`);
     });
 };

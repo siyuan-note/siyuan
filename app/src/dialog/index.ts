@@ -86,23 +86,26 @@ left:${left || "auto"};top:${top || "auto"}">
     }
 
     public destroy(options?: IObject) {
-        // av 修改列头emoji后点击关闭emoji图标
-        if ((this.element.querySelector(".b3-dialog") as HTMLElement).style.zIndex < window.siyuan.menus.menu.element.style.zIndex) {
-            // https://github.com/siyuan-note/siyuan/issues/6783
-            window.siyuan.menus.menu.remove();
-        }
-        this.element.remove();
-        if (this.destroyCallback) {
-            this.destroyCallback(options);
-        }
-        window.siyuan.dialogs.find((item, index) => {
-            if (item.id === this.id) {
-                window.siyuan.dialogs.splice(index, 1);
-                return true;
+        this.element.classList.remove("b3-dialog--open");
+        setTimeout(() => {
+            // av 修改列头emoji后点击关闭emoji图标
+            if ((this.element.querySelector(".b3-dialog") as HTMLElement).style.zIndex < window.siyuan.menus.menu.element.style.zIndex) {
+                // https://github.com/siyuan-note/siyuan/issues/6783
+                window.siyuan.menus.menu.remove();
             }
-        });
-        // https://github.com/siyuan-note/siyuan/issues/10475
-        document.getElementById("drag")?.classList.remove("fn__hidden");
+            this.element.remove();
+            if (this.destroyCallback) {
+                this.destroyCallback(options);
+            }
+            window.siyuan.dialogs.find((item, index) => {
+                if (item.id === this.id) {
+                    window.siyuan.dialogs.splice(index, 1);
+                    return true;
+                }
+            });
+            // https://github.com/siyuan-note/siyuan/issues/10475
+            document.getElementById("drag")?.classList.remove("fn__hidden");
+        }, Constants.TIMEOUT_DBLCLICK);
     }
 
     public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void, bindEnter = true) {

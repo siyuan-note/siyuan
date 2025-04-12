@@ -21,6 +21,7 @@ export class Editor extends Model {
         rootId: string,
         mode?: TEditorMode,
         action?: TProtyleAction[],
+        afterInitProtyle?: (editor: Protyle) => void,
     }) {
         super({
             app: options.app,
@@ -39,6 +40,7 @@ export class Editor extends Model {
         action?: TProtyleAction[]
         rootId: string,
         mode?: TEditorMode,
+        afterInitProtyle?: (editor: Protyle) => void,
     }) {
         this.editor = new Protyle(this.app, this.element, {
             action: options.action || [],
@@ -60,6 +62,9 @@ export class Editor extends Model {
                 /// #if !BROWSER
                 setModelsHash();
                 /// #endif
+                if (options.afterInitProtyle) {
+                    options.afterInitProtyle(editor);
+                }
             },
         });
         // 需在 after 回调之前，否则不会聚焦 https://github.com/siyuan-note/siyuan/issues/5303

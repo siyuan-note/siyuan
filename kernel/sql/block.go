@@ -257,7 +257,8 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 				}
 
 				if !strings.HasPrefix(n.TextMarkAHref, "assets/") || includeAssetPath {
-					buf.WriteString(" " + util.UnescapeHTML(n.TextMarkAHref))
+					href := util.UnescapeHTML(n.TextMarkAHref)
+					buf.WriteString(" " + util.UnescapeHTML(href))
 				}
 			}
 		case ast.NodeBackslashContent:

@@ -179,7 +179,7 @@ export const openMenuPanel = (options: {
         }
         avPanelElement.addEventListener("dragstart", (event: DragEvent) => {
             window.siyuan.dragElement = event.target as HTMLElement;
-            window.siyuan.dragElement.style.opacity = ".1";
+            window.siyuan.dragElement.style.opacity = ".38";
             return;
         });
         avPanelElement.addEventListener("drop", (event) => {

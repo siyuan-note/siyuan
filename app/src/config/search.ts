@@ -144,6 +144,28 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
                     searchElement.value = inputValue;
                     searchKeymapElement.value = "";
                     keymap.search(searchElement.value, searchKeymapElement.value);
+                } else if (type === "search") {
+                    panelElement.querySelectorAll(`.config__tab-container[data-name="${type}"] .b3-label`).forEach((itemElement: HTMLElement) => {
+                        let showItemElement = false;
+                        itemElement.querySelectorAll("label > .fn__flex-1").forEach(labelItem => {
+                            if (!labelItem.parentElement.classList.contains("fn__none")) {
+                                const text = labelItem.textContent.toLowerCase();
+                                if (text.indexOf(inputValue.toLowerCase()) > -1 || inputValue.toLowerCase().indexOf(text) > -1) {
+                                    labelItem.parentElement.style.display = "";
+                                    showItemElement = true;
+                                } else {
+                                    labelItem.parentElement.style.display = "none";
+                                }
+                            }
+                        });
+                        if (!itemElement.classList.contains("fn__none")) {
+                            if (showItemElement) {
+                                itemElement.style.display = "";
+                            } else {
+                                itemElement.style.display = "none";
+                            }
+                        }
+                    });
                 } else {
                     panelElement.querySelectorAll(`.config__tab-container[data-name="${type}"] .b3-label`).forEach((itemElement: HTMLElement) => {
                         if (!itemElement.classList.contains("fn__none")) {

@@ -26,6 +26,9 @@ export const processIOSPurchaseResponse = (code: number) => {
         // -7：AccountToken verification failed 校验 accountToken 失败
         // -8：Transaction verification failed 校验 transaction 失败
         // -9：Unknown product 未知的商品
+        // -10：用户取消交易
+        // -11：购买交易被挂起
+        // -12：其他情况
         let message = "";
         switch (code) {
             case -1:
@@ -54,6 +57,15 @@ export const processIOSPurchaseResponse = (code: number) => {
                 break;
             case -9:
                 message = "Unknown product.";
+                break;
+            case -10:
+                message = "User canceled the transaction.";
+                break;
+            case -11:
+                message = "Purchase transaction was suspended.";
+                break;
+            case -12:
+                message = "Purchase failed.";
                 break;
         }
         showMessage(message, 0, "error");

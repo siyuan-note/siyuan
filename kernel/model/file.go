@@ -1080,6 +1080,7 @@ func CreateDailyNote(boxID string) (p string, existed bool, err error) {
 
 	FlushTxQueue()
 
+	hPath = util.TrimSpaceInPath(hPath)
 	existRoot := treenode.GetBlockTreeRootByHPath(box.ID, hPath)
 	if nil != existRoot {
 		existed = true
@@ -1785,6 +1786,7 @@ func removeInvisibleCharsInTitle(title string) string {
 	title = strings.ReplaceAll(title, string(gulu.ZWJ), "__@ZWJ@__")
 	title = util.RemoveInvalid(title)
 	title = strings.ReplaceAll(title, "__@ZWJ@__", string(gulu.ZWJ))
+	title = strings.TrimSpace(title)
 	return title
 }
 

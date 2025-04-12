@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20250303234747"
+		"updated": "20250407200322"
 	},
 	"Children": [
 		{
@@ -9428,7 +9428,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "E"
+									"TextMarkTextContent": "D"
 								},
 								{
 									"Type": "NodeText",
@@ -9437,7 +9437,7 @@
 								{
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
-									"TextMarkTextContent": "⌥E"
+									"TextMarkTextContent": "⌥D"
 								},
 								{
 									"Type": "NodeText",
@@ -11398,16 +11398,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "Shift"
-				},
-				{
-					"Type": "NodeText",
-					"Data": "​+"
-				},
-				{
-					"Type": "NodeTextMark",
-					"TextMarkType": "kbd",
-					"TextMarkTextContent": "M"
+					"TextMarkTextContent": "O"
 				},
 				{
 					"Type": "NodeText",
@@ -11416,7 +11407,7 @@
 				{
 					"Type": "NodeTextMark",
 					"TextMarkType": "kbd",
-					"TextMarkTextContent": "⇧⌘M"
+					"TextMarkTextContent": "⌘O"
 				},
 				{
 					"Type": "NodeText",
@@ -13380,7 +13371,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "文字選則工具"
+									"Data": "文字選擇工具"
 								}
 							]
 						},
@@ -14870,12 +14861,12 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220619002223-zliquo3",
-				"updated": "20250115160004"
+				"updated": "20250407200322"
 			},
 			"Children": [
 				{
 					"Type": "NodeText",
-					"Data": "文檔樹"
+					"Data": "文檔樹面板"
 				}
 			]
 		},
@@ -15320,6 +15311,136 @@
 									"Type": "NodeTextMark",
 									"TextMarkType": "kbd",
 									"TextMarkTextContent": "⌥拖拽"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td"
+						}
+					]
+				}
+			]
+		},
+		{
+			"ID": "20250407200322-k6rjdej",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20250407200322-k6rjdej",
+				"updated": "20250407200322"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "標籤面板"
+				}
+			]
+		},
+		{
+			"ID": "20250407200322-dvmw1re",
+			"Type": "NodeTable",
+			"TableAligns": [
+				0,
+				0,
+				0
+			],
+			"Properties": {
+				"colgroup": "||",
+				"id": "20250407200322-dvmw1re",
+				"updated": "20250407200322"
+			},
+			"Children": [
+				{
+					"Type": "NodeTableHead",
+					"Data": "thead",
+					"Children": [
+						{
+							"Type": "NodeTableRow",
+							"Data": "tr",
+							"Children": [
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "名稱"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "操作"
+										}
+									]
+								},
+								{
+									"Type": "NodeTableCell",
+									"Data": "th",
+									"Children": [
+										{
+											"Type": "NodeText",
+											"Data": "備註"
+										}
+									]
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "多選搜尋"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Ctrl"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​+"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "點選"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ /"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "⌘點選"
 								},
 								{
 									"Type": "NodeText",

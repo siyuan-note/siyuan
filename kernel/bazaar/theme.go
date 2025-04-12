@@ -192,7 +192,7 @@ func InstalledThemes() (ret []*Theme) {
 			continue
 		}
 
-		theme.PreferredReadme, _ = renderREADME(theme.URL, readme)
+		theme.PreferredReadme, _ = renderLocalREADME("/appearance/themes/"+dirName+"/", readme)
 		theme.Outdated = isOutdatedTheme(theme, bazaarThemes)
 		ret = append(ret, theme)
 	}

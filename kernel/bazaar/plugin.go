@@ -227,7 +227,7 @@ func InstalledPlugins(frontend string, checkUpdate bool) (ret []*Plugin) {
 			continue
 		}
 
-		plugin.PreferredReadme, _ = renderREADME(plugin.URL, readme)
+		plugin.PreferredReadme, _ = renderLocalREADME("/plugins/"+dirName+"/", readme)
 		plugin.Outdated = isOutdatedPlugin(plugin, bazaarPlugins)
 		plugin.Incompatible = isIncompatiblePlugin(plugin, frontend)
 		ret = append(ret, plugin)

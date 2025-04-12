@@ -4,9 +4,9 @@ import {getAllEditor} from "../../layout/getAll";
 export const hideElements = (panels: string[], protyle?: IProtyle, focusHide = false) => {
     if (!protyle) {
         if (panels.includes("dialog")) {
-            for (let i = 0; i < window.siyuan.dialogs.length; i++) {
+            const dialogLength = window.siyuan.dialogs.length;
+            for (let i = 0; i < dialogLength; i++) {
                 window.siyuan.dialogs[i].destroy();
-                i--;
             }
         }
         return;

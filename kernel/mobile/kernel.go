@@ -279,3 +279,15 @@ func SetTimezone(container, appDir, timezoneID string) {
 func DisableFeature(feature string) {
 	util.DisableFeature(feature)
 }
+
+func FilepathBase(path string) string {
+	return filepath.Base(path)
+}
+
+func FilterUploadFileName(name string) string {
+	return util.FilterUploadFileName(name)
+}
+
+func AssetName(name string) string {
+	return util.AssetName(name)
+}

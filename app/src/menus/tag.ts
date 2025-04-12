@@ -3,6 +3,8 @@ import {fetchPost} from "../util/fetch";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {escapeHtml} from "../util/escape";
 import {renameTag} from "../util/noRelyPCFunction";
+import {getDockByType} from "../layout/tabUtil";
+import {Tag} from "../layout/dock/Tag";
 
 export const openTagMenu = (element: HTMLElement, event: MouseEvent, labelName: string) => {
     if (!window.siyuan.menus.menu.element.classList.contains("fn__none") &&
@@ -23,7 +25,14 @@ export const openTagMenu = (element: HTMLElement, event: MouseEvent, labelName: 
         label: window.siyuan.languages.remove,
         click: () => {
             confirmDialog(window.siyuan.languages.deleteOpConfirm, `${window.siyuan.languages.confirmDelete} <b>${escapeHtml(labelName)}</b>?`, () => {
-                fetchPost("/api/tag/removeTag", {label: labelName});
+                fetchPost("/api/tag/removeTag", {label: labelName}, () => {
+                    /// #if MOBILE
+                    window.siyuan.mobile.docks.tag.update();
+                    /// #else
+                    const dockTag = getDockByType("tag");
+                    (dockTag.data.tag as Tag).update();
+                    /// #endif
+                });
             }, undefined, true);
         }
     }).element);

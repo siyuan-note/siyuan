@@ -60,13 +60,6 @@ func ignoreAddMicrosoftDefenderExclusion(c *gin.Context) {
 	model.Conf.Save()
 }
 
-func reloadUI(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	util.ReloadUI()
-}
-
 func getWorkspaceInfo(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

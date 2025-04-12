@@ -188,17 +188,21 @@ ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOC
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
+${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${childItem.tag.split("# #").map(tag => `${tag.replace("#", "")}`).join(" ").replace("#", "")}</span>` : ""}
 </div>`;
             });
             resultHTML += "</div>";
         } else {
             resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
-<div class="b3-list-item__first">
-    <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
-    ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
-    <span class="b3-list-item__text">${item.content}</span>
-</div>
-<span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+    <div class="b3-list-item__first">
+        <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
+        ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
+        <span class="b3-list-item__text">${item.content}</span>
+    </div>
+    <div class="fn__flex">
+        ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${item.tag.split("# #").map(tag => `${tag.replace("#", "")}`).join(" ").replace("#", "")}</span><span class="fn__space"></span>` : ""}
+        <span class="b3-list-item__text b3-list-item__meta">${escapeGreat(title)}</span>
+    </div>
 </div>`;
         }
     });

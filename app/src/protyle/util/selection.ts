@@ -176,7 +176,7 @@ export const getEditorRange = (element: Element): Range => {
             if (type === "NodeThematicBreak") {
                 targetElement = element.firstElementChild;
             } else if (type === "NodeBlockQueryEmbed") {
-                targetElement = element.lastElementChild.previousElementSibling?.firstChild;
+                targetElement = element.querySelector(".protyle-cursor")?.firstChild;
             } else if (["NodeMathBlock", "NodeHTMLBlock"].includes(type)) {
                 targetElement = element.lastElementChild.previousElementSibling?.lastElementChild?.firstChild;
             } else if (type === "NodeVideo") {
@@ -571,7 +571,7 @@ export const focusBlock = (element: Element, parentElement?: HTMLElement, toStar
             setRange = true;
         } else if (type === "NodeBlockQueryEmbed") {
             genRenderFrame(element);
-            range.setStart(element.lastElementChild.previousElementSibling.firstChild, 0);
+            range.setStart(element.querySelector(".protyle-cursor").firstChild, 0);
             range.collapse(true);
             setRange = true;
         } else if (type === "NodeMathBlock") {

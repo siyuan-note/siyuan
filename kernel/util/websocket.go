@@ -275,6 +275,10 @@ func PushSetDefRefCount(rootID, blockID string, defIDs []string, refCount, rootR
 	BroadcastByType("main", "setDefRefCount", 0, "", map[string]interface{}{"rootID": rootID, "blockID": blockID, "refCount": refCount, "rootRefCount": rootRefCount, "defIDs": defIDs})
 }
 
+func PushLocalShorthandCount(count int) {
+	BroadcastByType("main", "setLocalShorthandCount", 0, "", map[string]interface{}{"count": count})
+}
+
 func PushProtyleLoading(rootID, msg string) {
 	BroadcastByType("protyle", "addLoading", 0, msg, rootID)
 }

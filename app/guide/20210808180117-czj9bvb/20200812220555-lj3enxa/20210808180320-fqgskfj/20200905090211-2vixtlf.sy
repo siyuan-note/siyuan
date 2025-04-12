@@ -6,7 +6,7 @@
 		"id": "20200905090211-2vixtlf",
 		"title": "内容块类型",
 		"type": "doc",
-		"updated": "20250311200014"
+		"updated": "20250330191713"
 	},
 	"Children": [
 		{
@@ -14,7 +14,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 2,
 			"Properties": {
-				"id": "20210104090624-fkv1xsc"
+				"id": "20210104090624-fkv1xsc",
+				"updated": "20250330191720"
 			},
 			"Children": [
 				{
@@ -52,7 +53,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20210104090624-c5bu25o",
-				"updated": "20220429115850"
+				"updated": "20250330191720"
 			},
 			"Children": [
 				{
@@ -109,6 +110,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -120,7 +125,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "paragraph.svg"
+											"Data": "paragraph"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -136,6 +141,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -170,6 +179,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -181,7 +194,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "heading.svg"
+											"Data": "heading"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -197,6 +210,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -231,6 +248,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -242,7 +263,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "math-block.svg"
+											"Data": "math-block"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -258,6 +279,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -292,6 +317,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -303,7 +332,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "code-block.svg"
+											"Data": "code-block"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -319,6 +348,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -353,6 +386,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -364,7 +401,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "table.svg"
+											"Data": "table"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -380,6 +417,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -414,6 +455,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -425,7 +470,76 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "html-block-20220429115636-e80k6ty.svg"
+											"Data": "embed-block"
+										},
+										{
+											"Type": "NodeCloseBracket"
+										},
+										{
+											"Type": "NodeOpenParen"
+										},
+										{
+											"Type": "NodeLinkDest",
+											"Data": "assets/embed-block-20250330183922-6b1vv77.svg"
+										},
+										{
+											"Type": "NodeCloseParen"
+										}
+									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "嵌入块"
+								}
+							]
+						},
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "叶子块"
+								}
+							]
+						}
+					]
+				},
+				{
+					"Type": "NodeTableRow",
+					"Data": "tr",
+					"Children": [
+						{
+							"Type": "NodeTableCell",
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeImage",
+									"Data": "span",
+									"Children": [
+										{
+											"Type": "NodeBang"
+										},
+										{
+											"Type": "NodeOpenBracket"
+										},
+										{
+											"Type": "NodeLinkText",
+											"Data": "html-block"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -441,6 +555,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -475,6 +593,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -486,7 +608,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "unordered-list.svg"
+											"Data": "unordered-list"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -502,6 +624,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -536,6 +662,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -547,7 +677,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "ordered-list.svg"
+											"Data": "ordered-list"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -563,6 +693,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -597,6 +731,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -608,7 +746,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "task-list.svg"
+											"Data": "task-list"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -624,6 +762,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -658,6 +800,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -669,7 +815,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "list-item.svg"
+											"Data": "list-item"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -685,6 +831,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -719,6 +869,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -730,7 +884,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "blockquote.svg"
+											"Data": "blockquote"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -746,6 +900,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -780,6 +938,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -791,7 +953,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "super-block.svg"
+											"Data": "super-block"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -807,6 +969,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -841,6 +1007,10 @@
 							"Data": "td",
 							"Children": [
 								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
 									"Type": "NodeImage",
 									"Data": "span",
 									"Children": [
@@ -852,7 +1022,7 @@
 										},
 										{
 											"Type": "NodeLinkText",
-											"Data": "doc.svg"
+											"Data": "doc"
 										},
 										{
 											"Type": "NodeCloseBracket"
@@ -868,6 +1038,10 @@
 											"Type": "NodeCloseParen"
 										}
 									]
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						},
@@ -901,7 +1075,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104090624-9qgquxh",
-				"updated": "20250115153225"
+				"updated": "20250330184301"
 			},
 			"Children": [
 				{
@@ -938,7 +1112,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-hq3v2ah",
-				"updated": "20250115153225"
+				"updated": "20250330184301"
 			},
 			"Children": [
 				{
@@ -955,41 +1129,46 @@
 			"ID": "20210104090624-h0xcfof",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-h0xcfof"
+				"id": "20210104090624-h0xcfof",
+				"updated": "20250330184301"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
-							"Data": "paragraph.svg"
+							"Data": "paragraph"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/paragraph-20210512165953-ag1nib4.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1034,7 +1213,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-zdi6qkg"
+				"id": "20210104090624-zdi6qkg",
+				"updated": "20250330184304"
 			},
 			"Children": [
 				{
@@ -1051,41 +1231,46 @@
 			"ID": "20210104090624-6pqbd46",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-6pqbd46"
+				"id": "20210104090624-6pqbd46",
+				"updated": "20250330184304"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "heading"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/heading-20210512170006-7ugwxnm.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1172,7 +1357,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-a6yjlte"
+				"id": "20210104090624-a6yjlte",
+				"updated": "20250330184306"
 			},
 			"Children": [
 				{
@@ -1189,41 +1375,46 @@
 			"ID": "20210104090624-h8dqpv2",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-h8dqpv2"
+				"id": "20210104090624-h8dqpv2",
+				"updated": "20250330184306"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "math-block"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/math-block-20210512170015-9v28ii5.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1255,7 +1446,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-l3zdlk1"
+				"id": "20210104090624-l3zdlk1",
+				"updated": "20250330184310"
 			},
 			"Children": [
 				{
@@ -1272,41 +1464,46 @@
 			"ID": "20210104090624-hxgh4ce",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-hxgh4ce"
+				"id": "20210104090624-hxgh4ce",
+				"updated": "20250330184310"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "code-block"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/code-block-20210512170024-qgn18hs.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1353,7 +1550,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-erf17it",
-				"updated": "20250311200014"
+				"updated": "20250330184312"
 			},
 			"Children": [
 				{
@@ -1371,41 +1568,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-9nmj624",
-				"updated": "20210512170812"
+				"updated": "20250330184312"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "table"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/table-20210512170035-432ty41.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1579,12 +1780,99 @@
 			]
 		},
 		{
+			"ID": "20250330183345-n3cc5zy",
+			"Type": "NodeHeading",
+			"HeadingLevel": 3,
+			"Properties": {
+				"id": "20250330183345-n3cc5zy",
+				"updated": "20250330191713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "嵌入块"
+				}
+			]
+		},
+		{
+			"ID": "20250330184148-icdhmfx",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250330184148-icdhmfx",
+				"updated": "20250330191713"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
+					"Type": "NodeImage",
+					"Data": "span",
+					"Children": [
+						{
+							"Type": "NodeBang"
+						},
+						{
+							"Type": "NodeOpenBracket"
+						},
+						{
+							"Type": "NodeLinkText",
+							"Data": "embed-block"
+						},
+						{
+							"Type": "NodeCloseBracket"
+						},
+						{
+							"Type": "NodeOpenParen"
+						},
+						{
+							"Type": "NodeLinkDest",
+							"Data": "assets/embed-block-20250330183922-6b1vv77.svg"
+						},
+						{
+							"Type": "NodeCloseParen"
+						}
+					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				}
+			]
+		},
+		{
+			"ID": "20250330183349-rh8gaya",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250330183349-rh8gaya",
+				"updated": "20250330183431"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "请参考"
+				},
+				{
+					"Type": "NodeTextMark",
+					"TextMarkType": "block-ref",
+					"TextMarkBlockRefID": "20201117101902-2ewjjum",
+					"TextMarkBlockRefSubtype": "s",
+					"TextMarkTextContent": "嵌入内容块"
+				},
+				{
+					"Type": "NodeText",
+					"Data": "。"
+				}
+			]
+		},
+		{
 			"ID": "20220429115141-c7omuyq",
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220429115141-c7omuyq",
-				"updated": "20220429115145"
+				"updated": "20250330184318"
 			},
 			"Children": [
 				{
@@ -1598,9 +1886,13 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20220429115715-xbwsbnc",
-				"updated": "20220429115736"
+				"updated": "20250330184318"
 			},
 			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
 				{
 					"Type": "NodeImage",
 					"Data": "span",
@@ -1613,7 +1905,7 @@
 						},
 						{
 							"Type": "NodeLinkText",
-							"Data": "html-block-20220429115636-e80k6ty.svg"
+							"Data": "html-block"
 						},
 						{
 							"Type": "NodeCloseBracket"
@@ -1629,6 +1921,10 @@
 							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1772,7 +2068,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-1gdzl0u"
+				"id": "20210104090624-1gdzl0u",
+				"updated": "20250330184321"
 			},
 			"Children": [
 				{
@@ -1790,41 +2087,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-h853yy2",
-				"updated": "20210512170832"
+				"updated": "20250330184321"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "unordered-list"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/unordered-list-20210512170043-8dzzwai.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -1947,7 +2248,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-uvdpfbk"
+				"id": "20210104090624-uvdpfbk",
+				"updated": "20250330184325"
 			},
 			"Children": [
 				{
@@ -1964,41 +2266,46 @@
 			"ID": "20210104090624-yrqa6l0",
 			"Type": "NodeParagraph",
 			"Properties": {
-				"id": "20210104090624-yrqa6l0"
+				"id": "20210104090624-yrqa6l0",
+				"updated": "20250330184325"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "ordered-list"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/ordered-list-20210512170847-z5581gd.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -2129,7 +2436,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-mvu5j2d",
-				"updated": "20210503220111"
+				"updated": "20250330184327"
 			},
 			"Children": [
 				{
@@ -2147,41 +2454,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-4rjs8pe",
-				"updated": "20210512170907"
+				"updated": "20250330184327"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "task-list"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/task-list-20210512170054-a0a7p2u.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -2320,7 +2631,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210104090624-n9anlgh",
-				"updated": "20250311200006"
+				"updated": "20250330184331"
 			},
 			"Children": [
 				{
@@ -2338,41 +2649,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-miauala",
-				"updated": "20210512170914"
+				"updated": "20250330184331"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "list-item"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/list-item-20210512170630-gqje0vb.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -2452,7 +2767,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-37f19ny"
+				"id": "20210104090624-37f19ny",
+				"updated": "20250330184333"
 			},
 			"Children": [
 				{
@@ -2470,41 +2786,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-y1h5468",
-				"updated": "20210512170922"
+				"updated": "20250330184333"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "blockquote"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/blockquote-20210512170136-ls06uyh.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -2563,7 +2883,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-jtebaer"
+				"id": "20210104090624-jtebaer",
+				"updated": "20250330184335"
 			},
 			"Children": [
 				{
@@ -2581,41 +2902,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-qgm8obs",
-				"updated": "20210512170929"
+				"updated": "20250330184335"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "super-block"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/super-block-20210512170142-uewen14.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},
@@ -2649,7 +2974,8 @@
 			"Type": "NodeHeading",
 			"HeadingLevel": 3,
 			"Properties": {
-				"id": "20210104090624-5abfwla"
+				"id": "20210104090624-5abfwla",
+				"updated": "20250330184338"
 			},
 			"Children": [
 				{
@@ -2667,41 +2993,45 @@
 			"Type": "NodeParagraph",
 			"Properties": {
 				"id": "20210104090624-trhgxiq",
-				"updated": "20210512170936"
+				"updated": "20250330184338"
 			},
 			"Children": [
 				{
+					"Type": "NodeText",
+					"Data": "​"
+				},
+				{
 					"Type": "NodeImage",
+					"Data": "span",
 					"Children": [
 						{
-							"Type": "NodeBang",
-							"Data": "!"
+							"Type": "NodeBang"
 						},
 						{
-							"Type": "NodeOpenBracket",
-							"Data": "["
+							"Type": "NodeOpenBracket"
 						},
 						{
 							"Type": "NodeLinkText",
 							"Data": "doc"
 						},
 						{
-							"Type": "NodeCloseBracket",
-							"Data": "]"
+							"Type": "NodeCloseBracket"
 						},
 						{
-							"Type": "NodeOpenParen",
-							"Data": "("
+							"Type": "NodeOpenParen"
 						},
 						{
 							"Type": "NodeLinkDest",
 							"Data": "assets/doc-20210512170149-zsm2gsu.svg"
 						},
 						{
-							"Type": "NodeCloseParen",
-							"Data": ")"
+							"Type": "NodeCloseParen"
 						}
 					]
+				},
+				{
+					"Type": "NodeText",
+					"Data": "​"
 				}
 			]
 		},

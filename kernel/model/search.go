@@ -937,13 +937,25 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 
 func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string) {
 	if 0 == method {
-		if "tag" == typ {
+		if strings.Contains(typ, "tag") {
 			keyword = strings.TrimPrefix(keyword, "#")
 			keyword = strings.TrimSuffix(keyword, "#")
-			escapedKey = strings.TrimPrefix(replacement, "#")
-			escapedKey = strings.TrimSuffix(replacement, "#")
-			replacement = strings.TrimPrefix(replacement, "#")
-			replacement = strings.TrimSuffix(replacement, "#")
+			escapedKey = strings.TrimPrefix(escapedKey, "#")
+			escapedKey = strings.TrimSuffix(escapedKey, "#")
+			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
+				replacement = strings.TrimPrefix(replacement, "#")
+				replacement = strings.TrimSuffix(replacement, "#")
+			} else {                         // 将标签转换为纯文本
+				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
+					n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(n.TextMarkTextContent)})
+					n.TextMarkTextContent = ""
+					return
+				}
+
+				// 存在其他类型时仅移除标签类型
+				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
+				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
+			}
 		}
 
 		if strings.Contains(n.TextMarkTextContent, escapedKey) {

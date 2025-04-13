@@ -940,6 +940,10 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 		if "tag" == typ {
 			keyword = strings.TrimPrefix(keyword, "#")
 			keyword = strings.TrimSuffix(keyword, "#")
+			escapedKey = strings.TrimPrefix(replacement, "#")
+			escapedKey = strings.TrimSuffix(replacement, "#")
+			replacement = strings.TrimPrefix(replacement, "#")
+			replacement = strings.TrimSuffix(replacement, "#")
 		}
 
 		if strings.Contains(n.TextMarkTextContent, escapedKey) {

@@ -947,7 +947,13 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				replacement = strings.TrimSuffix(replacement, "#")
 			} else {                         // 将标签转换为纯文本
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
-					n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(n.TextMarkTextContent)})
+					content := n.TextMarkTextContent
+					if strings.Contains(content, escapedKey) {
+						content = strings.ReplaceAll(content, escapedKey, replacement)
+					} else if strings.Contains(content, keyword) {
+						content = strings.ReplaceAll(content, keyword, replacement)
+					}
+					n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(content)})
 					n.TextMarkTextContent = ""
 					return
 				}

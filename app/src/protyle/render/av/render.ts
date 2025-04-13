@@ -12,6 +12,8 @@ import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
+import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
+import {isMobile} from "../../../util/functions";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string, renderAll = true) => {
     let avElements: Element[] = [];
@@ -28,6 +30,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
         avElements.forEach((e: HTMLElement) => {
             if (e.getAttribute("data-render") === "true") {
                 return;
+            }
+            if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {
+                e.classList.add("av--touch");
             }
             const alignSelf = e.style.alignSelf;
             if (e.firstElementChild.innerHTML === "") {

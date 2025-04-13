@@ -10,6 +10,13 @@
     opacity: 1;
   }
 
+  &--touch {
+    .av__views .block__icon,
+    .av__row--footer .av__calc {
+      opacity: 1;
+    }
+  }
+
   &__cursor {
     width: .1px;
     height: 0;

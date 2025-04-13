@@ -248,12 +248,12 @@ export class Toolbar {
             if (["block-ref", "virtual-block-ref", "file-annotation-ref", "a", "inline-memo", "inline-math", "tag"].includes(rangeTypes[0]) && type === "clear") {
                 return;
             }
-            // https://github.com/siyuan-note/siyuan/issues/14534
-            if (rangeTypes[0] === "text" && type === "text" && textObj && this.range.startContainer.nodeType === 3 && this.range.startContainer.isSameNode(this.range.endContainer)) {
-                const selectParentElement = this.range.startContainer.parentElement;
-                if (selectParentElement && hasSameTextStyle(null, selectParentElement, textObj)) {
-                    return;
-                }
+        }
+        // https://github.com/siyuan-note/siyuan/issues/14534
+        if (rangeTypes.includes("text") && type === "text" && textObj && this.range.startContainer.nodeType === 3 && this.range.startContainer.isSameNode(this.range.endContainer)) {
+            const selectParentElement = this.range.startContainer.parentElement;
+            if (selectParentElement && hasSameTextStyle(null, selectParentElement, textObj)) {
+                return;
             }
         }
 
@@ -273,6 +273,10 @@ export class Toolbar {
             }
         } else if (previousSibling && previousSibling.nodeType !== 3 && this.range.startOffset === 0) {
             // **aaa**bbb 选中 bbb 加粗
+            previousElement = previousSibling as HTMLElement;
+        } else if (["code", "tag", "kbd"].includes(type) && previousSibling && previousSibling.nodeType === 1 &&
+            this.range.startOffset === 1 && this.range.startContainer.textContent.startsWith(Constants.ZWSP)) {
+            // 合并相同元素第二条第一个操作 https://github.com/siyuan-note/siyuan/issues/14290
             previousElement = previousSibling as HTMLElement;
         }
         let isEndSpan = false;
@@ -399,14 +403,22 @@ export class Toolbar {
                             item.style.backgroundColor = "";
                             item.style.fontSize = "";
                         }
-                        if (index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                        const previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
-                            hasSameTextStyle(item, previousElement, textObj)) {
+                            hasSameTextStyle(item, previousElement, textObj);
+                        const nextIsSame = index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                            isArrayEqual(types, (nextElement.getAttribute("data-type") || "").split(" ")) &&
+                            hasSameTextStyle(item, nextElement, textObj);
+                        if (previousIsSame) {
                             previousIndex = previousElement.textContent.length;
                             previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
-                        } else if (index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                            isArrayEqual(types, (nextElement.getAttribute("data-type") || "").split(" ")) &&
-                            hasSameTextStyle(item, nextElement, textObj)) {
+                            if (nextIsSame) {
+                                nextIndex = previousElement.textContent.length;
+                                previousElement.innerHTML = previousElement.innerHTML + nextElement.innerHTML;
+                                nextElement.remove();
+                                nextElement = previousElement;
+                            }
+                        } else if (nextIsSame) {
                             nextIndex = item.textContent.length;
                             nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
                         } else {
@@ -482,41 +494,45 @@ export class Toolbar {
                                 newNodes.push(document.createTextNode(Constants.ZWSP));
                                 item.textContent = item.textContent.substring(1);
                             }
-                            // https://github.com/siyuan-note/siyuan/issues/14204
-                            while (item.textContent.endsWith("\n")) {
-                                item.textContent = item.textContent.substring(0, item.textContent.length - 1);
-                                removeText += "\n";
-                            }
-                            const inlineElement = document.createElement("span");
-                            inlineElement.setAttribute("data-type", type);
-                            inlineElement.textContent = item.textContent;
-                            setFontStyle(inlineElement, textObj);
-                            // 合并相同元素 https://github.com/siyuan-note/siyuan/issues/14290
-                            const previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
-                               type === previousElement.getAttribute("data-type") &&
-                                hasSameTextStyle(inlineElement, previousElement, textObj)
-                            const nextIsSame = index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
-                               type === nextElement.getAttribute("data-type") &&
-                                hasSameTextStyle(inlineElement, nextElement, textObj)
-                            if (previousIsSame) {
+                            if (item.textContent) {
+                                // https://github.com/siyuan-note/siyuan/issues/14204
+                                while (item.textContent.endsWith("\n")) {
+                                    item.textContent = item.textContent.substring(0, item.textContent.length - 1);
+                                    removeText += "\n";
+                                }
+                                const inlineElement = document.createElement("span");
+                                inlineElement.setAttribute("data-type", type);
+                                inlineElement.textContent = item.textContent;
+                                setFontStyle(inlineElement, textObj);
+                                // 合并相同元素 https://github.com/siyuan-note/siyuan/issues/14290
+                                const previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                                    type === previousElement.getAttribute("data-type") &&
+                                    hasSameTextStyle(inlineElement, previousElement, textObj);
+                                const nextIsSame = index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
+                                    type === nextElement.getAttribute("data-type") &&
+                                    hasSameTextStyle(inlineElement, nextElement, textObj);
                                 if (previousIsSame) {
                                     previousIndex = previousElement.textContent.length;
-                                    previousElement.innerHTML = previousElement.innerHTML + inlineElement.innerHTML;
+                                    previousElement.innerHTML = previousElement.innerHTML + inlineElement.innerHTML.replace(Constants.ZWSP, "");
                                     if (nextIsSame) {
                                         nextIndex = previousElement.textContent.length;
-                                        previousElement.innerHTML = previousElement.innerHTML + nextElement.innerHTML;
+                                        previousElement.innerHTML = previousElement.innerHTML + nextElement.innerHTML.replace(Constants.ZWSP, "");
+                                        const nextPrevSibling = hasPreviousSibling(nextElement);
+                                        if (nextPrevSibling && nextPrevSibling.textContent === Constants.ZWSP) {
+                                            nextPrevSibling.remove();
+                                        }
                                         nextElement.remove();
                                         nextElement = previousElement;
                                     }
-                                }
-                            } else if (nextIsSame) {
-                                nextIndex = inlineElement.textContent.length;
-                                nextElement.innerHTML = inlineElement.innerHTML + nextElement.innerHTML;
-                            } else {
-                                if (type === "text" && !inlineElement.getAttribute("style")) {
-                                    newNodes.push(item);
+                                } else if (nextIsSame) {
+                                    nextIndex = inlineElement.textContent.length;
+                                    nextElement.innerHTML = inlineElement.innerHTML + nextElement.innerHTML.replace(Constants.ZWSP, "");
                                 } else {
-                                    newNodes.push(inlineElement);
+                                    if (type === "text" && !inlineElement.getAttribute("style")) {
+                                        newNodes.push(item);
+                                    } else {
+                                        newNodes.push(inlineElement);
+                                    }
                                 }
                             }
                         } else {
@@ -613,26 +629,35 @@ export class Toolbar {
                                 item.setAttribute("data-subtype", "s");
                             }
                         }
-                        const previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
+                        let previousIsSame = false;
+                        previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
-                            hasSameTextStyle(item, previousElement, textObj)
+                            hasSameTextStyle(item, previousElement, textObj);
+                        if (index === 0 && !previousIsSame && previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
+                            const tempPreviousElement = previousElement.previousSibling as HTMLElement;
+                            previousIsSame = tempPreviousElement && tempPreviousElement.nodeType !== 3 &&
+                                isArrayEqual(types, (tempPreviousElement.getAttribute("data-type") || "").split(" ")) &&
+                                hasSameTextStyle(item, tempPreviousElement, textObj);
+                            if (previousIsSame) {
+                                previousElement.remove();
+                                previousElement = tempPreviousElement;
+                            }
+                        }
                         const nextIsSame = index === contents.childNodes.length - 1 && nextElement && nextElement.nodeType !== 3 &&
                             isArrayEqual(types, (nextElement.getAttribute("data-type") || "").split(" ")) &&
-                            hasSameTextStyle(item, nextElement, textObj)
+                            hasSameTextStyle(item, nextElement, textObj);
                         if (previousIsSame) {
-                            if (previousIsSame) {
-                                previousIndex = previousElement.textContent.length;
-                                previousElement.innerHTML = previousElement.innerHTML + item.innerHTML;
-                                if (nextIsSame) {
-                                    nextIndex = previousElement.textContent.length;
-                                    previousElement.innerHTML = previousElement.innerHTML + nextElement.innerHTML;
-                                    nextElement.remove();
-                                    nextElement = previousElement;
-                                }
+                            previousIndex = previousElement.textContent.length;
+                            previousElement.innerHTML = previousElement.innerHTML + item.innerHTML.replace(Constants.ZWSP, "");
+                            if (nextIsSame) {
+                                nextIndex = previousElement.textContent.length;
+                                previousElement.innerHTML = previousElement.innerHTML + nextElement.innerHTML.replace(Constants.ZWSP, "");
+                                nextElement.remove();
+                                nextElement = previousElement;
                             }
                         } else if (nextIsSame) {
                             nextIndex = item.textContent.length;
-                            nextElement.innerHTML = item.innerHTML + nextElement.innerHTML;
+                            nextElement.innerHTML = item.innerHTML + nextElement.innerHTML.replace(Constants.ZWSP, "");
                         } else if (item.tagName !== "BR" && item.tagName !== "IMG") {
                             item.setAttribute("data-type", types.join(" "));
                             setFontStyle(item, textObj);
@@ -738,9 +763,10 @@ export class Toolbar {
                 } else if (currentNewNode.nodeType === 3 && ["code", "tag", "kbd", "clear"].includes(type)) {
                     let currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;
                     let previousIsCTK = false;
+                    let currentPreviousSiblingTypes: string[];
                     if (currentPreviousSibling) {
                         if (currentPreviousSibling.nodeType === 1) {
-                            const currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ");
+                            currentPreviousSiblingTypes = currentPreviousSibling.dataset.type.split(" ");
                             if (currentPreviousSiblingTypes.includes("code") || currentPreviousSiblingTypes.includes("tag") || currentPreviousSiblingTypes.includes("kbd")) {
                                 previousIsCTK = true;
                             }
@@ -750,13 +776,15 @@ export class Toolbar {
                     }
                     let currentNextSibling = hasNextSibling(currentNewNode) as HTMLElement;
                     let nextIsCTK = false;
+                    let currentNextSiblingTypes: string[];
                     if (currentNextSibling) {
                         if (currentNextSibling.nodeType === 1) {
-                            const currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ");
+                            currentNextSiblingTypes = currentNextSibling.dataset.type.split(" ");
                             if (currentNextSiblingTypes.includes("code") || currentNextSiblingTypes.includes("tag") || currentNextSiblingTypes.includes("kbd")) {
                                 nextIsCTK = true;
                             }
-                        } else if (currentNextSibling.textContent.startsWith(Constants.ZWSP)) {
+                        } else if (currentNextSibling.textContent.startsWith(Constants.ZWSP) &&
+                            (!previousIsCTK || previousIsCTK && currentPreviousSibling.textContent === Constants.ZWSP)) {
                             currentNextSibling.textContent = currentNextSibling.textContent.substring(1);
                         }
                     }
@@ -764,6 +792,17 @@ export class Toolbar {
                         if (previousIsCTK) {
                             if (!currentNewNode.textContent.startsWith(Constants.ZWSP)) {
                                 currentNewNode.textContent = Constants.ZWSP + currentNewNode.textContent;
+                            } else if (nextIsCTK && isArrayEqual(currentNextSiblingTypes, currentPreviousSiblingTypes) &&
+                                hasSameTextStyle(currentNextSibling, currentPreviousSibling, textObj)) {
+                                // 行内元素设置第一条第二个操作 https://github.com/siyuan-note/siyuan/issues/14290
+                                newNodes.splice(i, 1);
+                                i--;
+                                currentNewNode.remove();
+                                previousIndex = currentPreviousSibling.innerHTML.length;
+                                nextElement = previousElement;
+                                nextIndex = currentPreviousSibling.innerHTML.length + nextIndex;
+                                currentPreviousSibling.innerHTML = currentPreviousSibling.innerHTML + currentNextSibling.innerHTML.replace(Constants.ZWSP, "");
+                                currentNextSibling.remove();
                             }
                         } else if (currentNewNode.textContent.startsWith(Constants.ZWSP)) {
                             currentPreviousSibling = hasPreviousSibling(currentNewNode) as HTMLElement;

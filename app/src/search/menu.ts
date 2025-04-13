@@ -651,7 +651,7 @@ export const initCriteriaMenu = (element: HTMLElement, data: Config.IUILayoutTab
 
 export const getKeyByLiElement = (element: HTMLElement) => {
     const keys: string[] = [];
-    element.querySelectorAll("mark").forEach(item => {
+    element.querySelectorAll(".b3-list-item__text mark").forEach(item => {
         keys.push(item.textContent);
     });
     return [...new Set(keys)].join(" ");

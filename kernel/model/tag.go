@@ -53,7 +53,7 @@ func RemoveTag(label string) (err error) {
 	updateNodes := map[string]*ast.Node{}
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockIDWithReindex(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -154,7 +154,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockIDWithReindex(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e

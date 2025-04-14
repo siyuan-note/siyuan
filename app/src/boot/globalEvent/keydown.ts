@@ -1753,4 +1753,4 @@ export const sendUnregisterGlobalShortcut = (app:App) => {
         });
     });
     /// #endif
-}
+};

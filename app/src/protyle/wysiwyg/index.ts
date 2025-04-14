@@ -2158,6 +2158,10 @@ export class WYSIWYG {
                 });
             });
             hideElements(["hint", "util"], protyle);
+            // https://github.com/siyuan-note/siyuan/issues/14569
+            if (event.target.tagName === "VIDEO") {
+                return;
+            }
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

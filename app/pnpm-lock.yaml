@@ -11,7 +11,13 @@ importers:
       '@electron/remote':
         specifier: ^2.1.2
         version: 2.1.2(electron@34.5.1)
+      '@eslint/eslintrc':
+        specifier: ^3.3.1
+        version: 3.3.1
     devDependencies:
+      '@eslint/js':
+        specifier: ^9.24.0
+        version: 9.24.0
       '@types/node':
         specifier: ^18.13.0
         version: 18.13.0
@@ -308,12 +314,16 @@ packages:
     resolution: {integrity: sha512-7ATR9F0e4W85D/0w7cU0SNj7qkAexMG+bAHEZOjo9akvGuhHE2m7umzWzfnpa0XAg5Kxc1BWmtPMV67jJ+9VUg==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
-  '@eslint/eslintrc@3.2.0':
-    resolution: {integrity: sha512-grOjVNN8P3hjJn/eIETF1wwd12DdnwFDoyceUJLYYdkpbwq3nLi+4fqrTAONx7XDALqlL220wC/RHSC/QTI/0w==}
+  '@eslint/eslintrc@3.3.1':
+    resolution: {integrity: sha512-gtF186CXhIl1p4pJNGZw8Yc6RlshoePRvE0X91oPGb3vZ8pM3qOS9W9NGPat9LziaBV7XrJWGylNQXkGcnM3IQ==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/js@9.15.0':
     resolution: {integrity: sha512-tMTqrY+EzbXmKJR5ToI8lxu7jaN5EdmrBFJpQk5JmSlyLsx6o4t27r883K5xsLuCYCpfKBCGswMSWXsM+jB7lg==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@eslint/js@9.24.0':
+    resolution: {integrity: sha512-uIY/y3z0uvOGX8cp1C2fiC4+ZmBhp6yZWkojtHL1YEMnRt1Y63HB9TM17proGEmeG7HeUY+UP36F0aknKYTpYA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/object-schema@2.1.4':
@@ -2970,13 +2980,13 @@ snapshots:
 
   '@eslint/core@0.9.0': {}
 
-  '@eslint/eslintrc@3.2.0':
+  '@eslint/eslintrc@3.3.1':
     dependencies:
       ajv: 6.12.6
       debug: 4.3.4
       espree: 10.3.0
       globals: 14.0.0
-      ignore: 5.2.0
+      ignore: 5.3.2
       import-fresh: 3.3.0
       js-yaml: 4.1.0
       minimatch: 3.1.2
@@ -2985,6 +2995,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@9.15.0': {}
+
+  '@eslint/js@9.24.0': {}
 
   '@eslint/object-schema@2.1.4': {}
 
@@ -4149,7 +4161,7 @@ snapshots:
       '@eslint-community/regexpp': 4.12.1
       '@eslint/config-array': 0.19.0
       '@eslint/core': 0.9.0
-      '@eslint/eslintrc': 3.2.0
+      '@eslint/eslintrc': 3.3.1
       '@eslint/js': 9.15.0
       '@eslint/plugin-kit': 0.2.3
       '@humanfs/node': 0.16.6

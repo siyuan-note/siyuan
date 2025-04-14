@@ -11,10 +11,10 @@ importers:
       '@electron/remote':
         specifier: ^2.1.2
         version: 2.1.2(electron@34.5.1)
+    devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
         version: 3.3.1
-    devDependencies:
       '@eslint/js':
         specifier: ^9.24.0
         version: 9.24.0

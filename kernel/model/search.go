@@ -800,7 +800,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							unlinks = append(unlinks, n)
 						}
 
-						util.PushReloadTag()
+						ReloadTag()
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue

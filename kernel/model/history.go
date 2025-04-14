@@ -318,8 +318,8 @@ func RollbackDocHistory(boxID, historyPath string) (err error) {
 	if writeErr := indexWriteTreeIndexQueue(tree); nil != writeErr {
 		return
 	}
-	util.PushReloadFiletree()
-	util.PushReloadProtyle(rootID)
+	ReloadFiletree()
+	ReloadProtyle(rootID)
 	util.PushMsg(Conf.Language(102), 3000)
 
 	IncSync()

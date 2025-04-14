@@ -182,6 +182,10 @@ func PushReloadFiletree() {
 	BroadcastByType("filetree", "reloadFiletree", 0, "", nil)
 }
 
+func PushReloadTag() {
+	BroadcastByType("main", "reloadTag", 0, "", nil)
+}
+
 type BlockStatResult struct {
 	RuneCount  int `json:"runeCount"`
 	WordCount  int `json:"wordCount"`

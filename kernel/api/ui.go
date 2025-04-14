@@ -25,6 +25,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func reloadTag(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	util.PushReloadTag()
+}
+
 func reloadFiletree(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

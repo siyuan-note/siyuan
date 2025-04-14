@@ -728,7 +728,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "em")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "em", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -738,7 +738,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "strong")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "strong", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -748,7 +748,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "kbd")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "kbd", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -757,7 +757,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "mark")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "mark", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -767,7 +767,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "s")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "s", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -777,7 +777,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sub")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sub", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -786,7 +786,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sup")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sup", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -795,16 +795,18 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "tag")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "tag", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
+
+						util.PushReloadTag()
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "u")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "u", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -853,7 +855,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "text")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "text", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -935,7 +937,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	return
 }
 
-func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string) {
+func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string, luteEngine *lute.Lute) {
 	if 0 == method {
 		if strings.Contains(typ, "tag") {
 			keyword = strings.TrimPrefix(keyword, "#")
@@ -945,10 +947,45 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else {                         // 将标签转换为纯文本
+			} else {
+				// 将标签转换为纯文本
+
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
-					n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(n.TextMarkTextContent)})
+					content := n.TextMarkTextContent
+					if strings.Contains(content, escapedKey) {
+						content = strings.ReplaceAll(content, escapedKey, replacement)
+					} else if strings.Contains(content, keyword) {
+						content = strings.ReplaceAll(content, keyword, replacement)
+					}
+
+					tree := parse.Inline("", []byte(content), luteEngine.ParseOptions)
+					if nil == tree.Root.FirstChild {
+						return
+					}
+					parse.NestedInlines2FlattedSpans(tree, false)
+
+					var replaceNodes []*ast.Node
+					var defIDs []string
+					for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
+						replaceNodes = append(replaceNodes, rNode)
+						if blockRefID, _, _ := treenode.GetBlockRef(rNode); "" != blockRefID {
+							defIDs = append(defIDs, blockRefID)
+						}
+					}
+
+					for _, rNode := range replaceNodes {
+						n.InsertBefore(rNode)
+					}
 					n.TextMarkTextContent = ""
+
+					for _, defID := range defIDs {
+						bt := treenode.GetBlockTree(defID)
+						if nil == bt {
+							continue
+						}
+
+						task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, defID)
+					}
 					return
 				}
 

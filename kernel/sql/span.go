@@ -101,7 +101,7 @@ func QueryTagSpansByKeyword(keyword string, limit int) (ret []*Span) {
 	contentLikes := ""
 	for _, k := range keywords {
 		if contentLikes != "" {
-			contentLikes += " OR "
+			contentLikes += " AND "
 		}
 		contentLikes += "content LIKE '%" + k + "%'"
 	}

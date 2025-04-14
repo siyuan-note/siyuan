@@ -17,6 +17,9 @@ export const onMessage = (app: App, data: IWebSocketData) => {
             case "setDefRefCount":
                 setDefRefCount(data.data);
                 break;
+            case "reloadTag":
+                window.siyuan.mobile.docks.tag?.update();
+                break;
             case "setLocalShorthandCount":
                 setLocalShorthandCount();
                 break;

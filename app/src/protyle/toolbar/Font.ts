@@ -50,7 +50,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     element.classList.add("protyle-font");
     let disableFont = false;
     nodeElements?.find((item: HTMLElement) => {
-        if (item.classList.contains("list") || item.classList.contains("li")) {
+        if (item.classList.contains("li")) {
             disableFont = true;
             return true;
         }

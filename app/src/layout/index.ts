@@ -71,7 +71,6 @@ export class Layout {
     }
 
     addWnd(child: Wnd, id?: string) {
-        recordBeforeResizeTop();
         if (!id) {
             this.children.splice(this.children.length, 0, child);
             this.element.append(child.element);

@@ -2160,6 +2160,9 @@ export class WYSIWYG {
             hideElements(["hint", "util"], protyle);
             // https://github.com/siyuan-note/siyuan/issues/14569
             if (event.target.tagName === "VIDEO") {
+                /// #if MOBILE
+                activeBlur();
+                /// #enfid
                 return;
             }
             const ctrlIsPressed = isOnlyMeta(event);

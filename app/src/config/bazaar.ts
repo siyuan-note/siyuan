@@ -446,6 +446,9 @@ export const bazaar = {
                 });
             }
             bazaar._data.downloaded = response.data.packages;
+            if (bazaar.element.querySelector("#configBazaarReadme").classList.contains("config-bazaar__readme--show")) {
+                bazaar._renderReadme(bazaar.element.querySelector("#configBazaarReadme > .item__side"), bazaarType);
+            }
             const checkElement = contentElement.parentElement.querySelector(".b3-switch");
             if (bazaarType === "plugins") {
                 checkElement.classList.remove("fn__none");

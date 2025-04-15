@@ -800,7 +800,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							unlinks = append(unlinks, n)
 						}
 
-						util.PushReloadTag()
+						ReloadTag()
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue
@@ -965,11 +965,15 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 					parse.NestedInlines2FlattedSpans(tree, false)
 
 					var replaceNodes []*ast.Node
-					var defIDs []string
 					for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
 						replaceNodes = append(replaceNodes, rNode)
 						if blockRefID, _, _ := treenode.GetBlockRef(rNode); "" != blockRefID {
-							defIDs = append(defIDs, blockRefID)
+							bt := treenode.GetBlockTree(blockRefID)
+							if nil == bt {
+								continue
+							}
+
+							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, blockRefID)
 						}
 					}
 
@@ -977,15 +981,6 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 						n.InsertBefore(rNode)
 					}
 					n.TextMarkTextContent = ""
-
-					for _, defID := range defIDs {
-						bt := treenode.GetBlockTree(defID)
-						if nil == bt {
-							continue
-						}
-
-						task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, defID)
-					}
 					return
 				}
 

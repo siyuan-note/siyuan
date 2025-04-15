@@ -4,8 +4,8 @@ import {genNotebookOption} from "../../menus/onGetnotebookconf";
 
 export const initFileTree = () => {
     openModel({
-        title: window.siyuan.languages.editor,
-        icon: "iconEdit",
+        title: window.siyuan.languages.fileTree,
+        icon: "iconFiles",
         html: `<label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree18}

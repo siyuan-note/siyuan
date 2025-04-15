@@ -654,5 +654,10 @@ export const getKeyByLiElement = (element: HTMLElement) => {
     element.querySelectorAll(".b3-list-item__text mark").forEach(item => {
         keys.push(item.textContent);
     });
+    if (keys.length === 0) {
+        element.querySelectorAll(".b3-list-item__meta mark").forEach(item => {
+            keys.push(item.textContent);
+        });
+    }
     return [...new Set(keys)].join(" ");
 };

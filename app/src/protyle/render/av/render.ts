@@ -323,8 +323,12 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     const avMaskElement = document.querySelector(".av__mask");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel") && !isSearching) {
-                        focusBlock(e);
+                    } else if (!document.querySelector(".av__panel") && !isSearching && getSelection().rangeCount > 0) {
+                        const range = getSelection().getRangeAt(0);
+                        const blockElement = hasClosestBlock(range.startContainer);
+                        if (blockElement && e.isSameNode(blockElement)) {
+                            focusBlock(e);
+                        }
                     }
                     cellScrollIntoView(e, newCellElement);
                 }

@@ -146,6 +146,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         ${window.siyuan.languages.relativeFontSize}
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
+        <span class="fn__space--small"></span>
     </label>
 </div>
 <div class="${disableFont ? " fn__none" : ""}">

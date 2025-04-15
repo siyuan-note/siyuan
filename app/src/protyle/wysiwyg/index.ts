@@ -2162,7 +2162,7 @@ export class WYSIWYG {
             if (event.target.tagName === "VIDEO") {
                 /// #if MOBILE
                 activeBlur();
-                /// #enfid
+                /// #endif
                 return;
             }
             const ctrlIsPressed = isOnlyMeta(event);

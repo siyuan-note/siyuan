@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
@@ -554,24 +555,42 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		}
 
 		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
-
 		if ast.NodeDocument == node.Type {
 			if !replaceTypes["docTitle"] {
 				continue
 			}
 
 			title := node.IALAttr("title")
+			tags := node.IALAttr("tags")
 			if 0 == method {
 				if strings.Contains(title, keyword) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
 				}
+
+				if strings.Contains(tags, keyword) {
+					replacement = strings.TrimPrefix(replacement, "#")
+					replacement = strings.TrimSuffix(replacement, "#")
+					tags = strings.ReplaceAll(tags, keyword, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
+					node.SetIALAttr("tags", tags)
+					ReloadTag()
+				}
 			} else if 3 == method {
 				if nil != r && r.MatchString(title) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
+				}
+
+				if nil != r && r.MatchString(tags) {
+					replacement = strings.TrimPrefix(replacement, "#")
+					replacement = strings.TrimSuffix(replacement, "#")
+					tags = r.ReplaceAllString(tags, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
+					node.SetIALAttr("tags", tags)
+					ReloadTag()
 				}
 			}
 		} else {
@@ -905,14 +924,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			for _, unlink := range unlinks {
 				unlink.Unlink()
 			}
-
-			if err = writeTreeUpsertQueue(tree); err != nil {
-				return
-			}
 		}
 
+		if err = writeTreeUpsertQueue(tree); err != nil {
+			return
+		}
 		updateNodes[id] = node
-
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
@@ -957,6 +974,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 					} else if strings.Contains(content, keyword) {
 						content = strings.ReplaceAll(content, keyword, replacement)
 					}
+					content = strings.ReplaceAll(content, editor.Zwsp, "")
 
 					tree := parse.Inline("", []byte(content), luteEngine.ParseOptions)
 					if nil == tree.Root.FirstChild {
@@ -995,10 +1013,12 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 		} else if strings.Contains(n.TextMarkTextContent, keyword) {
 			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	} else if 3 == method {
 		if nil != r && r.MatchString(n.TextMarkTextContent) {
 			n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	}
 }
 

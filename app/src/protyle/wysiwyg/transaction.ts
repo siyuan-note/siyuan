@@ -1093,7 +1093,7 @@ export const turnsIntoTransaction = (options: {
                 });
                 doOperations.push({
                     action: "update",
-                    id: item.id,
+                    id,
                     data: newHTML
                 });
             }

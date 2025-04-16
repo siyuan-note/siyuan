@@ -578,7 +578,7 @@ export const bazaar = {
         <img data-type="img-loading" style="height: 64px;width: 100%;padding: 16px 0;" src="/stage/loading-pure.svg">
     </div>
 </div>`;
-        if (downloaded) {
+        if (downloaded && data.preferredReadme) {
             const mdElement = readmeElement.querySelector(".item__readme");
             mdElement.innerHTML = data.preferredReadme;
             highlightRender(mdElement);

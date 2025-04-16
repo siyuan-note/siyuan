@@ -633,7 +633,7 @@ export class Toolbar {
                         previousIsSame = index === 0 && previousElement && previousElement.nodeType !== 3 &&
                             isArrayEqual(types, (previousElement.getAttribute("data-type") || "").split(" ")) &&
                             hasSameTextStyle(item, previousElement, textObj);
-                        if (index === 0 && !previousIsSame && previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
+                        if (index === 0 && !previousIsSame && previousElement && previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
                             const tempPreviousElement = previousElement.previousSibling as HTMLElement;
                             previousIsSame = tempPreviousElement && tempPreviousElement.nodeType !== 3 &&
                                 isArrayEqual(types, (tempPreviousElement.getAttribute("data-type") || "").split(" ")) &&

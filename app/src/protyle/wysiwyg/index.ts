@@ -2158,14 +2158,14 @@ export class WYSIWYG {
                 });
             });
             hideElements(["hint", "util"], protyle);
+            /// #if MOBILE
             // https://github.com/siyuan-note/siyuan/issues/14569
             if (event.target.tagName === "VIDEO") {
-                /// #if MOBILE
                 activeBlur();
                 hideKeyboardToolbar();
-                /// #endif
                 return;
             }
+            /// #endif
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

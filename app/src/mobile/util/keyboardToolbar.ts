@@ -462,7 +462,9 @@ export const hideKeyboardToolbar = () => {
 };
 
 export const activeBlur = () => {
-    window.JSAndroid?.hideKeyboard();
+    if (window.JSAndroid) {
+        window.JSAndroid.hideKeyboard();
+    }
     hideKeyboardToolbar();
     (document.activeElement as HTMLElement).blur();
 };

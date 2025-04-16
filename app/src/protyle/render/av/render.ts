@@ -260,9 +260,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-search-icon" class="block__icon">
+            <button data-type="av-search-icon" class="block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
-            </span>
+            </button>
             <div style="position: relative" class="fn__flex">
                 <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>

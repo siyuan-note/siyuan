@@ -33,7 +33,6 @@ import {initFileTree} from "../settings/fileTree";
 
 export const popMenu = () => {
     activeBlur();
-    hideKeyboardToolbar();
     document.getElementById("menu").style.transform = "translateX(0px)";
 };
 

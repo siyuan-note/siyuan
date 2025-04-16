@@ -21,7 +21,6 @@ const popSide = (render = true) => {
     if (render) {
         document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
     } else {
-        hideKeyboardToolbar();
         activeBlur();
         document.getElementById("sidebar").style.transform = "translateX(0px)";
     }
@@ -309,7 +308,6 @@ export const handleTouchMove = (event: TouchEvent) => {
             transformMask((windowWidth - xDiff) / windowWidth);
         }
         activeBlur();
-        hideKeyboardToolbar();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }

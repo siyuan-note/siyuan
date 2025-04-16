@@ -2168,7 +2168,6 @@ export class WYSIWYG {
             // https://github.com/siyuan-note/siyuan/issues/14569
             if (event.target.tagName === "VIDEO") {
                 activeBlur();
-                hideKeyboardToolbar();
                 return;
             }
             /// #endif
@@ -2265,7 +2264,6 @@ export class WYSIWYG {
                         }
                         /// #if MOBILE
                         activeBlur();
-                        hideKeyboardToolbar();
                         openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         /// #else
                         if (event.shiftKey) {
@@ -2332,7 +2330,6 @@ export class WYSIWYG {
                     }, (response) => {
                         checkFold(response.data.refDefs[0].refID, (zoomIn) => {
                             activeBlur();
-                            hideKeyboardToolbar();
                             openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                     });
@@ -2406,7 +2403,6 @@ export class WYSIWYG {
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
                     activeBlur();
-                    hideKeyboardToolbar();
                     openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     /// #else
                     if (event.shiftKey) {

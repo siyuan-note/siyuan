@@ -672,7 +672,6 @@ export const popSearch = (app: App, searchConfig?: any) => {
     }
 
     activeBlur();
-    hideKeyboardToolbar();
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {

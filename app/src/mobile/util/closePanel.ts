@@ -11,7 +11,6 @@ export const closePanel = () => {
 };
 
 export const closeModel = () => {
-    document.getElementById("model").style.transform = "";
     activeBlur();
-    hideKeyboardToolbar();
+    document.getElementById("model").style.transform = "";
 };

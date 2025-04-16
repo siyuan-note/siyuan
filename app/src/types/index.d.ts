@@ -208,6 +208,7 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         getBlockURL(): string
+        hideKeyboard(): void
     }
     JSHarmony: {
         openExternal(url: string): void

@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
@@ -572,6 +573,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					replacement = strings.TrimPrefix(replacement, "#")
 					replacement = strings.TrimSuffix(replacement, "#")
 					tags = strings.ReplaceAll(tags, keyword, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()
 				}
@@ -586,6 +588,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 					replacement = strings.TrimPrefix(replacement, "#")
 					replacement = strings.TrimSuffix(replacement, "#")
 					tags = r.ReplaceAllString(tags, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
 					node.SetIALAttr("tags", tags)
 					ReloadTag()
 				}
@@ -971,6 +974,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 					} else if strings.Contains(content, keyword) {
 						content = strings.ReplaceAll(content, keyword, replacement)
 					}
+					content = strings.ReplaceAll(content, editor.Zwsp, "")
 
 					tree := parse.Inline("", []byte(content), luteEngine.ParseOptions)
 					if nil == tree.Root.FirstChild {
@@ -1009,10 +1013,12 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 		} else if strings.Contains(n.TextMarkTextContent, keyword) {
 			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	} else if 3 == method {
 		if nil != r && r.MatchString(n.TextMarkTextContent) {
 			n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	}
 }
 

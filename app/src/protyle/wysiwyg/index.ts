@@ -2162,6 +2162,7 @@ export class WYSIWYG {
             if (event.target.tagName === "VIDEO") {
                 /// #if MOBILE
                 activeBlur();
+                hideKeyboardToolbar();
                 /// #endif
                 return;
             }
@@ -2257,9 +2258,9 @@ export class WYSIWYG {
                             action.push(Constants.CB_GET_HL);
                         }
                         /// #if MOBILE
-                        openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         activeBlur();
                         hideKeyboardToolbar();
+                        openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         /// #else
                         if (event.shiftKey) {
                             openFileById({
@@ -2324,9 +2325,9 @@ export class WYSIWYG {
                         excludeIDs: [blockElement.getAttribute("data-node-id")]
                     }, (response) => {
                         checkFold(response.data.refDefs[0].refID, (zoomIn) => {
-                            openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                             activeBlur();
                             hideKeyboardToolbar();
+                            openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
                     });
                 }
@@ -2398,9 +2399,9 @@ export class WYSIWYG {
                 const embedId = embedItemElement.getAttribute("data-id");
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
-                    openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     activeBlur();
                     hideKeyboardToolbar();
+                    openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     /// #else
                     if (event.shiftKey) {
                         openFileById({

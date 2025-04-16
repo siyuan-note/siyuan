@@ -417,7 +417,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     } else if (isFocus && (isNotEditBlock(container) || container.classList.contains("av"))) {
         return focusBlock(container);
     }
-    let startNode;
+    let startNode: Node;
     searchNode(container, container.firstChild, node => {
         if (node.nodeType === Node.TEXT_NODE) {
             const dataLength = (node as Text).data.length;
@@ -427,6 +427,14 @@ export const focusByOffset = (container: Element, start: number, end: number, is
             }
             start -= dataLength;
             end -= dataLength;
+            return false;
+        } else if (node.nodeType === Node.ELEMENT_NODE && (node as Element).tagName === "BR") {
+            if (start <= 1) {
+                startNode = node;
+                return true;
+            }
+            start -= 1;
+            end -= 1;
             return false;
         }
     });
@@ -448,7 +456,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 
     const range = document.createRange();
     if (startNode) {
-        if (start < (startNode as Text).data.length) {
+        if (startNode.nodeType === Node.TEXT_NODE && start < (startNode as Text).data.length) {
             range.setStart(startNode, start);
         } else {
             range.setStartAfter(startNode);

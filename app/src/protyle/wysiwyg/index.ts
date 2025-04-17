@@ -72,7 +72,7 @@ import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
 import {removeSearchMark} from "../toolbar/util";
-import {activeBlur, hideKeyboardToolbar} from "../../mobile/util/keyboardToolbar";
+import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
 import {selectRow, stickyRow, updateHeader} from "../render/av/row";
@@ -2151,7 +2151,7 @@ export class WYSIWYG {
                 return;
             }
         });
-
+        let mobileBlur = false;
         this.element.addEventListener("click", (event: MouseEvent & { target: HTMLElement }) => {
             if (this.preventClick) {
                 this.preventClick = false;
@@ -2167,6 +2167,7 @@ export class WYSIWYG {
             /// #if MOBILE
             // https://github.com/siyuan-note/siyuan/issues/14569
             if (event.target.tagName === "VIDEO") {
+                mobileBlur = true;
                 activeBlur();
                 return;
             }
@@ -2263,6 +2264,7 @@ export class WYSIWYG {
                             action.push(Constants.CB_GET_HL);
                         }
                         /// #if MOBILE
+                        mobileBlur = true;
                         activeBlur();
                         openMobileFileById(protyle.app, refBlockId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         /// #else
@@ -2329,6 +2331,7 @@ export class WYSIWYG {
                         excludeIDs: [blockElement.getAttribute("data-node-id")]
                     }, (response) => {
                         checkFold(response.data.refDefs[0].refID, (zoomIn) => {
+                            mobileBlur = true;
                             activeBlur();
                             openMobileFileById(protyle.app, response.data.refDefs[0].refID, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                         });
@@ -2402,6 +2405,7 @@ export class WYSIWYG {
                 const embedId = embedItemElement.getAttribute("data-id");
                 checkFold(embedId, (zoomIn, action) => {
                     /// #if MOBILE
+                    mobileBlur = true;
                     activeBlur();
                     openMobileFileById(protyle.app, embedId, zoomIn ? [Constants.CB_GET_ALL] : [Constants.CB_GET_HL, Constants.CB_GET_CONTEXT, Constants.CB_GET_ROOTSCROLL]);
                     /// #else
@@ -2669,9 +2673,11 @@ export class WYSIWYG {
                 if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select")) {
                     countSelectWord(newRange, protyle.block.rootID);
                 }
-                if (getSelection().rangeCount === 0) {
+                if (getSelection().rangeCount === 0 && !mobileBlur) {
+                    // TODO https://github.com/siyuan-note/siyuan/issues/14589  点击 video 也可以测试一下 https://github.com/siyuan-note/siyuan/issues/14569
                     // https://github.com/siyuan-note/siyuan/issues/5901
                     focusByRange(newRange);
+                    mobileBlur = false;
                 }
                 /// #if !MOBILE
                 pushBack(protyle, newRange);

@@ -329,7 +329,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (isNotCtrl(event) && event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+        if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
                 event.stopPropagation();

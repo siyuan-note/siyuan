@@ -17,12 +17,11 @@
 package util
 
 import (
-	"errors"
-	"fmt"
+	"strings"
 	"sync"
 	"time"
 
-	"github.com/siyuan-note/httpclient"
+	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/logging"
 )
 
@@ -30,31 +29,35 @@ var cachedRhyResult = map[string]interface{}{}
 var rhyResultCacheTime int64
 var rhyResultLock = sync.Mutex{}
 
-func GetRhyResult(force bool) (map[string]interface{}, error) {
-	rhyResultLock.Lock()
-	defer rhyResultLock.Unlock()
+func GetRhyResult(showMsg bool) (ret map[string]interface{}, err error) {
+	defer logging.Recover()
 
-	cacheDuration := int64(3600 * 6)
-	if ContainerDocker == Container {
-		cacheDuration = int64(3600 * 24)
-	}
-
-	now := time.Now().Unix()
-	if cacheDuration >= now-rhyResultCacheTime && !force && 0 < len(cachedRhyResult) {
-		return cachedRhyResult, nil
-	}
-
-	request := httpclient.NewCloudRequest30s()
-	resp, err := request.SetSuccessResult(&cachedRhyResult).Get(GetCloudServer() + "/apis/siyuan/version?ver=" + Ver)
+	// 使用 GitHub API 获取最新版本信息
+	client := req.C().SetTimeout(7 * time.Second)
+	resp, err := client.R().SetSuccessResult(&ret).Get("https://api.github.com/repos/EightDoor/siyuan/releases/latest")
 	if err != nil {
-		logging.LogErrorf("get version info failed: %s", err)
-		return nil, err
+		logging.LogErrorf("get latest release failed: %s", err)
+		return
 	}
 	if 200 != resp.StatusCode {
-		msg := fmt.Sprintf("get rhy result failed: %d", resp.StatusCode)
-		logging.LogErrorf(msg)
-		return nil, errors.New(msg)
+		logging.LogErrorf("get latest release failed: %d", resp.StatusCode)
+		return
 	}
-	rhyResultCacheTime = now
-	return cachedRhyResult, nil
+
+	// 转换 GitHub API 返回的数据格式
+	version := ret["tag_name"].(string)
+	version = strings.TrimPrefix(version, "v")
+
+	// 构建返回数据
+	ret = map[string]interface{}{
+		"ver": version,
+		"checksums": map[string]interface{}{
+			"siyuan-" + version + "-win.exe":        ret["assets"].([]interface{})[0].(map[string]interface{})["browser_download_url"].(string),
+			"siyuan-" + version + "-mac.dmg":        ret["assets"].([]interface{})[1].(map[string]interface{})["browser_download_url"].(string),
+			"siyuan-" + version + "-mac-arm64.dmg":  ret["assets"].([]interface{})[2].(map[string]interface{})["browser_download_url"].(string),
+			"siyuan-" + version + "-linux.AppImage": ret["assets"].([]interface{})[3].(map[string]interface{})["browser_download_url"].(string),
+		},
+	}
+
+	return
 }

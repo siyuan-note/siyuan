@@ -46,6 +46,8 @@ jobs:
         id: version
         with:
           cmd: 'jq .version ${{ env.package_json }} -r'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract electronVersion from package.json
         uses: sergeysova/jq-action@v2
@@ -82,7 +84,7 @@ jobs:
           tag: ${{ github.ref }}
           body: ${{ env.release_body }}
           draft: false
-          prerelease: true
+          prerelease: false
           token: ${{ secrets.GITHUB_TOKEN }}
 
   build:
@@ -235,6 +237,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ needs.create_release.outputs.upload_url }}
-          asset_name: siyuan-${{ needs.create_release.outputs.release_version }}-${{ matrix.config.suffix }}
+          asset_name: siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
           asset_path: ${{ github.workspace }}/go/src/github.com/${{ env.repo_owner }}/${{ env.repo_name }}/app/build/siyuan-${{ needs.create_release.outputs.version }}-${{ matrix.config.suffix }}
           asset_content_type: application/octet-stream

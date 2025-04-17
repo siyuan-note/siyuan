@@ -2677,11 +2677,11 @@ export class WYSIWYG {
                     // TODO https://github.com/siyuan-note/siyuan/issues/14589  点击 video 也可以测试一下 https://github.com/siyuan-note/siyuan/issues/14569
                     // https://github.com/siyuan-note/siyuan/issues/5901
                     focusByRange(newRange);
-                    mobileBlur = false;
                 }
                 /// #if !MOBILE
                 pushBack(protyle, newRange);
                 /// #endif
+                mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
             protyle.hint.enableExtend = false;
             if (event.shiftKey) {

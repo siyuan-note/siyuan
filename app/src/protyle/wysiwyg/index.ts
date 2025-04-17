@@ -1379,6 +1379,8 @@ export class WYSIWYG {
                             }).element);
                         }
                         window.siyuan.menus.menu.popup({x: mouseUpEvent.clientX - 8, y: mouseUpEvent.clientY - 16});
+                        // 多选表格单元格后，选择菜单中的居左，然后 shift+左 选中的文字无法显示选中背景，因此需移除
+                        protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                     }
                 }
 
@@ -1417,12 +1419,17 @@ export class WYSIWYG {
                     }
                     const startBlockElement = hasClosestBlock(range.startContainer);
                     let endBlockElement: false | HTMLElement;
-                    if (mouseUpEvent.detail > 2 && range.endContainer.nodeType !== 3 && (range.endContainer as HTMLElement).tagName === "DIV" && range.endOffset === 0) {
+                    if (mouseUpEvent.detail > 2 && range.endContainer.nodeType !== 3 && ["DIV", "TD", "TH"].includes((range.endContainer as HTMLElement).tagName) && range.endOffset === 0) {
                         // 三击选中段落块时，rangeEnd 会在下一个块
                         if ((range.endContainer as HTMLElement).classList.contains("protyle-attr") && startBlockElement) {
                             // 三击在悬浮层中会选择到 attr https://github.com/siyuan-note/siyuan/issues/4636
                             // 需要获取可编辑元素，使用 previousElementSibling 的话会 https://github.com/siyuan-note/siyuan/issues/9714
                             setLastNodeRange(getContenteditableElement(startBlockElement), range, false);
+                        } else if (["TD", "TH"].includes((range.endContainer as HTMLElement).tagName)) {
+                            const cellElement = hasClosestByTag(range.startContainer, "TH") || hasClosestByTag(range.startContainer, "TD")
+                            if (cellElement) {
+                                setLastNodeRange(cellElement, range, false);
+                            }
                         }
                     } else {
                         endBlockElement = hasClosestBlock(range.endContainer);

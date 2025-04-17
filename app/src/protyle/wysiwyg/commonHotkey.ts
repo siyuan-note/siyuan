@@ -205,6 +205,9 @@ export const downSelect = (options: {
                     // 代码块中 shift+alt 向下选中到末尾时，最后一个字符无法选中
                     options.event.preventDefault();
                 }
+            } else if (tdElement) {
+                setLastNodeRange(tdElement, options.range, false);
+                options.event.preventDefault();
             }
             return;
         }

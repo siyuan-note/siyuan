@@ -351,10 +351,6 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
     }
     let lastNode = editElement.lastChild as Element;
     while (lastNode && lastNode.nodeType !== 3) {
-        if (lastNode.nodeType !== 3 && lastNode.tagName === "BR") {
-            // 防止单元格中 ⇧↓ 全部选中
-            return range;
-        }
         // https://github.com/siyuan-note/siyuan/issues/12792
         if (!lastNode.lastChild) {
             break;
@@ -367,14 +363,14 @@ export const setLastNodeRange = (editElement: Element, range: Range, setStart = 
         lastNode = editElement;
     }
     if (setStart) {
-        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
+        if (lastNode.nodeType !== 3 && (lastNode.classList.contains("render-node") || lastNode.tagName === "BR") && lastNode.innerHTML === "") {
             range.setStartAfter(lastNode);
         } else {
             range.setStart(lastNode, lastNode.textContent.length);
         }
     } else {
-        if (lastNode.nodeType !== 3 && lastNode.classList.contains("render-node") && lastNode.innerHTML === "") {
-            range.setStartAfter(lastNode);
+        if (lastNode.nodeType !== 3 && (lastNode.classList.contains("render-node") || lastNode.tagName === "BR") && lastNode.innerHTML === "") {
+            range.setEndAfter(lastNode);
         } else {
             range.setEnd(lastNode, lastNode.textContent.length);
         }

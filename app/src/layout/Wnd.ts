@@ -563,7 +563,7 @@ export class Wnd {
                     resize,
                 });
             }
-            if (window.siyuan.editorIsFullscreen) {
+            if (window.siyuan.editorIsFullscreen && !currentTab.model.editor.protyle.element.className.includes("fullscreen")) {
                 fullscreen(currentTab.model.editor.protyle.element);
                 setPadding(currentTab.model.editor.protyle);
             }

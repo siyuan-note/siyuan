@@ -297,7 +297,7 @@ func refreshAnnouncement() {
 		}
 	}
 
-	for _, announcement := range GetAnnouncements() {
+	for _, announcement := range getAnnouncements() {
 		var exist bool
 		for _, existingAnnouncement := range existingAnnouncements {
 			if announcement.Id == existingAnnouncement.Id {

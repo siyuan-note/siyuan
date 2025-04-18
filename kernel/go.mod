@@ -30,7 +30,7 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/gabriel-vasile/mimetype v1.4.8
+	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.0.3
 	github.com/gin-contrib/sse v1.1.0
@@ -50,19 +50,19 @@ require (
 	github.com/mssola/useragent v1.0.0
 	github.com/olahol/melody v1.2.1
 	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
-	github.com/panjf2000/ants/v2 v2.11.2
+	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pdfcpu/pdfcpu v0.9.1
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20241111133259-a4122fabb196
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/sashabaranov/go-openai v1.38.1
+	github.com/sashabaranov/go-openai v1.38.2
 	github.com/shirou/gopsutil/v4 v4.25.3
-	github.com/siyuan-note/dejavu v0.0.0-20250410030713-6d3e4c9ecc07
+	github.com/siyuan-note/dejavu v0.0.0-20250418020730-e2cae0ebc147
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
-	github.com/siyuan-note/httpclient v0.0.0-20250322021658-9045f69f1f42
+	github.com/siyuan-note/httpclient v0.0.0-20250418020443-47f8751fa913
 	github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742
 	github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b
 	github.com/spf13/cast v1.7.1
@@ -130,7 +130,7 @@ require (
 	github.com/go-resty/resty/v2 v2.16.5 // indirect
 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
-	github.com/google/pprof v0.0.0-20250403155104-27863c87afa6 // indirect
+	github.com/google/pprof v0.0.0-20250417201159-ae779711f5d1 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/gopherjs/gopherjs v1.17.2 // indirect
 	github.com/gorilla/context v1.1.2 // indirect

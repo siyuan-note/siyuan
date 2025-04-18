@@ -30,7 +30,7 @@ import {
     hasPreviousSibling, isEndOfBlock,
     isNotEditBlock,
 } from "./getBlock";
-import {matchHotKey} from "../util/hotKey";
+import {isIncludesHotKey, matchHotKey} from "../util/hotKey";
 import {enter, softEnter} from "./enter";
 import {clearTableCell, fixTable} from "../util/table";
 import {
@@ -1931,14 +1931,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
 
             if (!range.toString()) {
-                if (event.key === "ArrowRight" && isEndOfBlock(range)) {
+                if (event.key === "ArrowRight" && isEndOfBlock(range) && !isIncludesHotKey("⌥⇧→")) {
                     event.preventDefault();
                     event.stopPropagation();
                     return;
                 }
                 const nodeEditableElement = getContenteditableElement(nodeElement);
                 const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-                if (position.start === 0 && event.key === "ArrowLeft") {
+                if (position.start === 0 && event.key === "ArrowLeft" && !isIncludesHotKey("⌥⇧←")) {
                     event.preventDefault();
                     event.stopPropagation();
                     return;

@@ -184,3 +184,36 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     return false;
 };
 
+export const isIncludesHotKey = (hotKey: string) => {
+    let isInclude = false;
+    Object.keys(window.siyuan.config.keymap).find(key => {
+        const item = window.siyuan.config.keymap[key as "editor"];
+        Object.keys(item).find(key2 => {
+            const item2 = item[key2 as "general"];
+            if (typeof item2.custom === "string") {
+                if (item2.custom === hotKey) {
+                    isInclude = true;
+                    return true;
+                }
+            } else {
+                Object.keys(item2).forEach(key3 => {
+                    const item3: Config.IKey = item2[key3];
+                    if (item3.custom === hotKey) {
+                        isInclude = true;
+                        return true;
+                    }
+                });
+                if (isInclude) {
+                    return true;
+                }
+            }
+        });
+
+        if (isInclude) {
+            return true;
+        }
+    });
+
+    return isInclude;
+};
+

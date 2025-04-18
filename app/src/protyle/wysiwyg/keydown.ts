@@ -329,30 +329,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
-        if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
-            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
-            if (selectElements.length > 0) {
-                event.stopPropagation();
-                event.preventDefault();
-                return;
-            }
-
-            if (!range.toString()) {
-                if (event.key === "ArrowRight" && isEndOfBlock(range)) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return;
-                }
-                const nodeEditableElement = getContenteditableElement(nodeElement);
-                const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
-                if (position.start === 0 && event.key === "ArrowLeft") {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return;
-                }
-            }
-        }
-
         if (matchHotKey(window.siyuan.config.keymap.editor.general.expandUp.custom, event)) {
             upSelect({
                 protyle, event, nodeElement, editorElement, range,
@@ -1943,6 +1919,31 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             return;
+        }
+
+        // 和自定义 alt+shift+左/右 冲突，降低优先级  https://github.com/siyuan-note/siyuan/issues/14638
+        if (event.shiftKey && (event.key === "ArrowLeft" || event.key === "ArrowRight")) {
+            const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
+            if (selectElements.length > 0) {
+                event.stopPropagation();
+                event.preventDefault();
+                return;
+            }
+
+            if (!range.toString()) {
+                if (event.key === "ArrowRight" && isEndOfBlock(range)) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+                const nodeEditableElement = getContenteditableElement(nodeElement);
+                const position = getSelectionOffset(nodeEditableElement, protyle.wysiwyg.element, range);
+                if (position.start === 0 && event.key === "ArrowLeft") {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
+            }
         }
 
         // 置于最后，太多快捷键会使用到选中元素

@@ -102,7 +102,7 @@ export const renameTag = (labelName: string) => {
         if (!listItemElement) {
             return;
         }
-        inputElement.value = listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim()
+        inputElement.value = listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim();
         listElement.classList.add("fn__none");
     });
 };

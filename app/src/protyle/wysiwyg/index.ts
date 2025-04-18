@@ -1429,7 +1429,7 @@ export class WYSIWYG {
                             // 需要获取可编辑元素，使用 previousElementSibling 的话会 https://github.com/siyuan-note/siyuan/issues/9714
                             setLastNodeRange(getContenteditableElement(startBlockElement), range, false);
                         } else if (["TD", "TH"].includes((range.endContainer as HTMLElement).tagName)) {
-                            const cellElement = hasClosestByTag(range.startContainer, "TH") || hasClosestByTag(range.startContainer, "TD")
+                            const cellElement = hasClosestByTag(range.startContainer, "TH") || hasClosestByTag(range.startContainer, "TD");
                             if (cellElement) {
                                 setLastNodeRange(cellElement, range, false);
                             }

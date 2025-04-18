@@ -15,7 +15,7 @@ import {hasTopClosestByTag} from "../../protyle/util/hasClosest";
 import {MobileBacklinks} from "../dock/MobileBacklinks";
 import {MobileBookmarks} from "../dock/MobileBookmarks";
 import {MobileTags} from "../dock/MobileTags";
-import {activeBlur, hideKeyboardToolbar, initKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur, initKeyboardToolbar} from "./keyboardToolbar";
 import {syncGuide} from "../../sync/syncGuide";
 import {Inbox} from "../../layout/dock/Inbox";
 import {App} from "../../index";

@@ -18,7 +18,7 @@ import {getFrontend} from "../../util/functions";
 
 const getPluginStyle = async () => {
     const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
-    let css = '';
+    let css = "";
     // 为加快启动速度，不进行 await
     response.data.forEach((item: IPluginData) => {
         css += item.css || "";

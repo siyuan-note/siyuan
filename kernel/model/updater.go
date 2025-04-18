@@ -233,7 +233,7 @@ type Announcement struct {
 	Region int    `json:"region"`
 }
 
-func GetAnnouncements() (ret []*Announcement) {
+func getAnnouncements() (ret []*Announcement) {
 	result, err := util.GetRhyResult(false)
 	if err != nil {
 		logging.LogErrorf("get announcement failed: %s", err)

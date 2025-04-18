@@ -2195,8 +2195,10 @@ func getRefSearchIgnoreLines() (ret []string) {
 
 func filterQueryInvisibleChars(query string) string {
 	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
+	query = strings.ReplaceAll(query, "\t", "_@tab@_")
 	query = util.RemoveInvalid(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
+	query = strings.ReplaceAll(query, "_@tab@_", "\t")
 	return query
 }
 

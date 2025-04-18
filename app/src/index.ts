@@ -71,7 +71,9 @@ export class App {
                                 setDefRefCount(data.data);
                                 break;
                             case "reloadTag":
-                                (getDockByType("tag")?.data.tag as Tag).update();
+                                if (getDockByType("tag")?.data.tag instanceof Tag) {
+                                    (getDockByType("tag").data.tag as Tag).update();
+                                }
                                 break;
                             /// #if BROWSER
                             case "setLocalShorthandCount":

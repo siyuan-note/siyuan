@@ -580,19 +580,17 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     enableProtyle(protyle);
                 }
             }
-            if (data.new.icon !== data.old.icon) {
+            if (data.new.icon !== data.old.icon ||
+                data.new["title-img"] !== data.old["title-img"] ||
+                data.new.tags !== data.old.tags && protyle.background) {
                 /// #if MOBILE
-                if (window.siyuan.mobile.editor.protyle.background.ial.icon !== data.new.icon) {
-                    window.siyuan.mobile.editor.protyle.background.ial.icon = data.new.icon;
-                    window.siyuan.mobile.editor.protyle.background.render(window.siyuan.mobile.editor.protyle.background.ial, window.siyuan.mobile.editor.protyle.block.rootID);
-                }
-                /// #else
-                if (protyle.background && protyle.background.ial.icon !== data.new.icon) {
-                    protyle.background.ial.icon = data.new.icon;
-                    protyle.background.render(protyle.background.ial, protyle.block.rootID);
-                    protyle.model?.parent.setDocIcon(data.new.icon);
-                }
+                protyle = window.siyuan.mobile.editor.protyle;
                 /// #endif
+                protyle.background.ial.icon = data.new.icon;
+                protyle.background.ial.tags = data.new.tags;
+                protyle.background.ial["title-img"] = data.new["title-img"];
+                protyle.background.render(protyle.background.ial, protyle.block.rootID);
+                protyle.model?.parent.setDocIcon(data.new.icon);
             }
             return;
         }

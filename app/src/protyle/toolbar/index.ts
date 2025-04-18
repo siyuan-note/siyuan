@@ -490,7 +490,9 @@ export class Toolbar {
                             // tag 会有零宽空格 https://github.com/siyuan-note/siyuan/issues/12922
                             (item.textContent === Constants.ZWSP && !rangeTypes.includes("img"))) {
                             // ZWSP spin 后会在行内元素外 https://github.com/siyuan-note/siyuan/issues/13871
-                            if (item.textContent.startsWith(Constants.ZWSP)) {
+                            if (item.textContent.startsWith(Constants.ZWSP) &&
+                                // https://github.com/siyuan-note/siyuan/issues/14639
+                                item.textContent.length > 1) {
                                 newNodes.push(document.createTextNode(Constants.ZWSP));
                                 item.textContent = item.textContent.substring(1);
                             }

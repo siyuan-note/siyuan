@@ -8,12 +8,23 @@ import {afterExport} from "./util";
 /// #endif
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
 import {isPaidUser} from "../../util/needSubscribe";
 import {getCloudURL} from "../../config/util/about";
+import {getFrontend} from "../../util/functions";
+
+const getPluginStyle = async () => {
+    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
+    let css = "";
+    // 为加快启动速度，不进行 await
+    response.data.forEach((item: IPluginData) => {
+        css += item.css || "";
+    });
+    return css;
+};
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
@@ -170,7 +181,7 @@ const renderPDF = async (id: string) => {
             border-bottom: none;
         }
         ${await setInlineStyle(false)}
-        ${document.getElementById("pluginsStyle").innerHTML}
+        ${await getPluginStyle()}
         ${getSnippetCSS()}
     </style>
 </head>
@@ -673,7 +684,7 @@ const onExport = async (data: IWebSocketData, filePath: string, exportOption: IE
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${await setInlineStyle(false)}
-        ${document.getElementById("pluginsStyle").innerHTML}
+        ${await getPluginStyle()}
         ${getSnippetCSS()}
     </style>
 </head>

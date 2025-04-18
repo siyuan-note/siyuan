@@ -1,4 +1,4 @@
-import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur} from "./keyboardToolbar";
 
 export const closePanel = () => {
     document.getElementById("menu").style.transform = "";
@@ -11,7 +11,6 @@ export const closePanel = () => {
 };
 
 export const closeModel = () => {
-    document.getElementById("model").style.transform = "";
     activeBlur();
-    hideKeyboardToolbar();
+    document.getElementById("model").style.transform = "";
 };

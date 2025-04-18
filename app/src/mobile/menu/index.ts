@@ -8,7 +8,7 @@ import {exitSiYuan, lockScreen, processSync} from "../../dialog/processSystem";
 import {openHistory} from "../../history/history";
 import {syncGuide} from "../../sync/syncGuide";
 import {openCard} from "../../card/openCard";
-import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
+import {activeBlur} from "../util/keyboardToolbar";
 import {initAI} from "../settings/ai";
 import {initRiffCard} from "../settings/riffCard";
 import {login, showAccountInfo} from "../settings/account";
@@ -33,7 +33,6 @@ import {initFileTree} from "../settings/fileTree";
 
 export const popMenu = () => {
     activeBlur();
-    hideKeyboardToolbar();
     document.getElementById("menu").style.transform = "translateX(0px)";
 };
 

@@ -35,6 +35,8 @@ import {processIOSPurchaseResponse} from "./util/iOSPurchase";
 /// #if BROWSER
 import {setLocalShorthandCount} from "./util/noRelyPCFunction";
 /// #endif
+import {getDockByType} from "./layout/tabUtil";
+import {Tag} from "./layout/dock/Tag";
 
 export class App {
     public plugins: import("./plugin").Plugin[] = [];
@@ -67,6 +69,11 @@ export class App {
                         switch (data.cmd) {
                             case "setDefRefCount":
                                 setDefRefCount(data.data);
+                                break;
+                            case "reloadTag":
+                                if (getDockByType("tag")?.data.tag instanceof Tag) {
+                                    (getDockByType("tag").data.tag as Tag).update();
+                                }
                                 break;
                             /// #if BROWSER
                             case "setLocalShorthandCount":

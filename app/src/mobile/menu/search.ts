@@ -13,7 +13,7 @@ import {unicode2Emoji} from "../../emoji";
 import {newFileByName} from "../../util/newFile";
 import {showMessage} from "../../dialog/message";
 import {reloadProtyle} from "../../protyle/util/reload";
-import {activeBlur, hideKeyboardToolbar} from "../util/keyboardToolbar";
+import {activeBlur} from "../util/keyboardToolbar";
 import {App} from "../../index";
 import {
     assetFilterMenu,
@@ -672,7 +672,6 @@ export const popSearch = (app: App, searchConfig?: any) => {
     }
 
     activeBlur();
-    hideKeyboardToolbar();
     let includeChild = true;
     let enableIncludeChild = false;
     config.idPath.forEach(item => {

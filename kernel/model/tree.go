@@ -178,8 +178,6 @@ var (
 )
 
 func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
-	// 仅提供给 getBlockInfo 接口使用
-
 	if "" == id {
 		logging.LogWarnf("block id is empty")
 		return nil, ErrTreeNotFound
@@ -192,8 +190,9 @@ func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
 			return
 		}
 
-		// 尝试从文件系统加载
-		searchTreeInFilesystem(id)
+		// 尝试从文件系统加载并建立索引
+		indexTreeInFilesystem(id)
+
 		bt = treenode.GetBlockTree(id)
 		if nil == bt {
 			if "dev" == util.Mode {
@@ -243,7 +242,7 @@ func loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
 
 var searchTreeLimiter = rate.NewLimiter(rate.Every(3*time.Second), 1)
 
-func searchTreeInFilesystem(rootID string) {
+func indexTreeInFilesystem(rootID string) {
 	if !searchTreeLimiter.Allow() {
 		return
 	}

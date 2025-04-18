@@ -50,7 +50,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     element.classList.add("protyle-font");
     let disableFont = false;
     nodeElements?.find((item: HTMLElement) => {
-        if (item.classList.contains("list") || item.classList.contains("li")) {
+        if (item.classList.contains("li")) {
             disableFont = true;
             return true;
         }
@@ -146,6 +146,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         ${window.siyuan.languages.relativeFontSize}
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
+        <span class="fn__space--small"></span>
     </label>
 </div>
 <div class="${disableFont ? " fn__none" : ""}">
@@ -368,7 +369,7 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
 export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) => {
     if (!textObj) {
         // https://github.com/siyuan-note/siyuan/issues/14019
-        if (currentElement.nodeType !== 3 && sideElement.nodeType !== 3 &&
+        if (currentElement && currentElement.nodeType !== 3 && sideElement.nodeType !== 3 &&
             // 当为 span 时，都经过 isArrayEqual 判断
             sideElement.style.color === currentElement.style.color &&
             sideElement.style.webkitTextFillColor === currentElement.style.webkitTextFillColor &&
@@ -384,7 +385,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         return false;
     }
     if (textObj.type === "id") {
-        if (currentElement.nodeType !== 3) {
+        if (currentElement && currentElement.nodeType !== 3) {
             return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
                 currentElement.getAttribute("data-subtype") === sideElement.getAttribute("data-subtype") &&
                 currentElement.textContent === sideElement.textContent;
@@ -396,7 +397,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     }
 
     if (textObj.type === "file-annotation-ref") {
-        if (currentElement.nodeType !== 3) {
+        if (currentElement && currentElement.nodeType !== 3) {
             return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
                 currentElement.textContent === sideElement.textContent;
         }
@@ -409,7 +410,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
     let textShadow = "";
     let backgroundColor = "";
     let fontSize = "";
-    if (currentElement.nodeType !== 3) {
+    if (currentElement && currentElement.nodeType !== 3) {
         color = currentElement.style.color;
         webkitTextFillColor = currentElement.style.webkitTextFillColor;
         webkitTextStroke = currentElement.style.webkitTextStroke;

@@ -563,7 +563,7 @@ export class Wnd {
                     resize,
                 });
             }
-            if (window.siyuan.editorIsFullscreen) {
+            if (window.siyuan.editorIsFullscreen && !currentTab.model.editor.protyle.element.className.includes("fullscreen")) {
                 fullscreen(currentTab.model.editor.protyle.element);
                 setPadding(currentTab.model.editor.protyle);
             }
@@ -974,6 +974,7 @@ export class Wnd {
             // 场景：没有打开的文档，点击标签面板打开
             return this;
         }
+        recordBeforeResizeTop();
         const wnd = new Wnd(this.app, direction);
         if (direction === this.parent.direction) {
             this.parent.addWnd(wnd, this.id);

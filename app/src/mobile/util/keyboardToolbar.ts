@@ -36,25 +36,25 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
         "var(--b3-font-color9)", "var(--b3-font-color10)", "var(--b3-font-color11)", "var(--b3-font-color12)",
         "var(--b3-font-color13)"].forEach((item, index) => {
         colorHTML += `<button class="keyboard__slash-item" data-type="color">
-    <span class="keyboard__slash-icon" ${item?`style="color:${item}"`:""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item?index + 1:window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-icon" ${item ? `style="color:${item}"` : ""}>A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorFont} ${item ? index + 1 : window.siyuan.languages.default}</span>
 </button>`;
     });
     let bgHTML = "";
-    ["","var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
+    ["", "var(--b3-font-background1)", "var(--b3-font-background2)", "var(--b3-font-background3)", "var(--b3-font-background4)",
         "var(--b3-font-background5)", "var(--b3-font-background6)", "var(--b3-font-background7)", "var(--b3-font-background8)",
         "var(--b3-font-background9)", "var(--b3-font-background10)", "var(--b3-font-background11)", "var(--b3-font-background12)",
         "var(--b3-font-background13)"].forEach((item, index) => {
         bgHTML += `<button class="keyboard__slash-item" data-type="backgroundColor">
-    <span class="keyboard__slash-icon" ${item?`style="background-color:${item}"`:""}>A</span>
-    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item?index + 1:window.siyuan.languages.default}</span>
+    <span class="keyboard__slash-icon" ${item ? `style="background-color:${item}"` : ""}>A</span>
+    <span class="keyboard__slash-text">${window.siyuan.languages.colorPrimary} ${item ? index + 1 : window.siyuan.languages.default}</span>
 </button>`;
     });
 
     const nodeElements = getFontNodeElements(protyle);
     let disableFont = false;
     nodeElements?.find((item: HTMLElement) => {
-        if (item.classList.contains("list") || item.classList.contains("li")) {
+        if (item.classList.contains("li")) {
             disableFont = true;
             return true;
         }
@@ -462,6 +462,10 @@ export const hideKeyboardToolbar = () => {
 };
 
 export const activeBlur = () => {
+    if (window.JSAndroid) {
+        window.JSAndroid.hideKeyboard();
+    }
+    hideKeyboardToolbar();
     (document.activeElement as HTMLElement).blur();
 };
 
@@ -566,7 +570,6 @@ export const initKeyboardToolbar = () => {
                 focusByRange(range);
             } else {
                 activeBlur();
-                hideKeyboardToolbar();
             }
             return;
         }
@@ -658,7 +661,6 @@ export const initKeyboardToolbar = () => {
             protyle.gutter.renderMenu(protyle, nodeElement);
             window.siyuan.menus.menu.fullscreen();
             activeBlur();
-            hideKeyboardToolbar();
             return;
         } else if (type === "outdent") {
             listOutdent(protyle, [nodeElement.parentElement], range);

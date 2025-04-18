@@ -136,6 +136,8 @@ const (
 	CacheVirtualBlockRef            = "task.cache.virtualBlockRef"         // 缓存虚拟块引用
 	ReloadAttributeView             = "task.reload.attributeView"          // 重新加载属性视图
 	ReloadProtyle                   = "task.reload.protyle"                // 重新加载编辑器
+	ReloadTag                       = "task.reload.tag"                    // 重新加载标签面板
+	ReloadFiletree                  = "task.reload.filetree"               // 重新加载文档树面板
 	SetRefDynamicText               = "task.ref.setDynamicText"            // 设置引用的动态锚文本
 	SetDefRefCount                  = "task.def.setRefCount"               // 设置定义的引用计数
 	UpdateIDs                       = "task.update.ids"                    // 更新 ID
@@ -156,6 +158,8 @@ var uniqueActions = []string{
 	AssetContentDatabaseIndexCommit,
 	ReloadAttributeView,
 	ReloadProtyle,
+	ReloadTag,
+	ReloadFiletree,
 	SetRefDynamicText,
 	SetDefRefCount,
 	UpdateIDs,

@@ -182,6 +182,45 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
+	// 通过 API token (header: Authorization)
+	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
+		var token string
+		if strings.HasPrefix(authHeader, "Token ") {
+			token = strings.TrimPrefix(authHeader, "Token ")
+		} else if strings.HasPrefix(authHeader, "token ") {
+			token = strings.TrimPrefix(authHeader, "token ")
+		} else if strings.HasPrefix(authHeader, "Bearer ") {
+			token = strings.TrimPrefix(authHeader, "Bearer ")
+		} else if strings.HasPrefix(authHeader, "bearer ") {
+			token = strings.TrimPrefix(authHeader, "bearer ")
+		}
+
+		if "" != token {
+			if Conf.Api.Token == token {
+				c.Set(RoleContextKey, RoleAdministrator)
+				c.Next()
+				return
+			}
+
+			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
+			c.Abort()
+			return
+		}
+	}
+
+	// 通过 API token (query-params: token)
+	if token := c.Query("token"); "" != token {
+		if Conf.Api.Token == token {
+			c.Set(RoleContextKey, RoleAdministrator)
+			c.Next()
+			return
+		}
+
+		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
+		c.Abort()
+		return
+	}
+
 	//logging.LogInfof("check auth for [%s]", c.Request.RequestURI)
 	localhost := util.IsLocalHost(c.Request.RemoteAddr)
 
@@ -265,45 +304,6 @@ func CheckAuth(c *gin.Context) {
 			c.Next()
 			return
 		}
-	}
-
-	// 通过 API token (header: Authorization)
-	if authHeader := c.GetHeader("Authorization"); "" != authHeader {
-		var token string
-		if strings.HasPrefix(authHeader, "Token ") {
-			token = strings.TrimPrefix(authHeader, "Token ")
-		} else if strings.HasPrefix(authHeader, "token ") {
-			token = strings.TrimPrefix(authHeader, "token ")
-		} else if strings.HasPrefix(authHeader, "Bearer ") {
-			token = strings.TrimPrefix(authHeader, "Bearer ")
-		} else if strings.HasPrefix(authHeader, "bearer ") {
-			token = strings.TrimPrefix(authHeader, "bearer ")
-		}
-
-		if "" != token {
-			if Conf.Api.Token == token {
-				c.Set(RoleContextKey, RoleAdministrator)
-				c.Next()
-				return
-			}
-
-			c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [header: Authorization]"})
-			c.Abort()
-			return
-		}
-	}
-
-	// 通过 API token (query-params: token)
-	if token := c.Query("token"); "" != token {
-		if Conf.Api.Token == token {
-			c.Set(RoleContextKey, RoleAdministrator)
-			c.Next()
-			return
-		}
-
-		c.JSON(http.StatusUnauthorized, map[string]interface{}{"code": -1, "msg": "Auth failed [query: token]"})
-		c.Abort()
-		return
 	}
 
 	// WebDAV BasicAuth Authenticate

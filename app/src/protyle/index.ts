@@ -177,7 +177,7 @@ export class Protyle {
                                 } else {
                                     onTransaction(this.protyle, item, false);
                                     // 反链面板移除元素后，文档为空
-                                    if (this.protyle.wysiwyg.element.childElementCount === 0) {
+                                    if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID) {
                                         const newID = Lute.NewNodeID();
                                         const emptyElement = genEmptyElement(false, false, newID);
                                         this.protyle.wysiwyg.element.append(emptyElement);

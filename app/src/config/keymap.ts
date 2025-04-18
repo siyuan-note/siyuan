@@ -7,6 +7,7 @@ import {confirmDialog} from "../dialog/confirmDialog";
 import {App} from "../index";
 /// #if !BROWSER
 import {ipcRenderer} from "electron";
+import {sendUnregisterGlobalShortcut} from "../boot/globalEvent/keydown";
 /// #endif
 import {sendGlobalShortcut} from "../boot/globalEvent/keydown";
 
@@ -61,7 +62,7 @@ export const keymap = {
                 const dockKeymap = window.siyuan.config.keymap.plugin[item.name][toolbarItem.name];
                 const keyValue = updateHotkeyTip(dockKeymap.custom);
                 commandHTML += `<label class="b3-list-item b3-list-item--narrow b3-list-item--hide-action">
-    <span class="b3-list-item__text">${toolbarItem.tip||window.siyuan.languages[toolbarItem.lang]}</span>
+    <span class="b3-list-item__text">${toolbarItem.tip || window.siyuan.languages[toolbarItem.lang]}</span>
     <span data-type="reset" class="b3-list-item__action b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.reset}">
         <svg><use xlink:href="#iconUndo"></use></svg>
     </span>
@@ -219,6 +220,14 @@ export const keymap = {
                     if (plugin.name === keys[1]) {
                         plugin.commands.forEach(command => {
                             if (command.langKey === keys[2]) {
+                                /// #if !BROWSER
+                                if (command.globalCallback && command.customHotkey && command.customHotkey !== newHotkey) {
+                                    ipcRenderer.send(Constants.SIYUAN_CMD, {
+                                        cmd: "unregisterGlobalShortcut",
+                                        accelerator: command.customHotkey
+                                    });
+                                }
+                                /// #endif
                                 command.customHotkey = newHotkey;
                             }
                         });
@@ -234,6 +243,7 @@ export const keymap = {
         fetchPost("/api/setting/setKeymap", {
             data
         }, () => {
+            /// #if !BROWSER
             ipcRenderer.send(Constants.SIYUAN_CMD, {
                 cmd: "writeLog",
                 msg: "user update keymap:" + JSON.stringify(window.siyuan.config.keymap)
@@ -245,6 +255,7 @@ export const keymap = {
                 });
             }
             sendGlobalShortcut(app);
+            /// #endif
         });
     },
     search(value: string, keymapString: string) {
@@ -336,10 +347,7 @@ export const keymap = {
         });
         /// #if !BROWSER
         searchKeymapElement.addEventListener("focus", () => {
-            ipcRenderer.send(Constants.SIYUAN_CMD, {
-                cmd: "unregisterGlobalShortcut",
-                accelerator: window.siyuan.config.keymap.general.toggleWin.custom
-            });
+            sendUnregisterGlobalShortcut(app);
         });
         /// #endif
         searchKeymapElement.addEventListener("blur", () => {
@@ -366,6 +374,7 @@ export const keymap = {
                 fetchPost("/api/setting/setKeymap", {
                     data: Constants.SIYUAN_KEYMAP,
                 }, () => {
+                    /// #if !BROWSER
                     ipcRenderer.send(Constants.SIYUAN_CMD, {
                         cmd: "writeLog",
                         msg: "user reset keymap"
@@ -376,8 +385,9 @@ export const keymap = {
                             accelerator: window.siyuan.config.keymap.general.toggleWin.custom
                         });
                     }
-                    window.location.reload();
                     sendGlobalShortcut(app);
+                    /// #endif
+                    window.location.reload();
                 });
             });
         });
@@ -497,10 +507,7 @@ export const keymap = {
             });
             /// #if !BROWSER
             item.addEventListener("focus", () => {
-                ipcRenderer.send(Constants.SIYUAN_CMD, {
-                    cmd: "unregisterGlobalShortcut",
-                    accelerator: window.siyuan.config.keymap.general.toggleWin.custom
-                });
+                sendUnregisterGlobalShortcut(app);
             });
             /// #endif
         });

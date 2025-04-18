@@ -8,12 +8,22 @@ import {getDockByType} from "../layout/tabUtil";
 import {Files} from "../layout/dock/Files";
 import {Tag} from "../layout/dock/Tag";
 /// #endif
+import {upDownHint} from "./upDownHint";
+import {escapeHtml} from "./escape";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
+import {isNotCtrl} from "../protyle/util/compatibility";
 
 // 需独立出来，否则移动端引用的时候会引入 pc 端大量无用代码
 export const renameTag = (labelName: string) => {
     const dialog = new Dialog({
         title: window.siyuan.languages.rename,
-        content: `<div class="b3-dialog__content"><input class="b3-text-field fn__block" value="${labelName}"></div>
+        content: `<div class="b3-dialog__content">
+    <input class="b3-text-field fn__block" value="${labelName}">
+    <div class="b3-list fn__flex-1 b3-list--background fn__none protyle-hint" style="    position: absolute;
+    width: calc(100% - 48px);">
+        <img style="margin: 0 auto;display: block;width: 64px;height: 64px" src="/stage/loading-pure.svg">
+    </div>
+</div>
 <div class="b3-dialog__action">
     <button class="b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button><div class="fn__space"></div>
     <button class="b3-button b3-button--text">${window.siyuan.languages.confirm}</button>
@@ -25,12 +35,6 @@ export const renameTag = (labelName: string) => {
     btnsElement[0].addEventListener("click", () => {
         dialog.destroy();
     });
-    const inputElement = dialog.element.querySelector("input");
-    dialog.bindInput(inputElement, () => {
-        (btnsElement[1] as HTMLButtonElement).click();
-    });
-    inputElement.focus();
-    inputElement.select();
     btnsElement[1].addEventListener("click", () => {
         fetchPost("/api/tag/renameTag", {oldLabel: labelName, newLabel: inputElement.value}, () => {
             dialog.destroy();
@@ -41,6 +45,65 @@ export const renameTag = (labelName: string) => {
             (dockTag.data.tag as Tag).update();
             /// #endif
         });
+    });
+    const inputElement = dialog.element.querySelector("input");
+    inputElement.focus();
+    inputElement.select();
+    const listElement = dialog.element.querySelector(".b3-list--background");
+    inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.isComposing) {
+            return;
+        }
+        upDownHint(listElement, event);
+        if (event.key === "Escape") {
+            if (listElement.classList.contains("fn__none")) {
+                dialog.destroy();
+            } else {
+                listElement.classList.add("fn__none");
+            }
+            event.preventDefault();
+        } else if (!event.shiftKey && isNotCtrl(event) && event.key === "Enter") {
+            if (listElement.classList.contains("fn__none")) {
+                (btnsElement[1] as HTMLButtonElement).click();
+            } else {
+                const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                inputElement.value = currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim();
+                listElement.classList.add("fn__none");
+            }
+            event.preventDefault();
+        }
+    });
+    inputElement.addEventListener("input", (event) => {
+        event.stopPropagation();
+        listElement.classList.remove("fn__none");
+        fetchPost("/api/search/searchTag", {
+            k: inputElement.value.trim(),
+        }, (response) => {
+            let searchHTML = "";
+            let hasKey = false;
+            response.data.tags.forEach((item: string, index: number) => {
+                searchHTML += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">
+    <div class="fn__flex-1">${item}</div>
+</div>`;
+                if (item === `<mark>${response.data.k}</mark>`) {
+                    hasKey = true;
+                }
+            });
+            if (!hasKey && response.data.k) {
+                searchHTML = `<div data-type="new" class="b3-list-item${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
+            }
+            listElement.innerHTML = searchHTML;
+        });
+    });
+    listElement.addEventListener("click", (event) => {
+        const target = event.target as HTMLElement;
+        const listItemElement = hasClosestByClassName(target, "b3-list-item");
+        if (!listItemElement) {
+            return;
+        }
+        inputElement.value = listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim();
+        listElement.classList.add("fn__none");
     });
 };
 

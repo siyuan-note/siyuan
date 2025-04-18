@@ -25,7 +25,6 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/emirpasic/gods/sets/hashset"
-	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -54,7 +53,7 @@ func RemoveTag(label string) (err error) {
 	updateNodes := map[string]*ast.Node{}
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockIDWithReindex(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -155,7 +154,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 
 	for treeID, blocks := range treeBlocks {
 		util.PushEndlessProgress("[" + treeID + "]")
-		tree, e := LoadTreeByBlockID(treeID)
+		tree, e := LoadTreeByBlockIDWithReindex(treeID)
 		if nil != e {
 			util.ClearPushProgress(100)
 			return e
@@ -303,9 +302,11 @@ func sortTags(tags Tags) {
 
 func SearchTags(keyword string) (ret []string) {
 	ret = []string{}
-	defer logging.Recover() // 定位 无法添加题头图标签 https://github.com/siyuan-note/siyuan/issues/6756
+
+	sql.FlushQueue()
 
 	labels := labelBlocksByKeyword(keyword)
+	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
 	for label := range labels {
 		_, t := search.MarkText(label, keyword, 1024, Conf.Search.CaseSensitive)
 		ret = append(ret, t)

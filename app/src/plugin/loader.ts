@@ -41,7 +41,7 @@ export const loadPlugins = async (app: App, names?: string[]) => {
     });
     const pluginsStyle = document.getElementById("pluginsStyle");
     if (pluginsStyle) {
-        pluginsStyle.innerHTML = css;
+        pluginsStyle.insertAdjacentHTML("afterend", css);
     } else {
         document.head.insertAdjacentHTML("beforeend", css);
     }

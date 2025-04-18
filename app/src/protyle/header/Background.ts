@@ -419,11 +419,15 @@ export class Background {
         });
     }
 
-    private removeTag(protyle: IProtyle) {
+    private removeTag(protyle: IProtyle, cb?: () => void) {
         const tags = this.getTags();
         fetchPost("/api/attr/setBlockAttrs", {
             id: protyle.block.rootID,
             attrs: {"tags": tags.toString()}
+        }, () => {
+            if (cb) {
+                cb();
+            }
         });
         if (tags.length === 0) {
             delete this.ial.tags;
@@ -539,14 +543,13 @@ export class Background {
                     }
                     upDownHint(listElement, event);
                     if (event.key === "Enter") {
-                        const currentElement = listElement.querySelector(".b3-list-item--focus");
-                        if (currentElement) {
-                            this.addTags(currentElement.textContent.trim(), protyle);
-                        } else {
-                            this.addTags(inputElement.value.trim(), protyle);
-                        }
-                        inputElement.value = "";
-                        inputElement.dispatchEvent(new CustomEvent("input"));
+                        const currentElement = listElement.querySelector(".b3-list-item--focus") as HTMLElement;
+                        this.addTags(currentElement ?
+                            (currentElement.dataset.type === "new" ? currentElement.querySelector("mark").textContent.trim() : currentElement.textContent.trim()) :
+                            inputElement.value.trim(), protyle, () => {
+                            inputElement.value = "";
+                            inputElement.dispatchEvent(new CustomEvent("input"));
+                        });
                     } else if (event.key === "Escape") {
                         window.siyuan.menus.menu.remove();
                     }
@@ -554,7 +557,7 @@ export class Background {
                 inputElement.addEventListener("input", (event) => {
                     event.stopPropagation();
                     fetchPost("/api/search/searchTag", {
-                        k: inputElement.value,
+                        k: inputElement.value.trim(),
                     }, (response) => {
                         let searchHTML = "";
                         let hasKey = false;
@@ -569,7 +572,7 @@ export class Background {
                             }
                         });
                         if (!hasKey && response.data.k) {
-                            searchHTML = `<div class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
+                            searchHTML = `<div data-type="new" class="b3-list-item b3-list-item--narrow${searchHTML ? "" : " b3-list-item--focus"}"><div class="fn__flex-1">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div></div>` + searchHTML;
                         }
                         listElement.innerHTML = searchHTML;
                     });
@@ -580,8 +583,12 @@ export class Background {
                     if (!listItemElement) {
                         return;
                     }
-                    this.addTags(listItemElement.textContent.trim(), protyle);
-                    inputElement.dispatchEvent(new CustomEvent("input"));
+                    this.addTags(listItemElement.dataset.type === "new" ? listItemElement.querySelector("mark").textContent.trim() : listItemElement.textContent.trim(),
+                        protyle, () => {
+                            inputElement.value = "";
+                            inputElement.dispatchEvent(new CustomEvent("input"));
+                            inputElement.focus();
+                        });
                 });
             }
         });
@@ -609,16 +616,18 @@ export class Background {
         return tags;
     }
 
-    private addTags(tag: string, protyle: IProtyle) {
+    private addTags(tag: string, protyle: IProtyle, cb: () => void) {
         const tags = this.getTags(tag);
         if (tags.includes(tag)) {
-            this.removeTag(protyle);
+            this.removeTag(protyle, cb);
             return;
         }
         tags.push(tag);
         fetchPost("/api/attr/setBlockAttrs", {
             id: protyle.block.rootID,
             attrs: {"tags": tags.toString()}
+        }, () => {
+            cb();
         });
         this.ial.tags = tags.toString();
         this.render(this.ial, protyle.block.rootID);

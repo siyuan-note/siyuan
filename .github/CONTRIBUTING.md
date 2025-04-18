@@ -5,30 +5,29 @@
 * `git clone git@github.com:siyuan-note/siyuan.git`
 * switch to dev branch `git checkout dev`
 
-## User Interface
+## NPM dependencies
 
-Install pnpm: `npm install -g pnpm@9.12.1`
+Install pnpm: `npm install -g pnpm@10.8.0`
 
 <details>
 <summary>For China mainland</summary>
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v34.3.4 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v34.5.0 -D`
 * Windows:
-    * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-    * `pnpm install electron@v34.3.4 -D`
+  * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
+  * `pnpm install electron@v34.5.0 -D`
 
 NPM mirror:
 
 * Use npmmirror China mirror repository `pnpm --registry https://registry.npmmirror.com/ i`
 * Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
-
 </details>
 
 On the desktop, go to the app folder to run:
 
-* `pnpm install electron@v34.3.4 -D`
+* `pnpm install electron@v34.5.0-D`
 * `pnpm run dev`
 * `pnpm run start`
 
@@ -57,7 +56,8 @@ Note: In the development environment, the kernel process will not be automatical
 ### Android
 
 * `cd kernel`
-* `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8; gomobile bind --tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target=android/arm64 -androidapi 26 ./mobile/`
+* `set JAVA_TOOL_OPTIONS=-Dfile.encoding=UTF-8`
+* `gomobile bind --tags fts5 -ldflags "-s -w"  -v -o kernel.aar -target=android/arm64 -androidapi 26 ./mobile/`
 * https://github.com/siyuan-note/siyuan-android
 
 ### Harmony

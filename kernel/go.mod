@@ -30,7 +30,7 @@ require (
 	github.com/facette/natsort v0.0.0-20181210072756-2cd4dd1e2dcb
 	github.com/flopp/go-findfont v0.1.0
 	github.com/fsnotify/fsnotify v1.9.0
-	github.com/gabriel-vasile/mimetype v1.4.8
+	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/gin-contrib/gzip v1.2.3
 	github.com/gin-contrib/sessions v1.0.3
 	github.com/gin-contrib/sse v1.1.0
@@ -56,7 +56,7 @@ require (
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20241111133259-a4122fabb196
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/sashabaranov/go-openai v1.38.1
+	github.com/sashabaranov/go-openai v1.38.2
 	github.com/shirou/gopsutil/v4 v4.25.3
 	github.com/siyuan-note/dejavu v0.0.0-20250418020730-e2cae0ebc147
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec

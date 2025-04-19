@@ -140,13 +140,21 @@ func getUpdatePkg() (downloadPkgURLs []string, checksum string, err error) {
 	}
 	pkg := "siyuan-" + ver + "-" + suffix
 
-	// 修改为您的 GitHub 仓库
-	githubURL := "https://github.com/EightDoor/siyuan/releases/download/v" + ver + "/" + pkg
+	b3logURL := "https://release.b3log.org/siyuan/" + pkg
+	liuyunURL := "https://release.liuyun.io/siyuan/" + pkg
+	githubURL := "https://github.com/siyuan-note/siyuan/releases/download/v" + ver + "/" + pkg
 	ghproxyURL := "https://ghfast.top/" + githubURL
-
-	// 优先使用 GitHub 和 ghproxy 源
-	downloadPkgURLs = append(downloadPkgURLs, githubURL)
-	downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
+	if util.IsChinaCloud() {
+		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
+		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)
+		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
+		downloadPkgURLs = append(downloadPkgURLs, githubURL)
+	} else {
+		downloadPkgURLs = append(downloadPkgURLs, b3logURL)
+		downloadPkgURLs = append(downloadPkgURLs, liuyunURL)
+		downloadPkgURLs = append(downloadPkgURLs, githubURL)
+		downloadPkgURLs = append(downloadPkgURLs, ghproxyURL)
+	}
 
 	checksums := result["checksums"].(map[string]interface{})
 	checksum = checksums[pkg].(string)

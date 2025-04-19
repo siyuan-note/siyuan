@@ -252,18 +252,16 @@ ${checkUpdateHTML}
                 openByMobile(response.data.zip)
             })
         })
-        const checkUpdateBtn = about.element.querySelector('#checkUpdateBtn')
-        if (checkUpdateBtn) {
-            checkUpdateBtn.addEventListener('click', () => {
-                fetchPost('/api/system/checkUpdate', { showMsg: true }, (response) => {
-                    if (response.code === 0) {
-                        showMessage(window.siyuan.languages.checkUpdateSuccess)
-                    } else {
-                        showMessage(response.msg)
-                    }
-                })
+        const updateElement = about.element.querySelector('#checkUpdateBtn')
+        updateElement?.addEventListener('click', () => {
+            if (updateElement.firstElementChild.classList.contains('fn__rotate')) {
+                return
+            }
+            updateElement.innerHTML = `<svg class="fn__rotate"><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`
+            fetchPost('/api/system/checkUpdate', { showMsg: true }, () => {
+                updateElement.innerHTML = `<svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.checkUpdate}`
             })
-        }
+        })
         about.element.querySelectorAll('[data-type="open"]').forEach((item) => {
             item.addEventListener('click', () => {
                 const url = item.getAttribute('data-url')

@@ -536,8 +536,15 @@
     transition: var(--b3-background-transition);
   }
 
-  &--hiderange ::selection {
-    background-color: transparent;
+  &--hiderange {
+    ::selection {
+      background-color: transparent;
+    }
+
+    .hljs ::selection {
+      background-color: transparent;
+      color: inherit;
+    }
   }
 
   // https://github.com/siyuan-note/siyuan/issues/11589

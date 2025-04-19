@@ -2,7 +2,8 @@ import {getTextStar, paste} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName, hasClosestByTag,
+    hasClosestByClassName,
+    hasClosestByTag,
     hasTopClosestByClassName,
     isInEmbedBlock,
 } from "../util/hasClosest";
@@ -13,7 +14,8 @@ import {
     focusSideBlock,
     getEditorRange,
     getSelectionOffset,
-    setFirstNodeRange, setInsertWbrHTML,
+    setFirstNodeRange,
+    setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
 import {Constants} from "../../constants";
@@ -39,7 +41,8 @@ import {
     getNextBlock,
     getTopAloneElement,
     hasNextSibling,
-    hasPreviousSibling, isEndOfBlock,
+    hasPreviousSibling,
+    isEndOfBlock,
     isNotEditBlock
 } from "./getBlock";
 import {transaction, updateTransaction} from "./transaction";
@@ -2175,14 +2178,6 @@ export class WYSIWYG {
                 });
             });
             hideElements(["hint", "util"], protyle);
-            /// #if MOBILE
-            // https://github.com/siyuan-note/siyuan/issues/14569
-            if (event.target.tagName === "VIDEO") {
-                mobileBlur = true;
-                activeBlur();
-                return;
-            }
-            /// #endif
             const ctrlIsPressed = isOnlyMeta(event);
             const backlinkBreadcrumbItemElement = hasClosestByClassName(event.target, "protyle-breadcrumb__item");
             if (backlinkBreadcrumbItemElement) {

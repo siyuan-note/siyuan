@@ -135,6 +135,12 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
+    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+        // https://github.com/siyuan-note/siyuan/issues/14569
+        activeBlur();
+        return;
+    }
+
     if (globalTouchStart(event)) {
         return;
     }

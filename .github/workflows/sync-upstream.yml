@@ -1,0 +1,104 @@
+name: Sync Upstream Repository
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # 每6小时运行一次
+  workflow_dispatch:  # 允许手动触发
+
+jobs:
+  sync-upstream:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout current repository
+        uses: actions/checkout@v4
+        with:
+          ref: dev
+          fetch-depth: 0
+
+      - name: Get current version
+        id: current_version
+        run: |
+          git describe --tags --abbrev=0 | sed 's/^v//' > current_version.txt
+          echo "current_version=$(cat current_version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Fetch upstream repository
+        run: |
+          git remote add upstream https://github.com/siyuan-note/siyuan.git
+          git fetch upstream master --tags
+
+      - name: Get latest upstream version
+        id: upstream_version
+        run: |
+          git describe --tags --abbrev=0 upstream/master | sed 's/^v//' > upstream_version.txt
+          echo "upstream_version=$(cat upstream_version.txt)" >> $GITHUB_OUTPUT
+
+      - name: Compare versions
+        id: version_check
+        run: |
+          if [ "$(printf '%s\n' "${{ steps.current_version.outputs.current_version }}" "${{ steps.upstream_version.outputs.upstream_version }}" | sort -V | head -n1)" = "${{ steps.current_version.outputs.current_version }}" ]; then
+            echo "need_update=true" >> $GITHUB_OUTPUT
+          else
+            echo "need_update=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Check for conflicts
+        if: steps.version_check.outputs.need_update == 'true'
+        run: |
+          git merge --no-commit --no-ff upstream/master || true
+          git merge --abort
+          git diff --name-only --diff-filter=U > conflicts.txt
+          if [ -s conflicts.txt ]; then
+            echo "CONFLICT_FILES=$(cat conflicts.txt)" >> $GITHUB_ENV
+            exit 1
+          fi
+
+      - name: Send email on conflict
+        if: failure() && steps.version_check.outputs.need_update == 'true'
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "SiYuan 同步冲突警告"
+          body: |
+            检测到与上游仓库合并时存在冲突，请检查以下文件：
+            ${{ env.CONFLICT_FILES }}
+          to: 851708184@qq.com
+          from: ${{ secrets.EMAIL_USERNAME }}
+
+      - name: Merge upstream changes
+        if: steps.version_check.outputs.need_update == 'true' && success()
+        run: |
+          git config --global user.name "GitHub Actions"
+          git config --global user.email "actions@github.com"
+          git merge --no-ff upstream/master
+          git push origin dev
+
+      - name: Merge dev to master
+        if: steps.version_check.outputs.need_update == 'true' && success()
+        run: |
+          git checkout master
+          git merge --no-ff dev
+          git push origin master
+
+      - name: Send success email
+        if: steps.version_check.outputs.need_update == 'true' && success()
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "SiYuan 同步成功通知"
+          body: |
+            成功完成与上游仓库的同步！
+            
+            当前版本：v${{ steps.current_version.outputs.current_version }}
+            同步到版本：v${{ steps.upstream_version.outputs.upstream_version }}
+            
+            已自动完成以下操作：
+            1. 将上游仓库的 master 分支合并到本地 dev 分支
+            2. 将本地 dev 分支合并到本地 master 分支
+          to: 851708184@qq.com
+          from: ${{ secrets.EMAIL_USERNAME }} 

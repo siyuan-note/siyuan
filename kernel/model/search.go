@@ -1406,19 +1406,34 @@ func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matc
 	}
 
 	stmt = strings.ToLower(stmt)
-	if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
-		stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
-	} else {
-		stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+	stdQuery := !strings.Contains(stmt, "with recursive") && !strings.Contains(stmt, "union")
+	if stdQuery {
+		if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
+			stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
+		} else {
+			stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+		}
 	}
 	stmt = removeLimitClause(stmt)
 	result, _ := sql.QueryNoLimit(stmt)
-	if 1 > len(ret) {
+	if 1 > len(result) {
 		return
 	}
 
-	matchedBlockCount = int(result[0]["matches"].(int64))
-	matchedRootCount = int(result[0]["docs"].(int64))
+	if !stdQuery {
+		var rootIDs, blockIDs []string
+		for _, queryResult := range result {
+			rootIDs = append(rootIDs, queryResult["root_id"].(string))
+			blockIDs = append(blockIDs, queryResult["id"].(string))
+		}
+		rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+		blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+		matchedRootCount = len(rootIDs)
+		matchedBlockCount = len(blockIDs)
+	} else {
+		matchedBlockCount = int(result[0]["matches"].(int64))
+		matchedRootCount = int(result[0]["docs"].(int64))
+	}
 	return
 }
 

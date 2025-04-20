@@ -121,6 +121,8 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
     }
     let successFileText = "";
     const keys = Object.keys(response.data.succMap);
+    // 插入多个资源文件时按文件名自然升序排列 Use natural ascending order when inserting multiple assets https://github.com/siyuan-note/siyuan/issues/14643
+    keys.sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
     const avAssets: IAVCellAssetValue[] = [];
     let hasImage = false;
     keys.forEach((key, index) => {

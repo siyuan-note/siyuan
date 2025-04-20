@@ -540,6 +540,10 @@ declare namespace Config {
          */
         markdownYFM: boolean;
         /**
+         * Whether to export the inline memo
+         */
+        inlineMemo: boolean;
+        /**
          * Pandoc executable file path
          */
         pandocBin: string;

@@ -1111,6 +1111,8 @@
   "export28": "Testo della filigrana o percorso del file della filigrana",
   "export29": "Posizione, dimensione e stile della filigrana",
   "export30": "Esporta filigrana immagine",
+  "export31": "Esporta annotazioni di riga",
+  "export32": "Quando abilitato, le annotazioni di riga verranno esportate come apice",
   "theme11": "Usa il tema in modalità chiara",
   "theme12": "Usa il tema in modalità scura",
   "theme2": "Seleziona le icone utilizzate nell'interfaccia utente",

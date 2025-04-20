@@ -1111,6 +1111,8 @@
   "export28": "Tekst znaku wodnego lub ścieżka pliku znaku wodnego",
   "export29": "Pozycja znaku wodnego, rozmiar i styl itp.",
   "export30": "Eksportuj obraz znak wodny",
+  "export31": "Eksportuj przypisy wierszowe",
+  "export32": "Po włączeniu przypisy wierszowe będą eksportowane jako indeks górny",
   "theme11": "Użyj motywu w trybie jasnym",
   "theme12": "Użyj motywu w trybie ciemnym",
   "theme2": "Wybierz ikony używane w interfejsie użytkownika",

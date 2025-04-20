@@ -2144,6 +2144,12 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
 		case ast.NodeTextMark:
+			if n.IsTextMarkType("inline-memo") {
+				if !inlineMemo {
+					n.TextMarkInlineMemoContent = ""
+				}
+			}
+
 			if n.IsTextMarkType("inline-math") {
 				n.TextMarkInlineMathContent = strings.TrimSpace(n.TextMarkInlineMathContent)
 				return ast.WalkContinue
@@ -2162,10 +2168,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					n.Tokens = []byte(tagOpenMarker + n.TextMarkTextContent + tagCloseMarker)
 					return ast.WalkContinue
 				}
-			} else if n.IsTextMarkType("inline-memo") {
-				if !inlineMemo {
-					n.TextMarkInlineMemoContent = ""
-				}
 			}
 		}
 
@@ -2180,6 +2182,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 2: // 锚文本块链
 			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
+			if n.IsTextMarkType("inline-memo") {
+				blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+				blockRefLink.TextMarkType = "a inline-memo"
+			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
@@ -2187,8 +2193,19 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			if 0 < len(n.KramdownIAL) {
 				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
 				blockRefLink.KramdownIAL = n.KramdownIAL
+
+				if n.IsTextMarkType("inline-memo") {
+					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+					blockRefLink.TextMarkType = "text inline-memo"
+				}
 			} else {
 				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+				if n.IsTextMarkType("inline-memo") {
+					blockRefLink.Type = ast.NodeTextMark
+					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+					blockRefLink.TextMarkType = "inline-memo"
+					blockRefLink.TextMarkTextContent = linkText
+				}
 			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
@@ -2206,7 +2223,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				return ast.WalkContinue
 			}
 
-			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
+			text := &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+			n.InsertBefore(text)
+			if n.IsTextMarkType("inline-memo") {
+				text.Type = ast.NodeTextMark
+				text.TextMarkType = "inline-memo"
+				text.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+			}
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
 		}

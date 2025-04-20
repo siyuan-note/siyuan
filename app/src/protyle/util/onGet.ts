@@ -20,6 +20,7 @@ import {hideTooltip} from "../../dialog/tooltip";
 import {stickyRow} from "../render/av/row";
 import {updateReadonly as updateReadonlyMethod} from "../breadcrumb/action";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {activeBlur} from "../../mobile/util/keyboardToolbar";
 
 export const onGet = (options: {
     data: IWebSocketData,
@@ -181,6 +182,15 @@ const setHTML = (options: {
     } else {
         protyle.wysiwyg.element.innerHTML = options.content;
     }
+
+    /// #if MOBILE
+    protyle.wysiwyg.element.querySelectorAll("video, audio").forEach(item => {
+        item.addEventListener("playing", () => {
+            activeBlur();
+            console.log("playing");
+        });
+    });
+    /// #endif
     // https://github.com/siyuan-note/siyuan/issues/10528
     if (!protyle.block.showAll && protyle.wysiwyg.element.childElementCount === 1 && protyle.wysiwyg.element.firstElementChild.classList.contains("p")) {
         const editElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);

@@ -18,6 +18,7 @@ package api
 
 import (
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path"
@@ -653,6 +654,11 @@ func exportAsFile(c *gin.Context) {
 	}
 
 	name := "file-" + file.Filename
+	typ := form.Value["type"][0]
+	exts, _ := mime.ExtensionsByType(typ)
+	if 0 < len(exts) {
+		name += exts[0]
+	}
 	name = util.FilterFileName(name)
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err = os.MkdirAll(tmpDir, 0755); err != nil {

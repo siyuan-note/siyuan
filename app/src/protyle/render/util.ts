@@ -28,8 +28,8 @@ export const genRenderFrame = (renderElement: Element) => {
     <span aria-label="${window.siyuan.languages.update} SQL" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
     <span aria-label="${window.siyuan.languages.more}" class="b3-tooltips__nw b3-tooltips protyle-icon protyle-action__menu protyle-icon--last"><svg><use xlink:href="#iconMore"></use></svg></span>
 </div><div class="protyle-cursor">${Constants.ZWSP}</div>`);
-    } else if (type==="NodeMathBlock") {
-        renderElement.firstElementChild.innerHTML =  `<span></span><span class="protyle-cursor">${Constants.ZWSP}</span>`;
+    } else if (type === "NodeMathBlock" || renderElement.getAttribute("data-subtype") === "math") {
+        renderElement.firstElementChild.innerHTML = `<span></span><span class="protyle-cursor">${Constants.ZWSP}</span>`;
     }
 };
 

@@ -1111,6 +1111,8 @@
   "export28": "Wasserzeichentext oder Wasserzeichen-Dateipfad",
   "export29": "Wasserzeichenposition, Größe und Stil usw.",
   "export30": "Exportieren Sie Bildwasserzeichen",
+  "export31": "Zeilenkommentare exportieren",
+  "export32": "Wenn aktiviert, werden Zeilenkommentare als Hochgestellt exportiert",
   "theme11": "Verwenden Sie das Thema im Hellmodus",
   "theme12": "Verwenden Sie das Thema im Dunkelmodus",
   "theme2": "Wählen Sie die in der Benutzeroberfläche verwendeten Icons aus",

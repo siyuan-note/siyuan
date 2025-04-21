@@ -272,7 +272,7 @@ func Export2Liandi(id string) (err error) {
 		".md", 3, 1, 1,
 		"#", "#",
 		"", "",
-		false, nil, true, &map[string]*parse.Tree{})
+		false, false, nil, true, &map[string]*parse.Tree{})
 	result := gulu.Ret.NewResult()
 	request := httpclient.NewCloudRequest30s()
 	request = request.
@@ -578,7 +578,7 @@ func Preview(id string) (retStdHTML string) {
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, true, true, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true, &map[string]*parse.Tree{})
 	luteEngine := NewLute()
 	enableLuteInlineSyntax(luteEngine)
 	luteEngine.SetFootnotes(true)
@@ -697,7 +697,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, true, true, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true, &map[string]*parse.Tree{})
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 	savePath = strings.TrimSpace(savePath)
@@ -854,7 +854,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, true, true, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true, &map[string]*parse.Tree{})
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -1452,7 +1452,7 @@ func ExportStdMarkdown(id string) string {
 		".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, defBlockIDs, true, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, &map[string]*parse.Tree{})
 }
 
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
@@ -1946,7 +1946,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm bool) (hPat
 		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, nil, true, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, nil, true, &map[string]*parse.Tree{})
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	if addYfm {
 		exportedMd = yfm(docIAL) + exportedMd
@@ -1965,7 +1965,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, defBlockIDs, singleFile, treeCache)
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, singleFile, treeCache)
 	docIAL := parse.IAL2Map(tree.Root.KramdownIAL)
 	if Conf.Export.MarkdownYFM {
 		// 导出 Markdown 时在文档头添加 YFM 开关 https://github.com/siyuan-note/siyuan/issues/7727
@@ -1977,12 +1977,12 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
-	addTitle bool, defBlockIDs []string, singleFile bool, treeCache *map[string]*parse.Tree) (ret string) {
+	addTitle, inlineMemo bool, defBlockIDs []string, singleFile bool, treeCache *map[string]*parse.Tree) (ret string) {
 	tree = exportTree(tree, false, false, false,
 		blockRefMode, blockEmbedMode, fileAnnotationRefMode,
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
-		addTitle, 0 < len(defBlockIDs), singleFile, treeCache)
+		addTitle, inlineMemo, 0 < len(defBlockIDs), singleFile, treeCache)
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -2093,7 +2093,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 	blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string,
 	blockRefTextLeft, blockRefTextRight string,
-	addTitle, addDocAnchorSpan, singleFile bool, treeCache *map[string]*parse.Tree) (ret *parse.Tree) {
+	addTitle, inlineMemo, addDocAnchorSpan, singleFile bool, treeCache *map[string]*parse.Tree) (ret *parse.Tree) {
 	luteEngine := NewLute()
 	ret = tree
 	id := tree.Root.ID
@@ -2144,6 +2144,12 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			n.Tokens = bytes.TrimSpace(n.Tokens) // 导出 Markdown 时去除公式内容中的首尾空格 https://github.com/siyuan-note/siyuan/issues/4666
 			return ast.WalkContinue
 		case ast.NodeTextMark:
+			if n.IsTextMarkType("inline-memo") {
+				if !inlineMemo {
+					n.TextMarkInlineMemoContent = ""
+				}
+			}
+
 			if n.IsTextMarkType("inline-math") {
 				n.TextMarkInlineMathContent = strings.TrimSpace(n.TextMarkInlineMathContent)
 				return ast.WalkContinue
@@ -2176,6 +2182,10 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		case 2: // 锚文本块链
 			blockRefLink := &ast.Node{Type: ast.NodeTextMark, TextMarkType: "a", TextMarkTextContent: linkText, TextMarkAHref: "siyuan://blocks/" + defID}
 			blockRefLink.KramdownIAL = n.KramdownIAL
+			if n.IsTextMarkType("inline-memo") {
+				blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+				blockRefLink.TextMarkType = "a inline-memo"
+			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
 		case 3: // 仅锚文本
@@ -2183,8 +2193,19 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			if 0 < len(n.KramdownIAL) {
 				blockRefLink = &ast.Node{Type: ast.NodeTextMark, TextMarkType: "text", TextMarkTextContent: linkText}
 				blockRefLink.KramdownIAL = n.KramdownIAL
+
+				if n.IsTextMarkType("inline-memo") {
+					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+					blockRefLink.TextMarkType = "text inline-memo"
+				}
 			} else {
 				blockRefLink = &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+				if n.IsTextMarkType("inline-memo") {
+					blockRefLink.Type = ast.NodeTextMark
+					blockRefLink.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+					blockRefLink.TextMarkType = "inline-memo"
+					blockRefLink.TextMarkTextContent = linkText
+				}
 			}
 			n.InsertBefore(blockRefLink)
 			unlinks = append(unlinks, n)
@@ -2202,7 +2223,13 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 				return ast.WalkContinue
 			}
 
-			n.InsertBefore(&ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)})
+			text := &ast.Node{Type: ast.NodeText, Tokens: []byte(linkText)}
+			n.InsertBefore(text)
+			if n.IsTextMarkType("inline-memo") {
+				text.Type = ast.NodeTextMark
+				text.TextMarkType = "inline-memo"
+				text.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
+			}
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})
 			unlinks = append(unlinks, n)
 		}
@@ -3084,9 +3111,9 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		}
 
 		// 调用 Pandoc 进行格式转换
-		err := util.Pandoc(pandocFrom, pandocTo, writePath, md)
-		if err != nil {
-			logging.LogErrorf("pandoc failed: %s", err)
+		pandocErr := util.Pandoc(pandocFrom, pandocTo, writePath, md)
+		if pandocErr != nil {
+			logging.LogErrorf("pandoc failed: %s", pandocErr)
 			continue
 		}
 

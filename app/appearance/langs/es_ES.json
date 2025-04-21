@@ -1111,6 +1111,8 @@
   "export28": "Texto de marca de agua o ruta del archivo de marca de agua",
   "export29": "Posición, tamaño y estilo de la marca de agua, etc.",
   "export30": "Exportar marca de agua de imagen",
+  "export31": "Exportar anotaciones de línea",
+  "export32": "Cuando esté habilitado, las anotaciones de línea se exportarán como superíndice",
   "theme11": "Usar tema en modo claro",
   "theme12": "Usar tema en modo oscuro",
   "theme2": "Selecciona los iconos utilizados en la interfaz de usuario",

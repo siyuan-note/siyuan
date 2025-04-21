@@ -12,7 +12,7 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {updateTransaction} from "../wysiwyg/transaction";
@@ -946,7 +946,7 @@ export class Toolbar {
         }
     }
 
-    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[], oldHTML?: string) {
+    public showRender(protyle: IProtyle, renderElement: HTMLElement, updateElements?: Element[], oldHTML?: string) {
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
@@ -1116,15 +1116,15 @@ export class Toolbar {
             }
             setTimeout(() => {
                 addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
-                    window.htmlToImage.toCanvas(renderElement).then((canvas) => {
-                        canvas.toBlob((blob: Blob) => {
-                            const formData = new FormData();
-                            formData.append("file", blob);
-                            formData.append("type", "image/png");
-                            fetchPost("/api/export/exportAsFile", formData, (response) => {
-                                openByMobile(response.data.file);
-                                hideMessage(msgId);
-                            });
+                    renderElement.style.display = "inline-block";
+                    window.htmlToImage.toBlob(renderElement).then(blob => {
+                        renderElement.style.display = "";
+                        const formData = new FormData();
+                        formData.append("file", blob);
+                        formData.append("type", "image/png");
+                        fetchPost("/api/export/exportAsFile", formData, (response) => {
+                            openByMobile(response.data.file);
+                            hideMessage(msgId);
                         });
                     });
                 });

@@ -224,6 +224,15 @@ export class Preview {
             copyElement.querySelectorAll("mjx-container > svg").forEach((item) => {
                 item.setAttribute("width", (parseInt(item.getAttribute("width")) * 8) + "px");
             });
+            // 列表嵌套 https://github.com/siyuan-note/siyuan/issues/11276
+            copyElement.querySelectorAll("ul, ol").forEach(listItem => {
+                Array.from(listItem.children).forEach(liItem => {
+                    const nestedList = liItem.querySelector("ul, ol");
+                    if (nestedList) {
+                        liItem.parentNode.insertBefore(nestedList, liItem.nextSibling);
+                    }
+                });
+            });
         } else if (type === "zhihu") {
             this.link2online(copyElement);
             copyElement.querySelectorAll('[data-subtype="math"]').forEach((item: HTMLElement) => {

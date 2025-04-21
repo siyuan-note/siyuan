@@ -338,7 +338,9 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
         if (window.siyuan.storage[Constants.LOCAL_LAYOUTS].length > 0) {
             layoutSubMenu.push({id: "separator_1", type: "separator"});
         }
-        window.siyuan.storage[Constants.LOCAL_LAYOUTS].forEach((item: ISaveLayout) => {
+        window.siyuan.storage[Constants.LOCAL_LAYOUTS].sort((a: { name: string }, b: { name: string }) => {
+            return b.name > a.name ? -1 : 1;
+        }).forEach((item: ISaveLayout) => {
             layoutSubMenu.push({
                 iconHTML: "",
                 action: "iconEdit",

@@ -1101,12 +1101,12 @@ export class Toolbar {
         const exportImg = () => {
             const msgId = showMessage(window.siyuan.languages.exporting, 0);
             if (renderElement.getAttribute("data-subtype") === "plantuml") {
-                fetch(renderElement.querySelector("img").getAttribute("src")).then(function (response) {
+                fetch(renderElement.querySelector("object").getAttribute("data")).then(function (response) {
                     return response.blob();
                 }).then(function (blob) {
                     const formData = new FormData();
                     formData.append("file", blob);
-                    formData.append("type", "image/png");
+                    formData.append("type", "image/svg+xml");
                     fetchPost("/api/export/exportAsFile", formData, (response) => {
                         openByMobile(response.data.file);
                         hideMessage(msgId);

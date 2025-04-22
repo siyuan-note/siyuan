@@ -517,17 +517,16 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     // 文字和图片中间回车后图片前需添加 zwsp
     newEditableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(newEditableElement.parentElement.outerHTML);
     listItemElement.insertAdjacentElement("afterend", newElement);
+    blockRender(protyle, newElement);
     mathRender(newElement);
+    processRender(newElement);
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
-    if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
-        !hasNextSibling(editableElement?.lastElementChild)) {
-        editableElement.insertAdjacentText("beforeend", "\n");
-    }
     // img 后有文字，在 img 后换行
-    if (editableElement?.lastElementChild?.classList.contains("img") && !hasNextSibling(editableElement?.lastElementChild)) {
-        editableElement.insertAdjacentText("beforeend", Constants.ZWSP);
-    }
+    editableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
+    blockRender(protyle, listItemElement);
+    mathRender(listItemElement);
+    processRender(listItemElement);
     if (listItemElement.getAttribute("data-subtype") === "o") {
         updateListOrder(listItemElement.parentElement);
     }

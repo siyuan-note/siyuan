@@ -18,6 +18,7 @@ import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
@@ -290,7 +291,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 id: item.dataset.nodeId,
             });
         }
-        mathRender(item);
+        if (item.dataset.type === "NodeBlockQueryEmbed") {
+            blockRender(protyle, item);
+        } else {
+            mathRender(item);
+        }
         currentElement = item;
         selectsElement.push(item);
     });
@@ -310,6 +315,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement.insertAdjacentElement("afterend", item);
         if (item.classList.contains("code-block")) {
             highlightRender(item);
+        } else if (item.dataset.type === "NodeBlockQueryEmbed") {
+            blockRender(protyle, item);
         } else {
             mathRender(currentElement.nextElementSibling);
         }

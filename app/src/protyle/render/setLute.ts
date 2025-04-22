@@ -47,5 +47,6 @@ export const setLute = (options: ILuteOptions) => {
         });
         lute.PutEmojis(emojis);
     }
+    lute.SetUnorderedListMarker("-");;
     return lute;
 };

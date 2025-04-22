@@ -280,6 +280,8 @@ declare class Lute {
     public HTML2Md(html: string): string;
 
     public HTML2BlockDOM(html: string): string;
+
+    public SetUnorderedListMarker(marker: string): void;
 }
 
 declare const webkitAudioContext: {

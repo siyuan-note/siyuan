@@ -2084,6 +2084,7 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		unlink.Unlink()
 	}
 
+	luteEngine.SetUnorderedListMarker("-")
 	renderer := render.NewProtyleExportMdRenderer(tree, luteEngine.RenderOptions)
 	ret = gulu.Str.FromBytes(renderer.Render())
 	return

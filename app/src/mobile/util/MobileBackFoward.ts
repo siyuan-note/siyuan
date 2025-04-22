@@ -130,7 +130,6 @@ export const pushBack = () => {
 };
 
 export const goBack = () => {
-    activeBlur();
     const editor = getCurrentEditor();
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {

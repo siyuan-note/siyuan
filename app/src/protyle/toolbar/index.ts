@@ -946,7 +946,7 @@ export class Toolbar {
         }
     }
 
-    public showRender(protyle: IProtyle, renderElement: HTMLElement, updateElements?: Element[], oldHTML?: string) {
+    public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[], oldHTML?: string) {
         const nodeElement = hasClosestBlock(renderElement);
         if (!nodeElement) {
             return;
@@ -1116,9 +1116,9 @@ export class Toolbar {
             }
             setTimeout(() => {
                 addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(() => {
-                    renderElement.style.display = "inline-block";
+                    (renderElement as HTMLHtmlElement).style.display = "inline-block";
                     window.htmlToImage.toBlob(renderElement).then(blob => {
-                        renderElement.style.display = "";
+                        (renderElement as HTMLHtmlElement).style.display = "";
                         const formData = new FormData();
                         formData.append("file", blob);
                         formData.append("type", "image/png");

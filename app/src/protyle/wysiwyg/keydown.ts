@@ -988,6 +988,29 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             return;
         }
 
+        // 代码块语言选择 https://github.com/siyuan-note/siyuan/issues/14126
+        if (matchHotKey("⌥↩", event) && selectText === "") {
+            const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
+            if (selectElements.length === 0 && nodeElement.classList.contains("code-block")) {
+                selectElements.push(nodeElement);
+            }
+            if (selectElements.length > 0) {
+                const otherElement = selectElements.find(item => {
+                    return !item.classList.contains("code-block");
+                });
+                if (!otherElement) {
+                    const languageElements: HTMLElement[] = [];
+                    selectElements.forEach(item => {
+                        languageElements.push(item.querySelector(".protyle-action__language"));
+                    });
+                    protyle.toolbar.showCodeLanguage(protyle, languageElements);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return;
+                }
+            }
+        }
+
         // 回车
         if (isNotCtrl(event) && event.key === "Enter") {
             if (event.altKey) {

@@ -2506,7 +2506,7 @@ export class WYSIWYG {
 
             const languageElement = hasClosestByClassName(event.target, "protyle-action__language");
             if (languageElement && !protyle.disabled && !ctrlIsPressed) {
-                protyle.toolbar.showCodeLanguage(protyle, languageElement);
+                protyle.toolbar.showCodeLanguage(protyle, [languageElement]);
                 event.stopPropagation();
                 event.preventDefault();
                 return;

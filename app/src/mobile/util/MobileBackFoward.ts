@@ -13,6 +13,7 @@ import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
 import {setTitle} from "../../dialog/processSystem";
+import {activeBlur} from "./keyboardToolbar";
 
 const forwardStack: IBackStack[] = [];
 
@@ -129,6 +130,7 @@ export const pushBack = () => {
 };
 
 export const goBack = () => {
+    activeBlur();
     const editor = getCurrentEditor();
     if (window.siyuan.menus.menu.element.classList.contains("b3-menu--fullscreen") &&
         !window.siyuan.menus.menu.element.classList.contains("fn__none")) {

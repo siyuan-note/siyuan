@@ -205,7 +205,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
         </div>
         <div class="b3-form__img fn__none">
             <div class="fn__hr--b"></div>
-            <img id="captchaImg" class="fn__pointer" style="top: 17px">
+            <img id="captchaImg" class="fn__pointer" style="top: 17px;height:26px">
             <input id="captcha" class="b3-text-field fn__block" placeholder="${window.siyuan.languages.captcha}">
         </div>
         <div class="fn__hr--b"></div>

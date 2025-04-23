@@ -215,7 +215,6 @@ var (
 )
 
 func RefreshCheckJob() {
-	go util.GetRhyResult(true) // 发一次请求进行结果缓存
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()

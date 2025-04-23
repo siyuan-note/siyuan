@@ -32,6 +32,7 @@ func StartCron() {
 	go every(5*time.Second, task.StatusJob)
 	go every(5*time.Second, model.SyncDataJob)
 	go every(2*time.Hour, model.StatJob)
+	go every(6*time.Hour, util.RefreshRhyResultJob)
 	go every(2*time.Hour, model.RefreshCheckJob)
 	go every(3*time.Second, model.FlushUpdateRefTextRenameDocJob)
 	go every(util.SQLFlushInterval, sql.FlushTxJob)
@@ -43,7 +44,7 @@ func StartCron() {
 	go every(30*time.Second, model.FlushAssetsTextsJob)
 	go every(30*time.Second, model.HookDesktopUIProcJob)
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
-	go every(30*time.Minute, model.AutoCheckMicrosoftDefender)
+	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
 
 	// TODO: 移除旧方案 https://github.com/siyuan-note/siyuan/issues/14414 实现新的刷新机制
 	//go every(3*time.Second, model.WatchLocalShorthands)

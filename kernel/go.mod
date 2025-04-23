@@ -1,8 +1,7 @@
 module github.com/siyuan-note/siyuan/kernel
 
 go 1.23.0
-
-toolchain go1.24.0
+toolchain go1.24.1
 
 require (
 	code.sajari.com/docconv v1.3.8
@@ -166,7 +165,7 @@ require (
 	github.com/quasoft/memstore v0.0.0-20191010062613-2bce066d2b0b // indirect
 	github.com/quic-go/qpack v0.5.1 // indirect
 	github.com/quic-go/quic-go v0.50.1 // indirect
-	github.com/refraction-networking/utls v1.6.7 // indirect
+	github.com/refraction-networking/utls v1.7.0 // indirect
 	github.com/restic/chunker v0.4.0 // indirect
 	github.com/richardlehane/mscfb v1.0.4 // indirect
 	github.com/richardlehane/msoleps v1.0.4 // indirect

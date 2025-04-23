@@ -217,3 +217,21 @@ export const isIncludesHotKey = (hotKey: string) => {
     return isInclude;
 };
 
+export const updateControlAlt = () => {
+    Object.keys(window.siyuan.config.keymap.general).forEach(key => {
+        if (["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
+            "graphView", "globalGraph", "riffCard"].includes(key)) {
+            if (navigator.platform.toUpperCase().indexOf("MAC") > -1) {
+                window.siyuan.config.keymap.general[key].default = window.siyuan.config.keymap.general[key].default.replace("⌥", "⌃")
+                if (window.siyuan.config.keymap.general[key].default === window.siyuan.config.keymap.general[key].custom) {
+                    window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default.replace("⌥", "⌃")
+                }
+            } else {
+                window.siyuan.config.keymap.general[key].default = window.siyuan.config.keymap.general[key].default.replace("⌃", "⌥")
+                if (window.siyuan.config.keymap.general[key].default === window.siyuan.config.keymap.general[key].custom) {
+                    window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default.replace("⌃", "⌥")
+                }
+            }
+        }
+    });
+};

@@ -10,6 +10,7 @@ import {App} from "../../index";
 import {reloadPlugin} from "../../plugin/loader";
 import {reloadEmoji} from "../../emoji";
 import {setLocalShorthandCount} from "../../util/noRelyPCFunction";
+import {updateControlAlt} from "../../protyle/util/hotKey";
 
 export const onMessage = (app: App, data: IWebSocketData) => {
     if (data) {
@@ -37,6 +38,7 @@ export const onMessage = (app: App, data: IWebSocketData) => {
                 break;
             case "setConf":
                 window.siyuan.config = data.data;
+                updateControlAlt();
                 break;
             case "reloaddoc":
                 reloadSync(this, {upsertRootIDs: [data.data], removeRootIDs: []}, false, false, true);

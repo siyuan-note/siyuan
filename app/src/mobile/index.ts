@@ -29,6 +29,7 @@ import {updateCardHV} from "../card/util";
 import {mobileKeydown} from "./util/keydown";
 import {correctHotkey} from "../boot/globalEvent/commonHotkey";
 import {processIOSPurchaseResponse} from "../util/iOSPurchase";
+import {updateControlAlt} from "../protyle/util/hotKey";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -96,6 +97,7 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = confResponse.data.conf;
+            updateControlAlt();
             window.siyuan.isPublish = confResponse.data.isPublish;
             correctHotkey(siyuanApp);
             await loadPlugins(this);

@@ -26,6 +26,7 @@ import {init} from "../window/init";
 import {loadPlugins, reloadPlugin} from "../plugin/loader";
 import {hideAllElements} from "../protyle/ui/hideElements";
 import {reloadEmoji} from "../emoji";
+import {updateControlAlt} from "../protyle/util/hotKey";
 
 class App {
     public plugins: import("../plugin").Plugin[] = [];
@@ -78,6 +79,7 @@ class App {
                                 break;
                             case "setConf":
                                 window.siyuan.config = data.data;
+                                updateControlAlt();
                                 break;
                             case "progress":
                                 progressLoading(data);
@@ -155,6 +157,7 @@ class App {
             addScriptSync(`${Constants.PROTYLE_CDN}/js/lute/lute.min.js?v=${Constants.SIYUAN_VERSION}`, "protyleLuteScript");
             addScript(`${Constants.PROTYLE_CDN}/js/protyle-html.js?v=${Constants.SIYUAN_VERSION}`, "protyleWcHtmlScript");
             window.siyuan.config = response.data.conf;
+            updateControlAlt();
             window.siyuan.isPublish = response.data.isPublish;
             await loadPlugins(this);
             getLocalStorage(() => {

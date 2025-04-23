@@ -227,7 +227,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         type: "empty",
         label: `<div class="fn__hr"></div>
 <div class="b3-form__icona fn__block">
-    <input class="b3-text-field b3-form__icona-input" type="text">
+    <input class="b3-text-field b3-form__icona-input" type="text" size="16">
     <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
 </div>
 <div class="fn__none">

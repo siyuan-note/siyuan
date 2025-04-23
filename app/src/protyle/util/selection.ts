@@ -452,7 +452,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 
     const range = document.createRange();
     if (startNode) {
-        if (startNode.nodeType === Node.TEXT_NODE && start < (startNode as Text).data.length) {
+        if (startNode.nodeType === Node.TEXT_NODE && start <= (startNode as Text).data.length) {
             range.setStart(startNode, start);
         } else {
             range.setStartAfter(startNode);
@@ -466,7 +466,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
     }
 
     if (endNode) {
-        if (end < (endNode as Text).data.length) {
+        if (end <= (endNode as Text).data.length) {
             range.setEnd(endNode, end);
         } else {
             range.setEndAfter(endNode);
@@ -485,7 +485,7 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 };
 
 export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    const offset = getSelectionOffset(nodeElement, nodeElement, range);
+    const offset = getSelectionOffset(getContenteditableElement(nodeElement), nodeElement, range);
     const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
     const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
     if (cloneRange) {

@@ -320,7 +320,13 @@ export const bindMenuKeydown = (event: KeyboardEvent) => {
             }
         }
         if (actionMenuElement) {
-            actionMenuElement.classList.add("b3-menu__item--current");
+            if (actionMenuElement.classList.contains("b3-menu__item")) {
+                actionMenuElement.classList.add("b3-menu__item--current");
+            }
+            const inputElement = actionMenuElement.querySelector(":scope > .b3-text-field") as HTMLInputElement;
+            if (inputElement) {
+                inputElement.focus();
+            }
             actionMenuElement.classList.remove("b3-menu__item--show");
             const parentRect = actionMenuElement.parentElement.getBoundingClientRect();
             const actionMenuRect = actionMenuElement.getBoundingClientRect();

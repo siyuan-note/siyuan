@@ -2229,6 +2229,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			if n.IsTextMarkType("inline-memo") {
 				text.Type = ast.NodeTextMark
 				text.TextMarkType = "inline-memo"
+				text.TextMarkTextContent = linkText
 				text.TextMarkInlineMemoContent = n.TextMarkInlineMemoContent
 			}
 			n.InsertBefore(&ast.Node{Type: ast.NodeFootnotesRef, Tokens: []byte("^" + refFoot.refNum), FootnotesRefId: refFoot.refNum, FootnotesRefLabel: []byte("^" + refFoot.refNum)})

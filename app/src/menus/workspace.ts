@@ -354,7 +354,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     const genListHTML = () => {
                         let html = "";
                         window.siyuan.storage[Constants.LOCAL_LAYOUTS].sort((a: ISaveLayout, b: ISaveLayout) => {
-                            return b.name > a.name ? -1 : 1;
+                            return a.name.localeCompare(b.name, undefined, {numeric:true});
                         }).forEach((item: ISaveLayout) => {
                             if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
                                 html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action ${html ? "" : "b3-list-item--focus"}">

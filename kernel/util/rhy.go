@@ -58,3 +58,7 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultCacheTime = now
 	return cachedRhyResult, nil
 }
+
+func RefreshRhyResultJob() {
+	GetRhyResult(true)
+}

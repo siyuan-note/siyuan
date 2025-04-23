@@ -417,6 +417,8 @@
     text-align: center;
   }
 
+  [data-subtype="flowchart"] > [spin="1"],
+  [data-subtype="plantuml"] > [spin="1"],
   [data-subtype="mermaid"] > [spin="1"] {
     // 不能加到上一级，否则属性会跟随滚动
     overflow: auto;

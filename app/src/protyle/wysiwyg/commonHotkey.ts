@@ -270,6 +270,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
         const newId = Lute.NewNodeID();
         tempElement.setAttribute("data-node-id", newId);
         tempElement.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
+        tempElement.classList.remove("protyle-wysiwyg--hl");
         tempElement.setAttribute("updated", newId.split("-")[0]);
         tempElement.removeAttribute("refcount");
         tempElement.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();
@@ -277,6 +278,7 @@ export const duplicateBlock = (nodeElements: Element[], protyle: IProtyle) => {
             const subNewId = Lute.NewNodeID();
             childItem.setAttribute("data-node-id", subNewId);
             childItem.removeAttribute(Constants.CUSTOM_RIFF_DECKS);
+            childItem.classList.remove("protyle-wysiwyg--hl");
             childItem.setAttribute("updated", subNewId.split("-")[0]);
             childItem.removeAttribute("refcount");
             childItem.lastElementChild.querySelector(".protyle-attr--refcount")?.remove();

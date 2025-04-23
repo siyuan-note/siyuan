@@ -233,7 +233,9 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 protyle.toolbar.showRender(protyle, realElement);
             } else if (realType === "NodeBlockQueryEmbed") {
                 blockRender(protyle, realElement);
-                protyle.toolbar.showRender(protyle, realElement);
+                if (!realElement.getAttribute("data-content")) {
+                    protyle.toolbar.showRender(protyle, realElement);
+                }
                 hideElements(["hint"], protyle);
             } else if (realType === "NodeThematicBreak" && focusHR) {
                 focusBlock(blockElement);

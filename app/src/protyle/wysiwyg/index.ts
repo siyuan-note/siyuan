@@ -1,4 +1,4 @@
-import {getTextStar, paste} from "../util/paste";
+import {enableLuteMarkdownSyntax, getTextStar, paste, restoreLuteMarkdownSyntax} from "../util/paste";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
@@ -442,7 +442,9 @@ export class WYSIWYG {
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
             event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            enableLuteMarkdownSyntax(protyle);
             event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
+            restoreLuteMarkdownSyntax(protyle);
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1702,7 +1704,9 @@ export class WYSIWYG {
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
             event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            enableLuteMarkdownSyntax(protyle);
             event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
+            restoreLuteMarkdownSyntax(protyle);
         });
 
         let beforeContextmenuRange: Range;

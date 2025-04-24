@@ -389,8 +389,8 @@ github.com/siyuan-note/httpclient v0.0.0-20250424022829-c8495e7c13a3 h1:oqZcCKrY
 github.com/siyuan-note/httpclient v0.0.0-20250424022829-c8495e7c13a3/go.mod h1:LjR34NI2Uqt5EhgAgEmdcJjMBG7EKyMY2NrUgbBRmXk=
 github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742 h1:PPiRvQDZ6bhXqvQRkOLNyNICZ/gvDuDide6gswoGsAg=
 github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742/go.mod h1:uszawhOtHHcCLZN7CZDM40J/IiwprO2lJZP4Nf4FJ14=
-github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b h1:PQGYhSUxjcll4M9tAIpPeZc4V4GtY+x0kc2K/aGpjbI=
-github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b/go.mod h1:afkzeVgkXWJkkp3LRDuBqUjv1z49+LDThOdwAsCP2Fw=
+github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d h1:VJ/DuLIx4FE7MZtlX2Gahx2m9tr4YCXPxZxUXZIWRx4=
+github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d/go.mod h1:oz+GggNPu23prmW5/8aqpu9Zs5eQBgN+YQJzFLxbT4g=
 github.com/spf13/cast v1.7.1 h1:cuNEagBQEHWN1FnbGEjCXL2szYEXqfJPbP2HNUaca9Y=
 github.com/spf13/cast v1.7.1/go.mod h1:ancEpBxwJDODSW/UG4rDrAqiKolqNNh2DX3mk86cAdo=
 github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf h1:pvbZ0lM0XWPBqUKqFU8cmavspvIl9nulOYwdy6IFRRo=

@@ -64,7 +64,7 @@ require (
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
 	github.com/siyuan-note/httpclient v0.0.0-20250424022829-c8495e7c13a3
 	github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742
-	github.com/siyuan-note/riff v0.0.0-20250320123739-f668df17442b
+	github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d
 	github.com/spf13/cast v1.7.1
 	github.com/steambap/captcha v1.4.1
 	github.com/studio-b12/gowebdav v0.10.0

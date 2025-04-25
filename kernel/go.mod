@@ -52,13 +52,13 @@ require (
 	github.com/open-spaced-repetition/go-fsrs/v3 v3.3.1
 	github.com/panjf2000/ants/v2 v2.11.3
 	github.com/patrickmn/go-cache v2.1.0+incompatible
-	github.com/pdfcpu/pdfcpu v0.9.1
+	github.com/pdfcpu/pdfcpu v0.10.2
 	github.com/radovskyb/watcher v1.0.7
 	github.com/rqlite/sql v0.0.0-20241111133259-a4122fabb196
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.38.2
 	github.com/shirou/gopsutil/v4 v4.25.3
-	github.com/siyuan-note/dejavu v0.0.0-20250425040734-cf778a44b27b
+	github.com/siyuan-note/dejavu v0.0.0-20250425041744-41d516f57836
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57

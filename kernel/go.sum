@@ -377,8 +377,8 @@ github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+D
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20250425040734-cf778a44b27b h1:Bq0gjcc+L3QRkZcGk2xLwjo13AeTORTLUriP4Gbhw4w=
-github.com/siyuan-note/dejavu v0.0.0-20250425040734-cf778a44b27b/go.mod h1:LoravhILz8sW38zPd73xpw//fyJHbKW/gFRGA6U3e3A=
+github.com/siyuan-note/dejavu v0.0.0-20250425041744-41d516f57836 h1:utRFKPUkVGkYogO6QVXfDYtHC6QjjJo0Tb1xkjqIGbE=
+github.com/siyuan-note/dejavu v0.0.0-20250425041744-41d516f57836/go.mod h1:LoravhILz8sW38zPd73xpw//fyJHbKW/gFRGA6U3e3A=
 github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec h1:D8Sjwa+7WxP3XrIBscT4PxBZZddZ83/O+5nX1sq6g6g=
 github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec/go.mod h1:6iAxXPOOAG3+M4bCiKQZTQ+n4gSUx/OyHhsP57dJlS8=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=

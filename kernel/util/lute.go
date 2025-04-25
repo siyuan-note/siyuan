@@ -80,6 +80,7 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetLinkRef(false)
 	ret.SetCodeSyntaxHighlight(false)
 	ret.SetSanitize(true)
+	ret.SetUnorderedListMarker("-")
 	return
 }
 

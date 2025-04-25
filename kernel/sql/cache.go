@@ -39,7 +39,7 @@ func disableCache() {
 	cacheDisabled = true
 }
 
-var blockCache, _ = ristretto.NewCache[string, *Block](&ristretto.Config[string, *Block]{
+var blockCache, _ = ristretto.NewCache(&ristretto.Config{
 	NumCounters: 102400,
 	MaxCost:     10240,
 	BufferItems: 64,
@@ -71,7 +71,7 @@ func getBlockCache(id string) (ret *Block) {
 
 	b, _ := blockCache.Get(id)
 	if nil != b {
-		ret = b
+		ret = b.(*Block)
 	}
 	return
 }

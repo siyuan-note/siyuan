@@ -81,6 +81,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 			if n.ParentIs(ast.NodeTableCell) {
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("|"), []byte("\\|"))
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<br /\\>"), []byte("<br />"))
 			}
 		}
 

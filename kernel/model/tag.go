@@ -308,6 +308,11 @@ func SearchTags(keyword string) (ret []string) {
 	labels := labelBlocksByKeyword(keyword)
 	keyword = strings.Join(strings.Split(keyword, " "), search.TermSep)
 	for label := range labels {
+		if "" == keyword {
+			ret = append(ret, util.EscapeHTML(label))
+			continue
+		}
+
 		_, t := search.MarkText(label, keyword, 1024, Conf.Search.CaseSensitive)
 		ret = append(ret, t)
 	}

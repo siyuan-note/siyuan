@@ -21,7 +21,7 @@ require (
 	github.com/asaskevich/EventBus v0.0.0-20200907212545-49d423059eef
 	github.com/common-nighthawk/go-figure v0.0.0-20210622060536-734e95fb86be
 	github.com/denisbrodbeck/machineid v1.0.1
-	github.com/dgraph-io/ristretto v1.0.0
+	github.com/dgraph-io/ristretto v0.2.0
 	github.com/djherbis/times v1.6.0
 	github.com/emersion/go-ical v0.0.0-20250329121855-f41e73efc392
 	github.com/emersion/go-vcard v0.0.0-20241024213814-c9703dde27ff
@@ -41,7 +41,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/imroc/req/v3 v3.50.0
+	github.com/imroc/req/v3 v3.51.0
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.14.1
@@ -58,11 +58,11 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.38.2
 	github.com/shirou/gopsutil/v4 v4.25.3
-	github.com/siyuan-note/dejavu v0.0.0-20250424023409-a6a4e8037d72
+	github.com/siyuan-note/dejavu v0.0.0-20250425040734-cf778a44b27b
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
-	github.com/siyuan-note/httpclient v0.0.0-20250424022829-c8495e7c13a3
+	github.com/siyuan-note/httpclient v0.0.0-20250425040344-7322dc6847d4
 	github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742
 	github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d
 	github.com/spf13/cast v1.7.1

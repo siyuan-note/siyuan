@@ -646,13 +646,12 @@ export class Toolbar {
                                 (currentNode.getAttribute("data-inline-memo-content") || ""));
                         }
                     }
+                    startContainer = currentNode;
                     if (currentType.includes("inline-math")) {
-                        startContainer = currentNode;
                         startOffset = null;
                     } else {
                         if (i === newNodes.length) {
                             endOffset = previousElement.textContent.length;
-                            startContainer = currentNode;
                         } else {
                             startOffset = previousElement.textContent.length;
                         }

@@ -377,8 +377,8 @@ github.com/shopspring/decimal v1.4.0/go.mod h1:gawqmDU56v4yIKSwfBSFip1HdCCXN8/+D
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d h1:lvCTyBbr36+tqMccdGMwuEU+hjux/zL6xSmf5S9ITaA=
 github.com/shurcooL/gofontwoff v0.0.0-20181114050219-180f79e6909d/go.mod h1:05UtEgK5zq39gLST6uB0cf3NEHjETfB4Fgr3Gx5R9Vw=
 github.com/simplereach/timeutils v1.2.0/go.mod h1:VVbQDfN/FHRZa1LSqcwo4kNZ62OOyqLLGQKYB3pB0Q8=
-github.com/siyuan-note/dejavu v0.0.0-20250425041744-41d516f57836 h1:utRFKPUkVGkYogO6QVXfDYtHC6QjjJo0Tb1xkjqIGbE=
-github.com/siyuan-note/dejavu v0.0.0-20250425041744-41d516f57836/go.mod h1:LoravhILz8sW38zPd73xpw//fyJHbKW/gFRGA6U3e3A=
+github.com/siyuan-note/dejavu v0.0.0-20250425042657-7c914335a3d4 h1:guaR4LHkrxeSMdu+b41eLJenfWyODW0co72wgXC/XoA=
+github.com/siyuan-note/dejavu v0.0.0-20250425042657-7c914335a3d4/go.mod h1:WbW1Cs0ZPjvHDAizIU85Ucp9J6i3bTmSAma1lO0WaWY=
 github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec h1:D8Sjwa+7WxP3XrIBscT4PxBZZddZ83/O+5nX1sq6g6g=
 github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec/go.mod h1:6iAxXPOOAG3+M4bCiKQZTQ+n4gSUx/OyHhsP57dJlS8=
 github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97 h1:lM5v8BfNtbOL5jYwhCdMYBcYtr06IYBKjjSLAPMKTM8=
@@ -387,8 +387,8 @@ github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57 h1:gRFbRUgTFP
 github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57/go.mod h1:oJhBKYrxS8WRsTZhOafG3FfGgCSOyxFzboBvQxcDX9s=
 github.com/siyuan-note/httpclient v0.0.0-20250425040344-7322dc6847d4 h1:Sub/eE2I4mDyCWBEG1LsWN7KNJaTu75qf1eTLY4c4Y4=
 github.com/siyuan-note/httpclient v0.0.0-20250425040344-7322dc6847d4/go.mod h1:to8y1GbT7/YKZZo4UnS8m/Y3ILRFdHiSYixwUQiDydc=
-github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742 h1:PPiRvQDZ6bhXqvQRkOLNyNICZ/gvDuDide6gswoGsAg=
-github.com/siyuan-note/logging v0.0.0-20241218085028-6514639a9742/go.mod h1:uszawhOtHHcCLZN7CZDM40J/IiwprO2lJZP4Nf4FJ14=
+github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54 h1:bNfLBxasCNYNIiE8YwIDDq0DxFjQ3aDbp25w8F5aShM=
+github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54/go.mod h1:9lb3q2RCdpjoQk7nDQwLSArNtCLafHwWtl8+kNkSISM=
 github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d h1:VJ/DuLIx4FE7MZtlX2Gahx2m9tr4YCXPxZxUXZIWRx4=
 github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d/go.mod h1:oz+GggNPu23prmW5/8aqpu9Zs5eQBgN+YQJzFLxbT4g=
 github.com/spf13/cast v1.7.1 h1:cuNEagBQEHWN1FnbGEjCXL2szYEXqfJPbP2HNUaca9Y=

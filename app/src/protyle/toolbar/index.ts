@@ -286,6 +286,19 @@ export class Toolbar {
                 this.range.collapse(true);
             }
         }
+        let isEndSpan = false;
+        // https://github.com/siyuan-note/siyuan/issues/7200
+        if (this.range.endOffset === this.range.startContainer.textContent.length &&
+            !["DIV", "TD", "TH", "TR"].includes(this.range.endContainer.parentElement.tagName) &&
+            !hasNextSibling(this.range.endContainer)) {
+            this.range.setEndAfter(this.range.endContainer.parentElement);
+            isEndSpan = true;
+        }
+        if (this.range.startOffset === 0 &&
+            !["DIV", "TD", "TH", "TR"].includes(this.range.startContainer.parentElement.tagName) &&
+            !hasPreviousSibling(this.range.startContainer)) {
+            this.range.setStartBefore(this.range.startContainer.parentElement);
+        }
         if (!html) {
             this.range.insertNode(document.createElement("wbr"));
             html = nodeElement.outerHTML;
@@ -299,7 +312,7 @@ export class Toolbar {
         });
         if (this.range.startContainer.nodeType !== 3) {
             let emptyNode: Element = this.range.startContainer.childNodes[this.range.startOffset] as HTMLElement;
-            if (emptyNode.nodeType === 3) {
+            if (emptyNode && emptyNode.nodeType === 3) {
                 if ((this.range.startContainer as HTMLElement).tagName === "DIV") {
                     emptyNode = emptyNode.previousSibling as HTMLElement;
                 } else {
@@ -327,7 +340,11 @@ export class Toolbar {
         const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
-
+        let keepZWPS = false;
+        let startContainer: Node;
+        let endContainer: Node;
+        let startOffset: number;
+        let endOffset: number;
         if (type === "clear" || actionBtn?.classList.contains("protyle-toolbar__item--current") || (
             action === "range" && rangeTypes.length > 0 && rangeTypes.includes(type) && !textObj
         )) {
@@ -346,11 +363,10 @@ export class Toolbar {
                         return true;
                     }
                 });
-                // TODO
                 if (rangeTypes.length === 0 || type === "clear") {
                     newNodes.push(document.createTextNode(Constants.ZWSP));
+                    startContainer = newNodes[0];
                 } else {
-                    // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
                     let removeIndex = 0;
                     while (removeIndex < rangeTypes.length) {
                         if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
@@ -363,14 +379,13 @@ export class Toolbar {
                     inlineElement.setAttribute("data-type", rangeTypes.join(" "));
                     inlineElement.textContent = Constants.ZWSP;
                     newNodes.push(inlineElement);
+                    startContainer = newNodes[0].firstChild;
                 }
+                keepZWPS = true;
+                startOffset = 1;
             }
             contents.childNodes.forEach((item: HTMLElement) => {
                 if (item.nodeType !== 3 && item.tagName !== "BR" && item.tagName !== "IMG" && !item.classList.contains("img")) {
-                    // TODO 图片后有粗体，仅选中图片后，rang 中会包含一个空的粗体，需移除
-                    if (item.textContent === "") {
-                        return;
-                    }
                     const types = (item.getAttribute("data-type") || "").split(" ");
                     if (type === "clear") {
                         for (let i = 0; i < types.length; i++) {
@@ -395,19 +410,8 @@ export class Toolbar {
                         });
                     }
                     if (types.length === 0) {
-                        if (item.textContent === "") {
-                            item.textContent = Constants.ZWSP;
-                        }
                         newNodes.push(document.createTextNode(item.textContent));
                     } else {
-                        if (selectText && type === "clear" && textObj && textObj.type === "text") {
-                            // 选中内容中没有样式需要清除时直接返回，否则清除粗体中部分内容会报错
-                            if (item.style.color === "" && item.style.webkitTextFillColor === "" && item.style.webkitTextStroke === "" && item.style.textShadow === "" && item.style.backgroundColor === "" && item.style.fontSize === "") {
-                                item.setAttribute("data-type", types.join(" "));
-                                newNodes.push(item);
-                                return true;
-                            }
-                        }
                         if (type === "clear") {
                             item.style.color = "";
                             item.style.webkitTextFillColor = "";
@@ -433,24 +437,25 @@ export class Toolbar {
                 rangeTypes.push(type);
 
                 // 遇到以下类型结尾不应继承 https://github.com/siyuan-note/siyuan/issues/7200
-                // if (isEndSpan) {
-                //     let removeIndex = 0;
-                //     while (removeIndex < rangeTypes.length) {
-                //         if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
-                //             rangeTypes.splice(removeIndex, 1);
-                //         } else {
-                //             ++removeIndex;
-                //         }
-                //     }
-                //     // https://github.com/siyuan-note/siyuan/issues/14421
-                //     if (rangeTypes.length === 0) {
-                //         rangeTypes.push(type);
-                //     }
-                // }
+                if (isEndSpan) {
+                    let removeIndex = 0;
+                    while (removeIndex < rangeTypes.length) {
+                        if (["inline-memo", "text", "block-ref", "virtual-block-ref", "file-annotation-ref", "a"].includes(rangeTypes[removeIndex])) {
+                            rangeTypes.splice(removeIndex, 1);
+                        } else {
+                            ++removeIndex;
+                        }
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/14421
+                    if (rangeTypes.length === 0) {
+                        rangeTypes.push(type);
+                    }
+                }
                 inlineElement.setAttribute("data-type", [...new Set(rangeTypes)].join(" "));
                 inlineElement.textContent = Constants.ZWSP;
                 setFontStyle(inlineElement, textObj);
                 newNodes.push(inlineElement);
+                keepZWPS = true;
             } else {
                 // https://github.com/siyuan-note/siyuan/issues/7477
                 // https://github.com/siyuan-note/siyuan/issues/8825
@@ -459,7 +464,7 @@ export class Toolbar {
                         contents.childNodes[0].remove();
                     }
                 }
-                contents.childNodes.forEach((item: HTMLElement, index) => {
+                contents.childNodes.forEach((item: HTMLElement) => {
                     let removeText = "";
                     if (item.nodeType === 3) {
                         if (
@@ -598,137 +603,145 @@ export class Toolbar {
         for (let i = newNodes.length - 1; i > -1; i--) {
             this.range.insertNode(newNodes[i]);
         }
-        let startContainer;
-        let startOffset;
-        let endOffset;
-        // 合并元素
-        for (let i = 0; i <= newNodes.length; i++) {
-            let previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
-            if (previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
-                previousElement = hasPreviousSibling(previousElement) as HTMLElement;
-                previousElement.nextSibling.remove();
-            }
-            let currentNode = newNodes[i] as HTMLElement;
-            if (!currentNode) {
-                currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
-                if (currentNode.nodeType === 3 && currentNode.textContent === Constants.ZWSP) {
-                    currentNode = hasNextSibling(currentNode) as HTMLElement;
-                    currentNode.previousSibling.remove();
+
+        if (!keepZWPS) {
+            // 合并元素
+            for (let i = 0; i <= newNodes.length; i++) {
+                let previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
+                if (previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
+                    previousElement = hasPreviousSibling(previousElement) as HTMLElement;
+                    previousElement.nextSibling.remove();
+                }
+                let currentNode = newNodes[i] as HTMLElement;
+                if (!currentNode) {
+                    currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
+                    if (currentNode.nodeType === 3 && currentNode.textContent === Constants.ZWSP) {
+                        currentNode = hasNextSibling(currentNode) as HTMLElement;
+                        currentNode.previousSibling.remove();
+                    }
+                }
+                if (currentNode && currentNode.nodeType !== 3) {
+                    const currentType = (currentNode.getAttribute("data-type") || "").split(" ");
+                    if (currentNode.tagName !== "BR" &&
+                        previousElement && previousElement.nodeType !== 3 &&
+                        currentNode.nodeType !== 3 &&
+                        isArrayEqual(currentType, (previousElement.getAttribute("data-type") || "").split(" ")) &&
+                        hasSameTextStyle(currentNode, previousElement, textObj)) {
+                        if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
+                            if (currentNode.textContent.startsWith(Constants.ZWSP)) {
+                                currentNode.textContent = currentNode.textContent.substring(1);
+                            }
+                        }
+                        if (currentType.includes("inline-math")) {
+                            // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
+                            currentNode.setAttribute("data-content", previousElement.getAttribute("data-content") + currentNode.getAttribute("data-content"));
+                        } else if (currentType.includes("block-ref") && previousElement.getAttribute("data-id") === currentNode.getAttribute("data-id")) {
+                            if (previousElement.dataset.subtype !== "d" || previousElement.dataset.subtype !== "d") {
+                                currentNode.setAttribute("data-subtype", "s");
+                                currentNode.textContent = previousElement.textContent + currentNode.textContent;
+                            }
+                        } else {
+                            // 测试不存在 https://ld246.com/article/1664454663564 情况，故移除引用合并限制
+                            // 搜索结果引用被高亮隔断需进行合并 https://github.com/siyuan-note/siyuan/issues/7588
+                            currentNode.textContent = previousElement.textContent + currentNode.textContent;
+                            // 如果为备注时，合并备注内容
+                            if (currentType.includes("inline-memo")) {
+                                currentNode.setAttribute("data-inline-memo-content", (previousElement.getAttribute("data-inline-memo-content") || "") +
+                                    (currentNode.getAttribute("data-inline-memo-content") || ""));
+                            }
+                        }
+                        if (!currentType.includes("inline-math")) {
+                            if (i === 0) {
+                                startContainer = currentNode;
+                                startOffset = previousElement.textContent.length;
+                            } else if (i === newNodes.length) {
+                                endContainer = currentNode;
+                                endOffset = previousElement.textContent.length;
+                                if (startContainer.isSameNode(previousElement)) {
+                                    startContainer = currentNode;
+                                }
+                            }
+                        }
+                        previousElement.remove();
+                        if (i > 0) {
+                            newNodes.splice(i - 1, 1);
+                            i--;
+                        }
+                        if (newNodes.length === 0) {
+                            newNodes.push(currentNode);
+                            break;
+                        }
+                    }
                 }
             }
-            if (currentNode && currentNode.nodeType !== 3) {
-                const currentType = (currentNode.getAttribute("data-type") || "").split(" ");
-                if (currentNode.tagName !== "BR" &&
-                    previousElement && previousElement.nodeType !== 3 &&
-                    currentNode.nodeType !== 3 &&
-                    isArrayEqual(currentType, (previousElement.getAttribute("data-type") || "").split(" ")) &&
-                    hasSameTextStyle(currentNode, previousElement, textObj)) {
-                    if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
+            // 整理 zwsp
+            for (let i = 0; i <= newNodes.length; i++) {
+                const previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
+                let currentNode = newNodes[i] as HTMLElement;
+                if (!currentNode) {
+                    currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
+                }
+                if (!currentNode) {
+                    break;
+                }
+                if (currentNode.nodeType === 3) {
+                    if (previousElement && previousElement.nodeType === 3) {
                         if (currentNode.textContent.startsWith(Constants.ZWSP)) {
                             currentNode.textContent = currentNode.textContent.substring(1);
                         }
-                    }
-                    if (currentType.includes("inline-math")) {
-                        // 数学公式合并 data-content https://github.com/siyuan-note/siyuan/issues/6028
-                        currentNode.setAttribute("data-content", previousElement.getAttribute("data-content") + currentNode.getAttribute("data-content"));
-                    } else if (currentType.includes("block-ref") && previousElement.getAttribute("data-id") === currentNode.getAttribute("data-id")) {
-                        if (previousElement.dataset.subtype !== "d" || previousElement.dataset.subtype !== "d") {
-                            currentNode.setAttribute("data-subtype", "s");
-                            currentNode.textContent = previousElement.textContent + currentNode.textContent;
+                        if (previousElement.textContent.endsWith(Constants.ZWSP)) {
+                            previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 2);
                         }
                     } else {
-                        // 测试不存在 https://ld246.com/article/1664454663564 情况，故移除引用合并限制
-                        // 搜索结果引用被高亮隔断需进行合并 https://github.com/siyuan-note/siyuan/issues/7588
-                        currentNode.textContent = previousElement.textContent + currentNode.textContent;
-                        // 如果为备注时，合并备注内容
-                        if (currentType.includes("inline-memo")) {
-                            currentNode.setAttribute("data-inline-memo-content", (previousElement.getAttribute("data-inline-memo-content") || "") +
-                                (currentNode.getAttribute("data-inline-memo-content") || ""));
+                        const previousType = previousElement ? (previousElement.getAttribute("data-type") || "").split(" ") : [];
+                        if (previousType.includes("code") || previousType.includes("tag") || previousType.includes("kbd")) {
+                            if (!currentNode.textContent.startsWith(Constants.ZWSP)) {
+                                currentNode.textContent = Constants.ZWSP + currentNode.textContent;
+                            }
+                        } else if (currentNode.textContent.startsWith(Constants.ZWSP)) {
+                            currentNode.textContent = currentNode.textContent.substring(1);
                         }
-                    }
-                    startContainer = currentNode;
-                    if (currentType.includes("inline-math")) {
-                        startOffset = null;
-                    } else {
-                        if (i === newNodes.length) {
-                            endOffset = previousElement.textContent.length;
-                        } else {
-                            startOffset = previousElement.textContent.length;
-                        }
-                    }
-                    previousElement.remove();
-                    if (i > 0) {
-                        newNodes.splice(i - 1, 1);
-                        i--;
-                    }
-                    if (newNodes.length === 0) {
-                        newNodes.push(currentNode);
-                        break;
-                    }
-                }
-            }
-        }
-        // 整理 zwsp
-        for (let i = 0; i <= newNodes.length; i++) {
-            const previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
-            let currentNode = newNodes[i] as HTMLElement;
-            if (!currentNode) {
-                currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
-            }
-            if (currentNode.nodeType === 3) {
-                if (previousElement && previousElement.nodeType === 3) {
-                    if (currentNode.textContent.startsWith(Constants.ZWSP)) {
-                        currentNode.textContent = currentNode.textContent.substring(1);
-                    }
-                    if (previousElement.textContent.endsWith(Constants.ZWSP)) {
-                        previousElement.textContent = previousElement.textContent.substring(0, previousElement.textContent.length - 2);
                     }
                 } else {
-                    const previousType = previousElement ? (previousElement.getAttribute("data-type") || "").split(" ") : [];
-                    if (previousType.includes("code") || previousType.includes("tag") || previousType.includes("kbd")) {
+                    const currentType = currentNode.nodeType === 3 ? [] : (currentNode.getAttribute("data-type") || "").split(" ");
+                    if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
                         if (!currentNode.textContent.startsWith(Constants.ZWSP)) {
-                            currentNode.textContent = Constants.ZWSP + currentNode.textContent;
+                            currentNode.insertAdjacentText("afterbegin", Constants.ZWSP);
+                        }
+                        if (!previousElement || (previousElement.nodeType === 3 && previousElement.textContent.endsWith("\n"))) {
+                            currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
                         }
                     } else if (currentNode.textContent.startsWith(Constants.ZWSP)) {
                         currentNode.textContent = currentNode.textContent.substring(1);
                     }
-                }
-            } else {
-                const currentType = (currentNode.getAttribute("data-type") || "").split(" ");
-                if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
-                    if (!currentNode.textContent.startsWith(Constants.ZWSP)) {
-                        currentNode.insertAdjacentText("afterbegin", Constants.ZWSP);
-                    }
-                    if (!previousElement || (previousElement.nodeType === 3 && previousElement.textContent.endsWith("\n"))) {
-                        currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
-                    }
-                } else if (currentNode.textContent.startsWith(Constants.ZWSP)) {
-                    currentNode.textContent = currentNode.textContent.substring(1);
-                }
-                if (previousElement && previousElement.nodeType !== 3) {
-                    const previousType = (previousElement.getAttribute("data-type") || "").split(" ");
-                    if (previousType.includes("code") || previousType.includes("tag") || previousType.includes("kbd")) {
-                        currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
+                    if (previousElement && previousElement.nodeType !== 3) {
+                        const previousType = (previousElement.getAttribute("data-type") || "").split(" ");
+                        if (previousType.includes("code") || previousType.includes("tag") || previousType.includes("kbd")) {
+                            currentNode.insertAdjacentText("beforebegin", Constants.ZWSP);
+                        }
                     }
                 }
             }
         }
-
         nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));
         updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
         nodeElement.querySelectorAll("wbr").forEach(item => {
             item.remove();
         });
-        if (startContainer) {
-            if (typeof startOffset === "number") {
-                this.range.setStart(startContainer.firstChild, startOffset);
+        if (startContainer && typeof startOffset === "number") {
+            if (startContainer.nodeType === 3) {
+                this.range.setStart(startContainer, startOffset);
             } else {
-                this.range.selectNode(startContainer);
+                this.range.setStart(startContainer.firstChild, startOffset);
             }
         }
 
-        if (typeof endOffset === "number") {
-            this.range.setEnd(startContainer.firstChild, endOffset);
+        if (endContainer && typeof endOffset === "number") {
+            if (endContainer.nodeType === 3) {
+                this.range.setEnd(endContainer, endOffset);
+            } else {
+                this.range.setEnd(endContainer.firstChild, endOffset);
+            }
         }
         focusByRange(this.range);
 

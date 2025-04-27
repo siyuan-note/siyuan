@@ -482,18 +482,20 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         // 缩放后仅更新局部 https://github.com/siyuan-note/siyuan/issues/14326
         if (updateElements.length === 0) {
             const newUpdateElement = protyle.wysiwyg.element.querySelector("[data-node-id]");
-            const newUpdateId = newUpdateElement.getAttribute("data-node-id");
-            const tempElement = document.createElement("template");
-            tempElement.innerHTML = operation.data;
-            const newTempElement = tempElement.content.querySelector(`[data-node-id="${newUpdateId}"]`);
-            if (newTempElement) {
-                updateElements.push(newUpdateElement);
-                operation.data = newTempElement.outerHTML;
-                operation.id = newUpdateId;
-                // https://github.com/siyuan-note/siyuan/issues/14326#issuecomment-2746140335
-                for (let i = 1; i < protyle.wysiwyg.element.childElementCount; i++) {
-                    protyle.wysiwyg.element.childNodes[i].remove();
-                    i--;
+            if (newUpdateElement) {
+                const newUpdateId = newUpdateElement.getAttribute("data-node-id");
+                const tempElement = document.createElement("template");
+                tempElement.innerHTML = operation.data;
+                const newTempElement = tempElement.content.querySelector(`[data-node-id="${newUpdateId}"]`);
+                if (newTempElement) {
+                    updateElements.push(newUpdateElement);
+                    operation.data = newTempElement.outerHTML;
+                    operation.id = newUpdateId;
+                    // https://github.com/siyuan-note/siyuan/issues/14326#issuecomment-2746140335
+                    for (let i = 1; i < protyle.wysiwyg.element.childElementCount; i++) {
+                        protyle.wysiwyg.element.childNodes[i].remove();
+                        i--;
+                    }
                 }
             }
         }

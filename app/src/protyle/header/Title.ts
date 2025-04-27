@@ -318,7 +318,11 @@ export class Title {
                 path: protyle.path,
                 title: fileName,
             });
-            this.setTitle(fileName);
+            if (fileName !== this.editElement.textContent) {
+                const offset = getSelectionOffset(this.editElement);
+                this.setTitle(fileName);
+                focusByOffset(this.editElement, offset.start, offset.end);
+            }
             setTitle(fileName);
         }, Constants.TIMEOUT_INPUT);
     }

@@ -2331,7 +2331,31 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		}
 	} else {
 		if 4 == blockRefMode { // 脚注+锚点哈希
-			if addDocAnchorSpan {
+			refRoot := false
+
+			for _, refFoot := range refFootnotes {
+				if id == refFoot.defID {
+					refRoot = true
+					break
+				}
+			}
+
+			footnotesDefs := tree.Root.ChildrenByType(ast.NodeFootnotesDef)
+			for _, footnotesDef := range footnotesDefs {
+				ast.Walk(footnotesDef, func(n *ast.Node, entering bool) ast.WalkStatus {
+					if !entering {
+						return ast.WalkContinue
+					}
+
+					if id == n.TextMarkBlockRefID {
+						refRoot = true
+						return ast.WalkStop
+					}
+					return ast.WalkContinue
+				})
+			}
+
+			if refRoot && addDocAnchorSpan {
 				anchorSpan := treenode.NewSpanAnchor(id)
 				ret.Root.PrependChild(anchorSpan)
 			}

@@ -241,7 +241,17 @@ export class Toolbar {
             this.range = setLastNodeRange(getContenteditableElement(nodeElement), this.range, false);
         }
 
-        const rangeTypes = this.getCurrentType(this.range);
+        let rangeTypes: string[] = [];
+        this.range.cloneContents().childNodes.forEach((item: HTMLElement) => {
+            if (item.nodeType !== 3) {
+                rangeTypes = rangeTypes.concat((item.getAttribute("data-type") || "").split(" "));
+            }
+        });
+        if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
+            this.range.startContainer.isSameNode(this.range.endContainer) &&
+            this.range.startOffset > -1 && this.range.endOffset <= this.range.startContainer.textContent.length) {
+            rangeTypes = rangeTypes.concat((this.range.startContainer.parentElement.getAttribute("data-type") || "").split(" "));
+        }
         if (rangeTypes.length === 1) {
             // https://github.com/siyuan-note/siyuan/issues/6501
             // https://github.com/siyuan-note/siyuan/issues/12877
@@ -305,8 +315,11 @@ export class Toolbar {
             contents = this.range.extractContents();
         }
         this.mergeNode(contents.childNodes);
-        contents.childNodes.forEach(item => {
+        contents.childNodes.forEach((item: HTMLElement) => {
             if (item.nodeType === 3 && item.textContent === Constants.ZWSP) {
+                item.remove();
+            }
+            if (item.nodeType === 1 && item.textContent === "" && item.tagName === "SPAN") {
                 item.remove();
             }
         });
@@ -466,40 +479,23 @@ export class Toolbar {
                 }
                 contents.childNodes.forEach((item: HTMLElement) => {
                     let removeText = "";
-                    if (item.nodeType === 3) {
-                        if (
-                            // 图片会有零宽空格，但图片不进行处理 https://github.com/siyuan-note/siyuan/issues/12840
-                            item.textContent !== Constants.ZWSP ||
-                            // tag 会有零宽空格 https://github.com/siyuan-note/siyuan/issues/12922
-                            (item.textContent === Constants.ZWSP && !rangeTypes.includes("img"))) {
-                            // TODO ZWSP spin 后会在行内元素外 https://github.com/siyuan-note/siyuan/issues/13871
-                            // if (item.textContent.startsWith(Constants.ZWSP) &&
-                            //     // https://github.com/siyuan-note/siyuan/issues/14639
-                            //     item.textContent.length > 1) {
-                            //     newNodes.push(document.createTextNode(Constants.ZWSP));
-                            //     item.textContent = item.textContent.substring(1);
-                            // }
-                            if (item.textContent) {
-                                // https://github.com/siyuan-note/siyuan/issues/14204
-                                while (item.textContent.endsWith("\n")) {
-                                    item.textContent = item.textContent.substring(0, item.textContent.length - 1);
-                                    removeText += "\n";
-                                }
-                                const inlineElement = document.createElement("span");
-                                inlineElement.setAttribute("data-type", type);
-                                inlineElement.textContent = item.textContent;
-                                setFontStyle(inlineElement, textObj);
-
-                                if (type === "text" && !inlineElement.getAttribute("style")) {
-                                    newNodes.push(item);
-                                } else {
-                                    newNodes.push(inlineElement);
-                                }
-                            }
-                        } else {
-                            newNodes.push(item);
+                    if (item.nodeType === 3 && item.textContent) {
+                        // https://github.com/siyuan-note/siyuan/issues/14204
+                        while (item.textContent.endsWith("\n")) {
+                            item.textContent = item.textContent.substring(0, item.textContent.length - 1);
+                            removeText += "\n";
                         }
-                    } else {
+                        const inlineElement = document.createElement("span");
+                        inlineElement.setAttribute("data-type", type);
+                        inlineElement.textContent = item.textContent;
+                        setFontStyle(inlineElement, textObj);
+
+                        if (type === "text" && !inlineElement.getAttribute("style")) {
+                            newNodes.push(item);
+                        } else {
+                            newNodes.push(inlineElement);
+                        }
+                    } else if (item.nodeType === 1) {
                         let types = (item.getAttribute("data-type") || "").split(" ");
                         for (let i = 0; i < types.length; i++) {
                             // "backslash", "virtual-block-ref", "search-mark" 只能单独存在
@@ -574,7 +570,7 @@ export class Toolbar {
                             });
                         }
                         types = [...new Set(types)];
-                        if (item.tagName !== "BR" && item.tagName !== "IMG") {
+                        if (item.tagName !== "BR" && item.tagName !== "IMG" && !types.includes("img")) {
                             item.setAttribute("data-type", types.join(" "));
                             setFontStyle(item, textObj);
                             if (types.includes("text") && !item.getAttribute("style")) {
@@ -657,7 +653,9 @@ export class Toolbar {
                             } else if (i === newNodes.length) {
                                 endContainer = currentNode;
                                 endOffset = previousElement.textContent.length;
-                                if (startContainer.isSameNode(previousElement)) {
+                                if (!startContainer) {
+                                    startContainer = currentNode;
+                                } else if (startContainer.isSameNode(previousElement)) {
                                     startContainer = currentNode;
                                 }
                             }
@@ -745,20 +743,21 @@ export class Toolbar {
         }
         focusByRange(this.range);
 
+        const showMenuElement = newNodes[0] as HTMLElement;
         if (type === "inline-math") {
             mathRender(nodeElement);
-            if (selectText === "") {
-                protyle.toolbar.showRender(protyle, newNodes[0] as HTMLElement, undefined, html);
+            if (selectText === "" && showMenuElement.getAttribute("data-type") === "inline-math") {
+                protyle.toolbar.showRender(protyle, showMenuElement, undefined, html);
             }
         } else if (type === "inline-memo") {
-            const memoElement = newNodes[0] as HTMLElement;
-            if (!memoElement.getAttribute("data-inline-memo-content")) {
-                protyle.toolbar.showRender(protyle, memoElement, newNodes as Element[], html);
+            if (!showMenuElement.getAttribute("data-inline-memo-content") &&
+                showMenuElement.getAttribute("data-type") === "inline-memo") {
+                protyle.toolbar.showRender(protyle, showMenuElement, newNodes as Element[], html);
             }
         } else if (type === "a") {
-            const aElement = newNodes[0] as HTMLElement;
-            if (aElement.textContent.replace(Constants.ZWSP, "") === "" || !aElement.getAttribute("data-href")) {
-                linkMenu(protyle, aElement, aElement.getAttribute("data-href") ? true : false);
+            if (showMenuElement.getAttribute("data-type") === "a" &&
+                (showMenuElement.textContent.replace(Constants.ZWSP, "") === "" || !showMenuElement.getAttribute("data-href"))) {
+                linkMenu(protyle, showMenuElement, showMenuElement.getAttribute("data-href") ? true : false);
             }
         }
     }

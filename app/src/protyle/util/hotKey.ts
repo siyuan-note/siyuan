@@ -218,6 +218,9 @@ export const isIncludesHotKey = (hotKey: string) => {
 };
 
 export const updateControlAlt = () => {
+    if (!window.siyuan.config.keymap.general) {
+        return;
+    }
     Object.keys(window.siyuan.config.keymap.general).forEach(key => {
         if (["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
             "graphView", "globalGraph", "riffCard"].includes(key)) {

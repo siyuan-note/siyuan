@@ -1170,7 +1170,7 @@
   "back": "Powrót",
   "mount": "Otwórz notes",
   "newNotebook": "Nowy notes",
-  "fileNameRule": "Tytuł dokumentu nie może zawierać znaku /",
+  "fileNameRule": "Tytuł nie może zawierać znaku /, został automatycznie zastąpiony pełnym znakiem ／",
   "slogan": "Refaktoryzuj swoje myślenie",
   "showInFolder": "Pokaż w folderze",
   "search": "Szukaj",

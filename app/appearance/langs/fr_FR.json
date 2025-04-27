@@ -1170,7 +1170,7 @@
   "back": "Retour",
   "mount": "Ouvrir le carnet de notes",
   "newNotebook": "Nouveau carnet de notes",
-  "fileNameRule": "Le titre du document ne peut pas contenir de caractères /",
+  "fileNameRule": "Le titre ne peut pas contenir le caractère /, il a été automatiquement remplacé par le caractère ／ en pleine largeur",
   "slogan": "Refactorisez votre pensée",
   "showInFolder": "Afficher dans le dossier",
   "search": "Recherche",

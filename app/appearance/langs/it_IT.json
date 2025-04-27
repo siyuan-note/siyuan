@@ -1170,7 +1170,7 @@
   "back": "Indietro",
   "mount": "Apri taccuino",
   "newNotebook": "Nuovo taccuino",
-  "fileNameRule": "Il titolo del documento non può contenere il carattere /",
+  "fileNameRule": "Il titolo non può contenere il carattere /, è stato automaticamente sostituito con il carattere ／ a larghezza intera",
   "slogan": "Ristruttura il tuo pensiero",
   "showInFolder": "Mostra nella cartella",
   "search": "Cerca",

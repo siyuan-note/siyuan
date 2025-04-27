@@ -611,9 +611,11 @@ export class Toolbar {
                 let currentNode = newNodes[i] as HTMLElement;
                 if (!currentNode) {
                     currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
-                    if (currentNode.nodeType === 3 && currentNode.textContent === Constants.ZWSP) {
+                    if (currentNode && currentNode.nodeType === 3 && currentNode.textContent === Constants.ZWSP) {
                         currentNode = hasNextSibling(currentNode) as HTMLElement;
-                        currentNode.previousSibling.remove();
+                        if (currentNode) {
+                            currentNode.previousSibling.remove();
+                        }
                     }
                 }
                 if (currentNode && currentNode.nodeType !== 3) {
@@ -744,18 +746,19 @@ export class Toolbar {
         focusByRange(this.range);
 
         const showMenuElement = newNodes[0] as HTMLElement;
+        const showMenuTypes = (showMenuElement.getAttribute("data-type") || "").split(" ");
         if (type === "inline-math") {
             mathRender(nodeElement);
-            if (selectText === "" && showMenuElement.getAttribute("data-type") === "inline-math") {
+            if (selectText === "" && showMenuTypes.includes("inline-math")) {
                 protyle.toolbar.showRender(protyle, showMenuElement, undefined, html);
             }
         } else if (type === "inline-memo") {
             if (!showMenuElement.getAttribute("data-inline-memo-content") &&
-                showMenuElement.getAttribute("data-type") === "inline-memo") {
+                showMenuTypes.includes("inline-memo")) {
                 protyle.toolbar.showRender(protyle, showMenuElement, newNodes as Element[], html);
             }
         } else if (type === "a") {
-            if (showMenuElement.getAttribute("data-type") === "a" &&
+            if (showMenuTypes.includes("a") &&
                 (showMenuElement.textContent.replace(Constants.ZWSP, "") === "" || !showMenuElement.getAttribute("data-href"))) {
                 linkMenu(protyle, showMenuElement, showMenuElement.getAttribute("data-href") ? true : false);
             }

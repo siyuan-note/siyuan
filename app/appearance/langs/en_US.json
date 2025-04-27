@@ -1170,7 +1170,7 @@
   "back": "Back",
   "mount": "Open Notebook",
   "newNotebook": "New Notebook",
-  "fileNameRule": "Document title cannot contain / character",
+  "fileNameRule": "The title cannot contain the / character, it has been automatically replaced with the full-width ／ character",
   "slogan": "Refactor your thinking",
   "showInFolder": "Show in Folder",
   "search": "Search",

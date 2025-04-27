@@ -1170,7 +1170,7 @@
   "back": "Zurück",
   "mount": "Notizbuch öffnen",
   "newNotebook": "Neues Notizbuch",
-  "fileNameRule": "Dokumenttitel darf das /-Zeichen nicht enthalten",
+  "fileNameRule": "Der Titel darf das Zeichen / nicht enthalten, es wurde automatisch durch das Vollbreite-Zeichen ／ ersetzt",
   "slogan": "Refaktorisieren Sie Ihr Denken",
   "showInFolder": "Im Ordner anzeigen",
   "search": "Suchen",

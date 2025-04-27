@@ -1170,7 +1170,7 @@
   "back": "Atrás",
   "mount": "Abrir cuaderno de notas",
   "newNotebook": "Nuevo cuaderno de notas",
-  "fileNameRule": "El título del documento no puede contener / caracteres",
+  "fileNameRule": "El título no puede contener el carácter /, se ha reemplazado automáticamente por el carácter ／ de ancho completo",
   "slogan": "Refactoriza tu forma de pensar",
   "showInFolder": "Mostrar en la carpeta",
   "search": "Buscar",

@@ -1796,6 +1796,25 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             }
             if (!event.shiftKey) {
+                const inlineElement = range.startContainer.parentElement;
+                const currentTypes = protyle.toolbar.getCurrentType(range);
+                // https://github.com/siyuan-note/siyuan/issues/14703
+                if (currentTypes.length > 0 && range.toString() === "" && range.startOffset === 0 &&
+                    inlineElement.tagName === "SPAN" && !hasPreviousSibling(range.startContainer) && !hasPreviousSibling(inlineElement)) {
+                    range.setStartBefore(inlineElement);
+                    range.collapse(true);
+                } else if (inlineElement.tagName === "SPAN" &&
+                    !currentTypes.includes("search-mark") &&    // https://github.com/siyuan-note/siyuan/issues/7586
+                    !currentTypes.includes("code") &&   // https://github.com/siyuan-note/siyuan/issues/13871
+                    !currentTypes.includes("kbd") &&
+                    !currentTypes.includes("tag") &&
+                    range.toString() === "" && range.startContainer.nodeType === 3 &&
+                    (currentTypes.includes("inline-memo") || currentTypes.includes("block-ref") || currentTypes.includes("file-annotation-ref") || currentTypes.includes("a")) &&
+                    !hasNextSibling(range.startContainer) && range.startContainer.textContent.length === range.startOffset
+                ) {
+                    range.setEndAfter(inlineElement);
+                    range.collapse(false);
+                }
                 const wbrElement = document.createElement("wbr");
                 range.insertNode(wbrElement);
                 const oldHTML = nodeElement.outerHTML;

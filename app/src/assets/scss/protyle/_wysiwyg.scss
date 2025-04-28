@@ -352,8 +352,13 @@
           }
         }
 
-        & > .protyle-icons + .protyle-wysiwyg__embed {
-          border-top: 0;
+        & > .protyle-icons {
+          // https://github.com/siyuan-note/siyuan/issues/14678
+          z-index: 2;
+
+          & + .protyle-wysiwyg__embed {
+            border-top: 0;
+          }
         }
       }
     }

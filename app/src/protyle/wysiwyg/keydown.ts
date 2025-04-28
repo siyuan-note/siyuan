@@ -991,10 +991,10 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
         // 代码块语言选择 https://github.com/siyuan-note/siyuan/issues/14126
         if (matchHotKey("⌥↩", event) && selectText === "") {
             const selectElements = Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select"));
-            if (selectElements.length === 0 && nodeElement.classList.contains("code-block")) {
+            if (selectElements.length === 0) {
                 selectElements.push(nodeElement);
             }
-            if (selectElements.length > 0) {
+            if (selectElements.length > 0 && !isIncludesHotKey("⌥↩")) {
                 const otherElement = selectElements.find(item => {
                     return !item.classList.contains("code-block");
                 });
@@ -1004,23 +1004,21 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         languageElements.push(item.querySelector(".protyle-action__language"));
                     });
                     protyle.toolbar.showCodeLanguage(protyle, languageElements);
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return;
+                } else {
+                    addSubList(protyle, nodeElement, range);
                 }
-            }
-        }
-
-        // 回车
-        if (isNotCtrl(event) && event.key === "Enter") {
-            if (event.altKey) {
-                addSubList(protyle, nodeElement, range);
-            } else if (!event.shiftKey) {
-                enter(nodeElement, range, protyle);
                 event.stopPropagation();
                 event.preventDefault();
                 return;
             }
+        }
+
+        // 回车
+        if (matchHotKey("↩", event)) {
+            enter(nodeElement, range, protyle);
+            event.stopPropagation();
+            event.preventDefault();
+            return;
         }
 
         if (matchHotKey("⌘A", event)) {

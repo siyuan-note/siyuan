@@ -1,20 +1,21 @@
 {
-	"spec": 0,
-	"ID": "20240530133134-tcqdrt2",
+	"spec": 1,
+	"id": "20240530133134-tcqdrt2",
 	"name": "著者",
 	"keyValues": [
 		{
 			"key": {
-				"ID": "20240530101000-dcyaa50",
+				"id": "20240530101000-dcyaa50",
 				"name": "著者",
 				"type": "block",
 				"icon": "",
+				"desc": "",
 				"numberFormat": "",
 				"template": ""
 			},
 			"values": [
 				{
-					"ID": "20240530101000-62vkxyv",
+					"id": "20240530101000-62vkxyv",
 					"keyID": "20240530101000-dcyaa50",
 					"blockID": "20240530101000-pfg9af0",
 					"type": "block",
@@ -22,14 +23,15 @@
 					"createdAt": 1707381102000,
 					"updatedAt": 1715701016765,
 					"block": {
-						"ID": "20240530101000-pfg9af0",
+						"id": "20240530101000-pfg9af0",
+						"icon": "",
 						"content": "ジュール・ヴェルヌ",
 						"created": 1707384702050,
 						"updated": 1715701016765
 					}
 				},
 				{
-					"ID": "20240530101000-uhkh41h",
+					"id": "20240530101000-uhkh41h",
 					"keyID": "20240530101000-dcyaa50",
 					"blockID": "20240530101000-wks9xgq",
 					"type": "block",
@@ -37,7 +39,8 @@
 					"createdAt": 1707381134000,
 					"updatedAt": 1715701010038,
 					"block": {
-						"ID": "20240530101000-wks9xgq",
+						"id": "20240530101000-wks9xgq",
+						"icon": "",
 						"content": "劉 慈欣",
 						"created": 1707384734844,
 						"updated": 1715701010038
@@ -47,10 +50,11 @@
 		},
 		{
 			"key": {
-				"ID": "20240530101000-k3lneyh",
+				"id": "20240530101000-k3lneyh",
 				"name": "作品",
 				"type": "relation",
 				"icon": "",
+				"desc": "",
 				"numberFormat": "",
 				"template": "",
 				"relation": {
@@ -61,7 +65,7 @@
 			},
 			"values": [
 				{
-					"ID": "20240530101000-jyglvgf",
+					"id": "20240530101000-jyglvgf",
 					"keyID": "20240530101000-k3lneyh",
 					"blockID": "20240530101000-pfg9af0",
 					"type": "relation",
@@ -75,7 +79,7 @@
 					}
 				},
 				{
-					"ID": "20240530101000-uz1f153",
+					"id": "20240530101000-uz1f153",
 					"keyID": "20240530101000-k3lneyh",
 					"blockID": "20240530101000-wks9xgq",
 					"type": "relation",
@@ -93,10 +97,11 @@
 		},
 		{
 			"key": {
-				"ID": "20240530101000-m4wvodp",
+				"id": "20240530101000-m4wvodp",
 				"name": "作品数",
 				"type": "rollup",
 				"icon": "",
+				"desc": "",
 				"numberFormat": "",
 				"template": "",
 				"rollup": {
@@ -110,27 +115,29 @@
 			}
 		}
 	],
+	"keyIDs": null,
 	"viewID": "20240530101000-7h1cj5l",
 	"views": [
 		{
-			"ID": "20240530101000-7h1cj5l",
+			"id": "20240530101000-7h1cj5l",
 			"icon": "",
 			"name": "テーブル",
 			"hideAttrViewName": false,
+			"desc": "",
 			"type": "table",
 			"table": {
 				"spec": 0,
-				"ID": "20240530101000-s8xhemo",
+				"id": "20240530101000-s8xhemo",
 				"columns": [
 					{
-						"ID": "20240530101000-dcyaa50",
+						"id": "20240530101000-dcyaa50",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
 						"width": ""
 					},
 					{
-						"ID": "20240530101000-k3lneyh",
+						"id": "20240530101000-k3lneyh",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
@@ -141,7 +148,7 @@
 						}
 					},
 					{
-						"ID": "20240530101000-m4wvodp",
+						"id": "20240530101000-m4wvodp",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,

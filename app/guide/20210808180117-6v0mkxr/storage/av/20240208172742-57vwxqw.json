@@ -1,1 +1,237 @@
-{"spec":0,"id":"20240208172742-57vwxqw","name":"Books","keyValues":[{"key":{"id":"20240208172742-dwysfvj","name":"Book","type":"block","icon":"","numberFormat":"","template":""},"values":[{"id":"20240208172930-9kz01lo","keyID":"20240208172742-dwysfvj","blockID":"20240208172930-3n32s4x","type":"block","isDetached":true,"block":{"id":"20240208172930-3n32s4x","content":"Twenty Thousand Leagues Under The Sea","created":1707384570935,"updated":1707384599291}},{"id":"20240208173042-rjglvag","keyID":"20240208172742-dwysfvj","blockID":"20240208173041-9utmfv2","type":"block","isDetached":true,"block":{"id":"20240208173041-9utmfv2","content":"The Three-Body Problem","created":1707384642526,"updated":1707384666857}},{"id":"20240208173054-ftxdqwc","keyID":"20240208172742-dwysfvj","blockID":"20240208173054-6k25xnw","type":"block","isDetached":true,"block":{"id":"20240208173054-6k25xnw","content":"The Wandering Earth","created":1707384654904,"updated":1707384668746}}]},{"key":{"id":"20240208172937-fxi3h2s","name":"Type","type":"mSelect","icon":"","options":[{"name":"Science fiction","color":"1"}],"numberFormat":"","template":""},"values":[{"id":"20240208172941-hcfpo3y","keyID":"20240208172937-fxi3h2s","blockID":"20240208172930-3n32s4x","type":"mSelect","mSelect":[{"content":"Science fiction","color":"1"}]},{"id":"20240208173105-d3roy1t","keyID":"20240208172937-fxi3h2s","blockID":"20240208173041-9utmfv2","type":"mSelect","mSelect":[{"content":"Science fiction","color":"1"}]},{"id":"20240208173107-quafxrg","keyID":"20240208172937-fxi3h2s","blockID":"20240208173054-6k25xnw","type":"mSelect","mSelect":[{"content":"Science fiction","color":"1"}]}]},{"key":{"id":"20240208173226-6666dv2","name":"Author","type":"relation","icon":"","numberFormat":"","template":"","relation":{"avID":"20240208172719-6qv16cr","isTwoWay":true,"backKeyID":"20240208173132-k3lneyh"}},"values":[{"id":"20240208173230-ttoisne","keyID":"20240208173226-6666dv2","blockID":"20240208172930-3n32s4x","type":"relation","relation":{"contents":null,"blockIDs":["20240208173141-pfg9af0"]}},{"id":"20240208173234-shl1jrt","keyID":"20240208173226-6666dv2","blockID":"20240208173054-6k25xnw","type":"relation","relation":{"contents":null,"blockIDs":["20240208173214-wks9xgq"]}},{"id":"20240208173235-ps7i68w","keyID":"20240208173226-6666dv2","blockID":"20240208173041-9utmfv2","type":"relation","relation":{"contents":null,"blockIDs":["20240208173214-wks9xgq"]}}]}],"viewID":"20240208172742-16mbtpr","views":[{"id":"20240208172742-16mbtpr","icon":"","name":"Table","type":"table","table":{"spec":0,"id":"20240208172742-mhhmma3","columns":[{"id":"20240208172742-dwysfvj","wrap":false,"hidden":false,"pin":false,"width":"297px"},{"id":"20240208172937-fxi3h2s","wrap":false,"hidden":false,"pin":false,"width":""},{"id":"20240208173226-6666dv2","wrap":false,"hidden":false,"pin":false,"width":""}],"rowIds":["20240208172930-3n32s4x","20240208173041-9utmfv2","20240208173054-6k25xnw"],"filters":[],"sorts":[],"pageSize":50}}]}
+{
+	"spec": 1,
+	"id": "20240208172742-57vwxqw",
+	"name": "Books",
+	"keyValues": [
+		{
+			"key": {
+				"id": "20240208172742-dwysfvj",
+				"name": "Book",
+				"type": "block",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20240208172930-9kz01lo",
+					"keyID": "20240208172742-dwysfvj",
+					"blockID": "20240208172930-3n32s4x",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707384570000,
+					"updatedAt": 1707384570000,
+					"block": {
+						"id": "20240208172930-3n32s4x",
+						"icon": "",
+						"content": "Twenty Thousand Leagues Under The Sea",
+						"created": 1707384570935,
+						"updated": 1707384599291
+					}
+				},
+				{
+					"id": "20240208173042-rjglvag",
+					"keyID": "20240208172742-dwysfvj",
+					"blockID": "20240208173041-9utmfv2",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707384642000,
+					"updatedAt": 1707384642000,
+					"block": {
+						"id": "20240208173041-9utmfv2",
+						"icon": "",
+						"content": "The Three-Body Problem",
+						"created": 1707384642526,
+						"updated": 1707384666857
+					}
+				},
+				{
+					"id": "20240208173054-ftxdqwc",
+					"keyID": "20240208172742-dwysfvj",
+					"blockID": "20240208173054-6k25xnw",
+					"type": "block",
+					"isDetached": true,
+					"createdAt": 1707384654000,
+					"updatedAt": 1707384654000,
+					"block": {
+						"id": "20240208173054-6k25xnw",
+						"icon": "",
+						"content": "The Wandering Earth",
+						"created": 1707384654904,
+						"updated": 1707384668746
+					}
+				}
+			]
+		},
+		{
+			"key": {
+				"id": "20240208172937-fxi3h2s",
+				"name": "Type",
+				"type": "mSelect",
+				"icon": "",
+				"desc": "",
+				"options": [
+					{
+						"name": "Science fiction",
+						"color": "1",
+						"desc": ""
+					}
+				],
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20240208172941-hcfpo3y",
+					"keyID": "20240208172937-fxi3h2s",
+					"blockID": "20240208172930-3n32s4x",
+					"type": "mSelect",
+					"createdAt": 1707384581000,
+					"updatedAt": 1707384581000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				},
+				{
+					"id": "20240208173105-d3roy1t",
+					"keyID": "20240208172937-fxi3h2s",
+					"blockID": "20240208173041-9utmfv2",
+					"type": "mSelect",
+					"createdAt": 1707384665000,
+					"updatedAt": 1707384665000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				},
+				{
+					"id": "20240208173107-quafxrg",
+					"keyID": "20240208172937-fxi3h2s",
+					"blockID": "20240208173054-6k25xnw",
+					"type": "mSelect",
+					"createdAt": 1707384667000,
+					"updatedAt": 1707384667000,
+					"mSelect": [
+						{
+							"content": "Science fiction",
+							"color": "1"
+						}
+					]
+				}
+			]
+		},
+		{
+			"key": {
+				"id": "20240208173226-6666dv2",
+				"name": "Author",
+				"type": "relation",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": "",
+				"relation": {
+					"avID": "20240208172719-6qv16cr",
+					"isTwoWay": true,
+					"backKeyID": "20240208173132-k3lneyh"
+				}
+			},
+			"values": [
+				{
+					"id": "20240208173230-ttoisne",
+					"keyID": "20240208173226-6666dv2",
+					"blockID": "20240208172930-3n32s4x",
+					"type": "relation",
+					"createdAt": 1707384750000,
+					"updatedAt": 1707384750000,
+					"relation": {
+						"blockIDs": [
+							"20240208173141-pfg9af0"
+						],
+						"contents": null
+					}
+				},
+				{
+					"id": "20240208173234-shl1jrt",
+					"keyID": "20240208173226-6666dv2",
+					"blockID": "20240208173054-6k25xnw",
+					"type": "relation",
+					"createdAt": 1707384754000,
+					"updatedAt": 1707384754000,
+					"relation": {
+						"blockIDs": [
+							"20240208173214-wks9xgq"
+						],
+						"contents": null
+					}
+				},
+				{
+					"id": "20240208173235-ps7i68w",
+					"keyID": "20240208173226-6666dv2",
+					"blockID": "20240208173041-9utmfv2",
+					"type": "relation",
+					"createdAt": 1707384755000,
+					"updatedAt": 1707384755000,
+					"relation": {
+						"blockIDs": [
+							"20240208173214-wks9xgq"
+						],
+						"contents": null
+					}
+				}
+			]
+		}
+	],
+	"keyIDs": null,
+	"viewID": "20240208172742-16mbtpr",
+	"views": [
+		{
+			"id": "20240208172742-16mbtpr",
+			"icon": "",
+			"name": "Table",
+			"hideAttrViewName": false,
+			"desc": "",
+			"type": "table",
+			"table": {
+				"spec": 0,
+				"id": "20240208172742-mhhmma3",
+				"columns": [
+					{
+						"id": "20240208172742-dwysfvj",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "297px"
+					},
+					{
+						"id": "20240208172937-fxi3h2s",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					},
+					{
+						"id": "20240208173226-6666dv2",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": ""
+					}
+				],
+				"rowIds": [
+					"20240208172930-3n32s4x",
+					"20240208173041-9utmfv2",
+					"20240208173054-6k25xnw"
+				],
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50
+			}
+		}
+	]
+}

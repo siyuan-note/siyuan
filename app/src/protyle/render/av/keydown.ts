@@ -232,13 +232,14 @@ export const bindAVPanelKeydown = (event: KeyboardEvent) => {
                             }
                         }));
                     }
+                    return true;
                 }
             } else if (event.key === "Escape") {
                 avPanelElement.dispatchEvent(new CustomEvent("click", {detail: "close"}));
-            } else {
-                upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild);
+                return true;
+            } else if (upDownHint(menuElement, event, "b3-menu__item--current", menuElement.firstElementChild)){
+                return true;
             }
-            return true;
         }
     }
     return false;

@@ -117,7 +117,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
-
+        if (document.querySelector(".av__panel")) {
+            return;
+        }
         if (avKeydown(event, nodeElement, protyle)) {
             return;
         }

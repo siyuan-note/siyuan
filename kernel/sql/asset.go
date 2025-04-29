@@ -52,7 +52,7 @@ func docTagSpans(n *ast.Node) (ret []*Span) {
 				RootID:   n.ID,
 				Box:      n.Box,
 				Path:     n.Path,
-				Content:  escaped,
+				Content:  tag,
 				Markdown: markdown,
 				Type:     "tag",
 				IAL:      "",

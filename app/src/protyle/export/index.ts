@@ -323,7 +323,7 @@ const renderPDF = async (id: string) => {
             item.parentElement.style.width = Math.min(item.parentElement.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle", document.querySelector("#scale").value);
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
             // 超级块内不能移除 width https://github.com/siyuan-note/siyuan/issues/14318
             item.removeAttribute('data-render');

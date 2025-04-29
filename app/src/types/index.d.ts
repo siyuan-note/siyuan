@@ -125,7 +125,7 @@ declare namespace CSS {
 }
 
 interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
-    WebkitAppRegion: string
+    WebkitAppRegion: string;
 }
 
 interface Window {
@@ -145,12 +145,18 @@ interface Window {
             clear: () => void
             getOption: () => { series: { type: string }[] }
         };
-    }
+    };
     ABCJS: {
         renderAbc(element: Element, text: string, options: {
             responsive: string
         }): void;
-    }
+    };
+    MathJax: {
+        tex2svg(math: string, {display: boolean}): HTMLElement
+        startup: {
+            promise: Promise<void>
+        }
+    };
     hljs: {
         listLanguages(): string[];
         highlight(text: string, options: {
@@ -171,7 +177,7 @@ interface Window {
             trust: boolean;
             strict: (errorCode: string) => "ignore" | "warn";
         }): string;
-    }
+    };
     mermaid: {
         initialize(options: any): void,
         render(id: string, text: string): { svg: string }
@@ -179,11 +185,11 @@ interface Window {
     plantumlEncoder: {
         encode(options: string): string,
     };
-    pdfjsLib: any
+    pdfjsLib: any;
 
-    dataLayer: any[]
+    dataLayer: any[];
 
-    siyuan: ISiyuan
+    siyuan: ISiyuan;
     webkit: {
         messageHandlers: {
             openLink: { postMessage: (url: string) => void }
@@ -192,7 +198,7 @@ interface Window {
             setClipboard: { postMessage: (url: string) => void }
             purchase: { postMessage: (url: string) => void }
         }
-    }
+    };
     htmlToImage: {
         toCanvas: (element: Element) => Promise<HTMLCanvasElement>
         toBlob: (element: Element) => Promise<Blob>
@@ -209,7 +215,7 @@ interface Window {
         readHTMLClipboard(): string
         getBlockURL(): string
         hideKeyboard(): void
-    }
+    };
     JSHarmony: {
         openExternal(url: string): void
         exportByDefault(url: string): void
@@ -219,25 +225,25 @@ interface Window {
         readClipboard(): string
         readHTMLClipboard(): string
         returnDesktop(): void
-    }
+    };
 
-    Protyle: import("../protyle/method").default
+    Protyle: import("../protyle/method").default;
 
-    goBack(): void
+    goBack(): void;
 
-    showMessage(message: string, timeout: number, type: string, messageId?: string): void
+    showMessage(message: string, timeout: number, type: string, messageId?: string): void;
 
-    reconnectWebSocket(): void
+    reconnectWebSocket(): void;
 
-    showKeyboardToolbar(height: number): void
+    showKeyboardToolbar(height: number): void;
 
-    processIOSPurchaseResponse(code: number): void
+    processIOSPurchaseResponse(code: number): void;
 
-    hideKeyboardToolbar(): void
+    hideKeyboardToolbar(): void;
 
-    openFileByURL(URL: string): boolean
+    openFileByURL(URL: string): boolean;
 
-    destroyTheme(): Promise<void>
+    destroyTheme(): Promise<void>;
 }
 
 interface IRefDefs {
@@ -266,26 +272,26 @@ interface ISaveLayout {
 }
 
 interface IWorkspace {
-    path: string
-    closed: boolean
+    path: string;
+    closed: boolean;
 }
 
 interface ICardPackage {
-    id: string
-    updated: string
-    name: string
-    size: number
+    id: string;
+    updated: string;
+    name: string;
+    size: number;
 }
 
 interface ICard {
-    deckID: string
-    cardID: string
-    blockID: string
-    nextDues: IObject
-    lapses: number  // 遗忘次数
-    lastReview: number  // 最后复习时间
-    reps: number  // 复习次数
-    state: number   // 卡片状态 0：新卡
+    deckID: string;
+    cardID: string;
+    blockID: string;
+    nextDues: IObject;
+    lapses: number;  // 遗忘次数
+    lastReview: number;  // 最后复习时间
+    reps: number;  // 复习次数
+    state: number;   // 卡片状态 0：新卡
 }
 
 interface ICardData {
@@ -296,12 +302,12 @@ interface ICardData {
 }
 
 interface IPluginSettingOption {
-    title: string
-    description?: string
-    actionElement?: HTMLElement
-    direction?: "column" | "row"
+    title: string;
+    description?: string;
+    actionElement?: HTMLElement;
+    direction?: "column" | "row";
 
-    createActionElement?(): HTMLElement
+    createActionElement?(): HTMLElement;
 }
 
 interface ISearchAssetOption {
@@ -327,22 +333,22 @@ interface ITextOption {
 }
 
 interface ISnippet {
-    id?: string
-    name: string
-    type: string
-    enabled: boolean
-    content: string
+    id?: string;
+    name: string;
+    type: string;
+    enabled: boolean;
+    content: string;
 }
 
 interface IInbox {
-    oId: string
-    shorthandContent: string
-    shorthandMd: string
-    shorthandDesc: string
-    shorthandFrom: number
-    shorthandTitle: string
-    shorthandURL: string
-    hCreated: string
+    oId: string;
+    shorthandContent: string;
+    shorthandMd: string;
+    shorthandDesc: string;
+    shorthandFrom: number;
+    shorthandTitle: string;
+    shorthandURL: string;
+    hCreated: string;
 }
 
 interface IPdfAnno {
@@ -397,15 +403,15 @@ interface IEmoji {
 }
 
 interface INotebook {
-    name: string
-    id: string
-    closed: boolean
-    icon: string
-    sort: number
+    name: string;
+    id: string;
+    closed: boolean;
+    icon: string;
+    sort: number;
     dueFlashcardCount?: string;
     newFlashcardCount?: string;
     flashcardCount?: string;
-    sortMode: number
+    sortMode: number;
 }
 
 interface ISiyuan {
@@ -618,28 +624,28 @@ interface IOpenFileOptions {
 }
 
 interface ILayoutOptions {
-    direction?: Config.TUILayoutDirection
-    size?: string
-    resize?: Config.TUILayoutDirection
-    type?: Config.TUILayoutType
-    element?: HTMLElement
+    direction?: Config.TUILayoutDirection;
+    size?: string;
+    resize?: Config.TUILayoutDirection;
+    type?: Config.TUILayoutType;
+    element?: HTMLElement;
 }
 
 interface ITab {
-    icon?: string
-    docIcon?: string
-    title?: string
-    panel?: string
-    callback?: (tab: import("../layout/Tab").Tab) => void
+    icon?: string;
+    docIcon?: string;
+    title?: string;
+    panel?: string;
+    callback?: (tab: import("../layout/Tab").Tab) => void;
 }
 
 interface IWebSocketData {
-    cmd?: string
-    callback?: string
-    data?: any
-    msg: string
-    code: number
-    sid?: string
+    cmd?: string;
+    callback?: string;
+    data?: any;
+    msg: string;
+    code: number;
+    sid?: string;
 }
 
 interface IGraphCommon {
@@ -652,7 +658,7 @@ interface IGraphCommon {
         linkWidth: number
         nodeSize: number
         arrow: boolean
-    }
+    };
     type: {
         blockquote: boolean
         code: boolean
@@ -664,7 +670,7 @@ interface IGraphCommon {
         super: boolean
         table: boolean
         tag: boolean
-    }
+    };
 }
 
 interface IKeymapItem {
@@ -772,52 +778,52 @@ interface IMenu {
 }
 
 interface IBazaarItem {
-    incompatible?: boolean  // 仅 plugin
-    enabled: boolean
-    preferredName: string
-    preferredDesc: string
-    preferredReadme: string
-    iconURL: string
-    stars: string
-    author: string
-    updated: string
-    downloads: string
-    current: false
-    installed: false
-    outdated: false
-    name: string
-    previewURL: string
-    previewURLThumb: string
-    repoHash: string
-    repoURL: string
-    url: string
-    openIssues: number
-    version: string
-    modes: string[]
-    hSize: string
-    hInstallSize: string
-    hInstallDate: string
-    hUpdated: string
-    preferredFunding: string
+    incompatible?: boolean;  // 仅 plugin
+    enabled: boolean;
+    preferredName: string;
+    preferredDesc: string;
+    preferredReadme: string;
+    iconURL: string;
+    stars: string;
+    author: string;
+    updated: string;
+    downloads: string;
+    current: false;
+    installed: false;
+    outdated: false;
+    name: string;
+    previewURL: string;
+    previewURLThumb: string;
+    repoHash: string;
+    repoURL: string;
+    url: string;
+    openIssues: number;
+    version: string;
+    modes: string[];
+    hSize: string;
+    hInstallSize: string;
+    hInstallDate: string;
+    hUpdated: string;
+    preferredFunding: string;
 }
 
 interface IAV {
-    id: string
-    name: string
-    view: IAVTable
-    viewID: string
-    viewType: string
-    views: IAVView[]
+    id: string;
+    name: string;
+    view: IAVTable;
+    viewID: string;
+    viewType: string;
+    views: IAVView[];
 }
 
 interface IAVView {
-    name: string
-    desc: string
-    id: string
-    type: string
-    icon: string
-    hideAttrViewName: boolean
-    pageSize: number
+    name: string;
+    desc: string;
+    id: string;
+    type: string;
+    icon: string;
+    hideAttrViewName: boolean;
+    pageSize: number;
 }
 
 interface IAVTable extends IAVView {
@@ -838,9 +844,9 @@ interface IAVFilter {
 }
 
 interface relativeDate {
-    count: number   // 数量
-    unit: number    // 单位：0: 天、1: 周、2: 月、3: 年
-    direction: number   // 方向：-1: 前、0: 现在、1: 后
+    count: number;   // 数量
+    unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
+    direction: number;   // 方向：-1: 前、0: 现在、1: 后
 }
 
 interface IAVSort {
@@ -933,8 +939,8 @@ interface IAVCellValue {
 }
 
 interface IAVCellRelationValue {
-    blockIDs: string[]
-    contents?: IAVCellValue[]
+    blockIDs: string[];
+    contents?: IAVCellValue[];
 }
 
 interface IAVCellDateValue {
@@ -959,15 +965,15 @@ interface IAVCellAssetValue {
 }
 
 interface IAVColumnRelation {
-    avID?: string
-    backKeyID?: string
-    isTwoWay?: boolean
+    avID?: string;
+    backKeyID?: string;
+    isTwoWay?: boolean;
 }
 
 interface IAVCellRollupValue {
-    relationKeyID?: string  // 关联列 ID
-    keyID?: string
-    calc?: IAVCalc
+    relationKeyID?: string;  // 关联列 ID
+    keyID?: string;
+    calc?: IAVCalc;
 }
 
 interface IAVCalc {

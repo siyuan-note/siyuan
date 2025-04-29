@@ -20,6 +20,7 @@ import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
 import {getPadding} from "../ui/initUI";
 import {hasClosestByAttribute} from "../util/hasClosest";
+import {addScriptSync} from "../util/addScript";
 
 export class Preview {
     public element: HTMLElement;
@@ -214,7 +215,7 @@ export class Preview {
         });
     }
 
-    private copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
+    private async copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
         // fix math render
         if (type === "mp-wechat") {
             this.link2online(copyElement);
@@ -232,6 +233,13 @@ export class Preview {
                         liItem.parentNode.insertBefore(nestedList, liItem.nextSibling);
                     }
                 });
+            });
+            await addScriptSync(`${Constants.PROTYLE_CDN}/js/mathjax/tex-svg-full.js`, "protyleMathJaxScript");
+            await window.MathJax.startup.promise;
+            copyElement.querySelectorAll('[data-subtype="math"]').forEach(mathElement => {
+                const node = window.MathJax.tex2svg(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")).trim(), {display: mathElement.tagName === "DIV"});
+                mathElement.innerHTML = "";
+                mathElement.append(node);
             });
         } else if (type === "zhihu") {
             this.link2online(copyElement);
@@ -264,6 +272,8 @@ export class Preview {
             item.style.backgroundImage = "none";
         });
         this.element.append(copyElement);
+        // 最后一个块是公式块时无法复制下来
+        copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();

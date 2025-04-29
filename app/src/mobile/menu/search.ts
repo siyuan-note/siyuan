@@ -53,21 +53,17 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     }
     loadElement.classList.remove("fn__none");
     loadElement.nextElementSibling.classList.add("fn__none");
-    let ids: string[] = [];
-    if (isAll) {
-        searchListElement.querySelectorAll('.b3-list-item[data-type="search-item"]').forEach(item => {
-            ids.push(item.getAttribute("data-node-id"));
-        });
-    } else {
-        ids = [currentLiElement.getAttribute("data-node-id")];
-    }
     fetchPost("/api/search/findReplace", {
         k: config.method === 0 ? getKeyByLiElement(currentLiElement) : (document.querySelector("#toolbarSearch") as HTMLInputElement).value,
         r: replaceInputElement.value,
-        ids,
+        ids: isAll ? [] : [currentLiElement.getAttribute("data-node-id")],
         types: config.types,
         method: config.method,
-        replaceTypes: config.replaceTypes
+        replaceTypes: config.replaceTypes,
+        paths: config.idPath || [],
+        groupBy: config.group,
+        orderBy: config.sort,
+        page: config.page,
     }, (response) => {
         loadElement.classList.add("fn__none");
         loadElement.nextElementSibling.classList.remove("fn__none");
@@ -76,7 +72,8 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
             showMessage(response.msg);
             return;
         }
-        if (ids.length > 1) {
+        if (isAll) {
+            updateSearchResult(config, element);
             return;
         }
         reloadProtyle(window.siyuan.mobile.editor.protyle, false);

@@ -1077,6 +1077,7 @@ export class Toolbar {
                 renderElement.removeAttribute("data-render");
                 if (types.includes("NodeBlockQueryEmbed")) {
                     blockRender(protyle, renderElement);
+                    (renderElement as HTMLElement).style.height = "";
                 } else {
                     processRender(renderElement);
                 }

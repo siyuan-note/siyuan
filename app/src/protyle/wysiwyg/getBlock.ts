@@ -177,8 +177,14 @@ export const isEndOfBlock = (range: Range) => {
     }
 
     while (nextSibling) {
-        if (hasNextSibling(nextSibling)) {
-            return false;
+        const nextNextSibling = hasNextSibling(nextSibling);
+        if (nextNextSibling) {
+            // 行内元素后为 \n https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2833372579
+            if (nextNextSibling.nodeType === 3 && (nextNextSibling as Text).wholeText === "\n") {
+                nextSibling = nextNextSibling;
+            } else {
+                return false;
+            }
         } else {
             if (nextSibling.parentElement.getAttribute("spellcheck")) {
                 return true;

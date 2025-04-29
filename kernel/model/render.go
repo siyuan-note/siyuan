@@ -346,7 +346,18 @@ func resolveEmbedR(n *ast.Node, blockEmbedMode int, luteEngine *lute.Lute, resol
 						}
 					}
 					if 2 < len(n.KramdownIAL) && 0 < len(inserts) {
-						inserts[0].KramdownIAL = n.KramdownIAL
+						if bookmark := n.IALAttr("bookmark"); "" != bookmark {
+							inserts[0].SetIALAttr("bookmark", bookmark)
+						}
+						if name := n.IALAttr("name"); "" != name {
+							inserts[0].SetIALAttr("name", name)
+						}
+						if alias := n.IALAttr("alias"); "" != alias {
+							inserts[0].SetIALAttr("alias", alias)
+						}
+						if memo := n.IALAttr("memo"); "" != memo {
+							inserts[0].SetIALAttr("memo", memo)
+						}
 					}
 					for _, insert := range inserts {
 						n.InsertBefore(insert)

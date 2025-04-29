@@ -606,7 +606,9 @@ export class Toolbar {
                 let previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
                 if (previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
                     previousElement = hasPreviousSibling(previousElement) as HTMLElement;
-                    previousElement.nextSibling.remove();
+                    if(previousElement) {
+                        previousElement.nextSibling.remove();
+                    }
                 }
                 let currentNode = newNodes[i] as HTMLElement;
                 if (!currentNode) {

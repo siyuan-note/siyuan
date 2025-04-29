@@ -152,7 +152,7 @@ interface Window {
         }): void;
     };
     MathJax: {
-        tex2svg(math: string, {display: boolean}): HTMLElement
+        tex2svg(math: string, options: {display: boolean}): HTMLElement
         startup: {
             promise: Promise<void>
         }

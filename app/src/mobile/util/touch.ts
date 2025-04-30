@@ -5,6 +5,7 @@ import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {showMessage} from "../../dialog/message";
 
 let clientX: number;
 let clientY: number;
@@ -138,6 +139,7 @@ export const handleTouchStart = (event: TouchEvent) => {
     if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
         // https://github.com/siyuan-note/siyuan/issues/14569
         activeBlur();
+        showMessage("activeBlur1");
         return;
     }
 
@@ -314,6 +316,7 @@ export const handleTouchMove = (event: TouchEvent) => {
             transformMask((windowWidth - xDiff) / windowWidth);
         }
         activeBlur();
+        showMessage("activeBlur2");
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }

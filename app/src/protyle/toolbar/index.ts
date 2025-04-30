@@ -606,7 +606,7 @@ export class Toolbar {
                 let previousElement = i === newNodes.length ? newNodes[i - 1] as HTMLElement : hasPreviousSibling(newNodes[i]) as HTMLElement;
                 if (previousElement.nodeType === 3 && previousElement.textContent === Constants.ZWSP) {
                     previousElement = hasPreviousSibling(previousElement) as HTMLElement;
-                    if(previousElement) {
+                    if (previousElement) {
                         previousElement.nextSibling.remove();
                     }
                 }
@@ -982,7 +982,9 @@ export class Toolbar {
                     inlineMemoElements = [renderElement];
                 }
                 inlineMemoElements.forEach((item) => {
-                    item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                    if (item.nodeType !== 3) {
+                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                    }
                 });
             } else {
                 renderElement.setAttribute("data-content", Lute.EscapeHTMLStr(textElement.value));
@@ -1056,7 +1058,7 @@ export class Toolbar {
                         if (index === inlineMemoElements.length - 1) {
                             inlineLastNode = item;
                         }
-                    } else {
+                    } else if (item.nodeType !== 3) {
                         // 行级备注自动移除换行  https://ld246.com/article/1664205917326
                         item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
                     }

@@ -387,7 +387,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
             highlightById(editor.editor.protyle, options.id, true);
         } else if (options.action?.includes(Constants.CB_GET_FOCUS)) {
             if (nodeElement) {
-                const newRange = focusBlock(nodeElement);
+                const newRange = focusBlock(nodeElement, undefined, options.action?.includes(Constants.CB_GET_SETID) ? false : true);
                 if (newRange) {
                     editor.editor.protyle.toolbar.range = newRange;
                 }

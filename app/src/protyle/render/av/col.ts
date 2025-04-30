@@ -611,6 +611,11 @@ const addAttrViewColAnimation = (options: {
         }
         return;
     }
+    // https://github.com/siyuan-note/siyuan/issues/14724
+    let colData;
+    if (options.data) {
+        colData = options.data.view.columns.find((item => item.id === options.id));
+    }
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -618,7 +623,7 @@ const addAttrViewColAnimation = (options: {
         colId: options.id,
         editData: {
             previousID: options.previousID,
-            colData: genColDataByType(options.type, options.id, options.name),
+            colData: colData || genColDataByType(options.type, options.id, options.name),
         }
     });
     window.siyuan.menus.menu.remove();

@@ -485,15 +485,17 @@ export class Toolbar {
                             item.textContent = item.textContent.substring(0, item.textContent.length - 1);
                             removeText += "\n";
                         }
-                        const inlineElement = document.createElement("span");
-                        inlineElement.setAttribute("data-type", type);
-                        inlineElement.textContent = item.textContent;
-                        setFontStyle(inlineElement, textObj);
+                        if (item.textContent) {
+                            const inlineElement = document.createElement("span");
+                            inlineElement.setAttribute("data-type", type);
+                            inlineElement.textContent = item.textContent;
+                            setFontStyle(inlineElement, textObj);
 
-                        if (type === "text" && !inlineElement.getAttribute("style")) {
-                            newNodes.push(item);
-                        } else {
-                            newNodes.push(inlineElement);
+                            if (type === "text" && !inlineElement.getAttribute("style")) {
+                                newNodes.push(item);
+                            } else {
+                                newNodes.push(inlineElement);
+                            }
                         }
                     } else if (item.nodeType === 1) {
                         let types = (item.getAttribute("data-type") || "").split(" ");

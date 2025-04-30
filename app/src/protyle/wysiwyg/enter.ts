@@ -35,10 +35,6 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (disableElement ||
         // https://github.com/siyuan-note/siyuan/issues/10633
         blockElement.classList.contains("table")) {
-        if (blockElement.classList.contains("hr")) {
-            insertEmptyBlock(protyle, "afterend");
-            return;
-        }
         if (blockElement.classList.contains("protyle-wysiwyg--select") && blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
         } else {

@@ -1,5 +1,5 @@
 import {focusByWbr, getEditorRange} from "../protyle/util/selection";
-import {hasClosestBlock} from "../protyle/util/hasClosest";
+import {hasClosestBlock, hasClosestByClassName} from "../protyle/util/hasClosest";
 import {getContenteditableElement, getTopAloneElement} from "../protyle/wysiwyg/getBlock";
 import {genListItemElement, updateListOrder} from "../protyle/wysiwyg/list";
 import {transaction, turnsIntoOneTransaction, updateTransaction} from "../protyle/wysiwyg/transaction";
@@ -131,6 +131,12 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
         } else {
             blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
             blockElement = getTopAloneElement(blockElement);
+            // https://github.com/siyuan-note/siyuan/issues/14720#issuecomment-2840665326
+            if (blockElement.classList.contains("list")) {
+                blockElement = hasClosestByClassName(range.startContainer, "li") as HTMLElement;
+            } else if (blockElement.classList.contains("bq")) {
+                blockElement = hasClosestBlock(range.startContainer) as HTMLElement;
+            }
         }
     }
     if (!blockElement) {

@@ -505,6 +505,10 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 				for _, content := range v.Rollup.Contents {
 					if av.KeyTypeNumber == content.Type {
 						numbers = append(numbers, content.Number.Content)
+					} else if av.KeyTypeMSelect == content.Type {
+						for _, s := range content.MSelect {
+							contents = append(contents, s.Content)
+						}
 					} else {
 						contents = append(contents, content.String(true))
 					}

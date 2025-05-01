@@ -363,7 +363,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 inputElement.addEventListener("input", () => {
                     if (inputElement.value) {
                         // 不能使用 textContent，否则 < 会变为 &lt;
-                        element.innerHTML = Lute.EscapeHTMLStr(inputElement.value);
+                        element.innerHTML = Lute.EscapeHTMLStr(inputElement.value).trim() || refBlockId;
                     } else {
                         fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
                             element.innerHTML = response.data;
@@ -1517,12 +1517,12 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 }
                 inputElements[1].value = anchor;
                 inputElements[1].addEventListener("compositionend", () => {
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "*");
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim() || "*");
                 });
                 inputElements[1].addEventListener("input", (event: KeyboardEvent) => {
                     if (!event.isComposing) {
                         // https://github.com/siyuan-note/siyuan/issues/4511
-                        linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "*";
+                        linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim()) || "*";
                     }
                 });
                 inputElements[1].addEventListener("keydown", (event) => {

@@ -1436,7 +1436,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
 
         // 闪卡长按 Esc 光标定位到闪卡按钮上 https://github.com/siyuan-note/siyuan/issues/12989
-        if (document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
+        // https://github.com/siyuan-note/siyuan/issues/14730
+        if (event.repeat && document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
             return;
         }
 
@@ -1736,7 +1737,7 @@ export const sendGlobalShortcut = (app: App) => {
 };
 
 
-export const sendUnregisterGlobalShortcut = (app:App) => {
+export const sendUnregisterGlobalShortcut = (app: App) => {
     /// #if !BROWSER
     ipcRenderer.send(Constants.SIYUAN_CMD, {
         cmd: "unregisterGlobalShortcut",

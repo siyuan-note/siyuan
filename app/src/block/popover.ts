@@ -272,7 +272,16 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                     itemLevel > parseInt(blockElement.getAttribute("data-level"))) {
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
+                        break;
                     } else {
+                        const hasToolbar = item.editors.find(editItem => {
+                            if (!editItem.protyle.toolbar.subElement.classList.contains("fn__none")) {
+                                return true;
+                            }
+                        });
+                        if (hasToolbar) {
+                            break;
+                        }
                         item.destroy();
                     }
                 }
@@ -284,10 +293,20 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                 if ((item.targetElement || typeof item.x === "number") && item.element.getAttribute("data-pin") === "false") {
                     if (menuLevel && menuLevel >= itemLevel) {
                         // 有 gutter 菜单时不隐藏
+                        break;
                     } else if (item.targetElement && item.targetElement.classList.contains("protyle-wysiwyg__embed") &&
                         item.targetElement.contains(targetElement)) {
                         // 点击嵌入块后浮窗消失后再快速点击嵌入块无法弹出浮窗 https://github.com/siyuan-note/siyuan/issues/12511
+                        break;
                     } else {
+                        const hasToolbar = item.editors.find(editItem => {
+                            if (!editItem.protyle.toolbar.subElement.classList.contains("fn__none")) {
+                                return true;
+                            }
+                        });
+                        if (hasToolbar) {
+                           break;
+                        }
                         item.destroy();
                     }
                 }

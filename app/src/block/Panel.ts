@@ -125,8 +125,8 @@ export class BlockPanel {
                     } else if (type === "stickTab") {
                         checkFold(this.refDefs[0].refID, (zoomIn, action) => {
                             openFileById({
-                                app:options.app,
-                                id:this.refDefs[0].refID,
+                                app: options.app,
+                                id: this.refDefs[0].refID,
                                 action,
                                 zoomIn,
                                 openNewTab: true

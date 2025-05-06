@@ -839,12 +839,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     // 需使用 innerText，否则 br 无法传唤为 /n https://github.com/siyuan-note/siyuan/issues/12066
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
                     if (isEndOfBlock(range)) {
+                        const cloneRange = range.cloneRange();
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
                             const nextRange = focusBlock(nextElement);
                             if (nextRange) {
                                 const nextBlockElement = hasClosestBlock(nextRange.startContainer);
                                 if (nextBlockElement) {
+                                    // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
+                                    cloneRange.insertNode(document.createElement("wbr"));
                                     removeBlock(protyle, nextBlockElement, nextRange, "Delete");
                                 }
                             }

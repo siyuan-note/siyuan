@@ -234,21 +234,19 @@ export class Preview {
                     }
                 });
             });
+            if(typeof  window.MathJax === "undefined") {
+                window.MathJax = {
+                    svg: {
+                        fontCache: "none"
+                    },
+                };
+            }
             await addScriptSync(`${Constants.PROTYLE_CDN}/js/mathjax/tex-svg-full.js`, "protyleMathJaxScript");
             await window.MathJax.startup.promise;
             copyElement.querySelectorAll('[data-subtype="math"]').forEach(mathElement => {
                 const node = window.MathJax.tex2svg(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")).trim(), {display: mathElement.tagName === "DIV"});
-                node.querySelectorAll("use").forEach(item => {
-                    const useTarget = node.querySelector(item.getAttribute("xlink:href"));
-                    if (useTarget) {
-                        useTarget.setAttribute("transform", item.getAttribute("transform") || "");
-                        item.outerHTML = useTarget.outerHTML;
-                    }
-                });
-                node.querySelector("mjx-assistive-mml")?.remove();
-                node.querySelector("defs")?.remove();
-                mathElement.innerHTML = "";
-                mathElement.append(node);
+                node.querySelector("mjx-assistive-mml").remove();
+                mathElement.innerHTML= node.outerHTML;
             });
         } else if (type === "zhihu") {
             this.link2online(copyElement);

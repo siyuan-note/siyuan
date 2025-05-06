@@ -152,10 +152,13 @@ interface Window {
         }): void;
     };
     MathJax: {
-        tex2svg(math: string, options: {display: boolean}): HTMLElement
-        startup: {
+        svg: {
+            fontCache: string
+        }
+        startup?: {
             promise: Promise<void>
         }
+        tex2svg?(math: string, options: { display: boolean }): HTMLElement
     };
     hljs: {
         listLanguages(): string[];

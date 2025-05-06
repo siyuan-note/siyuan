@@ -488,7 +488,7 @@ export class Toolbar {
                         if (item.textContent) {
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
-                            inlineElement.textContent = item.textContent;
+                            inlineElement.textContent = type === "a" ? (item.textContent.trim() || "*") : item.textContent;
                             setFontStyle(inlineElement, textObj);
 
                             if (type === "text" && !inlineElement.getAttribute("style")) {

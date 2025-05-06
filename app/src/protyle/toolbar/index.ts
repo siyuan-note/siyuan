@@ -601,7 +601,11 @@ export class Toolbar {
         for (let i = newNodes.length - 1; i > -1; i--) {
             this.range.insertNode(newNodes[i]);
         }
-
+        // 不选中后，ctrl+g 光标重置
+        if (newNodes.length === 1 && newNodes[0].textContent === Constants.ZWSP) {
+            this.range.setStart(newNodes[0], 1);
+            this.range.collapse(true);
+        }
         if (!keepZWPS) {
             // 合并元素
             for (let i = 0; i <= newNodes.length; i++) {

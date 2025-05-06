@@ -675,6 +675,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__hr"></div><div class="fn__flex">
+    <div class="fn__space"></div>
     <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
     <div class="b3-form__icona fn__block">
         <input class="b3-text-field b3-form__icona-input" type="text">

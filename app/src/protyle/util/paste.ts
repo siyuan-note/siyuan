@@ -398,6 +398,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         tempElement.innerHTML = siyuanHTML;
+        if (tempElement.childElementCount === 1 && ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ").includes("block-ref")) {
+            protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
+                type: "id",
+                color: `${(tempElement.firstElementChild as HTMLElement).dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+            });
+            return;
+        }
         let isBlock = false;
         tempElement.querySelectorAll("[data-node-id]").forEach((e) => {
             const newId = Lute.NewNodeID();
@@ -483,6 +490,13 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     e.remove();
                 }
             });
+            if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "A") {
+                protyle.toolbar.setInlineMark(protyle, "a", "range", {
+                    type: "a",
+                    color: (tempElement.firstElementChild as HTMLLinkElement).href
+                });
+                return;
+            }
             fetchPost("/api/lute/html2BlockDOM", {
                 dom: tempElement.innerHTML
             }, (response) => {

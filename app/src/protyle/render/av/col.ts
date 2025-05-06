@@ -98,7 +98,7 @@ export const getEditHTML = (options: {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
+            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
         </div>
         <div class="fn__hr--small"></div>
     </div>
@@ -681,10 +681,15 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         <input class="b3-text-field b3-form__icona-input" type="text">
         <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
     </div>
+    <div class="fn__space"></div>
 </div>
 <div class="fn__none">
     <div class="fn__hr"></div>
-    <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+    <div class="fn__flex">
+        <span class="fn__space"></span>
+        <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+        <span class="fn__space"></span>    
+    </div>
 </div>
 <div class="fn__hr--small"></div>`,
         bind(element) {
@@ -727,7 +732,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
             const descElement = element.querySelector("textarea");
             inputElement.nextElementSibling.addEventListener("click", () => {
-                const descPanelElement = descElement.parentElement;
+                const descPanelElement = descElement.parentElement.parentElement;
                 descPanelElement.classList.toggle("fn__none");
                 if (!descPanelElement.classList.contains("fn__none")) {
                     descElement.focus();

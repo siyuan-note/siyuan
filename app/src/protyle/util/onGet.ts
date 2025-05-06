@@ -450,7 +450,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         if (scrollAttr && scrollAttr.focusId) {
             range = focusByOffset(focusElement, scrollAttr.focusStart, scrollAttr.focusEnd) as Range;
         } else {
-            focusBlock(focusElement, undefined, action.includes(Constants.CB_GET_SETID) ? false : true);
+            focusBlock(focusElement, undefined, action.includes(Constants.CB_GET_OUTLINE) ? false : true);
         }
         /// #if !MOBILE
         if (!action.includes(Constants.CB_GET_UNUNDO)) {

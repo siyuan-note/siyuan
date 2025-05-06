@@ -125,7 +125,8 @@ export abstract class Constants {
     public static readonly CB_GET_HL = "cb-get-hl"; // 高亮
     public static readonly CB_GET_FOCUS = "cb-get-focus"; // 光标定位
     public static readonly CB_GET_FOCUSFIRST = "cb-get-focusfirst"; // 动态定位到第一个块
-    public static readonly CB_GET_SETID = "cb-get-setid"; // 重置 blockid
+    public static readonly CB_GET_SETID = "cb-get-setid"; // 无折叠大纲点击 重置 blockid
+    public static readonly CB_GET_OUTLINE = "cb-get-outline"; // 大纲点击
     public static readonly CB_GET_ALL = "cb-get-all"; // 获取所有块
     public static readonly CB_GET_BACKLINK = "cb-get-backlink"; // 悬浮窗为传递型需展示上下文
     public static readonly CB_GET_UNUNDO = "cb-get-unundo"; // 不需要记录历史

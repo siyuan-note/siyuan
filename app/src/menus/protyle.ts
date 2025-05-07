@@ -631,7 +631,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
+            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML).trim());
         }
     }).element);
     if (!protyle.disabled) {

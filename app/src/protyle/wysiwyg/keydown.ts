@@ -1786,6 +1786,13 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     });
                 }
                 let language = nodeElement.querySelector(".protyle-action__language").textContent;
+                // 语言优先级处理 https://github.com/siyuan-note/siyuan/issues/14767
+                if (range.commonAncestorContainer.nodeType === 1) {
+                    const snippetClassName = (range.commonAncestorContainer as HTMLElement).className;
+                    if (snippetClassName.startsWith("language-")) {
+                        language = snippetClassName.replace("language-", "");
+                    }
+                }
                 if (!window.hljs.getLanguage(language)) {
                     language = "plaintext";
                 }

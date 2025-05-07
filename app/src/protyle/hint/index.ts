@@ -555,6 +555,7 @@ ${genHintItemHTML(item)}
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
+                    protyle.toolbar.range.collapse(false);
                 });
             });
             return;
@@ -588,6 +589,7 @@ ${genHintItemHTML(item)}
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
             });
+            protyle.toolbar.range.collapse(false);
             return;
         } else if (this.splitChar === ":") {
             addEmoji(value);

@@ -372,11 +372,11 @@ func ListDocTree(boxID, listPath string, sortMode int, flashcard, showHidden boo
 	switch sortMode {
 	case util.SortModeNameASC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(docs[i].Name, docs[j].Name)
+			return util.PinYinCompare4FileTree(docs[i].Name, docs[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(docs, func(i, j int) bool {
-			return util.PinYinCompare(docs[j].Name, docs[i].Name)
+			return util.PinYinCompare4FileTree(docs[j].Name, docs[i].Name)
 		})
 	case util.SortModeUpdatedASC:
 		sort.Slice(docs, func(i, j int) bool { return docs[i].Mtime < docs[j].Mtime })

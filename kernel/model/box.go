@@ -148,11 +148,11 @@ func ListNotebooks() (ret []*Box, err error) {
 	switch Conf.FileTree.Sort {
 	case util.SortModeNameASC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(ret[i].Name, ret[j].Name)
+			return util.PinYinCompare4FileTree(ret[i].Name, ret[j].Name)
 		})
 	case util.SortModeNameDESC:
 		sort.Slice(ret, func(i, j int) bool {
-			return util.PinYinCompare(ret[j].Name, ret[i].Name)
+			return util.PinYinCompare4FileTree(ret[j].Name, ret[i].Name)
 		})
 	case util.SortModeAlphanumASC:
 		sort.Slice(ret, func(i, j int) bool {

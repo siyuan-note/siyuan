@@ -635,6 +635,12 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     const avId = blockElement.getAttribute("data-av-id");
     const id = blockElement.getAttribute("data-node-id");
     const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
+    // https://github.com/siyuan-note/siyuan/issues/14770
+    if (nameElement.textContent === "") {
+        nameElement.querySelectorAll("br").forEach(item => {
+            item.remove();
+        });
+    }
     const newData = nameElement.textContent.trim();
     if (newData === nameElement.dataset.title.trim()) {
         return;

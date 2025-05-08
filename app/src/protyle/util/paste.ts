@@ -398,7 +398,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         tempElement.innerHTML = siyuanHTML;
-        if (tempElement.childElementCount === 1) {
+        if (tempElement.childElementCount === 1 && range.toString()) {
             const types = ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ");
             if (types.includes("block-ref")) {
                 protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
@@ -511,7 +511,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     e.remove();
                 }
             });
-            if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "A") {
+            if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "A" && range.toString()) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: (tempElement.firstElementChild as HTMLLinkElement).href

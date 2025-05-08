@@ -16,7 +16,7 @@ import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {checkFold} from "../util/noRelyPCFunction";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -240,7 +240,7 @@ export class BlockPanel {
         }
         let openHTML = "";
         if (this.refDefs.length === 1) {
-            openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openInNewTab} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.openInNewTab.custom)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
+            openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openInNewTab}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.openInNewTab.custom)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
 <span class="fn__space"></span>`;
             /// #if !BROWSER
             openHTML += `<span data-type="open" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>

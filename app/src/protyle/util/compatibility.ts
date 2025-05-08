@@ -222,6 +222,14 @@ export const isInHarmony = () => {
     return window.siyuan.config.system.container === "harmony" && window.JSHarmony;
 };
 
+
+export const updateHotkeyAfterTip = (hotkey: string) => {
+    if (hotkey) {
+        return " " + updateHotkeyTip(hotkey);
+    }
+    return "";
+};
+
 // Mac，Windows 快捷键展示
 export const updateHotkeyTip = (hotkey: string) => {
     if (isMac()) {

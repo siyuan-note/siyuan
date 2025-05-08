@@ -18,6 +18,7 @@ import {input} from "../wysiwyg/input";
 import {objEquals} from "../../util/functions";
 import {fetchPost} from "../../util/fetch";
 import {mergeAddOption} from "../render/av/select";
+import {isIncludeCell} from "./table";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -253,14 +254,18 @@ const processTable = (range: Range, html: string, protyle: IProtyle, blockElemen
         return false;
     }
     const scrollLeft = blockElement.firstElementChild.scrollLeft;
+    const scrollTop = blockElement.querySelector("table").scrollTop;
     const tableSelectElement = blockElement.querySelector(".table__select") as HTMLElement;
     let index = 0;
     const matchCellsElement: HTMLTableCellElement[] = [];
     blockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-        if (!item.classList.contains("fn__none") &&
-            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-            copyCellElements.length > index) {
+        if (!item.classList.contains("fn__none") && copyCellElements.length > index &&
+            isIncludeCell({
+                tableSelectElement,
+                scrollLeft,
+                scrollTop,
+                item,
+            })) {
             matchCellsElement.push(item);
             index++;
         }

@@ -70,7 +70,7 @@ import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
-import {clearTableCell, setTableAlign} from "../util/table";
+import {clearTableCell, isIncludeCell, setTableAlign} from "../util/table";
 import {countBlockWord, countSelectWord} from "../../layout/status";
 import {showMessage} from "../../dialog/message";
 import {getBacklinkHeadingMore, loadBreadcrumb} from "./renderBacklink";
@@ -345,12 +345,16 @@ export class WYSIWYG {
             } else if (selectTableElement) {
                 const selectCellElements: HTMLTableCellElement[] = [];
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
+                const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 html = "<table>";
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                    if (!item.classList.contains("fn__none") &&
-                        item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                        item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                    if (!item.classList.contains("fn__none") && isIncludeCell({
+                        tableSelectElement,
+                        scrollLeft,
+                        scrollTop,
+                        item,
+                    })) {
                         selectCellElements.push(item);
                     }
                 });
@@ -890,7 +894,7 @@ export class WYSIWYG {
                             }
                         });
                         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
-                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top}px;height:${height}px;width:${width + 1}px;`);
+                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableBlockElement.querySelector('table').scrollTop}px;height:${height}px;width:${width + 1}px;`);
                         moveCellElement = moveTarget;
                     }
                     return;
@@ -1118,6 +1122,7 @@ export class WYSIWYG {
                                         const colCount = tableBlockElement.querySelectorAll("th").length;
                                         let fnNoneMax = 0;
                                         const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         let isTHead = false;
                                         let isTBody = false;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement, index: number) => {
@@ -1141,8 +1146,12 @@ export class WYSIWYG {
                                                     }
                                                 }
                                             } else {
-                                                if (item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                    item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                                if (isIncludeCell({
+                                                    tableSelectElement,
+                                                    scrollLeft,
+                                                    scrollTop,
+                                                    item,
+                                                })) {
                                                     selectCellElements.push(item);
                                                     if (!isTHead && item.parentElement.parentElement.tagName === "THEAD") {
                                                         isTHead = true;
@@ -1234,11 +1243,15 @@ export class WYSIWYG {
                                     if (tableBlockElement) {
                                         const selectCellElements: HTMLTableCellElement[] = [];
                                         const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
                                             if (!item.classList.contains("fn__none") &&
-                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                                isIncludeCell({
+                                                    tableSelectElement,
+                                                    scrollLeft,
+                                                    scrollTop,
+                                                    item,
+                                                }) && (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
                                                 selectCellElements.push(item);
                                             }
                                         });
@@ -1255,10 +1268,14 @@ export class WYSIWYG {
                                     if (tableBlockElement) {
                                         const selectCellElements: HTMLTableCellElement[] = [];
                                         const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") &&
-                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            if (!item.classList.contains("fn__none") && isIncludeCell({
+                                                    tableSelectElement,
+                                                    scrollLeft,
+                                                    scrollTop,
+                                                    item,
+                                                }) &&
                                                 (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
                                                 selectCellElements.push(item);
                                             }
@@ -1276,11 +1293,14 @@ export class WYSIWYG {
                                     if (tableBlockElement) {
                                         const selectCellElements: HTMLTableCellElement[] = [];
                                         const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") &&
-                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
-                                                (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
+                                            if (!item.classList.contains("fn__none") && isIncludeCell({
+                                                    tableSelectElement,
+                                                    scrollLeft,
+                                                    scrollTop,
+                                                    item,
+                                                }) && (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
                                                 selectCellElements.push(item);
                                             }
                                         });
@@ -1296,10 +1316,14 @@ export class WYSIWYG {
                                     if (tableBlockElement) {
                                         const selectCellElements: HTMLTableCellElement[] = [];
                                         const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                        const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                         tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                            if (!item.classList.contains("fn__none") &&
-                                                item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                                item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight &&
+                                            if (!item.classList.contains("fn__none") && isIncludeCell({
+                                                    tableSelectElement,
+                                                    scrollLeft,
+                                                    scrollTop,
+                                                    item,
+                                                }) &&
                                                 (selectCellElements.length === 0 || (selectCellElements.length > 0 && item.offsetTop === selectCellElements[0].offsetTop))) {
                                                 selectCellElements.push(item);
                                             }
@@ -1318,11 +1342,15 @@ export class WYSIWYG {
                                 if (tableBlockElement) {
                                     const selectCellElements: HTMLTableCellElement[] = [];
                                     const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+                                    const scrollTop = tableBlockElement.querySelector("table").scrollTop;
                                     const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
                                     tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                                        if (!item.classList.contains("fn__none") &&
-                                            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                                            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                                        if (!item.classList.contains("fn__none") && isIncludeCell({
+                                            tableSelectElement,
+                                            scrollLeft,
+                                            scrollTop,
+                                            item,
+                                        })) {
                                             selectCellElements.push(item);
                                         }
                                     });
@@ -1547,12 +1575,16 @@ export class WYSIWYG {
             } else if (selectTableElement) {
                 const selectCellElements: HTMLTableCellElement[] = [];
                 const scrollLeft = nodeElement.firstElementChild.scrollLeft;
+                const scrollTop = nodeElement.querySelector("table").scrollTop;
                 const tableSelectElement = nodeElement.querySelector(".table__select") as HTMLElement;
                 html = "<table>";
                 nodeElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-                    if (!item.classList.contains("fn__none") &&
-                        item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-                        item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+                    if (!item.classList.contains("fn__none") && isIncludeCell({
+                        tableSelectElement,
+                        scrollLeft,
+                        scrollTop,
+                        item,
+                    })) {
                         selectCellElements.push(item);
                     }
                 });

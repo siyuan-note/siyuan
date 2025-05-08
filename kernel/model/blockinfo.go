@@ -306,7 +306,6 @@ func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 	if "" == content {
 		content = Conf.language(105)
 	}
-
 	return
 }
 

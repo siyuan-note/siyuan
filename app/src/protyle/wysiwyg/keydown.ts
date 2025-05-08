@@ -1791,6 +1791,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const snippetClassName = (range.commonAncestorContainer as HTMLElement).className;
                     if (snippetClassName.startsWith("language-")) {
                         language = snippetClassName.replace("language-", "");
+                        // https://github.com/siyuan-note/siyuan/issues/14767
+                        if (!wbrElement.parentElement.isSameNode(range.commonAncestorContainer)) {
+                            wbrElement.parentElement.after(wbrElement);
+                            wbrElement.previousElementSibling.remove();
+                        }
                     }
                 }
                 if (!window.hljs.getLanguage(language)) {

@@ -12,7 +12,7 @@ import {
     setFirstNodeRange,
     setLastNodeRange
 } from "../util/selection";
-import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName, hasClosestByTag} from "../util/hasClosest";
+import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
 import {Link} from "./Link";
 import {setPosition} from "../../util/setPosition";
 import {transaction, updateTransaction} from "../wysiwyg/transaction";

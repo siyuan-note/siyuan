@@ -894,7 +894,7 @@ export class WYSIWYG {
                             }
                         });
                         protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
-                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableBlockElement.querySelector('table').scrollTop}px;height:${height}px;width:${width + 1}px;`);
+                        tableBlockElement.querySelector(".table__select").setAttribute("style", `left:${left - tableBlockElement.firstElementChild.scrollLeft}px;top:${top - tableBlockElement.querySelector("table").scrollTop}px;height:${height}px;width:${width + 1}px;`);
                         moveCellElement = moveTarget;
                     }
                     return;

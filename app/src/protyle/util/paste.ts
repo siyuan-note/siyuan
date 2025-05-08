@@ -399,7 +399,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         const tempElement = document.createElement("div");
         tempElement.innerHTML = siyuanHTML;
         if (tempElement.childElementCount === 1) {
-            const types = ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ")
+            const types = ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ");
             if (types.includes("block-ref")) {
                 protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",

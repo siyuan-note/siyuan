@@ -13,7 +13,6 @@ import {showMessage} from "../../dialog/message";
 import {getCurrentEditor} from "../editor";
 import {avRender} from "../../protyle/render/av/render";
 import {setTitle} from "../../dialog/processSystem";
-import {activeBlur} from "./keyboardToolbar";
 
 const forwardStack: IBackStack[] = [];
 

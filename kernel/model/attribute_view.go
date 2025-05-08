@@ -2903,7 +2903,9 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				if !operation.IsDetached {
 					bindBlockAv0(tx, operation.AvID, node, tree)
 					value.IsDetached = false
-					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
+					icon, content := getNodeAvBlockText(node)
+					content = util.UnescapeHTML(content)
+					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
 					err = av.SaveAttributeView(attrView)
 				}
@@ -2940,7 +2942,9 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				value.Block.ID = operation.NextID
 				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
+					icon, content := getNodeAvBlockText(node)
+					content = util.UnescapeHTML(content)
+					value.Block.Icon, value.Block.Content = icon, content
 				}
 			}
 

@@ -87,13 +87,13 @@ func PinYinCompare4FileTree(str1, str2 string) bool {
 
 	// 长度不相等的情况下，比较前面相等的部分
 	if len(a) < len(b) {
-		if 0 == bytes.Compare(a, b[:len(a)]) { // 前面相等的情况下，比较长度
-			return len(a) > len(b[:len(a)])
+		if 0 == bytes.Compare(a, b[:len(a)]) { // 前面相等的情况下短的在前
+			return true
 		}
 		return bytes.Compare(a, b[:len(a)]) < 0
 	}
 	if 0 == bytes.Compare(a[:len(b)], b) {
-		return len(a[:len(b)]) > len(b)
+		return false
 	}
 	return bytes.Compare(a[:len(b)], b) < 0
 }

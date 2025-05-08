@@ -274,11 +274,22 @@ export const globalCommand = (command: string, app: App) => {
             }
             return true;
         }
-        const tab = getActiveTab(false);
+
+        const tab = getActiveTab();
         if (tab) {
             tab.parent.removeTab(tab.id);
+            return true;
         }
-        return true;
+        // https://github.com/siyuan-note/siyuan/issues/14729
+        if (window.siyuan.blockPanels.length > 0) {
+            window.siyuan.blockPanels[window.siyuan.blockPanels.length - 1]?.destroy();
+            return true;
+        }
+        const noFocusTab = getActiveTab(false);
+        if (noFocusTab) {
+            noFocusTab.parent.removeTab(noFocusTab.id);
+            return true;
+        }
     }
     if (command === "closeOthers" || command === "closeAll") {
         const tab = getActiveTab(false);

@@ -400,14 +400,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         tempElement.innerHTML = siyuanHTML;
         if (tempElement.childElementCount === 1) {
             const types = ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ")
-            if(types.includes("block-ref")) {
+            if (types.includes("block-ref")) {
                 protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
                     color: `${(tempElement.firstElementChild as HTMLElement).dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
                 });
                 return;
             }
-            if(types.includes("a")) {
+            if (types.includes("a")) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: `${(tempElement.firstElementChild as HTMLElement).dataset.href}${Constants.ZWSP}${range.toString()}`
@@ -483,7 +483,18 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 isHTML = true;
             }
 
-            if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br")) && (0 > textHTML.toLowerCase().indexOf("class=\"katex") && 0 > textHTML.toLowerCase().indexOf("class=\"math"))) {
+            const textHTMLLowercase = textHTML.toLowerCase();
+            // <span style="color: rgb(36, 41, 46); font-family: &#34;Helvetica Neue&#34;, &#34;Luxi Sans&#34;, &#34;DejaVu Sans&#34;, &#34;Hiragino Sans GB&#34;, &#34;Microsoft Yahei&#34;, sans-serif, &#34;Apple Color Emoji&#34;, &#34;Segoe UI Emoji&#34;, &#34;Noto Color Emoji&#34;, &#34;Segoe UI Symbol&#34;, &#34;Android Emoji&#34;, EmojiSymbols; font-size: 16px; font-style: normal; font-variant-ligatures: no-common-ligatures; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">数据来自<span> </span></span><a href="https://ld246.com/forward?goto=https%3A%2F%2Fwww.similarweb.com%2F" target="_blank" rel="nofollow ugc" style="color: rgb(66, 133, 244); outline: 0px; text-decoration: none; font-family: &#34;Helvetica Neue&#34;, &#34;Luxi Sans&#34;, &#34;DejaVu Sans&#34;, &#34;Hiragino Sans GB&#34;, &#34;Microsoft Yahei&#34;, sans-serif, &#34;Apple Color Emoji&#34;, &#34;Segoe UI Emoji&#34;, &#34;Noto Color Emoji&#34;, &#34;Segoe UI Symbol&#34;, &#34;Android Emoji&#34;, EmojiSymbols; font-size: 16px; font-style: normal; font-variant-ligatures: no-common-ligatures; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255);">SimiliarWeb</a><span style="color: rgb(36, 41, 46); font-family: &#34;Helvetica Neue&#34;, &#34;Luxi Sans&#34;, &#34;DejaVu Sans&#34;, &#34;Hiragino Sans GB&#34;, &#34;Microsoft Yahei&#34;, sans-serif, &#34;Apple Color Emoji&#34;, &#34;Segoe UI Emoji&#34;, &#34;Noto Color Emoji&#34;, &#34;Segoe UI Symbol&#34;, &#34;Android Emoji&#34;, EmojiSymbols; font-size: 16px; font-style: normal; font-variant-ligatures: no-common-ligatures; font-variant-caps: normal; font-weight: 400; letter-spacing: normal; orphans: 2; text-align: start; text-indent: 0px; text-transform: none; widows: 2; word-spacing: 0px; -webkit-text-stroke-width: 0px; white-space: normal; background-color: rgb(255, 255, 255); text-decoration-thickness: initial; text-decoration-style: initial; text-decoration-color: initial; display: inline !important; float: none;">，为了方便对比，我们以 链</span>
+            if (textPlain && "" !== textPlain.trim() && (textHTML.startsWith("<span") || textHTML.startsWith("<br")) &&
+                (0 > textHTMLLowercase.indexOf("class=\"katex") && 0 > textHTMLLowercase.indexOf("class=\"math") &&
+                    0 > textHTMLLowercase.indexOf("</a>") && 0 > textHTMLLowercase.indexOf("</img>") &&
+                    0 > textHTMLLowercase.indexOf("</b>") && 0 > textHTMLLowercase.indexOf("</strong>") &&
+                    0 > textHTMLLowercase.indexOf("</i>") && 0 > textHTMLLowercase.indexOf("</em>") &&
+                    0 > textHTMLLowercase.indexOf("</ol>") && 0 > textHTMLLowercase.indexOf("</ul>") &&
+                    0 > textHTMLLowercase.indexOf("</table>") && 0 > textHTMLLowercase.indexOf("</blockquote>") &&
+                    0 > textHTMLLowercase.indexOf("</h1>") && 0 > textHTMLLowercase.indexOf("</h2>") &&
+                    0 > textHTMLLowercase.indexOf("</h3>") && 0 > textHTMLLowercase.indexOf("</h4>") &&
+                    0 > textHTMLLowercase.indexOf("</h5>") && 0 > textHTMLLowercase.indexOf("</h6>"))) {
                 // 豆包复制粘贴问题 https://github.com/siyuan-note/siyuan/issues/13265 https://github.com/siyuan-note/siyuan/issues/14313
                 isHTML = false;
             }

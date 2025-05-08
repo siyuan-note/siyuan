@@ -212,6 +212,7 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                 }
             });
         }
+        html = "";
         Array.from(tempElement.content.children).forEach((item, index) => {
             const tempId = item.getAttribute("data-node-id");
             let realElement;
@@ -271,6 +272,8 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
                     }
                 }
             }
+            // https://github.com/siyuan-note/siyuan/issues/14766
+            html += realElement.outerHTML;
         });
     } else if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
         editElement.parentElement.removeAttribute("data-render");

@@ -1,7 +1,7 @@
 import {ToolbarItem} from "./ToolbarItem";
 import {linkMenu} from "../../menus/protyle";
 import {hasClosestBlock, hasClosestByAttribute} from "../util/hasClosest";
-import {readText} from "../util/compatibility";
+import {readClipboard} from "../util/compatibility";
 import {Constants} from "../../constants";
 
 export class Link extends ToolbarItem {
@@ -25,29 +25,40 @@ export class Link extends ToolbarItem {
                 return;
             }
 
-            const rangeString = range.toString().trim().replace(Constants.ZWSP, "");
             let dataHref = "";
-            let dataText = "";
+            let dataText = range.toString().trim().replace(Constants.ZWSP, "");
             try {
-                const clipText = await readText();
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
-                dataHref = protyle.lute.GetLinkDest(rangeString);
+                dataHref = protyle.lute.GetLinkDest(dataText);
                 if (!dataHref) {
-                    dataHref = protyle.lute.GetLinkDest(clipText);
-                }
-                if (!dataHref) {
-                    // 360
-                    const lastSpace = clipText.lastIndexOf(" ");
-                    if (lastSpace > -1) {
-                        dataHref = protyle.lute.GetLinkDest(clipText.substring(lastSpace));
-                        if (dataHref) {
-                            dataText = clipText.substring(0, lastSpace);
+                    const clipObject = await readClipboard();
+                    const html = clipObject.textHTML || protyle.lute.Md2BlockDOM(clipObject.textPlain);
+                    if (html) {
+                        const tempElement = document.createElement("template");
+                        tempElement.innerHTML = html;
+                        const linkElement = tempElement.content.querySelector('span[data-type~="a"], a');
+                        if (linkElement) {
+                            dataText = dataText || linkElement.textContent;
+                            dataHref = linkElement.getAttribute("data-href") || linkElement.getAttribute("href");
                         }
                     }
-                }
-                // https://github.com/siyuan-note/siyuan/issues/12867
-                if (!dataHref && clipText.startsWith("assets/")) {
-                    dataHref = clipText;
+                    if (!dataHref) {
+                        dataHref = protyle.lute.GetLinkDest(clipObject.textPlain);
+                    }
+                    if (!dataHref) {
+                        // 360
+                        const lastSpace = clipObject.textPlain.lastIndexOf(" ");
+                        if (lastSpace > -1) {
+                            dataHref = protyle.lute.GetLinkDest(clipObject.textPlain.substring(lastSpace));
+                            if (dataHref && !dataText) {
+                                dataText = clipObject.textPlain.substring(0, lastSpace);
+                            }
+                        }
+                    }
+                    // https://github.com/siyuan-note/siyuan/issues/12867
+                    if (!dataHref && clipObject.textPlain.startsWith("assets/")) {
+                        dataHref = clipObject.textPlain;
+                    }
                 }
             } catch (e) {
                 console.log(e);

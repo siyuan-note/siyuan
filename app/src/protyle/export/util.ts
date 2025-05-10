@@ -60,7 +60,7 @@ export const exportImage = (id: string) => {
     btnsElement[0].addEventListener("click", () => {
         exportDialog.destroy();
     });
-    btnsElement[1].addEventListener("click", () => {
+    btnsElement[1].addEventListener("click", async () => {
         const msgId = showMessage(window.siyuan.languages.exporting, 0);
         const containerElement = exportDialog.element.querySelector(".b3-dialog__container") as HTMLElement;
         containerElement.style.height = "";
@@ -70,6 +70,16 @@ export const exportImage = (id: string) => {
         const contentElement = exportDialog.element.querySelector(".b3-dialog__content") as HTMLElement;
         contentElement.style.overflow = "hidden";
         setStorageVal(Constants.LOCAL_EXPORTIMG, window.siyuan.storage[Constants.LOCAL_EXPORTIMG]);
+        const plantumlElements = previewElement.querySelectorAll("[data-subtype='plantuml']");
+        for (let i = 0; i < plantumlElements.length; i++) {
+            const objectElement = plantumlElements[i].querySelector("object");
+            if (objectElement) {
+                const res = await fetch(objectElement.getAttribute("data"));
+                const response = await res.text();
+                objectElement.insertAdjacentHTML("beforebegin", response as string);
+                objectElement.remove();
+            }
+        }
         setTimeout(() => {
             addScript("/stage/protyle/js/html-to-image.min.js?v=1.11.13", "protyleHtml2image").then(async () => {
                 let blob = await window.htmlToImage.toBlob(exportDialog.element.querySelector(".b3-dialog__content"));

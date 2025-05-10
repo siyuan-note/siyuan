@@ -193,6 +193,9 @@ export class Toolbar {
             startElement = startElement.parentElement;
         } else if (startElement.childElementCount > 0 && startElement.childNodes[range.startOffset]?.nodeType !== 3) {
             startElement = startElement.childNodes[range.startOffset] as HTMLElement;
+            if (startElement.tagName === "WBR") {
+                startElement = startElement.parentElement;
+            }
         }
         if (!startElement || startElement.nodeType === 3) {
             return [];
@@ -206,10 +209,10 @@ export class Toolbar {
         } else if (endElement.childElementCount > 0 && endElement.childNodes[range.endOffset]?.nodeType !== 3) {
             endElement = endElement.childNodes[range.endOffset] as HTMLElement;
         }
-        if (!endElement || endElement.nodeType === 3) {
+        if (types.length === 0 && (!endElement || endElement.nodeType === 3)) {
             return [];
         }
-        if (!["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
+        if (endElement && !["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {

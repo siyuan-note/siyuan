@@ -531,11 +531,22 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     e.remove();
                 }
             });
-            if (tempElement.childElementCount === 1 && tempElement.childNodes.length === 1 &&
-                tempElement.firstElementChild.tagName === "A" && range.toString()) {
+            // https://github.com/siyuan-note/siyuan/issues/14625#issuecomment-2869618067
+            let linkElement;
+            if (tempElement.childElementCount === 1 && tempElement.childNodes.length === 1) {
+                if (tempElement.firstElementChild.tagName === "A") {
+                    linkElement = tempElement.firstElementChild;
+                } else if (tempElement.firstElementChild.tagName === "P" &&
+                    tempElement.firstElementChild.childElementCount === 1 &&
+                    tempElement.firstElementChild.childNodes.length === 1 &&
+                    tempElement.firstElementChild.firstElementChild.tagName === "A") {
+                    linkElement = tempElement.firstElementChild.firstElementChild;
+                }
+            }
+            if (linkElement) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: (tempElement.firstElementChild as HTMLLinkElement).href
+                    color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${range.toString() || linkElement.textContent}`
                 });
                 return;
             }

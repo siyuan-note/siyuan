@@ -838,7 +838,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     // 需使用 innerText，否则 br 无法传唤为 /n https://github.com/siyuan-note/siyuan/issues/12066
                     // 段末反向删除 https://github.com/siyuan-note/insider/issues/274
-                    if (isEndOfBlock(range)) {
+                    if (isEndOfBlock(range) || editElement.textContent.substring(position.start) === "\n") {
                         const cloneRange = range.cloneRange();
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
@@ -860,6 +860,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.preventDefault();
                         return;
                     } else {
+                        // TODO 软换行前 Delete https://github.com/siyuan-note/siyuan/issues/14807
+                        // if (/\n+$/.test(editElement.textContent.substring(position.start))) {
+                        //     const wbrElement = document.createElement("wbr");
+                        //     range.insertNode(wbrElement);
+                        //     const oldHTML = nodeElement.outerHTML;
+                        //     wbrElement.nextSibling.textContent =  wbrElement.nextSibling.textContent.substring(1);
+                        //     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
+                        //     focusByWbr(nodeElement, range);
+                        //     event.stopPropagation();
+                        //     event.preventDefault();
+                        //     return;
+                        // }
                         // 图片前 Delete 无效 https://github.com/siyuan-note/siyuan/issues/11209
                         let nextSibling = hasNextSibling(range.startContainer) as Element;
                         if (nextSibling) {

@@ -1720,11 +1720,17 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         } else {
             linkElement.removeAttribute("data-href");
         }
+        if (!inputElements[1].value && (inputElements[0].value || inputElements[2].value)) {
+            linkElement.textContent = "*";
+        }
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
         if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
             protyle.toolbar.range.selectNodeContents(linkElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);
+        }
+        if (!inputElements[1].value && !inputElements[0].value && !inputElements[2].value) {
+            linkElement.remove();
         }
         if (html !== nodeElement.outerHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

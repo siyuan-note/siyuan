@@ -59,6 +59,13 @@ export class Link extends ToolbarItem {
                     if (!dataHref && clipObject.textPlain.startsWith("assets/")) {
                         dataHref = clipObject.textPlain;
                     }
+                    // https://github.com/siyuan-note/siyuan/issues/14704 & https://github.com/siyuan-note/siyuan/issues/6798
+                    if (dataHref && !dataText) {
+                        dataText = decodeURIComponent(dataHref.replace("https://", "").replace("http://", ""));
+                        if (dataHref.length > Constants.SIZE_LINK_TEXT_MAX) {
+                            dataText = dataHref.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
+                        }
+                    }
                 }
             } catch (e) {
                 console.log(e);

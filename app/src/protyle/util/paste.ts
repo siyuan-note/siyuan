@@ -398,19 +398,40 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         // 编辑器内部粘贴
         const tempElement = document.createElement("div");
         tempElement.innerHTML = siyuanHTML;
-        if (tempElement.childElementCount === 1 && range.toString()) {
-            const types = ((tempElement.firstElementChild as HTMLElement).dataset?.type || "").split(" ");
+        if (range.toString()) {
+            let types: string[] = [];
+            let linkElement: HTMLElement;
+            if (tempElement.childNodes.length === 1 && tempElement.childElementCount === 1) {
+                types = (tempElement.firstElementChild.getAttribute("data-type") || "").split(" ");
+                if ((types.includes("block-ref") || types.includes("a"))) {
+                    linkElement = tempElement.firstElementChild as HTMLElement;
+                }
+            }
+            if (!linkElement) {
+                const linkTemp = document.createElement("template");
+                linkTemp.innerHTML = protyle.lute.SpinBlockDOM(siyuanHTML);
+                if (linkTemp.content.firstChild.nodeType !== 3 && linkTemp.content.firstElementChild.classList.contains("p")) {
+                    linkTemp.innerHTML = linkTemp.content.firstElementChild.firstElementChild.innerHTML.trim();
+                }
+                if (linkTemp.content.childNodes.length === 1 && linkTemp.content.childElementCount === 1) {
+                    types = (linkTemp.content.firstElementChild.getAttribute("data-type") || "").split(" ");
+                    if ((types.includes("block-ref") || types.includes("a"))) {
+                        linkElement = linkTemp.content.firstElementChild as HTMLElement;
+                    }
+                }
+            }
+
             if (types.includes("block-ref")) {
                 protyle.toolbar.setInlineMark(protyle, "block-ref", "range", {
                     type: "id",
-                    color: `${(tempElement.firstElementChild as HTMLElement).dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.id}${Constants.ZWSP}s${Constants.ZWSP}${range.toString()}`
                 });
                 return;
             }
             if (types.includes("a")) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: `${(tempElement.firstElementChild as HTMLElement).dataset.href}${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.dataset.href}${Constants.ZWSP}${range.toString()}`
                 });
                 return;
             }
@@ -510,7 +531,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                     e.remove();
                 }
             });
-            if (tempElement.childElementCount === 1 && tempElement.firstElementChild.tagName === "A" && range.toString()) {
+            if (tempElement.childElementCount === 1 && tempElement.childNodes.length === 1 &&
+                tempElement.firstElementChild.tagName === "A" && range.toString()) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
                     color: (tempElement.firstElementChild as HTMLLinkElement).href

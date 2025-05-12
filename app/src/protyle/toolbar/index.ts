@@ -608,6 +608,7 @@ export class Toolbar {
         if (newNodes.length === 1 && newNodes[0].textContent === Constants.ZWSP) {
             this.range.setStart(newNodes[0], 1);
             this.range.collapse(true);
+            keepZWPS = false;
         }
         if (!keepZWPS) {
             // 合并元素
@@ -693,6 +694,12 @@ export class Toolbar {
                     currentNode = hasNextSibling(newNodes[i - 1]) as HTMLElement;
                 }
                 if (!currentNode) {
+                    if (previousElement.nodeType !== 3) {
+                        const currentType = (previousElement.getAttribute("data-type") || "").split(" ");
+                        if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
+                            previousElement.insertAdjacentText("afterend", Constants.ZWSP);
+                        }
+                    }
                     break;
                 }
                 if (currentNode.nodeType === 3) {

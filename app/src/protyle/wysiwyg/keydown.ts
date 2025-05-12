@@ -972,6 +972,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (position.start === 2 && inlineElement &&
                         getSelectionOffset(inlineElement, protyle.wysiwyg.element, range).start === 1 &&
                         inlineElement.innerText.startsWith(Constants.ZWSP) &&
+                        // 7.1 ctrl+g 后删除 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2867478746
+                        inlineElement.innerText !== Constants.ZWSP &&
                         // 需排除行内代码前有一个字符的情况
                         editElement.innerText.startsWith(Constants.ZWSP)) {
                         focusBlock(nodeElement);

@@ -684,7 +684,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     const prevEditableElement = getContenteditableElement(previousElement) as HTMLElement;
                                     if (prevEditableElement && prevEditableElement.lastChild.nodeType === 3 &&
                                         prevEditableElement.lastChild.textContent.endsWith("\n")) {
-                                        prevEditableElement.lastChild.textContent = prevEditableElement.lastChild.textContent.replace(/\n$/, "");
+                                        //  不能移除 /n, 否则两个 /n 导致界面异常
+                                        focusBlock(previousElement, undefined, false);
+                                        event.preventDefault();
+                                        event.stopPropagation();
+                                        return;
                                     }
                                 }
                             }
@@ -860,18 +864,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.preventDefault();
                         return;
                     } else {
-                        // TODO 软换行前 Delete https://github.com/siyuan-note/siyuan/issues/14807
-                        // if (/\n+$/.test(editElement.textContent.substring(position.start))) {
-                        //     const wbrElement = document.createElement("wbr");
-                        //     range.insertNode(wbrElement);
-                        //     const oldHTML = nodeElement.outerHTML;
-                        //     wbrElement.nextSibling.textContent =  wbrElement.nextSibling.textContent.substring(1);
-                        //     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, oldHTML);
-                        //     focusByWbr(nodeElement, range);
-                        //     event.stopPropagation();
-                        //     event.preventDefault();
-                        //     return;
-                        // }
                         // 图片前 Delete 无效 https://github.com/siyuan-note/siyuan/issues/11209
                         let nextSibling = hasNextSibling(range.startContainer) as Element;
                         if (nextSibling) {

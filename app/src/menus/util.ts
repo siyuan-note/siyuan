@@ -175,7 +175,6 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 export const copyPNGByLink = (link: string) => {
     if (isInAndroid()) {
         window.JSAndroid.writeImageClipboard(link);
-        return;
     } else {
         const canvas = document.createElement("canvas");
         const tempElement = document.createElement("img");

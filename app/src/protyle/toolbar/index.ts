@@ -1530,7 +1530,7 @@ ${item.name}
         let html = "";
         const hasCopy = range.toString() !== "" || (range.cloneContents().childNodes[0] as HTMLElement)?.classList?.contains("emoji");
         if (hasCopy) {
-            html += "<button class=\"keyboard__action\" data-action=\"copy\"><svg><use xlink:href=\"#iconCopy\"></use></svg></button>";
+            html += '<button class="keyboard__action" data-action="copy"><svg><use xlink:href="#iconCopy"></use></svg></button>';
             if (!protyle.disabled) {
                 html += `<button class="keyboard__action" data-action="cut"><svg><use xlink:href="#iconCut"></use></svg></button>
 <button class="keyboard__action" data-action="delete"><svg><use xlink:href="#iconTrashcan"></use></svg></button>`;
@@ -1570,9 +1570,13 @@ ${item.name}
             } else if (action === "paste") {
                 if (document.queryCommandSupported("paste")) {
                     document.execCommand("paste");
+                    showMessage("document paste");
                 } else {
                     try {
                         const text = await readClipboard();
+                        showMessage("clipboard textHTML" + text.textHTML);
+                        showMessage("clipboard textPlain" + text.textPlain);
+                        showMessage("clipboard files" + text.files.length);
                         paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
                     } catch (e) {
                         console.log(e);

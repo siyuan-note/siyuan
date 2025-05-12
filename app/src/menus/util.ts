@@ -11,6 +11,7 @@ import {MenuItem} from "./Menu";
 import {App} from "../index";
 import {exportByMobile, isInAndroid, updateHotkeyTip} from "../protyle/util/compatibility";
 import {checkFold} from "../util/noRelyPCFunction";
+import {showMessage} from "../dialog/message";
 
 export const exportAsset = (src: string) => {
     return {
@@ -174,6 +175,7 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
 
 export const copyPNGByLink = (link: string) => {
     if (isInAndroid()) {
+        showMessage(link);
         window.JSAndroid.writeImageClipboard(link);
     } else {
         const canvas = document.createElement("canvas");

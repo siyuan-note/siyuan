@@ -100,11 +100,6 @@ func loadTreeNodes(box string, p string, level int) (ret []*ast.Node, err error)
 	heading.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: []byte(tree.Root.IALAttr("title"))})
 	tree.Root.PrependChild(heading)
 	for c := tree.Root.FirstChild; nil != c; c = c.Next {
-		if ast.NodeParagraph == c.Type && nil == c.FirstChild {
-			// 剔除空段落
-			continue
-		}
-
 		ret = append(ret, c)
 	}
 	return

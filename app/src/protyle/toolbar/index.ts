@@ -1570,13 +1570,9 @@ ${item.name}
             } else if (action === "paste") {
                 if (document.queryCommandSupported("paste")) {
                     document.execCommand("paste");
-                    showMessage("document paste");
                 } else {
                     try {
                         const text = await readClipboard();
-                        showMessage("clipboard textHTML" + text.textHTML);
-                        showMessage("clipboard textPlain" + text.textPlain);
-                        showMessage("clipboard files" + text.files.length);
                         paste(protyle, Object.assign(text, {target: nodeElement as HTMLElement}));
                     } catch (e) {
                         console.log(e);

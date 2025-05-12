@@ -433,6 +433,20 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 }
             }
         }
+
+        // https://github.com/siyuan-note/siyuan/issues/14807
+        if (previousLastEditElement) {
+            let previousLastChild = previousLastEditElement.lastChild;
+            if (previousLastChild.nodeType === 3) {
+                if (!previousLastChild.textContent) {
+                    previousLastChild = hasPreviousSibling(previousLastChild) as ChildNode;
+                }
+                if (previousLastChild && previousLastChild.nodeType === 3 && previousLastChild.textContent.endsWith("\n")) {
+                    previousLastChild.textContent = previousLastChild.textContent.slice(0, -1);
+                }
+            }
+        }
+
         const scroll = protyle.contentElement.scrollTop;
         const leftNodes = range.extractContents();
         range.selectNodeContents(previousLastEditElement);

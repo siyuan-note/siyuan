@@ -437,7 +437,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         // https://github.com/siyuan-note/siyuan/issues/14807
         if (previousLastEditElement) {
             let previousLastChild = previousLastEditElement.lastChild;
-            if (previousLastChild.nodeType === 3) {
+            if (previousLastChild && previousLastChild.nodeType === 3) {
                 if (!previousLastChild.textContent) {
                     previousLastChild = hasPreviousSibling(previousLastChild) as ChildNode;
                 }

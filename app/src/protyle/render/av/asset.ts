@@ -18,6 +18,7 @@ import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
 import {escapeAttr} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
+import * as dayjs from "dayjs";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -156,6 +157,11 @@ export const updateAssetCell = (options: {
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+    });
+    cellDoOperations.push({
+        action: "doUpdateUpdated",
+        id: options.blockElement.getAttribute("data-node-id"),
+        data: dayjs().format("YYYYMMDDHHmmss"),
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;

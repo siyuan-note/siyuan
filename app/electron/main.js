@@ -764,6 +764,9 @@ app.whenReady().then(() => {
     ipcMain.on("siyuan-open-folder", (event, filePath) => {
         shell.showItemInFolder(filePath);
     });
+    ipcMain.on("siyuan-open-path", (event, filePath) => {
+        shell.openPath(filePath);
+    });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });

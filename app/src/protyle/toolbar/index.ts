@@ -328,6 +328,9 @@ export class Toolbar {
         });
         if (this.range.startContainer.nodeType !== 3) {
             let emptyNode: Element = this.range.startContainer.childNodes[this.range.startOffset] as HTMLElement;
+            if (!emptyNode) {
+                emptyNode = this.range.startContainer.childNodes[this.range.startOffset - 1] as HTMLElement;
+            }
             if (emptyNode && emptyNode.nodeType === 3) {
                 if ((this.range.startContainer as HTMLElement).tagName === "DIV") {
                     emptyNode = emptyNode.previousSibling as HTMLElement;

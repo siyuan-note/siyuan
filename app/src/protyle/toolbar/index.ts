@@ -335,7 +335,8 @@ export class Toolbar {
                     emptyNode = this.range.startContainer as HTMLElement;
                 }
             }
-            if (emptyNode && emptyNode.nodeType !== 3 && emptyNode.textContent.replace(Constants.ZWSP, "") === "") {
+            if (emptyNode && emptyNode.nodeType !== 3 && emptyNode.textContent.replace(Constants.ZWSP, "") === "" &&
+                !["TD", "TH"].includes(emptyNode.tagName)) {
                 emptyNode.remove();
             }
         }

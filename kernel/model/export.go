@@ -793,6 +793,11 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 					n.ListData.Start = li.ListData.Num
 				}
 			}
+		} else if n.IsTextMarkType("code") {
+			if nil != n.Next && ast.NodeText == n.Next.Type {
+				// 行级代码导出 word 之后会有多余的零宽空格 https://github.com/siyuan-note/siyuan/issues/14825
+				n.Next.Tokens = bytes.TrimPrefix(n.Tokens, []byte(editor.Zwsp))
+			}
 		}
 		return ast.WalkContinue
 	})

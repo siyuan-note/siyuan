@@ -255,6 +255,23 @@ export class Toolbar {
             this.range.startOffset > -1 && this.range.endOffset <= this.range.startContainer.textContent.length) {
             rangeTypes = rangeTypes.concat((this.range.startContainer.parentElement.getAttribute("data-type") || "").split(" "));
         }
+        const selectText = this.range.toString();
+        let keepZWPS = false;
+        // ctrl+b/u/i  https://github.com/siyuan-note/siyuan/issues/14820
+        if (!selectText && this.range.startOffset === 1 && this.range.startContainer.textContent === Constants.ZWSP) {
+            let newElement;
+            if (this.range.startContainer.nodeType === 1) {
+                newElement = this.range.startContainer as HTMLElement;
+            } else {
+                newElement = this.range.startContainer.parentElement;
+            }
+            if (newElement.tagName === "SPAN") {
+                rangeTypes = rangeTypes.concat((newElement.getAttribute("data-type") || "").split(" "));
+                this.range.setStart(newElement.firstChild, 0);
+                this.range.setEnd(newElement.lastChild, newElement.lastChild.textContent.length || 0);
+                keepZWPS = true;
+            }
+        }
         if (rangeTypes.length === 1) {
             // https://github.com/siyuan-note/siyuan/issues/6501
             // https://github.com/siyuan-note/siyuan/issues/12877
@@ -269,7 +286,6 @@ export class Toolbar {
                 return;
             }
         }
-        const selectText = this.range.toString();
         fixTableRange(this.range);
 
         let contents;
@@ -326,7 +342,7 @@ export class Toolbar {
                 item.remove();
             }
         });
-        if (this.range.startContainer.nodeType !== 3) {
+        if (selectText && this.range.startContainer.nodeType !== 3) {
             let emptyNode: Element = this.range.startContainer.childNodes[this.range.startOffset] as HTMLElement;
             if (!emptyNode) {
                 emptyNode = this.range.startContainer.childNodes[this.range.startOffset - 1] as HTMLElement;
@@ -360,7 +376,6 @@ export class Toolbar {
         const toolbarElement = isMobile() ? document.querySelector("#keyboardToolbar .keyboard__dynamic").nextElementSibling : this.element;
         const actionBtn = action === "toolbar" ? toolbarElement.querySelector(`[data-type="${type}"]`) : undefined;
         const newNodes: Node[] = [];
-        let keepZWPS = false;
         let startContainer: Node;
         let endContainer: Node;
         let startOffset: number;

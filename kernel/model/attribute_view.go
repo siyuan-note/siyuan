@@ -933,6 +933,45 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	return
 }
 
+func GetCurrentAttributeViewImages(avID, viewID, query string, page, pageSize int) (ret []string, err error) {
+
+	var attrView *av.AttributeView
+	attrView, err = av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	var view *av.View
+	
+	if "" != viewID {
+		view, _ = attrView.GetCurrentView(viewID)
+	} else {
+		view = attrView.GetView(attrView.ViewID)
+	}
+
+	table := sql.RenderAttributeViewTable(attrView, view, query)
+	table.FilterRows(attrView)
+	table.SortRows(attrView)
+
+	for _, row := range table.Rows {
+		for _, cell := range row.Cells {
+			if nil != cell.Value {
+				if av.KeyTypeMAsset == cell.Value.Type {
+					if nil != cell.Value.MAsset {
+						for _, a := range cell.Value.MAsset {
+							if av.AssetTypeImage == a.Type {
+								ret = append(ret, a.Content)
+							}
+						}
+					}
+				}
+			}
+		}
+
+	}
+	return
+}
+
 func (tx *Transaction) doUnbindAttrViewBlock(operation *Operation) (ret *TxErr) {
 	err := unbindAttributeViewBlock(operation, tx)
 	if err != nil {

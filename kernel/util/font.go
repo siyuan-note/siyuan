@@ -133,9 +133,9 @@ func parseTTCFontFamily(fontPath string) (ret []string) {
 			continue
 		}
 
-		family, _ := font.Name(nil, ttc.NameIDTypographicFamily)
+		family, _ := font.Name(nil, ttc.NameIDFamily)
 		if "" == family {
-			family, _ = font.Name(nil, ttc.NameIDFamily)
+			family, _ = font.Name(nil, ttc.NameIDTypographicFamily)
 		}
 		family = strings.TrimSpace(family)
 		if "" == family || strings.HasPrefix(family, ".") {
@@ -143,6 +143,7 @@ func parseTTCFontFamily(fontPath string) (ret []string) {
 		}
 		ret = append(ret, family)
 	}
+	ret = gulu.Str.RemoveDuplicatedElem(ret)
 	return
 }
 

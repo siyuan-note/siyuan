@@ -544,10 +544,14 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
                 }
             }
             if (linkElement) {
+                const selectText = range.toString();
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${range.toString()}`
+                    color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${selectText || linkElement.textContent}`
                 });
+                if (!selectText) {
+                    range.collapse(false);
+                }
                 return;
             }
             fetchPost("/api/lute/html2BlockDOM", {

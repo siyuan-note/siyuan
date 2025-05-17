@@ -193,7 +193,7 @@ export class Toolbar {
             startElement = startElement.parentElement;
         } else if (startElement.childElementCount > 0 && startElement.childNodes[range.startOffset]?.nodeType !== 3) {
             startElement = startElement.childNodes[range.startOffset] as HTMLElement;
-            if (startElement.tagName === "WBR") {
+            if (startElement?.tagName === "WBR") {
                 startElement = startElement.parentElement;
             }
         }

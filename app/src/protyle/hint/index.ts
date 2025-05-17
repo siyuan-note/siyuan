@@ -986,6 +986,8 @@ ${genHintItemHTML(item)}
     }
 
     private getKey(currentLineValue: string, extend: IHintExtend[]) {
+        const prevSplit = this.splitChar;
+        const prevLastIndex = this.lastIndex;
         this.lastIndex = -1;
         this.splitChar = "";
         extend.forEach((item) => {
@@ -998,20 +1000,17 @@ ${genHintItemHTML(item)}
                 }
             }
             if (this.lastIndex < currentLastIndex) {
-                if (Constants.BLOCK_HINT_KEYS.includes(this.splitChar) &&
-                    (item.key === ":" || item.key === "#" || item.key === "/" || item.key === "、")) {
-                    // 块搜索中忽略以上符号
-                } else if (this.splitChar === "#" &&
-                    (item.key === "/" || item.key === "、")) {
-                    // 标签中忽略以上符号
-                } else {
-                    this.splitChar = item.key;
-                    this.lastIndex = currentLastIndex;
-                }
+                this.splitChar = item.key;
+                this.lastIndex = currentLastIndex;
             }
         });
         if (this.lastIndex === -1) {
             return undefined;
+        }
+        // 上一次提示没有结束时不能被其余提示干扰 https://github.com/siyuan-note/siyuan/issues/14324
+        if (!this.element.classList.contains("fn__none") && prevSplit && prevSplit !== this.splitChar) {
+            this.splitChar = prevSplit;
+            this.lastIndex = prevLastIndex;
         }
         // 冒号前为数字或冒号不进行emoji提示
         if (this.splitChar === ":") {

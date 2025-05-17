@@ -21,6 +21,12 @@ export const showFileInFolder = (filePath: string) => {
     /// #endif
 };
 
+export const openPath  = (filePath: string) => {
+    /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_OPEN_PATH, filePath);
+    /// #endif
+};
+
 export const getIdZoomInByPath = () => {
     const searchParams = new URLSearchParams(window.location.search);
     const PWAURL = searchParams.get("url");

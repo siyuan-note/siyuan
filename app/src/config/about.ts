@@ -12,6 +12,7 @@ import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {setKey} from "../sync/syncGuide";
+import {openPath} from "../util/pathName";
 
 export const about = {
     element: undefined as Element,
@@ -259,7 +260,7 @@ ${checkUpdateHTML}
                 if (url.startsWith("http")) {
                     shell.openExternal(url);
                 } else {
-                    shell.openPath(url);
+                    openPath(url);
                 }
                 /// #else
                 window.open(url);

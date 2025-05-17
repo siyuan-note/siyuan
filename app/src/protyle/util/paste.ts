@@ -546,7 +546,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             if (linkElement) {
                 protyle.toolbar.setInlineMark(protyle, "a", "range", {
                     type: "a",
-                    color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${range.toString() || linkElement.textContent}`
+                    color: `${linkElement.getAttribute("href")}${Constants.ZWSP}${range.toString()}`
                 });
                 return;
             }

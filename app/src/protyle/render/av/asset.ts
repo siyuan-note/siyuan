@@ -9,7 +9,7 @@ import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
-import {previewImage} from "../../preview/image";
+import {previewAttrViewImages} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
@@ -338,8 +338,13 @@ export const editAssetItem = (options: {
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
-                previewImage(linkAddress);
-            }
+                previewAttrViewImages(
+                    linkAddress,
+                    options.blockElement.getAttribute("data-av-id"),
+                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
+                    parseInt(options.blockElement.getAttribute("data-page-size")) || undefined
+        )}
         });
     }
     if (openSubMenu.length > 0) {

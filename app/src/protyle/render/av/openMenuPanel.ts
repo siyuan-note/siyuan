@@ -18,7 +18,7 @@ import {getSearch} from "../../../util/functions";
 /// #if !MOBILE
 import {openAsset} from "../../../editor/util";
 /// #endif
-import {previewImage} from "../../preview/image";
+import {previewAttrViewImages} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
 import {addView, bindSwitcherEvent, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
 import {focusBlock} from "../../util/selection";
@@ -1259,13 +1259,22 @@ export const openMenuPanel = (options: {
                     )) {
                         openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");
                     } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
-                        previewImage(assetLink);
+                        previewAttrViewImages(assetLink,avID,
+                            options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
+                            parseInt(options.blockElement.getAttribute("data-page-size")) || undefined
+                        )
+                        
                     } else {
                         window.open(assetLink);
                     }
                     /// #else
                     if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
-                        previewImage(assetLink);
+                        previewAttrViewImages(assetLink,avID,
+                            options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
+                            parseInt(options.blockElement.getAttribute("data-page-size")) || undefined
+                        )
                     } else {
                         window.open(assetLink);
                     }

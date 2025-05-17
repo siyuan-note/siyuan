@@ -153,6 +153,10 @@
           background-color: var(--b3-list-hover);
         }
 
+        & > div:nth-child(2) {
+          margin-bottom: 0;
+        }
+
         & > div:nth-child(3):not(.protyle-attr),
         & > div:nth-child(3) ~ div:not(.protyle-attr) {
           display: none;

@@ -52,6 +52,16 @@ func StartCron() {
 
 func every(interval time.Duration, f func(), name ...string) {
 	util.RandomSleep(50, 200)
+
+	// 启动后立即执行一次
+	func() {
+		defer logging.Recover()
+		f()
+		if 0 < len(name) {
+			logging.LogInfof("cron job [%s] executed", name)
+		}
+	}()
+
 	ticker := time.NewTicker(interval)
 	defer ticker.Stop()
 	for range ticker.C {

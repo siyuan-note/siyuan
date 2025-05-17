@@ -656,10 +656,11 @@ func exportAsFile(c *gin.Context) {
 	name := "file-" + file.Filename
 	typ := form.Value["type"][0]
 	exts, _ := mime.ExtensionsByType(typ)
-	if 0 < len(exts) {
+	if 0 < len(exts) && filepath.Ext(name) != exts[0] {
 		name += exts[0]
 	}
 	name = util.FilterFileName(name)
+	name = strings.ReplaceAll(name, "#", "_")
 	tmpDir := filepath.Join(util.TempDir, "export")
 	if err = os.MkdirAll(tmpDir, 0755); err != nil {
 		logging.LogErrorf("export as file failed: %s", err)
@@ -678,7 +679,6 @@ func exportAsFile(c *gin.Context) {
 	}
 
 	ret.Data = map[string]interface{}{
-		"name": name,
 		"file": path.Join("/export/", name),
 	}
 }

@@ -615,17 +615,6 @@ func getCurrentAttrViewImages(c *gin.Context) {
 	if nil != viewIDArg {
 		viewID = viewIDArg.(string)
 	}
-	page := 1
-	pageArg := arg["page"]
-	if nil != pageArg {
-		page = int(pageArg.(float64))
-	}
-
-	pageSize := -1
-	pageSizeArg := arg["pageSize"]
-	if nil != pageSizeArg {
-		pageSize = int(pageSizeArg.(float64))
-	}
 
 	query := ""
 	queryArg := arg["query"]
@@ -633,7 +622,7 @@ func getCurrentAttrViewImages(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	images, err := model.GetCurrentAttributeViewImages(id, viewID, query, page, pageSize)
+	images, err := model.GetCurrentAttributeViewImages(id, viewID, query)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -641,7 +630,6 @@ func getCurrentAttrViewImages(c *gin.Context) {
 	}
 	ret.Data = images
 }
-
 
 func getAttributeViewKeys(c *gin.Context) {
 	ret := gulu.Ret.NewResult()

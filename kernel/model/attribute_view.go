@@ -933,8 +933,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	return
 }
 
-func GetCurrentAttributeViewImages(avID, viewID, query string, page, pageSize int) (ret []string, err error) {
-
+func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, err error) {
 	var attrView *av.AttributeView
 	attrView, err = av.ParseAttributeView(avID)
 	if err != nil {
@@ -942,7 +941,7 @@ func GetCurrentAttributeViewImages(avID, viewID, query string, page, pageSize in
 		return
 	}
 	var view *av.View
-	
+
 	if "" != viewID {
 		view, _ = attrView.GetCurrentView(viewID)
 	} else {
@@ -955,19 +954,14 @@ func GetCurrentAttributeViewImages(avID, viewID, query string, page, pageSize in
 
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
-			if nil != cell.Value {
-				if av.KeyTypeMAsset == cell.Value.Type {
-					if nil != cell.Value.MAsset {
-						for _, a := range cell.Value.MAsset {
-							if av.AssetTypeImage == a.Type {
-								ret = append(ret, a.Content)
-							}
-						}
+			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset {
+				for _, a := range cell.Value.MAsset {
+					if av.AssetTypeImage == a.Type {
+						ret = append(ret, a.Content)
 					}
 				}
 			}
 		}
-
 	}
 	return
 }

@@ -341,10 +341,9 @@ export const editAssetItem = (options: {
                 previewAttrViewImages(
                     linkAddress,
                     options.blockElement.getAttribute("data-av-id"),
-                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-                    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
-                    parseInt(options.blockElement.getAttribute("data-page-size")) || undefined
-        )}
+                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
+                );
+            }
         });
     }
     if (openSubMenu.length > 0) {

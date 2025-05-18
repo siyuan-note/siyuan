@@ -68,8 +68,6 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             (imgElement as HTMLImageElement).src,
             blockElement.getAttribute("data-av-id"),
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-            (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
-            parseInt(blockElement.dataset.pageSize) || undefined
         );
         event.preventDefault();
         event.stopPropagation();

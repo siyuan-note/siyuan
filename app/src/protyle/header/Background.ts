@@ -14,7 +14,7 @@ import {getEventName} from "../util/compatibility";
 import {Dialog} from "../../dialog";
 import {Constants} from "../../constants";
 import {assetMenu} from "../../menus/protyle";
-import {previewImage} from "../preview/image";
+import {previewImages} from "../preview/image";
 import {Menu} from "../../plugin/Menu";
 import {escapeHtml} from "../../util/escape";
 
@@ -217,7 +217,7 @@ export class Background {
                 if (target.tagName === "IMG" && target.parentElement.classList.contains("protyle-background__img")) {
                     const imgSrc = target.getAttribute("src");
                     if (event.detail > 1 && !imgSrc.startsWith("data:image/png;base64")) {
-                        previewImage(imgSrc);
+                        previewImages([imgSrc]);
                         event.preventDefault();
                         event.stopPropagation();
                     }

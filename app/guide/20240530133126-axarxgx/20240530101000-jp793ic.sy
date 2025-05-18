@@ -8,7 +8,7 @@
 		"id": "20240530101000-jp793ic",
 		"title": "よくある質問",
 		"type": "doc",
-		"updated": "20240530101000"
+		"updated": "20250518103515"
 	},
 	"Children": [
 		{
@@ -495,7 +495,7 @@
 			"Properties": {
 				"ID": "20240530101000-kzr1stl",
 				"id": "20240530101000-kibjam5",
-				"updated": "20240530101000"
+				"updated": "20250518103515"
 			},
 			"Children": [
 				{
@@ -548,15 +548,8 @@
 		{
 			"ID": "20240530101000-dc55vlo",
 			"Type": "NodeList",
-			"ListData": {
-				"Tight": true,
-				"BulletChar": 42,
-				"Padding": 2,
-				"Marker": "Kg==",
-				"Num": -1
-			},
+			"ListData": {},
 			"Properties": {
-				"ID": "20240530101000-215dpj2",
 				"id": "20240530101000-dc55vlo",
 				"updated": "20240530101000"
 			},
@@ -564,16 +557,11 @@
 				{
 					"ID": "20240530101000-zgsohz6",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-v2y1fe0",
 						"id": "20240530101000-zgsohz6",
 						"updated": "20240530101000"
 					},
@@ -582,7 +570,6 @@
 							"ID": "20240530101000-qf51d1d",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-5cxr6xj",
 								"id": "20240530101000-qf51d1d",
 								"updated": "20240530101000"
 							},
@@ -639,16 +626,11 @@
 				{
 					"ID": "20240530101000-fgvjudu",
 					"Type": "NodeListItem",
-					"Data": "*",
 					"ListData": {
-						"Tight": true,
 						"BulletChar": 42,
-						"Padding": 2,
-						"Marker": "Kg==",
-						"Num": -1
+						"Marker": "Kg=="
 					},
 					"Properties": {
-						"ID": "20240530101000-igj6g8t",
 						"id": "20240530101000-fgvjudu",
 						"updated": "20240530101000"
 					},
@@ -657,7 +639,6 @@
 							"ID": "20240530101000-jjauibs",
 							"Type": "NodeParagraph",
 							"Properties": {
-								"ID": "20240530101000-93fnvsy",
 								"id": "20240530101000-jjauibs",
 								"updated": "20240530101000"
 							},
@@ -710,6 +691,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250518103454-fe6q6bd",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250518103454-fe6q6bd",
+				"updated": "20250518103515"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "macOS では、SiYuan はデスクトップ、ドキュメント、iCloud ドライブ フォルダーにアクセスして、ワークスペースが iCloud 同期パスの下に配置されているかどうかを検出します。 SiYuan がお客様の個人情報を盗み見ることは決してありませんのでご安心ください。"
 				}
 			]
 		},

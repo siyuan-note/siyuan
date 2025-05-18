@@ -452,6 +452,8 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/av/getAttributeViewKeysByAvID", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, getAttributeViewKeysByAvID)
 	ginServer.Handle("POST", "/api/av/duplicateAttributeViewBlock", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, duplicateAttributeViewBlock)
 	ginServer.Handle("POST", "/api/av/appendAttributeViewDetachedBlocksWithValues", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, appendAttributeViewDetachedBlocksWithValues)
+	ginServer.Handle("POST", "/api/av/getCurrentAttrViewImages", model.CheckAuth, getCurrentAttrViewImages)
+
 
 	ginServer.Handle("POST", "/api/ai/chatGPT", model.CheckAuth, model.CheckAdminRole, chatGPT)
 	ginServer.Handle("POST", "/api/ai/chatGPTWithAction", model.CheckAuth, model.CheckAdminRole, chatGPTWithAction)

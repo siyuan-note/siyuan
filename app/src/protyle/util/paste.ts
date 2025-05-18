@@ -17,6 +17,7 @@ import {hideElements} from "../ui/hideElements";
 import {avRender} from "../render/av/render";
 import {cellScrollIntoView, getCellText} from "../render/av/cell";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
+import {escapeAttr} from "../../util/escape";
 
 export const getTextStar = (blockElement: HTMLElement) => {
     const dataType = blockElement.dataset.type;
@@ -320,6 +321,9 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
     // 剪切复制中首位包含空格或仅有空格 https://github.com/siyuan-note/siyuan/issues/5667
     if (!siyuanHTML) {
+        // 从网页复制时，浏览器已经将符合条件的回车符转换为空格写入剪贴板了，其他回车符都是多余的，需移除
+        // 否则通过 innerHTML 获取到的、通过 Lute 处理后的所有单独回车符都会转换为换行符，产生多余的换行
+        textHTML = textHTML.replace(/\r/g, "");
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
         if (doc.body && doc.body.innerHTML) {
@@ -327,7 +331,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         // windows 剪切板
         if (textHTML.startsWith("\n<!--StartFragment-->") && textHTML.endsWith("<!--EndFragment-->\n\n")) {
-            textHTML = doc.body.innerHTML.trim().replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "");
+            textHTML = textHTML.trim().replace("<!--StartFragment-->", "").replace("<!--EndFragment-->", "");
         }
         textHTML = Lute.Sanitize(textHTML);
     }
@@ -506,17 +510,17 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             }
         }
         if (isHTML) {
+            // 不能用 new DOMParser().parseFromString(textHTML, "text/html")，否则之后 getComputedStyle() 无效
+            const element = document.createElement("div");
+            element.style.visibility = "hidden";
+            element.style.position = "absolute";
+            document.body.appendChild(element);
+            element.innerHTML = textHTML;
+
             const tempElement = document.createElement("div");
-            tempElement.innerHTML = textHTML;
-            tempElement.querySelectorAll("[style]").forEach((e) => {
-                e.removeAttribute("style");
-            });
-            // 移除空的 A 标签
-            tempElement.querySelectorAll("a").forEach((e) => {
-                if (e.innerHTML.trim() === "") {
-                    e.remove();
-                }
-            });
+            tempElement.innerHTML = processHTMLElement(element);
+            element.remove();
+
             // https://github.com/siyuan-note/siyuan/issues/14625#issuecomment-2869618067
             let linkElement;
             if (tempElement.childElementCount === 1 && tempElement.childNodes.length === 1) {
@@ -609,3 +613,69 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     }
 };
 
+const processHTMLElement = (element: Element) => {
+    let html = "";
+    // 遍历所有子节点
+    Array.from(element.childNodes).forEach(node => {
+        if (node.nodeType === 3) {
+            // 处理文本节点
+            const whiteSpace = getComputedStyle(element).whiteSpace;
+            html += processTextByWhiteSpace(node.textContent, whiteSpace);
+        } else if (node.nodeType === 1) {
+            // 处理元素节点
+            const childElement = node as HTMLElement;
+            const tagName = childElement.tagName.toLowerCase();
+            if (new Set(["area", "base", "br", "col", "embed", "hr", "img", "input",
+                "link", "meta", "param", "source", "track", "wbr"]).has(tagName)) {
+                // 空元素不能存在子节点、不能有结束标签
+                childElement.removeAttribute("style");
+                html += childElement.outerHTML;
+            } else if (tagName === "a" && (node as HTMLElement).innerHTML.trim() === "") {
+                // 过滤空的 A 标签
+            } else {
+                // 递归处理元素节点
+                const attrs = getAttributes(childElement);
+                const processedInnerHTML = processHTMLElement(childElement);
+                html += `<${tagName}${attrs}>${processedInnerHTML}</${tagName}>`;
+            }
+        }
+    });
+
+    return html;
+};
+
+// 根据 white-space 属性处理文本中的空白字符 https://github.com/siyuan-note/siyuan/issues/14775
+const processTextByWhiteSpace = (text: string, whiteSpace: string) => {
+    // 替换不使用'\s'，因为它包含不断行空白字符等其他字符
+    // 替换不使用'\r'，因为换行符在前面已经移除
+    // 行末的空白字符会被 Lute 移除，这里无需处理
+    switch (whiteSpace) {
+        default:
+        case "normal":
+        case "nowrap":
+            // 合并相连的空白符为一个空格（空格、制表符、换行符）
+            return text.replace(/[ \t\n]+/g, " ");
+        case "pre-line":
+            // 合并其他相连的空白符为一个空格，保留换行（换行符转换为<br>）
+            text = text.replace(/[ \t]+/g, " ");
+        /* falls through */
+        case "pre":
+        case "pre-wrap":
+        case "break-spaces":
+            // 不合并其他空白符，保留换行（换行符转换为<br>）
+            return text.replace(/\n/g, "<br>");
+    }
+};
+
+const getAttributes = (element: Element) => {
+    const attrs: string[] = [];
+    for (let i = 0; i < element.attributes.length; i++) {
+        const attr = element.attributes[i];
+        // 顺便移除 style 属性
+        if (attr.name.toLowerCase() === "style") {
+            continue;
+        }
+        attrs.push(`${attr.name}="${escapeAttr(attr.value)}"`);
+    }
+    return attrs.length > 0 ? " " + attrs.join(" ") : "";
+};

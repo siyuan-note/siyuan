@@ -322,7 +322,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     // 剪切复制中首位包含空格或仅有空格 https://github.com/siyuan-note/siyuan/issues/5667
     if (!siyuanHTML) {
         // 从网页复制时，浏览器已经将符合条件的回车符转换为空格写入剪贴板了，其他回车符都是多余的，需移除
-        // 否则通过 innerHTML 获取到的、通过 Lute 处理后的所有单独回车符都会转换为换行符，产生多余的换行
+        // 否则 new DOMParser().parseFromString(textHTML, "text/html") 之后所有的单独回车符都会转换为换行符，产生多余的换行
         textHTML = textHTML.replace(/\r/g, "");
         // process word
         const doc = new DOMParser().parseFromString(textHTML, "text/html");
@@ -654,10 +654,14 @@ const processTextByWhiteSpace = (text: string, whiteSpace: string) => {
         case "normal":
         case "nowrap":
             // 合并相连的空白符为一个空格（空格、制表符、换行符）
-            return text.replace(/[ \t\n]+/g, " ");
+            // return text.replace(/[ \t\n]+/g, " ");
+            // 前面不知道哪个步骤已经合并空白符
+            // return text;
+        /* falls through */
         case "pre-line":
             // 合并其他相连的空白符为一个空格，保留换行（换行符转换为<br>）
-            text = text.replace(/[ \t]+/g, " ");
+            // text = text.replace(/[ \t]+/g, " ");
+            // 前面不知道哪个步骤已经合并空白符
         /* falls through */
         case "pre":
         case "pre-wrap":

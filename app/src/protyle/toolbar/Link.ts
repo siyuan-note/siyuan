@@ -27,6 +27,7 @@ export class Link extends ToolbarItem {
 
             let dataHref = "";
             let dataText = range.toString().trim().replace(Constants.ZWSP, "");
+            let showMenu = false;
             try {
                 // 选中链接时需忽略剪切板内容 https://ld246.com/article/1643035329737
                 dataHref = protyle.lute.GetLinkDest(dataText);
@@ -65,15 +66,19 @@ export class Link extends ToolbarItem {
                         if (dataHref.length > Constants.SIZE_LINK_TEXT_MAX) {
                             dataText = dataHref.substring(0, Constants.SIZE_LINK_TEXT_MAX) + "...";
                         }
+                        showMenu = true;
                     }
                 }
             } catch (e) {
                 console.log(e);
             }
-            protyle.toolbar.setInlineMark(protyle, "a", "range", {
+            const linkElements = protyle.toolbar.setInlineMark(protyle, "a", "range", {
                 type: "a",
                 color: dataHref + (dataText ? Constants.ZWSP + dataText : "")
             });
+            if (showMenu) {
+                linkMenu(protyle, linkElements[0] as HTMLElement, true);
+            }
         });
     }
 }

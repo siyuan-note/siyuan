@@ -807,6 +807,7 @@ export class Toolbar {
                 }
             }
         }
+        return newNodes;
     }
 
     public showRender(protyle: IProtyle, renderElement: Element, updateElements?: Element[], oldHTML?: string) {

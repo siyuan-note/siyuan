@@ -471,11 +471,12 @@ export class WYSIWYG {
                 return;
             }
             const documentSelf = document;
-            const protyleRect = protyle.element.getBoundingClientRect();
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
-            const mostLeft = wysiwygRect.left + (parseFloat(wysiwygStyle.paddingLeft) || 24) + 1;
-            const mostRight = wysiwygRect.right - (parseFloat(wysiwygStyle.paddingRight) || 16) - 2;
+            const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
+            const mostRight = wysiwygRect.right - (parseInt(wysiwygStyle.paddingRight) || 16) - 2;
+
+            const protyleRect = protyle.element.getBoundingClientRect();
             const mostBottom = protyleRect.bottom;
             const y = event.clientY;
             const contentRect = protyle.contentElement.getBoundingClientRect();

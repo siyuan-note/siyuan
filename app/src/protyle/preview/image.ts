@@ -58,10 +58,11 @@ export const previewDocImage = (currentSrc: string, id: string) => {
     });
 };
 
-export const previewAttrViewImages = (currentSrc: string, avID: string, viewID: string) => {
+export const previewAttrViewImages = (currentSrc: string, avID: string, viewID: string, query: string) => {
     fetchPost("/api/av/getCurrentAttrViewImages", {
         id: avID,
-        viewID: viewID
+        viewID,
+        query,
     }, (response) => {
         previewImages(response.data, currentSrc);
     });

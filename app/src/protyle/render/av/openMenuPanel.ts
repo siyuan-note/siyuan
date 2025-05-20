@@ -1259,13 +1259,15 @@ export const openMenuPanel = (options: {
                     )) {
                         openAsset(options.protyle.app, assetLink.trim(), parseInt(getSearch("page", assetLink)), "right");
                     } else if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
-                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW));
+                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "");
                     } else {
                         window.open(assetLink);
                     }
                     /// #else
                     if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {
-                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW));
+                        previewAttrViewImages(assetLink, avID, options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                            (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "");
                     } else {
                         window.open(assetLink);
                     }

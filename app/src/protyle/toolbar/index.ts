@@ -296,7 +296,12 @@ export class Toolbar {
             if (this.range.startOffset > -1 && this.range.endOffset <= this.range.startContainer.textContent.length) {
                 needWrapTarget = this.range.startContainer.parentElement;
             }
-            if (this.range.startOffset !== 0 && this.range.endOffset !== this.range.startContainer.textContent.length &&
+            if ((
+                    this.range.startOffset !== 0 ||
+                    // https://github.com/siyuan-note/siyuan/issues/14869
+                    (this.range.startOffset === 0 && this.range.startContainer.previousSibling.nodeType === 3 &&
+                        this.range.startContainer.previousSibling.parentElement.isSameNode(this.range.startContainer.parentElement))
+                ) && this.range.endOffset !== this.range.startContainer.textContent.length &&
                 !(this.range.startOffset === 1 && this.range.startContainer.textContent.startsWith(Constants.ZWSP))) {
                 // 切割元素
                 const parentElement = this.range.startContainer.parentElement;

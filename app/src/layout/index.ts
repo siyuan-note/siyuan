@@ -40,9 +40,6 @@ export class Layout {
         } else {
             this.element.classList.add("fn__flex");
         }
-        if (mergedOptions.type === "left") {
-            this.element.classList.add("fn__flex-shrink");
-        }
     }
 
     addLayout(child: Layout, id?: string) {

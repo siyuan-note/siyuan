@@ -1,52 +1,27 @@
-FROM node:21 AS NODE_BUILD
+FROM debian:bookworm-slim
 
-WORKDIR /go/src/github.com/siyuan-note/siyuan/
-ADD . /go/src/github.com/siyuan-note/siyuan/
-RUN apt-get update && \
-    apt-get install -y jq
-RUN cd app && \
-packageManager=$(jq -r '.packageManager' package.json) && \
-if [ -n "$packageManager" ]; then \
-    npm install -g $packageManager; \
-else \
-    echo "No packageManager field found in package.json"; \
-    npm install -g pnpm; \
-fi && \
-pnpm install --registry=http://registry.npmjs.org/ --silent && \
-pnpm run build
-RUN apt-get purge -y jq
-RUN apt-get autoremove -y
-RUN rm -rf /var/lib/apt/lists/*
+# Install dependencies
+RUN apt-get update -y &&         apt-get install -y curl wget unzip gnupg &&         rm -rf /var/lib/apt/lists/*
 
-FROM golang:alpine AS GO_BUILD
-WORKDIR /go/src/github.com/siyuan-note/siyuan/
-COPY --from=NODE_BUILD /go/src/github.com/siyuan-note/siyuan/ /go/src/github.com/siyuan-note/siyuan/
-ENV GO111MODULE=on
-ENV CGO_ENABLED=1
-RUN apk add --no-cache gcc musl-dev && \
-    cd kernel && go build --tags fts5 -v -ldflags "-s -w" && \
-    mkdir /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/app/changelogs/ /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/kernel/kernel /opt/siyuan/ && \
-    mv /go/src/github.com/siyuan-note/siyuan/kernel/entrypoint.sh /opt/siyuan/entrypoint.sh && \
-    find /opt/siyuan/ -name .git | xargs rm -rf
+# Install Node.js 20.x LTS
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&         apt-get install -y nodejs &&         npm install -g pnpm
 
-FROM alpine:latest
-LABEL maintainer="Liang Ding<845765@qq.com>"
+# Install SiYuan (headless/server build)
+ENV SIYUAN_VERSION=3.1.1
+RUN mkdir -p /opt &&         wget -qO /tmp/siyuan.zip https://github.com/siyuan-note/siyuan/releases/download/v${SIYUAN_VERSION}/siyuan-linux-amd64-${SIYUAN_VERSION}.zip &&         unzip /tmp/siyuan.zip -d /opt &&         rm /tmp/siyuan.zip &&         mv /opt/siyuan-* /opt/siyuan &&         chmod +x /opt/siyuan/siyuan
 
-WORKDIR /opt/siyuan/
-COPY --from=GO_BUILD /opt/siyuan/ /opt/siyuan/
+WORKDIR /app
 
-RUN apk add --no-cache ca-certificates tzdata su-exec && \
-    chmod +x /opt/siyuan/entrypoint.sh
+# Copy proxy
+COPY discord-auth/package.json ./discord-auth/package.json
+COPY discord-auth/server.js ./discord-auth/server.js
+RUN cd discord-auth && npm install --omit=dev
 
-ENV TZ=Asia/Shanghai
-ENV HOME=/home/siyuan
-ENV RUN_IN_CONTAINER=true
+COPY start.sh /start.sh
+RUN chmod +x /start.sh
+
+ENV PORT=3000
+EXPOSE 3000
 EXPOSE 6806
 
-ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
-CMD ["/opt/siyuan/kernel"]
+CMD ["/start.sh"]

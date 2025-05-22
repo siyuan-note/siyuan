@@ -1,20 +1,28 @@
-# NSWIKI – Discord‑gated SiYuan (Updated)
+# NSWIKI – Discord‑gated SiYuan (Railway)
 
-This fork replaces SiYuan’s static `SIYUAN_AUTH_CODE` model with Discord OAuth2
-and aligns with new env conventions (`SIYUAN_ACCESS_AUTH_CODE`, `PORT=6806`, `TZ=Asia/Singapore`).
+This fork replaces the static `SIYUAN_AUTH_CODE` model with Discord OAuth2.
 
-## Build & Run on Railway
+## Variables
 
-1. **Variables** – copy `.env.example`, paste into Railway ↘️ *Variables* tab.
-2. **Deploy** – Railway builds the Dockerfile.  
-   * Discord gateway listens on **6806** (external).  
-   * SiYuan kernel lives on **6807** (internal).  
+| Key | Example |
+|-----|---------|
+| `DISCORD_CLIENT_ID` | 1234567890123 |
+| `DISCORD_CLIENT_SECRET` | xxxxxxxxx |
+| `DISCORD_CALLBACK_URL` | https://nswiki.up.railway.app/auth/discord/callback |
+| `SIYUAN_ACCESS_AUTH_CODE` | 7y0zgpxv555m41t9tkcxajth |
+| `PORT` | 6806 (external) |
+| `SIYUAN_INTERNAL_PORT` | 6807 (kernel) |
+| `TZ` | Asia/Singapore |
 
-## File Map
+## Build & Run locally (optional)
 
-* `Dockerfile` – grabs SiYuan v3.1.30 `.tar.gz`, installs Node 20.  
-* `start.sh` – boots kernel (`--port $SIYUAN_INTERNAL_PORT`) then gateway.  
-* `discord-auth/server.js` – Express + Passport‑Discord proxy.  
-* `.env.example` – definitive list of variables.  
+```bash
+docker build -t nswiki .
+docker run -p 6806:6806 -e DISCORD_CLIENT_ID=... -e DISCORD_CLIENT_SECRET=... nswiki
+```
 
----
+## Deploy to Railway
+
+1. Connect your repo.
+2. Paste variables above.
+3. Deploy. Railway exposes 6806; Discord login page appears on first hit.

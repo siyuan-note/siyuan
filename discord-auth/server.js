@@ -1,4 +1,4 @@
-// Discord OAuth2 reverse proxy for SiYuan
+// Discord OAuth2 reverse proxy
 import express from 'express';
 import session from 'express-session';
 import dotenv from 'dotenv';
@@ -14,17 +14,16 @@ const {
   DISCORD_CALLBACK_URL,
   SESSION_SECRET = 'keyboard cat',
   ALLOWED_GUILD_ID,
-  ALLOWED_ROLE_ID,
-  SIYUAN_INTERNAL_PORT = 6807
+  ALLOWED_ROLE_ID
 } = process.env;
 
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL) {
-  console.error('Discord OAuth2 env vars missing. Exiting.');
+  console.error('Discord OAuth2 env vars missing');
   process.exit(1);
 }
 
-passport.serializeUser((user, done) => done(null, user));
-passport.deserializeUser((obj, done) => done(null, obj));
+passport.serializeUser((u, d) => d(null, u));
+passport.deserializeUser((u, d) => d(null, u));
 
 passport.use(new DiscordStrategy(
   {
@@ -33,7 +32,7 @@ passport.use(new DiscordStrategy(
     callbackURL: DISCORD_CALLBACK_URL,
     scope: ['identify', 'guilds', 'guilds.members.read']
   },
-  (accessToken, refreshToken, profile, done) => done(null, profile)
+  (access, refresh, profile, done) => done(null, profile)
 ));
 
 const app = express();
@@ -47,20 +46,19 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/auth/discord', passport.authenticate('discord'));
-
 app.get('/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: '/auth/discord' }),
   (req, res) => res.redirect('/')
 );
 
-function isAuthorised(req) {
+function authorised(req) {
   if (!req.user) return false;
   if (ALLOWED_GUILD_ID) {
     const guild = req.user.guilds?.find(g => g.id === ALLOWED_GUILD_ID);
     if (!guild) return false;
     if (ALLOWED_ROLE_ID) {
-      // Discord API v10 doesn't push roles in guilds array – skip deep role check
-      return true;
+      const hasRole = guild.roles?.includes(ALLOWED_ROLE_ID);
+      if (!hasRole) return false;
     }
   }
   return true;
@@ -68,17 +66,19 @@ function isAuthorised(req) {
 
 app.use((req, res, next) => {
   if (req.path.startsWith('/auth/discord')) return next();
-  if (!req.isAuthenticated() || !isAuthorised(req)) {
+  if (!req.isAuthenticated() || !authorised(req)) {
     return res.redirect('/auth/discord');
   }
   next();
 });
 
+const targetPort = process.env.SIYUAN_INTERNAL_PORT || 6807;
+
 app.use('/', createProxyMiddleware({
-  target: `http://127.0.0.1:${SIYUAN_INTERNAL_PORT}`,
+  target: `http://127.0.0.1:${targetPort}`,
   changeOrigin: true,
   ws: true
 }));
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Auth proxy listening on ${PORT}, forwarding to kernel on ${SIYUAN_INTERNAL_PORT}`));
+const port = process.env.PORT || 6806;
+app.listen(port, () => console.log(`Proxy live on ${port} -> ${targetPort}`));

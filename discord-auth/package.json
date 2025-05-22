@@ -1,9 +1,9 @@
 {
   "name": "nswiki-auth-proxy",
   "version": "1.0.1",
-  "description": "Discord OAuth2 gateway for SiYuan on Railway",
-  "main": "server.js",
+  "description": "Discord OAuth2 gateway for SiYuan",
   "type": "module",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js"
   },

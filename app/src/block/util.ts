@@ -142,6 +142,7 @@ export const insertEmptyBlock = (protyle: IProtyle, position: InsertPosition, id
     if (!blockElement) {
         return;
     }
+    protyle.observerLoad?.disconnect();
     let newElement = genEmptyElement(false, true);
     let orderIndex = 1;
     if (blockElement.getAttribute("data-type") === "NodeListItem") {

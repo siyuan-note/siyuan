@@ -347,6 +347,7 @@ const getUnInitTab = (options: IOpenFileOptions) => {
     });
 };
 
+let resizeObserver:ResizeObserver;
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);
@@ -392,7 +393,8 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     editor.editor.protyle.toolbar.range = newRange;
                 }
                 scrollCenter(editor.editor.protyle, nodeElement, true);
-                const resizeObserver = new ResizeObserver(() => {
+                resizeObserver?.disconnect();
+                resizeObserver = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle, nodeElement, true);
                     }

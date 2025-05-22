@@ -31,6 +31,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         hideElements(["select"], protyle);
         return;
     }
+    protyle.observerLoad?.disconnect();
     // https://github.com/siyuan-note/siyuan/issues/5471
     if (disableElement ||
         // https://github.com/siyuan-note/siyuan/issues/10633

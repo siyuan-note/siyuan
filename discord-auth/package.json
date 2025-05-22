@@ -1,11 +1,7 @@
 {
   "name": "nswiki-auth-proxy",
-  "version": "1.0.3",
-  "description": "Discord OAuth2 gateway for SiYuan",
+  "version": "1.0.4",
   "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
   "dependencies": {
     "express": "^4.19.2",
     "express-session": "^1.17.4",

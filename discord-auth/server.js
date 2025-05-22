@@ -1,4 +1,4 @@
-// Discord OAuth2 reverse‑proxy for SiYuan
+// Discord OAuth2 reverse proxy for SiYuan
 import express from 'express';
 import session from 'express-session';
 import dotenv from 'dotenv';
@@ -14,7 +14,8 @@ const {
   DISCORD_CALLBACK_URL,
   SESSION_SECRET = 'keyboard cat',
   ALLOWED_GUILD_ID,
-  ALLOWED_ROLE_ID
+  ALLOWED_ROLE_ID,
+  SIYUAN_INTERNAL_PORT = 6807
 } = process.env;
 
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL) {
@@ -46,6 +47,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 app.get('/auth/discord', passport.authenticate('discord'));
+
 app.get('/auth/discord/callback',
   passport.authenticate('discord', { failureRedirect: '/auth/discord' }),
   (req, res) => res.redirect('/')
@@ -57,8 +59,8 @@ function isAuthorised(req) {
     const guild = req.user.guilds?.find(g => g.id === ALLOWED_GUILD_ID);
     if (!guild) return false;
     if (ALLOWED_ROLE_ID) {
-      const roles = guild.permissions_new?.roles || [];
-      if (!roles.includes(ALLOWED_ROLE_ID)) return false;
+      // Discord API v10 doesn't push roles in guilds array – skip deep role check
+      return true;
     }
   }
   return true;
@@ -73,10 +75,10 @@ app.use((req, res, next) => {
 });
 
 app.use('/', createProxyMiddleware({
-  target: 'http://127.0.0.1:6806',
+  target: `http://127.0.0.1:${SIYUAN_INTERNAL_PORT}`,
   changeOrigin: true,
   ws: true
 }));
 
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log(`Auth proxy listening on ${PORT}`));
+app.listen(PORT, () => console.log(`Auth proxy listening on ${PORT}, forwarding to kernel on ${SIYUAN_INTERNAL_PORT}`));

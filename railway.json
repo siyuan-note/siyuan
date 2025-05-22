@@ -1,16 +1,9 @@
 {
-  "plugins": [
-    {
-      "name": "prisma",
-      "type": "postgresql"
-    }
-  ],
   "services": [
     {
       "name": "nswiki",
       "sourceDir": ".",
-      "startCommand": "/start.sh",
-      "buildCommand": "docker build -t nswiki ."
+      "startCommand": "/start.sh"
     }
   ]
 }

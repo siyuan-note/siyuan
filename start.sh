@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Launch the SiYuan kernel in the background on the standard port (6806)
-# We still set an internal auth code, but it is never exposed to the user.
-# Feel free to regenerate this value – it's only used for the local proxy.
-/opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode=${SIYUAN_INTERNAL_CODE:-internal123} &
+# INTERNAL PORT for SiYuan kernel so it doesn't collide with external PORT
+export SIYUAN_INTERNAL_PORT=${SIYUAN_INTERNAL_PORT:-6807}
 
-# Export ENV so Node can see it
+# Launch SiYuan headless kernel
+/opt/siyuan/siyuan --workspace=/siyuan/workspace \
+    --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE:-internal123}" \
+    --port=${SIYUAN_INTERNAL_PORT} &
+
+# If Railway injects PORT (e.g., 6806) we'll use it, else default 3000
 export PORT=${PORT:-3000}
 
 echo "Starting Discord OAuth proxy on port ${PORT}"

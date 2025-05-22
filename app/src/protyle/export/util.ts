@@ -11,7 +11,7 @@ import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
 import {processRender} from "../util/processCode";
 import {isIPhone, isSafari, openByMobile, setStorageVal} from "../util/compatibility";
-import {showFileInFolder} from "../../util/pathName";
+import {useShell} from "../../util/pathName";
 import {isPaidUser} from "../../util/needSubscribe";
 import {getCloudURL} from "../../config/util/about";
 
@@ -21,7 +21,7 @@ export const afterExport = (exportPath: string, msgId: string) => {
 <div class="fn__space"></div>
 <button class="b3-button b3-button--white">${window.siyuan.languages.showInFolder}</button>`, 6000, "info", msgId);
     document.querySelector(`#message [data-id="${msgId}"] button`).addEventListener("click", () => {
-        showFileInFolder(path.join(exportPath));
+        useShell("showItemInFolder", path.join(exportPath));
         hideMessage(msgId);
     });
     /// #endif

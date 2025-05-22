@@ -761,12 +761,6 @@ app.whenReady().then(() => {
         const menu = Menu.buildFromTemplate(template);
         menu.popup({window: BrowserWindow.fromWebContents(event.sender)});
     });
-    ipcMain.on("siyuan-open-folder", (event, filePath) => {
-        shell.showItemInFolder(filePath);
-    });
-    ipcMain.on("siyuan-open-path", (event, filePath) => {
-        shell.openPath(filePath);
-    });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
@@ -874,6 +868,12 @@ app.whenReady().then(() => {
         }
         const currentWindow = getWindowByContentId(webContentsId);
         switch (cmd) {
+            case "showItemInFolder":
+                shell.showItemInFolder(data.filePath);
+                break;
+            case "openPath":
+                shell.openPath(data.filePath);
+                break;
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;

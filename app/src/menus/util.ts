@@ -3,7 +3,7 @@ import {ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {fetchPost} from "../util/fetch";
-import {getAssetName, pathPosix, showFileInFolder} from "../util/pathName";
+import {getAssetName, pathPosix, useShell} from "../util/pathName";
 import {openFileById} from "../editor/util";
 import {Constants} from "../constants";
 import {openNewWindowById} from "../window/openNewWindow";
@@ -149,11 +149,11 @@ export const openEditorTab = (app: App, ids: string[], notebookId?: string, path
         label: window.siyuan.languages.showInFolder,
         click: () => {
             if (notebookId) {
-                showFileInFolder(path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
+                useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, notebookId, pathString));
             } else {
                 ids.forEach((id) => {
                     fetchPost("/api/block/getBlockInfo", {id}, (response) => {
-                        showFileInFolder(path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
+                        useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, response.data.box, response.data.path));
                     });
                 });
             }

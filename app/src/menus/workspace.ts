@@ -3,7 +3,7 @@ import {MenuItem} from "./Menu";
 import {ipcRenderer} from "electron";
 /// #endif
 import {openHistory} from "../history/history";
-import {getOpenNotebookCount, originalPath, pathPosix, showFileInFolder} from "../util/pathName";
+import {getOpenNotebookCount, originalPath, pathPosix, useShell} from "../util/pathName";
 import {fetchNewDailyNote, mountHelp, newDailyNote} from "../util/mount";
 import {fetchPost} from "../util/fetch";
 import {Constants} from "../constants";
@@ -354,7 +354,7 @@ export const workspaceMenu = (app: App, rect: DOMRect) => {
                     const genListHTML = () => {
                         let html = "";
                         window.siyuan.storage[Constants.LOCAL_LAYOUTS].sort((a: ISaveLayout, b: ISaveLayout) => {
-                            return a.name.localeCompare(b.name, undefined, {numeric:true});
+                            return a.name.localeCompare(b.name, undefined, {numeric: true});
                         }).forEach((item: ISaveLayout) => {
                             if (inputElement.value === "" || item.name.toLowerCase().indexOf(inputElement.value.toLowerCase()) > -1) {
                                 html += `<div data-name="${item.name}" class="b3-list-item b3-list-item--narrow b3-list-item--hide-action ${html ? "" : "b3-list-item--focus"}">
@@ -607,7 +607,7 @@ const workspaceItem = (item: IWorkspace) => {
         icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click() {
-            showFileInFolder(item.path);
+            useShell("showItemInFolder", item.path);
         }
     }, {
         id: "copyPath",

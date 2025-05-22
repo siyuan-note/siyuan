@@ -6,7 +6,6 @@ import {highlightRender} from "../protyle/render/highlightRender";
 import {exportLayout, saveLayout} from "../layout/util";
 import {Constants} from "../constants";
 /// #if !BROWSER
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {getFrontend, isBrowser} from "../util/functions";
@@ -19,7 +18,7 @@ import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
 import {loadAssets} from "../util/assets";
 import {addScript} from "../protyle/util/addScript";
-import {openPath} from "../util/pathName";
+import {useShell} from "../util/pathName";
 
 export const bazaar = {
     element: undefined as Element,
@@ -626,9 +625,9 @@ export const bazaar = {
                     /// #if !BROWSER
                     const dirName = dataObj.bazaarType;
                     if (dirName === "icons" || dirName === "themes") {
-                        openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, dataObj.name));
+                        useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", dirName, dataObj.name));
                     } else {
-                        openPath(path.join(window.siyuan.config.system.dataDir, dirName, dataObj.name));
+                        useShell("openPath", path.join(window.siyuan.config.system.dataDir, dirName, dataObj.name));
                     }
                     /// #endif
                     event.preventDefault();

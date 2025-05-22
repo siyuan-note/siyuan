@@ -7,53 +7,49 @@ set -euo pipefail
 : "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage}"
 export TZ="${TZ:-Asia/Singapore}"
 
-wait_for_port() {
-  local host=$1 port=$2 timeout=$3
-  for ((i=0;i<timeout;i++)); do
-    if (echo > /dev/tcp/$host/$port) &>/dev/null; then return 0; fi
+# 1. Start system dbus
+if [ ! -S /run/dbus/system_bus_socket ]; then
+  mkdir -p /run/dbus
+  dbus-daemon --system --address=unix:path=/run/dbus/system_bus_socket --fork
+  echo "[init] system bus ready."
+fi
+export DBUS_SYSTEM_BUS_ADDRESS=unix:path=/run/dbus/system_bus_socket
+
+# 2. Start session dbus
+if command -v dbus-launch >/dev/null 2>&1; then
+  eval "$(dbus-launch --sh-syntax)"
+  echo "[init] session bus ready at $DBUS_SESSION_BUS_ADDRESS"
+fi
+
+wait_port() {
+  local port=$1
+  for i in {1..30}; do
+    (echo >/dev/tcp/127.0.0.1/$port) >/dev/null 2>&1 && return 0
     sleep 1
   done
   return 1
 }
 
-# ---- real session bus ----
-if command -v dbus-launch >/dev/null 2>&1; then
-  eval "$(dbus-launch --sh-syntax)"
-  echo "[init] dbus session bus started at $DBUS_SESSION_BUS_ADDRESS"
+# 3. Xvfb + SiYuan
+export DISPLAY=:99
+rm -f /tmp/.X99-lock || true
+Xvfb :99 -screen 0 1280x800x24 -nolisten tcp &
+/opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" ${SIYUAN_FLAGS} &
+KPID=$!
+
+if ! wait_port "${SIYUAN_INTERNAL_PORT}"; then
+  echo "❌ SiYuan failed to start"
+  exit 1
 fi
+echo "✅ SiYuan listening on ${SIYUAN_INTERNAL_PORT}"
 
-# Tier-0 kernel
-if [ -x /opt/siyuan/kernel ]; then
-  echo "[Tier-0] starting kernel binary"
-  /opt/siyuan/kernel --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" &
-  KPID=$!
-  if wait_for_port 127.0.0.1 "${SIYUAN_INTERNAL_PORT}" 20; then
-    echo "[Tier-0] kernel healthy"
-  else
-    kill $KPID || true
-    unset KPID
-  fi
-fi
-
-if [ -z "${KPID:-}" ]; then
-  export DISPLAY=:99
-  rm -f /tmp/.X99-lock || true
-  Xvfb :99 -screen 0 1280x800x24 -nolisten tcp &
-  XV=$!
-  /opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" ${SIYUAN_FLAGS} &
-  KPID=$!
-  if ! wait_for_port 127.0.0.1 "${SIYUAN_INTERNAL_PORT}" 30; then
-    echo "SiYuan failed to open port"
-    exit 1
-  fi
-fi
-
-echo "[init] kernel up on ${SIYUAN_INTERNAL_PORT}"
-
+# 4. Discord proxy
 if [[ -n "${DISCORD_CLIENT_ID:-}" && -n "${DISCORD_CLIENT_SECRET:-}" && -n "${DISCORD_CALLBACK_URL:-}" ]]; then
   node /app/discord-auth/server.js &
   PROXY=$!
+  echo "✅ Proxy listening on ${PORT}"
   wait $KPID $PROXY
 else
+  echo "⚠️  Proxy disabled – missing Discord env vars"
   wait $KPID
 fi

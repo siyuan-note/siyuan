@@ -7,7 +7,7 @@ const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
 
-const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_CALLBACK_URL, SESSION_SECRET = 'keyboard', ALLOWED_GUILD_ID } = process.env;
+const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_CALLBACK_URL, SESSION_SECRET = 'keyboard' } = process.env;
 
 if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_CALLBACK_URL) {
   console.error('Discord OAuth2 env vars missing');
@@ -35,8 +35,8 @@ app.use((req, res, next) => {
   res.redirect('/auth/discord');
 });
 
-const target = `http://127.0.0.1:${process.env.SIYUAN_INTERNAL_PORT || 6807}`;
-app.use('/', createProxyMiddleware({ target, changeOrigin: true, ws: true }));
+const upstream = `http://127.0.0.1:${process.env.SIYUAN_INTERNAL_PORT || 6807}`;
+app.use('/', createProxyMiddleware({ target: upstream, changeOrigin: true, ws: true }));
 
 const port = process.env.PORT || 6806;
-app.listen(port, () => console.log('Proxy up on', port, '->', target));
+app.listen(port, () => console.log('Proxy up on', port, '->', upstream));

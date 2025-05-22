@@ -1,72 +1,92 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+# ===== Config vars =====
 : "${PORT:=6806}"
 : "${SIYUAN_INTERNAL_PORT:=6807}"
 : "${SIYUAN_ACCESS_AUTH_CODE:=changeme}"
+: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage}"
 
-run_kernel_only() {
-  if [ -x /opt/siyuan/kernel ]; then
-    echo "[Tier‑1] Kernel‑only mode – launching /opt/siyuan/kernel"
-    /opt/siyuan/kernel --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" &
-    KPID=$!
-    sleep 6
-    if kill -0 "$KPID" 2>/dev/null; then
-      echo "[Tier‑1] Kernel‑only mode is healthy."
-      wait "$KPID"
-      exit 0
-    else
-      echo "[Tier‑1] Kernel‑only failed – escalating to Tier‑2."
+wait_for_port () {
+  local host=$1
+  local port=$2
+  local max=${3:-30}
+  local count=0
+  while ! (echo > /dev/tcp/$host/$port) >/dev/null 2>&1; do
+    sleep 1
+    count=$((count+1))
+    if [ $count -ge $max ]; then
       return 1
     fi
-  else
-    echo "[Tier‑1] Kernel binary not present."
-    return 1
+  done
+  return 0
+}
+
+start_dbus () {
+  if ! pgrep -x dbus-daemon >/dev/null 2>&1; then
+    echo "[init] starting system dbus-daemon"
+    dbus-daemon --system --address=unix:path=/run/dbus/system_bus_socket --fork
   fi
 }
 
-run_xvfb() {
-  echo "[Tier‑2] Starting Xvfb virtual display..."
+# ---------- Tier 1 : Direct headless (possible future kernel) ----------
+if [ -x /opt/siyuan/kernel ]; then
+  echo "[Tier-1] Running SiYuan kernel-only binary..."
+  /opt/siyuan/kernel --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" &
+  PID=$!
+  if wait_for_port 127.0.0.1 "${SIYUAN_INTERNAL_PORT}" 20; then
+    echo "[Tier-1] Kernel ready on :${SIYUAN_INTERNAL_PORT}"
+  else
+    echo "[Tier-1] Port check failed – escalating."
+    kill $PID || true
+    unset PID
+  fi
+fi
+
+# ---------- Tier 2 : Electron under Xvfb ----------
+if [ -z "${PID:-}" ]; then
+  echo "[Tier-2] Starting Xvfb virtual display..."
   export DISPLAY=:99
-  Xvfb :99 -screen 0 1024x768x16 &
+  Xvfb :99 -screen 0 1280x800x24 -nolisten tcp &
   XV=$!
-  dbus-daemon --system --fork || true
-  /opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" --no-sandbox &
-  SPID=$!
-  sleep 10
-  if kill -0 "$SPID" 2>/dev/null; then
-    echo "[Tier‑2] Electron is healthy under Xvfb."
-    wait "$SPID"
-    return 0
+  start_dbus
+  echo "[Tier-2] Launching Electron app with safe flags."
+  /opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" ${SIYUAN_FLAGS} &
+  PID=$!
+  if wait_for_port 127.0.0.1 "${SIYUAN_INTERNAL_PORT}" 30; then
+    echo "[Tier-2] Kernel is up via Electron+Xvfb."
   else
-    echo "[Tier‑2] Xvfb attempt failed – escalating to Tier‑3."
-    kill "$XV" || true
-    return 1
+    echo "[Tier-2] Failed to detect port – escalating."
+    kill $PID || true
+    kill $XV || true
+    unset PID
   fi
-}
+fi
 
-run_full_stack() {
-  echo "[Tier‑3] Starting full dummy X session..."
+# ---------- Tier 3 : Full FVWM/Fluxbox + Xvfb ----------
+if [ -z "${PID:-}" ]; then
+  echo "[Tier-3] Launching full lightweight window manager inside Xvfb."
   export DISPLAY=:0
-  Xvfb :0 -screen 0 1280x800x24 &
+  Xvfb :0 -screen 0 1280x800x24 -nolisten tcp &
   XV=$!
-  fluxbox > /dev/null 2>&1 &
-  dbus-daemon --system --fork || true
-  /opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" --no-sandbox &
-  wait $!
-}
+  fluxbox >/dev/null 2>&1 &
+  start_dbus
+  /opt/siyuan/siyuan --workspace=/siyuan/workspace --accessAuthCode="${SIYUAN_ACCESS_AUTH_CODE}" --port="${SIYUAN_INTERNAL_PORT}" ${SIYUAN_FLAGS} &
+  PID=$!
+  if ! wait_for_port 127.0.0.1 "${SIYUAN_INTERNAL_PORT}" 40; then
+    echo "[Tier-3] SiYuan failed even under full X. Exiting."
+    exit 1
+  fi
+  echo "[Tier-3] Kernel available."
+fi
 
-# Kick off tiers sequentially
-run_kernel_only || run_xvfb || run_full_stack &
-KERNEL_WRAPPER_PID=$!
-
-# --- OAuth proxy if creds exist ---
+# ---------- Start OAuth proxy ----------
 if [[ -n "${DISCORD_CLIENT_ID:-}" && -n "${DISCORD_CLIENT_SECRET:-}" && -n "${DISCORD_CALLBACK_URL:-}" ]]; then
-  echo "Starting Discord OAuth proxy on ${PORT} → ${SIYUAN_INTERNAL_PORT}"
+  echo "Starting Discord OAuth proxy on ${PORT} -> ${SIYUAN_INTERNAL_PORT}"
   node /app/discord-auth/server.js &
-  PROXY_PID=$!
-  wait $KERNEL_WRAPPER_PID $PROXY_PID
+  PROXY=$!
+  wait $PID $PROXY
 else
-  echo "Discord vars missing – OAuth proxy disabled."
-  wait $KERNEL_WRAPPER_PID
+  echo "[init] Discord env vars missing – proxy disabled."
+  wait $PID
 fi

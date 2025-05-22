@@ -1,4 +1,3 @@
-// Discord OAuth2 reverse proxy (CommonJS)
 const express = require('express');
 const session = require('express-session');
 const dotenv = require('dotenv');

@@ -4,21 +4,16 @@ ARG SIYUAN_VERSION=3.1.30
 ARG SIYUAN_ARCH=linux
 ARG SIYUAN_PACKAGE=siyuan-${SIYUAN_VERSION}-${SIYUAN_ARCH}.tar.gz
 
-# install runtime deps
-RUN apt-get update -y &&         apt-get install -y curl wget tar gzip ca-certificates gnupg unzip &&         rm -rf /var/lib/apt/lists/*
+RUN apt-get update -y &&         apt-get install -y curl wget tar gzip ca-certificates gnupg &&         rm -rf /var/lib/apt/lists/*
 
-# Node 20 LTS
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - &&         apt-get install -y nodejs
 
-# install SiYuan
 RUN mkdir -p /opt/siyuan &&         wget -qO - https://github.com/siyuan-note/siyuan/releases/download/v${SIYUAN_VERSION}/${SIYUAN_PACKAGE} |         tar -xz --strip-components=1 -C /opt/siyuan &&         chmod +x /opt/siyuan/siyuan
 
-# discord auth proxy deps
 WORKDIR /app/discord-auth
 COPY discord-auth/package.json ./package.json
 RUN npm install --omit=dev
 
-# copy project files
 WORKDIR /app
 COPY discord-auth/server.js ./discord-auth/server.js
 COPY start.sh /start.sh

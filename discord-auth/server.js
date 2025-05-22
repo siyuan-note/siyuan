@@ -1,10 +1,10 @@
-// Discord OAuth2 reverse proxy
-import express from 'express';
-import session from 'express-session';
-import dotenv from 'dotenv';
-import passport from 'passport';
-import { Strategy as DiscordStrategy } from 'passport-discord';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+// Discord OAuth2 reverse proxy (CommonJS)
+const express = require('express');
+const session = require('express-session');
+const dotenv = require('dotenv');
+const passport = require('passport');
+const DiscordStrategy = require('passport-discord').Strategy;
+const { createProxyMiddleware } = require('http-proxy-middleware');
 
 dotenv.config();
 
@@ -30,7 +30,7 @@ passport.use(new DiscordStrategy(
     clientID: DISCORD_CLIENT_ID,
     clientSecret: DISCORD_CLIENT_SECRET,
     callbackURL: DISCORD_CALLBACK_URL,
-    scope: ['identify', 'guilds', 'guilds.members.read']
+    scope: ['identify', 'guilds']
   },
   (access, refresh, profile, done) => done(null, profile)
 ));
@@ -54,12 +54,8 @@ app.get('/auth/discord/callback',
 function authorised(req) {
   if (!req.user) return false;
   if (ALLOWED_GUILD_ID) {
-    const guild = req.user.guilds?.find(g => g.id === ALLOWED_GUILD_ID);
-    if (!guild) return false;
-    if (ALLOWED_ROLE_ID) {
-      const hasRole = guild.roles?.includes(ALLOWED_ROLE_ID);
-      if (!hasRole) return false;
-    }
+    const inGuild = req.user.guilds?.some(g => g.id === ALLOWED_GUILD_ID);
+    if (!inGuild) return false;
   }
   return true;
 }
@@ -73,7 +69,6 @@ app.use((req, res, next) => {
 });
 
 const targetPort = process.env.SIYUAN_INTERNAL_PORT || 6807;
-
 app.use('/', createProxyMiddleware({
   target: `http://127.0.0.1:${targetPort}`,
   changeOrigin: true,
@@ -81,4 +76,4 @@ app.use('/', createProxyMiddleware({
 }));
 
 const port = process.env.PORT || 6806;
-app.listen(port, () => console.log(`Proxy live on ${port} -> ${targetPort}`));
+app.listen(port, () => console.log(`Proxy up on ${port} -> ${targetPort}`));

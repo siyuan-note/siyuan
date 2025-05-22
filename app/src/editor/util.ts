@@ -5,7 +5,7 @@ import {getInstanceById, getWndByLayout, pdfIsLoading, setPanelFocus} from "../l
 import {getDockByType} from "../layout/tabUtil";
 import {getAllModels, getAllTabs} from "../layout/getAll";
 import {highlightById, scrollCenter} from "../util/highlightById";
-import {getDisplayName, pathPosix, showFileInFolder} from "../util/pathName";
+import {getDisplayName, openPath, pathPosix, showFileInFolder} from "../util/pathName";
 import {Constants} from "../constants";
 import {setEditMode} from "../protyle/util/setEditMode";
 import {Files} from "../layout/dock/Files";
@@ -695,7 +695,7 @@ export const openBy = (url: string, type: "folder" | "app") => {
     if (url.startsWith("assets/")) {
         fetchPost("/api/asset/resolveAssetPath", {path: url.replace(/\.pdf\?page=\d{1,}$/, ".pdf")}, (response) => {
             if (type === "app") {
-                shell.openPath(response.data);
+                openPath(response.data);
             } else if (type === "folder") {
                 showFileInFolder(response.data);
             }
@@ -713,7 +713,7 @@ export const openBy = (url: string, type: "folder" | "app") => {
     // 拖入文件名包含 `)` 、`(` 的文件以 `file://` 插入后链接解析错误 https://github.com/siyuan-note/siyuan/issues/5786
     address = address.replace(/\\\)/g, ")").replace(/\\\(/g, "(");
     if (type === "app") {
-        shell.openPath(address);
+        openPath(address);
     } else if (type === "folder") {
         if ("windows" === window.siyuan.config.system.os) {
             if (!address.startsWith("\\\\")) { // \\ 开头的路径是 Windows 网络共享路径 https://github.com/siyuan-note/siyuan/issues/5980

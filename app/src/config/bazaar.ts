@@ -19,6 +19,7 @@ import {uninstall} from "../plugin/uninstall";
 import {afterLoadPlugin, loadPlugin, loadPlugins, reloadPlugin} from "../plugin/loader";
 import {loadAssets} from "../util/assets";
 import {addScript} from "../protyle/util/addScript";
+import {openPath} from "../util/pathName";
 
 export const bazaar = {
     element: undefined as Element,
@@ -625,9 +626,9 @@ export const bazaar = {
                     /// #if !BROWSER
                     const dirName = dataObj.bazaarType;
                     if (dirName === "icons" || dirName === "themes") {
-                        shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, dataObj.name));
+                        openPath(path.join(window.siyuan.config.system.confDir, "appearance", dirName, dataObj.name));
                     } else {
-                        shell.openPath(path.join(window.siyuan.config.system.dataDir, dirName, dataObj.name));
+                        openPath(path.join(window.siyuan.config.system.dataDir, dirName, dataObj.name));
                     }
                     /// #endif
                     event.preventDefault();

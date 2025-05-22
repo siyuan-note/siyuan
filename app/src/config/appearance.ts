@@ -11,6 +11,7 @@ import {openSnippets} from "./util/snippets";
 import {loadAssets} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {openPath} from "../util/pathName";
 
 export const appearance = {
     element: undefined as Element,
@@ -233,13 +234,13 @@ export const appearance = {
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+            openPath(path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
         });
         appearance.element.querySelector("#appearanceOpenTheme").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+            openPath(path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
         });
         appearance.element.querySelector("#appearanceOpenEmoji").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.dataDir, "emojis"));
+            openPath(path.join(window.siyuan.config.system.dataDir, "emojis"));
         });
         /// #endif
         appearance.element.querySelectorAll("select").forEach(item => {

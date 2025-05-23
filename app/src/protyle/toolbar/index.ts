@@ -250,9 +250,13 @@ export class Toolbar {
                 rangeTypes = rangeTypes.concat((item.getAttribute("data-type") || "").split(" "));
             }
         });
+        const rangeStartNextSibling = hasNextSibling(this.range.startContainer);
+        const isSameNode = this.range.startContainer.isSameNode(this.range.endContainer) ||
+            (rangeStartNextSibling && rangeStartNextSibling.isSameNode(this.range.endContainer) &&
+                this.range.startContainer.parentElement.isSameNode(this.range.endContainer.parentElement));
         if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
-            this.range.startContainer.isSameNode(this.range.endContainer) &&
-            this.range.startOffset > -1 && this.range.endOffset <= this.range.startContainer.textContent.length) {
+            isSameNode &&
+            this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
             rangeTypes = rangeTypes.concat((this.range.startContainer.parentElement.getAttribute("data-type") || "").split(" "));
         }
         const selectText = this.range.toString();
@@ -292,16 +296,16 @@ export class Toolbar {
         let html;
         let needWrapTarget;
         if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
-            this.range.startContainer.isSameNode(this.range.endContainer)) {
-            if (this.range.startOffset > -1 && this.range.endOffset <= this.range.startContainer.textContent.length) {
+            isSameNode) {
+            if (this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
                 needWrapTarget = this.range.startContainer.parentElement;
             }
             if ((
                     this.range.startOffset !== 0 ||
                     // https://github.com/siyuan-note/siyuan/issues/14869
-                    (this.range.startOffset === 0 && this.range.startContainer.previousSibling.nodeType === 3 &&
+                    (this.range.startOffset === 0 && this.range.startContainer.previousSibling?.nodeType === 3 &&
                         this.range.startContainer.previousSibling.parentElement.isSameNode(this.range.startContainer.parentElement))
-                ) && this.range.endOffset !== this.range.startContainer.textContent.length &&
+                ) && this.range.endOffset !== this.range.endContainer.textContent.length &&
                 !(this.range.startOffset === 1 && this.range.startContainer.textContent.startsWith(Constants.ZWSP))) {
                 // 切割元素
                 const parentElement = this.range.startContainer.parentElement;

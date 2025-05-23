@@ -347,7 +347,6 @@ const getUnInitTab = (options: IOpenFileOptions) => {
     });
 };
 
-let resizeObserver:ResizeObserver;
 const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IModels) => {
     if (options.keepCursor) {
         editor.parent.headElement.setAttribute("keep-cursor", options.id);
@@ -393,16 +392,15 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
                     editor.editor.protyle.toolbar.range = newRange;
                 }
                 scrollCenter(editor.editor.protyle, nodeElement, true);
-                resizeObserver?.disconnect();
-                resizeObserver = new ResizeObserver(() => {
+                editor.editor.protyle.observerLoad = new ResizeObserver(() => {
                     if (document.contains(nodeElement)) {
                         scrollCenter(editor.editor.protyle, nodeElement, true);
                     }
                 });
                 setTimeout(() => {
-                    resizeObserver.disconnect();
+                    editor.editor.protyle.observerLoad.disconnect();
                 }, 1000 * 3);
-                resizeObserver.observe(editor.editor.protyle.wysiwyg.element);
+                editor.editor.protyle.observerLoad.observe(editor.editor.protyle.wysiwyg.element);
             } else if (editor.editor.protyle.block.rootID === options.id) {
                 // 由于 https://github.com/siyuan-note/siyuan/issues/5420，移除定位
             } else if (editor.editor.protyle.toolbar.range) {

@@ -4,7 +4,7 @@ set -euo pipefail
 : "${PORT:=6806}"
 : "${SIYUAN_INTERNAL_PORT:=6807}"
 : "${SIYUAN_ACCESS_AUTH_CODE:=changeme}"
-: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --disable-features=DBus}"
+: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --no-zygote --disable-setuid-sandbox}"
 export TZ="${TZ:-Asia/Singapore}"
 
 wait_for_port() {
@@ -16,11 +16,12 @@ wait_for_port() {
   return 1
 }
 
-# Fix 2: Completely disable DBus in Chromium and set dummy socket
-mkdir -p /run/dbus
-touch /run/dbus/system_bus_socket
-export NO_AT_BRIDGE=1
-export DBUS_SESSION_BUS_ADDRESS="unix:path=/dev/null"
+# Root fix: Start dbus daemon directly in foreground mode
+echo "Starting dbus daemon in system mode..."
+mkdir -p /var/run/dbus
+dbus-daemon --system --nopidfile --print-address &
+DBUS_PID=$!
+sleep 2
 
 # Tier-0 kernel
 if [ -x /opt/siyuan/kernel ]; then
@@ -53,7 +54,7 @@ echo "[init] kernel up on ${SIYUAN_INTERNAL_PORT}"
 if [[ -n "${DISCORD_CLIENT_ID:-}" && -n "${DISCORD_CLIENT_SECRET:-}" && -n "${DISCORD_CALLBACK_URL:-}" ]]; then
   node /app/discord-auth/server.js &
   PROXY=$!
-  wait $KPID $PROXY
+  wait $KPID $PROXY $DBUS_PID
 else
-  wait $KPID
+  wait $KPID $DBUS_PID
 fi

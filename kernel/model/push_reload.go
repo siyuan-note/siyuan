@@ -191,6 +191,19 @@ func refreshDynamicRefText(updatedDefNode *ast.Node, updatedTree *parse.Tree) {
 // refreshDynamicRefTexts 用于批量刷新块引用的动态锚文本。
 // 该实现依赖了数据库缓存，导致外部调用时可能需要阻塞等待数据库写入后才能获取到 refs
 func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) {
+	for i := 0; i < 7; i++ {
+		updatedRefNodes, updatedRefTrees := refreshDynamicRefTexts0(updatedDefNodes, updatedTrees)
+		if 1 > len(updatedRefNodes) {
+			break
+		}
+		updatedDefNodes, updatedTrees = updatedRefNodes, updatedRefTrees
+	}
+}
+
+func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees map[string]*parse.Tree) (updatedRefNodes map[string]*ast.Node, updatedRefTrees map[string]*parse.Tree) {
+	updatedRefNodes = map[string]*ast.Node{}
+	updatedRefTrees = map[string]*parse.Tree{}
+
 	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
 	var changedParentNodes []*ast.Node
@@ -237,6 +250,8 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 				changed, changedDefNodes := updateRefText(n, updatedDefNodes)
 				if !refTreeChanged && changed {
 					refTreeChanged = true
+					updatedRefNodes[n.ID] = n
+					updatedRefTrees[refTreeID] = refTree
 				}
 
 				// 推送动态锚文本节点刷新
@@ -264,6 +279,7 @@ func refreshDynamicRefTexts(updatedDefNodes map[string]*ast.Node, updatedTrees m
 	for _, tree := range changedRefTree {
 		indexWriteTreeUpsertQueue(tree)
 	}
+	return
 }
 
 func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {

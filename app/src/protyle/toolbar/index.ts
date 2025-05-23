@@ -1007,7 +1007,7 @@ export class Toolbar {
         } else {
             textElement.value = Lute.UnEscapeHTMLStr(renderElement.getAttribute("data-content") || "");
         }
-
+        const oldTextValue = textElement.value;
         textElement.addEventListener("input", (event) => {
             if (!renderElement.parentElement) {
                 return;
@@ -1063,7 +1063,7 @@ export class Toolbar {
             }
         });
         this.subElementCloseCB = () => {
-            if (!renderElement.parentElement || protyle.disabled) {
+            if (!renderElement.parentElement || protyle.disabled || oldTextValue === textElement.value) {
                 return;
             }
             let inlineLastNode: Element;

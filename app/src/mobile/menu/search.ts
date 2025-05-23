@@ -47,16 +47,17 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
         return;
     }
     saveKeyList("replaceKeys", replaceInputElement.value);
-    let currentLiElement: HTMLElement = searchListElement.querySelector(".b3-list-item--focus");
+    const currentLiElement: HTMLElement = searchListElement.querySelector(".b3-list-item--focus");
     if (!currentLiElement) {
         return;
     }
     loadElement.classList.remove("fn__none");
     loadElement.nextElementSibling.classList.add("fn__none");
+    const currentId = currentLiElement.getAttribute("data-node-id");
     fetchPost("/api/search/findReplace", {
         k: config.method === 0 ? getKeyByLiElement(currentLiElement) : (document.querySelector("#toolbarSearch") as HTMLInputElement).value,
         r: replaceInputElement.value,
-        ids: isAll ? [] : [currentLiElement.getAttribute("data-node-id")],
+        ids: isAll ? [] : [currentId],
         types: config.types,
         method: config.method,
         replaceTypes: config.replaceTypes,
@@ -73,41 +74,27 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
             return;
         }
         if (isAll) {
-            updateSearchResult(config, element);
+            updateSearchResult(config, element, false);
             return;
         }
         reloadProtyle(window.siyuan.mobile.editor.protyle, false);
 
+        let newId = currentLiElement.getAttribute("data-node-id");
         if (currentLiElement.nextElementSibling) {
-            currentLiElement.nextElementSibling.classList.add("b3-list-item--focus");
+            newId = currentLiElement.nextElementSibling.getAttribute("data-node-id");
         } else if (currentLiElement.previousElementSibling) {
-            currentLiElement.previousElementSibling.classList.add("b3-list-item--focus");
+            newId = currentLiElement.previousElementSibling.getAttribute("data-node-id");
         }
-        if (config.group === 1) {
-            if (currentLiElement.nextElementSibling || currentLiElement.previousElementSibling) {
-                currentLiElement.remove();
-            } else {
-                const nextDocElement = currentLiElement.parentElement.nextElementSibling || currentLiElement.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling;
-                if (nextDocElement) {
-                    nextDocElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
-                    nextDocElement.nextElementSibling.classList.remove("fn__none");
-                    nextDocElement.firstElementChild.firstElementChild.classList.add("b3-list-item__arrow--open");
-                }
-                currentLiElement.parentElement.previousElementSibling.remove();
-                currentLiElement.parentElement.remove();
+        if (config.group === 1 && !newId) {
+            const nextDocElement = currentLiElement.parentElement.nextElementSibling || currentLiElement.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling;
+            if (nextDocElement) {
+                newId = nextDocElement.nextElementSibling.firstElementChild.getAttribute("data-node-id");
             }
-        } else {
-            currentLiElement.remove();
         }
-        currentLiElement = searchListElement.querySelector(".b3-list-item--focus");
-        if (!currentLiElement) {
-            searchListElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
-            return;
-        }
-        if (searchListElement.scrollTop < currentLiElement.offsetTop - searchListElement.clientHeight + 30 ||
-            searchListElement.scrollTop > currentLiElement.offsetTop) {
-            searchListElement.scrollTop = currentLiElement.offsetTop - searchListElement.clientHeight + 30;
-        }
+        updateSearchResult(config, element, false, {
+            currentId,
+            newId
+        });
     });
 };
 
@@ -167,10 +154,16 @@ const updateConfig = (element: Element, newConfig: Config.IUILayoutTabSearchConf
     window.siyuan.menus.menu.remove();
 };
 
-const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig, response?: IWebSocketData) => {
+const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
+                        response?: IWebSocketData, focusId?: {
+        currentId?: string,
+        newId?: string
+    }) => {
     const listElement = document.querySelector("#searchList");
     let resultHTML = "";
-    data.forEach((item: IBlock, index: number) => {
+    let currentData;
+    let newData;
+    data.forEach((item: IBlock) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
@@ -180,8 +173,16 @@ const onRecentBlocks = (data: IBlock[], config: Config.IUILayoutTabSearchConfig,
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text" style="color: var(--b3-theme-on-surface)">${escapeGreat(title)}</span>
 </div><div>`;
-            item.children.forEach((childItem, childIndex) => {
-                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}">
+            item.children.forEach((childItem) => {
+                if (focusId) {
+                    if (childItem.id === focusId.currentId) {
+                        currentData = childItem;
+                    }
+                    if (childItem.id === focusId.newId) {
+                        newData = childItem;
+                    }
+                }
+                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}">
 <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
@@ -190,7 +191,15 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
             });
             resultHTML += "</div>";
         } else {
-            resultHTML += `<div class="b3-list-item b3-list-item--two${index === 0 ? " b3-list-item--focus" : ""}" data-type="search-item" data-node-id="${item.id}">
+            if (focusId) {
+                if (item.id === focusId.currentId) {
+                    currentData = item;
+                }
+                if (item.id === focusId.newId) {
+                    newData = item;
+                }
+            }
+            resultHTML += `<div class="b3-list-item b3-list-item--two" data-type="search-item" data-node-id="${item.id}">
     <div class="b3-list-item__first">
         <svg class="b3-list-item__graphic"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
         ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
@@ -222,10 +231,31 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
 <span class="fn__flex-center">${config.page}/${response.data.pageCount || 1}</span>`;
     }
     listElement.previousElementSibling.querySelector('[data-type="result"]').innerHTML = countHTML;
+    if (!currentData) {
+        currentData = newData;
+    }
+    if (!currentData && data.length > 0) {
+        if (data[0].children) {
+            currentData = data[0].children[0];
+        } else {
+            currentData = data[0];
+        }
+    }
+    if (currentData) {
+        const currentList = listElement.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
+        if (currentList) {
+            currentList.classList.add("b3-list-item--focus");
+            currentList.scrollIntoView();
+        }
+    }
 };
 
 let toolbarSearchTimeout = 0;
-export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, element: Element, rmCurrentCriteria = false) => {
+export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, element: Element, rmCurrentCriteria = false,
+                                   focusId?: {
+                                       currentId?: string,
+                                       newId?: string
+                                   }) => {
     clearTimeout(toolbarSearchTimeout);
     toolbarSearchTimeout = window.setTimeout(() => {
         if (rmCurrentCriteria) {
@@ -238,7 +268,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
         if (inputElement.value === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
-                onRecentBlocks(response.data, config);
+                onRecentBlocks(response.data, config, undefined, focusId);
                 loadingElement.classList.add("fn__none");
                 previousElement.setAttribute("disabled", "true");
                 nextElement.setAttribute("disabled", "true");
@@ -261,7 +291,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 orderBy: config.sort,
                 page: config.page,
             }, (response) => {
-                onRecentBlocks(response.data.blocks, config, response);
+                onRecentBlocks(response.data.blocks, config, response, focusId);
                 loadingElement.classList.add("fn__none");
                 if (config.page < response.data.pageCount) {
                     nextElement.removeAttribute("disabled");

@@ -4,7 +4,7 @@ set -euo pipefail
 : "${PORT:=6806}"
 : "${SIYUAN_INTERNAL_PORT:=6807}"
 : "${SIYUAN_ACCESS_AUTH_CODE:=changeme}"
-: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --disable-features=DBus,BlinkGenPropertyTrees,UseChromeOSDirectVideoDecoder}"
+: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --disable-features=DBus}"
 export TZ="${TZ:-Asia/Singapore}"
 
 wait_for_port() {
@@ -16,19 +16,11 @@ wait_for_port() {
   return 1
 }
 
-# Fix 3: Complete DBus bypass with mock system
-# Create mock dbus directories and files
+# Fix 2: Completely disable DBus in Chromium and set dummy socket
 mkdir -p /run/dbus
-mkdir -p /var/run/dbus
 touch /run/dbus/system_bus_socket
-touch /var/run/dbus/system_bus_socket
-
-# Set all possible DBus environment variables to dummy values
 export NO_AT_BRIDGE=1
 export DBUS_SESSION_BUS_ADDRESS="unix:path=/dev/null"
-export DBUS_SYSTEM_BUS_ADDRESS="unix:path=/dev/null"
-export DBUS_STARTER_ADDRESS="unix:path=/dev/null"
-export DBUS_STARTER_BUS_TYPE="session"
 
 # Tier-0 kernel
 if [ -x /opt/siyuan/kernel ]; then

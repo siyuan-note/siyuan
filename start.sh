@@ -4,7 +4,7 @@ set -euo pipefail
 : "${PORT:=6806}"
 : "${SIYUAN_INTERNAL_PORT:=6807}"
 : "${SIYUAN_ACCESS_AUTH_CODE:=changeme}"
-: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage --no-zygote --disable-setuid-sandbox}"
+: "${SIYUAN_FLAGS:=--no-sandbox --disable-gpu --disable-software-rasterizer --disable-dev-shm-usage}"
 export TZ="${TZ:-Asia/Singapore}"
 
 wait_for_port() {
@@ -16,12 +16,14 @@ wait_for_port() {
   return 1
 }
 
-# Root fix: Start dbus daemon directly in foreground mode
-echo "Starting dbus daemon in system mode..."
+# Create directories but don't try to start dbus daemon
+# DBus errors are non-fatal and can be safely ignored
+mkdir -p /run/dbus
 mkdir -p /var/run/dbus
-dbus-daemon --system --nopidfile --print-address &
-DBUS_PID=$!
-sleep 2
+
+# Set dummy environment variables to minimize error logging
+export NO_AT_BRIDGE=1
+export DBUS_SESSION_BUS_ADDRESS="unix:path=/dev/null"
 
 # Tier-0 kernel
 if [ -x /opt/siyuan/kernel ]; then
@@ -54,7 +56,7 @@ echo "[init] kernel up on ${SIYUAN_INTERNAL_PORT}"
 if [[ -n "${DISCORD_CLIENT_ID:-}" && -n "${DISCORD_CLIENT_SECRET:-}" && -n "${DISCORD_CALLBACK_URL:-}" ]]; then
   node /app/discord-auth/server.js &
   PROXY=$!
-  wait $KPID $PROXY $DBUS_PID
+  wait $KPID $PROXY
 else
-  wait $KPID $DBUS_PID
+  wait $KPID
 fi

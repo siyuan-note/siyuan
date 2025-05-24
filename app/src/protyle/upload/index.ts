@@ -107,6 +107,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
+    const keys = Object.keys(response.data.succMap);
     // https://github.com/siyuan-note/siyuan/issues/7624
     const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
@@ -114,13 +115,13 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
             insertBlock = false;
         } else {
             const editableElement = getContenteditableElement(nodeElement);
-            if (editableElement && editableElement.textContent !== "" && nodeElement.classList.contains("p")) {
+            if (editableElement && nodeElement.classList.contains("p") &&
+                (editableElement.textContent !== "" || keys.length < 2)) {
                 insertBlock = false;
             }
         }
     }
     let successFileText = "";
-    const keys = Object.keys(response.data.succMap);
     // 插入多个资源文件时按文件名自然升序排列 Use natural ascending order when inserting multiple assets https://github.com/siyuan-note/siyuan/issues/14643
     keys.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
     const avAssets: IAVCellAssetValue[] = [];

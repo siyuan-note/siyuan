@@ -309,7 +309,7 @@ export const openMenuPanel = (options: {
                 }
                 const replaceValue: IAVCellAssetValue[] = [];
                 Array.from(targetElement.parentElement.children).forEach((item: HTMLElement) => {
-                    if (item.dataset.content) {
+                    if (["image", "file"].includes(item.dataset.type)) {
                         replaceValue.push({
                             content: item.dataset.content,
                             name: item.dataset.name,

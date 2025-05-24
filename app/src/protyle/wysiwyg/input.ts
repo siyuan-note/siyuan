@@ -102,8 +102,11 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         brElement.remove();
     }
 
-    if (type !== "NodeHeading" &&
-        (editElement.innerHTML.startsWith("》<wbr>") || editElement.innerHTML.indexOf("\n》<wbr>") > -1)) {
+    if (type !== "NodeHeading" && (
+        editElement.innerHTML.startsWith("》<wbr>") ||
+        editElement.innerHTML.startsWith(Constants.ZWSP + "》<wbr>") ||
+        editElement.innerHTML.indexOf("\n》<wbr>") > -1
+    )) {
         editElement.innerHTML = editElement.innerHTML.replace("》<wbr>", "><wbr>");
     }
     const trimStartText = editElement.innerHTML.trimStart();

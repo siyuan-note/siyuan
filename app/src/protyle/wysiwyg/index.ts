@@ -1116,6 +1116,7 @@ export class WYSIWYG {
                         window.siyuan.menus.menu.remove();
                         if (!protyle.disabled) {
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "mergeCell",
                                 label: window.siyuan.languages.mergeCell,
                                 click: () => {
                                     if (tableBlockElement) {
@@ -1236,8 +1237,9 @@ export class WYSIWYG {
                                     }
                                 }
                             }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(new MenuItem({id: "separator_1", type: "separator"}).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignLeft",
                                 icon: "iconAlignLeft",
                                 accelerator: window.siyuan.config.keymap.editor.general.alignLeft.custom,
                                 label: window.siyuan.languages.alignLeft,
@@ -1263,6 +1265,7 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignCenter",
                                 icon: "iconAlignCenter",
                                 accelerator: window.siyuan.config.keymap.editor.general.alignCenter.custom,
                                 label: window.siyuan.languages.alignCenter,
@@ -1288,6 +1291,7 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "alignRight",
                                 icon: "iconAlignRight",
                                 accelerator: window.siyuan.config.keymap.editor.general.alignRight.custom,
                                 label: window.siyuan.languages.alignRight,
@@ -1312,6 +1316,7 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "useDefaultAlign",
                                 icon: "",
                                 label: window.siyuan.languages.useDefaultAlign,
                                 click: () => {
@@ -1335,7 +1340,7 @@ export class WYSIWYG {
                                     }
                                 }
                             }).element);
-                            window.siyuan.menus.menu.append(new MenuItem({type: "separator"}).element);
+                            window.siyuan.menus.menu.append(new MenuItem({id: "separator_2", type: "separator"}).element);
                         }
                         window.siyuan.menus.menu.append(new MenuItem({
                             id: "copyPlainText",
@@ -1370,6 +1375,7 @@ export class WYSIWYG {
                             }
                         }).element);
                         window.siyuan.menus.menu.append(new MenuItem({
+                            id: "copy",
                             icon: "iconCopy",
                             accelerator: "⌘C",
                             label: window.siyuan.languages.copy,
@@ -1382,6 +1388,7 @@ export class WYSIWYG {
                         }).element);
                         if (!protyle.disabled) {
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "cut",
                                 icon: "iconCut",
                                 accelerator: "⌘X",
                                 label: window.siyuan.languages.cut,
@@ -1393,6 +1400,7 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "clear",
                                 label: window.siyuan.languages.clear,
                                 icon: "iconTrashcan",
                                 accelerator: "⌦",
@@ -1401,6 +1409,7 @@ export class WYSIWYG {
                                 }
                             }).element);
                             window.siyuan.menus.menu.append(new MenuItem({
+                                id: "paste",
                                 label: window.siyuan.languages.paste,
                                 icon: "iconPaste",
                                 accelerator: "⌘V",

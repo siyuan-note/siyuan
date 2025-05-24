@@ -74,7 +74,7 @@ export const openFileById = async (options: {
 };
 
 export const openAsset = (app: App, assetPath: string, page: number | string, position?: string) => {
-    const suffix = pathPosix().extname(assetPath.split("?page")[0]);
+    const suffix = pathPosix().extname(assetPath).split("?")[0];
     if (!Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
         return;
     }
@@ -421,7 +421,7 @@ const switchEditor = (editor: Editor, options: IOpenFileOptions, allModels: IMod
 const newTab = (options: IOpenFileOptions) => {
     let tab: Tab;
     if (options.assetPath) {
-        const suffix = pathPosix().extname(options.assetPath.split("?page")[0]);
+        const suffix = pathPosix().extname(options.assetPath).split("?")[0];
         if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
             let icon = "iconPDF";
             if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {

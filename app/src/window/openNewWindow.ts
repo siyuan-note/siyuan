@@ -74,7 +74,7 @@ export const openNewWindowById = async (id: string | string[], options: windowOp
 
 export const openAssetNewWindow = (assetPath: string, options: windowOptions = {}) => {
     /// #if !BROWSER
-    const suffix = pathPosix().extname(assetPath.split("?page")[0]);
+    const suffix = pathPosix().extname(assetPath).split("?")[0];
     if (Constants.SIYUAN_ASSETS_EXTS.includes(suffix)) {
         let docIcon = "iconPDF";
         if (Constants.SIYUAN_ASSETS_IMAGE.includes(suffix)) {

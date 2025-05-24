@@ -519,7 +519,13 @@ export class Toolbar {
                         if (item.textContent) {
                             const inlineElement = document.createElement("span");
                             inlineElement.setAttribute("data-type", type);
-                            inlineElement.textContent = type === "a" ? (item.textContent.trim() || "*") : item.textContent;
+                            inlineElement.textContent = item.textContent;
+                            if (type === "a") {
+                                if (!inlineElement.textContent) {
+                                    inlineElement.textContent = "*";
+                                }
+                                textObj.color = textObj.color.split(Constants.ZWSP)[0];
+                            }
                             setFontStyle(inlineElement, textObj);
 
                             if (type === "text" && !inlineElement.getAttribute("style")) {
@@ -605,6 +611,12 @@ export class Toolbar {
                         types = [...new Set(types)];
                         if (item.tagName !== "BR" && item.tagName !== "IMG" && !types.includes("img")) {
                             item.setAttribute("data-type", types.join(" "));
+                            if (type === "a") {
+                                if (!item.textContent) {
+                                    item.textContent = "*";
+                                }
+                                textObj.color = textObj.color.split(Constants.ZWSP)[0];
+                            }
                             setFontStyle(item, textObj);
                             if (types.includes("text") && !item.getAttribute("style")) {
                                 if (types.length === 1) {

@@ -26,11 +26,6 @@ RUN mkdir -p /opt/siyuan && \
     tar -xz --strip-components=1 -C /opt/siyuan && \
     chmod +x /opt/siyuan/siyuan
 
-# Start dbus service during container initialization
-RUN mkdir -p /etc/service/dbus
-COPY dbus-run.sh /etc/service/dbus/run
-RUN chmod +x /etc/service/dbus/run
-
 WORKDIR /app/discord-auth
 COPY discord-auth/package.json .
 RUN npm install --omit=dev

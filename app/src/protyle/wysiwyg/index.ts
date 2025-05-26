@@ -2033,6 +2033,7 @@ export class WYSIWYG {
             }
             // 链接，备注，样式，引用，pdf标注粘贴 https://github.com/siyuan-note/siyuan/issues/11572
             const range = getSelection().getRangeAt(0);
+            protyle.toolbar.range = range;
             const inlineElement = range.startContainer.parentElement;
             if (range.toString() === "" && inlineElement.tagName === "SPAN") {
                 const currentTypes = (inlineElement.getAttribute("data-type") || "").split(" ");

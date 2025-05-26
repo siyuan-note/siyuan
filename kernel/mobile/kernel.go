@@ -291,7 +291,3 @@ func FilterUploadFileName(name string) string {
 func AssetName(name string) string {
 	return util.AssetName(name)
 }
-
-func CurrentLanguage() string {
-	return model.Conf.Lang
-}

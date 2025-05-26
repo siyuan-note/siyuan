@@ -71,7 +71,7 @@ require (
 	github.com/vanng822/css v1.0.1
 	github.com/vmihailenco/msgpack/v5 v5.4.1
 	github.com/xrash/smetrics v0.0.0-20240521201337-686a1a2994c1
-	github.com/xuri/excelize/v2 v2.9.0
+	github.com/xuri/excelize/v2 v2.9.1
 	golang.org/x/image v0.27.0
 	golang.org/x/mobile v0.0.0-20250305212854-3a7bc9f8a4de
 	golang.org/x/mod v0.24.0
@@ -156,7 +156,6 @@ require (
 	github.com/mitchellh/reflectwalk v1.0.2 // indirect
 	github.com/modern-go/concurrent v0.0.0-20180306012644-bacd9c7ef1dd // indirect
 	github.com/modern-go/reflect2 v1.0.2 // indirect
-	github.com/mohae/deepcopy v0.0.0-20170929034955-c48cc78d4826 // indirect
 	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/onsi/ginkgo/v2 v2.23.4 // indirect
 	github.com/otiai10/gosseract/v2 v2.4.1 // indirect
@@ -176,6 +175,7 @@ require (
 	github.com/ssor/bom v0.0.0-20170718123548-6386211fdfcf // indirect
 	github.com/teambition/rrule-go v1.8.2 // indirect
 	github.com/tetratelabs/wazero v1.9.0 // indirect
+	github.com/tiendc/go-deepcopy v1.6.0 // indirect
 	github.com/tklauser/go-sysconf v0.3.15 // indirect
 	github.com/tklauser/numcpus v0.10.0 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect

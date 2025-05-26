@@ -401,18 +401,9 @@ const renderPDF = async (id: string) => {
         previewElement.innerHTML = '<div style="padding:8px 0 0 0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
         const wysElement = previewElement.querySelector(".protyle-wysiwyg");
         wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
-        if (data.attrs.memo) {
-            wysElement.setAttribute("memo", data.attrs.memo);
-        }
-        if (data.attrs.name) {
-            wysElement.setAttribute("name", data.attrs.name);
-        }
-        if (data.attrs.bookmark) {
-            wysElement.setAttribute("bookmark", data.attrs.bookmark);
-        }
-        if (data.attrs.alias) {
-            wysElement.setAttribute("alias", data.attrs.alias);
-        }
+        Object.keys(data.attrs).forEach(key => {
+            wysElement.setAttribute(key, data.attrs[key]);
+        })
         // https://github.com/siyuan-note/siyuan/issues/13669
         wysElement.querySelectorAll('[data-node-id]').forEach((item) => {
             if (item.querySelector(".img")) {

@@ -155,18 +155,9 @@ export const exportImage = (id: string) => {
     const refreshPreview = (response: IWebSocketData) => {
         previewElement.innerHTML = response.data.content;
         previewElement.setAttribute("data-doc-type", response.data.type || "NodeDocument");
-        if (response.data.attrs.memo) {
-            previewElement.setAttribute("memo", response.data.attrs.memo);
-        }
-        if (response.data.attrs.name) {
-            previewElement.setAttribute("name", response.data.attrs.name);
-        }
-        if (response.data.attrs.bookmark) {
-            previewElement.setAttribute("bookmark", response.data.attrs.bookmark);
-        }
-        if (response.data.attrs.alias) {
-            previewElement.setAttribute("alias", response.data.attrs.alias);
-        }
+        Object.keys(response.data.attrs).forEach(key => {
+            previewElement.setAttribute(key, response.data.attrs[key]);
+        });
         previewElement.querySelectorAll(".code-block").forEach(item => {
             item.setAttribute("linewrap", "true");
         });

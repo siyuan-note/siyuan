@@ -275,7 +275,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         tempElement.content.querySelectorAll(".protyle-wysiwyg--select").forEach(selectItem => {
             selectItem.classList.remove("protyle-wysiwyg--select");
         });
-        const wbrElement = tempElement.querySelector("wbr");
+        const wbrElement = tempElement.content.querySelector("wbr");
         if (wbrElement) {
             wbrElement.remove();
         }

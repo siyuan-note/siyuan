@@ -32,7 +32,7 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0
 	github.com/gabriel-vasile/mimetype v1.4.9
 	github.com/gin-contrib/gzip v1.2.3
-	github.com/gin-contrib/sessions v1.0.3
+	github.com/gin-contrib/sessions v1.0.4
 	github.com/gin-contrib/sse v1.1.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ole/go-ole v1.3.0

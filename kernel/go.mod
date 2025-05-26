@@ -41,7 +41,7 @@ require (
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/css v1.0.1
 	github.com/gorilla/websocket v1.5.3
-	github.com/imroc/req/v3 v3.52.1
+	github.com/imroc/req/v3 v3.52.2
 	github.com/jinzhu/copier v0.4.0
 	github.com/json-iterator/go v1.1.12
 	github.com/klippa-app/go-pdfium v1.14.1
@@ -58,11 +58,11 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.39.1
 	github.com/shirou/gopsutil/v4 v4.25.4
-	github.com/siyuan-note/dejavu v0.0.0-20250524024727-3a7ec214c89d
+	github.com/siyuan-note/dejavu v0.0.0-20250526130245-f729f46c75eb
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
-	github.com/siyuan-note/httpclient v0.0.0-20250524024522-3788ebad4e5e
+	github.com/siyuan-note/httpclient v0.0.0-20250526130146-7be189f1b77b
 	github.com/siyuan-note/logging v0.0.0-20250425042449-b96c40249b54
 	github.com/siyuan-note/riff v0.0.0-20250424035337-0a1e91809f6d
 	github.com/spf13/cast v1.8.0

@@ -681,7 +681,7 @@ export class Toolbar {
                         previousElement && previousElement.nodeType !== 3 &&
                         currentNode.nodeType !== 3 &&
                         isArrayEqual(currentType, (previousElement.getAttribute("data-type") || "").split(" ")) &&
-                        hasSameTextStyle(currentNode, previousElement, textObj)) {
+                        hasSameTextStyle(currentNode, previousElement)) {
                         if (currentType.includes("code") || currentType.includes("tag") || currentType.includes("kbd")) {
                             if (currentNode.textContent.startsWith(Constants.ZWSP)) {
                                 currentNode.textContent = currentNode.textContent.substring(1);

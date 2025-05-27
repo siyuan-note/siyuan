@@ -17,7 +17,7 @@ export const clearBeforeResizeTop = () => {
         }
     });
     /// #endif
-}
+};
 
 export const recordBeforeResizeTop = () => {
     /// #if !MOBILE

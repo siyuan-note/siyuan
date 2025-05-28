@@ -62,10 +62,13 @@ export const hideAllElements = (types: string[]) => {
     if (types.includes("util")) {
         getAllEditor().forEach(item => {
             if (item.protyle.toolbar) {
-                item.protyle.toolbar.subElement.classList.add("fn__none");
-                if (item.protyle.toolbar.subElementCloseCB) {
-                    item.protyle.toolbar.subElementCloseCB();
-                    item.protyle.toolbar.subElementCloseCB = undefined;
+                const pinElement = item.protyle.toolbar.subElement.querySelector('[data-type="pin"]');
+                if (!pinElement || (pinElement && pinElement.getAttribute("aria-label") === window.siyuan.languages.pin)) {
+                    item.protyle.toolbar.subElement.classList.add("fn__none");
+                    if (item.protyle.toolbar.subElementCloseCB) {
+                        item.protyle.toolbar.subElementCloseCB();
+                        item.protyle.toolbar.subElementCloseCB = undefined;
+                    }
                 }
             }
         });

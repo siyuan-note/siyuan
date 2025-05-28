@@ -541,6 +541,8 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		} else {
 			dataModel[rowValue.Key.Name] = v.String(true)
 		}
+
+		dataModel[rowValue.Key.Name+"_raw"] = v // Database template fields support access to the raw value https://github.com/siyuan-note/siyuan/issues/14903
 	}
 
 	if err = tpl.Execute(buf, dataModel); err != nil {

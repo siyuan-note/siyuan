@@ -3,21 +3,21 @@
 ## Get the source code
 
 * `git clone git@github.com:siyuan-note/siyuan.git`
-* switch to dev branch `git checkout dev`
+* Switch to dev branch `git checkout dev`
 
 ## NPM dependencies
 
-Install pnpm: `npm install -g pnpm@10.8.0`
+Install pnpm: `npm install -g pnpm@10.11.0`
 
 <details>
 <summary>For China mainland</summary>
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v35.3.0 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@v35.4.0 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@v35.3.0 -D`
+  * `pnpm install electron@v35.4.0 -D`
 
 NPM mirror:
 
@@ -25,9 +25,9 @@ NPM mirror:
 * Revert to using official repository `pnpm --registry https://registry.npmjs.org i`
 </details>
 
-On the desktop, go to the app folder to run:
+Enter the app folder and execute:
 
-* `pnpm install electron@v35.3.0-D`
+* `pnpm install electron@v35.4.0 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

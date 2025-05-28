@@ -22,6 +22,7 @@ import (
 	"time"
 
 	"github.com/88250/go-humanize"
+	"github.com/88250/lute/parse"
 	util2 "github.com/88250/lute/util"
 	"github.com/Masterminds/sprig/v3"
 	"github.com/araddon/dateparse"
@@ -53,7 +54,29 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["statBlock"] = StatBlock
 	ret["runeCount"] = runeCount
 	ret["wordCount"] = wordCount
+	ret["markdown2text"] = markdown2text
+	ret["markdown2content"] = markdown2content
 	return
+}
+
+func markdown2content(md string) (ret string) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	if nil == tree || nil == tree.Root {
+		logging.LogWarnf("parse markdown [%s] failed", md)
+		return
+	}
+	return tree.Root.Content()
+}
+
+func markdown2text(md string) (ret string) {
+	luteEngine := util.NewLute()
+	tree := parse.Parse("", []byte(md), luteEngine.ParseOptions)
+	if nil == tree || nil == tree.Root {
+		logging.LogWarnf("parse markdown [%s] failed", md)
+		return
+	}
+	return tree.Root.Text()
 }
 
 func runeCount(s string) (ret int) {

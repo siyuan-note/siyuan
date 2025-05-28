@@ -381,7 +381,7 @@ export const hintTag = (key: string, protyle: IProtyle): IHintData[] => {
         if (response.data.k && !hasKey) {
             dataList.splice(0, 0, {
                 value: `<span data-type="tag">${response.data.k}</span>`,
-                html: `<div class="b3-list-item__text">${window.siyuan.languages.new} <mark>${escapeHtml(response.data.k)}</mark></div>`,
+                html: `<div class="b3-list-item__text">${window.siyuan.languages.newTag} <mark>${escapeHtml(response.data.k)}</mark></div>`,
             });
             if (dataList.length > 1) {
                 dataList[1].focus = true;

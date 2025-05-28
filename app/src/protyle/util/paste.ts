@@ -252,7 +252,6 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
 }) & {
     target: HTMLElement
 }) => {
-    protyle.hint.enableExtend = false;
     if ("clipboardData" in event || "dataTransfer" in event) {
         event.stopPropagation();
         event.preventDefault();
@@ -370,7 +369,8 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
         }
         return;
     }
-    hideElements(["select", "hint"], protyle);
+    protyle.hint.enableExtend = Constants.BLOCK_HINT_KEYS.includes(protyle.hint.splitChar);
+    hideElements(protyle.hint.enableExtend ? ["select"] : ["select", "hint"], protyle);
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");
     });

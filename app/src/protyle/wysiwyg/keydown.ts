@@ -8,13 +8,15 @@ import {
     getSelectionOffset,
     getSelectionPosition,
     selectAll,
-    setFirstNodeRange, setInsertWbrHTML,
+    setFirstNodeRange,
+    setInsertWbrHTML,
     setLastNodeRange,
 } from "../util/selection";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName, hasClosestByTag,
+    hasClosestByClassName,
+    hasClosestByTag,
     hasTopClosestByAttribute,
     isInEmbedBlock
 } from "../util/hasClosest";
@@ -27,7 +29,8 @@ import {
     getPreviousBlock,
     getTopAloneElement,
     hasNextSibling,
-    hasPreviousSibling, isEndOfBlock,
+    hasPreviousSibling,
+    isEndOfBlock,
     isNotEditBlock,
 } from "./getBlock";
 import {isIncludesHotKey, matchHotKey} from "../util/hotKey";
@@ -285,8 +288,14 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.key !== "Enter" && event.key !== "Tab" && event.key !== "Backspace" && event.key !== "Delete" && event.key !== "ContextMenu") {
             event.stopPropagation();
             hideElements(["select"], protyle);
+            // https://github.com/siyuan-note/siyuan/issues/14743
+            if (nodeElement && getContenteditableElement(nodeElement) &&
+                range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).classList.contains("protyle-attr")) {
+                range.collapse(true);
+            }
             return false;
         }
+
         if (matchHotKey(window.siyuan.config.keymap.editor.general.collapse.custom, event) && !event.repeat) {
             const selectElements = protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select");
             if (selectElements.length > 0) {
@@ -2023,12 +2032,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             event.stopPropagation();
             return;
-        }
-
-        // https://github.com/siyuan-note/siyuan/issues/14743
-        if (nodeElement && getContenteditableElement(nodeElement) &&
-            range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).classList.contains("protyle-attr")) {
-            range.collapse(true);
         }
     });
 };

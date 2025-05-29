@@ -18,18 +18,26 @@ package util
 
 import (
 	"crypto/tls"
-	"net"
-	"net/http"
 	"time"
 
 	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/httpclient"
 )
 
+// NewCustomReqClient 创建自定义 req 客户端
+func NewCustomReqClient() *req.Client {
+	client := req.C().
+		SetTLSClientConfig(createCustomTLSConfig()).
+		SetUserAgent(UserAgent).
+		SetTimeout(30 * time.Second).
+		SetProxy(httpclient.ProxyFromEnvironment)
+	return client
+}
+
 // createCustomTLSConfig 创建自定义 TLS 配置
 func createCustomTLSConfig() *tls.Config {
 	return &tls.Config{
-		InsecureSkipVerify: false,
+		InsecureSkipVerify: true,
 		MinVersion:         tls.VersionTLS12,
 		MaxVersion:         tls.VersionTLS13,
 
@@ -52,42 +60,4 @@ func createCustomTLSConfig() *tls.Config {
 			tls.CurveP384,
 		},
 	}
-}
-
-// CreateCustomHTTPClient 创建自定义 HTTP 客户端
-func CreateCustomHTTPClient() *http.Client {
-	dialer := &net.Dialer{
-		Timeout:   30 * time.Second,
-		KeepAlive: 30 * time.Second,
-	}
-
-	transport := &http.Transport{
-		TLSClientConfig:       createCustomTLSConfig(),
-		DialContext:           dialer.DialContext,
-		MaxIdleConns:          100,
-		MaxIdleConnsPerHost:   10,
-		IdleConnTimeout:       90 * time.Second,
-		TLSHandshakeTimeout:   10 * time.Second,
-		ResponseHeaderTimeout: 10 * time.Second,
-		ForceAttemptHTTP2:     false,
-		TLSNextProto:          make(map[string]func(authority string, c *tls.Conn) http.RoundTripper),
-	}
-
-	return &http.Client{
-		Transport: transport,
-		Timeout:   60 * time.Second,
-	}
-}
-
-// CreateCustomReqClient 创建自定义 req 客户端
-func CreateCustomReqClient() *req.Client {
-	client := req.C()
-
-	client.SetTLSClientConfig(createCustomTLSConfig())
-
-	client.SetUserAgent(UserAgent).
-		SetTimeout(30 * time.Second).
-		SetProxy(httpclient.ProxyFromEnvironment)
-
-	return client
 }

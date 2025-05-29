@@ -100,8 +100,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		}
 	}
 
-	browserClient := util.CreateCustomReqClient().
-		EnableInsecureSkipVerify() // 添加了自定义TLS指纹, 可以完成对于CDN的资源下载
+	browserClient := util.NewCustomReqClient() // 自定义了 TLS 指纹，增加下载成功率
 
 	forbiddenCount := 0
 	destNodes := getRemoteAssetsLinkDestsInTree(tree, onlyImg)

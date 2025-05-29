@@ -476,7 +476,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	var paragraphParentIDs []string
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type || "NodeHeading" == ref.Type {
+			if "NodeParagraph" == ref.Type {
 				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 			}
 		}
@@ -494,7 +494,7 @@ func GetBacklink(id, keyword, mentionKeyword string, beforeLen int, containChild
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type || "NodeHeading" == ref.Type {
+			if "NodeParagraph" == ref.Type {
 				if processedParagraphs.Contains(ref.ParentID) {
 					continue
 				}
@@ -580,7 +580,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	var paragraphParentIDs []string
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type || "NodeHeading" == ref.Type {
+			if "NodeParagraph" == ref.Type {
 				parentRefParagraphs[ref.ParentID] = ref
 				paragraphParentIDs = append(paragraphParentIDs, ref.ParentID)
 			}
@@ -615,15 +615,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 							continue
 						}
 
-						text := c.Text()
-						if strings.HasPrefix(text, "#") {
-							tmp := strings.ReplaceAll(text, "#", "")
-							if " " == tmp { // 如果是标题标记符则跳过
-								continue
-							}
-						}
-
-						if "" != strings.TrimSpace(text) {
+						if "" != strings.TrimSpace(c.Text()) {
 							paragraphUseParentLi = false
 							break
 						}
@@ -648,7 +640,7 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 	}
 	for _, link := range links {
 		for _, ref := range link.Refs {
-			if "NodeParagraph" == ref.Type || "NodeHeading" == ref.Type {
+			if "NodeParagraph" == ref.Type {
 				if processedParagraphs.Contains(ref.ParentID) {
 					continue
 				}
@@ -662,6 +654,38 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 			ref.DefID = link.ID
 			ref.DefPath = link.Path
 			ret = append(ret, ref)
+		}
+	}
+
+	if 0 < len(keywords) {
+		// 过滤场景处理标题下方块 Improve backlink filtering below the heading https://github.com/siyuan-note/siyuan/issues/14929
+		headingRefChildren := map[string]*Block{}
+		var headingIDs []string
+		for _, link := range links {
+			for _, ref := range link.Refs {
+				if "NodeHeading" == ref.Type {
+					headingRefChildren[ref.ID] = ref
+					headingIDs = append(headingIDs, ref.ID)
+				}
+			}
+		}
+		var headingChildren []*Block
+		for _, headingID := range headingIDs {
+			sqlChildren := sql.GetChildBlocks(headingID, "", -1)
+			children := fromSQLBlocks(&sqlChildren, "", 12)
+			headingChildren = append(headingChildren, children...)
+		}
+		for _, child := range headingChildren {
+			if nil == child {
+				continue
+			}
+
+			if matchBacklinkKeyword(child, keywords) {
+				heading := headingRefChildren[child.ParentID]
+				if nil != heading {
+					ret = append(ret, heading)
+				}
+			}
 		}
 	}
 	return

@@ -2024,5 +2024,11 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.stopPropagation();
             return;
         }
+
+        // https://github.com/siyuan-note/siyuan/issues/14743
+        if (nodeElement && getContenteditableElement(nodeElement) &&
+            range.endContainer.nodeType === 1 && (range.endContainer as HTMLElement).classList.contains("protyle-attr")) {
+            range.collapse(true);
+        }
     });
 };

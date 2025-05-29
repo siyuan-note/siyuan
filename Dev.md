@@ -34,6 +34,8 @@ pnpm run build:mobile
 pnpm run build:app
 ```
 
-# 启动程序
+### 启动程序
+```bash
+cd app
 ./kernel/SiYuan-Kernel && pnpm run start
 ```

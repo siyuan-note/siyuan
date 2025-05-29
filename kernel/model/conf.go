@@ -112,6 +112,12 @@ func (conf *AppConf) SetUser(user *conf.User) {
 	conf.m.Lock()
 	defer conf.m.Unlock()
 	conf.User = user
+	// 此处用于账号付费
+	conf.User.UserSiYuanSubscriptionPlan = 0
+	conf.User.UserSiYuanSubscriptionStatus = 0
+	conf.User.UserSiYuanSubscriptionType = 1
+	conf.User.UserSiYuanOneTimePayStatus = 1
+	// 此处用于账号付费
 }
 
 func InitConf() {

@@ -7,7 +7,7 @@
 		"id": "20211226122549-jktxego",
 		"title": "快捷鍵",
 		"type": "doc",
-		"updated": "20250423105919"
+		"updated": "20250529111304"
 	},
 	"Children": [
 		{
@@ -3671,7 +3671,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226122652-htptsmh",
-				"updated": "20250303234747"
+				"updated": "20250529111040"
 			},
 			"Children": [
 				{
@@ -3686,7 +3686,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20211226122652-xp1hi60",
-				"updated": "20250303234747"
+				"updated": "20250529111040"
 			},
 			"Children": [
 				{
@@ -3706,7 +3706,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112151141-ggglv0f",
-				"updated": "20250303234747"
+				"updated": "20250529111040"
 			},
 			"Children": [
 				{
@@ -7309,7 +7309,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在反鏈面板中的作用是打開遊標所在區塊"
+								}
+							]
 						}
 					]
 				},
@@ -16324,7 +16330,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220902195608-jh61ukq",
-				"updated": "20250115160036"
+				"updated": "20250529111304"
 			},
 			"Children": [
 				{
@@ -16343,7 +16349,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902195638-92scg94",
-				"updated": "20250115160036"
+				"updated": "20250529111304"
 			},
 			"Children": [
 				{
@@ -16549,6 +16555,15 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "複製文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ → "
 								},
 								{
 									"Type": "NodeTextMark",

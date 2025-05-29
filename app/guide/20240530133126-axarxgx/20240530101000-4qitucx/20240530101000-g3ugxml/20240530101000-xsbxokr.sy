@@ -9,7 +9,7 @@
 		"id": "20240530101000-xsbxokr",
 		"title": "ショートカット",
 		"type": "doc",
-		"updated": "20250423105910"
+		"updated": "20250529111249"
 	},
 	"Children": [
 		{
@@ -3627,7 +3627,7 @@
 			"Properties": {
 				"ID": "20240530101000-twmuxke",
 				"id": "20240530101000-675gu9g",
-				"updated": "20250303234901"
+				"updated": "20250529111052"
 			},
 			"Children": [
 				{
@@ -3653,7 +3653,7 @@
 			"Properties": {
 				"ID": "20240530101000-tkbdrth",
 				"id": "20240530101000-9wkmh8w",
-				"updated": "20250303234901"
+				"updated": "20250529111052"
 			},
 			"Children": [
 				{
@@ -3673,7 +3673,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240530101000-1isfzez",
-				"updated": "20250303234901"
+				"updated": "20250529111052"
 			},
 			"Children": [
 				{
@@ -7276,7 +7276,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "バックリンクパネルの機能は、カーソルが位置するブロックを開くことです。"
+								}
+							]
 						}
 					]
 				},
@@ -16404,7 +16410,7 @@
 			"Properties": {
 				"ID": "20240530101000-84m3izj",
 				"id": "20240530101000-q5l68vs",
-				"updated": "20250115162016"
+				"updated": "20250529111249"
 			},
 			"Children": [
 				{
@@ -16433,7 +16439,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20240530101000-4pvglr9",
-				"updated": "20250115162016"
+				"updated": "20250529111249"
 			},
 			"Children": [
 				{
@@ -16648,6 +16654,15 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "ファイルのコピー"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ → "
 								},
 								{
 									"Type": "NodeTextMark",

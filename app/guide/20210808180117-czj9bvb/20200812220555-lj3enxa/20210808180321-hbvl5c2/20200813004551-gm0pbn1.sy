@@ -7,7 +7,7 @@
 		"id": "20200813004551-gm0pbn1",
 		"title": "快捷键",
 		"type": "doc",
-		"updated": "20250423105922"
+		"updated": "20250529111202"
 	},
 	"Children": [
 		{
@@ -3677,7 +3677,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20201227133317-rkh4bji",
-				"updated": "20250303234645"
+				"updated": "20250529110805"
 			},
 			"Children": [
 				{
@@ -3692,7 +3692,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20201227133317-kazyttz",
-				"updated": "20250303234645"
+				"updated": "20250529110805"
 			},
 			"Children": [
 				{
@@ -3716,7 +3716,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20201227133317-vopotjc",
-				"updated": "20250303234645"
+				"updated": "20250529110805"
 			},
 			"Children": [
 				{
@@ -7292,7 +7292,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "在反链面板中的作用是打开光标所在块"
+								}
+							]
 						}
 					]
 				},
@@ -16198,7 +16204,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220901210205-d5z8hhk",
-				"updated": "20250115155218"
+				"updated": "20250529111202"
 			},
 			"Children": [
 				{
@@ -16217,7 +16223,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902201053-imb47bl",
-				"updated": "20250115155218"
+				"updated": "20250529111202"
 			},
 			"Children": [
 				{
@@ -16423,6 +16429,15 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "复制文件"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ → "
 								},
 								{
 									"Type": "NodeTextMark",

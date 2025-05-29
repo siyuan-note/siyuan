@@ -7,7 +7,7 @@
 		"id": "20200924100950-9op5xi1",
 		"title": "Shortcuts",
 		"type": "doc",
-		"updated": "20250423105931"
+		"updated": "20250529111226"
 	},
 	"Children": [
 		{
@@ -3679,7 +3679,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210106154056-koo4wdj",
-				"updated": "20250303234918"
+				"updated": "20250529110920"
 			},
 			"Children": [
 				{
@@ -3698,7 +3698,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20210106154319-v9tt3e2",
-				"updated": "20250303234918"
+				"updated": "20250529110920"
 			},
 			"Children": [
 				{
@@ -3718,7 +3718,7 @@
 			"Properties": {
 				"colgroup": "||",
 				"id": "20240112150534-wiik5sl",
-				"updated": "20250303234918"
+				"updated": "20250529110920"
 			},
 			"Children": [
 				{
@@ -7316,7 +7316,13 @@
 						},
 						{
 							"Type": "NodeTableCell",
-							"Data": "td"
+							"Data": "td",
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "The function in the backlink panel is to open the block where the cursor is located"
+								}
+							]
 						}
 					]
 				},
@@ -16266,7 +16272,7 @@
 			"HeadingLevel": 3,
 			"Properties": {
 				"id": "20220902200437-58why4v",
-				"updated": "20250115161129"
+				"updated": "20250529111226"
 			},
 			"Children": [
 				{
@@ -16285,7 +16291,7 @@
 			"Properties": {
 				"colgroup": "|",
 				"id": "20220902200448-06bh19l",
-				"updated": "20250115161129"
+				"updated": "20250529111226"
 			},
 			"Children": [
 				{
@@ -16491,6 +16497,15 @@
 								{
 									"Type": "NodeText",
 									"Data": "​ / "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "kbd",
+									"TextMarkTextContent": "Copy file"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ → "
 								},
 								{
 									"Type": "NodeTextMark",

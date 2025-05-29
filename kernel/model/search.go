@@ -1042,7 +1042,6 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 					for _, k := range keywords {
 						lowerKeywords = append(lowerKeywords, strings.ToLower(k))
 					}
-					lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
 					keyword = strings.Join(lowerKeywords, " ")
 				}
 			}

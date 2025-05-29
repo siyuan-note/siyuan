@@ -38,7 +38,6 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/gabriel-vasile/mimetype"
-	"github.com/imroc/req/v3"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
@@ -101,11 +100,8 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 		}
 	}
 
-	browserClient := req.C().
-		SetUserAgent(util.UserAgent).
-		SetTimeout(30 * time.Second).
-		EnableInsecureSkipVerify().
-		SetProxy(httpclient.ProxyFromEnvironment)
+	browserClient := util.CreateCustomReqClient().
+		EnableInsecureSkipVerify() // 添加了自定义TLS指纹, 可以完成对于CDN的资源下载
 
 	forbiddenCount := 0
 	destNodes := getRemoteAssetsLinkDestsInTree(tree, onlyImg)

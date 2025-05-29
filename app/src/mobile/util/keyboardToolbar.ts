@@ -519,7 +519,7 @@ export const initKeyboardToolbar = () => {
     <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
-    toolbarElement.addEventListener("click", (event) => {
+    toolbarElement.addEventListener(isInAndroid() ? "touchstart" : "click", (event) => {
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");

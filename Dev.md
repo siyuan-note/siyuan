@@ -8,6 +8,7 @@ go run main.go
 
 ### 编译内核
 在`kernel`目录下运行`go build`命令可以将kernel内容编译成可执行文件
+
 **注意：这个是客户端运行的基础**
 ``` bash
 cd kernel
@@ -29,13 +30,20 @@ pnpm install && pnpm rebuild
 
 ### 编译客户端页面
 ```bash
-pnpm run build:desktop
-pnpm run build:mobile
-pnpm run build:app
+# 运行编译命令
+pnpm run build:desktop & pnpm run build:mobile & pnpm run build:app & pnpm run build:export
+# 或者
+pnpm run build
 ```
 
 ### 启动程序
 ```bash
 cd app
 ./kernel/SiYuan-Kernel && pnpm run start
+```
+
+
+### 打包
+```bash
+pnpm run dist
 ```

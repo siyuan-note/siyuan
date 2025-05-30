@@ -13,6 +13,11 @@ files:
 extraFiles:
   - from: "../LICENSE"
     to: "LICENSE"
+mac:
+  icon: "src/assets/icon.icns"
+  target:
+    - target: "dmg"
+    - target: "zip"
 win:
   icon: "src/assets/icon.ico"
   extraResources:
@@ -41,6 +46,8 @@ nsis:
   uninstallerSidebar: "nsis/uninstallerSidebar.bmp"
 
 extraResources:
+  - from: "kernel"
+    to: "kernel"
   - from: "changelogs"
     to: "changelogs"
   - from: "stage"

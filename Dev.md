@@ -1,4 +1,6 @@
 ## 如何编译
+
+[参考](./.github/CONTRIBUTING_zh_CN.md)
 ### 运行内核
 在`kernel`目录下运行`go run`命令可以将kernel内容运行起来
 ``` bash
@@ -13,7 +15,7 @@ go run main.go
 ``` bash
 cd kernel
 # 客户端依赖这个内核
-go build -o ../app/kernel/SiYuan-Kernel
+go build --tags "fts5" -o ../app/kernel/SiYuan-Kernel
 ```
 
 ### 运行客户端程序

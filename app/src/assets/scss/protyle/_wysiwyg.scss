@@ -193,6 +193,7 @@
           display: block;
           z-index: 1;
           position: relative;
+          pointer-events: none;
         }
 
         &--order::after {

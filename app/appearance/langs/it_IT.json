@@ -1470,7 +1470,7 @@
     "129": "I dati cloud sono stati corrotti, si prega di ripristinare il repository dati locale e la directory di sincronizzazione cloud per risolvere il problema",
     "130": "L'installatore della nuova versione sta per avviarsi. Poiché il sistema operativo eseguirà una scansione di sicurezza, potrebbe richiedere del tempo per avviarsi. Si prega di attendere...",
     "131": "Questa operazione non è supportata, si prega di andare al pannello di gestione del fornitore di archiviazione cloud per operare",
-    "132": "L'attuale metodo di ricerca non supporta l'operazione di sostituzione, si prega di utilizzare il metodo di ricerca [Parola Chiave] o [Regex]",
+    "132": "La modalità di ricerca SQL non supporta l'operazione di sostituzione, utilizzare un altro metodo di ricerca",
     "133": "Scaricamento pacchetto di installazione dell'aggiornamento [%s]",
     "134": "Per prevenire la sovrascrittura dei dati appena ripristinati tramite sincronizzazione, la funzione di sincronizzazione dei dati è stata automaticamente sospesa",
     "135": "La chiave del repository dati è errata e i dati non possono essere decrittografati. Si prega di consultare la Guida dell'utente-FAQ-Passi per chiave persa per risolvere il problema",

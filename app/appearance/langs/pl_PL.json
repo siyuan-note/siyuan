@@ -1470,7 +1470,7 @@
     "129": "Dane w chmurze zostały uszkodzone, proszę zresetować lokalne repozytorium danych i katalog synchronizacji w chmurze, aby rozwiązać problem",
     "130": "Instalator nowej wersji się uruchamia. Ponieważ system operacyjny wykona skanowanie zabezpieczeń, rozpoczęcie może zająć trochę czasu. Proszę czekać...",
     "131": "Ta operacja nie jest obsługiwana, proszę przejść do konsoli zarządzania dostawcy przechowywania w chmurze, aby wykonać operację",
-    "132": "Bieżąca metoda wyszukiwania nie obsługuje operacji zamiany, proszę użyć metody wyszukiwania [Słowo kluczowe] lub [Wyrażenie regex]",
+    "132": "Tryb wyszukiwania SQL nie obsługuje operacji zamiany, użyj innej metody wyszukiwania",
     "133": "Pobieranie pakietu instalacyjnego aktualizacji [%s]",
     "134": "Aby zapobiec nadpisaniu nowo przywróconych danych przez synchronizację, funkcja synchronizacji danych została automatycznie wstrzymana",
     "135": "Klucz repozytorium danych jest nieprawidłowy i dane nie mogą być odszyfrowane. Proszę zapoznać się z przewodnikiem użytkownika - FAQ - Kroki w przypadku zagubienia klucza w celu rozwiązania problemu",

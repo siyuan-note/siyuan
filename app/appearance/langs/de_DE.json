@@ -1470,7 +1470,7 @@
     "129": "Cloud-Daten wurden beschädigt, bitte setzen Sie das lokale Daten-Repository und das Cloud-Sync-Verzeichnis zurück, um das Problem zu beheben",
     "130": "Der Installer der neuen Version wird gestartet. Da das Betriebssystem eine Sicherheitsprüfung durchführen wird, kann es einige Zeit dauern, bis es startet. Bitte warten Sie...",
     "131": "Dieser Vorgang wird nicht unterstützt, bitte gehen Sie zur Verwaltungsoberfläche des Cloud-Speicherdienstanbieters, um zu operieren",
-    "132": "Die aktuelle Suchmethode unterstützt nicht die Ersetzungsoperation. Bitte verwenden Sie die Suchmethoden [Keyword] oder [Regex]",
+    "132": "Der SQL-Suchmodus unterstützt die Ersetzungsoperation nicht, bitte verwenden Sie eine andere Suchmethode",
     "133": "Herunterladen des Update-Installationspakets [%s]",
     "134": "Um zu verhindern, dass die neu wiederhergestellten Daten durch die Synchronisierung überschrieben werden, wurde die Funktion der Datensynchronisierung automatisch ausgesetzt.",
     "135": "Der Schlüssel des Daten-Repositorys ist falsch und die Daten können nicht entschlüsselt werden. Bitte beziehen Sie sich auf das Benutzerhandbuch - FAQ - Schritte bei verlorenem Schlüssel, um das Problem zu lösen.",

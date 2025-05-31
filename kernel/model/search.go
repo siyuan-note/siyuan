@@ -1900,6 +1900,7 @@ func maxContent(content string, maxLen int) string {
 }
 
 func fieldRegexp(regexp string) string {
+	regexp = strings.ReplaceAll(regexp, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	buf := bytes.Buffer{}
 	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")

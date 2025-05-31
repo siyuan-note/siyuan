@@ -682,13 +682,22 @@ func buildLinkRefs(defRootID string, refs []*sql.Ref, keywords []string) (ret []
 
 			if matchBacklinkKeyword(child, keywords) {
 				heading := headingRefChildren[child.ParentID]
-				if nil != heading {
+				if nil != heading && !existBlock(heading, ret) {
 					ret = append(ret, heading)
 				}
 			}
 		}
 	}
 	return
+}
+
+func existBlock(block *Block, blocks []*Block) bool {
+	for _, b := range blocks {
+		if block.ID == b.ID {
+			return true
+		}
+	}
+	return false
 }
 
 func matchBacklinkKeyword(block *Block, keywords []string) bool {

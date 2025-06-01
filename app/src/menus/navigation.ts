@@ -761,24 +761,43 @@ export const genImportMenu = (notebookId: string, pathString: string) => {
         id: "import",
         icon: "iconDownload",
         label: window.siyuan.languages.import,
-        submenu: [{
-            id: "importSiYuanZip",
-            icon: "iconSiYuan",
-            label: 'SiYuan .sy.zip<input class="b3-form__upload" type="file" accept="application/zip">',
-            bind: (element) => {
-                element.querySelector(".b3-form__upload").addEventListener("change", (event: InputEvent & {
-                    target: HTMLInputElement
-                }) => {
-                    const formData = new FormData();
-                    formData.append("file", event.target.files[0]);
-                    formData.append("notebook", notebookId);
-                    formData.append("toPath", pathString);
-                    fetchPost("/api/import/importSY", formData, () => {
-                        reloadDocTree();
+        submenu: [
+            {
+                id: "importSiYuanZip",
+                icon: "iconSiYuan",
+                label: 'SiYuan .sy.zip<input class="b3-form__upload" type="file" accept="application/zip">',
+                bind: (element) => {
+                    element.querySelector(".b3-form__upload").addEventListener("change", (event: InputEvent & {
+                        target: HTMLInputElement
+                    }) => {
+                        const formData = new FormData();
+                        formData.append("file", event.target.files[0]);
+                        formData.append("notebook", notebookId);
+                        formData.append("toPath", pathString);
+                        fetchPost("/api/import/importSY", formData, () => {
+                            reloadDocTree();
+                        });
                     });
-                });
-            }
-        },
+                }
+            },
+            {
+                id: "importMarkdownZip",
+                icon: "iconMarkdown",
+                label: 'Markdown .zip<input class="b3-form__upload" type="file" accept="application/zip">',
+                bind: (element) => {
+                    element.querySelector(".b3-form__upload").addEventListener("change", (event: InputEvent & {
+                        target: HTMLInputElement
+                    }) => {
+                        const formData = new FormData();
+                        formData.append("file", event.target.files[0]);
+                        formData.append("notebook", notebookId);
+                        formData.append("toPath", pathString);
+                        fetchPost("/api/import/importZipMd", formData, () => {
+                            reloadDocTree();
+                        });
+                    });
+                }
+            },
             /// #if !BROWSER
             importstdmd("Markdown " + window.siyuan.languages.doc, true),
             importstdmd("Markdown " + window.siyuan.languages.folder)

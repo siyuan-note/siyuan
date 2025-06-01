@@ -21,6 +21,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/88250/gulu"
 	"github.com/gin-gonic/gin"
@@ -179,6 +180,90 @@ func importStdMd(c *gin.Context) {
 	localPath := arg["localPath"].(string)
 	toPath := arg["toPath"].(string)
 	err := model.ImportFromLocalPath(notebook, localPath, toPath)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
+func importZipMd(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(200, ret)
+
+	util.PushEndlessProgress(model.Conf.Language(73))
+	defer util.ClearPushProgress(100)
+
+	form, err := c.MultipartForm()
+	if err != nil {
+		logging.LogErrorf("parse import .zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	files := form.File["file"]
+	if 1 > len(files) {
+		logging.LogErrorf("parse import .zip failed, no file found")
+		ret.Code = -1
+		ret.Msg = "no file found"
+		return
+	}
+	file := files[0]
+	reader, err := file.Open()
+	if err != nil {
+		logging.LogErrorf("read import .zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	importDir := filepath.Join(util.TempDir, "import")
+	if err = os.MkdirAll(importDir, 0755); err != nil {
+		logging.LogErrorf("make import dir [%s] failed: %s", importDir, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	writePath := filepath.Join(util.TempDir, "import", file.Filename)
+	defer os.RemoveAll(writePath)
+	writer, err := os.OpenFile(writePath, os.O_RDWR|os.O_CREATE, 0644)
+	if err != nil {
+		logging.LogErrorf("open import .zip [%s] failed: %s", writePath, err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	if _, err = io.Copy(writer, reader); err != nil {
+		logging.LogErrorf("write import .zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	writer.Close()
+	reader.Close()
+
+	notebook := form.Value["notebook"][0]
+	toPath := form.Value["toPath"][0]
+
+	// 准备解压路径
+	filenameMain := strings.TrimSuffix(file.Filename, filepath.Ext(file.Filename))
+	unzipPath := filepath.Join(util.TempDir, "import", filenameMain)
+
+	defer os.RemoveAll(unzipPath)
+
+	// 解压 writePath 的 zip 到 unzipPath
+	err = gulu.Zip.Unzip(writePath, unzipPath)
+	if err != nil {
+		logging.LogErrorf("unzip import .zip failed: %s", err)
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	// 调用本地导入逻辑
+	err = model.ImportFromLocalPath(notebook, unzipPath, toPath)
+
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

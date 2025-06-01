@@ -109,12 +109,12 @@ ${genSVGBG()}
     ${isIOS ? `<a href="javascript:void(0)" data-action="iOSPay" data-type="subscribe">${window.siyuan.languages.clickMeToRenew}</a>` : `<a href="${getCloudURL("subscribe/siyuan")}" target="_blank">${window.siyuan.languages.clickMeToRenew}</a>`}
 </div>`;
                 if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--success"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
+                    subscriptionHTML = `<div class="b3-chip b3-chip--success"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account7}</div>
 <div class="fn__hr--b"></div>`;
                 }
                 if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
                     // 订阅试用
-                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
+                    subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account8}</div>
 ${renewHTML}<div class="fn__hr--b"></div>`;
                 } else {
                     // 年费
@@ -130,7 +130,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
                 }
             } else {
                 if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) {
-                    subscriptionHTML = `<div class="b3-chip b3-chip--success"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.onepay}</div>
+                    subscriptionHTML = `<div class="b3-chip b3-chip--success"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account7}</div>
 <div class="fn__hr--b"></div>${payHTML}`;
                 } else {
                     subscriptionHTML = payHTML;
@@ -495,7 +495,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
                     html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;
                 }
                 if (window.siyuan.user.userSiYuanOneTimePayStatus === 1) { // 一次性付费功能特性
-                    html += `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.onepay}"><svg><use xlink:href="#iconVIP"></use></svg></div>`;
+                    html += `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.onepay}"><svg class="ft__success"><use xlink:href="#iconVIP"></use></svg></div>`;
                 }
             } else { // 未登录
                 html = `<div class="toolbar__item ariaLabel" aria-label="${window.siyuan.languages.freeSub}"><svg class="ft__error"><use xlink:href="#iconVIP"></use></svg></div>`;

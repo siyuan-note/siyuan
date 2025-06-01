@@ -42,7 +42,7 @@ svg {
     &[data-type=NodeHeading],
     &[data-type=NodeIFrame],
     &[data-type=NodeMathBlock],
-    &[data-type=NodeParagraph],
+    // 移除段落块元素 https://github.com/siyuan-note/siyuan/issues/14702 &[data-type=NodeParagraph],
     &[data-type=NodeThematicBreak],
     &[data-type=NodeVideo],
     &[data-type=NodeWidget],

@@ -107,6 +107,7 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         range.setEndAfter(range.startContainer.parentElement);
         range.collapse(false);
     }
+    const keys = Object.keys(response.data.succMap);
     // https://github.com/siyuan-note/siyuan/issues/7624
     const nodeElement = hasClosestBlock(range.startContainer);
     if (nodeElement) {
@@ -114,13 +115,15 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
             insertBlock = false;
         } else {
             const editableElement = getContenteditableElement(nodeElement);
-            if (editableElement && editableElement.textContent !== "" && nodeElement.classList.contains("p")) {
+            if (editableElement && nodeElement.classList.contains("p") &&
+                (editableElement.textContent !== "" || keys.length < 2)) {
                 insertBlock = false;
             }
         }
     }
     let successFileText = "";
-    const keys = Object.keys(response.data.succMap);
+    // 插入多个资源文件时按文件名自然升序排列 Use natural ascending order when inserting multiple assets https://github.com/siyuan-note/siyuan/issues/14643
+    keys.sort((a, b) => a.localeCompare(b, undefined, {numeric: true}));
     const avAssets: IAVCellAssetValue[] = [];
     let hasImage = false;
     keys.forEach((key, index) => {
@@ -147,31 +150,6 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
         }
     });
 
-    if ((nodeElement && nodeElement.classList.contains("av"))) {
-        const cellElements: HTMLElement[] = [];
-        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-            item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
-                if (getTypeByCellElement(cellItem) === "mAsset") {
-                    cellElements.push(cellItem);
-                }
-            });
-        });
-        if (cellElements.length === 0) {
-            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                if (getTypeByCellElement(item) === "mAsset") {
-                    cellElements.push(item);
-                }
-            });
-        }
-        if (cellElements.length > 0) {
-            updateCellsValue(protyle, nodeElement, avAssets, cellElements);
-            document.querySelector(".av__panel")?.remove();
-            return;
-        } else {
-            return;
-        }
-    }
-
     if (document.querySelector(".av__panel")) {
         const cellElements: HTMLElement[] = [document.querySelector('.custom-attr__avvalue[data-type="mAsset"][data-active="true"]')];
         if (!cellElements[0]) {
@@ -189,6 +167,28 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
                 document.querySelector(".av__panel")?.remove();
                 return;
             }
+        } else {
+            return;
+        }
+    } else if (nodeElement && nodeElement.classList.contains("av")) {
+        const cellElements: HTMLElement[] = [];
+        nodeElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
+            item.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
+                if (getTypeByCellElement(cellItem) === "mAsset") {
+                    cellElements.push(cellItem);
+                }
+            });
+        });
+        if (cellElements.length === 0) {
+            protyle.wysiwyg.element.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                if (getTypeByCellElement(item) === "mAsset") {
+                    cellElements.push(item);
+                }
+            });
+        }
+        if (cellElements.length > 0) {
+            updateCellsValue(protyle, nodeElement, avAssets, cellElements);
+            return;
         } else {
             return;
         }

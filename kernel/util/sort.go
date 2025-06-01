@@ -64,6 +64,40 @@ func PinYinCompare(str1, str2 string) bool {
 	return true
 }
 
+func PinYinCompare4FileTree(str1, str2 string) bool {
+	// 文档树字母排序不复用 PinYinCompare 而是单独实现
+	// Improve doc tree Name Alphabet sorting https://github.com/siyuan-note/siyuan/issues/14773
+
+	str1 = RemoveEmojiInvisible(str1)
+	str1 = strings.TrimSuffix(str1, ".sy")
+	str2 = RemoveEmojiInvisible(str2)
+	str2 = strings.TrimSuffix(str2, ".sy")
+
+	// Doc tree, backlinks, tags and templates ignores case when sorting alphabetically by name https://github.com/siyuan-note/siyuan/issues/8360
+	str1 = strings.ToLower(str1)
+	str2 = strings.ToLower(str2)
+
+	a, _ := UTF82GBK(str1)
+	b, _ := UTF82GBK(str2)
+
+	// 长度相等的情况下，直接比较字节数组
+	if len(a) == len(b) {
+		return bytes.Compare(a, b) < 0
+	}
+
+	// 长度不相等的情况下，比较前面相等的部分
+	if len(a) < len(b) {
+		if 0 == bytes.Compare(a, b[:len(a)]) { // 前面相等的情况下短的在前
+			return true
+		}
+		return bytes.Compare(a, b[:len(a)]) < 0
+	}
+	if 0 == bytes.Compare(a[:len(b)], b) {
+		return false
+	}
+	return bytes.Compare(a[:len(b)], b) < 0
+}
+
 // UTF82GBK transform UTF8 rune into GBK byte array.
 func UTF82GBK(src string) ([]byte, error) {
 	GB18030 := simplifiedchinese.All[0]

@@ -44,7 +44,11 @@ func copyStdMarkdown(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	ret.Data = model.ExportStdMarkdown(id)
+	assetsDestSpace2Underscore := false
+	if nil != arg["assetsDestSpace2Underscore"] {
+		assetsDestSpace2Underscore = arg["assetsDestSpace2Underscore"].(bool)
+	}
+	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore)
 }
 
 func html2BlockDOM(c *gin.Context) {

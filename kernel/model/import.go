@@ -22,6 +22,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	util2 "github.com/88250/lute/util"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -80,6 +81,7 @@ func HTML2Tree(htmlStr string, luteEngine *lute.Lute) (tree *parse.Tree, withMat
 			if n.ParentIs(ast.NodeTableCell) {
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\|"), []byte("|"))
 				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("|"), []byte("\\|"))
+				n.Tokens = bytes.ReplaceAll(n.Tokens, []byte("\\<br /\\>"), []byte("<br />"))
 			}
 		}
 
@@ -1113,7 +1115,7 @@ func parseStdMd(markdown []byte) (ret *parse.Tree, yfmRootID, yfmTitle, yfmUpdat
 		return
 	}
 	yfmRootID, yfmTitle, yfmUpdated = normalizeTree(ret)
-	imgHtmlBlock2InlineImg(ret)
+	htmlBlock2Inline(ret)
 	parse.TextMarks2Inlines(ret) // 先将 TextMark 转换为 Inlines https://github.com/siyuan-note/siyuan/issues/13056
 	parse.NestedInlines2FlattedSpansHybrid(ret, false)
 	return
@@ -1194,8 +1196,10 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 	n.Tokens = []byte("assets/" + name)
 }
 
-func imgHtmlBlock2InlineImg(tree *parse.Tree) {
+func htmlBlock2Inline(tree *parse.Tree) {
 	imgHtmlBlocks := map[*ast.Node]*html.Node{}
+	aHtmlBlocks := map[*ast.Node]*html.Node{}
+	var unlinks []*ast.Node
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1223,6 +1227,41 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 			for _, htmlNode := range htmlNodes {
 				if atom.Img == htmlNode.DataAtom {
 					imgHtmlBlocks[n] = htmlNode
+					break
+				}
+			}
+		}
+		if ast.NodeHTMLBlock == n.Type || (ast.NodeText == n.Type && bytes.HasPrefix(bytes.ToLower(n.Tokens), []byte("<a "))) {
+			tokens := bytes.TrimSpace(n.Tokens)
+			if bytes.HasPrefix(tokens, []byte("<div>")) {
+				tokens = bytes.TrimPrefix(tokens, []byte("<div>"))
+			}
+			if bytes.HasSuffix(tokens, []byte("</div>")) {
+				tokens = bytes.TrimSuffix(tokens, []byte("</div>"))
+			}
+			tokens = bytes.TrimSpace(tokens)
+
+			if ast.NodeHTMLBlock != n.Type && nil != n.Next && nil != n.Next.Next {
+				if ast.NodeText == n.Next.Next.Type && bytes.Equal(n.Next.Next.Tokens, []byte("</a>")) {
+					tokens = append(tokens, n.Next.Tokens...)
+					tokens = append(tokens, []byte("</a>")...)
+					unlinks = append(unlinks, n.Next)
+					unlinks = append(unlinks, n.Next.Next)
+				}
+			}
+
+			htmlNodes, pErr := html.ParseFragment(bytes.NewReader(tokens), &html.Node{Type: html.ElementNode})
+			if nil != pErr {
+				logging.LogErrorf("parse html block [%s] failed: %s", n.Tokens, pErr)
+				return ast.WalkContinue
+			}
+			if 1 > len(htmlNodes) {
+				return ast.WalkContinue
+			}
+
+			for _, htmlNode := range htmlNodes {
+				if atom.A == htmlNode.DataAtom {
+					aHtmlBlocks[n] = htmlNode
 					break
 				}
 			}
@@ -1256,6 +1295,37 @@ func imgHtmlBlock2InlineImg(tree *parse.Tree) {
 		} else {
 			n.InsertBefore(p)
 		}
+		unlinks = append(unlinks, n)
+	}
+
+	for n, htmlA := range aHtmlBlocks {
+		href := domAttrValue(htmlA, "href")
+		title := domAttrValue(htmlA, "title")
+		anchor := util2.DomText(htmlA)
+
+		p := treenode.NewParagraph(n.ID)
+		a := &ast.Node{Type: ast.NodeLink}
+		p.AppendChild(a)
+		a.AppendChild(&ast.Node{Type: ast.NodeOpenBracket})
+		a.AppendChild(&ast.Node{Type: ast.NodeLinkText, Tokens: []byte(anchor)})
+		a.AppendChild(&ast.Node{Type: ast.NodeCloseBracket})
+		a.AppendChild(&ast.Node{Type: ast.NodeOpenParen})
+		a.AppendChild(&ast.Node{Type: ast.NodeLinkDest, Tokens: []byte(href)})
+		if "" != title {
+			a.AppendChild(&ast.Node{Type: ast.NodeLinkSpace})
+			a.AppendChild(&ast.Node{Type: ast.NodeLinkTitle, Tokens: []byte(title)})
+		}
+		a.AppendChild(&ast.Node{Type: ast.NodeCloseParen})
+
+		if ast.NodeHTMLBlock == n.Type || (nil == n.Previous && (nil != n.Next && nil != n.Next.Next && nil == n.Next.Next.Next)) {
+			n.InsertBefore(p)
+		} else {
+			n.InsertBefore(a)
+		}
+		unlinks = append(unlinks, n)
+	}
+
+	for _, n := range unlinks {
 		n.Unlink()
 	}
 	return

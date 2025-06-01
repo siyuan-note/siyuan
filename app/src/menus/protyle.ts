@@ -363,7 +363,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
                 inputElement.addEventListener("input", () => {
                     if (inputElement.value) {
                         // 不能使用 textContent，否则 < 会变为 &lt;
-                        element.innerHTML = Lute.EscapeHTMLStr(inputElement.value);
+                        element.innerHTML = Lute.EscapeHTMLStr(inputElement.value).trim() || refBlockId;
                     } else {
                         fetchPost("/api/block/getRefText", {id: refBlockId}, (response) => {
                             element.innerHTML = response.data;
@@ -631,7 +631,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
         label: window.siyuan.languages.copy,
         icon: "iconCopy",
         click() {
-            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML));
+            writeText(protyle.lute.BlockDOM2StdMd(element.outerHTML).trim());
         }
     }).element);
     if (!protyle.disabled) {
@@ -1517,12 +1517,12 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
                 }
                 inputElements[1].value = anchor;
                 inputElements[1].addEventListener("compositionend", () => {
-                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "") || "*");
+                    linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim() || "*");
                 });
                 inputElements[1].addEventListener("input", (event: KeyboardEvent) => {
                     if (!event.isComposing) {
                         // https://github.com/siyuan-note/siyuan/issues/4511
-                        linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "")) || "*";
+                        linkElement.innerHTML = Lute.EscapeHTMLStr(inputElements[1].value.replace(/\n|\r\n|\r|\u2028|\u2029/g, "").trim()) || "*";
                     }
                 });
                 inputElements[1].addEventListener("keydown", (event) => {
@@ -1720,11 +1720,17 @@ style="margin:4px 0;width: ${isMobile() ? "100%" : "360px"}" class="b3-text-fiel
         } else {
             linkElement.removeAttribute("data-href");
         }
+        if (!inputElements[1].value && (inputElements[0].value || inputElements[2].value)) {
+            linkElement.textContent = "*";
+        }
         const currentRange = getSelection().rangeCount === 0 ? undefined : getSelection().getRangeAt(0);
         if (currentRange && !protyle.element.contains(currentRange.startContainer)) {
             protyle.toolbar.range.selectNodeContents(linkElement);
             protyle.toolbar.range.collapse(false);
             focusByRange(protyle.toolbar.range);
+        }
+        if (!inputElements[1].value && !inputElements[0].value && !inputElements[2].value) {
+            linkElement.remove();
         }
         if (html !== nodeElement.outerHTML) {
             nodeElement.setAttribute("updated", dayjs().format("YYYYMMDDHHmmss"));

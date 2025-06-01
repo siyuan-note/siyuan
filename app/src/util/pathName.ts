@@ -15,9 +15,12 @@ import {matchHotKey} from "../protyle/util/hotKey";
 import {Menu} from "../plugin/Menu";
 import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
-export const showFileInFolder = (filePath: string) => {
+export const useShell = (cmd: "showItemInFolder" | "openPath", filePath: string) => {
     /// #if !BROWSER
-    ipcRenderer.send(Constants.SIYUAN_OPEN_FOLDER, filePath);
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd,
+        filePath: filePath
+    });
     /// #endif
 };
 

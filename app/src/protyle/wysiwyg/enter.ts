@@ -18,6 +18,7 @@ import {mathRender} from "../render/mathRender";
 import {isMobile} from "../../util/functions";
 import {processRender} from "../util/processCode";
 import {hasClosestByAttribute, hasClosestByClassName} from "../util/hasClosest";
+import {blockRender} from "../render/blockRender";
 
 export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle) => {
     if (hasClosestByClassName(blockElement, "protyle-wysiwyg__embed")) {
@@ -30,24 +31,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         hideElements(["select"], protyle);
         return;
     }
+    protyle.observerLoad?.disconnect();
     // https://github.com/siyuan-note/siyuan/issues/5471
     if (disableElement ||
         // https://github.com/siyuan-note/siyuan/issues/10633
         blockElement.classList.contains("table")) {
-        if (blockElement.parentElement.classList.contains("li")) {
-            const oldHTML = blockElement.parentElement.parentElement.outerHTML;
-            const newElement = genListItemElement(blockElement.parentElement, 0, true);
-            blockElement.parentElement.insertAdjacentElement("afterend", newElement);
-            updateTransaction(protyle, blockElement.parentElement.parentElement.getAttribute("data-node-id"), blockElement.parentElement.parentElement.outerHTML, oldHTML);
-            focusByWbr(newElement, range);
-            removeEmptyNode(newElement);
-            scrollCenter(protyle);
-            return;
-        }
-        if (blockElement.classList.contains("hr")) {
-            insertEmptyBlock(protyle, "afterend");
-            return;
-        }
         if (blockElement.classList.contains("protyle-wysiwyg--select") && blockElement.classList.contains("render-node")) {
             protyle.toolbar.showRender(protyle, blockElement);
         } else {
@@ -290,7 +278,11 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
                 id: item.dataset.nodeId,
             });
         }
-        mathRender(item);
+        if (item.dataset.type === "NodeBlockQueryEmbed") {
+            blockRender(protyle, item);
+        } else {
+            mathRender(item);
+        }
         currentElement = item;
         selectsElement.push(item);
     });
@@ -310,6 +302,8 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         currentElement.insertAdjacentElement("afterend", item);
         if (item.classList.contains("code-block")) {
             highlightRender(item);
+        } else if (item.dataset.type === "NodeBlockQueryEmbed") {
+            blockRender(protyle, item);
         } else {
             mathRender(currentElement.nextElementSibling);
         }
@@ -510,17 +504,16 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     // 文字和图片中间回车后图片前需添加 zwsp
     newEditableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(newEditableElement.parentElement.outerHTML);
     listItemElement.insertAdjacentElement("afterend", newElement);
+    blockRender(protyle, newElement);
     mathRender(newElement);
+    processRender(newElement);
     // https://github.com/siyuan-note/siyuan/issues/3850
     // https://github.com/siyuan-note/siyuan/issues/6018
-    if ((editableElement?.lastElementChild?.getAttribute("data-type") || "").indexOf("inline-math") > -1 &&
-        !hasNextSibling(editableElement?.lastElementChild)) {
-        editableElement.insertAdjacentText("beforeend", "\n");
-    }
     // img 后有文字，在 img 后换行
-    if (editableElement?.lastElementChild?.classList.contains("img") && !hasNextSibling(editableElement?.lastElementChild)) {
-        editableElement.insertAdjacentText("beforeend", Constants.ZWSP);
-    }
+    editableElement.parentElement.outerHTML = protyle.lute.SpinBlockDOM(editableElement.parentElement.outerHTML);
+    blockRender(protyle, listItemElement);
+    mathRender(listItemElement);
+    processRender(listItemElement);
     if (listItemElement.getAttribute("data-subtype") === "o") {
         updateListOrder(listItemElement.parentElement);
     }

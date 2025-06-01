@@ -65,8 +65,8 @@ func GetCloudForumAssetsServer() string {
 }
 
 const (
-	chinaServer            = "https://siyuan-sync.b3logfile.com"    // 中国大陆云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer
-	chinaWebSocketServer   = "wss://siyuan-sync.b3logfile.com"      // 中国大陆云端服务地址，阿里云负载均衡，用于接口，数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer
+	chinaServer            = "https://siyuan-sync.b3logfile.com"    // 中国大陆云端服务地址，阿里云负载均衡，用于接口（数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer）
+	chinaWebSocketServer   = "wss://siyuan-sync.b3logfile.com"      // 中国大陆云端服务地址，阿里云负载均衡，用于接口（数据同步文件上传、下载会走七牛云 OSS ChinaSyncServer）
 	chinaSyncServer        = "https://siyuan-data.b3logfile.com/"   // 中国大陆云端数据同步服务地址，七牛云 OSS，用于数据同步文件上传、下载
 	chinaCloudAssetsServer = "https://assets.b3logfile.com/siyuan/" // 中国大陆云端图床服务地址，用于导出预览模式下订阅会员渲染图床
 	chinaAccountServer     = "https://ld246.com"                    // 中国大陆链滴服务地址，用于账号登录、分享发布帖子

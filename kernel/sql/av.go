@@ -479,6 +479,8 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		}
 	}
 
+	dataModel["id_mod"] = map[string]any{}
+	dataModel["id_mod_raw"] = map[string]any{}
 	for _, rowValue := range rowValues {
 		if 1 > len(rowValue.Values) {
 			continue
@@ -505,6 +507,10 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 				for _, content := range v.Rollup.Contents {
 					if av.KeyTypeNumber == content.Type {
 						numbers = append(numbers, content.Number.Content)
+					} else if av.KeyTypeMSelect == content.Type {
+						for _, s := range content.MSelect {
+							contents = append(contents, s.Content)
+						}
 					} else {
 						contents = append(contents, content.String(true))
 					}
@@ -537,6 +543,13 @@ func RenderTemplateCol(ial map[string]string, rowValues []*av.KeyValues, tplCont
 		} else {
 			dataModel[rowValue.Key.Name] = v.String(true)
 		}
+
+		// Database template fields support access to the raw value https://github.com/siyuan-note/siyuan/issues/14903
+		dataModel[rowValue.Key.Name+"_raw"] = v
+
+		// Database template fields support access by ID https://github.com/siyuan-note/siyuan/issues/11237
+		dataModel["id_mod"].(map[string]any)[rowValue.Key.ID] = dataModel[rowValue.Key.Name]
+		dataModel["id_mod_raw"].(map[string]any)[rowValue.Key.ID] = v
 	}
 
 	if err = tpl.Execute(buf, dataModel); err != nil {

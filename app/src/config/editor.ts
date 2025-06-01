@@ -39,7 +39,7 @@ export const editor = {
 <label class="fn__flex b3-label">
     <div class="fn__flex-1">
         ${window.siyuan.languages.editReadonly} 
-        <code class="fn__code">${updateHotkeyTip(window.siyuan.config.keymap.general.editReadonly.custom)}</code>
+        <code class="fn__code${window.siyuan.config.keymap.general.editReadonly.custom ? "" : " fn__none"}">${updateHotkeyTip(window.siyuan.config.keymap.general.editReadonly.custom)}</code>
         <div class="b3-label__text">${window.siyuan.languages.editReadonlyTip}</div>
     </div>
     <span class="fn__space"></span>

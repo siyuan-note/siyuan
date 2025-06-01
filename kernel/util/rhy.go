@@ -58,3 +58,14 @@ func GetRhyResult(force bool) (map[string]interface{}, error) {
 	rhyResultCacheTime = now
 	return cachedRhyResult, nil
 }
+
+func RefreshRhyResultJob() {
+	_, err := GetRhyResult(true)
+	if nil != err {
+		// 系统唤醒后可能还没有网络连接，这里等待后再重试
+		go func() {
+			time.Sleep(7 * time.Second)
+			GetRhyResult(true)
+		}()
+	}
+}

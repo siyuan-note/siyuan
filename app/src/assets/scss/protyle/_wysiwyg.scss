@@ -153,6 +153,10 @@
           background-color: var(--b3-list-hover);
         }
 
+        & > div:nth-child(2) {
+          margin-bottom: 0;
+        }
+
         & > div:nth-child(3):not(.protyle-attr),
         & > div:nth-child(3) ~ div:not(.protyle-attr) {
           display: none;
@@ -352,8 +356,13 @@
           }
         }
 
-        & > .protyle-icons + .protyle-wysiwyg__embed {
-          border-top: 0;
+        & > .protyle-icons {
+          // https://github.com/siyuan-note/siyuan/issues/14678
+          z-index: 2;
+
+          & + .protyle-wysiwyg__embed {
+            border-top: 0;
+          }
         }
       }
     }
@@ -536,8 +545,15 @@
     transition: var(--b3-background-transition);
   }
 
-  &--hiderange ::selection {
-    background-color: transparent;
+  &--hiderange {
+    ::selection {
+      background-color: transparent;
+    }
+
+    .hljs ::selection {
+      background-color: transparent;
+      color: inherit;
+    }
   }
 
   // https://github.com/siyuan-note/siyuan/issues/11589

@@ -14,7 +14,12 @@ import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {openEmojiPanel, unicode2Emoji} from "../../emoji";
 import {mountHelp, newNotebook} from "../../util/mount";
 import {confirmDialog} from "../../dialog/confirmDialog";
-import {isNotCtrl, isOnlyMeta, setStorageVal, updateHotkeyTip} from "../../protyle/util/compatibility";
+import {
+    isNotCtrl,
+    isOnlyMeta,
+    setStorageVal,
+    updateHotkeyAfterTip
+} from "../../protyle/util/compatibility";
 import {openFileById} from "../../editor/util";
 import {
     hasClosestByAttribute,
@@ -116,9 +121,9 @@ export class Files extends Model {
         <svg class="block__logoicon"><use xlink:href="#iconFiles"></use></svg>${window.siyuan.languages.fileTree}
     </div>
     <span class="fn__flex-1 fn__space"></span>
-    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1} ${updateHotkeyTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>
+    <span data-type="focus" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.selectOpen1}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.selectOpen1.custom)}"><svg><use xlink:href='#iconFocus'></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
+    <span data-type="collapse" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.collapse}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.collapse.custom)}">
         <svg><use xlink:href="#iconContract"></use></svg>
     </span>
     <div class="fn__space${window.siyuan.config.readonly ? " fn__none" : ""}"></div>
@@ -126,7 +131,7 @@ export class Files extends Model {
         <svg><use xlink:href="#iconMore"></use></svg>
     </div> 
     <span class="fn__space"></span>
-    <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min} ${updateHotkeyTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
+    <span data-type="min" class="block__icon b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.min}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg><use xlink:href='#iconMin'></use></svg></span>
 </div>
 <div class="fn__flex-1" style="padding-top: 2px;"></div>
 <ul class="b3-list fn__flex-column" style="min-height: auto;height:30px;transition: height  .2s cubic-bezier(0, 0, .2, 1) 0ms">
@@ -668,11 +673,10 @@ export class Files extends Model {
                 newElement.classList.remove("dragover", "dragover__bottom", "dragover__top");
                 return;
             }
-            const ulSort = newUlElement.getAttribute("data-sortmode");
-            if ((newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) &&
-                (ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15"))
-            ) {
-                if (selectRootElements.length > 0 && newElement.getAttribute("data-path") === "/") {
+            if (newElement.classList.contains("dragover__bottom") || newElement.classList.contains("dragover__top")) {
+                const ulSort = newUlElement.getAttribute("data-sortmode");
+                if (window.siyuan.config.fileTree.sort === 6 && selectRootElements.length > 0 &&
+                    newElement.getAttribute("data-path") === "/") {
                     if (newElement.classList.contains("dragover__top")) {
                         selectRootElements.forEach(item => {
                             newElement.parentElement.before(item.parentElement);
@@ -689,7 +693,7 @@ export class Files extends Model {
                     fetchPost("/api/notebook/changeSortNotebook", {
                         notebooks,
                     });
-                } else {
+                } else if ((ulSort === "6" || (window.siyuan.config.fileTree.sort === 6 && ulSort === "15")) && selectFileElements.length > 0) {
                     let hasMove = false;
                     const toDir = pathPosix().dirname(toPath);
                     if (fromPaths.length > 0) {

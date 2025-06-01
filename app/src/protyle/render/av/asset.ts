@@ -9,7 +9,7 @@ import {openMenu} from "../../../menus/commonMenuItem";
 import {MenuItem} from "../../../menus/Menu";
 import {copyPNGByLink, exportAsset} from "../../../menus/util";
 import {setPosition} from "../../../util/setPosition";
-import {previewImage} from "../../preview/image";
+import {previewAttrViewImages} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
@@ -18,6 +18,7 @@ import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
 import {escapeAttr} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
+import * as dayjs from "dayjs";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -156,6 +157,11 @@ export const updateAssetCell = (options: {
         } else {
             updateAttrViewCellAnimation(item, cellValue);
         }
+    });
+    cellDoOperations.push({
+        action: "doUpdateUpdated",
+        id: options.blockElement.getAttribute("data-node-id"),
+        data: dayjs().format("YYYYMMDDHHmmss"),
     });
     transaction(options.protyle, cellDoOperations, cellUndoOperations);
     const menuElement = document.querySelector(".av__panel > .b3-menu") as HTMLElement;
@@ -332,7 +338,12 @@ export const editAssetItem = (options: {
             icon: "iconPreview",
             label: window.siyuan.languages.cardPreview,
             click() {
-                previewImage(linkAddress);
+                previewAttrViewImages(
+                    linkAddress,
+                    options.blockElement.getAttribute("data-av-id"),
+                    options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+                );
             }
         });
     }

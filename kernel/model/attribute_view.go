@@ -933,6 +933,39 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	return
 }
 
+func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, err error) {
+	var attrView *av.AttributeView
+	attrView, err = av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	var view *av.View
+
+	if "" != viewID {
+		view, _ = attrView.GetCurrentView(viewID)
+	} else {
+		view = attrView.GetView(attrView.ViewID)
+	}
+
+	table := sql.RenderAttributeViewTable(attrView, view, query)
+	table.FilterRows(attrView)
+	table.SortRows(attrView)
+
+	for _, row := range table.Rows {
+		for _, cell := range row.Cells {
+			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset {
+				for _, a := range cell.Value.MAsset {
+					if av.AssetTypeImage == a.Type {
+						ret = append(ret, a.Content)
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
 func (tx *Transaction) doUnbindAttrViewBlock(operation *Operation) (ret *TxErr) {
 	err := unbindAttributeViewBlock(operation, tx)
 	if err != nil {
@@ -2903,7 +2936,9 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				if !operation.IsDetached {
 					bindBlockAv0(tx, operation.AvID, node, tree)
 					value.IsDetached = false
-					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
+					icon, content := getNodeAvBlockText(node)
+					content = util.UnescapeHTML(content)
+					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
 					err = av.SaveAttributeView(attrView)
 				}
@@ -2940,7 +2975,9 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 				value.Block.ID = operation.NextID
 				value.IsDetached = operation.IsDetached
 				if !operation.IsDetached {
-					value.Block.Icon, value.Block.Content = getNodeAvBlockText(node)
+					icon, content := getNodeAvBlockText(node)
+					content = util.UnescapeHTML(content)
+					value.Block.Icon, value.Block.Content = icon, content
 				}
 			}
 

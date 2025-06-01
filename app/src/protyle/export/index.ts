@@ -8,12 +8,23 @@ import {afterExport} from "./util";
 /// #endif
 import {confirmDialog} from "../../dialog/confirmDialog";
 import {getThemeMode, setInlineStyle} from "../../util/assets";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Dialog} from "../../dialog";
 import {replaceLocalPath} from "../../editor/rename";
 import {setStorageVal} from "../util/compatibility";
 import {isPaidUser} from "../../util/needSubscribe";
 import {getCloudURL} from "../../config/util/about";
+import {getFrontend} from "../../util/functions";
+
+const getPluginStyle = async () => {
+    const response = await fetchSyncPost("/api/petal/loadPetals", {frontend: getFrontend()});
+    let css = "";
+    // 为加快启动速度，不进行 await
+    response.data.forEach((item: IPluginData) => {
+        css += item.css || "";
+    });
+    return css;
+};
 
 export const saveExport = (option: IExportOptions) => {
     /// #if !BROWSER
@@ -170,7 +181,7 @@ const renderPDF = async (id: string) => {
             border-bottom: none;
         }
         ${await setInlineStyle(false)}
-        ${document.getElementById("pluginsStyle").innerHTML}
+        ${await getPluginStyle()}
         ${getSnippetCSS()}
     </style>
 </head>
@@ -312,7 +323,7 @@ const renderPDF = async (id: string) => {
             item.parentElement.style.width = Math.min(item.parentElement.clientWidth, width) + "px";
             item.removeAttribute('data-render');
         })
-        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle");
+        Protyle.highlightRender(previewElement, "${servePath}/stage/protyle", document.querySelector("#scale").value);
         previewElement.querySelectorAll('[data-type="NodeMathBlock"]').forEach((item) => {
             // 超级块内不能移除 width https://github.com/siyuan-note/siyuan/issues/14318
             item.removeAttribute('data-render');
@@ -387,21 +398,12 @@ const renderPDF = async (id: string) => {
         })
     }
     const renderPreview = (data) => {
-        previewElement.innerHTML = '<div style="padding:6px 0 0 0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
+        previewElement.innerHTML = '<div style="padding:8px 0 0 0" class="protyle-wysiwyg${window.siyuan.config.editor.displayBookmarkIcon ? " protyle-wysiwyg--attr" : ""}">' + data.content + '</div>';
         const wysElement = previewElement.querySelector(".protyle-wysiwyg");
         wysElement.setAttribute("data-doc-type", data.type || "NodeDocument");
-        if (data.attrs.memo) {
-            wysElement.setAttribute("memo", data.attrs.memo);
-        }
-        if (data.attrs.name) {
-            wysElement.setAttribute("name", data.attrs.name);
-        }
-        if (data.attrs.bookmark) {
-            wysElement.setAttribute("bookmark", data.attrs.bookmark);
-        }
-        if (data.attrs.alias) {
-            wysElement.setAttribute("alias", data.attrs.alias);
-        }
+        Object.keys(data.attrs).forEach(key => {
+            wysElement.setAttribute(key, data.attrs[key]);
+        })
         // https://github.com/siyuan-note/siyuan/issues/13669
         wysElement.querySelectorAll('[data-node-id]').forEach((item) => {
             if (item.querySelector(".img")) {
@@ -673,7 +675,7 @@ const onExport = async (data: IWebSocketData, filePath: string, exportOption: IE
     <style>
         body {font-family: var(--b3-font-family);background-color: var(--b3-theme-background);color: var(--b3-theme-on-background)}
         ${await setInlineStyle(false)}
-        ${document.getElementById("pluginsStyle").innerHTML}
+        ${await getPluginStyle()}
         ${getSnippetCSS()}
     </style>
 </head>

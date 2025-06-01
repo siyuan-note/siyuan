@@ -215,7 +215,6 @@ var (
 )
 
 func RefreshCheckJob() {
-	go util.GetRhyResult(true) // 发一次请求进行结果缓存
 	go refreshSubscriptionExpirationRemind()
 	go refreshUser()
 	go refreshAnnouncement()
@@ -297,7 +296,7 @@ func refreshAnnouncement() {
 		}
 	}
 
-	for _, announcement := range GetAnnouncements() {
+	for _, announcement := range getAnnouncements() {
 		var exist bool
 		for _, existingAnnouncement := range existingAnnouncements {
 			if announcement.Id == existingAnnouncement.Id {

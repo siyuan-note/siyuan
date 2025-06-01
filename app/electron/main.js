@@ -652,6 +652,7 @@ app.commandLine.appendSwitch("disable-web-security");
 app.commandLine.appendSwitch("auto-detect", "false");
 app.commandLine.appendSwitch("no-proxy-server");
 app.commandLine.appendSwitch("enable-features", "PlatformHEVCDecoderSupport");
+app.commandLine.appendSwitch("xdg-portal-required-version", "4");
 
 // Support set Chromium command line arguments on the desktop https://github.com/siyuan-note/siyuan/issues/9696
 writeLog("app is packaged [" + app.isPackaged + "], command line args [" + process.argv.join(", ") + "]");
@@ -761,9 +762,6 @@ app.whenReady().then(() => {
         const menu = Menu.buildFromTemplate(template);
         menu.popup({window: BrowserWindow.fromWebContents(event.sender)});
     });
-    ipcMain.on("siyuan-open-folder", (event, filePath) => {
-        shell.showItemInFolder(filePath);
-    });
     ipcMain.on("siyuan-first-quit", () => {
         app.exit();
     });
@@ -871,6 +869,12 @@ app.whenReady().then(() => {
         }
         const currentWindow = getWindowByContentId(webContentsId);
         switch (cmd) {
+            case "showItemInFolder":
+                shell.showItemInFolder(data.filePath);
+                break;
+            case "openPath":
+                shell.openPath(data.filePath);
+                break;
             case "openDevTools":
                 event.sender.openDevTools({mode: "bottom"});
                 break;

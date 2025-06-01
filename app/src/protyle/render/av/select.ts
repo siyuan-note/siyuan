@@ -8,6 +8,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {genAVValueHTML} from "./blockAttr";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
+import * as dayjs from "dayjs";
 
 let cellValues: IAVCellValue[];
 
@@ -119,6 +120,11 @@ export const removeCellOption = (protyle: IProtyle, cellElements: HTMLElement[],
             updateAttrViewCellAnimation(item, cellValue);
         }
     });
+    doOperations.push({
+        action: "doUpdateUpdated",
+        id: blockElement.getAttribute("data-node-id"),
+        data: dayjs().format("YYYYMMDDHHmmss"),
+    });
     transaction(protyle, doOperations, undoOperations);
     Array.from(document.querySelectorAll(".av__panel .b3-menu__item")).find((item: HTMLElement) => {
         if (item.dataset.name === target.dataset.content) {
@@ -154,6 +160,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                 newName: inputElement.value,
                 newDesc: descElement.value
             },
+        }, {
+            action: "doUpdateUpdated",
+            id: blockID,
+            data: dayjs().format("YYYYMMDDHHmmss"),
         }], [{
             action: "updateAttrViewColOption",
             id: colId,
@@ -227,7 +237,7 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
         type: "empty",
         label: `<div class="fn__hr"></div>
 <div class="b3-form__icona fn__block">
-    <input class="b3-text-field b3-form__icona-input" type="text">
+    <input class="b3-text-field b3-form__icona-input" type="text" size="16">
     <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${desc ? escapeAriaLabel(desc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
 </div>
 <div class="fn__none">
@@ -286,6 +296,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                     id: colId,
                     avID: data.id,
                     data: newName,
+                }, {
+                    action: "doUpdateUpdated",
+                    id: blockID,
+                    data: dayjs().format("YYYYMMDDHHmmss"),
                 }], [{
                     action: "updateAttrViewColOptions",
                     id: colId,
@@ -359,6 +373,10 @@ export const setColOption = (protyle: IProtyle, data: IAV, target: HTMLElement, 
                             newColor,
                             newDesc: descElement.value
                         },
+                    }, {
+                        action: "doUpdateUpdated",
+                        id: blockID,
+                        data: dayjs().format("YYYYMMDDHHmmss"),
                     }], [{
                         action: "updateAttrViewColOption",
                         id: colId,
@@ -579,6 +597,11 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             avID: data.id,
             data: colData.options
         });
+        cellDoOperations.push({
+            action: "doUpdateUpdated",
+            id: blockElement.getAttribute("data-node-id"),
+            data: dayjs().format("YYYYMMDDHHmmss"),
+        });
         transaction(protyle, cellDoOperations, [{
             action: "removeAttrViewColOption",
             id: colId,
@@ -586,6 +609,11 @@ export const addColOptionOrCell = (protyle: IProtyle, data: IAV, cellElements: H
             data: currentElement.dataset.name,
         }]);
     } else {
+        cellDoOperations.push({
+            action: "doUpdateUpdated",
+            id: blockElement.getAttribute("data-node-id"),
+            data: dayjs().format("YYYYMMDDHHmmss"),
+        });
         transaction(protyle, cellDoOperations, cellUndoOperations);
     }
     if (colData.type === "select") {

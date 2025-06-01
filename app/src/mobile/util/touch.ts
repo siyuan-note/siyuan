@@ -1,7 +1,7 @@
 import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName,} from "../../protyle/util/hasClosest";
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
-import {activeBlur, hideKeyboardToolbar} from "./keyboardToolbar";
+import {activeBlur} from "./keyboardToolbar";
 import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
@@ -21,7 +21,6 @@ const popSide = (render = true) => {
     if (render) {
         document.getElementById("toolbarFile").dispatchEvent(new CustomEvent("click"));
     } else {
-        hideKeyboardToolbar();
         activeBlur();
         document.getElementById("sidebar").style.transform = "translateX(0px)";
     }
@@ -136,6 +135,12 @@ export const handleTouchEnd = (event: TouchEvent, app: App) => {
 };
 
 export const handleTouchStart = (event: TouchEvent) => {
+    if (0 < event.touches.length && ((event.touches[0].target as HTMLElement).tagName === "VIDEO" || (event.touches[0].target as HTMLElement).tagName === "AUDIO")) {
+        // https://github.com/siyuan-note/siyuan/issues/14569
+        activeBlur();
+        return;
+    }
+
     if (globalTouchStart(event)) {
         return;
     }
@@ -309,7 +314,6 @@ export const handleTouchMove = (event: TouchEvent) => {
             transformMask((windowWidth - xDiff) / windowWidth);
         }
         activeBlur();
-        hideKeyboardToolbar();
         if (window.siyuan.mobile.editor) {
             window.siyuan.mobile.editor.protyle.contentElement.style.overflow = "hidden";
         }

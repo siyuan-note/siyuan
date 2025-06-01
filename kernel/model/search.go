@@ -35,6 +35,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/lex"
 	"github.com/88250/lute/parse"
@@ -456,9 +457,15 @@ func prependNotebookNameInHPath(blocks []*Block) {
 
 func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-	if 1 == method || 2 == method {
+	if 2 == method {
 		err = errors.New(Conf.Language(132))
 		return
+	}
+
+	if 1 == method {
+		// 将查询语法等价于关键字，因为 keyword 参数已经是结果关键字了
+		// Find and replace supports query syntax https://github.com/siyuan-note/siyuan/issues/14937
+		method = 0
 	}
 
 	if 0 != groupBy {
@@ -554,24 +561,42 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 		}
 
 		reloadTreeIDs = append(reloadTreeIDs, tree.ID)
-
 		if ast.NodeDocument == node.Type {
 			if !replaceTypes["docTitle"] {
 				continue
 			}
 
 			title := node.IALAttr("title")
+			tags := node.IALAttr("tags")
 			if 0 == method {
 				if strings.Contains(title, keyword) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = strings.ReplaceAll(title, keyword, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
 				}
+
+				if strings.Contains(tags, keyword) {
+					replacement = strings.TrimPrefix(replacement, "#")
+					replacement = strings.TrimSuffix(replacement, "#")
+					tags = strings.ReplaceAll(tags, keyword, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
+					node.SetIALAttr("tags", tags)
+					ReloadTag()
+				}
 			} else if 3 == method {
 				if nil != r && r.MatchString(title) {
-					docTitleReplacement := strings.ReplaceAll(replacement, "/", "")
+					docTitleReplacement := strings.ReplaceAll(replacement, "/", "／")
 					renameRootTitles[node.ID] = r.ReplaceAllString(title, docTitleReplacement)
 					renameRoots = append(renameRoots, node)
+				}
+
+				if nil != r && r.MatchString(tags) {
+					replacement = strings.TrimPrefix(replacement, "#")
+					replacement = strings.TrimSuffix(replacement, "#")
+					tags = r.ReplaceAllString(tags, replacement)
+					tags = strings.ReplaceAll(tags, editor.Zwsp, "")
+					node.SetIALAttr("tags", tags)
+					ReloadTag()
 				}
 			}
 		} else {
@@ -728,7 +753,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "em")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "em", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -738,7 +763,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "strong")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "strong", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -748,7 +773,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "kbd")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "kbd", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -757,7 +782,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "mark")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "mark", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -767,7 +792,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "s")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "s", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -777,7 +802,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sub")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sub", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -786,7 +811,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sup")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "sup", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
@@ -795,16 +820,18 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "tag")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "tag", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 						}
+
+						ReloadTag()
 					} else if n.IsTextMarkType("u") {
 						if !replaceTypes["u"] {
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "u")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "u", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -853,7 +880,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							return ast.WalkContinue
 						}
 
-						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "text")
+						replaceNodeTextMarkTextContent(n, method, keyword, escapedKey, replacement, r, "text", luteEngine)
 						if "" == n.TextMarkTextContent {
 							unlinks = append(unlinks, n)
 							mergeSamePreNext(n)
@@ -903,14 +930,12 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			for _, unlink := range unlinks {
 				unlink.Unlink()
 			}
-
-			if err = writeTreeUpsertQueue(tree); err != nil {
-				return
-			}
 		}
 
+		if err = writeTreeUpsertQueue(tree); err != nil {
+			return
+		}
 		updateNodes[id] = node
-
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(206), i+1, len(ids)))
 	}
 
@@ -935,11 +960,58 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 	return
 }
 
-func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string) {
+func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey string, replacement string, r *regexp.Regexp, typ string, luteEngine *lute.Lute) {
 	if 0 == method {
-		if "tag" == typ {
+		if strings.Contains(typ, "tag") {
 			keyword = strings.TrimPrefix(keyword, "#")
 			keyword = strings.TrimSuffix(keyword, "#")
+			escapedKey = strings.TrimPrefix(escapedKey, "#")
+			escapedKey = strings.TrimSuffix(escapedKey, "#")
+			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
+				replacement = strings.TrimPrefix(replacement, "#")
+				replacement = strings.TrimSuffix(replacement, "#")
+			} else {
+				// 将标签转换为纯文本
+
+				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
+					content := n.TextMarkTextContent
+					if strings.Contains(content, escapedKey) {
+						content = strings.ReplaceAll(content, escapedKey, replacement)
+					} else if strings.Contains(content, keyword) {
+						content = strings.ReplaceAll(content, keyword, replacement)
+					}
+					content = strings.ReplaceAll(content, editor.Zwsp, "")
+
+					tree := parse.Inline("", []byte(content), luteEngine.ParseOptions)
+					if nil == tree.Root.FirstChild {
+						return
+					}
+					parse.NestedInlines2FlattedSpans(tree, false)
+
+					var replaceNodes []*ast.Node
+					for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
+						replaceNodes = append(replaceNodes, rNode)
+						if blockRefID, _, _ := treenode.GetBlockRef(rNode); "" != blockRefID {
+							bt := treenode.GetBlockTree(blockRefID)
+							if nil == bt {
+								continue
+							}
+
+							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, blockRefID)
+						}
+					}
+
+					for _, rNode := range replaceNodes {
+						n.InsertBefore(rNode)
+					}
+					n.TextMarkTextContent = ""
+					return
+				}
+
+				// 存在其他类型时仅移除标签类型
+				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
+				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
+			}
 		}
 
 		if strings.Contains(n.TextMarkTextContent, escapedKey) {
@@ -947,10 +1019,12 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 		} else if strings.Contains(n.TextMarkTextContent, keyword) {
 			n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, keyword, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	} else if 3 == method {
 		if nil != r && r.MatchString(n.TextMarkTextContent) {
 			n.TextMarkTextContent = r.ReplaceAllString(n.TextMarkTextContent, replacement)
 		}
+		n.TextMarkTextContent = strings.ReplaceAll(n.TextMarkTextContent, editor.Zwsp, "")
 	}
 }
 
@@ -974,7 +1048,6 @@ func replaceTextNode(text *ast.Node, method int, keyword string, replacement str
 					for _, k := range keywords {
 						lowerKeywords = append(lowerKeywords, strings.ToLower(k))
 					}
-					lowerKeywords = gulu.Str.RemoveDuplicatedElem(lowerKeywords)
 					keyword = strings.Join(lowerKeywords, " ")
 				}
 			}
@@ -1338,19 +1411,34 @@ func searchBySQL(stmt string, beforeLen, page, pageSize int) (ret []*Block, matc
 	}
 
 	stmt = strings.ToLower(stmt)
-	if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
-		stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
-	} else {
-		stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+	stdQuery := !strings.Contains(stmt, "with recursive") && !strings.Contains(stmt, "union")
+	if stdQuery {
+		if strings.HasPrefix(stmt, "select a.* ") { // 多个搜索关键字匹配文档 https://github.com/siyuan-note/siyuan/issues/7350
+			stmt = strings.ReplaceAll(stmt, "select a.* ", "select COUNT(a.id) AS `matches`, COUNT(DISTINCT(a.root_id)) AS `docs` ")
+		} else {
+			stmt = strings.ReplaceAll(stmt, "select * ", "select COUNT(id) AS `matches`, COUNT(DISTINCT(root_id)) AS `docs` ")
+		}
 	}
 	stmt = removeLimitClause(stmt)
 	result, _ := sql.QueryNoLimit(stmt)
-	if 1 > len(ret) {
+	if 1 > len(result) {
 		return
 	}
 
-	matchedBlockCount = int(result[0]["matches"].(int64))
-	matchedRootCount = int(result[0]["docs"].(int64))
+	if !stdQuery {
+		var rootIDs, blockIDs []string
+		for _, queryResult := range result {
+			rootIDs = append(rootIDs, queryResult["root_id"].(string))
+			blockIDs = append(blockIDs, queryResult["id"].(string))
+		}
+		rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
+		blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
+		matchedRootCount = len(rootIDs)
+		matchedBlockCount = len(blockIDs)
+	} else {
+		matchedBlockCount = int(result[0]["matches"].(int64))
+		matchedRootCount = int(result[0]["docs"].(int64))
+	}
 	return
 }
 
@@ -1812,6 +1900,7 @@ func maxContent(content string, maxLen int) string {
 }
 
 func fieldRegexp(regexp string) string {
+	regexp = strings.ReplaceAll(regexp, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	buf := bytes.Buffer{}
 	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")
@@ -2127,8 +2216,10 @@ func getRefSearchIgnoreLines() (ret []string) {
 
 func filterQueryInvisibleChars(query string) string {
 	query = strings.ReplaceAll(query, "　", "_@full_width_space@_")
+	query = strings.ReplaceAll(query, "\t", "_@tab@_")
 	query = util.RemoveInvalid(query)
 	query = strings.ReplaceAll(query, "_@full_width_space@_", "　")
+	query = strings.ReplaceAll(query, "_@tab@_", "\t")
 	return query
 }
 

@@ -224,9 +224,22 @@ export const setFilter = async (options: {
             }
         });
         const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
-        response.data.av.keyValues.find((item: { key: { id: string, name: string, type: TAVCol } }) => {
+        response.data.av.keyValues.find((item: {
+            key: {
+                id: string,
+                name: string,
+                type: TAVCol,
+                options: {
+                    name: string,
+                    color: string,
+                }[]
+            }
+        }) => {
             if (item.key.id === colData.rollup.keyID) {
                 filterValue.type = item.key.type;
+                if (item.key.type === "select") {
+                    colData.options = item.key.options;
+                }
                 return true;
             }
         });

@@ -722,6 +722,21 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
     }
 };
 
+export const isIncludeCell = (options: {
+    tableSelectElement: HTMLElement,
+    scrollLeft: number,
+    scrollTop: number,
+    item: HTMLTableCellElement,
+}) => {
+    if (options.item.offsetLeft + 6 > options.tableSelectElement.offsetLeft + options.scrollLeft &&
+        options.item.offsetLeft + options.item.clientWidth - 6 < options.tableSelectElement.offsetLeft + options.scrollLeft + options.tableSelectElement.clientWidth &&
+        options.item.offsetTop + 6 > options.tableSelectElement.offsetTop + options.scrollTop &&
+        options.item.offsetTop + options.item.clientHeight - 6 < options.tableSelectElement.offsetTop + options.scrollTop + options.tableSelectElement.clientHeight) {
+        return true;
+    }
+    return false;
+};
+
 export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement) => {
     if (!tableBlockElement) {
         return;
@@ -729,10 +744,14 @@ export const clearTableCell = (protyle: IProtyle, tableBlockElement: HTMLElement
     const tableSelectElement = tableBlockElement.querySelector(".table__select") as HTMLElement;
     const selectCellElements: HTMLTableCellElement[] = [];
     const scrollLeft = tableBlockElement.firstElementChild.scrollLeft;
+    const scrollTop = tableBlockElement.querySelector("table").scrollTop;
     tableBlockElement.querySelectorAll("th, td").forEach((item: HTMLTableCellElement) => {
-        if (!item.classList.contains("fn__none") &&
-            item.offsetLeft + 6 > tableSelectElement.offsetLeft + scrollLeft && item.offsetLeft + item.clientWidth - 6 < tableSelectElement.offsetLeft + scrollLeft + tableSelectElement.clientWidth &&
-            item.offsetTop + 6 > tableSelectElement.offsetTop && item.offsetTop + item.clientHeight - 6 < tableSelectElement.offsetTop + tableSelectElement.clientHeight) {
+        if (!item.classList.contains("fn__none") && isIncludeCell({
+            tableSelectElement,
+            scrollLeft,
+            scrollTop,
+            item,
+        })) {
             selectCellElements.push(item);
         }
     });

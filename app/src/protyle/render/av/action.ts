@@ -21,7 +21,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {hintRef} from "../../hint/extend";
 import {focusBlock, focusByRange} from "../../util/selection";
 import {showMessage} from "../../../dialog/message";
-import {previewImage} from "../../preview/image";
+import {previewAttrViewImages} from "../../preview/image";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import * as dayjs from "dayjs";
 import {openCalcMenu} from "./calc";
@@ -64,7 +64,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     }
     const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
     if (imgElement) {
-        previewImage((imgElement as HTMLImageElement).src);
+        previewAttrViewImages(
+            (imgElement as HTMLImageElement).src,
+            blockElement.getAttribute("data-av-id"),
+            blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+        );
         event.preventDefault();
         event.stopPropagation();
         return true;
@@ -635,6 +640,12 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     const avId = blockElement.getAttribute("data-av-id");
     const id = blockElement.getAttribute("data-node-id");
     const nameElement = blockElement.querySelector(".av__title") as HTMLElement;
+    // https://github.com/siyuan-note/siyuan/issues/14770
+    if (nameElement.textContent === "") {
+        nameElement.querySelectorAll("br").forEach(item => {
+            item.remove();
+        });
+    }
     const newData = nameElement.textContent.trim();
     if (newData === nameElement.dataset.title.trim()) {
         return;

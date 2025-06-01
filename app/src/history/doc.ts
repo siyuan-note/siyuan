@@ -8,6 +8,7 @@ import {fetchPost} from "../util/fetch";
 import {isMobile} from "../util/functions";
 import {App} from "../index";
 import {resizeSide} from "./resizeSide";
+import {escapeHtml} from "../util/escape";
 
 let historyEditor: Protyle;
 let isLoading = false;
@@ -145,7 +146,7 @@ export const openDocHistory = (options: {
                 getHistoryPath(target.parentElement, opElement.value, options.id, (item) => {
                     const dataPath = item.path;
                     isLoading = false;
-                    const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", item.title)
+                    const confirmTip = window.siyuan.languages.rollbackConfirm.replace("${name}", escapeHtml(item.title))
                         .replace("${time}", target.previousElementSibling.previousElementSibling.textContent.trim());
                     confirmDialog("⚠️ " + window.siyuan.languages.rollback, confirmTip, () => {
                         fetchPost("/api/history/rollbackDocHistory", {

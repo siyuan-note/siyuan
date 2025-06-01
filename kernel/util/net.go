@@ -111,11 +111,13 @@ func IsPortOpen(port string) bool {
 }
 
 func isOnline(checkURL string, skipTlsVerify bool, timeout int) (ret bool) {
-	c := req.C().SetTimeout(time.Duration(timeout) * time.Millisecond)
+	c := req.C().
+		SetTimeout(time.Duration(timeout) * time.Millisecond).
+		SetProxy(httpclient.ProxyFromEnvironment).
+		SetUserAgent(UserAgent)
 	if skipTlsVerify {
 		c.EnableInsecureSkipVerify()
 	}
-	c.SetUserAgent(UserAgent)
 
 	for i := 0; i < 2; i++ {
 		resp, err := c.R().Get(checkURL)

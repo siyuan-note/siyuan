@@ -50,7 +50,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     element.classList.add("protyle-font");
     let disableFont = false;
     nodeElements?.find((item: HTMLElement) => {
-        if (item.classList.contains("list") || item.classList.contains("li")) {
+        if (item.classList.contains("li")) {
             disableFont = true;
             return true;
         }
@@ -146,6 +146,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
         ${window.siyuan.languages.relativeFontSize}
         <span class="fn__space"></span>
         <input class="b3-switch fn__flex-center" ${fontSize.endsWith("em") ? "checked" : ""} type="checkbox">
+        <span class="fn__space--small"></span>
     </label>
 </div>
 <div class="${disableFont ? " fn__none" : ""}">
@@ -290,10 +291,15 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
     const setBlockRef = (blockRefOption: string) => {
         const blockRefData = blockRefOption.split(Constants.ZWSP);
         // 标签等元素中包含 ZWSP，需移除后拼接 https://github.com/siyuan-note/siyuan/issues/6466
-        textElement.setAttribute("data-id", blockRefData.splice(0, 1)[0]);
+        const id = blockRefData.splice(0, 1)[0];
+        textElement.setAttribute("data-id", id);
         textElement.setAttribute("data-subtype", blockRefData.splice(0, 1)[0]);
         textElement.removeAttribute("data-href");
-        textElement.innerText = blockRefData.join("");
+        let text = blockRefData.join("");
+        if (text.replace(/\s/g, "") === "") {
+            text = id;
+        }
+        textElement.innerText = text;
     };
     const setLink = (textOption: string) => {
         const options = textOption.split(Constants.ZWSP);
@@ -365,12 +371,27 @@ export const setFontStyle = (textElement: HTMLElement, textOption: ITextOption) 
     }
 };
 
-export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj: ITextOption) => {
-    if (!textObj) {
-        // https://github.com/siyuan-note/siyuan/issues/14019
-        if (currentElement && currentElement.nodeType !== 3 && sideElement.nodeType !== 3 &&
-            // 当为 span 时，都经过 isArrayEqual 判断
-            sideElement.style.color === currentElement.style.color &&
+export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLElement, textObj?: ITextOption) => {
+    if (!textObj && currentElement) {
+        const types = sideElement.getAttribute("data-type").split(" ");
+        if (types.includes("inline-math") || types.includes("inline-memo") ||
+            types.includes("a")) {
+            return false;
+        }
+        if (types.includes("id")) {
+            if (currentElement.getAttribute("data-id") !== sideElement.getAttribute("data-id") ||
+                currentElement.getAttribute("data-subtype") !== sideElement.getAttribute("data-subtype") ||
+                currentElement.textContent !== sideElement.textContent) {
+                return false;
+            }
+        }
+        if (types.includes("file-annotation-ref")) {
+            if (currentElement.getAttribute("data-id") !== sideElement.getAttribute("data-id") ||
+                currentElement.textContent !== sideElement.textContent) {
+                return false;
+            }
+        }
+        if (sideElement.style.color === currentElement.style.color &&
             sideElement.style.webkitTextFillColor === currentElement.style.webkitTextFillColor &&
             sideElement.style.webkitTextStroke === currentElement.style.webkitTextStroke &&
             sideElement.style.textShadow === currentElement.style.textShadow &&
@@ -380,101 +401,39 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
         }
         return false;
     }
-    if (textObj.type === "inline-math" || textObj.type === "inline-memo" || textObj.type === "a") {
-        return false;
-    }
-    if (textObj.type === "id") {
-        if (currentElement && currentElement.nodeType !== 3) {
-            return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
-                currentElement.getAttribute("data-subtype") === sideElement.getAttribute("data-subtype") &&
-                currentElement.textContent === sideElement.textContent;
-        }
-        const blockRefData = textObj.color.split(Constants.ZWSP);
-        return blockRefData[0] === sideElement.getAttribute("data-id") &&
-            blockRefData[1] === sideElement.getAttribute("data-subtype") &&
-            blockRefData[2] === sideElement.textContent;
-    }
 
-    if (textObj.type === "file-annotation-ref") {
-        if (currentElement && currentElement.nodeType !== 3) {
-            return currentElement.getAttribute("data-id") === sideElement.getAttribute("data-id") &&
-                currentElement.textContent === sideElement.textContent;
+    if (textObj) {
+        if (textObj.type === "text") {
+            // 清除样式
+            return !sideElement.style.color &&
+                !sideElement.style.webkitTextFillColor &&
+                !sideElement.style.webkitTextStroke &&
+                !sideElement.style.textShadow &&
+                !sideElement.style.fontSize &&
+                !sideElement.style.backgroundColor;
         }
-        return textObj.color === sideElement.getAttribute("data-id");
+        if (textObj.type === "color") {
+            return textObj.color === sideElement.style.color;
+        }
+        if (textObj.type === "backgroundColor") {
+            return textObj.color === sideElement.style.backgroundColor;
+        }
+        if (textObj.type === "style1") {
+            return textObj.color.split(Constants.ZWSP)[0] === sideElement.style.color &&
+                textObj.color.split(Constants.ZWSP)[1] === sideElement.style.backgroundColor;
+        }
+        if (textObj.type === "style2") {
+            return "transparent" === sideElement.style.webkitTextFillColor &&
+                "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke;
+        }
+        if (textObj.type === "style4") {
+            return "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" === sideElement.style.textShadow;
+        }
+        if (textObj.type === "fontSize") {
+            return textObj.color === sideElement.style.fontSize;
+        }
     }
-
-    let color = "";
-    let webkitTextFillColor = "";
-    let webkitTextStroke = "";
-    let textShadow = "";
-    let backgroundColor = "";
-    let fontSize = "";
-    if (currentElement && currentElement.nodeType !== 3) {
-        color = currentElement.style.color;
-        webkitTextFillColor = currentElement.style.webkitTextFillColor;
-        webkitTextStroke = currentElement.style.webkitTextStroke;
-        textShadow = currentElement.style.textShadow;
-        backgroundColor = currentElement.style.backgroundColor;
-        fontSize = currentElement.style.fontSize;
-    }
-    if (textObj.type === "text") {
-        // 清除样式
-        return color === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            fontSize === sideElement.style.fontSize &&
-            backgroundColor === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "color") {
-        return textObj.color === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            fontSize === sideElement.style.fontSize &&
-            backgroundColor === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "backgroundColor") {
-        return color === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            fontSize === sideElement.style.fontSize &&
-            textObj.color === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "style1") {
-        return textObj.color.split(Constants.ZWSP)[0] === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            fontSize === sideElement.style.fontSize &&
-            textObj.color.split(Constants.ZWSP)[1] === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "style2") {
-        return color === sideElement.style.color &&
-            "transparent" === sideElement.style.webkitTextFillColor &&
-            "0.2px var(--b3-theme-on-background)" === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            fontSize === sideElement.style.fontSize &&
-            backgroundColor === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "style4") {
-        return color === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            fontSize === sideElement.style.fontSize &&
-            "1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)" === sideElement.style.textShadow &&
-            backgroundColor === sideElement.style.backgroundColor;
-    }
-    if (textObj.type === "fontSize") {
-        return color === sideElement.style.color &&
-            webkitTextFillColor === sideElement.style.webkitTextFillColor &&
-            webkitTextStroke === sideElement.style.webkitTextStroke &&
-            textShadow === sideElement.style.textShadow &&
-            textObj.color === sideElement.style.fontSize &&
-            backgroundColor === sideElement.style.backgroundColor;
-    }
-    return true; // 清除字体样式会使用 "text" 作为标识
+    return false;
 };
 
 export const getFontNodeElements = (protyle: IProtyle) => {

@@ -9,14 +9,7 @@ import {openFile, openFileById} from "../editor/util";
 import {showMessage} from "../dialog/message";
 import {reloadProtyle} from "../protyle/util/reload";
 import {MenuItem} from "../menus/Menu";
-import {
-    getDisplayName,
-    getNotebookIcon,
-    getNotebookName,
-    movePathTo,
-    pathPosix,
-    showFileInFolder
-} from "../util/pathName";
+import {getDisplayName, getNotebookIcon, getNotebookName, movePathTo, pathPosix, useShell} from "../util/pathName";
 import {Protyle} from "../protyle";
 import {onGet} from "../protyle/util/onGet";
 import {addLoading} from "../protyle/ui/initUI";
@@ -852,7 +845,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
                         clearTimeout(clickTimeout);
                         if (searchType === "asset") {
                             /// #if !BROWSER
-                            showFileInFolder(path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
+                            useShell("showItemInFolder", path.join(window.siyuan.config.system.dataDir, target.lastElementChild.getAttribute("aria-label")));
                             /// #endif
                         } else {
                             const id = target.getAttribute("data-node-id");
@@ -1161,7 +1154,7 @@ export const getArticle = (options: {
 };
 
 export const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, isAll: boolean) => {
-    if (config.method === 1 || config.method === 2) {
+    if (config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
     }
@@ -1174,13 +1167,14 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
         return;
     }
     saveKeyList("replaceKeys", replaceInputElement.value);
-    let currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
+    const currentList: HTMLElement = searchPanelElement.querySelector(".b3-list-item--focus");
     if (!currentList || currentList.dataset.type === "search-new") {
         return;
     }
     loadElement.classList.remove("fn__none");
+    const currentId = currentList.getAttribute("data-node-id");
     fetchPost("/api/search/findReplace", {
-        k: config.method === 0 ? getKeyByLiElement(currentList) : searchInputElement.value,
+        k: config.method === 0 || config.method === 1 ? getKeyByLiElement(currentList) : searchInputElement.value,
         r: replaceInputElement.value,
         method: config.method,
         types: config.types,
@@ -1188,7 +1182,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
         groupBy: config.group,
         orderBy: config.sort,
         page: config.page,
-        ids: isAll ? [] : [currentList.getAttribute("data-node-id")],
+        ids: isAll ? [] : [currentId],
         replaceTypes: config.replaceTypes
     }, (response) => {
         loadElement.classList.add("fn__none");
@@ -1197,7 +1191,7 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
             return;
         }
         if (isAll) {
-            inputEvent(element, config, edit, true);
+            inputEvent(element, config, edit, false);
             return;
         }
         const rootId = currentList.getAttribute("data-root-id");
@@ -1206,48 +1200,31 @@ export const replace = (element: Element, config: Config.IUILayoutTabSearchConfi
                 reloadProtyle(item.editor.protyle, false);
             }
         });
+        let newId = currentList.getAttribute("data-node-id");
         if (currentList.nextElementSibling) {
-            currentList.nextElementSibling.classList.add("b3-list-item--focus");
+            newId = currentList.nextElementSibling.getAttribute("data-node-id");
         } else if (currentList.previousElementSibling) {
-            currentList.previousElementSibling.classList.add("b3-list-item--focus");
+            newId = currentList.previousElementSibling.getAttribute("data-node-id");
         }
-        if (config.group === 1) {
-            if (currentList.nextElementSibling || currentList.previousElementSibling) {
-                currentList.remove();
-            } else {
-                const nextDocElement = currentList.parentElement.nextElementSibling || currentList.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling;
-                if (nextDocElement) {
-                    nextDocElement.nextElementSibling.firstElementChild.classList.add("b3-list-item--focus");
-                    nextDocElement.nextElementSibling.classList.remove("fn__none");
-                    nextDocElement.firstElementChild.firstElementChild.classList.add("b3-list-item__arrow--open");
-                }
-                currentList.parentElement.previousElementSibling.remove();
-                currentList.parentElement.remove();
+        if (config.group === 1 && !newId) {
+            const nextDocElement = currentList.parentElement.nextElementSibling || currentList.parentElement.previousElementSibling.previousElementSibling?.previousElementSibling;
+            if (nextDocElement) {
+                newId = nextDocElement.nextElementSibling.firstElementChild.getAttribute("data-node-id");
             }
-        } else {
-            currentList.remove();
         }
-        currentList = searchPanelElement.querySelector(".b3-list-item--focus");
-        if (!currentList) {
-            searchPanelElement.innerHTML = `<div class="b3-list--empty">${window.siyuan.languages.emptyContent}</div>`;
-            edit.protyle.element.classList.add("fn__none");
-            element.querySelector(".search__drag").classList.add("fn__none");
-            return;
-        }
-        if (searchPanelElement.scrollTop < currentList.offsetTop - searchPanelElement.clientHeight + 30 ||
-            searchPanelElement.scrollTop > currentList.offsetTop) {
-            searchPanelElement.scrollTop = currentList.offsetTop - searchPanelElement.clientHeight + 30;
-        }
-        getArticle({
-            edit,
-            id: currentList.getAttribute("data-node-id"),
-            config,
-            value: searchInputElement.value,
+        inputEvent(element, config, edit, false, {
+            currentId,
+            newId
         });
     });
 };
 
-export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchConfig, edit: Protyle, rmCurrentCriteria = false) => {
+export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchConfig,
+                           edit: Protyle, rmCurrentCriteria = false,
+                           focusId?: {
+                               currentId?: string,
+                               newId?: string
+                           }) => {
     let inputTimeout = parseInt(element.getAttribute("data-timeout") || "0");
     clearTimeout(inputTimeout);
     inputTimeout = window.setTimeout(() => {
@@ -1308,7 +1285,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 } else {
                     nextElement.setAttribute("disabled", "disabled");
                 }
-                onSearch(response.data.blocks, edit, element, config);
+                onSearch(response.data.blocks, edit, element, config, focusId);
                 let text = window.siyuan.languages.findInDoc.replace("${x}", response.data.matchedRootCount).replace("${y}", response.data.matchedBlockCount);
                 if (response.data.docMode) {
                     text = window.siyuan.languages.matchDoc.replace("${x}", response.data.matchedRootCount);
@@ -1337,9 +1314,15 @@ export const getAttr = (block: IBlock) => {
     return attrHTML;
 };
 
-const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Config.IUILayoutTabSearchConfig) => {
+const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Config.IUILayoutTabSearchConfig,
+                  focusId?: {
+                      currentId?: string,
+                      newId?: string
+                  }) => {
     let resultHTML = "";
-    data.forEach((item, index) => {
+    let currentData;
+    let newData;
+    data.forEach((item) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
@@ -1349,8 +1332,16 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
 ${unicode2Emoji(getNotebookIcon(item.box) || window.siyuan.storage[Constants.LOCAL_IMAGES].note, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text ariaLabel" style="color: var(--b3-theme-on-surface)" aria-label="${escapeAriaLabel(title)}">${escapeGreat(title)}</span>
 </div><div>`;
-            item.children.forEach((childItem, childIndex) => {
-                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item${childIndex === 0 && index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
+            item.children.forEach((childItem) => {
+                if (focusId) {
+                    if (childItem.id === focusId.currentId) {
+                        currentData = childItem;
+                    }
+                    if (childItem.id === focusId.newId) {
+                        newData = childItem;
+                    }
+                }
+                resultHTML += `<div style="padding-left: 36px" data-type="search-item" class="b3-list-item" data-node-id="${childItem.id}" data-root-id="${childItem.rootID}">
 <svg class="b3-list-item__graphic popover__block" data-id="${childItem.id}"><use xlink:href="#${getIconByType(childItem.type)}"></use></svg>
 ${unicode2Emoji(childItem.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${childItem.content}</span>
@@ -1360,7 +1351,15 @@ ${childItem.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis"
             });
             resultHTML += "</div>";
         } else {
-            resultHTML += `<div data-type="search-item" class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}" data-node-id="${item.id}" data-root-id="${item.rootID}">
+            if (focusId) {
+                if (item.id === focusId.currentId) {
+                    currentData = item;
+                }
+                if (item.id === focusId.newId) {
+                    newData = item;
+                }
+            }
+            resultHTML += `<div data-type="search-item" class="b3-list-item" data-node-id="${item.id}" data-root-id="${item.rootID}">
 <svg class="b3-list-item__graphic popover__block" data-id="${item.id}"><use xlink:href="#${getIconByType(item.type)}"></use></svg>
 ${unicode2Emoji(item.ial.icon, "b3-list-item__graphic", true)}
 <span class="b3-list-item__text">${item.content}</span>
@@ -1370,26 +1369,25 @@ ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${it
 </div>`;
         }
     });
-
-    if (data[0]) {
+    if (!currentData) {
+        currentData = newData;
+    }
+    if (!currentData && data.length > 0) {
+        if (data[0].children) {
+            currentData = data[0].children[0];
+        } else {
+            currentData = data[0];
+        }
+    }
+    if (currentData) {
         edit.protyle.element.classList.remove("fn__none");
         element.querySelector(".search__drag").classList.remove("fn__none");
-        const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-        if (data[0].children) {
-            getArticle({
-                edit,
-                id: data[0].children[0].id,
-                config,
-                value: searchInputElement.value,
-            });
-        } else {
-            getArticle({
-                edit,
-                id: data[0].id,
-                config,
-                value: searchInputElement.value,
-            });
-        }
+        getArticle({
+            edit,
+            id: currentData.id,
+            config,
+            value: (element.querySelector("#searchInput") as HTMLInputElement).value,
+        });
     } else {
         edit.protyle.element.classList.add("fn__none");
         element.querySelector(".search__drag").classList.add("fn__none");
@@ -1409,4 +1407,11 @@ ${item.tag ? `<span class="b3-list-item__meta b3-list-item__meta--ellipsis">${it
         ${window.siyuan.languages.emptyContent}
     </span>
 </div>`);
+    if (currentData) {
+        const currentList = element.querySelector(`[data-node-id="${currentData.id}"]`) as HTMLElement;
+        if (currentList) {
+            currentList.classList.add("b3-list-item--focus");
+            currentList.scrollIntoView();
+        }
+    }
 };

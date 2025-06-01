@@ -7,7 +7,7 @@
 		"id": "20211226115227-r1rty9v",
 		"title": "常見問題",
 		"type": "doc",
-		"updated": "20250115163022"
+		"updated": "20250518103355"
 	},
 	"Children": [
 		{
@@ -439,7 +439,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181824-pwnc2gx",
-				"updated": "20220808181824"
+				"updated": "20250518103355"
 			},
 			"Children": [
 				{
@@ -637,6 +637,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250518103354-bj96dlm",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250518103354-bj96dlm",
+				"updated": "20250518103355"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 macOS 上思源會存取桌面、文稿和 iCloud 雲端磁碟資料夾，目的是為了偵測工作空間是否放置在 iCloud 同步路徑下，思源絕不會窺探你的個人數據，請放心。"
 				}
 			]
 		},

@@ -411,6 +411,9 @@
     <div class="b3-snackbar__content"></div>
 </div>
 <script>
+    window.showKeyboardToolbar = function () {}
+    window.hideKeyboardToolbar = function () {}
+
     const exitApp = () => {
         try {
             const {ipcRenderer} = require('electron')

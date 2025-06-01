@@ -52,7 +52,7 @@ const focusStack = (backStack: IBackStack) => {
             protyle.wysiwyg.renderCustom(response.data.ial);
         });
     }
-
+    const exitFocusElement = protyle.breadcrumb.element.parentElement.querySelector('[data-type="exit-focus"]');
     if (backStack.zoomId) {
         if (backStack.zoomId !== protyle.block.id) {
             fetchPost("/api/block/checkBlockExist", {id: backStack.id}, existResponse => {
@@ -70,6 +70,7 @@ const focusStack = (backStack: IBackStack) => {
         } else {
             protyle.contentElement.scrollTop = backStack.scrollTop;
         }
+        exitFocusElement.classList.remove("fn__none");
         return;
     }
 
@@ -107,6 +108,7 @@ const focusStack = (backStack: IBackStack) => {
             item.eventBus.emit("switch-protyle", {protyle});
             item.eventBus.emit("loaded-protyle-static", {protyle});
         });
+        exitFocusElement.classList.add("fn__none");
     });
 };
 

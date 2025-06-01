@@ -144,6 +144,7 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 				Header: http.Header{
 					model.BasicAuthHeaderKey: {model.BasicAuthHeaderValue},
 				},
+				Body:          http.NoBody,
 				Close:         false,
 				ContentLength: -1,
 			}, nil

@@ -1,10 +1,10 @@
 import {copySubMenu, exportMd, movePathToMenu, openFileAttr, renameMenu,} from "./commonMenuItem";
 /// #if !BROWSER
-import {FileFilter, ipcRenderer, shell} from "electron";
+import {FileFilter, ipcRenderer} from "electron";
 import * as path from "path";
 /// #endif
 import {MenuItem} from "./Menu";
-import {getDisplayName, getNotebookName, getTopPaths, pathPosix} from "../util/pathName";
+import {getDisplayName, getNotebookName, getTopPaths, useShell, pathPosix} from "../util/pathName";
 import {hideMessage, showMessage} from "../dialog/message";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {onGetnotebookconf} from "./onGetnotebookconf";
@@ -362,7 +362,7 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         icon: "iconFolder",
         label: window.siyuan.languages.showInFolder,
         click: () => {
-            shell.openPath(path.join(window.siyuan.config.system.dataDir, notebookId));
+            useShell("openPath", path.join(window.siyuan.config.system.dataDir, notebookId));
         }
     }).element);
     /// #endif

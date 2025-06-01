@@ -32,6 +32,13 @@ export const globalClick = (event: MouseEvent & { target: HTMLElement }) => {
         }
     }
 
+    if (!hasTopClosestByClassName(event.target, "protyle-util") &&
+        !hasTopClosestByClassName(event.target, "protyle-toolbar")) {
+        document.querySelectorAll(".protyle-font").forEach((item: HTMLElement) => {
+            item.parentElement.classList.add("fn__none");
+        });
+    }
+
     const copyElement = hasTopClosestByClassName(event.target, "protyle-action__copy");
     if (copyElement) {
         let text = copyElement.parentElement.nextElementSibling.textContent.replace(/\n$/, "");

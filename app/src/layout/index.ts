@@ -2,7 +2,6 @@ import {Wnd} from "./Wnd";
 import {genUUID} from "../util/genID";
 import {addResize, fixWndFlex1} from "./util";
 import {resizeTabs} from "./tabUtil";
-import {recordBeforeResizeTop} from "../protyle/util/resize";
 /// #if MOBILE
 // 检测移动端是否引入了桌面端的代码
 console.error("Need remove unused code");
@@ -41,9 +40,6 @@ export class Layout {
         } else {
             this.element.classList.add("fn__flex");
         }
-        if (mergedOptions.type === "left") {
-            this.element.classList.add("fn__flex-shrink");
-        }
     }
 
     addLayout(child: Layout, id?: string) {
@@ -71,7 +67,6 @@ export class Layout {
     }
 
     addWnd(child: Wnd, id?: string) {
-        recordBeforeResizeTop();
         if (!id) {
             this.children.splice(this.children.length, 0, child);
             this.element.append(child.element);

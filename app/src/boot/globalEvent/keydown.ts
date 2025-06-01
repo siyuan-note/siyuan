@@ -1436,7 +1436,8 @@ export const windowKeyDown = (app: App, event: KeyboardEvent) => {
         }
 
         // 闪卡长按 Esc 光标定位到闪卡按钮上 https://github.com/siyuan-note/siyuan/issues/12989
-        if (document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
+        // https://github.com/siyuan-note/siyuan/issues/14730
+        if (event.repeat && document.activeElement && hasClosestByClassName(document.activeElement, "card__action")) {
             return;
         }
 
@@ -1731,6 +1732,26 @@ export const sendGlobalShortcut = (app: App) => {
     ipcRenderer.send(Constants.SIYUAN_HOTKEY, {
         languages: window.siyuan.languages["_trayMenu"],
         hotkeys
+    });
+    /// #endif
+};
+
+
+export const sendUnregisterGlobalShortcut = (app: App) => {
+    /// #if !BROWSER
+    ipcRenderer.send(Constants.SIYUAN_CMD, {
+        cmd: "unregisterGlobalShortcut",
+        accelerator: window.siyuan.config.keymap.general.toggleWin.custom
+    });
+    app.plugins.forEach(plugin => {
+        plugin.commands.forEach(command => {
+            if (command.globalCallback) {
+                ipcRenderer.send(Constants.SIYUAN_CMD, {
+                    cmd: "unregisterGlobalShortcut",
+                    accelerator: command.customHotkey
+                });
+            }
+        });
     });
     /// #endif
 };

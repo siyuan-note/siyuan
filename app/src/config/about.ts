@@ -12,6 +12,7 @@ import {showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {setKey} from "../sync/syncGuide";
+import {useShell} from "../util/pathName";
 
 export const about = {
     element: undefined as Element,
@@ -208,7 +209,7 @@ ${checkUpdateHTML}
         <span style="color:var(--b3-theme-background);font-family: cursive;">会泽百家&nbsp;至公天下</span>
     </div>
     <div class='fn__hr'></div>
-    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""} 
+    ${window.siyuan.languages.about1} ${"harmony" === window.siyuan.config.system.container ? " • " + window.siyuan.languages.feedback + " 845765@qq.com" : ""} 
 </div>`;
     },
     bindEvent: () => {
@@ -259,7 +260,7 @@ ${checkUpdateHTML}
                 if (url.startsWith("http")) {
                     shell.openExternal(url);
                 } else {
-                    shell.openPath(url);
+                    useShell("openPath", url);
                 }
                 /// #else
                 window.open(url);

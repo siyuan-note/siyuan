@@ -1,4 +1,4 @@
-import {hasClosestBlock, hasClosestByAttribute} from "../protyle/util/hasClosest";
+import {hasClosestBlock, isInEmbedBlock} from "../protyle/util/hasClosest";
 import {focusByRange, getEditorRange} from "../protyle/util/selection";
 
 export const bgFade = (element: Element) => {
@@ -22,7 +22,7 @@ export const highlightById = (protyle: IProtyle, id: string, top = false) => {
     }
 
     Array.from(protyleElement.querySelectorAll(`[data-node-id="${id}"]`)).find((item: HTMLElement) => {
-        if (!hasClosestByAttribute(item, "data-type", "block-render", true)) {
+        if (!isInEmbedBlock(item)) {
             nodeElement = item;
             return true;
         }

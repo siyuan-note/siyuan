@@ -39,7 +39,6 @@ var (
 )
 
 func TrimSpaceInPath(p string) string {
-	p = strings.ReplaceAll(p, "\\", "/")
 	parts := strings.Split(p, "/")
 	for i, part := range parts {
 		parts[i] = strings.TrimSpace(part)

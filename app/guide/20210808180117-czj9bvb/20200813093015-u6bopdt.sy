@@ -7,7 +7,7 @@
 		"id": "20200813093015-u6bopdt",
 		"title": "常见问题",
 		"type": "doc",
-		"updated": "20250115163009"
+		"updated": "20250518102608"
 	},
 	"Children": [
 		{
@@ -443,7 +443,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210918114843-6xo7hmr",
-				"updated": "20220808181126"
+				"updated": "20250518102608"
 			},
 			"Children": [
 				{
@@ -635,6 +635,20 @@
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250518102159-j2jxzeb",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250518102159-j2jxzeb",
+				"updated": "20250518102608"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "在 macOS 上思源会访问桌面、文稿和 iCloud 云盘文件夹，目的是为了检测工作空间是否放置在 iCloud 同步路径下，思源绝不会窥探你的个人数据，请放心。"
 				}
 			]
 		},

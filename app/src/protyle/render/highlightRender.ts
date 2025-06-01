@@ -3,7 +3,7 @@ import {Constants} from "../../constants";
 import {focusByOffset} from "../util/selection";
 import {setCodeTheme} from "../../util/assets";
 
-export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) => {
+export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, zoom = 1) => {
     let codeElements: NodeListOf<Element>;
     let isPreview = false;
     if (element.classList.contains("code-block")) {
@@ -93,7 +93,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
                         // 需要先添加 class 以防止抖动 https://ld246.com/article/1648116585443
                         block.firstElementChild.className = "protyle-linenumber__rows";
                         block.firstElementChild.setAttribute("contenteditable", "false");
-                        lineNumberRender(block);
+                        lineNumberRender(block, zoom);
                         block.style.display = "";
                     } else {
                         block.firstElementChild.className = "fn__none";
@@ -116,7 +116,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN) =
     });
 };
 
-export const lineNumberRender = (block: HTMLElement) => {
+export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
     const lineNumber = block.parentElement.getAttribute("lineNumber");
     if (lineNumber === "false") {
         return;
@@ -140,7 +140,7 @@ export const lineNumberRender = (block: HTMLElement) => {
     lineNumberTemp.className = "hljs";
     // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
     lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
-width: ${codeElement.getBoundingClientRect().width}px;
+width: ${codeElement.getBoundingClientRect().width / zoom}px;
 white-space:${codeElement.style.whiteSpace};
 word-break:${codeElement.style.wordBreak};
 font-variant-ligatures:${codeElement.style.fontVariantLigatures};

@@ -716,11 +716,12 @@ func planSyncAfter(d time.Duration) {
 }
 
 func isProviderOnline(byHand bool) (ret bool) {
-	checkURL := util.GetCloudSyncServer()
+	var checkURL string
 	skipTlsVerify := false
 	timeout := 3000
 	switch Conf.Sync.Provider {
 	case conf.ProviderSiYuan:
+		checkURL = util.GetCloudSyncServer()
 	case conf.ProviderS3:
 		checkURL = Conf.Sync.S3.Endpoint
 		skipTlsVerify = Conf.Sync.S3.SkipTlsVerify

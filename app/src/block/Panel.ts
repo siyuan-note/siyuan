@@ -16,7 +16,7 @@ import {showMessage} from "../dialog/message";
 import {App} from "../index";
 import {resize} from "../protyle/util/resize";
 import {checkFold} from "../util/noRelyPCFunction";
-import {updateHotkeyTip} from "../protyle/util/compatibility";
+import {updateHotkeyAfterTip} from "../protyle/util/compatibility";
 
 export class BlockPanel {
     public element: HTMLElement;
@@ -125,8 +125,8 @@ export class BlockPanel {
                     } else if (type === "stickTab") {
                         checkFold(this.refDefs[0].refID, (zoomIn, action) => {
                             openFileById({
-                                app:options.app,
-                                id:this.refDefs[0].refID,
+                                app: options.app,
+                                id: this.refDefs[0].refID,
                                 action,
                                 zoomIn,
                                 openNewTab: true
@@ -240,7 +240,7 @@ export class BlockPanel {
         }
         let openHTML = "";
         if (this.refDefs.length === 1) {
-            openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openInNewTab} ${updateHotkeyTip(window.siyuan.config.keymap.editor.general.openInNewTab.custom)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
+            openHTML = `<span data-type="stickTab" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openInNewTab}${updateHotkeyAfterTip(window.siyuan.config.keymap.editor.general.openInNewTab.custom)}"><svg><use xlink:href="#iconOpen"></use></svg></span>
 <span class="fn__space"></span>`;
             /// #if !BROWSER
             openHTML += `<span data-type="open" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.openByNewWindow}"><svg><use xlink:href="#iconOpenWindow"></use></svg></span>
@@ -251,7 +251,7 @@ export class BlockPanel {
     <span class="fn__space fn__flex-1 resize__move"></span>${openHTML}
     <span data-type="pin" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.pin}"><svg><use xlink:href="#iconPin"></use></svg></span>
     <span class="fn__space"></span>
-    <span data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}"><svg style="width: 12px;margin: 0 1px;"><use xlink:href="#iconClose"></use></svg></span>
+    <span data-type="close" class="block__icon block__icon--show b3-tooltips b3-tooltips__sw" aria-label="${window.siyuan.languages.close}${updateHotkeyAfterTip(window.siyuan.config.keymap.general.closeTab.custom)}"><svg style="width: 12px;margin: 0 1px;"><use xlink:href="#iconClose"></use></svg></span>
 </div>
 <div class="block__content">`;
         if (this.refDefs.length === 0) {

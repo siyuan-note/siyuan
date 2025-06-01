@@ -171,6 +171,7 @@ export const initUI = (protyle: IProtyle) => {
                     range.collapse(false);
                     focusByRange(range);
                 }
+                protyle.toolbar.range = range;
             }
         });
     });

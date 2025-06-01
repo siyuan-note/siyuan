@@ -154,6 +154,10 @@ export const updateRelation = (options: {
         isTwoWay: (options.avElement.querySelector(".b3-switch") as HTMLInputElement).checked,
         name: inputElement.value,
         format: colNewName
+    }, {
+        action: "doUpdateUpdated",
+        id: options.blockElement.getAttribute("data-node-id"),
+        data: dayjs().format("YYYYMMDDHHmmss"),
     }], [{
         action: "updateAttrViewColRelation",
         avID: options.avID,

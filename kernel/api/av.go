@@ -600,6 +600,37 @@ func renderAttributeView(c *gin.Context) {
 	}
 }
 
+func getCurrentAttrViewImages(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	id := arg["id"].(string)
+	viewIDArg := arg["viewID"]
+	var viewID string
+	if nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
+
+	query := ""
+	queryArg := arg["query"]
+	if nil != queryArg {
+		query = queryArg.(string)
+	}
+
+	images, err := model.GetCurrentAttributeViewImages(id, viewID, query)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	ret.Data = images
+}
+
 func getAttributeViewKeys(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

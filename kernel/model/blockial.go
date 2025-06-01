@@ -241,6 +241,10 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 			node.SetIALAttr(name, value)
 		}
 	}
+
+	if oldAttrs["tags"] != nameValues["tags"] {
+		ReloadTag()
+	}
 	return
 }
 

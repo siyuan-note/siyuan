@@ -32,6 +32,7 @@ func StartCron() {
 	go every(5*time.Second, task.StatusJob)
 	go every(5*time.Second, model.SyncDataJob)
 	go every(2*time.Hour, model.StatJob)
+	go every(6*time.Hour, util.RefreshRhyResultJob, "RefreshRhyResultJob")
 	go every(2*time.Hour, model.RefreshCheckJob)
 	go every(3*time.Second, model.FlushUpdateRefTextRenameDocJob)
 	go every(util.SQLFlushInterval, sql.FlushTxJob)
@@ -43,20 +44,33 @@ func StartCron() {
 	go every(30*time.Second, model.FlushAssetsTextsJob)
 	go every(30*time.Second, model.HookDesktopUIProcJob)
 	go every(24*time.Hour, model.AutoPurgeRepoJob)
-	go every(30*time.Minute, model.AutoCheckMicrosoftDefender)
+	go every(30*time.Minute, model.AutoCheckMicrosoftDefenderJob)
 
 	// TODO: 移除旧方案 https://github.com/siyuan-note/siyuan/issues/14414 实现新的刷新机制
 	//go every(3*time.Second, model.WatchLocalShorthands)
 }
 
-func every(interval time.Duration, f func()) {
+func every(interval time.Duration, f func(), name ...string) {
 	util.RandomSleep(50, 200)
-	for {
+
+	// 启动后立即执行一次
+	func() {
+		defer logging.Recover()
+		f()
+		if 0 < len(name) {
+			logging.LogInfof("cron job [%s] executed", name)
+		}
+	}()
+
+	ticker := time.NewTicker(interval)
+	defer ticker.Stop()
+	for range ticker.C {
 		func() {
 			defer logging.Recover()
 			f()
+			if 0 < len(name) {
+				logging.LogInfof("cron job [%s] executed", name)
+			}
 		}()
-
-		time.Sleep(interval)
 	}
 }

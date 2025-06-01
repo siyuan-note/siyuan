@@ -170,11 +170,6 @@
   h5,
   h6 {
     font-weight: 600;
-    line-height: 1.25;
-
-    & > [spellcheck] {
-      min-height: 1.25em;
-    }
   }
 
   h1,
@@ -417,6 +412,8 @@
     text-align: center;
   }
 
+  [data-subtype="flowchart"] > [spin="1"],
+  [data-subtype="plantuml"] > [spin="1"],
   [data-subtype="mermaid"] > [spin="1"] {
     // 不能加到上一级，否则属性会跟随滚动
     overflow: auto;

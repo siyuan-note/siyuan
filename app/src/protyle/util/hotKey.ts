@@ -184,3 +184,57 @@ export const matchHotKey = (hotKey: string, event: KeyboardEvent) => {
     return false;
 };
 
+export const isIncludesHotKey = (hotKey: string) => {
+    let isInclude = false;
+    Object.keys(window.siyuan.config.keymap).find(key => {
+        const item = window.siyuan.config.keymap[key as "editor"];
+        Object.keys(item).find(key2 => {
+            const item2 = item[key2 as "general"];
+            if (typeof item2.custom === "string") {
+                if (item2.custom === hotKey) {
+                    isInclude = true;
+                    return true;
+                }
+            } else {
+                Object.keys(item2).forEach(key3 => {
+                    const item3: Config.IKey = item2[key3];
+                    if (item3.custom === hotKey) {
+                        isInclude = true;
+                        return true;
+                    }
+                });
+                if (isInclude) {
+                    return true;
+                }
+            }
+        });
+
+        if (isInclude) {
+            return true;
+        }
+    });
+
+    return isInclude;
+};
+
+export const updateControlAlt = () => {
+    if (!window.siyuan.config.keymap.general) {
+        return;
+    }
+    Object.keys(window.siyuan.config.keymap.general).forEach(key => {
+        if (["fileTree", "outline", "bookmark", "tag", "dailyNote", "inbox", "backlinks",
+            "graphView", "globalGraph", "riffCard"].includes(key)) {
+            if (navigator.platform.toUpperCase().indexOf("MAC") > -1) {
+                window.siyuan.config.keymap.general[key].default = window.siyuan.config.keymap.general[key].default.replace("⌥", "⌃");
+                if (window.siyuan.config.keymap.general[key].default === window.siyuan.config.keymap.general[key].custom) {
+                    window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default.replace("⌥", "⌃");
+                }
+            } else {
+                window.siyuan.config.keymap.general[key].default = window.siyuan.config.keymap.general[key].default.replace("⌃", "⌥");
+                if (window.siyuan.config.keymap.general[key].default === window.siyuan.config.keymap.general[key].custom) {
+                    window.siyuan.config.keymap.general[key].custom = window.siyuan.config.keymap.general[key].default.replace("⌃", "⌥");
+                }
+            }
+        }
+    });
+};

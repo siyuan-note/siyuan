@@ -10,7 +10,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
 import {openLink} from "../../../editor/openLink";
 import {dragUpload, editAssetItem} from "./asset";
-import {previewImage} from "../../preview/image";
+import {previewImages} from "../../preview/image";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
@@ -477,7 +477,7 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
                 });
             } else {
                 if (target.tagName === "IMG") {
-                    previewImage(target.getAttribute("src"));
+                    previewImages([target.getAttribute("src")]);
                 } else {
                     openLink(protyle, target.dataset.url, event, event.ctrlKey || event.metaKey);
                 }

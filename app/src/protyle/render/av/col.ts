@@ -98,7 +98,7 @@ export const getEditHTML = (options: {
         </div>
         <div class="fn__none">
             <div class="fn__hr"></div>
-            <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
+            <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" data-type="desc" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(colData.desc)}">${colData.desc}</textarea>
         </div>
         <div class="fn__hr--small"></div>
     </div>
@@ -611,6 +611,11 @@ const addAttrViewColAnimation = (options: {
         }
         return;
     }
+    // https://github.com/siyuan-note/siyuan/issues/14724
+    let colData;
+    if (options.data) {
+        colData = options.data.view.columns.find((item => item.id === options.id));
+    }
     openMenuPanel({
         protyle: options.protyle,
         blockElement: options.blockElement,
@@ -618,7 +623,7 @@ const addAttrViewColAnimation = (options: {
         colId: options.id,
         editData: {
             previousID: options.previousID,
-            colData: genColDataByType(options.type, options.id, options.name),
+            colData: colData || genColDataByType(options.type, options.id, options.name),
         }
     });
     window.siyuan.menus.menu.remove();
@@ -670,15 +675,21 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         iconHTML: "",
         type: "empty",
         label: `<div class="fn__hr"></div><div class="fn__flex">
+    <div class="fn__space"></div>
     <span class="b3-menu__avemoji">${cellElement.dataset.icon ? unicode2Emoji(cellElement.dataset.icon) : `<svg style="height: 14px;width: 14px;"><use xlink:href="#${getColIconByType(type)}"></use></svg>`}</span>
     <div class="b3-form__icona fn__block">
         <input class="b3-text-field b3-form__icona-input" type="text">
         <svg data-position="north" class="b3-form__icona-icon ariaLabel" aria-label="${oldDesc ? escapeAriaLabel(oldDesc) : window.siyuan.languages.addDesc}"><use xlink:href="#iconInfo"></use></svg>
     </div>
+    <div class="fn__space"></div>
 </div>
 <div class="fn__none">
     <div class="fn__hr"></div>
-    <textarea style="margin-left: 22px;width: calc(100% - 22px);" placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__size200" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+    <div class="fn__flex">
+        <span class="fn__space"></span>
+        <textarea placeholder="${window.siyuan.languages.addDesc}" rows="1" class="b3-text-field fn__block" type="text" data-value="${escapeAttr(oldDesc)}">${oldDesc}</textarea>
+        <span class="fn__space"></span>    
+    </div>
 </div>
 <div class="fn__hr--small"></div>`,
         bind(element) {
@@ -721,7 +732,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             });
             const descElement = element.querySelector("textarea");
             inputElement.nextElementSibling.addEventListener("click", () => {
-                const descPanelElement = descElement.parentElement;
+                const descPanelElement = descElement.parentElement.parentElement;
                 descPanelElement.classList.toggle("fn__none");
                 if (!descPanelElement.classList.contains("fn__none")) {
                     descElement.focus();

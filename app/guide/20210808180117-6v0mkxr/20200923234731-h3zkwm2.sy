@@ -7,7 +7,7 @@
 		"id": "20200923234731-h3zkwm2",
 		"title": "FAQ",
 		"type": "doc",
-		"updated": "20250115163037"
+		"updated": "20250518103440"
 	},
 	"Children": [
 		{
@@ -442,7 +442,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20220808181753-3ligpvz",
-				"updated": "20220808181753"
+				"updated": "20250518103440"
 			},
 			"Children": [
 				{
@@ -608,7 +608,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -617,7 +617,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ - "
+									"Data": "​ - "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -626,7 +626,7 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​ / "
+									"Data": "​ / "
 								},
 								{
 									"Type": "NodeTextMark",
@@ -635,11 +635,25 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​​"
+									"Data": "​"
 								}
 							]
 						}
 					]
+				}
+			]
+		},
+		{
+			"ID": "20250518103412-4mf2mer",
+			"Type": "NodeParagraph",
+			"Properties": {
+				"id": "20250518103412-4mf2mer",
+				"updated": "20250518103440"
+			},
+			"Children": [
+				{
+					"Type": "NodeText",
+					"Data": "On macOS, SiYuan will access the Desktop, Documents, and iCloud drive folders to detect whether the workspace is placed under the iCloud synchronization path. Please rest assured that SiYuan will never snoop on your personal data."
 				}
 			]
 		},

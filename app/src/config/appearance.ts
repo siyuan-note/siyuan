@@ -1,5 +1,4 @@
 /// #if !BROWSER
-import {shell} from "electron";
 import * as path from "path";
 /// #endif
 import {Constants} from "../constants";
@@ -11,6 +10,7 @@ import {openSnippets} from "./util/snippets";
 import {loadAssets} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
+import {useShell} from "../util/pathName";
 
 export const appearance = {
     element: undefined as Element,
@@ -233,13 +233,13 @@ export const appearance = {
         });
         /// #if !BROWSER
         appearance.element.querySelector("#appearanceOpenIcon").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
+            useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "icons"));
         });
         appearance.element.querySelector("#appearanceOpenTheme").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
+            useShell("openPath", path.join(window.siyuan.config.system.confDir, "appearance", "themes"));
         });
         appearance.element.querySelector("#appearanceOpenEmoji").addEventListener("click", () => {
-            shell.openPath(path.join(window.siyuan.config.system.dataDir, "emojis"));
+            useShell("openPath", path.join(window.siyuan.config.system.dataDir, "emojis"));
         });
         /// #endif
         appearance.element.querySelectorAll("select").forEach(item => {

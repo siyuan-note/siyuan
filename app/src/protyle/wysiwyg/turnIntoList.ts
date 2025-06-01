@@ -11,7 +11,13 @@ export const turnIntoTaskList = (protyle: IProtyle, type: string, blockElement: 
             ["[]", "【】"].includes(editElement.innerHTML.substring(0, 2))
         )
     ) {
-        const contextStartIndex = (editElement.innerHTML.indexOf("]") + 1) || (editElement.innerHTML.indexOf("】") + 1);
+        const contextStar2tIndex = editElement.innerHTML.indexOf("】") + 1;
+        let contextStartIndex = editElement.innerHTML.indexOf("]") + 1;
+        if (contextStartIndex === 0) {
+            contextStartIndex = contextStar2tIndex;
+        } else if (contextStartIndex > 0 && contextStar2tIndex > 0) {
+            contextStartIndex = Math.min(contextStartIndex, contextStar2tIndex);
+        }
         const isDone = editElement.innerHTML.substring(1, 2).toLowerCase() === "x";
         if (blockElement.parentElement.classList.contains("li") &&
             blockElement.parentElement.childElementCount === 3  // https://ld246.com/article/1659315815506

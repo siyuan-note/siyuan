@@ -1,10 +1,10 @@
 {
   "name": "SiYuan",
-  "version": "3.1.27",
+  "version": "3.1.31",
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@10.8.0",
+  "packageManager": "pnpm@10.11.0",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
@@ -49,6 +49,8 @@
     }
   ],
   "devDependencies": {
+    "@eslint/eslintrc": "^3.3.1",
+    "@eslint/js": "^9.24.0",
     "@types/node": "^18.13.0",
     "@typescript-eslint/eslint-plugin": "^8.15.0",
     "@typescript-eslint/parser": "^8.15.0",
@@ -56,8 +58,8 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^6.7.1",
     "dayjs": "^1.11.5",
-    "electron": "34.5.1",
-    "electron-builder": "26.0.11",
+    "electron": "35.5.0",
+    "electron-builder": "26.0.12",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",
     "eslint": "^9.15.0",

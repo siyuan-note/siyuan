@@ -727,7 +727,7 @@ export const openMenu = (app: App, src: string, onlyMenu: boolean, showAccelerat
     });
     /// #else
     if (isLocalPath(src)) {
-        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src)) &&
+        if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname(src).split("?")[0]) &&
             (!src.endsWith(".pdf") ||
                 (src.endsWith(".pdf") && !src.startsWith("file://")))
         ) {

@@ -20,6 +20,7 @@ import {speechRender} from "../render/speechRender";
 import {avRender} from "../render/av/render";
 import {getPadding} from "../ui/initUI";
 import {hasClosestByAttribute} from "../util/hasClosest";
+import {addScriptSync} from "../util/addScript";
 
 export class Preview {
     public element: HTMLElement;
@@ -98,7 +99,7 @@ export class Preview {
                             openBy(linkAddress, "folder");
                         } else if (event.shiftKey) {
                             openBy(linkAddress, "app");
-                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress.split("?page")[0])))) {
+                        } else if (Constants.SIYUAN_ASSETS_EXTS.includes(pathPosix().extname((linkAddress).split("?")[0]))) {
                             openAsset(protyle.app, linkAddress.split("?page")[0], parseInt(getSearch("page", linkAddress)));
                         }
                         /// #endif
@@ -214,7 +215,7 @@ export class Preview {
         });
     }
 
-    private copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
+    private async copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
         // fix math render
         if (type === "mp-wechat") {
             this.link2online(copyElement);
@@ -223,6 +224,29 @@ export class Preview {
             });
             copyElement.querySelectorAll("mjx-container > svg").forEach((item) => {
                 item.setAttribute("width", (parseInt(item.getAttribute("width")) * 8) + "px");
+            });
+            // 列表嵌套 https://github.com/siyuan-note/siyuan/issues/11276
+            copyElement.querySelectorAll("ul, ol").forEach(listItem => {
+                Array.from(listItem.children).forEach(liItem => {
+                    const nestedList = liItem.querySelector("ul, ol");
+                    if (nestedList) {
+                        liItem.parentNode.insertBefore(nestedList, liItem.nextSibling);
+                    }
+                });
+            });
+            if(typeof  window.MathJax === "undefined") {
+                window.MathJax = {
+                    svg: {
+                        fontCache: "none"
+                    },
+                };
+            }
+            await addScriptSync(`${Constants.PROTYLE_CDN}/js/mathjax/tex-svg-full.js`, "protyleMathJaxScript");
+            await window.MathJax.startup.promise;
+            copyElement.querySelectorAll('[data-subtype="math"]').forEach(mathElement => {
+                const node = window.MathJax.tex2svg(Lute.UnEscapeHTMLStr(mathElement.getAttribute("data-content")).trim(), {display: mathElement.tagName === "DIV"});
+                node.querySelector("mjx-assistive-mml").remove();
+                mathElement.innerHTML= node.outerHTML;
             });
         } else if (type === "zhihu") {
             this.link2online(copyElement);
@@ -242,6 +266,7 @@ export class Preview {
         } else if (type === "yuque") {
             fetchPost("/api/lute/copyStdMarkdown", {
                 id: protyle.block.rootID,
+                assetsDestSpace2Underscore: true,
             }, (response) => {
                 writeText(response.data);
                 showMessage(`${window.siyuan.languages.pasteToYuque}`);
@@ -255,6 +280,8 @@ export class Preview {
             item.style.backgroundImage = "none";
         });
         this.element.append(copyElement);
+        // 最后一个块是公式块时无法复制下来
+        copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();

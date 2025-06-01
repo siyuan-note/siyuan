@@ -387,6 +387,12 @@ func getCardsBlocks(cards []riff.Card, page, pageSize int) (blocks []*Block, tot
 	sort.Slice(cards, func(i, j int) bool {
 		due1 := cards[i].(*riff.FSRSCard).C.Due
 		due2 := cards[j].(*riff.FSRSCard).C.Due
+		if due1.IsZero() || due2.IsZero() {
+			// Improve flashcard management sorting https://github.com/siyuan-note/siyuan/issues/14686
+			cid1 := cards[i].ID()
+			cid2 := cards[j].ID()
+			return cid1 < cid2
+		}
 		return due1.Before(due2)
 	})
 

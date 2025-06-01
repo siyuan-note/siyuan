@@ -2,7 +2,8 @@ import {listIndent, listOutdent} from "../../protyle/wysiwyg/list";
 import {
     hasClosestBlock,
     hasClosestByAttribute,
-    hasClosestByClassName, hasClosestByTag,
+    hasClosestByClassName,
+    hasClosestByTag,
 } from "../../protyle/util/hasClosest";
 import {moveToDown, moveToUp} from "../../protyle/wysiwyg/move";
 import {Constants} from "../../constants";
@@ -11,7 +12,7 @@ import {getCurrentEditor} from "../editor";
 import {fontEvent, getFontNodeElements} from "../../protyle/toolbar/Font";
 import {hideElements} from "../../protyle/ui/hideElements";
 import {softEnter} from "../../protyle/wysiwyg/enter";
-import {isInAndroid} from "../../protyle/util/compatibility";
+import {isInAndroid, isInHarmony} from "../../protyle/util/compatibility";
 
 let renderKeyboardToolbarTimeout: number;
 let showUtil = false;
@@ -519,7 +520,7 @@ export const initKeyboardToolbar = () => {
     <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
-    toolbarElement.addEventListener(isInAndroid() ? "touchstart" : "click", (event) => {
+    toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchstart" : "click", (event) => {
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");

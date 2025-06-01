@@ -457,9 +457,15 @@ func prependNotebookNameInHPath(blocks []*Block) {
 
 func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids []string, paths, boxes []string, types map[string]bool, method, orderBy, groupBy int) (err error) {
 	// method：0：文本，1：查询语法，2：SQL，3：正则表达式
-	if 1 == method || 2 == method {
+	if 2 == method {
 		err = errors.New(Conf.Language(132))
 		return
+	}
+
+	if 1 == method {
+		// 将查询语法等价于关键字，因为 keyword 参数已经是结果关键字了
+		// Find and replace supports query syntax https://github.com/siyuan-note/siyuan/issues/14937
+		method = 0
 	}
 
 	if 0 != groupBy {
@@ -1894,6 +1900,7 @@ func maxContent(content string, maxLen int) string {
 }
 
 func fieldRegexp(regexp string) string {
+	regexp = strings.ReplaceAll(regexp, "'", "''") // 不需要转义双引号，因为条件都是通过单引号包裹的，只需要转义单引号即可
 	buf := bytes.Buffer{}
 	buf.WriteString("(")
 	buf.WriteString("content REGEXP '")

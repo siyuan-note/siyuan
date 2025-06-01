@@ -1470,7 +1470,7 @@
     "129": "Los datos de la nube se han dañado, reinicie el repositorio de datos local y el directorio de sincronización en la nube para resolver el problema",
     "130": "El instalador de la nueva versión se está iniciando. Dado que el sistema operativo realizará un análisis de seguridad, es posible que tarde algún tiempo en iniciarse. Espere...",
     "131": "Esta solicitud no es compatible, vaya a la consola de administración del proveedor de almacenamiento en la nube para operar",
-    "132": "El método de búsqueda actual no admite la operación de reemplazo, utilice el método de búsqueda [Palabra clave] o [Regex]",
+    "132": "El modo de búsqueda SQL no admite la operación de reemplazo, utilice otro método de búsqueda",
     "133": "Descargando paquete de instalación de actualización [%s]",
     "134": "Para evitar que los datos recién restaurados sean sobrescritos por la sincronización, se ha suspendido automáticamente la función de sincronización de datos",
     "135": "La clave del repositorio de datos es incorrecta y los datos no se pueden descifrar. Consulte los pasos User Guide-FAQ-Lost Key para resolver el problema",

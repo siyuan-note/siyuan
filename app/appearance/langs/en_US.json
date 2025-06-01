@@ -1470,7 +1470,7 @@
     "129": "Cloud data has been corrupted, please reset the local data repo and cloud sync dir to resolve the issue",
     "130": "The new version installer is starting. Since the operating system will perform a security scan, it may take some time to start. Please wait...",
     "131": "This operation is not supported, please go to the cloud storage provider management console to operate",
-    "132": "The current search method does not support the replace operation, please use the [Keyword] or [Regex] search method",
+    "132": "SQL search mode does not support the replace operation, please use another search method",
     "133": "Downloading update installation package [%s]",
     "134": "In order to prevent the newly restored data from being overwritten by synchronization, the data synchronization function has been automatically suspended",
     "135": "The data repo key is incorrect and the data cannot be decrypted. Please refer to the User Guide-FAQ-Lost Key steps to resolve the issue",

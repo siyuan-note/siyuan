@@ -35,7 +35,7 @@ import {
 } from "../../search/toggleHistory";
 
 const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAll: boolean) => {
-    if (config.method === 1 || config.method === 2) {
+    if (config.method === 2) {
         showMessage(window.siyuan.languages._kernel[132]);
         return;
     }
@@ -55,7 +55,7 @@ const replace = (element: Element, config: Config.IUILayoutTabSearchConfig, isAl
     loadElement.nextElementSibling.classList.add("fn__none");
     const currentId = currentLiElement.getAttribute("data-node-id");
     fetchPost("/api/search/findReplace", {
-        k: config.method === 0 ? getKeyByLiElement(currentLiElement) : (document.querySelector("#toolbarSearch") as HTMLInputElement).value,
+        k: config.method === 0 || config.method === 1 ? getKeyByLiElement(currentLiElement) : (document.querySelector("#toolbarSearch") as HTMLInputElement).value,
         r: replaceInputElement.value,
         ids: isAll ? [] : [currentId],
         types: config.types,

@@ -621,7 +621,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     }, 450);
                 }
             });
-            const attrElement = item.querySelector(".protyle-attr");
+            const attrElements = item.querySelectorAll(".protyle-attr");
+            const attrElement = attrElements[attrElements.length - 1];
             if (data.new["custom-avs"] && !data.new["av-names"]) {
                 nodeAttrHTML += attrElement.querySelector(".protyle-attr--av")?.outerHTML || "";
             }

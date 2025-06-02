@@ -321,7 +321,7 @@ export const setInlineStyle = async (set = true) => {
 .b3-typography code:not(.hljs), .protyle-wysiwyg span[data-type~=code] { font-variant-ligatures: ${window.siyuan.config.editor.codeLigatures ? "normal" : "none"} }
 .li > .protyle-action {height:${height + 8}px;line-height: ${height + 8}px}
 /* 列表项后的内容和列表项对齐 https://github.com/siyuan-note/siyuan/issues/2803 */
-.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div {line-height:${height}px}
+.protyle-wysiwyg [data-node-id].li > .protyle-action ~ div:not(.code-block) {line-height:${height}px}
 .protyle-wysiwyg [data-node-id].li > .protyle-action ~ div > [spellcheck] {min-height:${height}px}
 .protyle-wysiwyg [data-node-id].li::before {height: calc(100% - ${height + 12}px);top:${(height + 12)}px}
 ${rtlCSS}

@@ -72,10 +72,10 @@ export const showAccountInfo = () => {
         }
         if (window.siyuan.user.userSiYuanSubscriptionPlan === 2) {
             // 订阅试用
-            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account8}</div>
+            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account3}</div>
 ${renewHTML}<div class="fn__hr--b"></div>`;
         } else {
-            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account10}</div>
+            subscriptionHTML += `<div class="b3-chip b3-chip--primary"><svg class="ft__secondary"><use xlink:href="#iconVIP"></use></svg>${window.siyuan.languages.account8}</div>
 ${renewHTML}<div class="fn__hr--b"></div>`;
         }
         if (window.siyuan.user.userSiYuanOneTimePayStatus === 0) {

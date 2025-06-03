@@ -158,7 +158,7 @@ const initMultiMenu = (selectItemElements: NodeListOf<Element>, app: App) => {
         icon: "iconUpload",
         submenu: [{
             id: "exportMarkdown",
-            label: "Markdown",
+            label: "Markdown .zip",
             icon: "iconMarkdown",
             click: () => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
@@ -374,19 +374,6 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
         type: "submenu",
         icon: "iconUpload",
         submenu: [{
-            id: "exportMarkdown",
-            label: "Markdown",
-            icon: "iconMarkdown",
-            click: () => {
-                const msgId = showMessage(window.siyuan.languages.exporting, -1);
-                fetchPost("/api/export/exportNotebookMd", {
-                    notebook: notebookId
-                }, response => {
-                    hideMessage(msgId);
-                    openByMobile(response.data.zip);
-                });
-            }
-        }, {
             id: "exportSiYuanZip",
             label: "SiYuan .sy.zip",
             icon: "iconSiYuan",
@@ -394,6 +381,19 @@ export const initNavigationMenu = (app: App, liElement: HTMLElement) => {
                 const msgId = showMessage(window.siyuan.languages.exporting, -1);
                 fetchPost("/api/export/exportNotebookSY", {
                     id: notebookId,
+                }, response => {
+                    hideMessage(msgId);
+                    openByMobile(response.data.zip);
+                });
+            }
+        }, {
+            id: "exportMarkdown",
+            label: "Markdown .zip",
+            icon: "iconMarkdown",
+            click: () => {
+                const msgId = showMessage(window.siyuan.languages.exporting, -1);
+                fetchPost("/api/export/exportNotebookMd", {
+                    notebook: notebookId
                 }, response => {
                     hideMessage(msgId);
                     openByMobile(response.data.zip);

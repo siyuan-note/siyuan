@@ -2,9 +2,11 @@ import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName,}
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isIPhone} from "../../protyle/util/compatibility";
+import {isInAndroid, isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
+import {focusByRange} from "../../protyle/util/selection";
+import {getCurrentEditor} from "../editor";
 
 let clientX: number;
 let clientY: number;
@@ -27,6 +29,15 @@ const popSide = (render = true) => {
 };
 
 export const handleTouchEnd = (event: TouchEvent, app: App) => {
+    if (isInAndroid() && window.siyuan.mobile.androidLastRange && getSelection().rangeCount>0) {
+        const range = getSelection().getRangeAt(0);
+        if (range.toString() && range.startContainer === window.siyuan.mobile.androidLastRange.startContainer) {
+            range.setStart(window.siyuan.mobile.androidLastRange.startContainer, window.siyuan.mobile.androidLastRange.startOffset);
+            focusByRange(range);
+            const editor = getCurrentEditor();
+            editor.protyle.toolbar.range = range;
+        }
+    }
     if (isIPhone() && globalTouchEnd(event, yDiff, time, app)) {
         event.stopImmediatePropagation();
         event.preventDefault();

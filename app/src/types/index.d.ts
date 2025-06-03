@@ -436,6 +436,7 @@ interface ISiyuan {
     emojis?: IEmoji[],
     backStack?: IBackStack[],
     mobile?: {
+        androidLastRange?: Range,
         editor?: import("../protyle").Protyle
         popEditor?: import("../protyle").Protyle
         docks?: {

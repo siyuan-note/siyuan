@@ -2,11 +2,9 @@ import {hasClosestByAttribute, hasClosestByClassName, hasTopClosestByClassName,}
 import {closeModel, closePanel} from "./closePanel";
 import {popMenu} from "../menu";
 import {activeBlur} from "./keyboardToolbar";
-import {isInAndroid, isIPhone} from "../../protyle/util/compatibility";
+import {isIPhone} from "../../protyle/util/compatibility";
 import {App} from "../../index";
 import {globalTouchEnd, globalTouchStart} from "../../boot/globalEvent/touch";
-import {focusByRange} from "../../protyle/util/selection";
-import {getCurrentEditor} from "../editor";
 
 let clientX: number;
 let clientY: number;

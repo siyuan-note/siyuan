@@ -49,3 +49,8 @@ cd app
 ```bash
 pnpm run dist
 ```
+
+
+### 如何重新同步数据
+
+**删除siyuan目录下的repo文件夹，此文件夹下会记录同步的历史**

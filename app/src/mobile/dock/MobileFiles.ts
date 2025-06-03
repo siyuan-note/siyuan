@@ -354,6 +354,7 @@ export class MobileFiles extends Model {
         this.closeElement.lastElementChild.innerHTML = closeHtml;
         const counterElement = this.closeElement.querySelector(".counter");
         counterElement.textContent = closeCounter.toString();
+        this.closeElement.dataset.closeCounter = closeCounter.toString();
         if (closeCounter) {
             counterElement.classList.remove("fn__none");
         } else {
@@ -436,7 +437,9 @@ export class MobileFiles extends Model {
                         });
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
                         const counterElement = this.closeElement.querySelector(".counter");
-                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
+                        const closeCounter = (parseInt(counterElement.textContent) + 1).toString();
+                        counterElement.textContent = closeCounter;
+                        this.closeElement.dataset.closeCounter = closeCounter;
                         counterElement.classList.remove("fn__none");
                     }
                 }
@@ -446,8 +449,10 @@ export class MobileFiles extends Model {
                 if (removeElement) {
                     removeElement.remove();
                     const counterElement = this.closeElement.querySelector(".counter");
-                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0") {
+                    const closeCounter = (parseInt(counterElement.textContent) - 1).toString();
+                    counterElement.textContent = closeCounter;
+                    this.closeElement.dataset.closeCounter = closeCounter;
+                    if (closeCounter === "0") {
                         counterElement.classList.add("fn__none");
                     }
                 }
@@ -500,8 +505,10 @@ export class MobileFiles extends Model {
         if (liElement) {
             liElement.remove();
             const counterElement = this.closeElement.querySelector(".counter");
-            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-            if (counterElement.textContent === "0") {
+            const closeCounter = (parseInt(counterElement.textContent) - 1).toString();
+            counterElement.textContent = closeCounter;
+            this.closeElement.dataset.closeCounter = closeCounter;
+            if (closeCounter === "0") {
                 counterElement.classList.add("fn__none");
             }
         }

@@ -857,6 +857,7 @@ data-type="navigation-root" data-path="/">
         this.closeElement.lastElementChild.innerHTML = closeHtml;
         const counterElement = this.closeElement.querySelector(".counter");
         counterElement.textContent = closeCounter.toString();
+        this.closeElement.dataset.closeCounter = closeCounter.toString();
         if (closeCounter) {
             counterElement.classList.remove("fn__none");
         } else {
@@ -898,7 +899,9 @@ data-type="navigation-root" data-path="/">
                         });
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
                         const counterElement = this.closeElement.querySelector(".counter");
-                        counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
+                        const closeCounter = (parseInt(counterElement.textContent) + 1).toString();
+                        counterElement.textContent = closeCounter;
+                        this.closeElement.dataset.closeCounter = closeCounter;
                         counterElement.classList.remove("fn__none");
                     }
                 }
@@ -908,8 +911,10 @@ data-type="navigation-root" data-path="/">
                 if (removeElement) {
                     removeElement.remove();
                     const counterElement = this.closeElement.querySelector(".counter");
-                    counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-                    if (counterElement.textContent === "0") {
+                    const closeCounter = (parseInt(counterElement.textContent) - 1).toString();
+                    counterElement.textContent = closeCounter;
+                    this.closeElement.dataset.closeCounter = closeCounter;
+                    if (closeCounter === "0") {
                         counterElement.classList.add("fn__none");
                     }
                 }
@@ -952,8 +957,10 @@ data-type="navigation-root" data-path="/">
         const liElement = this.closeElement.querySelector(`li[data-url="${data.data.box.id}"]`) as HTMLElement;
         if (liElement) {
             const counterElement = this.closeElement.querySelector(".counter");
-            counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
-            if (counterElement.textContent === "0") {
+            const closeCounter = (parseInt(counterElement.textContent) - 1).toString();
+            counterElement.textContent = closeCounter;
+            this.closeElement.dataset.closeCounter = closeCounter;
+            if (closeCounter === "0") {
                 counterElement.classList.add("fn__none");
             }
             liElement.remove();

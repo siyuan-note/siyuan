@@ -473,16 +473,6 @@ export const activeBlur = () => {
 export const initKeyboardToolbar = () => {
     let preventRender = false;
     document.addEventListener("selectionchange", () => {
-        if (isInAndroid()) {
-            const range = document.getSelection().getRangeAt(0);
-            const editor = getCurrentEditor();
-            if (range.toString() && editor.protyle.wysiwyg.element.contains(range.startContainer) &&
-                range.getBoundingClientRect().top < editor.protyle.contentElement.getBoundingClientRect().top) {
-                window.siyuan.mobile.androidLastRange = range.cloneRange();
-            } else {
-                window.siyuan.mobile.androidLastRange = null;
-            }
-        }
         if (!preventRender) {
             renderKeyboardToolbar();
         }

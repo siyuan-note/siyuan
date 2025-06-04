@@ -1596,6 +1596,7 @@
     "253": "Comprimiendo el archivo [%s], por favor espere...",
     "254": "[Region ID] ID de región incorrecto, por favor consulte la documentación del proveedor de servicios S3 para configurar el ID de región",
     "255": "El sitio de destino ha activado la protección contra hotlinking, por lo que no es posible descargar [%d] recursos",
-    "256": "La ruta especificada [%s] tiene una ruta de espacio de trabajo padre [%s]"
+    "256": "La ruta especificada [%s] tiene una ruta de espacio de trabajo padre [%s]",
+    "257": "Recuérdame durante 30 días"
   }
 }

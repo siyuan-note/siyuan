@@ -31,6 +31,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
+	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/steambap/captcha"
 )
 
@@ -121,6 +122,26 @@ func LoginAuth(c *gin.Context) {
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
 	workspaceSession.Captcha = gulu.Rand.String(7)
+	
+	// Handle remember me preference
+	if rememberMe, ok := arg["rememberMe"].(bool); ok && rememberMe {
+		// Set session cookie to expire in 30 days
+		ginSessions.Default(c).Options(ginSessions.Options{
+			Path:     "/",
+			Secure:   util.SSL,
+			MaxAge:   30 * 24 * 60 * 60, // 30 days in seconds
+			HttpOnly: true,
+		})
+	} else {
+		// Default session expiration (browser session)
+		ginSessions.Default(c).Options(ginSessions.Options{
+			Path:     "/",
+			Secure:   util.SSL,
+			MaxAge:   0, // Session cookie
+			HttpOnly: true,
+		})
+	}
+
 	logging.LogInfof("auth success [ip=%s]", util.GetRemoteAddr(c.Request))
 	if err := session.Save(c); err != nil {
 		logging.LogErrorf("save session failed: " + err.Error())

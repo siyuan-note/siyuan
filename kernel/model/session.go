@@ -92,6 +92,13 @@ func LoginAuth(c *gin.Context) {
 			ret.Code = 1
 			ret.Msg = Conf.Language(22)
 			logging.LogWarnf("invalid captcha")
+
+			workspaceSession.Captcha = gulu.Rand.String(7) // https://github.com/siyuan-note/siyuan/issues/13147
+			if err := session.Save(c); err != nil {
+				logging.LogErrorf("save session failed: " + err.Error())
+				c.Status(http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 	}

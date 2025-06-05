@@ -349,7 +349,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
     const tempElement = document.createElement("template");
 
-    // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14162
+    // https://github.com/siyuan-note/siyuan/issues/14162 & https://github.com/siyuan-note/siyuan/issues/14965
     if (/^\s*&gt;|\*|-|\+|\d*.|\[ \]|[x]/.test(html) &&
         editableElement.textContent.replace(Constants.ZWSP, "") !== "") {
         unSpinHTML = html;

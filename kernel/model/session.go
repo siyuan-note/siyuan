@@ -27,6 +27,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	ginSessions "github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"github.com/siyuan-note/logging"
@@ -91,6 +92,13 @@ func LoginAuth(c *gin.Context) {
 			ret.Code = 1
 			ret.Msg = Conf.Language(22)
 			logging.LogWarnf("invalid captcha")
+
+			workspaceSession.Captcha = gulu.Rand.String(7) // https://github.com/siyuan-note/siyuan/issues/13147
+			if err := session.Save(c); err != nil {
+				logging.LogErrorf("save session failed: " + err.Error())
+				c.Status(http.StatusInternalServerError)
+				return
+			}
 			return
 		}
 	}
@@ -121,7 +129,20 @@ func LoginAuth(c *gin.Context) {
 	workspaceSession.AccessAuthCode = authCode
 	util.WrongAuthCount = 0
 	workspaceSession.Captcha = gulu.Rand.String(7)
-	logging.LogInfof("auth success [ip=%s]", util.GetRemoteAddr(c.Request))
+
+	maxAge := 0 // Default session expiration (browser session)
+	if rememberMe, ok := arg["rememberMe"].(bool); ok && rememberMe {
+		// Add a 'Remember me' checkbox when logging in to save a session https://github.com/siyuan-note/siyuan/pull/14964
+		maxAge = 60 * 60 * 24 * 30 // 30 days
+	}
+	ginSessions.Default(c).Options(ginSessions.Options{
+		Path:     "/",
+		Secure:   util.SSL,
+		MaxAge:   maxAge,
+		HttpOnly: true,
+	})
+
+	logging.LogInfof("auth success [ip=%s, maxAge=%d]", util.GetRemoteAddr(c.Request), maxAge)
 	if err := session.Save(c); err != nil {
 		logging.LogErrorf("save session failed: " + err.Error())
 		c.Status(http.StatusInternalServerError)

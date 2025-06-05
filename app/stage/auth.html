@@ -184,6 +184,10 @@
         <img id="captchaImg" style="top: 1px;position: absolute;height: 26px;right: 1px;cursor: pointer">
         <input id="captcha" class="b3-text-field" placeholder="{{.l3}}">
     </div>
+    <div style="width: 240px; margin: 8px auto; text-align: left; display: flex; align-items: center;">
+        <input type="checkbox" id="rememberMe" style="margin-right: 8px;">
+        <label for="rememberMe" style="color: var(--b3-theme-on-surface); font-size: 14px;">{{.l10}}</label>
+    </div>
     <button class="b3-button" onclick="submitAuth()">{{.l1}}</button>
     <div class="ft__on-surface">
         {{.l2}}
@@ -475,6 +479,7 @@
     const submitAuth = () => {
         const inputElement = document.getElementById('authCode')
         const captchaElement = document.getElementById('captcha')
+        const rememberMeElement = document.getElementById('rememberMe')
         let code =  inputElement.value.trim();
         if ("" === code) {
             showMessage({{.l9}})
@@ -489,6 +494,7 @@
             body: JSON.stringify({
                 authCode: code,
                 captcha: captchaElement.value,
+                rememberMe: rememberMeElement.checked
             }),
         }).then((response) => {
             return response.json()

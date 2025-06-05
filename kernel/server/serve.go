@@ -36,7 +36,7 @@ import (
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/gin-contrib/gzip"
 	"github.com/gin-contrib/sessions"
-	"github.com/gin-contrib/sessions/memstore"
+	"github.com/gin-contrib/sessions/cookie"
 	"github.com/gin-gonic/gin"
 	"github.com/mssola/useragent"
 	"github.com/olahol/melody"
@@ -61,8 +61,7 @@ const (
 )
 
 var (
-	// 这里用的是内存存储，意味着重启后所有 session 会丢失，需要重新登录
-	sessionStore = memstore.NewStore([]byte("ATN51UlxVq1Gcvdf"))
+	sessionStore = cookie.NewStore([]byte("ATN51UlxVq1Gcvdf"))
 
 	HttpMethods = []string{
 		http.MethodGet,
@@ -452,6 +451,7 @@ func serveAuthPage(c *gin.Context) {
 		"l7":                     template.HTML(model.Conf.Language(184)),
 		"l8":                     model.Conf.Language(95),
 		"l9":                     model.Conf.Language(83),
+		"l10":                    model.Conf.Language(257),
 		"appearanceMode":         model.Conf.Appearance.Mode,
 		"appearanceModeOS":       model.Conf.Appearance.ModeOS,
 		"workspace":              util.WorkspaceName,

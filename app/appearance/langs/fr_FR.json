@@ -1596,6 +1596,7 @@
     "253": "Compression du fichier [%s], veuillez patienter...",
     "254": "[Region ID] ID de région incorrect, veuillez consulter la documentation du fournisseur de services S3 pour configurer l'ID de région",
     "255": "Le site cible a activé la protection contre le hotlinking, il est donc impossible de télécharger [%d] ressources",
-    "256": "Le chemin spécifié [%s] contient un chemin d'espace de travail parent [%s]"
+    "256": "Le chemin spécifié [%s] contient un chemin d'espace de travail parent [%s]",
+    "257": "Souviens-toi de moi pendant 30 jours"
   }
 }

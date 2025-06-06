@@ -520,8 +520,23 @@ export const initKeyboardToolbar = () => {
     <button class="keyboard__action" data-type="done"><svg style="width: 36px"><use xlink:href="#iconKeyboardHide"></use></svg></button>
 </div>
 <div class="keyboard__util"></div>`;
-    toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", (event) => {
-        console.log(getSelection().getRangeAt(0).toString());
+    // let startY = 0;
+    // let moved = false;
+    // toolbarElement.addEventListener("touchstart", e => {
+    //     startY = e.touches[0].clientY;
+    //     moved = false;
+    // });
+    // toolbarElement.addEventListener("touchmove", e => {
+    //     if (Math.abs(e.touches[0].clientY - startY) > 10) {
+    //         moved = true;
+    //     }
+    // });
+    toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchstart" : "click", (event) => {
+        // console.log("moved", moved);
+        // if (moved) {
+        //     return;
+        // }
+        console.log("touchend", getSelection().getRangeAt(0).toString());
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
@@ -559,8 +574,8 @@ export const initKeyboardToolbar = () => {
             }
         }
 
-        event.preventDefault();
-        event.stopPropagation();
+        // event.preventDefault();
+        // event.stopPropagation();
         if (getSelection().rangeCount === 0) {
             return;
         }

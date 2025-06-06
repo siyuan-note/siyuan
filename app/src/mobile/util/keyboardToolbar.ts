@@ -532,11 +532,9 @@ export const initKeyboardToolbar = () => {
         }
     });
     toolbarElement.addEventListener(isInAndroid() || isInHarmony() ? "touchend" : "click", (event) => {
-        console.log("moved", moved);
         if (moved) {
             return;
         }
-        console.log("touchend");
         const protyle = getCurrentEditor()?.protyle;
         const target = event.target as HTMLElement;
         const slashBtnElement = hasClosestByClassName(event.target as HTMLElement, "keyboard__slash-item");
@@ -647,6 +645,9 @@ export const initKeyboardToolbar = () => {
                 const oldScrollTop = protyle.contentElement.scrollTop;
                 renderTextMenu(protyle, toolbarElement);
                 showKeyboardToolbarUtil(oldScrollTop);
+                if (window.JSAndroid && window.JSAndroid.hideKeyboard) {
+                    window.JSAndroid.hideKeyboard();
+                }
             }
             return;
         } else if (type === "moveup") {

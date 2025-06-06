@@ -275,11 +275,19 @@ ${unicode2Emoji(emoji.unicode)}</button>`;
             const cellElement = hasClosestByClassName(protyle.toolbar.range.startContainer, "av__cell");
             if (cellElement) {
                 const cellRect = cellElement.getBoundingClientRect();
+                /// #if !MOBILE
                 setPosition(this.element, cellRect.left, cellRect.bottom, cellRect.height);
+                /// #else
+                setPosition(this.element, 0, 0);
+                /// #endif
             }
         } else {
             const textareaPosition = getSelectionPosition(protyle.wysiwyg.element);
+            /// #if !MOBILE
             setPosition(this.element, textareaPosition.left, textareaPosition.top + 26, 30);
+            /// #else
+            setPosition(this.element, 0, 0);
+            /// #endif
         }
         this.element.scrollTop = 0;
         this.bindUploadEvent(protyle, this.element);

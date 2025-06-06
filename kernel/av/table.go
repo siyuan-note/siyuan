@@ -32,6 +32,7 @@ type LayoutTable struct {
 	PageSize int                `json:"pageSize"` // 每页行数
 }
 
+// ViewTableColumn 描述了表格列的结构。
 type ViewTableColumn struct {
 	ID string `json:"id"` // 列 ID
 
@@ -80,17 +81,19 @@ type TableColumn struct {
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
-type TableCell struct {
-	ID        string  `json:"id"`
-	Value     *Value  `json:"value"`
-	ValueType KeyType `json:"valueType"`
-	Color     string  `json:"color"`
-	BgColor   string  `json:"bgColor"`
+// TableRow 描述了表格行的结构。
+type TableRow struct {
+	ID    string       `json:"id"`    // 行 ID
+	Cells []*TableCell `json:"cells"` // 行单元格
 }
 
-type TableRow struct {
-	ID    string       `json:"id"`
-	Cells []*TableCell `json:"cells"`
+// TableCell 描述了表格单元格的结构。
+type TableCell struct {
+	ID        string  `json:"id"`        // 单元格 ID
+	Value     *Value  `json:"value"`     // 单元格值
+	ValueType KeyType `json:"valueType"` // 单元格值类型
+	Color     string  `json:"color"`     // 单元格颜色
+	BgColor   string  `json:"bgColor"`   // 单元格背景颜色
 }
 
 func (row *TableRow) GetBlockValue() (ret *Value) {

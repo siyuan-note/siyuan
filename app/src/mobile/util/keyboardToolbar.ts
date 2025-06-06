@@ -675,5 +675,5 @@ export const initKeyboardToolbar = () => {
             focusByRange(range);
             return;
         }
-    });
+    }, {passive: true});
 };

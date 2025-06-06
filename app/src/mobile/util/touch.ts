@@ -271,11 +271,12 @@ export const handleTouchMove = (event: TouchEvent) => {
                     scrollBlock = true;
                     return;
                 }
-                if (scrollBlock) {
-                    return;
-                }
+            }
+            if (scrollBlock) {
+                return;
             }
         }
+
         if (isFirstMove) {
             sideMaskElement.style.zIndex = (++window.siyuan.zIndex).toString();
             document.getElementById("sidebar").style.zIndex = (++window.siyuan.zIndex).toString();

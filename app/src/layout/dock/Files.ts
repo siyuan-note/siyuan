@@ -140,7 +140,7 @@ export class Files extends Model {
             <svg class="b3-list-item__arrow"><use xlink:href="#iconRight"></use></svg>
         </span>
         <span class="b3-list-item__text">${window.siyuan.languages.closeNotebook}</span>
-        <span class="counter fn__none" style="cursor: auto"></span>
+        <span class="counter" style="cursor: auto"></span>
     </li>
     <ul class="fn__none fn__flex-1"></ul>
 </ul>`;

@@ -340,7 +340,7 @@ func filterTesseractLangs(langs []string) (ret []string) {
 	} else {
 		for _, lang := range langs {
 			if "eng" == lang || strings.HasPrefix(lang, "chi") || "fra" == lang || "spa" == lang || "deu" == lang ||
-				"rus" == lang || "osd" == lang {
+				"rus" == lang || "jpn" == lang || "osd" == lang {
 				ret = append(ret, lang)
 			}
 		}

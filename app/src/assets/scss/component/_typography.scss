@@ -305,15 +305,13 @@
         color: var(--b3-theme-on-surface);
         margin-top: -4px;
         align-self: center;
+        margin-left: 1em;
+        opacity: 0;
+        transition: var(--b3-transition);
+        line-height: calc(1.625 / 0.85);
       }
 
       .protyle-icon {
-        opacity: 0;
-        transition: var(--b3-transition);
-      }
-
-      .protyle-action__language {
-        margin-left: 1em;
         opacity: 0;
         transition: var(--b3-transition);
       }

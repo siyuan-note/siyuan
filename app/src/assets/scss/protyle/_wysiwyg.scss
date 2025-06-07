@@ -116,12 +116,15 @@
       padding: 0;
       display: flex;
       flex-direction: column;
+      min-height: calc(1.625em + 8px);
 
       &::before {
         content: "";
         position: absolute;
         border-left: .5px solid var(--b3-theme-background-light);
         left: 17px;
+        height: calc(100% - 1em * 1.625 - 12px);
+        top: calc(1em * 1.625 + 12px);
       }
 
       &:hover::before {
@@ -174,6 +177,16 @@
         display: flex;
         align-items: center;
         word-break: keep-all;
+        height: calc(1.625em + 8px);
+        line-height: calc(1.625em + 8px);
+
+        & ~ [data-type="NodeHeading"] {
+          line-height: 1em;
+
+          & > [spellcheck] {
+            min-height: 1em;
+          }
+        }
 
         &::after {
           content: "";

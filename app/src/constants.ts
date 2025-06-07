@@ -701,7 +701,7 @@ export abstract class Constants {
     public static readonly SIYUAN_ASSETS_EXTS: string[] = [".pdf"].concat(Constants.SIYUAN_ASSETS_IMAGE).concat(Constants.SIYUAN_ASSETS_AUDIO).concat(Constants.SIYUAN_ASSETS_VIDEO);
     public static readonly SIYUAN_ASSETS_SEARCH: string[] = [".txt", ".md", ".markdown", ".docx", ".xlsx", ".pptx", ".pdf", ".json", ".log", ".sql", ".html", ".xml", ".java", ".h", ".c",
         ".cpp", ".go", ".rs", ".swift", ".kt", ".py", ".php", ".js", ".css", ".ts", ".sh", ".bat", ".cmd", ".ini", ".yaml",
-        ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki", ".epub"];
+        ".rst", ".adoc", ".textile", ".opml", ".org", ".wiki", ".epub", ".cs"];
 
     // protyle
     public static readonly SIYUAN_CONFIG_APPEARANCE_DARK_CODE: string[] = ["a11y-dark", "agate", "an-old-hope", "androidstudio",

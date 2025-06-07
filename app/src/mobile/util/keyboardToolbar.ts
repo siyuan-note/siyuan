@@ -521,13 +521,15 @@ export const initKeyboardToolbar = () => {
 </div>
 <div class="keyboard__util"></div>`;
     let startY = 0;
+    let startX = 0;
     let moved = false;
     toolbarElement.addEventListener("touchstart", e => {
         startY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
         moved = false;
     });
     toolbarElement.addEventListener("touchmove", e => {
-        if (Math.abs(e.touches[0].clientY - startY) > 10) {
+        if (Math.abs(e.touches[0].clientY - startY) > 10 || Math.abs(e.touches[0].clientX - startX) > 10) {
             moved = true;
         }
     });

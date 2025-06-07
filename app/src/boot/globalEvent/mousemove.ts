@@ -6,6 +6,9 @@ import {getColIndex} from "../../protyle/util/table";
 const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
     let nodeElement = element;
+    if (nodeElement && nodeElement.classList.contains("protyle-action")) {
+        nodeElement = nodeElement.parentElement;
+    }
     while (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
         nodeElement = document.elementFromPoint(x + 73 * index, y) as HTMLElement;
         nodeElement = hasClosestBlock(nodeElement) as HTMLElement;
@@ -145,7 +148,7 @@ export const windowMouseMove = (event: MouseEvent, mouseIsEnter: boolean) => {
         }
         return;
     }
-    if (eventPath0 && eventPath0.nodeType !== 3 && (eventPath0.classList.contains("li") || eventPath0.classList.contains("list"))) {
+    if (eventPath0 && eventPath0.nodeType !== 3 && (eventPath0.classList.contains("li") || eventPath0.classList.contains("list") || eventPath0.classList.contains("protyle-action"))) {
         // 光标在列表下部应显示右侧的元素，而不是列表本身
         const targetBlockElement = getRightBlock(eventPath0, eventPath0.getBoundingClientRect().left + 1, event.clientY);
         if (!targetBlockElement) {

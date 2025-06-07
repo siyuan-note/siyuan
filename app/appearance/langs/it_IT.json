@@ -1336,6 +1336,7 @@
   },
   "_attrView": {
     "table": "Tabella",
+    "gallery": "Galleria",
     "key": "Chiave primaria",
     "select": "Seleziona"
   },

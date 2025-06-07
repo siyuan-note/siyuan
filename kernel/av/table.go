@@ -59,6 +59,7 @@ type Table struct {
 	PageSize         int            `json:"pageSize"`         // 每页行数
 }
 
+// TableColumn 描述了表格实例列的结构。
 type TableColumn struct {
 	ID     string      `json:"id"`     // 列 ID
 	Name   string      `json:"name"`   // 列名
@@ -81,13 +82,13 @@ type TableColumn struct {
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
-// TableRow 描述了表格行的结构。
+// TableRow 描述了表格实例行的结构。
 type TableRow struct {
 	ID    string       `json:"id"`    // 行 ID
 	Cells []*TableCell `json:"cells"` // 行单元格
 }
 
-// TableCell 描述了表格单元格的结构。
+// TableCell 描述了表格实例单元格的结构。
 type TableCell struct {
 	ID        string  `json:"id"`        // 单元格 ID
 	Value     *Value  `json:"value"`     // 单元格值

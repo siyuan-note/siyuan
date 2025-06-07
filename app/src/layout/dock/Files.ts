@@ -858,11 +858,9 @@ data-type="navigation-root" data-path="/">
         const counterElement = this.closeElement.querySelector(".counter");
         counterElement.textContent = closeCounter.toString();
         if (closeCounter) {
-            counterElement.classList.remove("fn__none");
-            counterElement.parentElement.parentElement.classList.remove("fn__none");
+            this.closeElement.classList.remove("fn__none");
         } else {
-            counterElement.classList.add("fn__none");
-            counterElement.parentElement.parentElement.classList.add("fn__none");
+            this.closeElement.classList.add("fn__none");
         }
         window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
             item.openPaths.forEach((openPath) => {
@@ -901,8 +899,7 @@ data-type="navigation-root" data-path="/">
                         this.closeElement.lastElementChild.innerHTML = closeHTML;
                         const counterElement = this.closeElement.querySelector(".counter");
                         counterElement.textContent = (parseInt(counterElement.textContent) + 1).toString();
-                        counterElement.classList.remove("fn__none");
-                        counterElement.parentElement.parentElement.classList.remove("fn__none");
+                        this.closeElement.classList.remove("fn__none");
                     }
                 }
             });
@@ -913,8 +910,7 @@ data-type="navigation-root" data-path="/">
                     const counterElement = this.closeElement.querySelector(".counter");
                     counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
                     if (counterElement.textContent === "0") {
-                        counterElement.classList.add("fn__none");
-                        counterElement.parentElement.parentElement.classList.add("fn__none");
+                        this.closeElement.classList.add("fn__none");
                     }
                 }
             }
@@ -958,8 +954,7 @@ data-type="navigation-root" data-path="/">
             const counterElement = this.closeElement.querySelector(".counter");
             counterElement.textContent = (parseInt(counterElement.textContent) - 1).toString();
             if (counterElement.textContent === "0") {
-                counterElement.classList.add("fn__none");
-                counterElement.parentElement.parentElement.classList.add("fn__none");
+                this.closeElement.classList.add("fn__none");
             }
             liElement.remove();
         }

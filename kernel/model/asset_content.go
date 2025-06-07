@@ -475,6 +475,7 @@ func NewAssetsSearcher() *AssetsSearcher {
 			".opml":     txtAssetParser,
 			".org":      txtAssetParser,
 			".wiki":     txtAssetParser,
+			".cs":       txtAssetParser,
 			".docx":     &DocxAssetParser{},
 			".pptx":     &PptxAssetParser{},
 			".xlsx":     &XlsxAssetParser{},

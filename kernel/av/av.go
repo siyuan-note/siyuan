@@ -184,15 +184,17 @@ type View struct {
 	HideAttrViewName bool   `json:"hideAttrViewName"` // 是否隐藏属性视图名称
 	Desc             string `json:"desc"`             // 视图描述
 
-	LayoutType LayoutType   `json:"type"`            // 当前布局类型
-	Table      *LayoutTable `json:"table,omitempty"` // 表格布局
+	LayoutType LayoutType     `json:"type"`              // 当前布局类型
+	Table      *LayoutTable   `json:"table,omitempty"`   // 表格布局
+	Gallery    *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
 }
 
 // LayoutType 描述了视图布局的类型。
 type LayoutType string
 
 const (
-	LayoutTypeTable LayoutType = "table" // 属性视图类型 - 表格
+	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
+	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 画廊
 )
 
 func NewTableView() (ret *View) {
@@ -230,6 +232,22 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 
 	selectKey = NewKey(ast.NewNodeID(), getI18nName("select"), "", KeyTypeSelect)
 	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{ID: selectKey.ID})
+	return
+}
+
+func NewGalleryView() (ret *View) {
+	ret = &View{
+		ID:         ast.NewNodeID(),
+		Name:       getI18nName("gallery"),
+		LayoutType: LayoutTypeGallery,
+		Gallery: &LayoutGallery{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: 50,
+		},
+	}
 	return
 }
 

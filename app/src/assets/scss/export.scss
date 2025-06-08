@@ -34,6 +34,18 @@ svg {
   }
 }
 
+.protyle-wysiwyg .table[data-node-id] {
+  &[style*="text-align: left"] {
+    margin-right: auto;
+  }
+  &[style*="text-align: center"] {
+    margin: auto;
+  }
+  &[style*="text-align: right"] {
+    margin-left: auto;
+  }
+}
+
 @media print {
   // 尽量避免块内分页
   .protyle-wysiwyg [data-node-id] {

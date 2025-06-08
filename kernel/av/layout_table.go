@@ -126,7 +126,7 @@ func (table *Table) GetColumn(id string) *TableColumn {
 	return nil
 }
 
-func (table *Table) GetType() LayoutType {
+func (*Table) GetType() LayoutType {
 	return LayoutTypeTable
 }
 
@@ -134,7 +134,7 @@ func (table *Table) GetID() string {
 	return table.ID
 }
 
-func (table *Table) SortRows(attrView *AttributeView) {
+func (table *Table) Sort(attrView *AttributeView) {
 	if 1 > len(table.Sorts) {
 		return
 	}
@@ -247,7 +247,7 @@ func (table *Table) SortRows(attrView *AttributeView) {
 	}
 }
 
-func (table *Table) FilterRows(attrView *AttributeView) {
+func (table *Table) Filter(attrView *AttributeView) {
 	if 1 > len(table.Filters) {
 		return
 	}

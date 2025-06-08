@@ -23,7 +23,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func (table *Table) CalcCols() {
+func (table *Table) Calc() {
 	for i, col := range table.Columns {
 		if nil == col.Calc {
 			continue

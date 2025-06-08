@@ -24,12 +24,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+// Sortable 接口定义了可排序的视图类型。
 type Sortable interface {
-	SortRows(attrView *AttributeView)
+
+	// Sort 根据视图中设置的排序规则进行排序。
+	Sort(attrView *AttributeView)
 }
 
+// ViewSort 描述了视图排序规则的结构。
 type ViewSort struct {
-	Column string    `json:"column"` // 列 ID
+	Column string    `json:"column"` // 列（字段）ID
 	Order  SortOrder `json:"order"`  // 排序顺序
 }
 

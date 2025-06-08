@@ -42,31 +42,21 @@ type ViewTableColumn struct {
 
 // Table 描述了表格实例的结构。
 type Table struct {
-	ID               string         `json:"id"`               // 表格布局 ID
-	Icon             string         `json:"icon"`             // 表格图标
-	Name             string         `json:"name"`             // 表格名称
-	Desc             string         `json:"desc"`             // 表格描述
-	HideAttrViewName bool           `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Filters          []*ViewFilter  `json:"filters"`          // 过滤规则
-	Sorts            []*ViewSort    `json:"sorts"`            // 排序规则
-	Columns          []*TableColumn `json:"columns"`          // 表格列
-	Rows             []*TableRow    `json:"rows"`             // 表格行
-	RowCount         int            `json:"rowCount"`         // 表格总行数
-	PageSize         int            `json:"pageSize"`         // 每页行数
+	*BaseInstance
+
+	Columns  []*TableColumn `json:"columns"`  // 表格列
+	Rows     []*TableRow    `json:"rows"`     // 表格行
+	RowCount int            `json:"rowCount"` // 表格总行数
 }
 
 // TableColumn 描述了表格实例列的结构。
 type TableColumn struct {
-	ID     string      `json:"id"`     // 列 ID
-	Name   string      `json:"name"`   // 列名
-	Type   KeyType     `json:"type"`   // 列类型
-	Icon   string      `json:"icon"`   // 列图标
-	Wrap   bool        `json:"wrap"`   // 是否换行
-	Hidden bool        `json:"hidden"` // 是否隐藏
-	Pin    bool        `json:"pin"`    // 是否固定
-	Width  string      `json:"width"`  // 列宽度
-	Desc   string      `json:"desc"`   // 列描述
-	Calc   *ColumnCalc `json:"calc"`   // 计算
+	*BaseInstanceField
+
+	Wrap  bool        `json:"wrap"`  // 是否换行
+	Pin   bool        `json:"pin"`   // 是否固定
+	Width string      `json:"width"` // 列宽度
+	Calc  *ColumnCalc `json:"calc"`  // 计算
 
 	// 以下是某些列类型的特有属性
 
@@ -86,11 +76,10 @@ type TableRow struct {
 
 // TableCell 描述了表格实例单元格的结构。
 type TableCell struct {
-	ID        string  `json:"id"`        // 单元格 ID
-	Value     *Value  `json:"value"`     // 单元格值
-	ValueType KeyType `json:"valueType"` // 单元格值类型
-	Color     string  `json:"color"`     // 单元格颜色
-	BgColor   string  `json:"bgColor"`   // 单元格背景颜色
+	*BaseValue
+
+	Color   string `json:"color"`   // 单元格颜色
+	BgColor string `json:"bgColor"` // 单元格背景颜色
 }
 
 func (row *TableRow) GetBlockValue() (ret *Value) {

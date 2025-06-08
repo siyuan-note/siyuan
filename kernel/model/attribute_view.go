@@ -1599,6 +1599,10 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		return
 	}
 
+	if "" == operation.Layout {
+		operation.Layout = av.LayoutTypeTable
+	}
+
 	var view *av.View
 	switch operation.Layout {
 	case av.LayoutTypeTable:

@@ -28,15 +28,17 @@ import (
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {
 	ret = &av.Table{
-		ID:               view.ID,
-		Icon:             view.Icon,
-		Name:             view.Name,
-		Desc:             view.Desc,
-		HideAttrViewName: view.HideAttrViewName,
-		Columns:          []*av.TableColumn{},
-		Rows:             []*av.TableRow{},
-		Filters:          view.Table.Filters,
-		Sorts:            view.Table.Sorts,
+		BaseInstance: &av.BaseInstance{
+			ID:               view.ID,
+			Icon:             view.Icon,
+			Name:             view.Name,
+			Desc:             view.Desc,
+			HideAttrViewName: view.HideAttrViewName,
+			Filters:          view.Table.Filters,
+			Sorts:            view.Table.Sorts,
+		},
+		Columns: []*av.TableColumn{},
+		Rows:    []*av.TableRow{},
 	}
 
 	// 组装列
@@ -49,10 +51,14 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		}
 
 		ret.Columns = append(ret.Columns, &av.TableColumn{
-			ID:           key.ID,
-			Name:         key.Name,
-			Type:         key.Type,
-			Icon:         key.Icon,
+			BaseInstanceField: &av.BaseInstanceField{
+				ID:     key.ID,
+				Name:   key.Name,
+				Type:   key.Type,
+				Icon:   key.Icon,
+				Hidden: col.Hidden,
+				Desc:   key.Desc,
+			},
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
 			Template:     key.Template,
@@ -60,9 +66,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			Rollup:       key.Rollup,
 			Date:         key.Date,
 			Wrap:         col.Wrap,
-			Hidden:       col.Hidden,
 			Width:        col.Width,
-			Desc:         key.Desc,
 			Pin:          col.Pin,
 			Calc:         col.Calc,
 		})
@@ -121,17 +125,21 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			for _, keyValues := range row {
 				if keyValues.Key.ID == col.ID {
 					tableCell = &av.TableCell{
-						ID:        keyValues.Values[0].ID,
-						Value:     keyValues.Values[0],
-						ValueType: col.Type,
+						BaseValue: &av.BaseValue{
+							ID:        keyValues.Values[0].ID,
+							Value:     keyValues.Values[0],
+							ValueType: col.Type,
+						},
 					}
 					break
 				}
 			}
 			if nil == tableCell {
 				tableCell = &av.TableCell{
-					ID:        ast.NewNodeID(),
-					ValueType: col.Type,
+					BaseValue: &av.BaseValue{
+						ID:        ast.NewNodeID(),
+						ValueType: col.Type,
+					},
 				}
 			}
 			tableRow.ID = rowID

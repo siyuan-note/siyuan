@@ -14,15 +14,17 @@ import (
 
 func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string) (ret *av.Gallery) {
 	ret = &av.Gallery{
-		ID:               view.ID,
-		Icon:             view.Icon,
-		Name:             view.Name,
-		Desc:             view.Desc,
-		HideAttrViewName: view.HideAttrViewName,
-		Filters:          view.Gallery.Filters,
-		Sorts:            view.Gallery.Sorts,
-		Fields:           []*av.GalleryField{},
-		Cards:            []*av.GalleryCard{},
+		BaseInstance: &av.BaseInstance{
+			ID:               view.ID,
+			Icon:             view.Icon,
+			Name:             view.Name,
+			Desc:             view.Desc,
+			HideAttrViewName: view.HideAttrViewName,
+			Filters:          view.Gallery.Filters,
+			Sorts:            view.Gallery.Sorts,
+		},
+		Fields: []*av.GalleryField{},
+		Cards:  []*av.GalleryCard{},
 	}
 
 	// 组装字段
@@ -35,12 +37,14 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		}
 
 		ret.Fields = append(ret.Fields, &av.GalleryField{
-			ID:           key.ID,
-			Name:         key.Name,
-			Type:         key.Type,
-			Icon:         key.Icon,
-			Hidden:       field.Hidden,
-			Desc:         key.Desc,
+			BaseInstanceField: &av.BaseInstanceField{
+				ID:     key.ID,
+				Name:   key.Name,
+				Type:   key.Type,
+				Icon:   key.Icon,
+				Hidden: field.Hidden,
+				Desc:   key.Desc,
+			},
 			Options:      key.Options,
 			NumberFormat: key.NumberFormat,
 			Template:     key.Template,
@@ -103,17 +107,21 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			for _, keyValues := range card {
 				if keyValues.Key.ID == field.ID {
 					fieldValue = &av.GalleryFieldValue{
-						ID:        keyValues.Values[0].ID,
-						Value:     keyValues.Values[0],
-						ValueType: field.Type,
+						BaseValue: &av.BaseValue{
+							ID:        keyValues.Values[0].ID,
+							Value:     keyValues.Values[0],
+							ValueType: field.Type,
+						},
 					}
 					break
 				}
 			}
 			if nil == fieldValue {
 				fieldValue = &av.GalleryFieldValue{
-					ID:        ast.NewNodeID(),
-					ValueType: field.Type,
+					BaseValue: &av.BaseValue{
+						ID:        ast.NewNodeID(),
+						ValueType: field.Type,
+					},
 				}
 			}
 			galleryCard.ID = cardID

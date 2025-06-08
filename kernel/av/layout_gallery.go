@@ -38,17 +38,11 @@ type ViewGalleryCardField struct {
 
 // Gallery 描述了画廊实例的结构。
 type Gallery struct {
-	ID               string          `json:"id"`               // 画廊布局 ID
-	Icon             string          `json:"icon"`             // 画廊图标
-	Name             string          `json:"name"`             // 画廊名称
-	Desc             string          `json:"desc"`             // 画廊描述
-	HideAttrViewName bool            `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Filters          []*ViewFilter   `json:"filters"`          // 过滤规则
-	Sorts            []*ViewSort     `json:"sorts"`            // 排序规则
-	Fields           []*GalleryField `json:"fields"`           // 画廊字段
-	Cards            []*GalleryCard  `json:"cards"`            // 画廊卡片
-	CardCount        int             `json:"cardCount"`        // 画廊总卡片数
-	PageSize         int             `json:"pageSize"`         // 每页卡片数
+	*BaseInstance
+
+	Fields    []*GalleryField `json:"fields"`    // 画廊字段
+	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
+	CardCount int             `json:"cardCount"` // 画廊总卡片数
 }
 
 // GalleryCard 描述了画廊实例卡片的结构。
@@ -61,12 +55,7 @@ type GalleryCard struct {
 
 // GalleryField 描述了画廊实例卡片字段的结构。
 type GalleryField struct {
-	ID     string  `json:"id"`     // 字段 ID
-	Name   string  `json:"name"`   // 字段名
-	Type   KeyType `json:"type"`   // 字段类型
-	Icon   string  `json:"icon"`   // 字段图标
-	Hidden bool    `json:"hidden"` // 是否隐藏
-	Desc   string  `json:"desc"`   // 字段描述
+	*BaseInstanceField
 
 	// 以下是某些字段类型的特有属性
 
@@ -80,9 +69,7 @@ type GalleryField struct {
 
 // GalleryFieldValue 描述了画廊实例字段值的结构。
 type GalleryFieldValue struct {
-	ID        string  `json:"id"`        // 字段值 ID
-	Value     *Value  `json:"value"`     // 字段值
-	ValueType KeyType `json:"valueType"` // 字段值类型
+	*BaseValue
 }
 
 func (card *GalleryCard) GetBlockValue() (ret *Value) {

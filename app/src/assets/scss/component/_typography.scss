@@ -229,16 +229,6 @@
     border-spacing: 0;
     width: max-content;
 
-    &[style*="text-align: left"] {
-      margin-right: auto;
-    }
-    &[style*="text-align: center"] {
-      margin: auto;
-    }
-    &[style*="text-align: right"] {
-      margin-left: auto;
-    }
-
     tr:nth-child(even) td {
       background-color: var(--b3-table-even-background);
     }
@@ -514,6 +504,14 @@
 
   table {
     margin: 1em 0;
+
+    &[style*="text-align: center"] {
+      margin: auto;
+    }
+
+    &[style*="text-align: right"] {
+      margin-left: auto;
+    }
   }
 
   div[data-subtype="math"] {

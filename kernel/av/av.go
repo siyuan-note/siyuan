@@ -189,7 +189,7 @@ type View struct {
 	Gallery    *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
 }
 
-// LayoutType 描述了视图布局的类型。
+// LayoutType 描述了视图布局类型。
 type LayoutType string
 
 const (
@@ -619,8 +619,9 @@ func getI18nName(name string) string {
 }
 
 var (
-	ErrViewNotFound = errors.New("view not found")
-	ErrKeyNotFound  = errors.New("key not found")
+	ErrViewNotFound    = errors.New("view not found")
+	ErrKeyNotFound     = errors.New("key not found")
+	ErrWrongLayoutType = errors.New("wrong layout type")
 )
 
 const (

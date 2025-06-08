@@ -1482,6 +1482,7 @@ type Operation struct {
 	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
 	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
 	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
+	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
 }
 
 type Transaction struct {

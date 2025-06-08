@@ -1559,16 +1559,53 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		return
 	}
 
-	view := av.NewTableView()
+	var view *av.View
+	switch operation.Layout {
+	case av.LayoutTypeTable:
+		view = av.NewTableView()
+		switch firstView.LayoutType {
+		case av.LayoutTypeTable:
+			for _, col := range firstView.Table.Columns {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
+			}
+			for _, rowID := range firstView.Table.RowIDs {
+				view.Table.RowIDs = append(view.Table.RowIDs, rowID)
+			}
+		case av.LayoutTypeGallery:
+			for _, field := range firstView.Gallery.CardFields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: field.ID})
+			}
+			for _, cardID := range firstView.Gallery.CardIDs {
+				view.Table.RowIDs = append(view.Table.RowIDs, cardID)
+			}
+		}
+	case av.LayoutTypeGallery:
+		view = av.NewGalleryView()
+		switch firstView.LayoutType {
+		case av.LayoutTypeTable:
+			for _, col := range firstView.Table.Columns {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: col.ID})
+			}
+			for _, rowID := range firstView.Table.RowIDs {
+				view.Gallery.CardIDs = append(view.Gallery.CardIDs, rowID)
+			}
+		case av.LayoutTypeGallery:
+			for _, field := range firstView.Gallery.CardFields {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: field.ID})
+			}
+			for _, cardID := range firstView.Gallery.CardIDs {
+				view.Gallery.CardIDs = append(view.Gallery.CardIDs, cardID)
+			}
+		}
+	default:
+		err = av.ErrWrongLayoutType
+		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", operation.Layout, avID)
+		return
+	}
+
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
-
-	for _, col := range firstView.Table.Columns {
-		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
-	}
-
-	view.Table.RowIDs = firstView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

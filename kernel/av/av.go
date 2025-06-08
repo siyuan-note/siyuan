@@ -208,11 +208,13 @@ func NewTableView() (ret *View) {
 		Name:       getI18nName("table"),
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
-			Spec:     0,
-			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: TableViewDefaultPageSize,
+			BaseLayout: &BaseLayout{
+				Spec:     0,
+				ID:       ast.NewNodeID(),
+				Filters:  []*ViewFilter{},
+				Sorts:    []*ViewSort{},
+				PageSize: TableViewDefaultPageSize,
+			},
 		},
 	}
 	return
@@ -225,11 +227,13 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 		Name:       name,
 		LayoutType: LayoutTypeTable,
 		Table: &LayoutTable{
-			Spec:     0,
-			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: TableViewDefaultPageSize,
+			BaseLayout: &BaseLayout{
+				Spec:     0,
+				ID:       ast.NewNodeID(),
+				Filters:  []*ViewFilter{},
+				Sorts:    []*ViewSort{},
+				PageSize: TableViewDefaultPageSize,
+			},
 		},
 	}
 	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
@@ -246,11 +250,13 @@ func NewGalleryView() (ret *View) {
 		Name:       getI18nName("gallery"),
 		LayoutType: LayoutTypeGallery,
 		Gallery: &LayoutGallery{
-			Spec:     0,
-			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: GalleryViewDefaultPageSize,
+			BaseLayout: &BaseLayout{
+				Spec:     0,
+				ID:       ast.NewNodeID(),
+				Filters:  []*ViewFilter{},
+				Sorts:    []*ViewSort{},
+				PageSize: GalleryViewDefaultPageSize,
+			},
 		},
 	}
 	return

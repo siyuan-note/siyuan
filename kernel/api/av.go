@@ -572,8 +572,11 @@ func renderAttributeView(c *gin.Context) {
 	var views []map[string]interface{}
 	for _, v := range attrView.Views {
 		pSize := 10
-		if nil != v.Table && av.LayoutTypeTable == v.LayoutType {
+		switch v.LayoutType {
+		case av.LayoutTypeTable:
 			pSize = v.Table.PageSize
+		case av.LayoutTypeGallery:
+			pSize = v.Gallery.PageSize
 		}
 
 		view := map[string]interface{}{

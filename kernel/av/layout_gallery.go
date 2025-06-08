@@ -20,16 +20,12 @@ import "sort"
 
 // LayoutGallery 描述了画廊布局的结构。
 type LayoutGallery struct {
-	Spec int    `json:"spec"` // 布局格式版本
-	ID   string `json:"id"`   // 布局 ID
+	*BaseLayout
 
 	CoverFrom           int                     `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
 	CoverFromAssetKeyID string                  `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
 	CardFields          []*ViewGalleryCardField `json:"fields"`                        // 画廊卡片字段
 	CardIDs             []string                `json:"cardIds"`                       // 卡片 ID，用于自定义排序
-	Filters             []*ViewFilter           `json:"filters"`                       // 过滤规则
-	Sorts               []*ViewSort             `json:"sorts"`                         // 排序规则
-	PageSize            int                     `json:"pageSize"`                      // 每页卡片数
 }
 
 // ViewGalleryCardField 描述了画廊卡片字段的结构。

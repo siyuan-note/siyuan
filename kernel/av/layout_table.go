@@ -22,14 +22,10 @@ import (
 
 // LayoutTable 描述了表格布局的结构。
 type LayoutTable struct {
-	Spec int    `json:"spec"` // 布局格式版本
-	ID   string `json:"id"`   // 布局 ID
+	*BaseLayout
 
-	Columns  []*ViewTableColumn `json:"columns"`  // 表格列
-	RowIDs   []string           `json:"rowIds"`   // 行 ID，用于自定义排序
-	Filters  []*ViewFilter      `json:"filters"`  // 过滤规则
-	Sorts    []*ViewSort        `json:"sorts"`    // 排序规则
-	PageSize int                `json:"pageSize"` // 每页行数
+	Columns []*ViewTableColumn `json:"columns"` // 表格列
+	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
 }
 
 // ViewTableColumn 描述了表格列的结构。

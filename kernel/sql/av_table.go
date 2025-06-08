@@ -157,7 +157,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			if nil == tableCell.Value {
 				tableCell.Value = av.GetAttributeViewDefaultValue(tableCell.ID, col.ID, rowID, tableCell.ValueType)
 			} else {
-				fillAttributeViewNilValue(tableCell.Value, rowID, col.ID, tableCell.ValueType)
+				fillAttributeViewNilValue(tableCell.Value, tableCell.ValueType)
 			}
 
 			tableRow.Cells = append(tableRow.Cells, tableCell)

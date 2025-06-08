@@ -28,15 +28,15 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplContent string) (ret string, err error) {
+func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
-		block := getBlockValue(rowValues)
+		block := getBlockValue(keyValues)
 		if nil != block && nil != block.Block {
 			ial["id"] = block.Block.ID
 		}
 	}
 	if "" == ial["updated"] {
-		block := getBlockValue(rowValues)
+		block := getBlockValue(keyValues)
 		if nil != block && nil != block.Block {
 			ial["updated"] = time.UnixMilli(block.Block.Updated).Format("20060102150405")
 		}
@@ -94,23 +94,23 @@ func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplCo
 
 	dataModel["id_mod"] = map[string]any{}
 	dataModel["id_mod_raw"] = map[string]any{}
-	for _, rowValue := range rowValues {
-		if 1 > len(rowValue.Values) {
+	for _, keyValue := range keyValues {
+		if 1 > len(keyValue.Values) {
 			continue
 		}
 
-		v := rowValue.Values[0]
+		v := keyValue.Values[0]
 		if av.KeyTypeNumber == v.Type {
 			if nil != v.Number && v.Number.IsNotEmpty {
-				dataModel[rowValue.Key.Name] = v.Number.Content
+				dataModel[keyValue.Key.Name] = v.Number.Content
 			}
 		} else if av.KeyTypeDate == v.Type {
 			if nil != v.Date {
 				if v.Date.IsNotEmpty {
-					dataModel[rowValue.Key.Name] = time.UnixMilli(v.Date.Content)
+					dataModel[keyValue.Key.Name] = time.UnixMilli(v.Date.Content)
 				}
 				if v.Date.IsNotEmpty2 {
-					dataModel[rowValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
+					dataModel[keyValue.Key.Name+"_end"] = time.UnixMilli(v.Date.Content2)
 				}
 			}
 		} else if av.KeyTypeRollup == v.Type {
@@ -130,9 +130,9 @@ func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplCo
 				}
 
 				if 0 < len(numbers) {
-					dataModel[rowValue.Key.Name] = numbers
+					dataModel[keyValue.Key.Name] = numbers
 				} else {
-					dataModel[rowValue.Key.Name] = contents
+					dataModel[keyValue.Key.Name] = contents
 				}
 			}
 		} else if av.KeyTypeRelation == v.Type {
@@ -141,10 +141,10 @@ func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplCo
 				for _, content := range v.Relation.Contents {
 					contents = append(contents, content.String(true))
 				}
-				dataModel[rowValue.Key.Name] = contents
+				dataModel[keyValue.Key.Name] = contents
 			}
 		} else if av.KeyTypeBlock == v.Type {
-			dataModel[rowValue.Key.Name+"_created"] = time.Now()
+			dataModel[keyValue.Key.Name+"_created"] = time.Now()
 			if nil != v.Block {
 				dataModel["entryCreated"] = time.UnixMilli(v.Block.Created)
 			}
@@ -152,17 +152,17 @@ func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplCo
 			if nil != v.Block {
 				dataModel["entryUpdated"] = time.UnixMilli(v.Block.Updated)
 			}
-			dataModel[rowValue.Key.Name] = v.String(true)
+			dataModel[keyValue.Key.Name] = v.String(true)
 		} else {
-			dataModel[rowValue.Key.Name] = v.String(true)
+			dataModel[keyValue.Key.Name] = v.String(true)
 		}
 
 		// Database template fields support access to the raw value https://github.com/siyuan-note/siyuan/issues/14903
-		dataModel[rowValue.Key.Name+"_raw"] = v
+		dataModel[keyValue.Key.Name+"_raw"] = v
 
 		// Database template fields support access by ID https://github.com/siyuan-note/siyuan/issues/11237
-		dataModel["id_mod"].(map[string]any)[rowValue.Key.ID] = dataModel[rowValue.Key.Name]
-		dataModel["id_mod_raw"].(map[string]any)[rowValue.Key.ID] = v
+		dataModel["id_mod"].(map[string]any)[keyValue.Key.ID] = dataModel[keyValue.Key.Name]
+		dataModel["id_mod_raw"].(map[string]any)[keyValue.Key.ID] = v
 	}
 
 	if err = tpl.Execute(buf, dataModel); err != nil {
@@ -173,7 +173,7 @@ func RenderTemplateField(ial map[string]string, rowValues []*av.KeyValues, tplCo
 	return
 }
 
-func fillAttributeViewNilValue(value *av.Value, rowID, colID string, typ av.KeyType) {
+func fillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 	value.Type = typ
 	switch typ {
 	case av.KeyTypeText:

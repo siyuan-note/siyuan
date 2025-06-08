@@ -139,7 +139,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			if nil == fieldValue.Value {
 				fieldValue.Value = av.GetAttributeViewDefaultValue(fieldValue.ID, field.ID, cardID, fieldValue.ValueType)
 			} else {
-				fillAttributeViewNilValue(fieldValue.Value, cardID, field.ID, fieldValue.ValueType)
+				fillAttributeViewNilValue(fieldValue.Value, fieldValue.ValueType)
 			}
 
 			galleryCard.Values = append(galleryCard.Values, fieldValue)

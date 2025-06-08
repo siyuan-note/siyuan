@@ -52,4 +52,13 @@ type BaseInstanceField struct {
 	Icon   string  `json:"icon"`   // 字段图标
 	Hidden bool    `json:"hidden"` // 是否隐藏
 	Desc   string  `json:"desc"`   // 字段描述
+
+	// 以下是某些字段类型的特有属性
+
+	Options      []*SelectOption `json:"options,omitempty"`  // 选项列表
+	NumberFormat NumberFormat    `json:"numberFormat"`       // 数字字段格式化
+	Template     string          `json:"template"`           // 模板字段内容
+	Relation     *Relation       `json:"relation,omitempty"` // 关联字段
+	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总字段
+	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }

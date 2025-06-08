@@ -57,15 +57,6 @@ type TableColumn struct {
 	Pin   bool        `json:"pin"`   // 是否固定
 	Width string      `json:"width"` // 列宽度
 	Calc  *ColumnCalc `json:"calc"`  // 计算
-
-	// 以下是某些列类型的特有属性
-
-	Options      []*SelectOption `json:"options,omitempty"`  // 选项列表
-	NumberFormat NumberFormat    `json:"numberFormat"`       // 数字列格式化
-	Template     string          `json:"template"`           // 模板列内容
-	Relation     *Relation       `json:"relation,omitempty"` // 关联列
-	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总列
-	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
 // TableRow 描述了表格实例行的结构。

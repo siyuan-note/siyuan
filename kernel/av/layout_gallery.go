@@ -56,15 +56,6 @@ type GalleryCard struct {
 // GalleryField 描述了画廊实例卡片字段的结构。
 type GalleryField struct {
 	*BaseInstanceField
-
-	// 以下是某些字段类型的特有属性
-
-	Options      []*SelectOption `json:"options,omitempty"`  // 选项字段表
-	NumberFormat NumberFormat    `json:"numberFormat"`       // 数字字段格式化
-	Template     string          `json:"template"`           // 模板字段内容
-	Relation     *Relation       `json:"relation,omitempty"` // 关联字段
-	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总字段
-	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
 // GalleryFieldValue 描述了画廊实例字段值的结构。

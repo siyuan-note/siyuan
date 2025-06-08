@@ -38,19 +38,19 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 		ret.Fields = append(ret.Fields, &av.GalleryField{
 			BaseInstanceField: &av.BaseInstanceField{
-				ID:     key.ID,
-				Name:   key.Name,
-				Type:   key.Type,
-				Icon:   key.Icon,
-				Hidden: field.Hidden,
-				Desc:   key.Desc,
+				ID:           key.ID,
+				Name:         key.Name,
+				Type:         key.Type,
+				Icon:         key.Icon,
+				Hidden:       field.Hidden,
+				Desc:         key.Desc,
+				Options:      key.Options,
+				NumberFormat: key.NumberFormat,
+				Template:     key.Template,
+				Relation:     key.Relation,
+				Rollup:       key.Rollup,
+				Date:         key.Date,
 			},
-			Options:      key.Options,
-			NumberFormat: key.NumberFormat,
-			Template:     key.Template,
-			Relation:     key.Relation,
-			Rollup:       key.Rollup,
-			Date:         key.Date,
 		})
 	}
 

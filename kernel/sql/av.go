@@ -258,36 +258,14 @@ func getAttributeViewContent(avID string) (content string) {
 		buf.WriteByte(' ')
 	}
 
-	if 1 > len(attrView.Views) {
-		content = strings.TrimSpace(buf.String())
-		return
-	}
-
-	var view *av.View
-	for _, v := range attrView.Views {
-		if av.LayoutTypeTable == v.LayoutType {
-			view = v
-			break
-		}
-	}
-	if nil == view {
-		content = strings.TrimSpace(buf.String())
-		return
-	}
-
-	table := RenderAttributeViewTable(attrView, view, "")
-	for _, col := range table.Columns {
-		buf.WriteString(col.Name)
+	for _, keyValues := range attrView.KeyValues {
+		buf.WriteString(keyValues.Key.Name)
 		buf.WriteByte(' ')
-	}
-
-	for _, row := range table.Rows {
-		for _, cell := range row.Cells {
-			if nil == cell.Value {
-				continue
+		for _, value := range keyValues.Values {
+			if nil != value {
+				buf.WriteString(value.String(true))
+				buf.WriteByte(' ')
 			}
-			buf.WriteString(cell.Value.String(true))
-			buf.WriteByte(' ')
 		}
 	}
 

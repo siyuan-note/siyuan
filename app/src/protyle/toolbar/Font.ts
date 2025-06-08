@@ -378,7 +378,7 @@ export const hasSameTextStyle = (currentElement: HTMLElement, sideElement: HTMLE
             types.includes("a")) {
             return false;
         }
-        if (types.includes("id")) {
+        if (types.includes("block-ref")) {
             if (currentElement.getAttribute("data-id") !== sideElement.getAttribute("data-id") ||
                 currentElement.getAttribute("data-subtype") !== sideElement.getAttribute("data-subtype") ||
                 currentElement.textContent !== sideElement.textContent) {

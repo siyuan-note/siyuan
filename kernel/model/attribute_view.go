@@ -676,7 +676,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 					}
 
 					var renderErr error
-					kv.Values[0].Template.Content, renderErr = sql.RenderTemplateCol(ial, keyValues, kv.Key.Template)
+					kv.Values[0].Template.Content, renderErr = sql.RenderTemplateField(ial, keyValues, kv.Key.Template)
 					if nil != renderErr {
 						renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), kv.Key.Name, renderErr)
 					}
@@ -904,11 +904,36 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		view.Table.Sorts = tmpSorts
 
 		viewable = sql.RenderAttributeViewTable(attrView, view, query)
+	case av.LayoutTypeGallery:
+		// 字段删除以后需要删除设置的过滤和排序
+		tmpFilters := []*av.ViewFilter{}
+		for _, f := range view.Gallery.Filters {
+			if k, _ := attrView.GetKey(f.Column); nil != k {
+				tmpFilters = append(tmpFilters, f)
+			}
+		}
+		view.Gallery.Filters = tmpFilters
+
+		tmpSorts := []*av.ViewSort{}
+		for _, s := range view.Gallery.Sorts {
+			if k, _ := attrView.GetKey(s.Column); nil != k {
+				tmpSorts = append(tmpSorts, s)
+			}
+		}
+		view.Gallery.Sorts = tmpSorts
+
+		viewable = sql.RenderAttributeViewGallery(attrView, view, query)
 	}
 
-	viewable.FilterRows(attrView)
-	viewable.SortRows(attrView)
-	viewable.CalcCols()
+	if nil == viewable {
+		err = av.ErrViewNotFound
+		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)
+		return
+	}
+
+	viewable.Filter(attrView)
+	viewable.Sort(attrView)
+	viewable.Calc()
 
 	// 分页
 	switch viewable.GetType() {
@@ -916,19 +941,34 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		table := viewable.(*av.Table)
 		table.RowCount = len(table.Rows)
 		if 1 > view.Table.PageSize {
-			view.Table.PageSize = 50
+			view.Table.PageSize = av.TableViewDefaultPageSize
 		}
 		table.PageSize = view.Table.PageSize
 		if 1 > pageSize {
 			pageSize = table.PageSize
 		}
-
 		start := (page - 1) * pageSize
 		end := start + pageSize
 		if len(table.Rows) < end {
 			end = len(table.Rows)
 		}
 		table.Rows = table.Rows[start:end]
+	case av.LayoutTypeGallery:
+		gallery := viewable.(*av.Gallery)
+		gallery.CardCount = len(gallery.Cards)
+		if 1 > view.Gallery.PageSize {
+			view.Gallery.PageSize = av.GalleryViewDefaultPageSize
+		}
+		gallery.PageSize = view.Gallery.PageSize
+		if 1 > pageSize {
+			pageSize = gallery.PageSize
+		}
+		start := (page - 1) * pageSize
+		end := start + pageSize
+		if len(gallery.Cards) < end {
+			end = len(gallery.Cards)
+		}
+		gallery.Cards = gallery.Cards[start:end]
 	}
 	return
 }
@@ -949,8 +989,8 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	}
 
 	table := sql.RenderAttributeViewTable(attrView, view, query)
-	table.FilterRows(attrView)
-	table.SortRows(attrView)
+	table.Filter(attrView)
+	table.Sort(attrView)
 
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
@@ -2021,8 +2061,8 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 	if nil != view && 0 < len(view.Table.Filters) && !ignoreFillFilter {
 		viewable := sql.RenderAttributeViewTable(attrView, view, "")
-		viewable.FilterRows(attrView)
-		viewable.SortRows(attrView)
+		viewable.Filter(attrView)
+		viewable.Sort(attrView)
 
 		var nearRow *av.TableRow
 		if 0 < len(viewable.Rows) {

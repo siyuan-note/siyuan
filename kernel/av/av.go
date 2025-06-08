@@ -43,10 +43,10 @@ type AttributeView struct {
 	Views     []*View      `json:"views"`     // 视图
 }
 
-// KeyValues 描述了属性视图属性列值的结构。
+// KeyValues 描述了属性视图属性键值列表的结构。
 type KeyValues struct {
-	Key    *Key     `json:"key"`              // 属性视图属性列
-	Values []*Value `json:"values,omitempty"` // 属性视图属性列值
+	Key    *Key     `json:"key"`              // 属性视图属性键
+	Values []*Value `json:"values,omitempty"` // 属性视图属性值列表
 }
 
 func (kValues *KeyValues) GetValue(blockID string) (ret *Value) {
@@ -197,6 +197,11 @@ const (
 	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 画廊
 )
 
+const (
+	TableViewDefaultPageSize   = 50 // 表格视图默认分页大小
+	GalleryViewDefaultPageSize = 50 // 画廊视图默认分页大小
+)
+
 func NewTableView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
@@ -207,7 +212,7 @@ func NewTableView() (ret *View) {
 			ID:       ast.NewNodeID(),
 			Filters:  []*ViewFilter{},
 			Sorts:    []*ViewSort{},
-			PageSize: 50,
+			PageSize: TableViewDefaultPageSize,
 		},
 	}
 	return
@@ -224,7 +229,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 			ID:       ast.NewNodeID(),
 			Filters:  []*ViewFilter{},
 			Sorts:    []*ViewSort{},
-			PageSize: 50,
+			PageSize: TableViewDefaultPageSize,
 		},
 	}
 	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
@@ -245,7 +250,7 @@ func NewGalleryView() (ret *View) {
 			ID:       ast.NewNodeID(),
 			Filters:  []*ViewFilter{},
 			Sorts:    []*ViewSort{},
-			PageSize: 50,
+			PageSize: GalleryViewDefaultPageSize,
 		},
 	}
 	return
@@ -411,7 +416,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
 			// 分页大小
 			if 1 > view.Table.PageSize {
-				view.Table.PageSize = 50
+				view.Table.PageSize = TableViewDefaultPageSize
 			}
 		}
 	}

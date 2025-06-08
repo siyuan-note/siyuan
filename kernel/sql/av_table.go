@@ -73,23 +73,23 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	}
 
 	// 生成行
-	rows := map[string][]*av.KeyValues{}
+	rowsValues := map[string][]*av.KeyValues{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
-			values := rows[val.BlockID]
+			values := rowsValues[val.BlockID]
 			if nil == values {
 				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
 			} else {
 				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
 			}
-			rows[val.BlockID] = values
+			rowsValues[val.BlockID] = values
 		}
 	}
 
 	// 过滤掉不存在的行
 	var notFound []string
 	var toCheckBlockIDs []string
-	for blockID, keyValues := range rows {
+	for blockID, keyValues := range rowsValues {
 		blockValue := getBlockValue(keyValues)
 		if nil == blockValue {
 			notFound = append(notFound, blockID)
@@ -114,15 +114,15 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		}
 	}
 	for _, blockID := range notFound {
-		delete(rows, blockID)
+		delete(rowsValues, blockID)
 	}
 
 	// 生成行单元格
-	for rowID, row := range rows {
+	for rowID, rowValues := range rowsValues {
 		var tableRow av.TableRow
 		for _, col := range ret.Columns {
 			var tableCell *av.TableCell
-			for _, keyValues := range row {
+			for _, keyValues := range rowValues {
 				if keyValues.Key.ID == col.ID {
 					tableCell = &av.TableCell{
 						BaseValue: &av.BaseValue{
@@ -250,11 +250,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 
 				cell.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
 
-				// 将汇总列的值保存到 rows 中，后续渲染模板列的时候会用到，下同
+				// 将汇总列的值保存到 rowsValues 中，后续渲染模板列的时候会用到，下同
 				// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
-				keyValues := rows[row.ID]
+				keyValues := rowsValues[row.ID]
 				keyValues = append(keyValues, &av.KeyValues{Key: rollupKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: rollupKey.ID, BlockID: row.ID, Type: av.KeyTypeRollup, Rollup: cell.Value.Rollup}}})
-				rows[row.ID] = keyValues
+				rowsValues[row.ID] = keyValues
 			case av.KeyTypeRelation: // 渲染关联列
 				relKey, _ := attrView.GetKey(cell.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {
@@ -281,9 +281,9 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					}
 				}
 
-				keyValues := rows[row.ID]
+				keyValues := rowsValues[row.ID]
 				keyValues = append(keyValues, &av.KeyValues{Key: relKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: relKey.ID, BlockID: row.ID, Type: av.KeyTypeRelation, Relation: cell.Value.Relation}}})
-				rows[row.ID] = keyValues
+				rowsValues[row.ID] = keyValues
 			case av.KeyTypeCreated: // 渲染创建时间
 				createdStr := row.ID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
@@ -294,10 +294,10 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					cell.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 
-				keyValues := rows[row.ID]
+				keyValues := rowsValues[row.ID]
 				createdKey, _ := attrView.GetKey(cell.Value.KeyID)
 				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: createdKey.ID, BlockID: row.ID, Type: av.KeyTypeCreated, Created: cell.Value.Created}}})
-				rows[row.ID] = keyValues
+				rowsValues[row.ID] = keyValues
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := ials[row.ID]
 				if nil == ial {
@@ -318,10 +318,10 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 					}
 				}
 
-				keyValues := rows[row.ID]
+				keyValues := rowsValues[row.ID]
 				updatedKey, _ := attrView.GetKey(cell.Value.KeyID)
 				keyValues = append(keyValues, &av.KeyValues{Key: updatedKey, Values: []*av.Value{{ID: cell.Value.ID, KeyID: updatedKey.ID, BlockID: row.ID, Type: av.KeyTypeUpdated, Updated: cell.Value.Updated}}})
-				rows[row.ID] = keyValues
+				rowsValues[row.ID] = keyValues
 			}
 		}
 	}
@@ -334,7 +334,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		for _, cell := range row.Cells {
 			switch cell.ValueType {
 			case av.KeyTypeTemplate: // 渲染模板列
-				keyValues := rows[row.ID]
+				keyValues := rowsValues[row.ID]
 				ial := ials[row.ID]
 				if nil == ial {
 					ial = map[string]string{}

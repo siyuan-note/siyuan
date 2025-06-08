@@ -466,7 +466,7 @@ export class WYSIWYG {
                 hideElements(["select"], protyle);
             }
             let target = event.target as HTMLElement;
-            if (hasClosestByClassName(target, "protyle-action") ||
+            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block") )||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }

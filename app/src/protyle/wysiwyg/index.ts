@@ -964,9 +964,9 @@ export class WYSIWYG {
                 }
                 protyle.selectElement.setAttribute("style", `background-color: ${protyle.selectElement.style.backgroundColor};top:${newTop}px;height:${newHeight}px;left:${newLeft + 2}px;width:${newWidth - 2}px;`);
                 const newMouseElement = document.elementFromPoint(moveEvent.clientX, moveEvent.clientY);
-                if (mouseElement && mouseElement.isSameNode(newMouseElement) && !mouseElement.classList.contains("protyle-wysiwyg") &&
+                if (window.siyuan.isSelecting && mouseElement && mouseElement.isSameNode(newMouseElement) && !mouseElement.classList.contains("protyle-wysiwyg") &&
                     !mouseElement.classList.contains("list") && !mouseElement.classList.contains("bq") && !mouseElement.classList.contains("sb")) {
-                    // 性能优化，同一个p元素不进行选中计算
+                    // 性能优化，同一个p元素不进行选中计算，但没有选中块则仍计算
                     return;
                 } else {
                     mouseElement = newMouseElement;
@@ -1025,50 +1025,54 @@ export class WYSIWYG {
                     }
                 }
 
-                let hasJump = false;
-                const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
+                let isParent = false;
                 while (currentElement) {
-                    if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                        const currentRect = currentElement.getBoundingClientRect();
-                        if (currentRect.height > 0 && currentRect.top < selectBottom && currentRect.left < newLeft + newWidth) {
-                            if (hasJump) {
-                                // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
-                                if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                    const nextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                    if (nextRect.top < selectBottom && nextRect.left < newLeft + newWidth) {
-                                        selectElements = [currentElement];
-                                        currentElement = currentElement.nextElementSibling;
-                                        hasJump = false;
-                                    } else if (currentElement.parentElement.classList.contains("sb")) {
-                                        currentElement = hasClosestBlock(currentElement.parentElement);
-                                        hasJump = true;
-                                    } else {
-                                        break;
-                                    }
-                                } else {
-                                    currentElement = hasClosestBlock(currentElement.parentElement);
-                                    hasJump = true;
-                                }
-                            } else {
-                                if (!currentElement.classList.contains("protyle-breadcrumb__bar") &&
-                                    !currentElement.classList.contains("protyle-breadcrumb__item")) {
-                                    selectElements.push(currentElement);
-                                }
-                                currentElement = currentElement.nextElementSibling;
-                            }
-                        } else if (currentElement.parentElement.classList.contains("sb")) {
-                            // 跳出超级块横向排版中的未选中元素
-                            currentElement = hasClosestBlock(currentElement.parentElement);
-                            hasJump = true;
-                        } else if (currentRect.height === 0 && currentRect.width === 0 && currentElement.parentElement.getAttribute("fold") === "1") {
-                            currentElement = currentElement.parentElement;
-                            selectElements = [];
-                        } else {
-                            break;
-                        }
-                    } else {
+                    if (currentElement.classList.contains("protyle-attr")) {
                         currentElement = hasClosestBlock(currentElement.parentElement);
-                        hasJump = true;
+                        if (!currentElement) break;
+                        isParent = true;
+                    }
+                    const currentRect = currentElement.getBoundingClientRect();
+                    const selectBottom = endLastElement ? endLastElement.getBoundingClientRect().bottom : (newTop + newHeight);
+                    const computedStyle = window.getComputedStyle(currentElement);
+                    const currentMarginTop = parseFloat(computedStyle.marginTop) || 0;
+                    if (currentRect.height > 0 && Math.round(currentRect.top) - currentMarginTop <= selectBottom && currentRect.left < newLeft + newWidth) {
+                        if (!isParent) {
+                            if (!currentElement.classList.contains("protyle-breadcrumb__bar") &&
+                                !currentElement.classList.contains("protyle-breadcrumb__item")) {
+                                selectElements.push(currentElement);
+                            }
+                            currentElement = currentElement.nextElementSibling;
+                            continue;
+                        }
+                        // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
+                        if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
+                            const nextRect = currentElement.nextElementSibling.getBoundingClientRect();
+                            const computedStyle = window.getComputedStyle(currentElement.nextElementSibling);
+                            const nextMarginTop = parseFloat(computedStyle.marginTop) || 0;
+                            if (Math.round(nextRect.top) - nextMarginTop <= selectBottom && nextRect.left < newLeft + newWidth) {
+                                selectElements = [currentElement];
+                                currentElement = currentElement.nextElementSibling;
+                                isParent = false;
+                            } else if (currentElement.parentElement.classList.contains("sb")) {
+                                currentElement = hasClosestBlock(currentElement.parentElement);
+                                isParent = true;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            currentElement = hasClosestBlock(currentElement.parentElement);
+                            isParent = true;
+                        }
+                    } else if (currentElement.parentElement.classList.contains("sb")) {
+                        // 跳出超级块横向排版中的未选中元素
+                        currentElement = hasClosestBlock(currentElement.parentElement);
+                        isParent = true;
+                    } else if (currentRect.height === 0 && currentRect.width === 0 && currentElement.parentElement.getAttribute("fold") === "1") {
+                        currentElement = currentElement.parentElement;
+                        selectElements = [];
+                    } else {
+                        break;
                     }
                 }
                 if (moveEvent.clientY <= y && !endLastElement) {
@@ -1077,9 +1081,11 @@ export class WYSIWYG {
                 if (selectElements.length === 1 && !selectElements[0].classList.contains("list") &&
                     !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
                     // 只有一个 p 时不选中
+                    window.siyuan.isSelecting = false;
                     protyle.selectElement.style.backgroundColor = "transparent";
                     protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
                 } else {
+                    window.siyuan.isSelecting = true;
                     protyle.wysiwyg.element.classList.add("protyle-wysiwyg--hiderange");
                     selectElements.forEach(item => {
                         if (!hasClosestByClassName(item, "protyle-wysiwyg__embed")) {
@@ -2775,46 +2781,46 @@ export class WYSIWYG {
                         toDown = false;
                     }
                     let selectElements: Element[] = [];
-                    let currentElement: HTMLElement = startElement;
-                    let hasJump = false;
+                    let currentElement: HTMLElement | false = startElement;
+                    let isParent = false;
                     while (currentElement) {
-                        if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                            const currentRect = currentElement.getBoundingClientRect();
-                            if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
-                                if (hasJump) {
-                                    // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
-                                    if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                        if (startRect.top === endRect.top ?
-                                            (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
-                                            (currentNextRect.top <= endTop)) {
-                                            selectElements = [currentElement];
-                                            currentElement = currentElement.nextElementSibling as HTMLElement;
-                                            hasJump = false;
-                                        } else if (currentElement.parentElement.classList.contains("sb")) {
-                                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                            hasJump = true;
-                                        } else {
-                                            break;
-                                        }
-                                    } else {
-                                        currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                        hasJump = true;
-                                    }
-                                } else {
-                                    selectElements.push(currentElement);
-                                    currentElement = currentElement.nextElementSibling as HTMLElement;
-                                }
-                            } else if (currentElement.parentElement.classList.contains("sb")) {
-                                // 跳出超级块横向排版中的未选中元素
-                                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                hasJump = true;
-                            } else {
-                                break;
+                        if (currentElement.classList.contains("protyle-attr")) {
+                            currentElement = hasClosestBlock(currentElement.parentElement);
+                            if (!currentElement) break;
+                            isParent = true;
+                        }
+                        const currentRect = currentElement.getBoundingClientRect();
+                        if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
+                            if (!isParent) {
+                                selectElements.push(currentElement);
+                                currentElement = currentElement.nextElementSibling as HTMLElement;
+                                continue;
                             }
-                        } else {
+                            // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
+                            if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
+                                const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
+                                if (startRect.top === endRect.top ?
+                                    (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
+                                    (currentNextRect.top <= endTop)) {
+                                    selectElements = [currentElement];
+                                    currentElement = currentElement.nextElementSibling as HTMLElement;
+                                    isParent = false;
+                                } else if (currentElement.parentElement.classList.contains("sb")) {
+                                    currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                                    isParent = true;
+                                } else {
+                                    break;
+                                }
+                            } else {
+                                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                                isParent = true;
+                            }
+                        } else if (currentElement.parentElement.classList.contains("sb")) {
+                            // 跳出超级块横向排版中的未选中元素
                             currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                            hasJump = true;
+                            isParent = true;
+                        } else {
+                            break;
                         }
                     }
                     if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {

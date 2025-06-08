@@ -346,16 +346,50 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
 export const addView = (protyle: IProtyle, blockElement: Element) => {
     const id = Lute.NewNodeID();
     const avID = blockElement.getAttribute("data-av-id");
-    transaction(protyle, [{
-        action: "addAttrViewView",
-        avID,
-        id,
-        blockID: blockElement.getAttribute("data-node-id")
-    }], [{
-        action: "removeAttrViewView",
-        avID,
-        id,
-        blockID: blockElement.getAttribute("data-node-id")
-    }]);
-    blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
+    const viewElement = blockElement.querySelector(".av__views");
+    const addMenu = new Menu(undefined, () => {
+        viewElement.classList.remove("av__views--show");
+    });
+    addMenu.addItem({
+        icon: "iconTable",
+        label: window.siyuan.languages.table,
+        click() {
+            transaction(protyle, [{
+                action: "addAttrViewView",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }], [{
+                action: "removeAttrViewView",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }]);
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
+        }
+    });
+    addMenu.addItem({
+        icon: "iconGallery",
+        label: window.siyuan.languages.gallery,
+        click() {
+            transaction(protyle, [{
+                action: "addAttrViewView",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }], [{
+                action: "removeAttrViewView",
+                avID,
+                id,
+                blockID: blockElement.getAttribute("data-node-id")
+            }]);
+            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
+        }
+    });
+    viewElement.classList.add("av__views--show");
+    const addRect = viewElement.querySelector('.block__icon[data-type="av-add"]')?.getBoundingClientRect();
+    addMenu.open({
+        x: addRect.left,
+        y: addRect.bottom + 8
+    });
 };

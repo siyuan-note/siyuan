@@ -22,11 +22,20 @@ import "sort"
 type LayoutGallery struct {
 	*BaseLayout
 
-	CoverFrom           int                     `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFrom           CoverFrom               `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
 	CoverFromAssetKeyID string                  `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
 	CardFields          []*ViewGalleryCardField `json:"fields"`                        // 画廊卡片字段
 	CardIDs             []string                `json:"cardIds"`                       // 卡片 ID，用于自定义排序
 }
+
+// CoverFrom 描述了画廊中的卡片封面来源的枚举类型。
+type CoverFrom int
+
+const (
+	CoverFromNone         CoverFrom = iota // 无封面
+	CoverFromContentImage                  // 内容图
+	CoverFromAssetField                    // 资源字段
+)
 
 // ViewGalleryCardField 描述了画廊卡片字段的结构。
 type ViewGalleryCardField struct {

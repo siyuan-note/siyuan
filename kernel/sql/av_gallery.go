@@ -55,23 +55,23 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	}
 
 	// 生成卡片
-	cards := map[string][]*av.KeyValues{}
+	cardsValues := map[string][]*av.KeyValues{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
-			values := cards[val.BlockID]
+			values := cardsValues[val.BlockID]
 			if nil == values {
 				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
 			} else {
 				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
 			}
-			cards[val.BlockID] = values
+			cardsValues[val.BlockID] = values
 		}
 	}
 
 	// 过滤掉不存在的卡片
 	var notFound []string
 	var toCheckBlockIDs []string
-	for blockID, keyValues := range cards {
+	for blockID, keyValues := range cardsValues {
 		blockValue := getBlockValue(keyValues)
 		if nil == blockValue {
 			notFound = append(notFound, blockID)
@@ -96,15 +96,15 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		}
 	}
 	for _, blockID := range notFound {
-		delete(cards, blockID)
+		delete(cardsValues, blockID)
 	}
 
 	// 生成卡片字段值
-	for cardID, card := range cards {
+	for cardID, cardValues := range cardsValues {
 		var galleryCard av.GalleryCard
 		for _, field := range ret.Fields {
 			var fieldValue *av.GalleryFieldValue
-			for _, keyValues := range card {
+			for _, keyValues := range cardValues {
 				if keyValues.Key.ID == field.ID {
 					fieldValue = &av.GalleryFieldValue{
 						BaseValue: &av.BaseValue{
@@ -152,6 +152,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
+
+		fillGalleryCardCover(attrView, view, cardValues, galleryCard, cardID)
 		ret.Cards = append(ret.Cards, &galleryCard)
 	}
 
@@ -232,10 +234,10 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 				value.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
 
-				// 将汇总字段的值保存到 cards 中，后续渲染模板字段的时候会用到，下同
-				keyValues := cards[card.ID]
+				// 将汇总字段的值保存到 cardsValues 中，后续渲染模板字段的时候会用到，下同
+				keyValues := cardsValues[card.ID]
 				keyValues = append(keyValues, &av.KeyValues{Key: rollupKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: rollupKey.ID, BlockID: card.ID, Type: av.KeyTypeRollup, Rollup: value.Value.Rollup}}})
-				cards[card.ID] = keyValues
+				cardsValues[card.ID] = keyValues
 			case av.KeyTypeRelation: // 渲染关联字段
 				relKey, _ := attrView.GetKey(value.Value.KeyID)
 				if nil != relKey && nil != relKey.Relation {
@@ -262,9 +264,9 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 					}
 				}
 
-				keyValues := cards[card.ID]
+				keyValues := cardsValues[card.ID]
 				keyValues = append(keyValues, &av.KeyValues{Key: relKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: relKey.ID, BlockID: card.ID, Type: av.KeyTypeRelation, Relation: value.Value.Relation}}})
-				cards[card.ID] = keyValues
+				cardsValues[card.ID] = keyValues
 			case av.KeyTypeCreated: // 渲染创建时间
 				createdStr := card.ID[:len("20060102150405")]
 				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
@@ -275,10 +277,10 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 					value.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
 				}
 
-				keyValues := cards[card.ID]
+				keyValues := cardsValues[card.ID]
 				createdKey, _ := attrView.GetKey(value.Value.KeyID)
 				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: createdKey.ID, BlockID: card.ID, Type: av.KeyTypeCreated, Created: value.Value.Created}}})
-				cards[card.ID] = keyValues
+				cardsValues[card.ID] = keyValues
 			case av.KeyTypeUpdated: // 渲染更新时间
 				ial := ials[card.ID]
 				if nil == ial {
@@ -299,10 +301,10 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 					}
 				}
 
-				keyValues := cards[card.ID]
+				keyValues := cardsValues[card.ID]
 				updatedKey, _ := attrView.GetKey(value.Value.KeyID)
 				keyValues = append(keyValues, &av.KeyValues{Key: updatedKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: updatedKey.ID, BlockID: card.ID, Type: av.KeyTypeUpdated, Updated: value.Value.Updated}}})
-				cards[card.ID] = keyValues
+				cardsValues[card.ID] = keyValues
 			}
 		}
 	}
@@ -314,7 +316,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		for _, value := range card.Values {
 			switch value.ValueType {
 			case av.KeyTypeTemplate: // 渲染模板字段
-				keyValues := cards[card.ID]
+				keyValues := cardsValues[card.ID]
 				ial := ials[card.ID]
 				if nil == ial {
 					ial = map[string]string{}
@@ -387,4 +389,57 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		return iv < jv
 	})
 	return
+}
+
+func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard av.GalleryCard, cardID string) {
+	switch view.Gallery.CoverFrom {
+	case av.CoverFromNone:
+	case av.CoverFromContentImage:
+		blockValue := getBlockValue(cardValues)
+		if !blockValue.IsDetached {
+			tree := loadTreeByBlockID(blockValue.BlockID)
+			if nil == tree {
+				break
+			}
+			node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+			if nil == node {
+				break
+			}
+
+			if ast.NodeDocument == node.Type {
+				if titleImg := node.IALAttr("title-img"); "" != titleImg {
+					galleryCard.CoverURL = titleImg
+					break
+				}
+			}
+
+			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+				if !entering {
+					return ast.WalkContinue
+				}
+
+				if ast.NodeImage != n.Type {
+					return ast.WalkContinue
+				}
+
+				dest := n.ChildByType(ast.NodeLinkDest)
+				if nil == dest {
+					return ast.WalkContinue
+				}
+				galleryCard.CoverURL = dest.TokensStr()
+				return ast.WalkStop
+			})
+		}
+	case av.CoverFromAssetField:
+		if "" == view.Gallery.CoverFromAssetKeyID {
+			break
+		}
+
+		assetValue := attrView.GetValue(view.Gallery.CoverFromAssetKeyID, cardID)
+		if nil == assetValue || 1 > len(assetValue.MAsset) {
+			break
+		}
+
+		galleryCard.CoverURL = assetValue.MAsset[0].Content
+	}
 }

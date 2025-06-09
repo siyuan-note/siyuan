@@ -278,6 +278,18 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUnbindAttrViewBlock(op)
 		case "duplicateAttrViewKey":
 			ret = tx.doDuplicateAttrViewKey(op)
+		case "setAttrViewCoverFrom":
+			ret = tx.doSetAttrViewCoverFrom(op)
+		case "setAttrViewCoverFromAssetKeyID":
+			ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
+		case "setAttrViewCardSize":
+			ret = tx.doSetAttrViewCardSize(op)
+		case "setAttrViewFitImage":
+			ret = tx.doSetAttrViewFitImage(op)
+		case "setAttrViewShowIcon":
+			ret = tx.doSetAttrViewShowIcon(op)
+		case "setAttrViewWrapField":
+			ret = tx.doSetAttrViewWrapField(op)
 		}
 
 		if nil != ret {

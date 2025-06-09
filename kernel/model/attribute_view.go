@@ -2169,6 +2169,22 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 			} else {
 				v.Table.RowIDs = append([]string{addingBlockID}, v.Table.RowIDs...)
 			}
+		case av.LayoutTypeGallery:
+			if "" != previousBlockID {
+				changed := false
+				for i, id := range v.Gallery.CardIDs {
+					if id == previousBlockID {
+						v.Gallery.CardIDs = append(v.Gallery.CardIDs[:i+1], append([]string{addingBlockID}, v.Gallery.CardIDs[i+1:]...)...)
+						changed = true
+						break
+					}
+				}
+				if !changed {
+					v.Gallery.CardIDs = append(v.Gallery.CardIDs, addingBlockID)
+				}
+			} else {
+				v.Gallery.CardIDs = append([]string{addingBlockID}, v.Gallery.CardIDs...)
+			}
 		}
 	}
 
@@ -2780,6 +2796,23 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 				}
 				if !added {
 					view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+				}
+			case av.LayoutTypeGallery:
+				if "" == previousKeyID {
+					view.Gallery.CardFields = append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields...)
+					break
+				}
+
+				added := false
+				for i, field := range view.Gallery.CardFields {
+					if field.ID == previousKeyID {
+						view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields[i+1:]...)...)
+						added = true
+						break
+					}
+				}
+				if !added {
+					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
 				}
 			}
 		}

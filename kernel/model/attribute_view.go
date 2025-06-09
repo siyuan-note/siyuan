@@ -44,6 +44,36 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSetAttrViewWrapField(operation *Operation) (ret *TxErr) {
+	err := setAttrViewWrapField(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewWrapField(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		view.Gallery.WrapField = operation.Data.(bool)
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doSetAttrViewShowIcon(operation *Operation) (ret *TxErr) {
 	err := setAttrViewShowIcon(operation)
 	if err != nil {

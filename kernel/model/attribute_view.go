@@ -1692,6 +1692,7 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
+	node.AttributeViewType = string(view.LayoutType)
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

@@ -1627,20 +1627,6 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		return &TxErr{code: TxErrWriteAttributeView, id: avID}
 	}
 
-	node, tree, _ := getNodeByBlockID(nil, operation.BlockID)
-	if nil == node {
-		logging.LogErrorf("get node by block ID [%s] failed", operation.BlockID)
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
-	}
-
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[av.NodeAttrView] = operation.ID
-	err = setNodeAttrs(node, tree, attrs)
-	if err != nil {
-		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
-		return
-	}
-
 	if "" == operation.Layout {
 		operation.Layout = av.LayoutTypeTable
 	}
@@ -1692,7 +1678,21 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
+
+	node, tree, _ := getNodeByBlockID(nil, operation.BlockID)
+	if nil == node {
+		logging.LogErrorf("get node by block ID [%s] failed", operation.BlockID)
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+	}
+
 	node.AttributeViewType = string(view.LayoutType)
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrView] = operation.ID
+	err = setNodeAttrs(node, tree, attrs)
+	if err != nil {
+		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+		return
+	}
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

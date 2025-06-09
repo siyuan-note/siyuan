@@ -1480,7 +1480,8 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		index = 0
 	}
 
-	attrView.ViewID = attrView.Views[index].ID
+	view = attrView.Views[index]
+	attrView.ViewID = view.ID
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: avID}
@@ -1492,6 +1493,7 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 		blockViewID := attrs[av.NodeAttrView]
 		if blockViewID == viewID {
 			attrs[av.NodeAttrView] = attrView.ViewID
+			node.AttributeViewType = string(view.LayoutType)
 			oldAttrs, e := setNodeAttrs0(node, attrs)
 			if nil != e {
 				logging.LogErrorf("set node attrs failed: %s", e)

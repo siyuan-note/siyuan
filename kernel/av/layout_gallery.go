@@ -22,11 +22,24 @@ import "sort"
 type LayoutGallery struct {
 	*BaseLayout
 
-	CoverFrom           CoverFrom               `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string                  `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
-	CardFields          []*ViewGalleryCardField `json:"fields"`                        // 画廊卡片字段
-	CardIDs             []string                `json:"cardIds"`                       // 卡片 ID，用于自定义排序
+	CoverFrom           CoverFrom `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFromAssetKeyID string    `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CardSize            CardSize  `json:"cardSize"`                      // 卡片大小
+	FitImage            bool      `json:"fitImage"`                      // 是否适应图片大小
+	ShowIcon            bool      `json:"showIcon"`                      // 是否显示图标
+	WrapField           bool      `json:"wrapField"`                     // 是否换行字段
+
+	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
+	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
 }
+
+type CardSize int
+
+const (
+	CardSizeSmall  CardSize = iota // 小卡片
+	CardSizeMedium                 // 中卡片
+	CardSizeLarge                  // 大卡片
+)
 
 // CoverFrom 描述了画廊中的卡片封面来源的枚举类型。
 type CoverFrom int

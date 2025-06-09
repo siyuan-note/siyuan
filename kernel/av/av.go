@@ -257,6 +257,9 @@ func NewGalleryView() (ret *View) {
 				Sorts:    []*ViewSort{},
 				PageSize: GalleryViewDefaultPageSize,
 			},
+			CoverFrom: CoverFromContentImage,
+			CardSize:  CardSizeMedium,
+			ShowIcon:  true,
 		},
 	}
 	return

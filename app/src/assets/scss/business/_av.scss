@@ -271,6 +271,22 @@
     }
   }
 
+  &__gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 16px;
+    width: 100%;
+
+    &-item {
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius);
+
+      &--select {
+
+      }
+    }
+  }
+
   &__cell {
     box-sizing: border-box;
     position: relative;

@@ -14,6 +14,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
+import {renderGallery} from "./gallery/render";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string, renderAll = true) => {
     let avElements: Element[] = [];
@@ -35,7 +36,10 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                 e.classList.add("av--touch");
             }
 
-            // TODO
+            if (e.getAttribute("data-av-type") === "gallery") {
+                renderGallery({blockElement: e, protyle, cb, viewID, renderAll});
+                return;
+            }
 
             const alignSelf = e.style.alignSelf;
             if (e.firstElementChild.innerHTML === "") {
@@ -85,7 +89,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, v
                     e.dataset.pageSize = viewTabElement.dataset.page;
                 }
                 newViewID = viewID;
-                fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID});
+                fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID, avID: e.dataset.avId,});
                 e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
             }
             let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
@@ -432,7 +436,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
 
 let searchTimeout: number;
 
-const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
+export const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
     clearTimeout(searchTimeout);
     searchTimeout = window.setTimeout(() => {
         e.removeAttribute("data-render");

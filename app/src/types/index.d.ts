@@ -814,7 +814,7 @@ interface IBazaarItem {
 interface IAV {
     id: string;
     name: string;
-    view: IAVTable;
+    view: IAVTable | IAVGallery;
     viewID: string;
     viewType: string;
     views: IAVView[];
@@ -827,7 +827,7 @@ interface IAVView {
     type: string;
     icon: string;
     hideAttrViewName: boolean;
-    pageSize: number;
+    pageSize: number,
 }
 
 interface IAVTable extends IAVView {
@@ -836,7 +836,15 @@ interface IAVTable extends IAVView {
     sorts: IAVSort[],
     rows: IAVRow[],
     rowCount: number,
-    pageSize: number,
+}
+
+interface IAVGallery extends IAVView {
+    cards: IAVGalleryItem[],
+    desc: string
+    fields: IAVColumn[]
+    filters: IAVFilter[],
+    sorts: IAVSort[],
+    cardCount: number,
 }
 
 interface IAVFilter {

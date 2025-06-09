@@ -889,6 +889,12 @@ interface IAVRow {
     cells: IAVCell[]
 }
 
+interface IAVGalleryItem {
+    coverURL?: string;
+    id: string;
+    values: IAVCell[];
+}
+
 interface IAVCell {
     id: string,
     color: string,

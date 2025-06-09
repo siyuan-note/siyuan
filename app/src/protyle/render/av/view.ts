@@ -375,10 +375,12 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
             transaction(protyle, [{
                 action: "addAttrViewView",
                 avID,
+                layout:"gallery",
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
             }], [{
                 action: "removeAttrViewView",
+                layout:"gallery",
                 avID,
                 id,
                 blockID: blockElement.getAttribute("data-node-id")

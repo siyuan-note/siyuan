@@ -376,12 +376,12 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
             transaction(protyle, [{
                 action: "addAttrViewView",
                 avID,
-                layout:"gallery",
+                layout: "gallery",
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
             }], [{
                 action: "removeAttrViewView",
-                layout:"gallery",
+                layout: "gallery",
                 avID,
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
@@ -396,4 +396,13 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
         x: addRect.left,
         y: addRect.bottom + 8
     });
+};
+
+export const getViewIcon = (type: string) => {
+    switch (type) {
+        case "table":
+            return "iconTable";
+        case "gallery":
+            return "iconGallery";
+    }
 };

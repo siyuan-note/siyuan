@@ -526,6 +526,7 @@ interface IOperation {
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
     removeDest?: boolean // removeAttrViewCol 专享
+    layout?: string // addAttrViewView 专享
 }
 
 interface IOperationSrcs {

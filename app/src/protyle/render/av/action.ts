@@ -115,6 +115,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             openViewMenu({protyle, blockElement, element: viewItemElement});
         } else {
             blockElement.removeAttribute("data-render");
+            blockElement.setAttribute("data-av-type", viewItemElement.dataset.avType);
             avRender(blockElement, protyle, undefined, viewItemElement.dataset.id);
         }
         event.preventDefault();

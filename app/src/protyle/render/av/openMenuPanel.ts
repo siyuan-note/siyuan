@@ -1314,6 +1314,7 @@ export const openMenuPanel = (options: {
                         avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                         target.parentElement.classList.add("b3-menu__item--current");
                         options.blockElement.removeAttribute("data-render");
+                        options.blockElement.setAttribute("data-av-type", target.dataset.avType);
                         avRender(options.blockElement, options.protyle, undefined, target.parentElement.dataset.id);
                     }
                     event.preventDefault();

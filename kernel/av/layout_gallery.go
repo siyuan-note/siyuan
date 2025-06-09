@@ -72,7 +72,8 @@ type GalleryCard struct {
 	ID     string               `json:"id"`     // 卡片 ID
 	Values []*GalleryFieldValue `json:"values"` // 卡片字段值
 
-	CoverURL string `json:"coverURL"` // 卡片封面超链接
+	CoverURL     string `json:"coverURL"`     // 卡片封面超链接
+	CoverContent string `json:"coverContent"` // 卡片封面文本内容
 }
 
 // GalleryField 描述了画廊实例卡片字段的结构。

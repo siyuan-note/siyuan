@@ -6,7 +6,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/parse"
+	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -153,7 +156,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 
-		fillGalleryCardCover(attrView, view, cardValues, galleryCard, cardID)
+		fillGalleryCardCover(attrView, view, cardValues, galleryCard, cardID, luteEngine)
 		ret.Cards = append(ret.Cards, &galleryCard)
 	}
 
@@ -391,7 +394,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	return
 }
 
-func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard av.GalleryCard, cardID string) {
+func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard av.GalleryCard, cardID string, luteEngine *lute.Lute) {
 	switch view.Gallery.CoverFrom {
 	case av.CoverFromNone:
 	case av.CoverFromContentImage:
@@ -429,6 +432,16 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 				galleryCard.CoverURL = dest.TokensStr()
 				return ast.WalkStop
 			})
+
+			if "" == galleryCard.CoverURL {
+				if ast.NodeDocument == node.Type {
+					galleryCard.CoverContent = node.IALAttr("title")
+					return
+				}
+
+				galleryCard.CoverContent = renderBlockDOMByNode(node, luteEngine)
+				return
+			}
 		}
 	case av.CoverFromAssetField:
 		if "" == view.Gallery.CoverFromAssetKeyID {
@@ -441,5 +454,20 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 		}
 
 		galleryCard.CoverURL = assetValue.MAsset[0].Content
+		return
 	}
+}
+
+func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
+	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
+	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
+	ast.Walk(node, func(node *ast.Node, entering bool) ast.WalkStatus {
+		rendererFunc := blockRenderer.RendererFuncs[node.Type]
+		return rendererFunc(node, entering)
+	})
+	h := strings.TrimSpace(blockRenderer.Writer.String())
+	if strings.HasPrefix(h, "<li") {
+		h = "<ul>" + h + "</ul>"
+	}
+	return h
 }

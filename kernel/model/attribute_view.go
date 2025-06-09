@@ -102,6 +102,10 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			for _, addingBlockID := range blockIDs {
 				v.Table.RowIDs = append(v.Table.RowIDs, addingBlockID)
 			}
+		case av.LayoutTypeGallery:
+			for _, addingBlockID := range blockIDs {
+				v.Gallery.CardIDs = append(v.Gallery.CardIDs, addingBlockID)
+			}
 		}
 	}
 
@@ -250,7 +254,7 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 	view, err := getAttrViewViewByBlockID(attrView, blockID)
 	if nil == view {
 		view, err = attrView.GetCurrentView(attrView.ViewID)
-		if err != nil {
+		if nil == view || err != nil {
 			logging.LogErrorf("get current view failed: %s", err)
 			return
 		}
@@ -262,6 +266,9 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 	case av.LayoutTypeTable:
 		filters = view.Table.Filters
 		sorts = view.Table.Sorts
+	case av.LayoutTypeGallery:
+		filters = view.Gallery.Filters
+		sorts = view.Gallery.Sorts
 	}
 	return
 }
@@ -1072,6 +1079,18 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 			if !replacedRowID {
 				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
 			}
+		case av.LayoutTypeGallery:
+			for i, cardID := range v.Gallery.CardIDs {
+				if cardID == operation.ID {
+					v.Gallery.CardIDs[i] = operation.NextID
+					replacedRowID = true
+					break
+				}
+			}
+
+			if !replacedRowID {
+				v.Gallery.CardIDs = append(v.Gallery.CardIDs, operation.NextID)
+			}
 		}
 	}
 
@@ -1312,6 +1331,8 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 			switch v.LayoutType {
 			case av.LayoutTypeTable:
 				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.BackRelationKeyID})
+			case av.LayoutTypeGallery:
+				v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{ID: operation.BackRelationKeyID})
 			}
 		}
 
@@ -1849,6 +1870,10 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Filters); err != nil {
 			return
 		}
+	case av.LayoutTypeGallery:
+		if err = gulu.JSON.UnmarshalJSON(data, &view.Gallery.Filters); err != nil {
+			return
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1885,6 +1910,10 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Sorts); err != nil {
 			return
 		}
+	case av.LayoutTypeGallery:
+		if err = gulu.JSON.UnmarshalJSON(data, &view.Gallery.Sorts); err != nil {
+			return
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1913,6 +1942,8 @@ func setAttributeViewPageSize(operation *Operation) (err error) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		view.Table.PageSize = int(operation.Data.(float64))
+	case av.LayoutTypeGallery:
+		view.Gallery.PageSize = int(operation.Data.(float64))
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1957,6 +1988,8 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 				break
 			}
 		}
+	case av.LayoutTypeGallery:
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2375,6 +2408,18 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 					break
 				}
 			}
+		case av.LayoutTypeGallery:
+			for i, field := range view.Gallery.CardFields {
+				if field.ID == key.ID {
+					view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{
+						{
+							ID:   copyKey.ID,
+							Desc: field.Desc,
+						},
+					}, view.Gallery.CardFields[i+1:]...)...)
+					break
+				}
+			}
 		}
 	}
 
@@ -2409,6 +2454,8 @@ func setAttributeViewColWidth(operation *Operation) (err error) {
 				break
 			}
 		}
+	case av.LayoutTypeGallery:
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2442,6 +2489,8 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 				break
 			}
 		}
+	case av.LayoutTypeGallery:
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2472,6 +2521,13 @@ func setAttributeViewColHidden(operation *Operation) (err error) {
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
 				column.Hidden = operation.Data.(bool)
+				break
+			}
+		}
+	case av.LayoutTypeGallery:
+		for _, field := range view.Gallery.CardFields {
+			if field.ID == operation.ID {
+				field.Hidden = operation.Data.(bool)
 				break
 			}
 		}
@@ -2508,6 +2564,8 @@ func setAttributeViewColPin(operation *Operation) (err error) {
 				break
 			}
 		}
+	case av.LayoutTypeGallery:
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2613,6 +2671,14 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			}
 		}
 		view.Table.RowIDs = util.InsertElem(view.Table.RowIDs, previousIndex, rowID)
+	case av.LayoutTypeGallery:
+		view.Gallery.CardIDs = append(view.Gallery.CardIDs[:idx], view.Gallery.CardIDs[idx+1:]...)
+		for i, c := range view.Gallery.CardIDs {
+			if c == operation.PreviousID {
+				previousIndex = i + 1
+				break
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2643,14 +2709,14 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 		return
 	}
 
+	var curIndex, previousIndex int
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		var col *av.ViewTableColumn
-		var index, previousIndex int
 		for i, column := range view.Table.Columns {
 			if column.ID == keyID {
 				col = column
-				index = i
+				curIndex = i
 				break
 			}
 		}
@@ -2658,7 +2724,7 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 			return
 		}
 
-		view.Table.Columns = append(view.Table.Columns[:index], view.Table.Columns[index+1:]...)
+		view.Table.Columns = append(view.Table.Columns[:curIndex], view.Table.Columns[curIndex+1:]...)
 		for i, column := range view.Table.Columns {
 			if column.ID == previousKeyID {
 				previousIndex = i + 1
@@ -2666,6 +2732,26 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 			}
 		}
 		view.Table.Columns = util.InsertElem(view.Table.Columns, previousIndex, col)
+	case av.LayoutTypeGallery:
+		var field *av.ViewGalleryCardField
+		for i, cardField := range view.Gallery.CardFields {
+			if cardField.ID == keyID {
+				field = cardField
+				curIndex = i
+				break
+			}
+		}
+		if nil == field {
+			return
+		}
+
+		view.Gallery.CardFields = append(view.Gallery.CardFields[:curIndex], view.Gallery.CardFields[curIndex+1:]...)
+		for i, cardField := range view.Gallery.CardFields {
+			if cardField.ID == previousKeyID {
+				previousIndex = i + 1
+				break
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2980,6 +3066,13 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 									break
 								}
 							}
+						case av.LayoutTypeGallery:
+							for i, field := range view.Gallery.CardFields {
+								if field.ID == removedKey.Relation.BackKeyID {
+									view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
+									break
+								}
+							}
 						}
 					}
 				}
@@ -3012,6 +3105,13 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 			for i, column := range view.Table.Columns {
 				if column.ID == keyID {
 					view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
+					break
+				}
+			}
+		case av.LayoutTypeGallery:
+			for i, field := range view.Gallery.CardFields {
+				if field.ID == keyID {
+					view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)
 					break
 				}
 			}
@@ -3118,6 +3218,14 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 
 			if !replacedRowID {
 				v.Table.RowIDs = append(v.Table.RowIDs, operation.NextID)
+			}
+		case av.LayoutTypeGallery:
+			for i, cardID := range v.Gallery.CardIDs {
+				if cardID == operation.PreviousID {
+					v.Gallery.CardIDs[i] = operation.NextID
+					replacedRowID = true
+					break
+				}
 			}
 		}
 	}
@@ -3698,8 +3806,23 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	for _, view := range attrView.Views {
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
-			table := view.Table
-			for _, filter := range table.Filters {
+			for _, filter := range view.Table.Filters {
+				if filter.Column != key.ID {
+					continue
+				}
+
+				if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+					for i, opt := range filter.Value.MSelect {
+						if oldName == opt.Content {
+							filter.Value.MSelect[i].Content = newName
+							filter.Value.MSelect[i].Color = newColor
+							break
+						}
+					}
+				}
+			}
+		case av.LayoutTypeGallery:
+			for _, filter := range view.Gallery.Filters {
 				if filter.Column != key.ID {
 					continue
 				}

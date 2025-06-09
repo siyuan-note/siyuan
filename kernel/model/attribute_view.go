@@ -44,6 +44,36 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSetAttrViewCoverFromAssetKeyID(operation *Operation) (ret *TxErr) {
+	err := setAttrViewCoverFromAssetKeyID(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewCoverFromAssetKeyID(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		return
+	case av.LayoutTypeGallery:
+		view.Gallery.CoverFromAssetKeyID = operation.KeyID
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doSetAttrViewCoverFrom(operation *Operation) (ret *TxErr) {
 	err := setAttrViewCoverFrom(operation)
 	if err != nil {

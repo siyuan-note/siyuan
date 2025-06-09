@@ -280,6 +280,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doDuplicateAttrViewKey(op)
 		case "setAttrViewCoverFrom":
 			ret = tx.doSetAttrViewCoverFrom(op)
+		case "setAttrViewCoverFromAssetKeyID":
+			ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
 		}
 
 		if nil != ret {

@@ -185,11 +185,32 @@ func GetAttributeViewKeysByAvID(avID string) (ret []*av.Key) {
 	return ret
 }
 
-func SetDatabaseBlockView(blockID, viewID string) (err error) {
+func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if nil != err {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+	if attrView.ViewID != viewID {
+		attrView.ViewID = viewID
+		if err = av.SaveAttributeView(attrView); err != nil {
+			return
+		}
+	}
+
+	view := attrView.GetView(viewID)
+	if nil == view {
+		err = av.ErrViewNotFound
+		logging.LogErrorf("view [%s] not found in attribute view [%s]", viewID, avID)
+		return
+	}
+
 	node, tree, err := getNodeByBlockID(nil, blockID)
 	if err != nil {
 		return
 	}
+
+	node.AttributeViewType = string(view.LayoutType)
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = viewID

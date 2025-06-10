@@ -388,7 +388,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			if nil != parseErr {
 				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
 			} else {
-				cloned := attrView.ShallowClone()
+				cloned := attrView.Clone()
 				if nil == cloned {
 					logging.LogErrorf("clone attribute view [%s] failed", n.AttributeViewID)
 					return ast.WalkContinue

@@ -554,7 +554,7 @@ func (av *AttributeView) GetBlockKey() (ret *Key) {
 	return
 }
 
-func (av *AttributeView) ShallowClone() (ret *AttributeView) {
+func (av *AttributeView) Clone() (ret *AttributeView) {
 	ret = &AttributeView{}
 	data, err := gulu.JSON.MarshalJSON(av)
 	if err != nil {

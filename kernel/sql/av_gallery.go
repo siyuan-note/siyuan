@@ -383,11 +383,11 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		}
 	}
 
-	sort.Slice(ret.Fields, func(i, j int) bool {
-		iv := sortCardIDs[ret.Fields[i].ID]
-		jv := sortCardIDs[ret.Fields[j].ID]
+	sort.Slice(ret.Cards, func(i, j int) bool {
+		iv := sortCardIDs[ret.Cards[i].ID]
+		jv := sortCardIDs[ret.Cards[j].ID]
 		if iv == jv {
-			return ret.Fields[i].ID < ret.Fields[j].ID
+			return ret.Cards[i].ID < ret.Cards[j].ID
 		}
 		return iv < jv
 	})

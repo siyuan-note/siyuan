@@ -20,7 +20,14 @@ import {openAsset} from "../../../editor/util";
 /// #endif
 import {previewAttrViewImages} from "../../preview/image";
 import {assetMenu} from "../../../menus/protyle";
-import {addView, bindSwitcherEvent, bindViewEvent, getSwitcherHTML, getViewHTML, openViewMenu} from "./view";
+import {
+    addView,
+    bindSwitcherEvent,
+    bindViewEvent,
+    getSwitcherHTML,
+    getViewHTML,
+    openViewMenu
+} from "./view";
 import {focusBlock} from "../../util/selection";
 import {avRender} from "./render";
 import {setPageSize} from "./row";
@@ -30,6 +37,7 @@ import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
+import {bindLayoutEvent, getLayoutHTML} from "./layout";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -533,6 +541,14 @@ export const openMenuPanel = (options: {
                     tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
                     menuElement.innerHTML = getPropertiesHTML(data.view);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "go-layout") {
+                    menuElement.innerHTML = getLayoutHTML(data);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    bindLayoutEvent({protyle: options.protyle, data, menuElement, blockElement: options.blockElement});
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
                     event.stopPropagation();

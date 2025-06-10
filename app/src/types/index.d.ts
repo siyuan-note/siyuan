@@ -816,7 +816,7 @@ interface IAV {
     name: string;
     view: IAVTable | IAVGallery;
     viewID: string;
-    viewType: string;
+    viewType: "table" | "gallery";
     views: IAVView[];
 }
 

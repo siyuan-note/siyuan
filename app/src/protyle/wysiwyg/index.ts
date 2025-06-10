@@ -1848,6 +1848,7 @@ export class WYSIWYG {
                 if (avTabHeaderElement.classList.contains("item--focus")) {
                     openViewMenu({protyle, blockElement: nodeElement, element: avTabHeaderElement});
                 } else {
+                    nodeElement.setAttribute("data-av-type", avTabHeaderElement.dataset.avType);
                     nodeElement.removeAttribute("data-render");
                     avRender(nodeElement, protyle, () => {
                         openViewMenu({

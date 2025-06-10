@@ -163,39 +163,6 @@ export const bindViewEvent = (options: {
     descElement.addEventListener("input", () => {
         inputElement.nextElementSibling.setAttribute("aria-label", descElement.value ? escapeHtml(descElement.value) : window.siyuan.languages.addDesc);
     });
-    const toggleTitleElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-view-title"]') as HTMLInputElement;
-    toggleTitleElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
-        if (!toggleTitleElement.checked) {
-            // hide
-            transaction(options.protyle, [{
-                action: "hideAttrViewName",
-                avID,
-                blockID,
-                data: true
-            }], [{
-                action: "hideAttrViewName",
-                avID,
-                blockID,
-                data: false
-            }]);
-            options.blockElement.querySelector(".av__title").classList.add("fn__none");
-        } else {
-            transaction(options.protyle, [{
-                action: "hideAttrViewName",
-                avID,
-                blockID,
-                data: false
-            }], [{
-                action: "hideAttrViewName",
-                avID,
-                blockID,
-                data: true
-            }]);
-            options.blockElement.querySelector(".av__title").classList.remove("fn__none");
-        }
-    });
 };
 
 export const getViewHTML = (data: IAV) => {
@@ -258,12 +225,6 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${view.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : view.pageSize}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<label class="b3-menu__item">
-    <svg class="b3-menu__icon"></svg>
-    <span class="fn__flex-center">${window.siyuan.languages.showTitle}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${view.hideAttrViewName ? "" : "checked"}>
-</label>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="duplicate-view">
     <svg class="b3-menu__icon">
@@ -428,3 +389,4 @@ export const getViewName = (type: string) => {
             return window.siyuan.languages.gallery;
     }
 };
+

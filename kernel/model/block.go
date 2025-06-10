@@ -696,6 +696,24 @@ func GetBlockDOM(id string) (ret string) {
 	return
 }
 
+func GetBlockDOMs(ids []string) (ret map[string]string) {
+	ret = map[string]string{}
+	if 0 == len(ids) {
+		return
+	}
+
+	luteEngine := NewLute()
+	trees := filesys.LoadTrees(ids)
+	for id, tree := range trees {
+		node := treenode.GetNodeInTree(tree, id)
+		if nil == node {
+			continue
+		}
+		ret[id] = luteEngine.RenderNodeBlockDOM(node)
+	}
+	return
+}
+
 func GetBlockKramdown(id, mode string) (ret string) {
 	if "" == id {
 		return

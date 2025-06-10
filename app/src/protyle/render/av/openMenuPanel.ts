@@ -37,7 +37,7 @@ import {updateCellsValue} from "./cell";
 import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
-import {bindLayoutEvent, getLayoutHTML} from "./layout";
+import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGallerySize} from "./gallery/util";
 
 export const openMenuPanel = (options: {
@@ -1382,11 +1382,11 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "set-layout") {
-                    setPageSize({
+                    updateLayout({
                         target,
                         protyle: options.protyle,
-                        avID,
-                        nodeElement: options.blockElement
+                        nodeElement: options.blockElement,
+                        view: data.view as IAVGallery
                     });
                     event.preventDefault();
                     event.stopPropagation();

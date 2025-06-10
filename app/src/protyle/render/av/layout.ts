@@ -56,12 +56,12 @@ export const getLayoutHTML = (data: IAV) => {
     <button class="b3-menu__separator"></button>
     <button class="b3-menu__item" data-type="nobg">
         <div class="av__layout">
-            <div data-type="set-layoyt" data-view-type="${data.viewType}" class="av__layout-item${data.viewType === "table" ? " av__layout-item--select" : ""}">
+            <div data-type="set-layout" data-view-type="table" class="av__layout-item${data.viewType === "table" ? " av__layout-item--select" : ""}">
                 <svg><use xlink:href="#iconTable"></use></svg>
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.table}</div>
             </div>
-            <div data-type="set-layoyt" data-view-type="${data.viewType}" class="av__layout-item${data.viewType === "gallery" ? " av__layout-item--select" : ""}">
+            <div data-type="set-layout" data-view-type="gallery" class="av__layout-item${data.viewType === "gallery" ? " av__layout-item--select" : ""}">
                 <svg><use xlink:href="#iconGallery"></use></svg>
                 <div class="fn__hr"></div>
                 <div>${window.siyuan.languages.gallery}</div>
@@ -134,13 +134,13 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-            options.blockElement.querySelectorAll(".av__gallery-img").forEach(item => {
-                if (checked) {
-                    item.classList.add("av__gallery-img--fit");
-                } else {
-                    item.classList.remove("av__gallery-img--fit");
-                }
-            })
+        options.blockElement.querySelectorAll(".av__gallery-img").forEach(item => {
+            if (checked) {
+                item.classList.add("av__gallery-img--fit");
+            } else {
+                item.classList.remove("av__gallery-img--fit");
+            }
+        });
     });
     const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
     toggleIconElement.addEventListener("change", () => {
@@ -176,4 +176,32 @@ export const bindLayoutEvent = (options: {
             data: !checked
         }]);
     });
+};
+
+export const updateLayout = (options: {
+    view: IAVGallery
+    nodeElement: Element,
+    protyle: IProtyle,
+    target: HTMLElement
+}) => {
+    if (options.target.classList.contains("av__layout-item--select")) {
+        return;
+    }
+    const avID = options.nodeElement.getAttribute("data-av-id");
+    const blockID = options.nodeElement.getAttribute("data-node-id");
+    const layout = options.target.getAttribute("data-view-type");
+    transaction(options.protyle, [{
+        action: "changeAttrViewLayout",
+        avID,
+        blockID,
+        layout
+    }], [{
+        action: "changeAttrViewLayout",
+        avID,
+        blockID,
+        layout: options.view.type
+    }]);
+    options.nodeElement.setAttribute("data-view-type", layout);
+    options.target.parentElement.querySelector(".av__layout-item--select").classList.remove("av__layout-item--select");
+    options.target.classList.add("av__layout-item--select");
 };

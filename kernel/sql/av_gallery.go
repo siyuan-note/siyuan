@@ -416,7 +416,7 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 			}
 
 			if ast.NodeDocument == node.Type {
-				if titleImg := node.IALAttr("title-img"); "" != titleImg {
+				if titleImg := treenode.GetDocTitleImgPath(node); "" != titleImg {
 					galleryCard.CoverURL = titleImg
 					break
 				}

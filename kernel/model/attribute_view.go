@@ -1742,47 +1742,93 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		return
 	}
 
-	view := av.NewTableView()
+	var view *av.View
+	switch masterView.LayoutType {
+	case av.LayoutTypeTable:
+		view = av.NewTableView()
+	case av.LayoutTypeGallery:
+		view = av.NewGalleryView()
+	}
+
 	view.ID = operation.ID
 	attrView.Views = append(attrView.Views, view)
 	attrView.ViewID = view.ID
 
 	view.Icon = masterView.Icon
 	view.Name = util.GetDuplicateName(masterView.Name)
-	view.LayoutType = masterView.LayoutType
 	view.HideAttrViewName = masterView.HideAttrViewName
+	view.Desc = masterView.Desc
+	view.LayoutType = masterView.LayoutType
 
-	for _, col := range masterView.Table.Columns {
-		view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
-			ID:     col.ID,
-			Wrap:   col.Wrap,
-			Hidden: col.Hidden,
-			Pin:    col.Pin,
-			Width:  col.Width,
-			Desc:   col.Desc,
-			Calc:   col.Calc,
-		})
+	switch masterView.LayoutType {
+	case av.LayoutTypeTable:
+		for _, col := range masterView.Table.Columns {
+			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
+				ID:     col.ID,
+				Wrap:   col.Wrap,
+				Hidden: col.Hidden,
+				Pin:    col.Pin,
+				Width:  col.Width,
+				Desc:   col.Desc,
+				Calc:   col.Calc,
+			})
+		}
+
+		for _, filter := range masterView.Table.Filters {
+			view.Table.Filters = append(view.Table.Filters, &av.ViewFilter{
+				Column:        filter.Column,
+				Operator:      filter.Operator,
+				Value:         filter.Value,
+				RelativeDate:  filter.RelativeDate,
+				RelativeDate2: filter.RelativeDate2,
+			})
+		}
+
+		for _, s := range masterView.Table.Sorts {
+			view.Table.Sorts = append(view.Table.Sorts, &av.ViewSort{
+				Column: s.Column,
+				Order:  s.Order,
+			})
+		}
+
+		view.Table.PageSize = masterView.Table.PageSize
+		view.Table.RowIDs = masterView.Table.RowIDs
+	case av.LayoutTypeGallery:
+		for _, field := range masterView.Gallery.CardFields {
+			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{
+				ID:     field.ID,
+				Hidden: field.Hidden,
+				Desc:   field.Desc,
+			})
+		}
+
+		for _, filter := range masterView.Gallery.Filters {
+			view.Gallery.Filters = append(view.Gallery.Filters, &av.ViewFilter{
+				Column:        filter.Column,
+				Operator:      filter.Operator,
+				Value:         filter.Value,
+				RelativeDate:  filter.RelativeDate,
+				RelativeDate2: filter.RelativeDate2,
+			})
+		}
+
+		for _, s := range masterView.Gallery.Sorts {
+			view.Gallery.Sorts = append(view.Gallery.Sorts, &av.ViewSort{
+				Column: s.Column,
+				Order:  s.Order,
+			})
+		}
+
+		view.Gallery.PageSize = masterView.Gallery.PageSize
+		view.Gallery.CardIDs = masterView.Gallery.CardIDs
+
+		view.Gallery.CoverFrom = masterView.Gallery.CoverFrom
+		view.Gallery.CoverFromAssetKeyID = masterView.Gallery.CoverFromAssetKeyID
+		view.Gallery.CardSize = masterView.Gallery.CardSize
+		view.Gallery.FitImage = masterView.Gallery.FitImage
+		view.Gallery.ShowIcon = masterView.Gallery.ShowIcon
+		view.Gallery.WrapField = masterView.Gallery.WrapField
 	}
-
-	for _, filter := range masterView.Table.Filters {
-		view.Table.Filters = append(view.Table.Filters, &av.ViewFilter{
-			Column:        filter.Column,
-			Operator:      filter.Operator,
-			Value:         filter.Value,
-			RelativeDate:  filter.RelativeDate,
-			RelativeDate2: filter.RelativeDate2,
-		})
-	}
-
-	for _, s := range masterView.Table.Sorts {
-		view.Table.Sorts = append(view.Table.Sorts, &av.ViewSort{
-			Column: s.Column,
-			Order:  s.Order,
-		})
-	}
-
-	view.Table.PageSize = masterView.Table.PageSize
-	view.Table.RowIDs = masterView.Table.RowIDs
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

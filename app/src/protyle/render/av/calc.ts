@@ -38,7 +38,7 @@ const calcItem = (options: {
                 }]);
             } else {
                 options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator, true);
-                const colData = options.data.view.columns.find((item) => {
+                const colData = (options.data.view as IAVTable).columns.find((item) => {
                     if (item.id === options.colId) {
                         if (!item.rollup) {
                             item.rollup = {};
@@ -274,7 +274,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             const avResponse = await fetchSyncPost("api/av/renderAttributeView", {id: avId});
             avData = avResponse.data;
         }
-        avData.view.columns.find((item) => {
+        (avData.view as IAVTable).columns.find((item) => {
             if (item.id === colId) {
                 relationKeyID = item.rollup?.relationKeyID;
                 keyID = item.rollup?.keyID;
@@ -283,7 +283,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         });
         if (relationKeyID && keyID) {
             let relationAvId: string;
-            avData.view.columns.find((item) => {
+            (avData.view as IAVTable).columns.find((item) => {
                 if (item.id === relationKeyID) {
                     relationAvId = item.relation?.avID;
                     return true;

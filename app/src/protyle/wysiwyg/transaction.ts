@@ -850,7 +850,8 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "replaceAttrViewBlock", "updateAttrViewColTemplate", "setAttrViewColPin", "addAttrViewView", "setAttrViewColIcon",
         "removeAttrViewView", "setAttrViewViewName", "setAttrViewViewIcon", "duplicateAttrViewView", "sortAttrViewView",
         "updateAttrViewColRelation", "setAttrViewPageSize", "updateAttrViewColRollup", "sortAttrViewKey",
-        "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc"].includes(operation.action)) {
+        "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewColDesc", "setAttrViewCoverFrom", "setAttrViewShowIcon",
+        "setAttrViewCoverFromAssetKeyID", "changeAttrViewLayout"].includes(operation.action)) {
         if (!isUndo) {
             // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
             refreshAV(protyle, operation);

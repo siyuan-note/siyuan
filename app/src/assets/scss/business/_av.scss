@@ -277,6 +277,10 @@
     gap: 16px;
     width: 100%;
 
+    &--top {
+      margin-top: 16px;
+    }
+
     &--small {
       grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
     }
@@ -293,11 +297,11 @@
 
       &:hover {
         .av__gallery-cover {
-          background-color: var(--b3-theme-surface-lighter);
+          background-color: var(--b3-list-hover);
         }
 
         .av__gallery-fields {
-          background-color: var(--b3-theme-surface-light);
+          background-color: var(--b3-theme-surface);
         }
       }
 
@@ -336,6 +340,7 @@
     }
 
     &-fields {
+      border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius);
       flex: 1;
       transition: background 100ms ease-out;
     }

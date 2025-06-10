@@ -153,13 +153,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
         <div contenteditable="${options.protyle.disabled || hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
-    <div class="av__gallery${view.cardSize === 0 ? " av__gallery--small" : (view.cardSize === 2 ? " av__gallery--big" : "")}">
+    <div class="av__gallery${view.cardSize === 0 ? " av__gallery--small" : (view.cardSize === 2 ? " av__gallery--big" : "")}
+${view.hideAttrViewName ? " av__gallery--top" : ""}">
         ${galleryHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
         } else {
-            options.blockElement.firstElementChild.querySelector(".av__gallery").innerHTML = galleryHTML;
+            const galleryElement = options.blockElement.firstElementChild.querySelector(".av__gallery");
+            galleryElement.innerHTML = galleryHTML;
+            if (view.hideAttrViewName) {
+                galleryElement.classList.add("av__gallery--top");
+            } else {
+                galleryElement.classList.remove("av__gallery--top");
+            }
         }
         options.blockElement.setAttribute("data-render", "true");
         if (alignSelf) {

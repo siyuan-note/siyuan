@@ -38,6 +38,7 @@ import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML} from "./layout";
+import {setGalleryCover, setGallerySize} from "./gallery/util";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1357,6 +1358,36 @@ export const openMenuPanel = (options: {
                             target.parentElement.querySelector(".b3-chip").classList.add("b3-chip--primary");
                         }, target.parentElement.dataset.id);
                     }
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "set-gallery-cover") {
+                    setGalleryCover({
+                        target,
+                        protyle: options.protyle,
+                        nodeElement: options.blockElement,
+                        view: data.view as IAVGallery
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "set-gallery-size") {
+                    setGallerySize({
+                        target,
+                        protyle: options.protyle,
+                        nodeElement: options.blockElement,
+                        view: data.view as IAVGallery
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "set-layout") {
+                    setPageSize({
+                        target,
+                        protyle: options.protyle,
+                        avID,
+                        nodeElement: options.blockElement
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

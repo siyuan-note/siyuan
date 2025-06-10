@@ -839,6 +839,11 @@ interface IAVTable extends IAVView {
 }
 
 interface IAVGallery extends IAVView {
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段
+    cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
+    fitImage:boolean;
+    showIcon:boolean;
+    wrapField:boolean;
     cards: IAVGalleryItem[],
     desc: string
     fields: IAVColumn[]
@@ -899,6 +904,7 @@ interface IAVRow {
 
 interface IAVGalleryItem {
     coverURL?: string;
+    coverContent?: string;
     id: string;
     values: IAVCell[];
 }

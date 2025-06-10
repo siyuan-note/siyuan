@@ -61,14 +61,25 @@ export const renderGallery = (options: {
         viewID: newViewID,
         query: query.trim()
     }, (response) => {
-        const data = response.data;
+        const view: IAVGallery = response.data.view;
         if (!options.blockElement.dataset.pageSize) {
-            options.blockElement.dataset.pageSize = data.view.pageSize.toString();
+            options.blockElement.dataset.pageSize = view.pageSize.toString();
         }
         let galleryHTML = "";
         // body
-        data.view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
+        view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
             galleryHTML += `<div class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
+            if (view.coverFrom !== 0) {
+                if (item.coverURL) {
+                    galleryHTML += `<div class="av__gallery-cover"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL}')"></div></div>`;
+                } else if (!item.coverContent) {
+                    galleryHTML += `<div class="av__gallery-cover"><div class="av__gallery-content">${item.coverContent}</div></div>`;
+                } else {
+                    galleryHTML += `<div class="av__gallery-cover"></div>`;
+                }
+            }
+
+            galleryHTML += '<div class="av__gallery-fields">';
             item.values.forEach(cell => {
                 let checkClass = "";
                 if (cell.valueType === "checkbox") {
@@ -81,7 +92,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
 ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
             });
-            galleryHTML += "</div>";
+            galleryHTML += "</div></div>";
         });
         let tabHTML = "";
         let viewData: IAVView;
@@ -107,17 +118,17 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             </span>
             <div class="fn__flex-1"></div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" class="block__icon${data.views.length > 0 ? "" : " fn__none"}">
+            <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
                 <span class="fn__space"></span>
-                <small>${data.views.length}</small>
+                <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${data.view.filters.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-filter" class="block__icon${view.filters.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon${data.view.sorts.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-sort" class="block__icon${view.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
@@ -136,13 +147,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 <svg><use xlink:href="#iconAdd"></use></svg>
             </span>
             <div class="fn__space"></div>
-            ${data.isMirror ? ` <span data-av-id="${data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
+            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
     <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
         </div>
-        <div contenteditable="${options.protyle.disabled || hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${data.name || ""}</div>
+        <div contenteditable="${options.protyle.disabled || hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
         <div class="av__counter fn__none"></div>
     </div>
-    <div class="av__gallery">
+    <div class="av__gallery${view.cardSize === 0 ? " av__gallery--small" : (view.cardSize === 2 ? " av__gallery--big" : "")}">
         ${galleryHTML}
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>

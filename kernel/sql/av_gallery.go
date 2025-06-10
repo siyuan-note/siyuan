@@ -1,6 +1,7 @@
 package sql
 
 import (
+	"bytes"
 	"fmt"
 	"sort"
 	"strings"
@@ -444,7 +445,7 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 					node = node.FirstChild
 				}
 
-				buf := strings.Builder{}
+				buf := bytes.Buffer{}
 				for c := node; nil != c; c = c.Next {
 					buf.WriteString(renderBlockDOMByNode(c, luteEngine))
 					if 1024*4 < buf.Len() {

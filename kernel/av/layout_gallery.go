@@ -16,7 +16,11 @@
 
 package av
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/88250/lute/ast"
+)
 
 // LayoutGallery 描述了画廊布局的结构。
 type LayoutGallery struct {
@@ -31,6 +35,21 @@ type LayoutGallery struct {
 
 	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
+}
+
+func NewLayoutGallery() *LayoutGallery {
+	return &LayoutGallery{
+		BaseLayout: &BaseLayout{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: GalleryViewDefaultPageSize,
+		},
+		CoverFrom: CoverFromContentImage,
+		CardSize:  CardSizeMedium,
+		ShowIcon:  true,
+	}
 }
 
 type CardSize int

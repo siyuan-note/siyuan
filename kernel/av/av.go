@@ -207,15 +207,7 @@ func NewTableView() (ret *View) {
 		ID:         ast.NewNodeID(),
 		Name:       getI18nName("table"),
 		LayoutType: LayoutTypeTable,
-		Table: &LayoutTable{
-			BaseLayout: &BaseLayout{
-				Spec:     0,
-				ID:       ast.NewNodeID(),
-				Filters:  []*ViewFilter{},
-				Sorts:    []*ViewSort{},
-				PageSize: TableViewDefaultPageSize,
-			},
-		},
+		Table:      NewLayoutTable(),
 	}
 	return
 }
@@ -226,15 +218,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 		ID:         ast.NewNodeID(),
 		Name:       name,
 		LayoutType: LayoutTypeTable,
-		Table: &LayoutTable{
-			BaseLayout: &BaseLayout{
-				Spec:     0,
-				ID:       ast.NewNodeID(),
-				Filters:  []*ViewFilter{},
-				Sorts:    []*ViewSort{},
-				PageSize: TableViewDefaultPageSize,
-			},
-		},
+		Table:      NewLayoutTable(),
 	}
 	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
 	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
@@ -249,18 +233,7 @@ func NewGalleryView() (ret *View) {
 		ID:         ast.NewNodeID(),
 		Name:       getI18nName("gallery"),
 		LayoutType: LayoutTypeGallery,
-		Gallery: &LayoutGallery{
-			BaseLayout: &BaseLayout{
-				Spec:     0,
-				ID:       ast.NewNodeID(),
-				Filters:  []*ViewFilter{},
-				Sorts:    []*ViewSort{},
-				PageSize: GalleryViewDefaultPageSize,
-			},
-			CoverFrom: CoverFromContentImage,
-			CardSize:  CardSizeMedium,
-			ShowIcon:  true,
-		},
+		Gallery:    NewLayoutGallery(),
 	}
 	return
 }

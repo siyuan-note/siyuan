@@ -441,10 +441,8 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 
 			if "" == galleryCard.CoverURL {
 				if ast.NodeDocument == node.Type {
-					galleryCard.CoverContent = node.IALAttr("title")
-					return
+					node = node.FirstChild
 				}
-
 				galleryCard.CoverContent = renderBlockDOMByNode(node, luteEngine)
 				return
 			}

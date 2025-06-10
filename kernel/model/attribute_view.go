@@ -1690,6 +1690,8 @@ func (tx *Transaction) doRemoveAttrViewView(operation *Operation) (ret *TxErr) {
 			return
 		}
 	}
+
+	operation.RetData = view.LayoutType
 	return
 }
 

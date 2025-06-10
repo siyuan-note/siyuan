@@ -16,7 +16,11 @@
 
 package av
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/88250/lute/ast"
+)
 
 // LayoutGallery 描述了画廊布局的结构。
 type LayoutGallery struct {
@@ -31,6 +35,21 @@ type LayoutGallery struct {
 
 	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
+}
+
+func NewLayoutGallery() *LayoutGallery {
+	return &LayoutGallery{
+		BaseLayout: &BaseLayout{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: GalleryViewDefaultPageSize,
+		},
+		CoverFrom: CoverFromContentImage,
+		CardSize:  CardSizeMedium,
+		ShowIcon:  true,
+	}
 }
 
 type CardSize int
@@ -61,6 +80,13 @@ type ViewGalleryCardField struct {
 // Gallery 描述了画廊实例的结构。
 type Gallery struct {
 	*BaseInstance
+
+	CoverFrom           CoverFrom `json:"coverFrom"`                     // 封面来源
+	CoverFromAssetKeyID string    `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
+	CardSize            CardSize  `json:"cardSize"`                      // 卡片大小
+	FitImage            bool      `json:"fitImage"`                      // 是否适应封面图片大小
+	ShowIcon            bool      `json:"showIcon"`                      // 是否显示字段图标
+	WrapField           bool      `json:"wrapField"`                     // 是否换行字段内容
 
 	Fields    []*GalleryField `json:"fields"`    // 画廊字段
 	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片

@@ -18,6 +18,8 @@ package av
 
 import (
 	"sort"
+
+	"github.com/88250/lute/ast"
 )
 
 // LayoutTable 描述了表格布局的结构。
@@ -26,6 +28,18 @@ type LayoutTable struct {
 
 	Columns []*ViewTableColumn `json:"columns"` // 表格列
 	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
+}
+
+func NewLayoutTable() *LayoutTable {
+	return &LayoutTable{
+		BaseLayout: &BaseLayout{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: TableViewDefaultPageSize,
+		},
+	}
 }
 
 // ViewTableColumn 描述了表格列的结构。

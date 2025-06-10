@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Podgląd karty",
+  "contentImage": "Obraz treści",
+  "cardSize": "Rozmiar karty",
+  "large": "Duży",
+  "medium": "Średni",
+  "small": "Mały",
+  "fitImage": "Automatyczne dopasowanie rozmiaru obrazu",
+  "showIcon": "Pokaż ikonę",
+  "wrapAllFields": "Automatyczne zawijanie pól",
   "gallery": "Galeria",
   "newTag": "Nowy tag",
   "pleaseWait": "Proszę czekać...",

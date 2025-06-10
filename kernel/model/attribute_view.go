@@ -44,6 +44,68 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr) {
+	err := changeAttrViewLayout(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func changeAttrViewLayout(operation *Operation) (err error) {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return
+	}
+
+	newLayout := operation.Layout
+	if newLayout == view.LayoutType {
+		return
+	}
+
+	view.LayoutType = newLayout
+	switch newLayout {
+	case av.LayoutTypeTable:
+		if nil != view.Table {
+			break
+		}
+
+		view.Table = av.NewLayoutTable()
+		switch view.LayoutType {
+		case av.LayoutTypeGallery:
+			for _, field := range view.Gallery.CardFields {
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: field.ID})
+			}
+			for _, cardID := range view.Gallery.CardIDs {
+				view.Table.RowIDs = append(view.Table.RowIDs, cardID)
+			}
+		}
+	case av.LayoutTypeGallery:
+		if nil != view.Gallery {
+			break
+		}
+
+		view.Gallery = av.NewLayoutGallery()
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			for _, col := range view.Table.Columns {
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: col.ID})
+			}
+			for _, rowID := range view.Table.RowIDs {
+				view.Gallery.CardIDs = append(view.Gallery.CardIDs, rowID)
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doSetAttrViewWrapField(operation *Operation) (ret *TxErr) {
 	err := setAttrViewWrapField(operation)
 	if err != nil {

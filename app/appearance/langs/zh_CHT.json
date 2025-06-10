@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "卡片預覽",
+  "contentImage": "內容圖片",
+  "cardSize": "卡片大小",
+  "large": "大",
+  "medium": "中",
+  "small": "小",
+  "fitImage": "自動調整圖片大小",
+  "showIcon": "顯示圖示",
+  "wrapAllFields": "欄位自動換行",
   "gallery": "圖庫",
   "newTag": "新建標籤",
   "pleaseWait": "請稍等片刻...",

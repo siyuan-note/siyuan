@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Card preview",
+  "contentImage": "Content image",
+  "cardSize": "Card size",
+  "large": "Large",
+  "medium": "Medium",
+  "small": "Small",
+  "fitImage": "Auto-fit image size",
+  "showIcon": "Show icon",
+  "wrapAllFields": "Auto-wrap fields",
   "gallery": "Gallery",
   "newTag": "New tag",
   "pleaseWait": "Please wait...",

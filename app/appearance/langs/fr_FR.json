@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Aperçu de la carte",
+  "contentImage": "Image du contenu",
+  "cardSize": "Taille de la carte",
+  "large": "Grand",
+  "medium": "Moyen",
+  "small": "Petit",
+  "fitImage": "Ajuster automatiquement la taille de l'image",
+  "showIcon": "Afficher l'icône",
+  "wrapAllFields": "Retour automatique des champs",
   "gallery": "Galerie",
   "newTag": "Nouvelle étiquette",
   "pleaseWait": "Veuillez patienter...",

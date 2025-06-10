@@ -81,6 +81,13 @@ type ViewGalleryCardField struct {
 type Gallery struct {
 	*BaseInstance
 
+	CoverFrom           CoverFrom `json:"coverFrom"`                     // 封面来源
+	CoverFromAssetKeyID string    `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
+	CardSize            CardSize  `json:"cardSize"`                      // 卡片大小
+	FitImage            bool      `json:"fitImage"`                      // 是否适应封面图片大小
+	ShowIcon            bool      `json:"showIcon"`                      // 是否显示字段图标
+	WrapField           bool      `json:"wrapField"`                     // 是否换行字段内容
+
 	Fields    []*GalleryField `json:"fields"`    // 画廊字段
 	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
 	CardCount int             `json:"cardCount"` // 画廊总卡片数

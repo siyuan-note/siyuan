@@ -26,8 +26,14 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			Filters:          view.Gallery.Filters,
 			Sorts:            view.Gallery.Sorts,
 		},
-		Fields: []*av.GalleryField{},
-		Cards:  []*av.GalleryCard{},
+		CoverFrom:           view.Gallery.CoverFrom,
+		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,
+		CardSize:            view.Gallery.CardSize,
+		FitImage:            view.Gallery.FitImage,
+		ShowIcon:            view.Gallery.ShowIcon,
+		WrapField:           view.Gallery.WrapField,
+		Fields:              []*av.GalleryField{},
+		Cards:               []*av.GalleryCard{},
 	}
 
 	// 组装字段

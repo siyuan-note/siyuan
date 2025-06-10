@@ -443,7 +443,15 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 				if ast.NodeDocument == node.Type {
 					node = node.FirstChild
 				}
-				galleryCard.CoverContent = renderBlockDOMByNode(node, luteEngine)
+
+				buf := strings.Builder{}
+				for c := node; nil != c; c = c.Next {
+					buf.WriteString(renderBlockDOMByNode(c, luteEngine))
+					if 1024*4 < buf.Len() {
+						break
+					}
+				}
+				galleryCard.CoverContent = buf.String()
 				return
 			}
 		}

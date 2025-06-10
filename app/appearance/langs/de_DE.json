@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Kartenansicht",
+  "contentImage": "Inhaltsbild",
+  "cardSize": "Kartengröße",
+  "large": "Groß",
+  "medium": "Mittel",
+  "small": "Klein",
+  "fitImage": "Bildgröße automatisch anpassen",
+  "showIcon": "Symbol anzeigen",
+  "wrapAllFields": "Felder automatisch umbrechen",
   "gallery": "Galerie",
   "newTag": "Neuer Tag",
   "pleaseWait": "Bitte warten...",

@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Vista previa de la tarjeta",
+  "contentImage": "Imagen del contenido",
+  "cardSize": "Tamaño de la tarjeta",
+  "large": "Grande",
+  "medium": "Mediano",
+  "small": "Pequeño",
+  "fitImage": "Ajustar automáticamente el tamaño de la imagen",
+  "showIcon": "Mostrar ícono",
+  "wrapAllFields": "Ajuste automático de campos",
   "gallery": "Galería",
   "newTag": "Nueva etiqueta",
   "pleaseWait": "Por favor, espere...",

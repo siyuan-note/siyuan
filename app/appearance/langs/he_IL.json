@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "תצוגה מקדימה של כרטיס",
+  "contentImage": "תמונת תוכן",
+  "cardSize": "גודל כרטיס",
+  "large": "גדול",
+  "medium": "בינוני",
+  "small": "קטן",
+  "fitImage": "התאמה אוטומטית לגודל התמונה",
+  "showIcon": "הצג אייקון",
+  "wrapAllFields": "עטיפת שדות אוטומטית",
   "gallery": "גלריה",
   "newTag": "תג חדש",
   "pleaseWait": "אנא המתן...",

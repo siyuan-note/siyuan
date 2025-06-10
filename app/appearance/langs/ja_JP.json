@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "カードプレビュー",
+  "contentImage": "コンテンツ画像",
+  "cardSize": "カードサイズ",
+  "large": "大",
+  "medium": "中",
+  "small": "小",
+  "fitImage": "画像サイズを自動調整",
+  "showIcon": "アイコンを表示",
+  "wrapAllFields": "フィールドを自動折り返し",
   "gallery": "ギャラリー",
   "newTag": "新しいタグ",
   "pleaseWait": "しばらくお待ちください...",

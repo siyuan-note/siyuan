@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "معاينة البطاقة",
+  "contentImage": "صورة المحتوى",
+  "cardSize": "حجم البطاقة",
+  "large": "كبير",
+  "medium": "متوسط",
+  "small": "صغير",
+  "fitImage": "تعديل حجم الصورة تلقائيًا",
+  "showIcon": "إظهار الأيقونة",
+  "wrapAllFields": "التفاف الحقول تلقائيًا",
   "gallery": "معرض",
   "newTag": "علامة جديدة",
   "pleaseWait": "يرجى الانتظار...",

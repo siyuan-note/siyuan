@@ -1,4 +1,13 @@
 {
+  "cardPreview1": "Anteprima della carta",
+  "contentImage": "Immagine del contenuto",
+  "cardSize": "Dimensione della carta",
+  "large": "Grande",
+  "medium": "Medio",
+  "small": "Piccolo",
+  "fitImage": "Adatta automaticamente la dimensione dell'immagine",
+  "showIcon": "Mostra icona",
+  "wrapAllFields": "Avvolgi automaticamente i campi",
   "gallery": "Galleria",
   "newTag": "Nuova etichetta",
   "pleaseWait": "Attendere prego...",

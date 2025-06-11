@@ -68,7 +68,6 @@ func changeAttrViewLayout(operation *Operation) (err error) {
 		return
 	}
 
-	view.LayoutType = newLayout
 	switch newLayout {
 	case av.LayoutTypeTable:
 		if nil != view.Table {
@@ -102,6 +101,7 @@ func changeAttrViewLayout(operation *Operation) (err error) {
 		}
 	}
 
+	view.LayoutType = newLayout
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -1859,6 +1859,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		for _, field := range masterView.Gallery.CardFields {
 			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{
 				ID:     field.ID,
+				Wrap:   field.Wrap,
 				Hidden: field.Hidden,
 				Desc:   field.Desc,
 			})

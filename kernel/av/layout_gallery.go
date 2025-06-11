@@ -73,6 +73,7 @@ const (
 type ViewGalleryCardField struct {
 	ID string `json:"id"` // 字段 ID
 
+	Wrap   bool   `json:"wrap"`           // 是否换行
 	Hidden bool   `json:"hidden"`         // 是否隐藏
 	Desc   string `json:"desc,omitempty"` // 字段描述
 }

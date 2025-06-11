@@ -112,6 +112,16 @@ export class Dock {
 
         if (activeElements.length === 0) {
             this.resizeElement.classList.add("fn__none");
+            // 如果没有打开的侧栏，隐藏 layout 的子元素
+            this.layout.children.forEach(child => {
+                (child as Wnd).element.classList.add("fn__none");
+            });
+            if (this.layout.children.length > 1) {
+                const separatorElement = (this.layout.children[0] as Wnd).element.nextElementSibling;
+                if (separatorElement) {
+                    separatorElement.classList.add("fn__none");
+                }
+            }
         } else {
             activeElements.forEach(item => {
                 this.toggleModel(item.getAttribute("data-type") as TDock, true, false, false, false);

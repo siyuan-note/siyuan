@@ -1859,7 +1859,6 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		for _, field := range masterView.Gallery.CardFields {
 			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{
 				ID:     field.ID,
-				Wrap:   field.Wrap,
 				Hidden: field.Hidden,
 				Desc:   field.Desc,
 			})

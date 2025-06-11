@@ -1183,7 +1183,7 @@ const genUpdateColItem = (type: TAVCol, oldType: TAVCol) => {
 export const addCol = (protyle: IProtyle, blockElement: Element, previousID?: string) => {
     const menu = new Menu("av-header-add");
     const avID = blockElement.getAttribute("data-av-id");
-    if (typeof previousID === "undefined") {
+    if (typeof previousID === "undefined" && blockElement.getAttribute("data-av-type") === "table") {
         previousID = Array.from(blockElement.querySelectorAll(".av__row--header .av__cell")).pop().getAttribute("data-col-id");
     }
     const blockId = blockElement.getAttribute("data-node-id");

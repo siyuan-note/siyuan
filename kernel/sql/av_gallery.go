@@ -341,55 +341,62 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 	case av.CoverFromNone:
 	case av.CoverFromContentImage:
 		blockValue := getBlockValue(cardValues)
-		if !blockValue.IsDetached {
-			tree := loadTreeByBlockID(blockValue.BlockID)
-			if nil == tree {
-				break
-			}
-			node := treenode.GetNodeInTree(tree, blockValue.BlockID)
-			if nil == node {
+		if blockValue.IsDetached {
+			break
+		}
+
+		tree := loadTreeByBlockID(blockValue.BlockID)
+		if nil == tree {
+			break
+		}
+		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		if nil == node {
+			break
+		}
+
+		if ast.NodeDocument == node.Type {
+			if titleImg := treenode.GetDocTitleImgPath(node); "" != titleImg {
+				galleryCard.CoverURL = titleImg
 				break
 			}
 
+			if titleImgCss := node.IALAttr("title-img"); strings.HasPrefix(titleImgCss, "background:") {
+				galleryCard.CoverURL = titleImgCss
+				break
+			}
+		}
+
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if ast.NodeImage != n.Type {
+				return ast.WalkContinue
+			}
+
+			dest := n.ChildByType(ast.NodeLinkDest)
+			if nil == dest {
+				return ast.WalkContinue
+			}
+			galleryCard.CoverURL = dest.TokensStr()
+			return ast.WalkStop
+		})
+
+		if "" == galleryCard.CoverURL {
 			if ast.NodeDocument == node.Type {
-				if titleImg := treenode.GetDocTitleImgPath(node); "" != titleImg {
-					galleryCard.CoverURL = titleImg
+				node = node.FirstChild
+			}
+
+			buf := bytes.Buffer{}
+			for c := node; nil != c; c = c.Next {
+				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
+				if 1024*4 < buf.Len() {
 					break
 				}
 			}
-
-			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering {
-					return ast.WalkContinue
-				}
-
-				if ast.NodeImage != n.Type {
-					return ast.WalkContinue
-				}
-
-				dest := n.ChildByType(ast.NodeLinkDest)
-				if nil == dest {
-					return ast.WalkContinue
-				}
-				galleryCard.CoverURL = dest.TokensStr()
-				return ast.WalkStop
-			})
-
-			if "" == galleryCard.CoverURL {
-				if ast.NodeDocument == node.Type {
-					node = node.FirstChild
-				}
-
-				buf := bytes.Buffer{}
-				for c := node; nil != c; c = c.Next {
-					buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-					if 1024*4 < buf.Len() {
-						break
-					}
-				}
-				galleryCard.CoverContent = buf.String()
-				return
-			}
+			galleryCard.CoverContent = buf.String()
+			return
 		}
 	case av.CoverFromAssetField:
 		if "" == view.Gallery.CoverFromAssetKeyID {

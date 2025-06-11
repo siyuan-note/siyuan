@@ -64,50 +64,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		})
 	}
 
-	// 生成卡片
-	cardsValues := map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.KeyValues {
-		for _, val := range keyValues.Values {
-			values := cardsValues[val.BlockID]
-			if nil == values {
-				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
-			} else {
-				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
-			}
-			cardsValues[val.BlockID] = values
-		}
-	}
-
-	// 过滤掉不存在的卡片
-	var notFound []string
-	var toCheckBlockIDs []string
-	for blockID, keyValues := range cardsValues {
-		blockValue := getBlockValue(keyValues)
-		if nil == blockValue {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		if blockValue.IsDetached {
-			continue
-		}
-
-		if nil != blockValue.Block && "" == blockValue.Block.ID {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
-	}
-	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
-	for blockID, exist := range checkRet {
-		if !exist {
-			notFound = append(notFound, blockID)
-		}
-	}
-	for _, blockID := range notFound {
-		delete(cardsValues, blockID)
-	}
+	cardsValues := generateAttrViewItems(attrView) // 生成卡片
+	filterNotFoundAttrViewItems(&cardsValues)      // 过滤掉不存在的卡片
 
 	// 生成卡片字段值
 	for cardID, cardValues := range cardsValues {
@@ -136,30 +94,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			}
 			galleryCard.ID = cardID
 
-			switch fieldValue.ValueType {
-			case av.KeyTypeNumber: // 格式化数字
-				if nil != fieldValue.Value && nil != fieldValue.Value.Number && fieldValue.Value.Number.IsNotEmpty {
-					fieldValue.Value.Number.Format = field.NumberFormat
-					fieldValue.Value.Number.FormatNumber()
-				}
-			case av.KeyTypeTemplate: // 渲染模板字段
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: field.Template}}
-			case av.KeyTypeCreated: // 填充创建时间字段值，后面再渲染
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeCreated}
-			case av.KeyTypeUpdated: // 填充更新时间字段值，后面再渲染
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeUpdated}
-			case av.KeyTypeRelation: // 清空关联字段值，后面再渲染 https://ld246.com/article/1703831044435
-				if nil != fieldValue.Value && nil != fieldValue.Value.Relation {
-					fieldValue.Value.Relation.Contents = nil
-				}
-			}
-
-			if nil == fieldValue.Value {
-				fieldValue.Value = av.GetAttributeViewDefaultValue(fieldValue.ID, field.ID, cardID, fieldValue.ValueType)
-			} else {
-				fillAttributeViewNilValue(fieldValue.Value, fieldValue.ValueType)
-			}
-
+			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template)
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 
@@ -406,55 +341,62 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 	case av.CoverFromNone:
 	case av.CoverFromContentImage:
 		blockValue := getBlockValue(cardValues)
-		if !blockValue.IsDetached {
-			tree := loadTreeByBlockID(blockValue.BlockID)
-			if nil == tree {
-				break
-			}
-			node := treenode.GetNodeInTree(tree, blockValue.BlockID)
-			if nil == node {
+		if blockValue.IsDetached {
+			break
+		}
+
+		tree := loadTreeByBlockID(blockValue.BlockID)
+		if nil == tree {
+			break
+		}
+		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		if nil == node {
+			break
+		}
+
+		if ast.NodeDocument == node.Type {
+			if titleImg := treenode.GetDocTitleImgPath(node); "" != titleImg {
+				galleryCard.CoverURL = titleImg
 				break
 			}
 
+			if titleImgCss := node.IALAttr("title-img"); strings.HasPrefix(titleImgCss, "background:") {
+				galleryCard.CoverURL = titleImgCss
+				break
+			}
+		}
+
+		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering {
+				return ast.WalkContinue
+			}
+
+			if ast.NodeImage != n.Type {
+				return ast.WalkContinue
+			}
+
+			dest := n.ChildByType(ast.NodeLinkDest)
+			if nil == dest {
+				return ast.WalkContinue
+			}
+			galleryCard.CoverURL = dest.TokensStr()
+			return ast.WalkStop
+		})
+
+		if "" == galleryCard.CoverURL {
 			if ast.NodeDocument == node.Type {
-				if titleImg := treenode.GetDocTitleImgPath(node); "" != titleImg {
-					galleryCard.CoverURL = titleImg
+				node = node.FirstChild
+			}
+
+			buf := bytes.Buffer{}
+			for c := node; nil != c; c = c.Next {
+				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
+				if 1024*4 < buf.Len() {
 					break
 				}
 			}
-
-			ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
-				if !entering {
-					return ast.WalkContinue
-				}
-
-				if ast.NodeImage != n.Type {
-					return ast.WalkContinue
-				}
-
-				dest := n.ChildByType(ast.NodeLinkDest)
-				if nil == dest {
-					return ast.WalkContinue
-				}
-				galleryCard.CoverURL = dest.TokensStr()
-				return ast.WalkStop
-			})
-
-			if "" == galleryCard.CoverURL {
-				if ast.NodeDocument == node.Type {
-					node = node.FirstChild
-				}
-
-				buf := bytes.Buffer{}
-				for c := node; nil != c; c = c.Next {
-					buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-					if 1024*4 < buf.Len() {
-						break
-					}
-				}
-				galleryCard.CoverContent = buf.String()
-				return
-			}
+			galleryCard.CoverContent = buf.String()
+			return
 		}
 	case av.CoverFromAssetField:
 		if "" == view.Gallery.CoverFromAssetKeyID {
@@ -474,6 +416,7 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
+	blockRenderer.Options.ProtyleContenteditable = false
 	ast.Walk(node, func(node *ast.Node, entering bool) ast.WalkStatus {
 		rendererFunc := blockRenderer.RendererFuncs[node.Type]
 		return rendererFunc(node, entering)

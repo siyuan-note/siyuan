@@ -22,7 +22,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -72,50 +71,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		})
 	}
 
-	// 生成行
-	rowsValues := map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.KeyValues {
-		for _, val := range keyValues.Values {
-			values := rowsValues[val.BlockID]
-			if nil == values {
-				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
-			} else {
-				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
-			}
-			rowsValues[val.BlockID] = values
-		}
-	}
-
-	// 过滤掉不存在的行
-	var notFound []string
-	var toCheckBlockIDs []string
-	for blockID, keyValues := range rowsValues {
-		blockValue := getBlockValue(keyValues)
-		if nil == blockValue {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		if blockValue.IsDetached {
-			continue
-		}
-
-		if nil != blockValue.Block && "" == blockValue.Block.ID {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
-	}
-	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
-	for blockID, exist := range checkRet {
-		if !exist {
-			notFound = append(notFound, blockID)
-		}
-	}
-	for _, blockID := range notFound {
-		delete(rowsValues, blockID)
-	}
+	rowsValues := generateAttrViewItems(attrView) // 生成行
+	filterNotFoundAttrViewItems(&rowsValues)      // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {
@@ -144,30 +101,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			}
 			tableRow.ID = rowID
 
-			switch tableCell.ValueType {
-			case av.KeyTypeNumber: // 格式化数字
-				if nil != tableCell.Value && nil != tableCell.Value.Number && tableCell.Value.Number.IsNotEmpty {
-					tableCell.Value.Number.Format = col.NumberFormat
-					tableCell.Value.Number.FormatNumber()
-				}
-			case av.KeyTypeTemplate: // 渲染模板列
-				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: col.Template}}
-			case av.KeyTypeCreated: // 填充创建时间列值，后面再渲染
-				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeCreated}
-			case av.KeyTypeUpdated: // 填充更新时间列值，后面再渲染
-				tableCell.Value = &av.Value{ID: tableCell.ID, KeyID: col.ID, BlockID: rowID, Type: av.KeyTypeUpdated}
-			case av.KeyTypeRelation: // 清空关联列值，后面再渲染 https://ld246.com/article/1703831044435
-				if nil != tableCell.Value && nil != tableCell.Value.Relation {
-					tableCell.Value.Relation.Contents = nil
-				}
-			}
-
-			if nil == tableCell.Value {
-				tableCell.Value = av.GetAttributeViewDefaultValue(tableCell.ID, col.ID, rowID, tableCell.ValueType)
-			} else {
-				fillAttributeViewNilValue(tableCell.Value, tableCell.ValueType)
-			}
-
+			fillAttributeViewBaseValue(tableCell.BaseValue, col.ID, rowID, col.NumberFormat, col.Template)
 			tableRow.Cells = append(tableRow.Cells, tableCell)
 		}
 		ret.Rows = append(ret.Rows, &tableRow)

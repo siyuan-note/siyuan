@@ -25,6 +25,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -171,6 +172,80 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	}
 	ret = buf.String()
 	return
+}
+
+func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.KeyValues) {
+	ret = map[string][]*av.KeyValues{}
+	for _, keyValues := range attrView.KeyValues {
+		for _, val := range keyValues.Values {
+			values := ret[val.BlockID]
+			if nil == values {
+				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
+			} else {
+				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
+			}
+			ret[val.BlockID] = values
+		}
+	}
+	return
+}
+
+func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
+	var notFound []string
+	var toCheckBlockIDs []string
+	for blockID, keyValues := range *keyValuesMap {
+		blockValue := getBlockValue(keyValues)
+		if nil == blockValue {
+			notFound = append(notFound, blockID)
+			continue
+		}
+
+		if blockValue.IsDetached {
+			continue
+		}
+
+		if nil != blockValue.Block && "" == blockValue.Block.ID {
+			notFound = append(notFound, blockID)
+			continue
+		}
+
+		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
+	}
+	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
+	for blockID, exist := range checkRet {
+		if !exist {
+			notFound = append(notFound, blockID)
+		}
+	}
+	for _, blockID := range notFound {
+		delete(*keyValuesMap, blockID)
+	}
+}
+
+func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string) {
+	switch baseValue.ValueType {
+	case av.KeyTypeNumber: // 格式化数字
+		if nil != baseValue.Value && nil != baseValue.Value.Number && baseValue.Value.Number.IsNotEmpty {
+			baseValue.Value.Number.Format = fieldNumberFormat
+			baseValue.Value.Number.FormatNumber()
+		}
+	case av.KeyTypeTemplate: // 渲染模板字段
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: fieldTemplate}}
+	case av.KeyTypeCreated: // 填充创建时间字段值，后面再渲染
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeCreated}
+	case av.KeyTypeUpdated: // 填充更新时间字段值，后面再渲染
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeUpdated}
+	case av.KeyTypeRelation: // 清空关联字段值，后面再渲染 https://ld246.com/article/1703831044435
+		if nil != baseValue.Value && nil != baseValue.Value.Relation {
+			baseValue.Value.Relation.Contents = nil
+		}
+	}
+
+	if nil == baseValue.Value {
+		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType)
+	} else {
+		fillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
+	}
 }
 
 func fillAttributeViewNilValue(value *av.Value, typ av.KeyType) {

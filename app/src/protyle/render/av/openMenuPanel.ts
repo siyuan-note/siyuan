@@ -86,7 +86,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "switcher") {
             html = getSwitcherHTML(data.views, data.viewID);
         } else if (options.type === "filters") {
-            html = getFiltersHTML(data.view);
+            html = getFiltersHTML(data);
         } else if (options.type === "select") {
             html = getSelectHTML(data.view, options.cellElements, true);
         } else if (options.type === "asset") {
@@ -285,7 +285,7 @@ export const openMenuPanel = (options: {
                     data: oldData,
                     blockID
                 }]);
-                menuElement.innerHTML = getFiltersHTML(data.view);
+                menuElement.innerHTML = getFiltersHTML(data);
                 return;
             }
             if (targetElement.querySelector('[data-type="av-view-edit"]')) {
@@ -621,7 +621,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goFilters") {
-                    menuElement.innerHTML = getFiltersHTML(data.view);
+                    menuElement.innerHTML = getFiltersHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -640,7 +640,7 @@ export const openMenuPanel = (options: {
                         blockID
                     }]);
                     data.view.filters = [];
-                    menuElement.innerHTML = getFiltersHTML(data.view);
+                    menuElement.innerHTML = getFiltersHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();
@@ -679,7 +679,7 @@ export const openMenuPanel = (options: {
                         data: oldFilters,
                         blockID
                     }]);
-                    menuElement.innerHTML = getFiltersHTML(data.view);
+                    menuElement.innerHTML = getFiltersHTML(data);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

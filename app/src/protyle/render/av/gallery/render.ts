@@ -84,7 +84,10 @@ export const renderGallery = (options: {
             }
 
             galleryHTML += '<div class="av__gallery-fields">';
-            item.values.forEach(cell => {
+            item.values.forEach((cell, fieldsIndex) => {
+                if (view.fields[fieldsIndex].hidden) {
+                    return;
+                }
                 let checkClass = "";
                 if (cell.valueType === "checkbox") {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";

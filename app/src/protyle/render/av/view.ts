@@ -390,3 +390,6 @@ export const getViewName = (type: string) => {
     }
 };
 
+export const getFieldsByData = (data: IAV) => {
+    return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
+}

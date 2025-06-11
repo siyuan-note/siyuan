@@ -16,6 +16,7 @@ import {setPosition} from "../../../util/setPosition";
 import {duplicateNameAddOne} from "../../../util/functions";
 import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {getFieldsByData} from "./view";
 
 export const duplicateCol = (options: {
     protyle: IProtyle,
@@ -25,10 +26,11 @@ export const duplicateCol = (options: {
     data: IAV,
 }) => {
     let newColData: IAVColumn;
-    options.data.view.columns.find((item: IAVColumn, index) => {
+    const fields = getFieldsByData(options.data);
+    fields.find((item: IAVColumn, index) => {
         if (item.id === options.colId) {
             newColData = JSON.parse(JSON.stringify(item));
-            options.data.view.columns.splice(index + 1, 0, newColData);
+            fields.splice(index + 1, 0, newColData);
             return true;
         }
     });
@@ -74,7 +76,7 @@ export const getEditHTML = (options: {
     isCustomAttr: boolean
 }) => {
     let colData: IAVColumn;
-    options.data.view.columns.find((item) => {
+    getFieldsByData(options.data).find((item) => {
         if (item.id === options.colId) {
             colData = item;
             return true;
@@ -190,12 +192,6 @@ export const getEditHTML = (options: {
     }
     return `<div class="b3-menu__items">
     ${html}
-    <button class="b3-menu__separator" data-id="separator_4"></button>
-    <label class="b3-menu__item" data-type="wrap">
-        <span class="fn__flex-center">${window.siyuan.languages.wrap}</span>
-        <span class="fn__space fn__flex-1"></span>
-        <input data-type="wrap" type="checkbox" class="b3-switch b3-switch--menu" ${colData.wrap ? " checked" : ""}>
-    </label>
 </div>
 <div class="b3-menu__items fn__none">
     <button class="b3-menu__item" data-type="nobg" data-col-id="${colData.id}">
@@ -233,7 +229,7 @@ export const bindEditEvent = (options: {
 }) => {
     const avID = options.data.id;
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
-    const colData = options.data.view.columns.find((item: IAVColumn) => item.id === colId);
+    const colData = getFieldsByData(options.data).find((item: IAVColumn) => item.id === colId);
     const nameElement = options.menuElement.querySelector('[data-type="name"]') as HTMLInputElement;
     nameElement.addEventListener("blur", () => {
         const newValue = nameElement.value;
@@ -614,7 +610,7 @@ const addAttrViewColAnimation = (options: {
     // https://github.com/siyuan-note/siyuan/issues/14724
     let colData;
     if (options.data) {
-        colData = options.data.view.columns.find((item => item.id === options.id));
+        colData = getFieldsByData(options.data).find((item => item.id === options.id));
     }
     openMenuPanel({
         protyle: options.protyle,
@@ -1122,7 +1118,7 @@ const removeColByMenu = (options: {
 
 export const removeCol = (options: {
     protyle: IProtyle,
-    data: IAV,
+    fields: IAVColumn[],
     avID: string,
     blockID: string,
     isCustomAttr: boolean
@@ -1134,10 +1130,10 @@ export const removeCol = (options: {
 }) => {
     const colId = options.menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
     let previousID = "";
-    const colData = options.data.view.columns.find((item: IAVColumn, index) => {
+    const colData = options.fields.find((item: IAVColumn, index) => {
         if (item.id === colId) {
-            previousID = options.data.view.columns[index - 1]?.id;
-            options.data.view.columns.splice(index, 1);
+            previousID = options.fields[index - 1]?.id;
+            options.fields.splice(index, 1);
             return true;
         }
     });
@@ -1169,7 +1165,7 @@ export const removeCol = (options: {
     if (options.isCustomAttr) {
         options.avPanelElement.remove();
     } else {
-        options.menuElement.innerHTML = getPropertiesHTML(options.data.view);
+        options.menuElement.innerHTML = getPropertiesHTML(options.fields);
         setPosition(options.menuElement,
             options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom,
             options.tabRect.height);

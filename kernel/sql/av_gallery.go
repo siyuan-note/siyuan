@@ -360,7 +360,7 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 				break
 			}
 
-			if titleImgCss := node.IALAttr("title-img"); strings.HasPrefix(titleImgCss, "background:") {
+			if titleImgCss := node.IALAttr("title-img"); "" != titleImgCss {
 				galleryCard.CoverURL = titleImgCss
 				break
 			}

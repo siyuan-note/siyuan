@@ -2283,7 +2283,7 @@ export class Gutter {
         let hideParent = false;
         while (nodeElement) {
             let parentElement = hasClosestBlock(nodeElement.parentElement);
-            if (!isInEmbedBlock(nodeElement) && !isInAVBlock(nodeElement)) {
+            if (!isInEmbedBlock(nodeElement)) {
                 let type;
                 if (!hideParent) {
                     type = nodeElement.getAttribute("data-type");

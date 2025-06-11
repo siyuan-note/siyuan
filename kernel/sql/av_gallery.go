@@ -98,7 +98,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 
-		fillGalleryCardCover(attrView, view, cardValues, &galleryCard, cardID, luteEngine)
+		fillAttributeViewGalleryCardCover(attrView, view, cardValues, &galleryCard, cardID, luteEngine)
 		ret.Cards = append(ret.Cards, &galleryCard)
 	}
 
@@ -336,7 +336,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	return
 }
 
-func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard *av.GalleryCard, cardID string, luteEngine *lute.Lute) {
+func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard *av.GalleryCard, cardID string, luteEngine *lute.Lute) {
 	switch view.Gallery.CoverFrom {
 	case av.CoverFromNone:
 	case av.CoverFromContentImage:

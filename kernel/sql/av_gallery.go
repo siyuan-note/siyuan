@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"sort"
 	"strings"
-	"time"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
@@ -117,140 +116,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	avCache[attrView.ID] = attrView
 	for _, card := range ret.Cards {
 		for _, value := range card.Values {
-			switch value.ValueType {
-			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
-				if nil != value.Value.Block {
-					for k, v := range ials[card.ID] {
-						if k == av.NodeAttrViewStaticText+"-"+attrView.ID {
-							value.Value.Block.Content = v
-							break
-						}
-					}
-				}
-			case av.KeyTypeRollup: // 渲染汇总字段
-				rollupKey, _ := attrView.GetKey(value.Value.KeyID)
-				if nil == rollupKey || nil == rollupKey.Rollup {
-					break
-				}
-
-				relKey, _ := attrView.GetKey(rollupKey.Rollup.RelationKeyID)
-				if nil == relKey || nil == relKey.Relation {
-					break
-				}
-
-				relVal := attrView.GetValue(relKey.ID, card.ID)
-				if nil == relVal || nil == relVal.Relation {
-					break
-				}
-
-				destAv := avCache[relKey.Relation.AvID]
-				if nil == destAv {
-					destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
-					if nil != destAv {
-						avCache[relKey.Relation.AvID] = destAv
-					}
-				}
-				if nil == destAv {
-					break
-				}
-
-				destKey, _ := destAv.GetKey(rollupKey.Rollup.KeyID)
-				if nil == destKey {
-					continue
-				}
-
-				for _, blockID := range relVal.Relation.BlockIDs {
-					destVal := destAv.GetValue(rollupKey.Rollup.KeyID, blockID)
-					if nil == destVal {
-						if destAv.ExistBlock(blockID) { // 数据库中存在但是值不存在是数据未初始化，这里补一个默认值
-							destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), rollupKey.Rollup.KeyID, blockID, destKey.Type)
-						}
-						if nil == destVal {
-							continue
-						}
-					}
-					if av.KeyTypeNumber == destKey.Type {
-						destVal.Number.Format = destKey.NumberFormat
-						destVal.Number.FormatNumber()
-					}
-
-					value.Value.Rollup.Contents = append(value.Value.Rollup.Contents, destVal.Clone())
-				}
-
-				value.Value.Rollup.RenderContents(rollupKey.Rollup.Calc, destKey)
-
-				// 将汇总字段的值保存到 cardsValues 中，后续渲染模板字段的时候会用到，下同
-				keyValues := cardsValues[card.ID]
-				keyValues = append(keyValues, &av.KeyValues{Key: rollupKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: rollupKey.ID, BlockID: card.ID, Type: av.KeyTypeRollup, Rollup: value.Value.Rollup}}})
-				cardsValues[card.ID] = keyValues
-			case av.KeyTypeRelation: // 渲染关联字段
-				relKey, _ := attrView.GetKey(value.Value.KeyID)
-				if nil != relKey && nil != relKey.Relation {
-					destAv := avCache[relKey.Relation.AvID]
-					if nil == destAv {
-						destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
-						if nil != destAv {
-							avCache[relKey.Relation.AvID] = destAv
-						}
-					}
-					if nil != destAv {
-						blocks := map[string]*av.Value{}
-						blockValues := destAv.GetBlockKeyValues()
-						if nil != blockValues {
-							for _, blockValue := range blockValues.Values {
-								blocks[blockValue.BlockID] = blockValue
-							}
-							for _, blockID := range value.Value.Relation.BlockIDs {
-								if val := blocks[blockID]; nil != val {
-									value.Value.Relation.Contents = append(value.Value.Relation.Contents, val)
-								}
-							}
-						}
-					}
-				}
-
-				keyValues := cardsValues[card.ID]
-				keyValues = append(keyValues, &av.KeyValues{Key: relKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: relKey.ID, BlockID: card.ID, Type: av.KeyTypeRelation, Relation: value.Value.Relation}}})
-				cardsValues[card.ID] = keyValues
-			case av.KeyTypeCreated: // 渲染创建时间
-				createdStr := card.ID[:len("20060102150405")]
-				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-				if nil == parseErr {
-					value.Value.Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
-					value.Value.Created.IsNotEmpty = true
-				} else {
-					value.Value.Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
-				}
-
-				keyValues := cardsValues[card.ID]
-				createdKey, _ := attrView.GetKey(value.Value.KeyID)
-				keyValues = append(keyValues, &av.KeyValues{Key: createdKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: createdKey.ID, BlockID: card.ID, Type: av.KeyTypeCreated, Created: value.Value.Created}}})
-				cardsValues[card.ID] = keyValues
-			case av.KeyTypeUpdated: // 渲染更新时间
-				ial := ials[card.ID]
-				if nil == ial {
-					ial = map[string]string{}
-				}
-				block := card.GetBlockValue()
-				updatedStr := ial["updated"]
-				if "" == updatedStr && nil != block {
-					value.Value.Updated = av.NewFormattedValueUpdated(block.Block.Updated, 0, av.UpdatedFormatNone)
-					value.Value.Updated.IsNotEmpty = true
-				} else {
-					updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
-					if nil == parseErr {
-						value.Value.Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
-						value.Value.Updated.IsNotEmpty = true
-					} else {
-						value.Value.Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
-					}
-				}
-
-				keyValues := cardsValues[card.ID]
-				updatedKey, _ := attrView.GetKey(value.Value.KeyID)
-				keyValues = append(keyValues, &av.KeyValues{Key: updatedKey, Values: []*av.Value{{ID: value.Value.ID, KeyID: updatedKey.ID, BlockID: card.ID, Type: av.KeyTypeUpdated, Updated: value.Value.Updated}}})
-				cardsValues[card.ID] = keyValues
-			}
+			fillAttributeViewAutoGeneratedValues(attrView, ials, value.Value, card, cardsValues, &avCache)
 		}
 	}
 

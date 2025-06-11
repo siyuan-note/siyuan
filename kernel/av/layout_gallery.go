@@ -112,6 +112,10 @@ type GalleryFieldValue struct {
 	*BaseValue
 }
 
+func (card *GalleryCard) GetID() string {
+	return card.ID
+}
+
 func (card *GalleryCard) GetBlockValue() (ret *Value) {
 	for _, v := range card.Values {
 		if KeyTypeBlock == v.ValueType {

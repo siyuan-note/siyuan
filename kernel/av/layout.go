@@ -16,6 +16,17 @@
 
 package av
 
+// Item 描述了一个项目的接口。
+// 项目可以表格行、画廊卡片或其他视图类型的实体。
+type Item interface {
+
+	// GetBlockValue 返回主键的值。
+	GetBlockValue() *Value
+
+	// GetID 返回项目的 ID。
+	GetID() string
+}
+
 // BaseLayout 描述了布局的基础结构。
 type BaseLayout struct {
 	Spec     int           `json:"spec"`     // 布局格式版本

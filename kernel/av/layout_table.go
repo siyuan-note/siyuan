@@ -87,6 +87,10 @@ type TableCell struct {
 	BgColor string `json:"bgColor"` // 单元格背景颜色
 }
 
+func (row *TableRow) GetID() string {
+	return row.ID
+}
+
 func (row *TableRow) GetBlockValue() (ret *Value) {
 	for _, cell := range row.Cells {
 		if KeyTypeBlock == cell.ValueType {

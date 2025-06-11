@@ -67,6 +67,7 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
+	Wrap  bool        `json:"wrap"`  // 是否换行
 	Pin   bool        `json:"pin"`   // 是否固定
 	Width string      `json:"width"` // 列宽度
 	Calc  *ColumnCalc `json:"calc"`  // 计算

@@ -50,7 +50,6 @@ type BaseInstanceField struct {
 	Name   string  `json:"name"`   // 字段名
 	Type   KeyType `json:"type"`   // 字段类型
 	Icon   string  `json:"icon"`   // 字段图标
-	Wrap   bool    `json:"wrap"`   // 是否换行
 	Hidden bool    `json:"hidden"` // 是否隐藏
 	Desc   string  `json:"desc"`   // 字段描述
 

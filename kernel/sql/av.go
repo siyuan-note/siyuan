@@ -222,6 +222,32 @@ func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
 	}
 }
 
+func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string, fieldNumberFormat av.NumberFormat, fieldTemplate string) {
+	switch baseValue.ValueType {
+	case av.KeyTypeNumber: // 格式化数字
+		if nil != baseValue.Value && nil != baseValue.Value.Number && baseValue.Value.Number.IsNotEmpty {
+			baseValue.Value.Number.Format = fieldNumberFormat
+			baseValue.Value.Number.FormatNumber()
+		}
+	case av.KeyTypeTemplate: // 渲染模板字段
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: fieldTemplate}}
+	case av.KeyTypeCreated: // 填充创建时间字段值，后面再渲染
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeCreated}
+	case av.KeyTypeUpdated: // 填充更新时间字段值，后面再渲染
+		baseValue.Value = &av.Value{ID: baseValue.ID, KeyID: fieldID, BlockID: itemID, Type: av.KeyTypeUpdated}
+	case av.KeyTypeRelation: // 清空关联字段值，后面再渲染 https://ld246.com/article/1703831044435
+		if nil != baseValue.Value && nil != baseValue.Value.Relation {
+			baseValue.Value.Relation.Contents = nil
+		}
+	}
+
+	if nil == baseValue.Value {
+		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType)
+	} else {
+		fillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
+	}
+}
+
 func fillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 	value.Type = typ
 	switch typ {

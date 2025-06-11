@@ -94,30 +94,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			}
 			galleryCard.ID = cardID
 
-			switch fieldValue.ValueType {
-			case av.KeyTypeNumber: // 格式化数字
-				if nil != fieldValue.Value && nil != fieldValue.Value.Number && fieldValue.Value.Number.IsNotEmpty {
-					fieldValue.Value.Number.Format = field.NumberFormat
-					fieldValue.Value.Number.FormatNumber()
-				}
-			case av.KeyTypeTemplate: // 渲染模板字段
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeTemplate, Template: &av.ValueTemplate{Content: field.Template}}
-			case av.KeyTypeCreated: // 填充创建时间字段值，后面再渲染
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeCreated}
-			case av.KeyTypeUpdated: // 填充更新时间字段值，后面再渲染
-				fieldValue.Value = &av.Value{ID: fieldValue.ID, KeyID: field.ID, BlockID: cardID, Type: av.KeyTypeUpdated}
-			case av.KeyTypeRelation: // 清空关联字段值，后面再渲染 https://ld246.com/article/1703831044435
-				if nil != fieldValue.Value && nil != fieldValue.Value.Relation {
-					fieldValue.Value.Relation.Contents = nil
-				}
-			}
-
-			if nil == fieldValue.Value {
-				fieldValue.Value = av.GetAttributeViewDefaultValue(fieldValue.ID, field.ID, cardID, fieldValue.ValueType)
-			} else {
-				fillAttributeViewNilValue(fieldValue.Value, fieldValue.ValueType)
-			}
-
+			fillAttributeViewBaseValue(fieldValue.BaseValue, field.ID, cardID, field.NumberFormat, field.Template)
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 

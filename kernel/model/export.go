@@ -80,7 +80,7 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	}
 
 	name := util.FilterFileName(getAttrViewName(attrView))
-	table := sql.RenderAttributeViewTable(attrView, view, "")
+	table := getAttrViewTable(attrView, view)
 
 	// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 	table.Filter(attrView)
@@ -2492,7 +2492,7 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 			return ast.WalkContinue
 		}
 
-		table := sql.RenderAttributeViewTable(attrView, view, "")
+		table := getAttrViewTable(attrView, view)
 
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
 		table.Filter(attrView)
@@ -3378,5 +3378,20 @@ func loadTreeWithCache(id string, treeCache *map[string]*parse.Tree) (tree *pars
 	if nil == err && nil != tree {
 		(*treeCache)[id] = tree
 	}
+	return
+}
+
+func getAttrViewTable(attrView *av.AttributeView, view *av.View) (ret *av.Table) {
+	switch view.LayoutType {
+	case av.LayoutTypeGallery:
+		view.Table = av.NewLayoutTable()
+		for _, field := range view.Gallery.CardFields {
+			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: field.ID})
+		}
+		for _, cardID := range view.Gallery.CardIDs {
+			view.Table.RowIDs = append(view.Table.RowIDs, cardID)
+		}
+	}
+	ret = sql.RenderAttributeViewTable(attrView, view, "")
 	return
 }

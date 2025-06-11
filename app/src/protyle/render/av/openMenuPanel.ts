@@ -1386,7 +1386,7 @@ export const openMenuPanel = (options: {
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,
-                        view: data.view as IAVGallery
+                        data: data
                     });
                     event.preventDefault();
                     event.stopPropagation();

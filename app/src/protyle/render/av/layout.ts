@@ -179,7 +179,7 @@ export const bindLayoutEvent = (options: {
 };
 
 export const updateLayout = (options: {
-    view: IAVGallery
+    data: IAV
     nodeElement: Element,
     protyle: IProtyle,
     target: HTMLElement
@@ -199,9 +199,8 @@ export const updateLayout = (options: {
         action: "changeAttrViewLayout",
         avID,
         blockID,
-        layout: options.view.type
+        layout: options.data.viewType
     }]);
-    options.nodeElement.setAttribute("data-view-type", layout);
     options.target.parentElement.querySelector(".av__layout-item--select").classList.remove("av__layout-item--select");
     options.target.classList.add("av__layout-item--select");
 };

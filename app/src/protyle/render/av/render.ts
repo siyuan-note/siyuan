@@ -488,6 +488,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 if (operation.action === "removeAttrViewView") {
                     item.setAttribute("data-av-type", operation.retData);
                 }
+                if (operation.action === "changeAttrViewLayout") {
+                    item.setAttribute("data-av-type", operation.layout);
+                }
                 avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {

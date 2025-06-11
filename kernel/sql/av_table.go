@@ -22,7 +22,6 @@ import (
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
-	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -72,50 +71,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		})
 	}
 
-	// 生成行
-	rowsValues := map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.KeyValues {
-		for _, val := range keyValues.Values {
-			values := rowsValues[val.BlockID]
-			if nil == values {
-				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
-			} else {
-				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
-			}
-			rowsValues[val.BlockID] = values
-		}
-	}
-
-	// 过滤掉不存在的行
-	var notFound []string
-	var toCheckBlockIDs []string
-	for blockID, keyValues := range rowsValues {
-		blockValue := getBlockValue(keyValues)
-		if nil == blockValue {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		if blockValue.IsDetached {
-			continue
-		}
-
-		if nil != blockValue.Block && "" == blockValue.Block.ID {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
-	}
-	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
-	for blockID, exist := range checkRet {
-		if !exist {
-			notFound = append(notFound, blockID)
-		}
-	}
-	for _, blockID := range notFound {
-		delete(rowsValues, blockID)
-	}
+	rowsValues := generateAttrViewItems(attrView) // 生成行
+	filterNotFoundAttrViewItems(&rowsValues)      // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {

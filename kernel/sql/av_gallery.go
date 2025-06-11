@@ -64,50 +64,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		})
 	}
 
-	// 生成卡片
-	cardsValues := map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.KeyValues {
-		for _, val := range keyValues.Values {
-			values := cardsValues[val.BlockID]
-			if nil == values {
-				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
-			} else {
-				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
-			}
-			cardsValues[val.BlockID] = values
-		}
-	}
-
-	// 过滤掉不存在的卡片
-	var notFound []string
-	var toCheckBlockIDs []string
-	for blockID, keyValues := range cardsValues {
-		blockValue := getBlockValue(keyValues)
-		if nil == blockValue {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		if blockValue.IsDetached {
-			continue
-		}
-
-		if nil != blockValue.Block && "" == blockValue.Block.ID {
-			notFound = append(notFound, blockID)
-			continue
-		}
-
-		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
-	}
-	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
-	for blockID, exist := range checkRet {
-		if !exist {
-			notFound = append(notFound, blockID)
-		}
-	}
-	for _, blockID := range notFound {
-		delete(cardsValues, blockID)
-	}
+	cardsValues := generateAttrViewItems(attrView) // 生成卡片
+	filterNotFoundAttrViewItems(&cardsValues)      // 过滤掉不存在的卡片
 
 	// 生成卡片字段值
 	for cardID, cardValues := range cardsValues {

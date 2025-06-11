@@ -25,6 +25,7 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
+	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
@@ -171,6 +172,54 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	}
 	ret = buf.String()
 	return
+}
+
+func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.KeyValues) {
+	ret = map[string][]*av.KeyValues{}
+	for _, keyValues := range attrView.KeyValues {
+		for _, val := range keyValues.Values {
+			values := ret[val.BlockID]
+			if nil == values {
+				values = []*av.KeyValues{{Key: keyValues.Key, Values: []*av.Value{val}}}
+			} else {
+				values = append(values, &av.KeyValues{Key: keyValues.Key, Values: []*av.Value{val}})
+			}
+			ret[val.BlockID] = values
+		}
+	}
+	return
+}
+
+func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
+	var notFound []string
+	var toCheckBlockIDs []string
+	for blockID, keyValues := range *keyValuesMap {
+		blockValue := getBlockValue(keyValues)
+		if nil == blockValue {
+			notFound = append(notFound, blockID)
+			continue
+		}
+
+		if blockValue.IsDetached {
+			continue
+		}
+
+		if nil != blockValue.Block && "" == blockValue.Block.ID {
+			notFound = append(notFound, blockID)
+			continue
+		}
+
+		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
+	}
+	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
+	for blockID, exist := range checkRet {
+		if !exist {
+			notFound = append(notFound, blockID)
+		}
+	}
+	for _, blockID := range notFound {
+		delete(*keyValuesMap, blockID)
+	}
 }
 
 func fillAttributeViewNilValue(value *av.Value, typ av.KeyType) {

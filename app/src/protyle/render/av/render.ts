@@ -16,8 +16,10 @@ import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
 import {getViewIcon} from "./view";
+import {bindLayoutEvent, getLayoutHTML} from "./layout";
+import {setPosition} from "../../../util/setPosition";
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: () => void, viewID?: string, renderAll = true) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, viewID?: string, renderAll = true) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -370,7 +372,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 }
                 e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
                 if (cb) {
-                    cb();
+                    cb(response.data);
                 }
                 if (!renderAll) {
                     return;
@@ -491,7 +493,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 if (operation.action === "changeAttrViewLayout") {
                     item.setAttribute("data-av-type", operation.layout);
                 }
-                avRender(item, protyle, () => {
+                avRender(item, protyle, (data) => {
+                    if (operation.action === "changeAttrViewLayout") {
+                        const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
+                        menuElement.innerHTML = getLayoutHTML(data);
+                        const tabRect = item.querySelector(".av__views").getBoundingClientRect();
+                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                        bindLayoutEvent({protyle: protyle, data, menuElement, blockElement: item});
+                    }
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {
                         // 更新属性面板

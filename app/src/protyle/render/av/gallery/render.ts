@@ -13,7 +13,7 @@ import {getViewIcon} from "../view";
 export const renderGallery = (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
-    cb?: () => void,
+    cb?: (data:IAV) => void,
     viewID?: string,
     renderAll: boolean
 }) => {
@@ -184,7 +184,7 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
         }
         options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
         if (options.cb) {
-            options.cb();
+            options.cb(response.data);
         }
         if (!options.renderAll) {
             return;

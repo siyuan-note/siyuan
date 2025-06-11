@@ -205,7 +205,7 @@ const (
 func NewTableView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
-		Name:       getI18nName("table"),
+		Name:       GetAttributeViewI18n("table"),
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
 	}
@@ -213,17 +213,17 @@ func NewTableView() (ret *View) {
 }
 
 func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKey *Key) {
-	name := getI18nName("table")
+	name := GetAttributeViewI18n("table")
 	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
 	}
-	blockKey = NewKey(blockKeyID, getI18nName("key"), "", KeyTypeBlock)
+	blockKey = NewKey(blockKeyID, GetAttributeViewI18n("key"), "", KeyTypeBlock)
 	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
 
-	selectKey = NewKey(ast.NewNodeID(), getI18nName("select"), "", KeyTypeSelect)
+	selectKey = NewKey(ast.NewNodeID(), GetAttributeViewI18n("select"), "", KeyTypeSelect)
 	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{ID: selectKey.ID})
 	return
 }
@@ -231,7 +231,7 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 func NewGalleryView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
-		Name:       getI18nName("gallery"),
+		Name:       GetAttributeViewI18n("gallery"),
 		LayoutType: LayoutTypeGallery,
 		Gallery:    NewLayoutGallery(),
 	}
@@ -601,8 +601,8 @@ func GetAttributeViewDataPath(avID string) (ret string) {
 	return
 }
 
-func getI18nName(name string) string {
-	return util.AttrViewLangs[util.Lang][name].(string)
+func GetAttributeViewI18n(key string) string {
+	return util.AttrViewLangs[util.Lang][key].(string)
 }
 
 var (

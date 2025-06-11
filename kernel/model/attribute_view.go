@@ -70,6 +70,10 @@ func changeAttrViewLayout(operation *Operation) (err error) {
 
 	switch newLayout {
 	case av.LayoutTypeTable:
+		if view.Name == av.GetAttributeViewI18n("gallery") {
+			view.Name = av.GetAttributeViewI18n("table")
+		}
+
 		if nil != view.Table {
 			break
 		}
@@ -85,6 +89,10 @@ func changeAttrViewLayout(operation *Operation) (err error) {
 			}
 		}
 	case av.LayoutTypeGallery:
+		if view.Name == av.GetAttributeViewI18n("table") {
+			view.Name = av.GetAttributeViewI18n("gallery")
+		}
+
 		if nil != view.Gallery {
 			break
 		}

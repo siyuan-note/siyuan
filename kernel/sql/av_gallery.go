@@ -416,6 +416,7 @@ func fillGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues 
 func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
+	blockRenderer.Options.ProtyleContenteditable = false
 	ast.Walk(node, func(node *ast.Node, entering bool) ast.WalkStatus {
 		rendererFunc := blockRenderer.RendererFuncs[node.Type]
 		return rendererFunc(node, entering)

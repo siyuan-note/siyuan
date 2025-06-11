@@ -3207,7 +3207,7 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 				}
 			case av.LayoutTypeGallery:
 				if "" == previousKeyID {
-					view.Gallery.CardFields = append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields...)
+					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
 					break
 				}
 

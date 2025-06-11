@@ -2314,7 +2314,7 @@ export class Gutter {
                     const topElement = getTopAloneElement(nodeElement);
                     listItem = topElement.querySelector(".li") || topElement.querySelector(".list");
                     // 嵌入块中有列表时块标显示位置错误 https://github.com/siyuan-note/siyuan/issues/6254
-                    if (isInEmbedBlock(listItem)) {
+                    if (isInEmbedBlock(listItem) || isInAVBlock(listItem)) {
                         listItem = undefined;
                     }
                     // 标题必须显示

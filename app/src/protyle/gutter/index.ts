@@ -2,7 +2,7 @@ import {
     hasClosestBlock,
     hasClosestByClassName,
     hasClosestByTag,
-    hasTopClosestByClassName,
+    hasTopClosestByClassName, isInAVBlock,
     isInEmbedBlock
 } from "../util/hasClosest";
 import {getIconByType} from "../../editor/getIcon";
@@ -2283,7 +2283,7 @@ export class Gutter {
         let hideParent = false;
         while (nodeElement) {
             let parentElement = hasClosestBlock(nodeElement.parentElement);
-            if (!isInEmbedBlock(nodeElement)) {
+            if (!isInEmbedBlock(nodeElement) && !isInAVBlock(nodeElement)) {
                 let type;
                 if (!hideParent) {
                     type = nodeElement.getAttribute("data-type");

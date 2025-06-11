@@ -970,6 +970,11 @@ export const addResize = (obj: Layout | Wnd) => {
 
 export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.parent) => {
     layout.children.forEach((item: Layout | Wnd) => {
+        if (item.element.classList.contains("layout__dockl") ||
+            item.element.classList.contains("layout__dockr")) {
+            return;
+        }
+        
         item.element.style.maxWidth = "";
         if (!item.element.style.width && !item.element.classList.contains("layout__center")) {
             item.element.style.minWidth = "8px";
@@ -982,6 +987,11 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
     // +2 由于某些分辨率下 scrollWidth 会大于 clientWidth
     while (layout.element.scrollWidth > layout.element.clientWidth + 2 && index > 0) {
         layout.children.find((item: Layout | Wnd) => {
+            if (item.element.classList.contains("layout__dockl") ||
+                item.element.classList.contains("layout__dockr")) {
+                return false;
+            }
+            
             if (item.element.style.width && item.element.style.width !== "0px") {
                 item.element.style.maxWidth = Math.max(Math.min(item.element.clientWidth, window.innerWidth) - 8, 64) + "px";
                 lastItem = item.element;
@@ -992,7 +1002,8 @@ export const adjustLayout = (layout: Layout = window.siyuan.layout.centerLayout.
         });
         index--;
     }
-    if (lastItem) {
+    if (lastItem && !lastItem.classList.contains("layout__dockl") &&
+        !lastItem.classList.contains("layout__dockr")) {
         lastItem.style.maxWidth = Math.max(Math.min(lastItem.clientWidth, window.innerWidth) - 8, 64) + "px";
     }
     layout.children.forEach((item: Layout | Wnd) => {

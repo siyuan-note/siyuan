@@ -127,27 +127,12 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 
 	// 最后单独渲染模板列，这样模板列就可以使用汇总、关联、创建时间和更新时间列的值了
 	// Database table view template columns support reading relation, rollup, created and updated columns https://github.com/siyuan-note/siyuan/issues/10442
-
 	var renderTemplateErr error
 	for _, row := range ret.Rows {
 		for _, cell := range row.Cells {
-			switch cell.ValueType {
-			case av.KeyTypeTemplate: // 渲染模板列
-				keyValues := rowsValues[row.ID]
-				ial := ials[row.ID]
-				if nil == ial {
-					ial = map[string]string{}
-				}
-				content, renderErr := RenderTemplateField(ial, keyValues, cell.Value.Template.Content)
-				cell.Value.Template.Content = content
-				if nil != renderErr {
-					key, _ := attrView.GetKey(cell.Value.KeyID)
-					keyName := ""
-					if nil != key {
-						keyName = key.Name
-					}
-					renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), keyName, renderErr)
-				}
+			err := fillAttributeViewTemplateValue(cell.Value, row, attrView, ials, rowsValues)
+			if nil != err {
+				renderTemplateErr = err
 			}
 		}
 	}

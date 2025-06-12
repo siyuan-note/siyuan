@@ -121,27 +121,12 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	}
 
 	// 最后单独渲染模板字段，这样模板字段就可以使用汇总、关联、创建时间和更新时间字段的值了
-
 	var renderTemplateErr error
 	for _, card := range ret.Cards {
 		for _, value := range card.Values {
-			switch value.ValueType {
-			case av.KeyTypeTemplate: // 渲染模板字段
-				keyValues := cardsValues[card.ID]
-				ial := ials[card.ID]
-				if nil == ial {
-					ial = map[string]string{}
-				}
-				content, renderErr := RenderTemplateField(ial, keyValues, value.Value.Template.Content)
-				value.Value.Template.Content = content
-				if nil != renderErr {
-					key, _ := attrView.GetKey(value.Value.KeyID)
-					keyName := ""
-					if nil != key {
-						keyName = key.Name
-					}
-					renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), keyName, renderErr)
-				}
+			err := fillAttributeViewTemplateValue(value.Value, card, attrView, ials, cardsValues)
+			if nil != err {
+				renderTemplateErr = err
 			}
 		}
 	}

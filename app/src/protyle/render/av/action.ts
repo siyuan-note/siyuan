@@ -46,7 +46,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
 
     const loadMoreElement = hasClosestByAttribute(event.target, "data-type", "av-load-more");
     if (loadMoreElement && !hasClosestByAttribute(event.target, "data-type", "set-page-size")) {
-        (blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = "";
+        const rowFooterElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
+        if (rowFooterElement) {
+            rowFooterElement.style.transform = "";
+        }
         blockElement.removeAttribute("data-render");
         blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
         avRender(blockElement, protyle);

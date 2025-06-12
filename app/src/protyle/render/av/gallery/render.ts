@@ -101,7 +101,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             });
             galleryHTML += "</div></div>";
         });
-        galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newCol}</div>`;
+        galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.addCard}</div>`;
         let tabHTML = "";
         let viewData: IAVView;
         response.data.views.forEach((item: IAVView) => {

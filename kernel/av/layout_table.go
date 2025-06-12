@@ -91,16 +91,6 @@ type TableCell struct {
 	BgColor string `json:"bgColor"` // 单元格背景颜色
 }
 
-func (row *TableRow) GetValue(keyID string) (ret *Value) {
-	for _, cell := range row.Cells {
-		if nil != cell.Value && keyID == cell.Value.KeyID {
-			ret = cell.Value
-			break
-		}
-	}
-	return
-}
-
 func (table *Table) GetColumn(id string) *TableColumn {
 	for _, column := range table.Columns {
 		if column.ID == id {
@@ -129,6 +119,16 @@ func (row *TableRow) GetValues() (ret []*Value) {
 	for _, cell := range row.Cells {
 		if nil != cell.Value {
 			ret = append(ret, cell.Value)
+		}
+	}
+	return
+}
+
+func (row *TableRow) GetValue(keyID string) (ret *Value) {
+	for _, cell := range row.Cells {
+		if nil != cell.Value && keyID == cell.Value.KeyID {
+			ret = cell.Value
+			break
 		}
 	}
 	return

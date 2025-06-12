@@ -91,6 +91,9 @@ type Item interface {
 	// GetValues 返回项目的所有字段值。
 	GetValues() []*Value
 
+	// GetValue 返回指定键 ID 的字段值。
+	GetValue(keyID string) (ret *Value)
+
 	// GetID 返回项目的 ID。
 	GetID() string
 }

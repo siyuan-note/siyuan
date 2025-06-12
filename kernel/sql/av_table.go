@@ -16,8 +16,6 @@ package sql
 
 import (
 	"fmt"
-	"sort"
-	"strings"
 
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
@@ -140,55 +138,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		util.PushErrMsg(fmt.Sprintf(util.Langs[util.Lang][44], util.EscapeHTML(renderTemplateErr.Error())), 30000)
 	}
 
-	// 根据搜索条件过滤
-	query = strings.TrimSpace(query)
-	if "" != query {
-		// 将连续空格转换为一个空格
-		query = strings.Join(strings.Fields(query), " ")
-		// 按空格分割关键字
-		keywords := strings.Split(query, " ")
-		// 使用 AND 逻辑 https://github.com/siyuan-note/siyuan/issues/11535
-		var hitRows []*av.TableRow
-		for _, row := range ret.Rows {
-			hit := false
-			for _, cell := range row.Cells {
-				allKeywordsHit := true
-				for _, keyword := range keywords {
-					if !strings.Contains(strings.ToLower(cell.Value.String(true)), strings.ToLower(keyword)) {
-						allKeywordsHit = false
-						break
-					}
-				}
-				if allKeywordsHit {
-					hit = true
-					break
-				}
-			}
-			if hit {
-				hitRows = append(hitRows, row)
-			}
-		}
-		ret.Rows = hitRows
-		if 1 > len(ret.Rows) {
-			ret.Rows = []*av.TableRow{}
-		}
-	}
-
-	// 自定义排序
-	sortRowIDs := map[string]int{}
-	if 0 < len(view.Table.RowIDs) {
-		for i, rowID := range view.Table.RowIDs {
-			sortRowIDs[rowID] = i
-		}
-	}
-
-	sort.Slice(ret.Rows, func(i, j int) bool {
-		iv := sortRowIDs[ret.Rows[i].ID]
-		jv := sortRowIDs[ret.Rows[j].ID]
-		if iv == jv {
-			return ret.Rows[i].ID < ret.Rows[j].ID
-		}
-		return iv < jv
-	})
+	filterByQuery(query, ret)
+	manualSort(view.Table, ret)
 	return
 }

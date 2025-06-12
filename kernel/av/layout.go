@@ -63,12 +63,33 @@ type BaseInstanceField struct {
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
+// CollectionLayout 描述了集合布局的接口。
+type CollectionLayout interface {
+
+	// GetItemIDs 返回集合中所有项目的 ID。
+	GetItemIDs() []string
+}
+
+// Collection 描述了一个集合的接口。
+// 集合可以是表格、画廊等，包含多个项目。
+type Collection interface {
+
+	// GetItems 返回集合中的所有项目。
+	GetItems() (ret []Item)
+
+	// SetItems 设置集合中的项目。
+	SetItems(items []Item)
+}
+
 // Item 描述了一个项目的接口。
-// 项目可以表格行、画廊卡片或其他视图类型的实体。
+// 项目可以是表格行、画廊卡片等。
 type Item interface {
 
 	// GetBlockValue 返回主键的值。
 	GetBlockValue() *Value
+
+	// GetValues 返回项目的所有字段值。
+	GetValues() []*Value
 
 	// GetID 返回项目的 ID。
 	GetID() string

@@ -189,6 +189,26 @@ type View struct {
 	Gallery    *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
 }
 
+func (view *View) GetFilters() (ret []*ViewFilter) {
+	switch view.LayoutType {
+	case LayoutTypeTable:
+		return view.Table.Filters
+	case LayoutTypeGallery:
+		return view.Gallery.Filters
+	}
+	return
+}
+
+func (view *View) GetSorts() (ret []*ViewSort) {
+	switch view.LayoutType {
+	case LayoutTypeTable:
+		return view.Table.Sorts
+	case LayoutTypeGallery:
+		return view.Gallery.Sorts
+	}
+	return
+}
+
 // LayoutType 描述了视图布局类型。
 type LayoutType string
 

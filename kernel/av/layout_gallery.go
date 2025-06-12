@@ -138,6 +138,16 @@ func (card *GalleryCard) GetValues() (ret []*Value) {
 	return
 }
 
+func (card *GalleryCard) GetValue(keyID string) (ret *Value) {
+	for _, value := range card.Values {
+		if nil != value.Value && keyID == value.Value.KeyID {
+			ret = value.Value
+			break
+		}
+	}
+	return
+}
+
 func (gallery *Gallery) GetItems() (ret []Item) {
 	ret = []Item{}
 	for _, card := range gallery.Cards {

@@ -19,6 +19,7 @@ package sql
 import (
 	"bytes"
 	"fmt"
+	"sort"
 	"strings"
 	"text/template"
 	"time"
@@ -558,4 +559,58 @@ func removeMissingField(attrView *av.AttributeView, view *av.View, missingKeyID 
 	if changed {
 		av.SaveAttributeView(attrView)
 	}
+}
+
+// filterByQuery 根据搜索条件过滤
+func filterByQuery(query string, collection av.Collection) {
+	query = strings.TrimSpace(query)
+	if "" != query {
+		query = strings.Join(strings.Fields(query), " ") // 将连续空格转换为一个空格
+		keywords := strings.Split(query, " ")            // 按空格分割关键字
+
+		// 使用 AND 逻辑 https://github.com/siyuan-note/siyuan/issues/11535
+		var hitItems []av.Item
+		for _, item := range collection.GetItems() {
+			hit := false
+			for _, cell := range item.GetValues() {
+				allKeywordsHit := true
+				for _, keyword := range keywords {
+					if !strings.Contains(strings.ToLower(cell.String(true)), strings.ToLower(keyword)) {
+						allKeywordsHit = false
+						break
+					}
+				}
+				if allKeywordsHit {
+					hit = true
+					break
+				}
+			}
+			if hit {
+				hitItems = append(hitItems, item)
+			}
+		}
+		collection.SetItems(hitItems)
+		if 1 > len(collection.GetItems()) {
+			collection.SetItems([]av.Item{})
+		}
+	}
+}
+
+// manualSort 处理用户手动排序。
+func manualSort(collectionLayout av.CollectionLayout, collection av.Collection) {
+	sortRowIDs := map[string]int{}
+	for i, itemID := range collectionLayout.GetItemIDs() {
+		sortRowIDs[itemID] = i
+	}
+
+	items := collection.GetItems()
+	sort.Slice(items, func(i, j int) bool {
+		iv := sortRowIDs[items[i].GetID()]
+		jv := sortRowIDs[items[j].GetID()]
+		if iv == jv {
+			return items[i].GetID() < items[j].GetID()
+		}
+		return iv < jv
+	})
+	collection.SetItems(items)
 }

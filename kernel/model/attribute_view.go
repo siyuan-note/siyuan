@@ -3074,6 +3074,7 @@ func SortAttributeViewViewKey(avID, blockID, keyID, previousKeyID string) (err e
 				break
 			}
 		}
+		view.Gallery.CardFields = util.InsertElem(view.Gallery.CardFields, previousIndex, field)
 	}
 
 	err = av.SaveAttributeView(attrView)

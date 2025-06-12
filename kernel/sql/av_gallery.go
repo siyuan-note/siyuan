@@ -3,7 +3,6 @@ package sql
 import (
 	"bytes"
 	"fmt"
-	"sort"
 	"strings"
 
 	"github.com/88250/lute"
@@ -134,56 +133,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		util.PushErrMsg(fmt.Sprintf(util.Langs[util.Lang][44], util.EscapeHTML(renderTemplateErr.Error())), 30000)
 	}
 
-	// 根据搜索条件过滤
-	query = strings.TrimSpace(query)
-	if "" != query {
-		// 将连续空格转换为一个空格
-		query = strings.Join(strings.Fields(query), " ")
-		// 按空格分割关键字
-		keywords := strings.Split(query, " ")
-		// 使用 AND 逻辑 https://github.com/siyuan-note/siyuan/issues/11535
-		var hitCards []*av.GalleryCard
-		for _, card := range ret.Cards {
-			hit := false
-			for _, value := range card.Values {
-				allKeywordsHit := true
-				for _, keyword := range keywords {
-					if !strings.Contains(strings.ToLower(value.Value.String(true)), strings.ToLower(keyword)) {
-						allKeywordsHit = false
-						break
-					}
-				}
-				if allKeywordsHit {
-					hit = true
-					break
-				}
-			}
-			if hit {
-				hitCards = append(hitCards, card)
-			}
-		}
-		ret.Cards = hitCards
-		if 1 > len(ret.Cards) {
-			ret.Cards = []*av.GalleryCard{}
-		}
-	}
-
-	// 自定义排序
-	sortCardIDs := map[string]int{}
-	if 0 < len(view.Gallery.CardIDs) {
-		for i, cardID := range view.Gallery.CardIDs {
-			sortCardIDs[cardID] = i
-		}
-	}
-
-	sort.Slice(ret.Cards, func(i, j int) bool {
-		iv := sortCardIDs[ret.Cards[i].ID]
-		jv := sortCardIDs[ret.Cards[j].ID]
-		if iv == jv {
-			return ret.Cards[i].ID < ret.Cards[j].ID
-		}
-		return iv < jv
-	})
+	filterByQuery(query, ret)
+	manualSort(view.Gallery, ret)
 	return
 }
 

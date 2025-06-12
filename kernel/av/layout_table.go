@@ -30,6 +30,10 @@ type LayoutTable struct {
 	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
 }
 
+func (layoutTable *LayoutTable) GetItemIDs() (ret []string) {
+	return layoutTable.RowIDs
+}
+
 func NewLayoutTable() *LayoutTable {
 	return &LayoutTable{
 		BaseLayout: &BaseLayout{
@@ -87,20 +91,6 @@ type TableCell struct {
 	BgColor string `json:"bgColor"` // 单元格背景颜色
 }
 
-func (row *TableRow) GetID() string {
-	return row.ID
-}
-
-func (row *TableRow) GetBlockValue() (ret *Value) {
-	for _, cell := range row.Cells {
-		if KeyTypeBlock == cell.ValueType {
-			ret = cell.Value
-			break
-		}
-	}
-	return
-}
-
 func (row *TableRow) GetValue(keyID string) (ret *Value) {
 	for _, cell := range row.Cells {
 		if nil != cell.Value && keyID == cell.Value.KeyID {
@@ -118,6 +108,47 @@ func (table *Table) GetColumn(id string) *TableColumn {
 		}
 	}
 	return nil
+}
+
+func (row *TableRow) GetID() string {
+	return row.ID
+}
+
+func (row *TableRow) GetBlockValue() (ret *Value) {
+	for _, cell := range row.Cells {
+		if KeyTypeBlock == cell.ValueType {
+			ret = cell.Value
+			break
+		}
+	}
+	return
+}
+
+func (row *TableRow) GetValues() (ret []*Value) {
+	ret = []*Value{}
+	for _, cell := range row.Cells {
+		if nil != cell.Value {
+			ret = append(ret, cell.Value)
+		}
+	}
+	return
+}
+
+func (table *Table) GetItems() (ret []Item) {
+	ret = []Item{}
+	for _, row := range table.Rows {
+		if nil != row {
+			ret = append(ret, row)
+		}
+	}
+	return
+}
+
+func (table *Table) SetItems(items []Item) {
+	table.Rows = []*TableRow{}
+	for _, item := range items {
+		table.Rows = append(table.Rows, item.(*TableRow))
+	}
 }
 
 func (*Table) GetType() LayoutType {

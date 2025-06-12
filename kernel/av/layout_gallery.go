@@ -37,6 +37,10 @@ type LayoutGallery struct {
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
 }
 
+func (layoutGallery *LayoutGallery) GetItemIDs() (ret []string) {
+	return layoutGallery.CardIDs
+}
+
 func NewLayoutGallery() *LayoutGallery {
 	return &LayoutGallery{
 		BaseLayout: &BaseLayout{
@@ -124,6 +128,29 @@ func (card *GalleryCard) GetBlockValue() (ret *Value) {
 		}
 	}
 	return
+}
+
+func (card *GalleryCard) GetValues() (ret []*Value) {
+	ret = []*Value{}
+	for _, v := range card.Values {
+		ret = append(ret, v.Value)
+	}
+	return
+}
+
+func (gallery *Gallery) GetItems() (ret []Item) {
+	ret = []Item{}
+	for _, card := range gallery.Cards {
+		ret = append(ret, card)
+	}
+	return
+}
+
+func (gallery *Gallery) SetItems(items []Item) {
+	gallery.Cards = []*GalleryCard{}
+	for _, item := range items {
+		gallery.Cards = append(gallery.Cards, item.(*GalleryCard))
+	}
 }
 
 func (gallery *Gallery) GetType() LayoutType {

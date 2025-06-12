@@ -13,11 +13,12 @@ import {getViewIcon} from "../view";
 export const renderGallery = (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
-    cb?: (data:IAV) => void,
+    cb?: (data: IAV) => void,
     viewID?: string,
     renderAll: boolean
 }) => {
     const alignSelf = options.blockElement.style.alignSelf;
+    let oldOffset: number;
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";
         options.blockElement.firstElementChild.outerHTML = `<div class="av__gallery">
@@ -25,6 +26,8 @@ export const renderGallery = (options: {
     <span style="width: 100%;height: 178px;" class="av__pulse"></span>
     <span style="width: 100%;height: 178px;" class="av__pulse"></span>
 </div>`;
+    } else {
+        oldOffset = options.protyle.contentElement.scrollTop;
     }
 
     const selectItemIds: string[] = [];
@@ -182,6 +185,9 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
             } else {
                 galleryElement.classList.remove("av__gallery--top");
             }
+        }
+        if (typeof oldOffset === "number") {
+            options.protyle.contentElement.scrollTop = oldOffset;
         }
         options.blockElement.setAttribute("data-render", "true");
         if (alignSelf) {

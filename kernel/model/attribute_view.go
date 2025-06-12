@@ -1266,7 +1266,7 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 		view = attrView.GetView(attrView.ViewID)
 	}
 
-	table := sql.RenderAttributeViewTable(attrView, view, query)
+	table := getAttrViewTable(attrView, view, query)
 	table.Filter(attrView)
 	table.Sort(attrView)
 

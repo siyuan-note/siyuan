@@ -1,4 +1,5 @@
 import {transaction} from "../../wysiwyg/transaction";
+import {Constants} from "../../../constants";
 
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
@@ -74,6 +75,12 @@ export const getLayoutHTML = (data: IAV) => {
         <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${view.hideAttrViewName ? "" : "checked"}>
     </label>
     ${html}
+    <button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
+        <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
+        <span class="fn__flex-1"></span>
+        <span class="b3-menu__accelerator">${view.pageSize === Constants.SIZE_DATABASE_MAZ_SIZE ? window.siyuan.languages.all : view.pageSize}</span>
+        <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+    </button>
 </div>`;
 };
 

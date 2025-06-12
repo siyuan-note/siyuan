@@ -325,7 +325,7 @@
       height: 100%;
 
       &--fit {
-        background-size: contain;
+        background-size: cover;
         background-position: center center;
         background-repeat: no-repeat;
       }
@@ -353,6 +353,22 @@
       border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius);
       flex: 1;
       transition: background 100ms ease-out;
+    }
+
+    &-add {
+      border: 1px solid var(--b3-border-color);
+      border-radius: var(--b3-border-radius);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--b3-theme-on-surface);
+      cursor: pointer;
+      transition: background 100ms ease-out, color 100ms ease-out;
+
+      &:hover {
+        background-color: var(--b3-list-hover);
+        color: var(--b3-theme-on-background);
+      }
     }
   }
 

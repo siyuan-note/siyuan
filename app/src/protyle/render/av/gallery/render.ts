@@ -68,7 +68,7 @@ export const renderGallery = (options: {
         let galleryHTML = "";
         // body
         view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-            galleryHTML += `<div class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
+            galleryHTML += `<div data-id="${item.id}" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
             if (view.coverFrom !== 0) {
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
@@ -92,7 +92,7 @@ export const renderGallery = (options: {
                 if (cell.valueType === "checkbox") {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                 }
-                galleryHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}"
+                galleryHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-field-id="${view.fields[fieldsIndex].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} 
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
@@ -101,6 +101,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             });
             galleryHTML += "</div></div>";
         });
+        galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newCol}</div>`;
         let tabHTML = "";
         let viewData: IAVView;
         response.data.views.forEach((item: IAVView) => {
@@ -163,6 +164,13 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
     <div class="av__gallery${view.cardSize === 0 ? " av__gallery--small" : (view.cardSize === 2 ? " av__gallery--big" : "")}
 ${view.hideAttrViewName ? " av__gallery--top" : ""}">
         ${galleryHTML}
+    </div>
+    <div class="av__row--util av__readonly--show">
+        <button class="b3-button${view.cardCount > view.cards.length ? "" : " fn__none"}" data-type="av-load-more">
+            <svg><use xlink:href="#iconArrowDown"></use></svg>
+            <span>${window.siyuan.languages.loadMore}</span>
+            <svg data-type="set-page-size" data-size="${view.pageSize}"><use xlink:href="#iconMore"></use></svg>
+        </button>
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;

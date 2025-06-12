@@ -14,6 +14,7 @@ import {fetchPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
+import {insertGalleryItemAnimation} from "./gallery/item";
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");
@@ -81,7 +82,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     avHeadElement.style.position = "sticky";
 };
 
-const setPage = (blockElement: Element) => {
+export const setPage = (blockElement: Element) => {
     const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {
         const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
@@ -477,6 +478,15 @@ export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: 
         id: blockElement.dataset.nodeId,
         data: blockElement.getAttribute("updated")
     }]);
-    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+    if (blockElement.getAttribute("data-av-type") === "gallery") {
+        insertGalleryItemAnimation({
+            blockElement,
+            protyle,
+            srcIDs,
+            previousId: previousID
+        });
+    } else {
+        insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+    }
     blockElement.setAttribute("updated", newUpdated);
 };

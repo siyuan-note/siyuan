@@ -199,7 +199,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-bottom") {
-            insertRows(blockElement, protyle, 1, blockElement.querySelector(".av__row--util").previousElementSibling.getAttribute("data-id") || "");
+            insertRows(blockElement, protyle, 1,
+                blockElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id") ||
+                target.previousElementSibling?.getAttribute("data-id") || undefined
+            );
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -112,6 +112,10 @@ type GalleryFieldValue struct {
 	*BaseValue
 }
 
+func (card *GalleryCard) GetID() string {
+	return card.ID
+}
+
 func (card *GalleryCard) GetBlockValue() (ret *Value) {
 	for _, v := range card.Values {
 		if KeyTypeBlock == v.ValueType {
@@ -250,7 +254,7 @@ func (gallery *Gallery) Filter(attrView *AttributeView) {
 
 	var fieldIndexes []int
 	for _, f := range gallery.Filters {
-		for i, c := range gallery.Cards {
+		for i, c := range gallery.Fields {
 			if c.ID == f.Column {
 				fieldIndexes = append(fieldIndexes, i)
 				break

@@ -62,3 +62,14 @@ type BaseInstanceField struct {
 	Rollup       *Rollup         `json:"rollup,omitempty"`   // 汇总字段
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
+
+// Item 描述了一个项目的接口。
+// 项目可以表格行、画廊卡片或其他视图类型的实体。
+type Item interface {
+
+	// GetBlockValue 返回主键的值。
+	GetBlockValue() *Value
+
+	// GetID 返回项目的 ID。
+	GetID() string
+}

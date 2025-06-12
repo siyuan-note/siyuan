@@ -165,8 +165,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
 ${view.hideAttrViewName ? " av__gallery--top" : ""}">
         ${galleryHTML}
     </div>
-    <div class="av__row--util av__readonly--show">
-        <button class="b3-button${view.cardCount > view.cards.length ? "" : " fn__none"}" data-type="av-load-more">
+    <div class="av__gallery-load${view.cardCount > view.cards.length ? "" : " fn__none"}">
+        <button class="b3-button av__button" data-type="av-load-more">
             <svg><use xlink:href="#iconArrowDown"></use></svg>
             <span>${window.siyuan.languages.loadMore}</span>
             <svg data-type="set-page-size" data-size="${view.pageSize}"><use xlink:href="#iconMore"></use></svg>

@@ -243,30 +243,6 @@
 
       .b3-button {
         margin: 5px 0 5px 1.625em;
-        color: var(--b3-theme-on-surface);
-        background-color: transparent;
-        font-size: 75%;
-
-        &:hover,
-        &:focus {
-          background-color: var(--b3-list-hover);
-          box-shadow: none;
-        }
-      }
-
-      svg {
-        height: 1.625em;
-        width: calc(1.625em - 8px);
-
-        &[data-type="set-page-size"] {
-          margin: 0 0 0 4px;
-          border-radius: var(--b3-border-radius);
-          padding: 0 4px;
-
-          &:hover {
-            background-color: var(--b3-theme-background);
-          }
-        }
       }
     }
   }
@@ -369,6 +345,11 @@
         background-color: var(--b3-list-hover);
         color: var(--b3-theme-on-background);
       }
+    }
+
+    &-load {
+      border-top: 1px solid var(--b3-border-color);
+      margin-top: 5px;
     }
   }
 
@@ -737,6 +718,34 @@
       &__item:not([data-type="nobg"]):hover,
       &__item--current:not([data-type="nobg"]) {
         background-color: var(--b3-list-hover);
+      }
+    }
+  }
+
+  &__button {
+    margin: 5px;
+    color: var(--b3-theme-on-surface);
+    background-color: transparent;
+    font-size: 75%;
+
+    &:hover,
+    &:focus {
+      background-color: var(--b3-list-hover);
+      box-shadow: none;
+    }
+
+    svg {
+      height: 1.625em;
+      width: calc(1.625em - 8px);
+
+      &[data-type="set-page-size"] {
+        margin: 0 0 0 4px;
+        border-radius: var(--b3-border-radius);
+        padding: 0 4px;
+
+        &:hover {
+          background-color: var(--b3-theme-background);
+        }
       }
     }
   }

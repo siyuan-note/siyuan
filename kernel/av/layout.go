@@ -16,6 +16,8 @@
 
 package av
 
+import "sort"
+
 // BaseLayout 描述了布局的基础结构。
 type BaseLayout struct {
 	Spec     int           `json:"spec"`     // 布局格式版本
@@ -42,6 +44,10 @@ type BaseInstance struct {
 	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
 	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
 	PageSize         int           `json:"pageSize"`         // 每页项目
+}
+
+func (baseInstance *BaseInstance) GetSorts() []*ViewSort {
+	return baseInstance.Sorts
 }
 
 func (baseInstance *BaseInstance) GetFilters() []*ViewFilter {
@@ -91,6 +97,9 @@ type Collection interface {
 	// GetFields 返回集合的所有字段。
 	GetFields() []Field
 
+	// GetSorts 返回集合的排序规则。
+	GetSorts() []*ViewSort
+
 	// GetFilters 返回集合的过滤规则。
 	GetFilters() []*ViewFilter
 }
@@ -119,7 +128,122 @@ type Item interface {
 	GetID() string
 }
 
-func filter(collection Collection, attrView *AttributeView) {
+func sort0(collection Collection, attrView *AttributeView) {
+	sorts := collection.GetSorts()
+	if 1 > len(sorts) {
+		return
+	}
+
+	type FieldIndexSort struct {
+		Index int
+		Order SortOrder
+	}
+
+	var fieldIndexSorts []*FieldIndexSort
+	for _, s := range sorts {
+		for i, c := range collection.GetFields() {
+			if c.GetID() == s.Column {
+				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{Index: i, Order: s.Order})
+				break
+			}
+		}
+	}
+
+	items := collection.GetItems()
+	editedValItems := map[string]bool{}
+	for i, item := range items {
+		for _, fieldIndexSort := range fieldIndexSorts {
+			val := items[i].GetValues()[fieldIndexSort.Index]
+			if KeyTypeCheckbox == val.Type {
+				if block := item.GetBlockValue(); nil != block && block.IsEdited() {
+					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
+					editedValItems[item.GetID()] = true
+					break
+				}
+			}
+
+			if val.IsEdited() {
+				// 如果该卡片某字段的值已经编辑过，则该卡片可参与排序
+				editedValItems[item.GetID()] = true
+				break
+			}
+		}
+	}
+
+	// 将未编辑的卡片和已编辑的卡片分开排序
+	var uneditedItems, editedItems []Item
+	for _, item := range items {
+		if _, ok := editedValItems[item.GetID()]; ok {
+			editedItems = append(editedItems, item)
+		} else {
+			uneditedItems = append(uneditedItems, item)
+		}
+	}
+
+	sort.Slice(uneditedItems, func(i, j int) bool {
+		val1 := uneditedItems[i].GetBlockValue()
+		if nil == val1 {
+			return true
+		}
+		val2 := uneditedItems[j].GetBlockValue()
+		if nil == val2 {
+			return false
+		}
+		return val1.CreatedAt < val2.CreatedAt
+	})
+
+	sort.Slice(editedItems, func(i, j int) bool {
+		sorted := true
+		for _, fieldIndexSort := range fieldIndexSorts {
+			val1 := editedItems[i].GetValues()[fieldIndexSort.Index]
+			val2 := editedItems[j].GetValues()[fieldIndexSort.Index]
+			if nil == val1 || val1.IsEmpty() {
+				if nil != val2 && !val2.IsEmpty() {
+					return false
+				}
+				sorted = false
+				continue
+			} else {
+				if nil == val2 || val2.IsEmpty() {
+					return true
+				}
+			}
+
+			result := val1.Compare(val2, attrView)
+			if 0 == result {
+				sorted = false
+				continue
+			}
+			sorted = true
+
+			if fieldIndexSort.Order == SortOrderAsc {
+				return 0 > result
+			}
+			return 0 < result
+		}
+
+		if !sorted {
+			key1 := editedItems[i].GetBlockValue()
+			if nil == key1 {
+				return false
+			}
+			key2 := editedItems[j].GetBlockValue()
+			if nil == key2 {
+				return false
+			}
+			return key1.CreatedAt < key2.CreatedAt
+		}
+		return false
+	})
+
+	// 将包含未编辑的卡片放在最后
+	collection.SetItems(append(editedItems, uneditedItems...))
+	if 1 > len(collection.GetItems()) {
+		collection.SetItems([]Item{})
+	}
+}
+
+func filter0(collection Collection, attrView *AttributeView) {
 	filters := collection.GetFilters()
 	if 1 > len(filters) {
 		return
@@ -135,12 +259,12 @@ func filter(collection Collection, attrView *AttributeView) {
 		}
 	}
 
-	items := []Item{}
+	var items []Item
 	attrViewCache := map[string]*AttributeView{}
 	attrViewCache[attrView.ID] = attrView
-	for _, row := range collection.GetItems() {
+	for _, item := range collection.GetItems() {
 		pass := true
-		values := row.GetValues()
+		values := item.GetValues()
 		for j, index := range colIndexes {
 			operator := filters[j].Operator
 
@@ -158,13 +282,13 @@ func filter(collection Collection, attrView *AttributeView) {
 				break
 			}
 
-			if !values[index].Filter(filters[j], attrView, row.GetID(), &attrViewCache) {
+			if !values[index].Filter(filters[j], attrView, item.GetID(), &attrViewCache) {
 				pass = false
 				break
 			}
 		}
 		if pass {
-			items = append(items, row)
+			items = append(items, item)
 		}
 	}
 	collection.SetItems(items)

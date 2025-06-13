@@ -421,6 +421,14 @@ func SaveAttributeView(av *AttributeView) (err error) {
 				view.Table.PageSize = TableViewDefaultPageSize
 			}
 		}
+		if nil != view.Gallery {
+			// 行去重
+			view.Gallery.CardIDs = gulu.Str.RemoveDuplicatedElem(view.Gallery.CardIDs)
+			// 分页大小
+			if 1 > view.Gallery.PageSize {
+				view.Gallery.PageSize = GalleryViewDefaultPageSize
+			}
+		}
 	}
 
 	var data []byte
@@ -587,16 +595,31 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
 		view.Table.ID = ast.NewNodeID()
-		for _, column := range view.Table.Columns {
-			column.ID = keyIDMap[column.ID]
-		}
-		view.Table.RowIDs = []string{}
+		switch view.LayoutType {
+		case LayoutTypeTable:
+			for _, column := range view.Table.Columns {
+				column.ID = keyIDMap[column.ID]
+			}
+			view.Table.RowIDs = []string{}
 
-		for _, f := range view.Table.Filters {
-			f.Column = keyIDMap[f.Column]
-		}
-		for _, s := range view.Table.Sorts {
-			s.Column = keyIDMap[s.Column]
+			for _, f := range view.Table.Filters {
+				f.Column = keyIDMap[f.Column]
+			}
+			for _, s := range view.Table.Sorts {
+				s.Column = keyIDMap[s.Column]
+			}
+		case LayoutTypeGallery:
+			for _, cardField := range view.Gallery.CardFields {
+				cardField.ID = keyIDMap[cardField.ID]
+			}
+			view.Gallery.CardIDs = []string{}
+
+			for _, f := range view.Gallery.Filters {
+				f.Column = keyIDMap[f.Column]
+			}
+			for _, s := range view.Gallery.Sorts {
+				s.Column = keyIDMap[s.Column]
+			}
 		}
 	}
 	ret.ViewID = ret.Views[0].ID

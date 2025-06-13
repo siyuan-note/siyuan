@@ -258,6 +258,14 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-gallery-edit") {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-gallery-more") {
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
         target = target.parentElement;
     }

@@ -270,6 +270,7 @@
       border-radius: var(--b3-border-radius);
       display: flex;
       flex-direction: column;
+      position: relative;
 
       &:hover {
         .av__gallery-cover {
@@ -278,6 +279,10 @@
 
         .av__gallery-fields {
           background-color: var(--b3-theme-surface);
+        }
+
+        .av__gallery-actions {
+          opacity: 1;
         }
       }
 
@@ -329,6 +334,12 @@
       border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius);
       flex: 1;
       transition: background 100ms ease-out;
+      white-space: nowrap;
+
+      &--wrap {
+        word-break: break-all;
+        white-space: pre-wrap;
+      }
     }
 
     &-add {
@@ -350,6 +361,15 @@
     &-load {
       border-top: 1px solid var(--b3-border-color);
       margin-top: 5px;
+    }
+
+    &-actions {
+      position: absolute;
+      right: 8px;
+      top: 8px;
+      display: flex;
+      opacity: 0;
+      transition: var(--b3-transition);
     }
   }
 

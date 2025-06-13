@@ -86,7 +86,7 @@ export const renderGallery = (options: {
                 }
             }
 
-            galleryHTML += '<div class="av__gallery-fields">';
+            galleryHTML += `<div class="av__gallery-fields${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;
             item.values.forEach((cell, fieldsIndex) => {
                 if (view.fields[fieldsIndex].hidden) {
                     return;
@@ -100,9 +100,14 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon)}</div>`;
             });
-            galleryHTML += "</div></div>";
+            galleryHTML += `</div>
+    <div class="av__gallery-actions">
+        <span class="protyle-icon protyle-icon--first" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+    </div>
+</div>`;
         });
         galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.addCard}</div>`;
         let tabHTML = "";

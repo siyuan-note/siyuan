@@ -25,7 +25,7 @@ type LayoutGallery struct {
 	*BaseLayout
 
 	CoverFrom           CoverFrom `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string    `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CoverFromAssetKeyID string    `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
 	CardSize            CardSize  `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool      `json:"fitImage"`                      // 是否适应封面图片大小
 	ShowIcon            bool      `json:"showIcon"`                      // 是否显示字段图标

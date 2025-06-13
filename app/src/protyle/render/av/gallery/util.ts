@@ -1,5 +1,8 @@
 import {transaction} from "../../../wysiwyg/transaction";
 import {Menu} from "../../../../plugin/Menu";
+import * as dayjs from "dayjs";
+import {hasClosestByClassName} from "../../../util/hasClosest";
+import {genCellValueByElement} from "../cell";
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -168,4 +171,61 @@ export const setGallerySize = (options: {
     });
     const rect = options.target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});
+};
+
+export const openGalleryItemMenu = (options: {
+    target: HTMLElement,
+    blockElement: HTMLElement,
+    protyle: IProtyle,
+}) => {
+    const menu = new Menu();
+    const avID = options.blockElement.getAttribute("data-av-id");
+    menu.addItem({
+        icon: "iconCopy",
+        label: window.siyuan.languages.duplicate,
+        click() {
+        }
+    });
+    menu.addItem({
+        icon: "iconTrashcan",
+        warning: true,
+        label: window.siyuan.languages.delete,
+        click() {
+            const cardElement = hasClosestByClassName(options.target, "av__gallery-item");
+            if (cardElement) {
+                const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                const blockValue = genCellValueByElement("block", cardElement.querySelector(".av__cell[data-block-id]"));
+                transaction(options.protyle, [{
+                    action: "removeAttrViewBlock",
+                    srcIDs: [cardElement.dataset.id],
+                    avID,
+                }, {
+                    action: "doUpdateUpdated",
+                    id: options.blockElement.dataset.nodeId,
+                    data: newUpdated,
+                }], [{
+                    action: "insertAttrViewBlock",
+                    avID,
+                    previousID: cardElement.previousElementSibling?.getAttribute("data-id") || "",
+                    srcs: [{
+                        id: cardElement.getAttribute("data-id"),
+                        isDetached: blockValue.isDetached,
+                        content: blockValue.block.content
+                    }],
+                    blockID: options.blockElement.dataset.nodeId
+                },{
+                    action: "doUpdateUpdated",
+                    id: options.blockElement.dataset.nodeId,
+                    data: options.blockElement.getAttribute("updated")
+                }]);
+                cardElement.remove()
+                options.blockElement.setAttribute("updated", newUpdated);
+            }
+        }
+    });
+    const rect = options.target.getBoundingClientRect();
+    menu.open({
+        x: rect.left,
+        y: rect.bottom
+    });
 };

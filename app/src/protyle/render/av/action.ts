@@ -34,6 +34,7 @@ import {hideElements} from "../../ui/hideElements";
 import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {scrollCenter} from "../../../util/highlightById";
 import {escapeHtml} from "../../../util/escape";
+import {openGalleryItemMenu} from "./gallery/util";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -263,6 +264,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-gallery-more") {
+            openGalleryItemMenu({target, blockElement, protyle});
             event.preventDefault();
             event.stopPropagation();
             return true;

@@ -282,7 +282,7 @@
         }
 
         .av__gallery-actions {
-          opacity: 1;
+          opacity: .86;
         }
       }
 
@@ -335,6 +335,16 @@
       flex: 1;
       transition: background 100ms ease-out;
       white-space: nowrap;
+      font-size: 85%;
+
+      .av__cell {
+        padding: 0 8px;
+        border-right: 0;
+
+        &:hover .block__icon {
+          opacity: 0;
+        }
+      }
 
       &--wrap {
         word-break: break-all;

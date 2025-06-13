@@ -1,7 +1,7 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchPost} from "../../../../util/fetch";
-import {escapeAriaLabel, escapeHtml} from "../../../../util/escape";
+import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../../util/escape";
 import {unicode2Emoji} from "../../../../emoji";
 import {renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
@@ -95,7 +95,11 @@ export const renderGallery = (options: {
                 if (cell.valueType === "checkbox") {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                 }
-                galleryHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-field-id="${view.fields[fieldsIndex].id}"
+                galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
+aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
+data-position="west"
+data-id="${cell.id}" 
+data-field-id="${view.fields[fieldsIndex].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} 
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 

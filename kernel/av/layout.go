@@ -44,6 +44,10 @@ type BaseInstance struct {
 	PageSize         int           `json:"pageSize"`         // 每页项目
 }
 
+func (baseInstance *BaseInstance) GetFilters() []*ViewFilter {
+	return baseInstance.Filters
+}
+
 // BaseInstanceField 描述了实例字段的基础结构。
 type BaseInstanceField struct {
 	ID     string  `json:"id"`     // ID
@@ -63,6 +67,10 @@ type BaseInstanceField struct {
 	Date         *Date           `json:"date,omitempty"`     // 日期设置
 }
 
+func (baseInstanceField *BaseInstanceField) GetID() string {
+	return baseInstanceField.ID
+}
+
 // CollectionLayout 描述了集合布局的接口。
 type CollectionLayout interface {
 
@@ -79,6 +87,19 @@ type Collection interface {
 
 	// SetItems 设置集合中的项目。
 	SetItems(items []Item)
+
+	// GetFields 返回集合的所有字段。
+	GetFields() []Field
+
+	// GetFilters 返回集合的过滤规则。
+	GetFilters() []*ViewFilter
+}
+
+// Field 描述了一个字段的接口。
+type Field interface {
+
+	// GetID 返回字段的 ID。
+	GetID() string
 }
 
 // Item 描述了一个项目的接口。
@@ -96,4 +117,55 @@ type Item interface {
 
 	// GetID 返回项目的 ID。
 	GetID() string
+}
+
+func filter(collection Collection, attrView *AttributeView) {
+	filters := collection.GetFilters()
+	if 1 > len(filters) {
+		return
+	}
+
+	var colIndexes []int
+	for _, f := range filters {
+		for i, c := range collection.GetFields() {
+			if c.GetID() == f.Column {
+				colIndexes = append(colIndexes, i)
+				break
+			}
+		}
+	}
+
+	items := []Item{}
+	attrViewCache := map[string]*AttributeView{}
+	attrViewCache[attrView.ID] = attrView
+	for _, row := range collection.GetItems() {
+		pass := true
+		values := row.GetValues()
+		for j, index := range colIndexes {
+			operator := filters[j].Operator
+
+			if nil == values[index] {
+				if FilterOperatorIsNotEmpty == operator {
+					pass = false
+				} else if FilterOperatorIsEmpty == operator {
+					pass = true
+					break
+				}
+
+				if KeyTypeText != values[index].Type {
+					pass = false
+				}
+				break
+			}
+
+			if !values[index].Filter(filters[j], attrView, row.GetID(), &attrViewCache) {
+				pass = false
+				break
+			}
+		}
+		if pass {
+			items = append(items, row)
+		}
+	}
+	collection.SetItems(items)
 }

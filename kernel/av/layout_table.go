@@ -151,6 +151,14 @@ func (table *Table) SetItems(items []Item) {
 	}
 }
 
+func (table *Table) GetFields() []Field {
+	fields := []Field{}
+	for _, column := range table.Columns {
+		fields = append(fields, column)
+	}
+	return fields
+}
+
 func (*Table) GetType() LayoutType {
 	return LayoutTypeTable
 }
@@ -273,50 +281,5 @@ func (table *Table) Sort(attrView *AttributeView) {
 }
 
 func (table *Table) Filter(attrView *AttributeView) {
-	if 1 > len(table.Filters) {
-		return
-	}
-
-	var colIndexes []int
-	for _, f := range table.Filters {
-		for i, c := range table.Columns {
-			if c.ID == f.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
-	}
-
-	rows := []*TableRow{}
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
-	for _, row := range table.Rows {
-		pass := true
-		for j, index := range colIndexes {
-			operator := table.Filters[j].Operator
-
-			if nil == row.Cells[index].Value {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != row.Cells[index].ValueType {
-					pass = false
-				}
-				break
-			}
-
-			if !row.Cells[index].Value.Filter(table.Filters[j], attrView, row.ID, &attrViewCache) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			rows = append(rows, row)
-		}
-	}
-	table.Rows = rows
+	filter(table, attrView)
 }

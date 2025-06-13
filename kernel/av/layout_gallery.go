@@ -163,6 +163,14 @@ func (gallery *Gallery) SetItems(items []Item) {
 	}
 }
 
+func (gallery *Gallery) GetFields() []Field {
+	fields := []Field{}
+	for _, field := range gallery.Fields {
+		fields = append(fields, field)
+	}
+	return fields
+}
+
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
 }
@@ -285,50 +293,5 @@ func (gallery *Gallery) Sort(attrView *AttributeView) {
 }
 
 func (gallery *Gallery) Filter(attrView *AttributeView) {
-	if 1 > len(gallery.Filters) {
-		return
-	}
-
-	var fieldIndexes []int
-	for _, f := range gallery.Filters {
-		for i, c := range gallery.Fields {
-			if c.ID == f.Column {
-				fieldIndexes = append(fieldIndexes, i)
-				break
-			}
-		}
-	}
-
-	cards := []*GalleryCard{}
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
-	for _, card := range gallery.Cards {
-		pass := true
-		for j, index := range fieldIndexes {
-			operator := gallery.Filters[j].Operator
-
-			if nil == card.Values[index].Value {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != card.Values[index].ValueType {
-					pass = false
-				}
-				break
-			}
-
-			if !card.Values[index].Value.Filter(gallery.Filters[j], attrView, card.ID, &attrViewCache) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			cards = append(cards, card)
-		}
-	}
-	gallery.Cards = cards
+	filter(gallery, attrView)
 }

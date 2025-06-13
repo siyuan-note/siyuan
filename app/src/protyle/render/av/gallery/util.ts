@@ -58,7 +58,7 @@ export const setGalleryCover = (options: {
         if (item.type === "mAsset") {
             menu.addItem({
                 iconHTML: "",
-                checked: options.view.coverFromAssetKeyID === item.id,
+                checked: options.view.coverFrom === 2 && options.view.coverFromAssetKeyID === item.id,
                 label: item.name,
                 click() {
                     transaction(options.protyle, [{
@@ -181,12 +181,6 @@ export const openGalleryItemMenu = (options: {
     const menu = new Menu();
     const avID = options.blockElement.getAttribute("data-av-id");
     menu.addItem({
-        icon: "iconCopy",
-        label: window.siyuan.languages.duplicate,
-        click() {
-        }
-    });
-    menu.addItem({
         icon: "iconTrashcan",
         warning: true,
         label: window.siyuan.languages.delete,
@@ -213,12 +207,12 @@ export const openGalleryItemMenu = (options: {
                         content: blockValue.block.content
                     }],
                     blockID: options.blockElement.dataset.nodeId
-                },{
+                }, {
                     action: "doUpdateUpdated",
                     id: options.blockElement.dataset.nodeId,
                     data: options.blockElement.getAttribute("updated")
                 }]);
-                cardElement.remove()
+                cardElement.remove();
                 options.blockElement.setAttribute("updated", newUpdated);
             }
         }

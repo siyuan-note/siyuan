@@ -159,7 +159,7 @@
       svg, img {
         height: 16px;
         width: 16px;
-        color: var(--b3-theme-on-surface);
+        fill: currentColor;
       }
 
       text-align: center;
@@ -175,6 +175,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      color: var(--b3-theme-on-background);
 
       &:hover {
         color: var(--b3-theme-on-background);
@@ -207,11 +208,13 @@
       line-height: 14px;
       font-size: 12px;
       font-family: var(--b3-font-family-emoji);
+      color: var(--b3-theme-on-background);
 
       // doc icon in the bookmark panel
       svg {
         width: 12px;
         height: 14px;
+        fill: currentColor;
       }
     }
 

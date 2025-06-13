@@ -1,4 +1,3 @@
-
 .emojis {
   word-break: break-all;
   white-space: normal;
@@ -22,6 +21,22 @@
       display: flex;
       flex-direction: column;
       height: 100%;
+    }
+    
+    div[data-type="tab-icon"] {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      // 图标面板样式
+      &.emojis__item img, .emojis__item svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      & .emojis__item svg {
+        fill: currentColor;
+        color: var(--b3-theme-on-background);
+      }
     }
   }
 
@@ -60,11 +75,16 @@
     overflow: hidden;
     border-radius: var(--b3-border-radius);
     width: 32px;
+    color: var(--b3-theme-on-background);
 
     img, svg {
       height: 24px;
       display: block;
       width: 24px;
+    }
+
+    svg {
+      fill: currentColor;
     }
 
     &--current,

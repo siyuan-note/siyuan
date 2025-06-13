@@ -17,8 +17,6 @@
 package av
 
 import (
-	"sort"
-
 	"github.com/88250/lute/ast"
 )
 
@@ -151,6 +149,14 @@ func (table *Table) SetItems(items []Item) {
 	}
 }
 
+func (table *Table) GetFields() (ret []Field) {
+	ret = []Field{}
+	for _, column := range table.Columns {
+		ret = append(ret, column)
+	}
+	return ret
+}
+
 func (*Table) GetType() LayoutType {
 	return LayoutTypeTable
 }
@@ -160,163 +166,9 @@ func (table *Table) GetID() string {
 }
 
 func (table *Table) Sort(attrView *AttributeView) {
-	if 1 > len(table.Sorts) {
-		return
-	}
-
-	type ColIndexSort struct {
-		Index int
-		Order SortOrder
-	}
-
-	var colIndexSorts []*ColIndexSort
-	for _, s := range table.Sorts {
-		for i, c := range table.Columns {
-			if c.ID == s.Column {
-				colIndexSorts = append(colIndexSorts, &ColIndexSort{Index: i, Order: s.Order})
-				break
-			}
-		}
-	}
-
-	editedValRows := map[string]bool{}
-	for i, row := range table.Rows {
-		for _, colIndexSort := range colIndexSorts {
-			val := table.Rows[i].Cells[colIndexSort.Index].Value
-			if KeyTypeCheckbox == val.Type {
-				if block := row.GetBlockValue(); nil != block && block.IsEdited() {
-					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
-					editedValRows[row.ID] = true
-					break
-				}
-			}
-
-			if val.IsEdited() {
-				// 如果该行某列的值已经编辑过，则该行可参与排序
-				editedValRows[row.ID] = true
-				break
-			}
-		}
-	}
-
-	// 将未编辑的行和已编辑的行分开排序
-	var uneditedRows, editedRows []*TableRow
-	for _, row := range table.Rows {
-		if _, ok := editedValRows[row.ID]; ok {
-			editedRows = append(editedRows, row)
-		} else {
-			uneditedRows = append(uneditedRows, row)
-		}
-	}
-
-	sort.Slice(uneditedRows, func(i, j int) bool {
-		val1 := uneditedRows[i].GetBlockValue()
-		if nil == val1 {
-			return true
-		}
-		val2 := uneditedRows[j].GetBlockValue()
-		if nil == val2 {
-			return false
-		}
-		return val1.CreatedAt < val2.CreatedAt
-	})
-
-	sort.Slice(editedRows, func(i, j int) bool {
-		sorted := true
-		for _, colIndexSort := range colIndexSorts {
-			val1 := editedRows[i].Cells[colIndexSort.Index].Value
-			val2 := editedRows[j].Cells[colIndexSort.Index].Value
-			if nil == val1 || val1.IsEmpty() {
-				if nil != val2 && !val2.IsEmpty() {
-					return false
-				}
-				sorted = false
-				continue
-			} else {
-				if nil == val2 || val2.IsEmpty() {
-					return true
-				}
-			}
-
-			result := val1.Compare(val2, attrView)
-			if 0 == result {
-				sorted = false
-				continue
-			}
-			sorted = true
-
-			if colIndexSort.Order == SortOrderAsc {
-				return 0 > result
-			}
-			return 0 < result
-		}
-
-		if !sorted {
-			key1 := editedRows[i].GetBlockValue()
-			if nil == key1 {
-				return false
-			}
-			key2 := editedRows[j].GetBlockValue()
-			if nil == key2 {
-				return false
-			}
-			return key1.CreatedAt < key2.CreatedAt
-		}
-		return false
-	})
-
-	// 将包含未编辑的行放在最后
-	table.Rows = append(editedRows, uneditedRows...)
-	if 1 > len(table.Rows) {
-		table.Rows = []*TableRow{}
-	}
+	sort0(table, attrView)
 }
 
 func (table *Table) Filter(attrView *AttributeView) {
-	if 1 > len(table.Filters) {
-		return
-	}
-
-	var colIndexes []int
-	for _, f := range table.Filters {
-		for i, c := range table.Columns {
-			if c.ID == f.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
-	}
-
-	rows := []*TableRow{}
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
-	for _, row := range table.Rows {
-		pass := true
-		for j, index := range colIndexes {
-			operator := table.Filters[j].Operator
-
-			if nil == row.Cells[index].Value {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != row.Cells[index].ValueType {
-					pass = false
-				}
-				break
-			}
-
-			if !row.Cells[index].Value.Filter(table.Filters[j], attrView, row.ID, &attrViewCache) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			rows = append(rows, row)
-		}
-	}
-	table.Rows = rows
+	filter0(table, attrView)
 }

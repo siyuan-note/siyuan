@@ -1180,8 +1180,6 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 			}
 		}
 		view.Table.Sorts = tmpSorts
-
-		viewable = sql.RenderAttributeViewTable(attrView, view, query)
 	case av.LayoutTypeGallery:
 		// 字段删除以后需要删除设置的过滤和排序
 		tmpFilters := []*av.ViewFilter{}
@@ -1199,10 +1197,9 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 			}
 		}
 		view.Gallery.Sorts = tmpSorts
-
-		viewable = sql.RenderAttributeViewGallery(attrView, view, query)
 	}
 
+	viewable = sql.RenderView(view, attrView, query)
 	if nil == viewable {
 		err = av.ErrViewNotFound
 		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)
@@ -2424,13 +2421,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	}
 
 	if nil != view && 0 < len(filters) && !ignoreFillFilter {
-		var viewable av.Viewable
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			viewable = sql.RenderAttributeViewTable(attrView, view, "")
-		case av.LayoutTypeGallery:
-			viewable = sql.RenderAttributeViewGallery(attrView, view, "")
-		}
+		viewable := sql.RenderView(view, attrView, "")
 		viewable.Filter(attrView)
 		viewable.Sort(attrView)
 

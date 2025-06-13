@@ -32,6 +32,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func RenderView(view *av.View, attrView *av.AttributeView, query string) (ret av.Viewable) {
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		ret = RenderAttributeViewTable(attrView, view, query)
+	case av.LayoutTypeGallery:
+		ret = RenderAttributeViewGallery(attrView, view, query)
+	}
+	return
+}
+
 func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)

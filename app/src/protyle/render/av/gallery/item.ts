@@ -29,7 +29,7 @@ export const insertGalleryItemAnimation = (options: {
     options.srcIDs.forEach((id) => {
         html += `<div class="av__gallery-item"${needUpdate} data-type="ghost" data-id="${id}">
     <div class="av__gallery-cover"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
-    <div class="av__gallery-fields"><span style="margin: 8px;" class="av__pulse"></span></div>
+    <div class="av__gallery-fields"><span class="av__pulse"></span></div>
 </div>`;
     });
     if (options.previousId) {

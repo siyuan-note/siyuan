@@ -336,9 +336,11 @@
       transition: background 100ms ease-out;
       white-space: nowrap;
       font-size: 85%;
+      min-height: 23px;
+      padding: 5px;
 
       .av__cell {
-        padding: 0 8px;
+        padding: 0;
         border-right: 0;
 
         &:hover .block__icon {

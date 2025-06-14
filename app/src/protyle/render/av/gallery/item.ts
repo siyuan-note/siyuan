@@ -120,7 +120,9 @@ export const insertGalleryItemAnimation = (options: {
                 const sideItemCellElement = sideItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`) as HTMLElement;
                 const cellElement = currentItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`);
                 const cellValue = genCellValueByElement(getTypeByCellElement(sideItemCellElement), sideItemCellElement);
-                cellElement.innerHTML = renderCell(cellValue);
+                const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+                cellElement.innerHTML = renderCell(cellValue, undefined,
+                    iconElement ? !iconElement.classList.contains("fn__none") : false, "gallery");
                 renderCellAttr(cellElement, cellValue);
             }
         });

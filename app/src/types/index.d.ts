@@ -78,6 +78,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "destroy-protyle" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
+type TAVView = "table" | "gallery"
 type TAVCol =
     "text"
     | "date"
@@ -823,7 +824,7 @@ interface IAV {
     name: string;
     view: IAVTable | IAVGallery;
     viewID: string;
-    viewType: "table" | "gallery";
+    viewType: TAVView;
     views: IAVView[];
 }
 
@@ -831,7 +832,7 @@ interface IAVView {
     name: string;
     desc: string;
     id: string;
-    type: string;
+    type: TAVView;
     icon: string;
     hideAttrViewName: boolean;
     pageSize: number,

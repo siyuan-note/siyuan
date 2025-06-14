@@ -97,14 +97,14 @@ export const renderGallery = (options: {
                 }
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
-data-position="west"
+data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"
 ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} 
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}</div>`;
             });
             galleryHTML += `</div>
     <div class="av__gallery-actions">

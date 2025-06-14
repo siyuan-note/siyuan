@@ -162,8 +162,8 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 				break
 			}
 
-			if titleImgCss := node.IALAttr("title-img"); "" != titleImgCss {
-				galleryCard.CoverURL = titleImgCss
+			if titleImgCSS := node.IALAttr("title-img"); "" != titleImgCSS {
+				galleryCard.CoverURL = titleImgCSS
 				break
 			}
 		}

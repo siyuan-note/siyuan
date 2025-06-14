@@ -426,7 +426,12 @@ func exportMdContent(c *gin.Context) {
 		yfm = arg["yfm"].(bool)
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm)
+	fillCSSVar := false
+	if nil != arg["fillCSSVar"] {
+		fillCSSVar = arg["fillCSSVar"].(bool)
+	}
+
+	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,
 		"content": content,

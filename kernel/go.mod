@@ -58,7 +58,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.40.1
 	github.com/shirou/gopsutil/v4 v4.25.5
-	github.com/siyuan-note/dejavu v0.0.0-20250610091035-e79a9bc7c4ea
+	github.com/siyuan-note/dejavu v0.0.0-20250614090910-cc4494870cc9
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
@@ -94,23 +94,23 @@ require (
 	github.com/alex-ant/gomath v0.0.0-20160516115720-89013a210a82 // indirect
 	github.com/andybalholm/brotli v1.1.1 // indirect
 	github.com/andybalholm/cascadia v1.3.3 // indirect
-	github.com/aws/aws-sdk-go-v2 v1.36.3 // indirect
+	github.com/aws/aws-sdk-go-v2 v1.36.4 // indirect
 	github.com/aws/aws-sdk-go-v2/aws/protocol/eventstream v1.6.10 // indirect
-	github.com/aws/aws-sdk-go-v2/config v1.29.15 // indirect
-	github.com/aws/aws-sdk-go-v2/credentials v1.17.68 // indirect
-	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.30 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.34 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.34 // indirect
+	github.com/aws/aws-sdk-go-v2/config v1.29.16 // indirect
+	github.com/aws/aws-sdk-go-v2/credentials v1.17.69 // indirect
+	github.com/aws/aws-sdk-go-v2/feature/ec2/imds v1.16.31 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/configsources v1.3.35 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.6.35 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/ini v1.8.3 // indirect
-	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.34 // indirect
+	github.com/aws/aws-sdk-go-v2/internal/v4a v1.3.35 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.12.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.15 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sso v1.25.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.1 // indirect
-	github.com/aws/aws-sdk-go-v2/service/sts v1.33.20 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.16 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.16 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.80.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sso v1.25.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/sts v1.33.21 // indirect
 	github.com/aws/smithy-go v1.22.3 // indirect
 	github.com/bytedance/sonic v1.13.3 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
@@ -192,7 +192,7 @@ require (
 	golang.org/x/tools v0.34.0 // indirect
 	google.golang.org/protobuf v1.36.6 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
-	modernc.org/fileutil v1.3.3 // indirect
+	modernc.org/fileutil v1.3.4 // indirect
 )
 
 replace github.com/mattn/go-sqlite3 => github.com/88250/go-sqlite3 v1.14.13-0.20231214121541-e7f54c482950

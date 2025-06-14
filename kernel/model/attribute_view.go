@@ -2602,7 +2602,12 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	for _, view := range attrView.Views {
 		for _, blockID := range srcIDs {
-			view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+			switch view.LayoutType {
+			case av.LayoutTypeTable:
+				view.Table.RowIDs = gulu.Str.RemoveElem(view.Table.RowIDs, blockID)
+			case av.LayoutTypeGallery:
+				view.Gallery.CardIDs = gulu.Str.RemoveElem(view.Gallery.CardIDs, blockID)
+			}
 		}
 	}
 

@@ -8,7 +8,7 @@ import {fetchPost} from "../../../util/fetch";
 import {focusBlock, focusByRange} from "../../util/selection";
 import * as dayjs from "dayjs";
 import {unicode2Emoji} from "../../../emoji";
-import {getColIconByType} from "./col";
+import {getColIconByType, getColId} from "./col";
 import {genAVValueHTML} from "./blockAttr";
 import {Constants} from "../../../constants";
 import {hintRef} from "../../hint/extend";
@@ -16,6 +16,8 @@ import {getAssetName, pathPosix} from "../../../util/pathName";
 import {mergeAddOption} from "./select";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
+import {getFieldIdByCellElement} from "./row";
+import {getFieldsByData} from "./view";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -519,7 +521,7 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         } else if (type === "relation") {
             openMenuPanel({protyle, blockElement, type: "relation", cellElements});
         } else if (type === "rollup") {
-            openMenuPanel({protyle, blockElement, type: "rollup", cellElements, colId: cellElements[0].dataset.colId});
+            openMenuPanel({protyle, blockElement, type: "rollup", cellElements, colId: getColId(cellElements[0], viewType)});
         }
         if (viewType === "table" && !hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -544,8 +546,8 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                 id: blockElement.dataset.avId,
                 viewID: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
             }, (response) => {
-                response.data.view.columns.find((item: IAVColumn) => {
-                    if (item.id === cellElements[0].dataset.colId) {
+                getFieldsByData(response.data).find((item: IAVColumn) => {
+                    if (item.id === getColId(cellElements[0], viewType)) {
                         inputElement.value = item.template;
                         inputElement.dataset.template = item.template;
                         return true;
@@ -557,10 +559,12 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             inputElement.addEventListener("input", (event: InputEvent) => {
                 if (Constants.BLOCK_HINT_KEYS.includes(inputElement.value.substring(0, 2))) {
                     protyle.toolbar.range = document.createRange();
-                    if (!blockElement.contains(cellElements[0])) {
-                        const rowElement = hasClosestByClassName(cellElements[0], "av__row") as HTMLElement;
-                        if (cellElements[0]) {
-                            cellElements[0] = blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) as HTMLElement;
+                    if (cellElements[0] && !blockElement.contains(cellElements[0])) {
+                        const rowID = getFieldIdByCellElement(cellElements[0], viewType);
+                        if (viewType === "table") {
+                            cellElements[0] = (blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
+                        } else {
+                            cellElements[0] = (blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElements[0].dataset.fieldId}"]`)) as HTMLElement;
                         }
                     }
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
@@ -643,7 +647,7 @@ const updateCellValueByInput = (protyle: IProtyle, type: TAVCol, blockElement: H
     const avMaskElement = document.querySelector(".av__mask");
     const avID = blockElement.getAttribute("data-av-id");
     if (type === "template") {
-        const colId = cellElements[0].getAttribute("data-col-id");
+        const colId = getColId(cellElements[0], viewType);
         const textElement = avMaskElement.querySelector(".b3-text-field") as HTMLInputElement;
         if (textElement.value !== textElement.dataset.template && !blockElement.getAttribute("data-loading")) {
             transaction(protyle, [{
@@ -707,14 +711,16 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
     const isCustomAttr = hasClosestByClassName(cellElements[0], "custom-attr");
     const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
     cellElements.forEach((item: HTMLElement, elementIndex) => {
-        const rowElement = hasClosestByClassName(item, "av__row") as HTMLElement;
-        if (viewType === "table") {
-            if (!rowElement) {
-                return;
-            }
-            if (!nodeElement.contains(item)) {
-                item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+        const rowID = getFieldIdByCellElement(item, viewType);
+        if (!rowID) {
+            return;
+        }
+        if (!nodeElement.contains(item)) {
+            if (viewType === "table") {
+                item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
                     nodeElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
+            } else {
+                item = cellElements[elementIndex] = (nodeElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
 
@@ -726,9 +732,8 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         if (["created", "updated", "template", "rollup"].includes(type)) {
             return;
         }
-        const rowID = viewType === "table" ? rowElement.getAttribute("data-id") : item.getAttribute("data-field-id");
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
-        const colId = item.dataset.colId;
+        const colId = getColId(item, viewType)
 
         text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);

@@ -18,6 +18,14 @@ import {Dialog} from "../../../dialog";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {getFieldsByData} from "./view";
 
+export const getColId = (element: Element, viewType: TAVView) => {
+    if (viewType === "table") {
+        return element.getAttribute("data-col-id");
+    } else if (viewType === "gallery") {
+        return element.getAttribute("data-field-id");
+    }
+};
+
 export const duplicateCol = (options: {
     protyle: IProtyle,
     colId: string,

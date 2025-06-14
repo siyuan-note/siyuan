@@ -1,6 +1,15 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {fetchPost} from "../../../util/fetch";
-import {addCol, bindEditEvent, duplicateCol, getColIconByType, getColNameByType, getEditHTML, removeCol} from "./col";
+import {
+    addCol,
+    bindEditEvent,
+    duplicateCol,
+    getColIconByType,
+    getColId,
+    getColNameByType,
+    getEditHTML,
+    removeCol
+} from "./col";
 import {setPosition} from "../../../util/setPosition";
 import {hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {addColOptionOrCell, bindSelectEvent, getSelectHTML, removeCellOption, setColOption} from "./select";
@@ -88,7 +97,7 @@ export const openMenuPanel = (options: {
         } else if (options.type === "filters") {
             html = getFiltersHTML(data);
         } else if (options.type === "select") {
-            html = getSelectHTML(data.view, options.cellElements, true);
+            html = getSelectHTML(fields, options.cellElements, true, options.blockElement);
         } else if (options.type === "asset") {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
@@ -116,7 +125,7 @@ export const openMenuPanel = (options: {
                     protyle: options.protyle,
                     blockElement: options.blockElement,
                     type: "edit",
-                    colId: options.cellElements[0].dataset.colId
+                    colId: getColId(options.cellElements[0], data.viewType)
                 });
                 return;
             }
@@ -336,7 +345,7 @@ export const openMenuPanel = (options: {
                 return;
             }
             if (targetElement.querySelector('[data-type="setColOption"]')) {
-                const colId = options.cellElements ? options.cellElements[0].dataset.colId : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
+                const colId = options.cellElements ? getColId(options.cellElements[0], data.viewType) : menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
                 const changeData = fields.find((column) => column.id === colId).options;
                 const oldData = Object.assign([], changeData);
                 let targetOption: { name: string, color: string };
@@ -369,7 +378,7 @@ export const openMenuPanel = (options: {
                 }]);
                 const oldScroll = menuElement.querySelector(".b3-menu__items").scrollTop;
                 if (options.cellElements) {
-                    menuElement.innerHTML = getSelectHTML(data.view, options.cellElements);
+                    menuElement.innerHTML = getSelectHTML(fields, options.cellElements, false, options.blockElement);
                     bindSelectEvent(options.protyle, data, menuElement, options.cellElements, options.blockElement);
                 } else {
                     menuElement.innerHTML = getEditHTML({

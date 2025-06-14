@@ -49,6 +49,7 @@ export class App {
 
         this.appId = Constants.SIYUAN_APPID;
         window.siyuan = {
+            isSelecting: false,
             zIndex: 10,
             transactions: [],
             reqIds: {},

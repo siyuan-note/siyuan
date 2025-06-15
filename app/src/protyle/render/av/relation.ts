@@ -9,6 +9,9 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 import * as dayjs from "dayjs";
+import {getFieldsByData} from "./view";
+import {getColId} from "./col";
+import {getFieldIdByCellElement} from "./row";
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {
@@ -329,8 +332,8 @@ ${html || genSelectItemHTML("empty")}`;
 
 export const getRelationHTML = (data: IAV, cellElements?: HTMLElement[]) => {
     let colRelationData: IAVColumnRelation;
-    data.view.columns.find(item => {
-        if (item.id === cellElements[0].dataset.colId) {
+    getFieldsByData(data).find(item => {
+        if (item.id === getColId(cellElements[0], data.viewType)) {
             colRelationData = item.relation;
             return true;
         }
@@ -359,14 +362,18 @@ export const setRelationCell = (protyle: IProtyle, nodeElement: HTMLElement, tar
     if (menuElement.querySelector(".dragover__bottom, .dragover__top")) {
         return;
     }
-    const rowElement = hasClosestByClassName(cellElements[0], "av__row");
-    if (!rowElement) {
-        return;
-    }
+
     if (!nodeElement.contains(cellElements[0])) {
-        cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
-            nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
+        const viewType = nodeElement.getAttribute("data-av-type") as TAVView;
+        const rowID = getFieldIdByCellElement(cellElements[0], viewType);
+        if (viewType === "table") {
+            cellElements[0] = (nodeElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${cellElements[0].dataset.colId}"]`) ||
+                nodeElement.querySelector(`.fn__flex-1[data-col-id="${cellElements[0].dataset.colId}"]`)) as HTMLElement;
+        } else {
+            cellElements[0] = (nodeElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${cellElements[0].dataset.fieldId}"]`)) as HTMLElement;
+        }
     }
+
     const newValue: IAVCellRelationValue = {blockIDs: [], contents: []};
     menuElement.querySelectorAll('[draggable="true"]').forEach(item => {
         const id = item.getAttribute("data-id");

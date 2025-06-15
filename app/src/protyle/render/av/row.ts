@@ -16,9 +16,9 @@ import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
 
-export const getFieldIdByCellElement = (cellElement: Element, viewType:TAVView): string => {
+export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
     return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
-}
+};
 
 export const selectRow = (checkElement: Element, type: "toggle" | "select" | "unselect" | "unselectAll") => {
     const rowElement = hasClosestByClassName(checkElement, "av__row");

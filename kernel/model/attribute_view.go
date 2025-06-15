@@ -1803,6 +1803,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = operation.ID
+	node.AttributeViewType = string(masterView.LayoutType)
 	err = setNodeAttrs(node, tree, attrs)
 	if err != nil {
 		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)

@@ -29,7 +29,10 @@ export const renderGallery = (options: {
     } else {
         oldOffset = options.protyle.contentElement.scrollTop;
     }
-
+    const editIds: string[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
+        editIds.push(item.parentElement.getAttribute("data-id"));
+    });
     const selectItemIds: string[] = [];
     options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(rowItem => {
         const rowId = rowItem.getAttribute("data-id");
@@ -85,8 +88,7 @@ export const renderGallery = (options: {
                     galleryHTML += '<div class="av__gallery-cover"></div>';
                 }
             }
-
-            galleryHTML += `<div class="av__gallery-fields${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;
+            galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;
             item.values.forEach((cell, fieldsIndex) => {
                 if (view.fields[fieldsIndex].hidden) {
                     return;

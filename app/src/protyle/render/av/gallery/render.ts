@@ -3,7 +3,7 @@ import {Constants} from "../../../../constants";
 import {fetchPost} from "../../../../util/fetch";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../../util/escape";
 import {unicode2Emoji} from "../../../../emoji";
-import {renderCell} from "../cell";
+import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
@@ -95,8 +95,10 @@ export const renderGallery = (options: {
                 if (cell.valueType === "checkbox") {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                 }
+                const isEmpty = cellValueIsEmpty(cell.value);
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
-aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
+data-empty="${isEmpty}" 
+aria-label="${isEmpty ? window.siyuan.languages.edit + " " : ""}${escapeAttr(view.fields[fieldsIndex].name)}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"

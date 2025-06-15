@@ -352,6 +352,18 @@
         word-break: break-all;
         white-space: pre-wrap;
       }
+
+      &--edit {
+        .av__cell {
+          min-height: 1.625em;
+
+          &[data-empty="true"]:after {
+            content: attr(aria-label);
+            position: absolute;
+            color: var(--b3-theme-on-surface-light);
+          }
+        }
+      }
     }
 
     &-add {

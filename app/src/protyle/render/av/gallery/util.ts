@@ -223,3 +223,10 @@ export const openGalleryItemMenu = (options: {
         y: rect.bottom
     });
 };
+
+export const editGalleryItem = (taget: Element) => {
+    const itemElement = hasClosestByClassName(taget, "av__gallery-item");
+    if (itemElement) {
+        itemElement.querySelector(".av__gallery-fields")?.classList.toggle("av__gallery-fields--edit");
+    }
+};

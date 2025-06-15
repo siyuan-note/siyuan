@@ -237,7 +237,6 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     return newValue;
 };
 
-
 export const genCellValue = (colType: TAVCol, value: string | any) => {
     let cellValue: IAVCellValue = {
         type: colType,
@@ -521,7 +520,13 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
         } else if (type === "relation") {
             openMenuPanel({protyle, blockElement, type: "relation", cellElements});
         } else if (type === "rollup") {
-            openMenuPanel({protyle, blockElement, type: "rollup", cellElements, colId: getColId(cellElements[0], viewType)});
+            openMenuPanel({
+                protyle,
+                blockElement,
+                type: "rollup",
+                cellElements,
+                colId: getColId(cellElements[0], viewType)
+            });
         }
         if (viewType === "table" && !hasClosestByClassName(cellElements[0], "custom-attr")) {
             cellElements[0].classList.add("av__cell--select");
@@ -733,7 +738,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
             return;
         }
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
-        const colId = getColId(item, viewType)
+        const colId = getColId(item, viewType);
 
         text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
@@ -1170,5 +1175,36 @@ export const addDragFill = (cellElement: Element) => {
     cellElement.classList.add("av__cell--active");
     if (!cellElement.querySelector(".av__drag-fill")) {
         cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
+    }
+};
+
+export const cellValueIsEmpty = (value: IAVCellValue) => {
+    if (value.type === "checkbox") {
+        return false;
+    }
+    if (["text", "number", "block", "url", "phone", "email", "template"].includes(value.type)) {
+        return !value[value.type as "text"]?.content;
+    }
+    if (["mSelect", "mAsset", "select"].includes(value.type)) {
+        if (value[value.type as "mSelect"]?.length > 0) {
+            return false;
+        }
+        return true;
+    }
+    if (["date", "created", "updated"].includes(value.type)) {
+        return !value[value.type as "date"]?.isNotEmpty &&
+            !value[value.type as "date"]?.isNotEmpty2;
+    }
+    if (value.type === "relation") {
+        if (value.relation?.blockIDs && value.relation.blockIDs.length > 0) {
+            return false;
+        }
+        return true;
+    }
+    if (value.type === "rollup") {
+        if (value.rollup?.contents && value.rollup.contents.length > 0) {
+            return false;
+        }
+        return true;
     }
 };

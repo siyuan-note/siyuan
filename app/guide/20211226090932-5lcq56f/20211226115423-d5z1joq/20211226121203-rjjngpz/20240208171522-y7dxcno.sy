@@ -7,7 +7,7 @@
 		"id": "20240208171522-y7dxcno",
 		"title": "資料庫",
 		"type": "doc",
-		"updated": "20250311195932"
+		"updated": "20250615173721"
 	},
 	"Children": [
 		{
@@ -325,7 +325,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208171620-5ek5rxs",
-				"updated": "20240208171620"
+				"updated": "20250615173721"
 			},
 			"Children": [
 				{
@@ -389,11 +389,12 @@
 			"ID": "20240208171718-01yn7et",
 			"Type": "NodeAttributeView",
 			"Properties": {
+				"custom-sy-av-view": "20250615173733-4es9lsl",
 				"id": "20240208171718-01yn7et",
-				"updated": "20240208171808"
+				"updated": "20250615173721"
 			},
 			"AttributeViewID": "20240208171724-zfkzgwi",
-			"AttributeViewType": "table"
+			"AttributeViewType": "gallery"
 		},
 		{
 			"ID": "20240208171846-ym84dpx",

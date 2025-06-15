@@ -7,7 +7,7 @@
 		"id": "20240208172514-9dsv6na",
 		"title": "Database",
 		"type": "doc",
-		"updated": "20250115152047"
+		"updated": "20250615172312"
 	},
 	"Children": [
 		{
@@ -325,7 +325,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208172555-hv2afdr",
-				"updated": "20240208172648"
+				"updated": "20250615172312"
 			},
 			"Children": [
 				{
@@ -389,11 +389,12 @@
 			"ID": "20240208172736-zavxwgi",
 			"Type": "NodeAttributeView",
 			"Properties": {
+				"custom-sy-av-view": "20250615171046-3ucugf9",
 				"id": "20240208172736-zavxwgi",
-				"updated": "20240208173104"
+				"updated": "20250615172312"
 			},
 			"AttributeViewID": "20240208172742-57vwxqw",
-			"AttributeViewType": "table"
+			"AttributeViewType": "gallery"
 		},
 		{
 			"ID": "20240208172751-izg8evh",

@@ -233,18 +233,19 @@ export abstract class Constants {
 
     // id
     public static readonly HELP_PATH: { [key: string]: string } = {
-        zh_CN: "20210808180117-czj9bvb",
-        zh_CHT: "20211226090932-5lcq56f",
-        ja_JP: "20240530133126-axarxgx",
-        en_US: "20210808180117-6v0mkxr",
-        fr_FR: "20210808180117-6v0mkxr",
-        es_ES: "20210808180117-6v0mkxr",
-        it_IT: "20210808180117-6v0mkxr",
+        ar_SA: "20210808180117-6v0mkxr",
         de_DE: "20210808180117-6v0mkxr",
+        en_US: "20210808180117-6v0mkxr",
+        es_ES: "20210808180117-6v0mkxr",
+        fr_FR: "20210808180117-6v0mkxr",
         he_IL: "20210808180117-6v0mkxr",
-        ru_RU: "20210808180117-6v0mkxr",
+        it_IT: "20210808180117-6v0mkxr",
+        ja_JP: "20240530133126-axarxgx",
         pl_PL: "20210808180117-6v0mkxr",
-        ar_SA: "20210808180117-6v0mkxr"
+        pt_BR: "20210808180117-6v0mkxr",
+        ru_RU: "20210808180117-6v0mkxr",
+        zh_CHT: "20211226090932-5lcq56f",
+        zh_CN: "20210808180117-czj9bvb",
     };
     public static readonly QUICK_DECK_ID = "20230218211946-2kw8jgx";
 

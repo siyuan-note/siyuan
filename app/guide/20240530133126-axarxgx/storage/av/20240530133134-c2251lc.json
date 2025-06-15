@@ -21,13 +21,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707380970000,
-					"updatedAt": 1715701024936,
+					"updatedAt": 1749980366669,
 					"block": {
 						"id": "20240530101000-3n32s4x",
 						"icon": "",
 						"content": "海底二万里",
 						"created": 1707384570935,
-						"updated": 1715701024936
+						"updated": 1749980366669
 					}
 				},
 				{
@@ -37,13 +37,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707381042000,
-					"updatedAt": 1715701031917,
+					"updatedAt": 1749980371540,
 					"block": {
 						"id": "20240530101000-9utmfv2",
 						"icon": "",
 						"content": "三体",
 						"created": 1707384642526,
-						"updated": 1715701031917
+						"updated": 1749980371540
 					}
 				},
 				{
@@ -53,29 +53,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707381054000,
-					"updatedAt": 1715701038153,
+					"updatedAt": 1749980377036,
 					"block": {
 						"id": "20240530101000-6k25xnw",
 						"icon": "",
 						"content": "流浪地球",
 						"created": 1707384654904,
-						"updated": 1715701038153
-					}
-				},
-				{
-					"id": "20240530101000-tqmnj9p",
-					"keyID": "20240530101000-dwysfvj",
-					"blockID": "20240530101000-quskt1f",
-					"type": "block",
-					"isDetached": true,
-					"createdAt": 1716328048409,
-					"updatedAt": 1716328048409,
-					"block": {
-						"id": "20240530101000-quskt1f",
-						"icon": "",
-						"content": "",
-						"created": 1716328048409,
-						"updated": 1716328048409
+						"updated": 1749980377036
 					}
 				}
 			]
@@ -201,10 +185,68 @@
 					}
 				}
 			]
+		},
+		{
+			"key": {
+				"id": "20250615173851-vmlovdh",
+				"name": "カバー",
+				"type": "mAsset",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20250615173917-n5pmduc",
+					"keyID": "20250615173851-vmlovdh",
+					"blockID": "20240530101000-3n32s4x",
+					"type": "mAsset",
+					"createdAt": 1749980366669,
+					"updatedAt": 1749980367669,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "Twenty Thousand Leagues Under The Sea.jpg",
+							"content": "assets/Twenty Thousand Leagues Under The Sea-20250615173926-vaec28c.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615173926-cop01xu",
+					"keyID": "20250615173851-vmlovdh",
+					"blockID": "20240530101000-9utmfv2",
+					"type": "mAsset",
+					"createdAt": 1749980371540,
+					"updatedAt": 1749980372540,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Three-Body Problem.jpg",
+							"content": "assets/The Three-Body Problem-20250615173930-oz6xsj4.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615173931-rbnuyia",
+					"keyID": "20250615173851-vmlovdh",
+					"blockID": "20240530101000-6k25xnw",
+					"type": "mAsset",
+					"createdAt": 1749980377036,
+					"updatedAt": 1749980378036,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Wandering Earth.jpg",
+							"content": "assets/The Wandering Earth-20250615173936-er9vfnp.jpg"
+						}
+					]
+				}
+			]
 		}
 	],
 	"keyIDs": null,
-	"viewID": "20240530101000-16mbtpr",
+	"viewID": "20250615173942-0xk5p5h",
 	"views": [
 		{
 			"id": "20240530101000-16mbtpr",
@@ -216,20 +258,23 @@
 			"table": {
 				"spec": 0,
 				"id": "20240530101000-mhhmma3",
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50,
 				"columns": [
 					{
 						"id": "20240530101000-dwysfvj",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": "276px"
+						"width": "179px"
 					},
 					{
 						"id": "20240530101000-fxi3h2s",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": "183px"
+						"width": "154px"
 					},
 					{
 						"id": "20240530101000-6666dv2",
@@ -237,17 +282,64 @@
 						"hidden": false,
 						"pin": false,
 						"width": ""
+					},
+					{
+						"id": "20250615173851-vmlovdh",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "128px"
 					}
 				],
 				"rowIds": [
 					"20240530101000-3n32s4x",
 					"20240530101000-9utmfv2",
-					"20240530101000-6k25xnw",
-					"20240530101000-quskt1f"
-				],
+					"20240530101000-6k25xnw"
+				]
+			}
+		},
+		{
+			"id": "20250615173942-0xk5p5h",
+			"icon": "",
+			"name": "ギャラリー",
+			"hideAttrViewName": false,
+			"desc": "",
+			"type": "gallery",
+			"gallery": {
+				"spec": 0,
+				"id": "20250615173947-oj97e6l",
 				"filters": [],
 				"sorts": [],
-				"pageSize": 50
+				"pageSize": 50,
+				"coverFrom": 2,
+				"coverFromAssetKeyID": "20250615173851-vmlovdh",
+				"cardSize": 1,
+				"fitImage": true,
+				"showIcon": true,
+				"wrapField": false,
+				"fields": [
+					{
+						"id": "20240530101000-dwysfvj",
+						"hidden": false
+					},
+					{
+						"id": "20240530101000-fxi3h2s",
+						"hidden": false
+					},
+					{
+						"id": "20240530101000-6666dv2",
+						"hidden": false
+					},
+					{
+						"id": "20250615173851-vmlovdh",
+						"hidden": true
+					}
+				],
+				"cardIds": [
+					"20240530101000-3n32s4x",
+					"20240530101000-9utmfv2",
+					"20240530101000-6k25xnw"
+				]
 			}
 		}
 	]

@@ -7,7 +7,7 @@
 		"id": "20240208113259-nykkvaq",
 		"title": "数据库",
 		"type": "doc",
-		"updated": "20250311200010"
+		"updated": "20250615173511"
 	},
 	"Children": [
 		{
@@ -324,7 +324,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20240208120825-ktzju1z",
-				"updated": "20240208162539"
+				"updated": "20250615173511"
 			},
 			"Children": [
 				{
@@ -388,11 +388,12 @@
 			"ID": "20240208155914-zazoj5v",
 			"Type": "NodeAttributeView",
 			"Properties": {
+				"custom-sy-av-view": "20250615173530-5yn6s87",
 				"id": "20240208155914-zazoj5v",
-				"updated": "20240208162539"
+				"updated": "20250615173511"
 			},
 			"AttributeViewID": "20240208155918-uylgwbj",
-			"AttributeViewType": "table"
+			"AttributeViewType": "gallery"
 		},
 		{
 			"ID": "20240208161029-tbovh3b",

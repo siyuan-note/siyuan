@@ -8,7 +8,7 @@
 		"id": "20240530101000-3eaevtp",
 		"title": "データベース",
 		"type": "doc",
-		"updated": "20250115145155"
+		"updated": "20250615173941"
 	},
 	"Children": [
 		{
@@ -358,7 +358,7 @@
 			"Properties": {
 				"ID": "20240530101000-x6r9yyj",
 				"id": "20240530101000-jgap8im",
-				"updated": "20240818190253"
+				"updated": "20250615173941"
 			},
 			"Children": [
 				{
@@ -424,8 +424,9 @@
 			"Type": "NodeAttributeView",
 			"Properties": {
 				"ID": "20240530101000-ftsbbgi",
+				"custom-sy-av-view": "20240530101000-16mbtpr",
 				"id": "20240530101000-ab5ovyw",
-				"updated": "20240530101000"
+				"updated": "20250615173941"
 			},
 			"AttributeViewID": "20240530133134-c2251lc",
 			"AttributeViewType": "table"

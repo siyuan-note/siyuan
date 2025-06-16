@@ -207,6 +207,7 @@ func FilterUploadFileName(name string) string {
 	ret = strings.ReplaceAll(ret, "#", "")
 	ret = strings.ReplaceAll(ret, "%", "")
 	ret = strings.ReplaceAll(ret, "$", "")
+	ret = strings.ReplaceAll(ret, ";", "")
 	ret = TruncateLenFileName(ret)
 	return ret
 }

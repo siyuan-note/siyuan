@@ -171,9 +171,14 @@ func getEmojiConf(c *gin.Context) {
 				}
 
 				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+					emojiFullName := customConfDir + "/" + name
+					fullPathFilteredName := customConfDir + "/" + util.FilterUploadFileName(name)
 					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 					logging.LogWarnf("invalid custom emoji name [%s]", name)
-					continue
+					logging.LogErrorf("renaming invalid file to [%s] in emojis", fullPathFilteredName)
+					if removeErr := os.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+						logging.LogErrorf("renaming invalid file to [%s] failed: %s", fullPathFilteredName, removeErr)
+					}
 				}
 
 				if customEmoji.IsDir() {
@@ -195,9 +200,14 @@ func getEmojiConf(c *gin.Context) {
 						}
 
 						if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+							emojiFullName := customConfDir + "/" + name
+							fullPathFilteredName := customConfDir + "/" + util.FilterUploadFileName(name)
 							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 							logging.LogWarnf("invalid custom emoji name [%s]", name)
-							continue
+							logging.LogErrorf("renaming invalid file to [%s] in emojis", fullPathFilteredName)
+							if removeErr := os.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+								logging.LogErrorf("renaming invalid file to [%s] failed: %s", fullPathFilteredName, removeErr)
+							}
 						}
 
 						addCustomEmoji(customEmoji.Name()+"/"+name, &items)

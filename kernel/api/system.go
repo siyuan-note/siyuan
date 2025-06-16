@@ -173,6 +173,7 @@ func getEmojiConf(c *gin.Context) {
 				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
 					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 					logging.LogWarnf("invalid custom emoji name [%s]", name)
+					continue
 				}
 
 				if customEmoji.IsDir() {

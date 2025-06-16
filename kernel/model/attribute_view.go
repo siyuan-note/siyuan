@@ -53,25 +53,25 @@ func (tx *Transaction) doSetAttrViewBlockView(operation *Operation) (ret *TxErr)
 }
 
 func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr) {
-	err := changeAttrViewLayout(operation)
+	err := ChangeAttrViewLayout(operation.BlockID, operation.AvID, operation.Layout)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func changeAttrViewLayout(operation *Operation) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
 	if err != nil {
 		return
 	}
 
-	newLayout := operation.Layout
+	newLayout := layout
 	if newLayout == view.LayoutType {
 		return
 	}

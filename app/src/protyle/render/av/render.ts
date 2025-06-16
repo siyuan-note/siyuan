@@ -16,10 +16,8 @@ import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
 import {getViewIcon} from "./view";
-import {bindLayoutEvent, getLayoutHTML} from "./layout";
-import {setPosition} from "../../../util/setPosition";
 
-export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, viewID?: string, renderAll = true) => {
+export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true) => {
     let avElements: Element[] = [];
     if (element.getAttribute("data-type") === "NodeAttributeView") {
         // 编辑器内代码块编辑渲染
@@ -40,7 +38,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
             }
 
             if (e.getAttribute("data-av-type") === "gallery") {
-                renderGallery({blockElement: e, protyle, cb, viewID, renderAll});
+                renderGallery({blockElement: e, protyle, cb, renderAll});
                 return;
             }
 
@@ -85,16 +83,6 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
             });
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
-            let newViewID = e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
-            if (typeof viewID === "string") {
-                const viewTabElement = e.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${viewID}"]`) as HTMLElement;
-                if (viewTabElement) {
-                    e.dataset.pageSize = viewTabElement.dataset.page;
-                }
-                newViewID = viewID;
-                fetchPost("/api/av/setDatabaseBlockView", {id: e.dataset.nodeId, viewID, avID: e.dataset.avId,});
-                e.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
-            }
             let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
             const isSearching = searchInputElement && document.activeElement.isSameNode(searchInputElement);
             const query = searchInputElement?.value || "";
@@ -103,7 +91,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
-                viewID: newViewID,
+                viewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 query: query.trim()
             }, (response) => {
                 const data = response.data.view as IAVTable;
@@ -443,7 +431,7 @@ export const updateSearch = (e: HTMLElement, protyle: IProtyle) => {
     clearTimeout(searchTimeout);
     searchTimeout = window.setTimeout(() => {
         e.removeAttribute("data-render");
-        avRender(e, protyle, undefined, undefined, false);
+        avRender(e, protyle, undefined, false);
     }, Constants.TIMEOUT_INPUT);
 };
 
@@ -489,18 +477,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 if (operation.action === "removeAttrViewView") {
                     item.setAttribute("data-av-type", operation.retData);
-                }
-                if (operation.action === "changeAttrViewLayout") {
-                    item.setAttribute("data-av-type", operation.layout);
-                }
-                avRender(item, protyle, (data) => {
-                    if (operation.action === "changeAttrViewLayout") {
-                        const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
-                        menuElement.innerHTML = getLayoutHTML(data);
-                        const tabRect = item.querySelector(".av__views").getBoundingClientRect();
-                        setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                        bindLayoutEvent({protyle: protyle, data, menuElement, blockElement: item});
+                } else if (operation.action === "setAttrViewBlockView") {
+                    const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
+                    if (viewTabElement) {
+                        item.dataset.pageSize = viewTabElement.dataset.page;
+                        item.setAttribute("data-av-type", viewTabElement.dataset.avType);
                     }
+                }
+                avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {
                         // 更新属性面板

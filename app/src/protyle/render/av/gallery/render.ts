@@ -14,7 +14,6 @@ export const renderGallery = (options: {
     blockElement: HTMLElement,
     protyle: IProtyle,
     cb?: (data: IAV) => void,
-    viewID?: string,
     renderAll: boolean
 }) => {
     const alignSelf = options.blockElement.style.alignSelf;
@@ -42,20 +41,6 @@ export const renderGallery = (options: {
     });
     const created = options.protyle.options.history?.created;
     const snapshot = options.protyle.options.history?.snapshot;
-    let newViewID = options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "";
-    if (typeof options.viewID === "string") {
-        const viewTabElement = options.blockElement.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${options.viewID}"]`) as HTMLElement;
-        if (viewTabElement) {
-            options.blockElement.dataset.pageSize = viewTabElement.dataset.page;
-        }
-        newViewID = options.viewID;
-        fetchPost("/api/av/setDatabaseBlockView", {
-            id: options.blockElement.dataset.nodeId,
-            avID: options.blockElement.dataset.avId,
-            viewID: options.viewID
-        });
-        options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, newViewID);
-    }
     let searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
     const isSearching = searchInputElement && document.activeElement.isSameNode(searchInputElement);
     const query = searchInputElement?.value || "";
@@ -64,7 +49,7 @@ export const renderGallery = (options: {
         created,
         snapshot,
         pageSize: parseInt(options.blockElement.dataset.pageSize) || undefined,
-        viewID: newViewID,
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
         query: query.trim()
     }, (response) => {
         const view: IAVGallery = response.data.view;

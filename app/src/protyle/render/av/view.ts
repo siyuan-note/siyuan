@@ -245,8 +245,12 @@ export const bindSwitcherEvent = (options: { protyle: IProtyle, menuElement: Ele
         if (event.key === "Enter") {
             const currentElement = options.menuElement.querySelector(".b3-menu__item--current") as HTMLElement;
             if (currentElement) {
-                options.blockElement.removeAttribute("data-render");
-                avRender(options.blockElement, options.protyle, undefined, currentElement.dataset.id);
+                transaction(options.protyle, [{
+                    action: "setAttrViewBlockView",
+                    blockID: options.blockElement.getAttribute("data-node-id"),
+                    id: currentElement.dataset.id,
+                    avID: options.blockElement.getAttribute("data-av-id"),
+                }]);
                 options.menuElement.remove();
                 focusBlock(options.blockElement);
             }
@@ -386,4 +390,4 @@ export const getViewName = (type: string) => {
 
 export const getFieldsByData = (data: IAV) => {
     return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
-}
+};

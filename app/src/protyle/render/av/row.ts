@@ -89,7 +89,8 @@ export const updateHeader = (rowElement: HTMLElement) => {
 export const setPage = (blockElement: Element) => {
     const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
     if (pageSize) {
-        const currentCount = blockElement.querySelectorAll(".av__row:not(.av__row--header)").length;
+        const avType = blockElement.getAttribute("data-av-type") as TAVView;
+        const currentCount = blockElement.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
         if (pageSize < currentCount) {
             blockElement.setAttribute("data-page-size", currentCount.toString());
         }

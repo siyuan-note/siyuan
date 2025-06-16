@@ -1340,9 +1340,12 @@ export const openMenuPanel = (options: {
                     if (!target.parentElement.classList.contains("b3-menu__item--current")) {
                         avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                         target.parentElement.classList.add("b3-menu__item--current");
-                        options.blockElement.removeAttribute("data-render");
-                        options.blockElement.setAttribute("data-av-type", target.dataset.avType);
-                        avRender(options.blockElement, options.protyle, undefined, target.parentElement.dataset.id);
+                        transaction(options.protyle, [{
+                            action: "setAttrViewBlockView",
+                            blockID,
+                            id: target.parentElement.dataset.id,
+                            avID
+                        }]);
                     }
                     event.preventDefault();
                     event.stopPropagation();
@@ -1357,16 +1360,18 @@ export const openMenuPanel = (options: {
                     } else {
                         avPanelElement.querySelector(".b3-menu__item--current")?.classList.remove("b3-menu__item--current");
                         target.parentElement.classList.add("b3-menu__item--current");
-                        options.blockElement.removeAttribute("data-render");
-                        avRender(options.blockElement, options.protyle, () => {
-                            openViewMenu({
-                                protyle: options.protyle,
-                                blockElement: options.blockElement as HTMLElement,
-                                element: target.parentElement
-                            });
-                            avPanelElement.querySelector(".b3-chip--primary").classList.remove("b3-chip--primary");
-                            target.parentElement.querySelector(".b3-chip").classList.add("b3-chip--primary");
-                        }, target.parentElement.dataset.id);
+                        transaction(options.protyle, [{
+                            action: "setAttrViewBlockView",
+                            blockID,
+                            id: target.parentElement.dataset.id,
+                            avID,
+                        }]);
+                        window.siyuan.menus.menu.remove();
+                        openViewMenu({
+                            protyle: options.protyle,
+                            blockElement: options.blockElement as HTMLElement,
+                            element: target.parentElement
+                        });
                     }
                     event.preventDefault();
                     event.stopPropagation();

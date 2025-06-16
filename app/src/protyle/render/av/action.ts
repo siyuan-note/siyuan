@@ -118,9 +118,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         if (viewItemElement.classList.contains("item--focus")) {
             openViewMenu({protyle, blockElement, element: viewItemElement});
         } else {
-            blockElement.removeAttribute("data-render");
-            blockElement.setAttribute("data-av-type", viewItemElement.dataset.avType);
-            avRender(blockElement, protyle, undefined, viewItemElement.dataset.id);
+            transaction(protyle, [{
+                action: "setAttrViewBlockView",
+                blockID: blockElement.getAttribute("data-node-id"),
+                id: viewItemElement.dataset.id,
+                avID: blockElement.getAttribute("data-av-id"),
+            }]);
         }
         event.preventDefault();
         event.stopPropagation();

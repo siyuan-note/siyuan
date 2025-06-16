@@ -1,5 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
+import {fetchPost} from "../../../util/fetch";
 
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
@@ -189,7 +190,7 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-        options.blockElement.querySelectorAll('.av__gallery-fields').forEach(item => {
+        options.blockElement.querySelectorAll(".av__gallery-fields").forEach(item => {
             if (checked) {
                 item.classList.add("av__gallery-fields--wrap");
             } else {
@@ -205,23 +206,25 @@ export const updateLayout = (options: {
     protyle: IProtyle,
     target: HTMLElement
 }) => {
-    if (options.target.classList.contains("av__layout-item--select")) {
+    if (options.target.classList.contains("av__layout-item--select") || options.target.dataset.load === "true") {
         return;
     }
-    const avID = options.nodeElement.getAttribute("data-av-id");
-    const blockID = options.nodeElement.getAttribute("data-node-id");
-    const layout = options.target.getAttribute("data-view-type");
-    transaction(options.protyle, [{
-        action: "changeAttrViewLayout",
-        avID,
-        blockID,
-        layout
-    }], [{
-        action: "changeAttrViewLayout",
-        avID,
-        blockID,
-        layout: options.data.viewType
-    }]);
+    options.target.dataset.load = "true";
     options.target.parentElement.querySelector(".av__layout-item--select").classList.remove("av__layout-item--select");
     options.target.classList.add("av__layout-item--select");
+    fetchPost("/api/av/changeAttrViewLayout", {
+        blockID: options.nodeElement.getAttribute("data-node-id"),
+        avID: options.nodeElement.getAttribute("data-av-id"),
+        layoutType:  options.target.getAttribute("data-view-type")
+    }, (response) => {
+        const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
+        menuElement.innerHTML = getLayoutHTML(response.data);
+        bindLayoutEvent({
+            protyle: options.protyle,
+            data: response.data,
+            menuElement,
+            blockElement: options.nodeElement
+        });
+        options.target.removeAttribute("data-load");
+    });
 };

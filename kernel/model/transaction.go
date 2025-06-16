@@ -290,6 +290,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewWrapField(op)
 		case "changeAttrViewLayout":
 			ret = tx.doChangeAttrViewLayout(op)
+		case "setAttrViewBlockView":
+			ret = tx.doSetAttrViewBlockView(op)
 		}
 
 		if nil != ret {

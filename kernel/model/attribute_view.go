@@ -44,6 +44,14 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSetAttrViewBlockView(operation *Operation) (ret *TxErr) {
+	err := SetDatabaseBlockView(operation.BlockID, operation.ID, operation.AvID)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
 func (tx *Transaction) doChangeAttrViewLayout(operation *Operation) (ret *TxErr) {
 	err := changeAttrViewLayout(operation)
 	if err != nil {

@@ -37,8 +37,8 @@ func changeAttrViewLayout(c *gin.Context) {
 
 	blockID := arg["blockID"].(string)
 	avID := arg["avID"].(string)
-	layoutType := arg["layoutType"].(av.LayoutType)
-	err := model.ChangeAttrViewLayout(blockID, avID, layoutType)
+	layoutType := arg["layoutType"].(string)
+	err := model.ChangeAttrViewLayout(blockID, avID, av.LayoutType(layoutType))
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

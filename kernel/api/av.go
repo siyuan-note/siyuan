@@ -27,6 +27,29 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func changeAttrViewLayout(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	blockID := arg["blockID"].(string)
+	avID := arg["avID"].(string)
+	layoutType := arg["layoutType"].(av.LayoutType)
+	err := model.ChangeAttrViewLayout(blockID, avID, layoutType)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
+		return
+	}
+
+	ret = renderAttrView(avID, "", "", 1, -1)
+	c.JSON(http.StatusOK, ret)
+}
+
 func duplicateAttributeViewBlock(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -532,10 +555,9 @@ func renderHistoryAttributeView(c *gin.Context) {
 
 func renderAttributeView(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 
@@ -563,7 +585,13 @@ func renderAttributeView(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	view, attrView, err := model.RenderAttributeView(id, viewID, query, page, pageSize)
+	ret = renderAttrView(id, viewID, query, page, pageSize)
+	c.JSON(http.StatusOK, ret)
+}
+
+func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
+	ret = gulu.Ret.NewResult()
+	view, attrView, err := model.RenderAttributeView(avID, viewID, query, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -602,6 +630,7 @@ func renderAttributeView(c *gin.Context) {
 		"view":     view,
 		"isMirror": av.IsMirror(attrView.ID),
 	}
+	return
 }
 
 func getCurrentAttrViewImages(c *gin.Context) {

@@ -28,6 +28,7 @@ import (
 	"github.com/88250/lute"
 	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
+	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/model"
@@ -171,8 +172,13 @@ func getEmojiConf(c *gin.Context) {
 				}
 
 				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+					emojiFullName := filepath.Join(customConfDir, name)
+					fullPathFilteredName := filepath.Join(customConfDir, util.FilterUploadFileName(name))
 					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-					logging.LogWarnf("invalid custom emoji name [%s]", name)
+					logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
+					if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+						logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
+					}
 				}
 
 				if customEmoji.IsDir() {
@@ -194,9 +200,13 @@ func getEmojiConf(c *gin.Context) {
 						}
 
 						if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+							emojiFullName := filepath.Join(customConfDir, name)
+							fullPathFilteredName := filepath.Join(customConfDir, util.FilterUploadFileName(name))
 							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-							logging.LogWarnf("invalid custom emoji name [%s]", name)
-							continue
+							logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
+							if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+								logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
+							}
 						}
 
 						addCustomEmoji(customEmoji.Name()+"/"+name, &items)

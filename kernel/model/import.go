@@ -557,10 +557,11 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
-	filelock.Walk(filepath.Join(unzipRootPath, "emojis"), func(path string, d fs.DirEntry, err error) error {
+	unzipRootEmojisPath := filepath.Join(unzipRootPath, "emojis")
+	filelock.Walk(unzipRootEmojisPath, func(path string, d fs.DirEntry, err error) error {
 		if !util.IsValidUploadFileName(d.Name()) {
-			emojiFullName := filepath.Join(unzipRootPath, "emojis", d.Name())
-			fullPathFilteredName := filepath.Join(unzipRootPath, "emojis", util.FilterUploadFileName(d.Name()))
+			emojiFullName := filepath.Join(unzipRootEmojisPath, d.Name())
+			fullPathFilteredName := filepath.Join(unzipRootEmojisPath, util.FilterUploadFileName(d.Name()))
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
 			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
@@ -687,6 +688,19 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
+	tmpDataEmojisPath := filepath.Join(tmpDataPath, "emojis")
+	filelock.Walk(tmpDataEmojisPath, func(path string, d fs.DirEntry, err error) error {
+		if !util.IsValidUploadFileName(d.Name()) {
+			emojiFullName := filepath.Join(tmpDataEmojisPath, d.Name())
+			fullPathFilteredName := filepath.Join(tmpDataEmojisPath, util.FilterUploadFileName(d.Name()))
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
+			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
+			}
+		}
+		return nil
+	})
 	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")

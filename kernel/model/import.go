@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	util2 "github.com/88250/lute/util"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -44,6 +43,7 @@ import (
 	"github.com/88250/lute/html/atom"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	util2 "github.com/88250/lute/util"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -557,6 +557,17 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
+	filelock.Walk(filepath.Join(unzipRootPath, "emojis"), func(path string, d fs.DirEntry, err error) error {
+		if !util.IsValidUploadFileName(d.Name()) {
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			logging.LogErrorf("remove invalid file [%s] in emojis", path)
+			if removeErr := os.Remove(path); nil != removeErr {
+				logging.LogErrorf("remove invalid file [%s] failed: %s", path, removeErr)
+				return nil
+			}
+		}
+		return nil
+	})
 	var emojiDirs []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
 		if strings.Contains(path, "emojis") && d.IsDir() {

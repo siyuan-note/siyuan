@@ -184,6 +184,10 @@ func IsCorruptedSYData(data []byte) bool {
 	return false
 }
 
+func IsValidUploadFileName(name string) bool {
+	return name == FilterUploadFileName(name)
+}
+
 func FilterUploadFileName(name string) string {
 	ret := FilterFileName(name)
 

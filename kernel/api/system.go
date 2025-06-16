@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
+	"github.com/88250/lute/html"
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
@@ -165,8 +166,13 @@ func getEmojiConf(c *gin.Context) {
 		} else {
 			for _, customEmoji := range customEmojis {
 				name := customEmoji.Name()
-				if strings.HasPrefix(name, ".") || strings.ContainsAny(name, "<\"") {
+				if strings.HasPrefix(name, ".") {
 					continue
+				}
+
+				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+					logging.LogWarnf("invalid custom emoji name [%s]", name)
 				}
 
 				if customEmoji.IsDir() {
@@ -183,7 +189,13 @@ func getEmojiConf(c *gin.Context) {
 						}
 
 						name = subCustomEmoji.Name()
-						if strings.HasPrefix(name, ".") || strings.ContainsAny(name, "<\"") {
+						if strings.HasPrefix(name, ".") {
+							continue
+						}
+
+						if !util.IsValidUploadFileName(html.UnescapeString(name)) {
+							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+							logging.LogWarnf("invalid custom emoji name [%s]", name)
 							continue
 						}
 

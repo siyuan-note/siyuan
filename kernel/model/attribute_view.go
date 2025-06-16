@@ -45,7 +45,7 @@ import (
 )
 
 func (tx *Transaction) doSetAttrViewBlockView(operation *Operation) (ret *TxErr) {
-	err := SetDatabaseBlockView(operation.BlockID, operation.ID, operation.AvID)
+	err := SetDatabaseBlockView(operation.BlockID, operation.AvID, operation.ID)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}

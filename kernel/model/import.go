@@ -559,13 +559,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
 	filelock.Walk(filepath.Join(unzipRootPath, "emojis"), func(path string, d fs.DirEntry, err error) error {
 		if !util.IsValidUploadFileName(d.Name()) {
-			emojiFullName := unzipRootPath + "emojis/" + name
-			fullPathFilteredName := unzipRootPath + "emojis/" + util.FilterUploadFileName(name)
+			emojiFullName := filepath.Join(unzipRootPath, "emojis", d.Name())
+			fullPathFilteredName := filepath.Join(unzipRootPath, "emojis", util.FilterUploadFileName(d.Name()))
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			logging.LogWarnf("invalid custom emoji name [%s]", name)
-			logging.LogErrorf("renaming invalid file to [%s] in emojis", fullPathFilteredName)
-			if removeErr := os.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
-				logging.LogErrorf("renaming invalid file to [%s] failed: %s", fullPathFilteredName, removeErr)
+			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
+			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
 			}
 		}
 		return nil

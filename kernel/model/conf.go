@@ -231,6 +231,13 @@ func InitConf() {
 	if 1 > len(Conf.Editor.Emoji) {
 		Conf.Editor.Emoji = []string{}
 	}
+	for i, emoji := range Conf.Editor.Emoji {
+		if strings.Contains(emoji, ".") {
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			emoji = util.FilterUploadFileName(emoji)
+			Conf.Editor.Emoji[i] = emoji
+		}
+	}
 	if 9 > Conf.Editor.FontSize || 72 < Conf.Editor.FontSize {
 		Conf.Editor.FontSize = 16
 	}

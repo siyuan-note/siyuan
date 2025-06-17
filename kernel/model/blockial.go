@@ -250,7 +250,11 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 
 func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
-	doOp := &Operation{Action: "updateAttrs", Data: map[string]interface{}{"old": oldAttrs, "new": newAttrs}, ID: node.ID}
+	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
+	if "" != node.AttributeViewType {
+		data["data-av-type"] = node.AttributeViewType
+	}
+	doOp := &Operation{Action: "updateAttrs", Data: data, ID: node.ID}
 	evt := util.NewCmdResult("transactions", 0, util.PushModeBroadcast)
 	evt.Data = []*Transaction{{
 		DoOperations:   []*Operation{doOp},

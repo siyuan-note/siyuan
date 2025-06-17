@@ -621,6 +621,9 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                     }, 450);
                 }
             });
+            if (data["data-av-type"]) {
+                item.setAttribute("data-av-type", data["data-av-type"]);
+            }
             const attrElements = item.querySelectorAll(".protyle-attr");
             const attrElement = attrElements[attrElements.length - 1];
             if (data.new["custom-avs"] && !data.new["av-names"]) {

@@ -65,7 +65,6 @@ export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLEle
                 id,
                 blockID: options.blockElement.dataset.nodeId
             }]);
-            options.blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
         }
     });
     if (options.blockElement.querySelectorAll(".layout-tab-bar .item").length > 1) {
@@ -337,8 +336,6 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
             }]);
-            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
-            blockElement.setAttribute("data-av-type", "table");
         }
     });
     addMenu.addItem({
@@ -358,8 +355,6 @@ export const addView = (protyle: IProtyle, blockElement: Element) => {
                 id,
                 blockID: blockElement.getAttribute("data-node-id")
             }]);
-            blockElement.setAttribute(Constants.CUSTOM_SY_AV_VIEW, id);
-            blockElement.setAttribute("data-av-type", "gallery");
         }
     });
     viewElement.classList.add("av__views--show");

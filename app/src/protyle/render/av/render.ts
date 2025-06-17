@@ -455,7 +455,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         if (operation.action === "setAttrViewColWidth") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-                if (!cellElement || cellElement.style.width === operation.data || item.getAttribute("custom-sy-av-view") !== operation.keyID) {
+                if (!cellElement || cellElement.style.width === operation.data || item.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== operation.keyID) {
                     return;
                 }
                 item.querySelectorAll(".av__row").forEach(rowItem => {
@@ -475,13 +475,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     });
                     addDragFill(item.querySelector(".av__cell--select"));
                 }
-                if (operation.action === "removeAttrViewView") {
-                    item.setAttribute("data-av-type", operation.retData);
-                } else if (operation.action === "setAttrViewBlockView") {
+               if (operation.action === "setAttrViewBlockView") {
                     const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
                     if (viewTabElement) {
                         item.dataset.pageSize = viewTabElement.dataset.page;
-                        item.setAttribute("data-av-type", viewTabElement.dataset.avType);
                     }
                 }
                 avRender(item, protyle, () => {

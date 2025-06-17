@@ -180,7 +180,7 @@ export const getCardAspectRatio = (ratio: number) => {
         case 4:
             return "3:2";
         case 5:
-            return "3:2";
+            return "2:3";
         case 6:
             return "1:1";
     }
@@ -197,25 +197,27 @@ export const setGalleryRatio = (options: {
     const avID = options.nodeElement.getAttribute("data-av-id");
     const blockID = options.nodeElement.getAttribute("data-node-id");
     const targetNameElement = options.target.querySelector(".b3-menu__accelerator");
-    menu.addItem({
-        iconHTML: "",
-        checked: options.view.cardAspectRatio === 0,
-        label: "16:9",
-        click() {
-            transaction(options.protyle, [{
-                action: "setAttrViewCardAspectRatio",
-                avID,
-                blockID,
-                data: 0
-            }], [{
-                action: "setAttrViewCardAspectRatio",
-                avID,
-                blockID,
-                data: options.view.cardSize
-            }]);
-            options.view.cardAspectRatio = 0;
-            targetNameElement.textContent = getCardAspectRatio(0);
-        }
+    [0, 1, 2, 3, 4, 5, 6].forEach(ratio => {
+        menu.addItem({
+            iconHTML: "",
+            checked: options.view.cardAspectRatio === ratio,
+            label: getCardAspectRatio(ratio),
+            click() {
+                transaction(options.protyle, [{
+                    action: "setAttrViewCardAspectRatio",
+                    avID,
+                    blockID,
+                    data: ratio
+                }], [{
+                    action: "setAttrViewCardAspectRatio",
+                    avID,
+                    blockID,
+                    data: options.view.cardAspectRatio
+                }]);
+                options.view.cardAspectRatio = ratio;
+                targetNameElement.textContent = getCardAspectRatio(ratio);
+            }
+        });
     });
     const rect = options.target.getBoundingClientRect();
     menu.open({x: rect.left, y: rect.bottom});

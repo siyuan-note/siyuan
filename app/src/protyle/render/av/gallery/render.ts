@@ -71,7 +71,7 @@ export const renderGallery = (options: {
                 } else if (item.coverContent) {
                     galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
                 } else {
-                    galleryHTML += '<div class="${coverClass}"></div>';
+                    galleryHTML += `<div class="${coverClass}"></div>`;
                 }
             }
             galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;

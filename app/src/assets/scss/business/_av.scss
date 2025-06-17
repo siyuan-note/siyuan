@@ -292,7 +292,6 @@
     }
 
     &-cover {
-      height: 168px;
       border-bottom: 1px solid var(--b3-border-color);
       background-color: var(--b3-theme-surface);
       border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;
@@ -300,6 +299,28 @@
       transition: background 100ms ease-out;
       position: relative;
       cursor: pointer;
+
+      &--0 {
+        aspect-ratio: 16/9;
+      }
+      &--1 {
+        aspect-ratio: 9/16;
+      }
+      &--2 {
+        aspect-ratio: 4/3;
+      }
+      &--3 {
+        aspect-ratio: 3/4;
+      }
+      &--4 {
+        aspect-ratio: 3/2;
+      }
+      &--5 {
+        aspect-ratio: 2/3;
+      }
+      &--6 {
+        aspect-ratio: 1;
+      }
     }
 
     &-img {

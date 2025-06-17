@@ -119,6 +119,20 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 
 	view.LayoutType = newLayout
 	err = av.SaveAttributeView(attrView)
+
+	node, tree, err := getNodeByBlockID(nil, blockID)
+	if err != nil {
+		return
+	}
+
+	node.AttributeViewType = string(view.LayoutType)
+	attrs := parse.IAL2Map(node.KramdownIAL)
+	attrs[av.NodeAttrView] = view.ID
+	err = setNodeAttrs(node, tree, attrs)
+	if err != nil {
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		return
+	}
 	return
 }
 
@@ -469,7 +483,6 @@ func SetDatabaseBlockView(blockID, avID, viewID string) (err error) {
 	}
 
 	node.AttributeViewType = string(view.LayoutType)
-
 	attrs := parse.IAL2Map(node.KramdownIAL)
 	attrs[av.NodeAttrView] = viewID
 	err = setNodeAttrs(node, tree, attrs)

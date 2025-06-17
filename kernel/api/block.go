@@ -626,13 +626,18 @@ func getBlockInfo(c *gin.Context) {
 	}
 	rootTitle := root.IAL["title"]
 	rootTitle = html.UnescapeString(rootTitle)
+	icon := root.IAL["icon"]
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+	}
 	ret.Data = map[string]string{
 		"box":         block.Box,
 		"path":        block.Path,
 		"rootID":      block.RootID,
 		"rootTitle":   rootTitle,
 		"rootChildID": rootChildID,
-		"rootIcon":    root.IAL["icon"],
+		"rootIcon":    icon,
 	}
 }
 

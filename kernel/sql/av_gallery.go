@@ -27,6 +27,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		},
 		CoverFrom:           view.Gallery.CoverFrom,
 		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,
+		CardAspectRatio:     view.Gallery.CardAspectRatio,
 		CardSize:            view.Gallery.CardSize,
 		FitImage:            view.Gallery.FitImage,
 		ShowIcon:            view.Gallery.ShowIcon,

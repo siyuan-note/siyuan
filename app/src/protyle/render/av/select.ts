@@ -653,7 +653,7 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
             cellValues.push(genCellValueByElement(isCustomAttr ? item.dataset.type as TAVCol : getTypeByCellElement(item), item));
         });
     }
-    const colId = cellElements[0].dataset[blockElement.getAttribute("data-av-type") === "table" ? "colId" : "fieldId"];
+    const colId = getColId(cellElements[0],blockElement.getAttribute("data-av-type") as TAVView);
     const colData = fields.find(item => {
         if (item.id === colId) {
             return item;

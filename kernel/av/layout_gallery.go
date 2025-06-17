@@ -24,12 +24,13 @@ import (
 type LayoutGallery struct {
 	*BaseLayout
 
-	CoverFrom           CoverFrom `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string    `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
-	CardSize            CardSize  `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
-	FitImage            bool      `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool      `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool      `json:"wrapField"`                     // 是否换行字段内容
+	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
+	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
+	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
 
 	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
@@ -48,11 +49,24 @@ func NewLayoutGallery() *LayoutGallery {
 			Sorts:    []*ViewSort{},
 			PageSize: GalleryViewDefaultPageSize,
 		},
-		CoverFrom: CoverFromContentImage,
-		CardSize:  CardSizeMedium,
-		ShowIcon:  true,
+		CoverFrom:       CoverFromContentImage,
+		CardAspectRatio: CardAspectRatio16_9,
+		CardSize:        CardSizeMedium,
+		ShowIcon:        true,
 	}
 }
+
+type CardAspectRatio int
+
+const (
+	CardAspectRatio16_9 CardAspectRatio = iota // 16:9
+	CardAspectRatio9_16                        // 9:16
+	CardAspectRatio4_3                         // 4:3
+	CardAspectRatio3_4                         // 3:4
+	CardAspectRatio3_2                         // 3:2
+	CardAspectRatio2_3                         // 2:3
+	CardAspectRatio1_1                         // 1:1
+)
 
 type CardSize int
 

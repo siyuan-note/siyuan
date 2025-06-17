@@ -45,7 +45,7 @@ import (
 )
 
 func (tx *Transaction) doSetAttrViewCardAspectRatio(operation *Operation) (ret *TxErr) {
-	err := setAttrViewCardSize(operation)
+	err := setAttrViewCardAspectRatio(operation)
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}

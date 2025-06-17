@@ -46,7 +46,7 @@ import {openCalcMenu} from "./calc";
 import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
-import {setGalleryCover, setGallerySize} from "./gallery/util";
+import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -1386,6 +1386,16 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "set-gallery-size") {
                     setGallerySize({
+                        target,
+                        protyle: options.protyle,
+                        nodeElement: options.blockElement,
+                        view: data.view as IAVGallery
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "set-gallery-ratio") {
+                    setGalleryRatio({
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,

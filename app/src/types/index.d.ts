@@ -52,6 +52,7 @@ type TOperation =
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
     | "setAttrViewCardSize"
+    | "setAttrViewCardAspectRatio"
     | "setAttrViewCoverFrom"
     | "setAttrViewCoverFromAssetKeyID"
     | "setAttrViewFitImage"
@@ -850,6 +851,7 @@ interface IAVGallery extends IAVView {
     coverFrom: number;    // 0：无，1：内容图，2：资源字段
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
+    cardAspectRatio: number;
     fitImage: boolean;
     showIcon: boolean;
     wrapField: boolean;

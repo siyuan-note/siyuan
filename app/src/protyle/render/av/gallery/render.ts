@@ -61,16 +61,17 @@ export const renderGallery = (options: {
         view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
             galleryHTML += `<div data-id="${item.id}" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
             if (view.coverFrom !== 0) {
+                const coverClass= "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
-                        galleryHTML += `<div class="av__gallery-cover"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;
                     } else {
-                        galleryHTML += `<div class="av__gallery-cover"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL}')"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL}')"></div></div>`;
                     }
                 } else if (item.coverContent) {
-                    galleryHTML += `<div class="av__gallery-cover"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
+                    galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
                 } else {
-                    galleryHTML += '<div class="av__gallery-cover"></div>';
+                    galleryHTML += '<div class="${coverClass}"></div>';
                 }
             }
             galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;

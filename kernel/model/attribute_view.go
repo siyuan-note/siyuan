@@ -133,6 +133,8 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
 		return
 	}
+
+	ReloadAttrView(avID)
 	return
 }
 

@@ -71,6 +71,8 @@ func setAttrViewCardAspectRatio(operation *Operation) (err error) {
 	}
 
 	err = av.SaveAttributeView(attrView)
+
+	ReloadAttrView(operation.AvID)
 	return
 }
 

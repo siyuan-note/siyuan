@@ -196,6 +196,13 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 		logging.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
 		return
 	}
+
+	icon := ret.Icon
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+		ret.Icon = icon
+	}
 	return
 }
 

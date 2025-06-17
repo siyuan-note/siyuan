@@ -3,9 +3,7 @@ import {unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {focusBlock} from "../../util/selection";
-import {Constants} from "../../../constants";
 import {upDownHint} from "../../../util/upDownHint";
-import {avRender} from "./render";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {

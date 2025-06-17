@@ -199,7 +199,7 @@ export const setFilter = async (options: {
     }
     let selectHTML = "";
     let colData: IAVColumn;
-    const fields = getFieldsByData(options.data)
+    const fields = getFieldsByData(options.data);
     fields.find((column) => {
         if (column.id === options.filter.column) {
             colData = column;

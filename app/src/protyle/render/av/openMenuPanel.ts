@@ -38,7 +38,6 @@ import {
     openViewMenu
 } from "./view";
 import {focusBlock} from "../../util/selection";
-import {avRender} from "./render";
 import {setPageSize} from "./row";
 import {bindRelationEvent, getRelationHTML, openSearchAV, setRelationCell, updateRelation} from "./relation";
 import {bindRollupData, getRollupHTML, goSearchRollupCol} from "./rollup";

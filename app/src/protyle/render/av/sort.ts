@@ -15,7 +15,7 @@ export const addSort = (options: {
     blockID: string,
 }) => {
     const menu = new Menu("av-add-sort");
-    const fields = getFieldsByData(options.data)
+    const fields = getFieldsByData(options.data);
     fields.forEach((column) => {
         let hasSort = false;
 

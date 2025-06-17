@@ -127,10 +127,16 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		id := dir.Name()
+		icon := boxConf.Icon
+		if strings.Contains(icon, ".") { // 说明是自定义图标
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			icon = util.FilterUploadFileName(icon)
+		}
+
 		box := &Box{
 			ID:       id,
 			Name:     boxConf.Name,
-			Icon:     boxConf.Icon,
+			Icon:     icon,
 			Sort:     boxConf.Sort,
 			SortMode: boxConf.SortMode,
 			Closed:   boxConf.Closed,

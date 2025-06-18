@@ -187,14 +187,15 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 		})
 
 		if "" == galleryCard.CoverURL {
-			if ast.NodeDocument == node.Type {
+			isDoc := ast.NodeDocument == node.Type
+			if isDoc {
 				node = node.FirstChild
 			}
 
 			buf := bytes.Buffer{}
 			for c := node; nil != c; c = c.Next {
 				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-				if 1024*4 < buf.Len() {
+				if !isDoc || 1024*4 < buf.Len() {
 					break
 				}
 			}
@@ -220,9 +221,15 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	blockRenderer.Options.ProtyleContenteditable = false
-	ast.Walk(node, func(node *ast.Node, entering bool) ast.WalkStatus {
-		rendererFunc := blockRenderer.RendererFuncs[node.Type]
-		return rendererFunc(node, entering)
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
+			ial := parse.IAL2Map(n.KramdownIAL)
+			delete(ial, av.NodeAttrNameAvs)
+			n.KramdownIAL = parse.Map2IAL(ial)
+		}
+		rendererFunc := blockRenderer.RendererFuncs[n.Type]
+		return rendererFunc(n, entering)
 	})
 	h := strings.TrimSpace(blockRenderer.Writer.String())
 	if strings.HasPrefix(h, "<li") {

@@ -187,14 +187,15 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 		})
 
 		if "" == galleryCard.CoverURL {
-			if ast.NodeDocument == node.Type {
+			isDoc := ast.NodeDocument == node.Type
+			if isDoc {
 				node = node.FirstChild
 			}
 
 			buf := bytes.Buffer{}
 			for c := node; nil != c; c = c.Next {
 				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-				if 1024*4 < buf.Len() {
+				if !isDoc || 1024*4 < buf.Len() {
 					break
 				}
 			}

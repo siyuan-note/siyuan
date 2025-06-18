@@ -606,7 +606,7 @@ export class WYSIWYG {
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !isInEmbedBlock(avCellElement)) {
                 const nodeElement = hasClosestBlock(avCellElement);
-                if (!nodeElement) {
+                if (!nodeElement || nodeElement.dataset.avType !== "table") {
                     return;
                 }
                 nodeElement.querySelectorAll(".av__cell--select").forEach(item => {

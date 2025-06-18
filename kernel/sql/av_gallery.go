@@ -221,9 +221,14 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	blockRenderer.Options.ProtyleContenteditable = false
-	ast.Walk(node, func(node *ast.Node, entering bool) ast.WalkStatus {
-		rendererFunc := blockRenderer.RendererFuncs[node.Type]
-		return rendererFunc(node, entering)
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			ial := parse.IAL2Map(n.KramdownIAL)
+			delete(ial, av.NodeAttrNameAvs)
+			n.KramdownIAL = parse.Map2IAL(ial)
+		}
+		rendererFunc := blockRenderer.RendererFuncs[n.Type]
+		return rendererFunc(n, entering)
 	})
 	h := strings.TrimSpace(blockRenderer.Writer.String())
 	if strings.HasPrefix(h, "<li") {

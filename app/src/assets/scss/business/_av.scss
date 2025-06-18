@@ -28,6 +28,10 @@
     cursor: auto;
   }
 
+  &[data-av-type="gallery"] > .av__container {
+    overflow: inherit;
+  }
+
   &__pulse {
     width: 70%;
     height: 23px;
@@ -289,6 +293,25 @@
       &--select {
         background-color: var(--b3-theme-primary-lightest);
       }
+
+      &.dragover__left::after,
+      &.dragover__right::after {
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        content: '';
+        position: absolute;
+        background-color: var(--b3-theme-primary-lighter);
+        z-index: 3;
+      }
+
+      &.dragover__left::after {
+        left: -11px;
+      }
+
+      &.dragover__right::after {
+        right: -11px;
+      }
     }
 
     &-cover {
@@ -303,21 +326,27 @@
       &--0 {
         aspect-ratio: 16/9;
       }
+
       &--1 {
         aspect-ratio: 9/16;
       }
+
       &--2 {
         aspect-ratio: 4/3;
       }
+
       &--3 {
         aspect-ratio: 3/4;
       }
+
       &--4 {
         aspect-ratio: 3/2;
       }
+
       &--5 {
         aspect-ratio: 2/3;
       }
+
       &--6 {
         aspect-ratio: 1;
       }

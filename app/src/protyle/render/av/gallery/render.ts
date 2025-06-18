@@ -59,7 +59,7 @@ export const renderGallery = (options: {
         let galleryHTML = "";
         // body
         view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-            galleryHTML += `<div data-id="${item.id}" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
+            galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
             if (view.coverFrom !== 0) {
                 const coverClass= "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio
                 if (item.coverURL) {

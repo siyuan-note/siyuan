@@ -33,6 +33,7 @@ import {webUtils} from "electron";
 /// #endif
 import {addDragFill} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
+import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -838,6 +839,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}Col${Constants.ZWSP}${[target.getAttribute("data-col-id")]}`,
                     target.outerHTML);
                 return;
+            } else if (target.classList.contains("av__gallery-item")) {
+                window.siyuan.dragElement = target;
+                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${[target.getAttribute("data-id")]}`,
+                    target.outerHTML);
+                return;
             }
         }
         // 选中编辑器中的文字进行拖拽
@@ -988,7 +994,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 } else if (targetElement.classList.contains("av__row")) {
-                    // 拖拽到属性视图内
+                    // 拖拽到属性视图 table 内
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
@@ -1045,6 +1051,71 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             }]);
                             blockElement.setAttribute("updated", newUpdated);
                             insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
+                        }
+                    }
+                } else if (targetElement.classList.contains("av__gallery-item")) {
+                    // 拖拽到属性视图 gallery 内
+                    const blockElement = hasClosestBlock(targetElement);
+                    if (blockElement) {
+                        let previousID = "";
+                        if (targetClass.includes("dragover__right")) {
+                            previousID = targetElement.getAttribute("data-id") || "";
+                        } else {
+                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        }
+                        const avID = blockElement.getAttribute("data-av-id");
+                        if (gutterTypes[1] === "galleryitem" && gutterTypes[0] === "nodeattributeview") {
+                            // gallery item 内部拖拽
+                            const doOperations: IOperation[] = [];
+                            const undoOperations: IOperation[] = [];
+                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            selectedIds.reverse().forEach(item => {
+                                if (previousID !== item && undoPreviousId !== previousID) {
+                                    doOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                    undoOperations.push({
+                                        action: "sortAttrViewRow",
+                                        avID,
+                                        previousID: undoPreviousId,
+                                        id: item,
+                                        blockID: blockElement.dataset.nodeId,
+                                    });
+                                }
+                            });
+                            transaction(protyle, doOperations, undoOperations);
+                        } else {
+                            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            transaction(protyle, [{
+                                action: "insertAttrViewBlock",
+                                avID,
+                                previousID,
+                                srcs,
+                                blockID: blockElement.dataset.nodeId
+                            }, {
+                                action: "doUpdateUpdated",
+                                id: blockElement.dataset.nodeId,
+                                data: newUpdated,
+                            }], [{
+                                action: "removeAttrViewBlock",
+                                srcIDs: sourceIds,
+                                avID,
+                            }, {
+                                action: "doUpdateUpdated",
+                                id: blockElement.dataset.nodeId,
+                                data: blockElement.getAttribute("updated")
+                            }]);
+                            blockElement.setAttribute("updated", newUpdated);
+                            insertGalleryItemAnimation({
+                                protyle,
+                                blockElement,
+                                srcIDs: sourceIds,
+                                previousId: previousID
+                            });
                         }
                     }
                 } else if (sourceElements.length > 0) {
@@ -1290,11 +1361,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
-            const targetAssitElement = hasClosestBlock(event.target);
-            if (targetAssitElement) {
-                targetAssitElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
-                targetAssitElement.removeAttribute("select-start");
-                targetAssitElement.removeAttribute("select-end");
+            const targetAssetElement = hasClosestBlock(event.target);
+            if (targetAssetElement) {
+                targetAssetElement.classList.remove("dragover__top", "protyle-wysiwyg--select", "dragover__bottom", "dragover__left", "dragover__right");
+                targetAssetElement.removeAttribute("select-start");
+                targetAssetElement.removeAttribute("select-end");
             } else {
                 // https://github.com/siyuan-note/siyuan/issues/14177
                 editorElement.querySelectorAll(".dragover__top, .protyle-wysiwyg--select, .dragover__bottom, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
@@ -1308,7 +1379,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        targetElement = hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") || hasClosestBlock(event.target);
+        targetElement = hasClosestByClassName(event.target, "av__gallery-item") ||
+            hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
+            hasClosestBlock(event.target);
+        if (targetElement && targetElement.getAttribute("data-av-type") === "gallery" &&
+            event.target.classList.contains("av__gallery")) {
+            // 拖拽到属性视图 gallery 内，但没选中 item
+            return;
+        }
         const point = {x: event.clientX, y: event.clientY, className: ""};
 
         // 超级块中有a，b两个段落块，移动到 ab 之间的间隙 targetElement 会变为超级块，需修正为 a
@@ -1377,6 +1455,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 (window.siyuan.dragElement && !window.siyuan.dragElement.contains(targetElement))) {
                 targetElement = false;
             }
+        } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
+            // gallery item 只能拖拽当前 av 中
+            const galleryElement = hasClosestByClassName(event.target, "av__gallery");
+            if (!galleryElement || !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
+                targetElement = false;
+            }
         }
         if (!targetElement) {
             return;
@@ -1429,6 +1513,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     } else {
                         targetElement.classList.add("dragover__right");
                     }
+                }
+                return;
+            }
+            if (targetElement.classList.contains("av__gallery-item")) {
+                const midLeft = nodeRect.left + nodeRect.width / 2;
+                if (event.clientX < midLeft && event.clientX > nodeRect.left - 13) {
+                    targetElement.classList.add("dragover__left");
+                } else if (event.clientX > midLeft && event.clientX <= nodeRect.right + 13) {
+                    targetElement.classList.add("dragover__right");
                 }
                 return;
             }

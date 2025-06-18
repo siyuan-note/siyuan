@@ -89,7 +89,7 @@ export class Gutter {
             let avElement: Element;
             if (buttonElement.dataset.rowId) {
                 avElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"]`)).find((item: HTMLElement) => {
-                    if (!isInEmbedBlock(item)) {
+                    if (!isInEmbedBlock(item) && !isInAVBlock(item)) {
                         return true;
                     }
                 });

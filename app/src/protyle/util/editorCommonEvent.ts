@@ -1383,7 +1383,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
         if (targetElement && targetElement.getAttribute("data-av-type") === "gallery" &&
-            event.target.classList.contains("av__gallery")) {
+            (event.target.classList.contains("av__gallery") || event.target.classList.contains("av__gallery-add"))) {
             // 拖拽到属性视图 gallery 内，但没选中 item
             return;
         }
@@ -1458,7 +1458,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
             // gallery item 只能拖拽当前 av 中
             const galleryElement = hasClosestByClassName(event.target, "av__gallery");
-            if (!galleryElement || !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
+            if (targetElement.classList.contains("av") || !galleryElement ||
+                !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
                 targetElement = false;
             }
         }
@@ -1563,22 +1564,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             return;
         }
+
         if (gutterType) {
             disabledPosition = "";
-            // https://github.com/siyuan-note/siyuan/issues/12651
-            if (dragoverElement) {
-                dragoverElement.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
-                dragoverElement = undefined;
-            }
             // gutter 文档内拖拽限制
             // 排除自己及子孙
             const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
                 // 表头不能拖到自己上
+                clearDragoverElement(dragoverElement);
                 return;
             }
             if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2] === targetElement.getAttribute("data-id")) {
                 // 行不能拖到自己上
+                clearDragoverElement(dragoverElement);
                 return;
             }
             const isSelf = gutterTypes[2].split(",").find((item: string) => {
@@ -1587,20 +1586,24 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             });
             if (isSelf && "nodeattributeviewrowmenu" !== gutterTypes[0]) {
+                clearDragoverElement(dragoverElement);
                 return;
             }
             if (isInEmbedBlock(targetElement)) {
                 // 不允许托入嵌入块
+                clearDragoverElement(dragoverElement);
                 return;
             }
             if (gutterTypes[0] === "nodelistitem" &&
                 gutterTypes[1] !== targetElement.getAttribute("data-subtype") &&
                 "NodeListItem" === targetElement.getAttribute("data-type")) {
                 // 排除类型不同的列表项
+                clearDragoverElement(dragoverElement);
                 return;
             }
             if (gutterTypes[0] !== "nodelistitem" && targetElement.getAttribute("data-type") === "NodeListItem") {
                 // 非列表项不能拖入列表项周围
+                clearDragoverElement(dragoverElement);
                 return;
             }
             if (gutterTypes[0] === "nodelistitem" && targetElement.parentElement.classList.contains("li") &&
@@ -1646,5 +1649,13 @@ const addDragover = (element: HTMLElement) => {
         element.classList.contains("list") ||
         element.classList.contains("bq")) {
         element.classList.add("dragover");
+    }
+};
+
+// https://github.com/siyuan-note/siyuan/issues/12651
+const clearDragoverElement = (element: Element) => {
+    if (element) {
+        element.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");
+        element = undefined;
     }
 };

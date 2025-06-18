@@ -223,6 +223,7 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	blockRenderer.Options.ProtyleContenteditable = false
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
+			// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
 			ial := parse.IAL2Map(n.KramdownIAL)
 			delete(ial, av.NodeAttrNameAvs)
 			n.KramdownIAL = parse.Map2IAL(ial)

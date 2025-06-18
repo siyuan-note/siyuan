@@ -1286,7 +1286,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     window.clearTimeout(transactionsTimeout);
     // 加速折叠 https://github.com/siyuan-note/siyuan/issues/11828
     if (doOperations.length === 1 && (
-        doOperations[0].action === "unfoldHeading" ||
+        doOperations[0].action === "unfoldHeading" || doOperations[0].action === "setAttrViewBlockView" ||
         (doOperations[0].action === "setAttrs" && doOperations[0].data.startsWith('{"fold":'))
     )) {
         // 防止 needDebounce 为 true

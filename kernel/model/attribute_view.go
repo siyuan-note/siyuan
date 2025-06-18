@@ -3068,6 +3068,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				break
 			}
 		}
+		view.Gallery.CardIDs = util.InsertElem(view.Gallery.CardIDs, previousIndex, rowID)
 	}
 
 	err = av.SaveAttributeView(attrView)

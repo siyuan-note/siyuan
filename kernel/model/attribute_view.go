@@ -3035,23 +3035,23 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		return
 	}
 
-	var rowID string
+	var itemID string
 	var idx, previousIndex int
-	for i, r := range view.Table.RowIDs {
-		if r == operation.ID {
-			rowID = r
-			idx = i
-			break
-		}
-	}
-	if "" == rowID {
-		rowID = operation.ID
-		view.Table.RowIDs = append(view.Table.RowIDs, rowID)
-		idx = len(view.Table.RowIDs) - 1
-	}
-
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
+		for i, r := range view.Table.RowIDs {
+			if r == operation.ID {
+				itemID = r
+				idx = i
+				break
+			}
+		}
+		if "" == itemID {
+			itemID = operation.ID
+			view.Table.RowIDs = append(view.Table.RowIDs, itemID)
+			idx = len(view.Table.RowIDs) - 1
+		}
+
 		view.Table.RowIDs = append(view.Table.RowIDs[:idx], view.Table.RowIDs[idx+1:]...)
 		for i, r := range view.Table.RowIDs {
 			if r == operation.PreviousID {
@@ -3059,8 +3059,20 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				break
 			}
 		}
-		view.Table.RowIDs = util.InsertElem(view.Table.RowIDs, previousIndex, rowID)
+		view.Table.RowIDs = util.InsertElem(view.Table.RowIDs, previousIndex, itemID)
 	case av.LayoutTypeGallery:
+		for i, c := range view.Gallery.CardIDs {
+			if c == operation.ID {
+				itemID = c
+				idx = i
+				break
+			}
+		}
+		if "" == itemID {
+			itemID = operation.ID
+			view.Gallery.CardIDs = append(view.Gallery.CardIDs, itemID)
+			idx = len(view.Gallery.CardIDs) - 1
+		}
 		view.Gallery.CardIDs = append(view.Gallery.CardIDs[:idx], view.Gallery.CardIDs[idx+1:]...)
 		for i, c := range view.Gallery.CardIDs {
 			if c == operation.PreviousID {
@@ -3068,6 +3080,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				break
 			}
 		}
+		view.Gallery.CardIDs = util.InsertElem(view.Gallery.CardIDs, previousIndex, itemID)
 	}
 
 	err = av.SaveAttributeView(attrView)

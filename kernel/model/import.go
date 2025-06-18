@@ -126,7 +126,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-
+		if d == nil {
+			return nil
+		}
 		if !d.IsDir() && strings.HasSuffix(d.Name(), ".sy") {
 			syPaths = append(syPaths, path)
 		}
@@ -231,6 +233,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	if gulu.File.IsExist(storageAvDir) {
 		// 重新生成数据库数据
 		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}
@@ -468,7 +476,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-
+		if d == nil {
+			return nil
+		}
 		if d.IsDir() && ast.IsNodeIDPattern(d.Name()) {
 			renamePaths[path] = path
 		}
@@ -540,6 +550,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 将包含的资源文件统一移动到 data/assets/ 下
 	var assetsDirs []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if strings.Contains(path, "assets") && d.IsDir() {
 			assetsDirs = append(assetsDirs, path)
 		}
@@ -559,6 +575,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
 	unzipRootEmojisPath := filepath.Join(unzipRootPath, "emojis")
 	filelock.Walk(unzipRootEmojisPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if !util.IsValidUploadFileName(d.Name()) {
 			emojiFullName := filepath.Join(unzipRootEmojisPath, d.Name())
 			fullPathFilteredName := filepath.Join(unzipRootEmojisPath, util.FilterUploadFileName(d.Name()))
@@ -572,6 +594,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	})
 	var emojiDirs []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if strings.Contains(path, "emojis") && d.IsDir() {
 			emojiDirs = append(emojiDirs, path)
 		}
@@ -607,6 +635,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	var treePaths []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if d.IsDir() {
 			if strings.HasPrefix(d.Name(), ".") {
 				return filepath.SkipDir
@@ -690,6 +724,12 @@ func ImportData(zipPath string) (err error) {
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
 	tmpDataEmojisPath := filepath.Join(tmpDataPath, "emojis")
 	filelock.Walk(tmpDataEmojisPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if !util.IsValidUploadFileName(d.Name()) {
 			emojiFullName := filepath.Join(tmpDataEmojisPath, d.Name())
 			fullPathFilteredName := filepath.Join(tmpDataEmojisPath, util.FilterUploadFileName(d.Name()))
@@ -754,6 +794,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		// 收集所有资源文件
 		assets := map[string]string{}
 		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if localPath == currentPath {
 				return nil
 			}
@@ -775,6 +821,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		count := 0
 		// md 转换 sy
 		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if strings.HasPrefix(d.Name(), ".") {
 				if d.IsDir() {
 					return filepath.SkipDir

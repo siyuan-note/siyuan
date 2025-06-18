@@ -66,9 +66,24 @@ func extensionCopy(c *gin.Context) {
 		// 剪藏链滴帖子时直接使用 Markdown 接口的返回
 		// https://ld246.com/article/raw/1724850322251
 		symArticleHref = form.Value["href"][0]
-		if strings.HasPrefix(symArticleHref, "https://ld246.com/article/") || strings.HasPrefix(symArticleHref, "https://liuyun.io/article/") {
-			symArticleHref = strings.ReplaceAll(symArticleHref, "https://ld246.com/article/", "https://ld246.com/article/raw/")
-			symArticleHref = strings.ReplaceAll(symArticleHref, "https://liuyun.io/article/", "https://liuyun.io/article/raw/")
+
+		var baseURL, originalPrefix string
+		if strings.HasPrefix(symArticleHref, "https://ld246.com/article/") {
+			baseURL = "https://ld246.com/article/raw/"
+			originalPrefix = "https://ld246.com/article/"
+		} else if strings.HasPrefix(symArticleHref, "https://liuyun.io/article/") {
+			baseURL = "https://liuyun.io/article/raw/"
+			originalPrefix = "https://liuyun.io/article/"
+		}
+
+		if "" != baseURL {
+			articleID := strings.TrimPrefix(symArticleHref, originalPrefix)
+
+			if idx := strings.IndexAny(articleID, "/?#"); -1 != idx {
+				articleID = articleID[:idx]
+			}
+
+			symArticleHref = baseURL + articleID
 			clippingSym = true
 		}
 	}

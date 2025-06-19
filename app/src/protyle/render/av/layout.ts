@@ -1,6 +1,6 @@
 import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
-import {fetchPost} from "../../../util/fetch";
+import {fetchSyncPost} from "../../../util/fetch";
 import {getCardAspectRatio} from "./gallery/util";
 
 export const getLayoutHTML = (data: IAV) => {
@@ -207,7 +207,7 @@ export const bindLayoutEvent = (options: {
     });
 };
 
-export const updateLayout = (options: {
+export const updateLayout = async (options: {
     data: IAV
     nodeElement: Element,
     protyle: IProtyle,
@@ -219,19 +219,19 @@ export const updateLayout = (options: {
     options.target.dataset.load = "true";
     options.target.parentElement.querySelector(".av__layout-item--select").classList.remove("av__layout-item--select");
     options.target.classList.add("av__layout-item--select");
-    fetchPost("/api/av/changeAttrViewLayout", {
+    const response = await fetchSyncPost("/api/av/changeAttrViewLayout", {
         blockID: options.nodeElement.getAttribute("data-node-id"),
         avID: options.nodeElement.getAttribute("data-av-id"),
         layoutType: options.target.getAttribute("data-view-type")
-    }, (response) => {
-        const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
-        menuElement.innerHTML = getLayoutHTML(response.data);
-        bindLayoutEvent({
-            protyle: options.protyle,
-            data: response.data,
-            menuElement,
-            blockElement: options.nodeElement
-        });
-        options.target.removeAttribute("data-load");
     });
+    const menuElement = document.querySelector(".av__panel").lastElementChild as HTMLElement;
+    menuElement.innerHTML = getLayoutHTML(response.data);
+    bindLayoutEvent({
+        protyle: options.protyle,
+        data: response.data,
+        menuElement,
+        blockElement: options.nodeElement
+    });
+    options.target.removeAttribute("data-load");
+    return response.data;
 };

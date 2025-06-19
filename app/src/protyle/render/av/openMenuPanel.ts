@@ -82,7 +82,7 @@ export const openMenuPanel = (options: {
         const blockID = options.blockElement.getAttribute("data-node-id");
 
         const isCustomAttr = !options.blockElement.classList.contains("av");
-        const data = response.data as IAV;
+        let data = response.data as IAV;
         let html;
         const fields = getFieldsByData(data);
         if (options.type === "config") {
@@ -511,7 +511,7 @@ export const openMenuPanel = (options: {
                 document.querySelector(".av__panel").dispatchEvent(new CustomEvent("click", {detail: "close"}));
             }
         });
-        avPanelElement.addEventListener("click", (event: MouseEvent) => {
+        avPanelElement.addEventListener("click", async (event: MouseEvent) => {
             let type: string;
             let target = event.target as HTMLElement;
             if (typeof event.detail === "string") {
@@ -1405,7 +1405,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "set-layout") {
-                    updateLayout({
+                    data = await updateLayout({
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,

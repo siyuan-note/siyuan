@@ -427,6 +427,7 @@ interface INotebook {
 }
 
 interface ISiyuan {
+    isSelecting: boolean;
     zIndex: number
     storage?: {
         [key: string]: any

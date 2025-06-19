@@ -291,7 +291,7 @@ export const getSwitcherHTML = (views: IAVView[], viewId: string) => {
         html += `<button draggable="true" class="b3-menu__item${item.id === viewId ? " b3-menu__item--current" : ""}" data-id="${item.id}">
     <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
     <div class="b3-menu__label fn__flex" data-type="av-view-switch" data-av-type="${item.type}">
-        ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : '<svg class="b3-menu__icon"><use xlink:href="#iconTable"></use></svg>'}
+        ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
         <span class="fn__ellipsis">${item.name}</span>
     </div>
     <svg class="b3-menu__action" data-type="av-view-edit"><use xlink:href="#iconEdit"></use></svg>

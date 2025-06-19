@@ -98,6 +98,7 @@ import {editAssetItem} from "../render/av/asset";
 import {img3115} from "../../boot/compatibleVersion";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
 import {hideTooltip} from "../../dialog/tooltip";
+import {openGalleryItemMenu} from "../render/av/gallery/util";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -1793,6 +1794,23 @@ export class WYSIWYG {
             const nodeElement = hasClosestBlock(target);
             if (!nodeElement) {
                 return false;
+            }
+            const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
+            if (avGalleryItemElement) {
+                avGalleryItemElement.classList.add("av__gallery-item--select");
+                const menu = openGalleryItemMenu({
+                    target: avGalleryItemElement.querySelector('.protyle-icon--last'),
+                    blockElement: nodeElement,
+                    protyle,
+                    returnMenu: true
+                });
+                menu.open({
+                    x: event.clientX,
+                    y: event.clientY
+                });
+                event.stopPropagation();
+                event.preventDefault();
+                return;
             }
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (avCellElement) {

@@ -227,6 +227,7 @@ export const openGalleryItemMenu = (options: {
     target: HTMLElement,
     blockElement: HTMLElement,
     protyle: IProtyle,
+    returnMenu: boolean
 }) => {
     const menu = new Menu();
     const avID = options.blockElement.getAttribute("data-av-id");
@@ -267,6 +268,9 @@ export const openGalleryItemMenu = (options: {
             }
         }
     });
+    if (options.returnMenu) {
+        return menu;
+    }
     const rect = options.target.getBoundingClientRect();
     menu.open({
         x: rect.left,

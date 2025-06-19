@@ -62,10 +62,8 @@ func extensionCopy(c *gin.Context) {
 
 	clippingSym := false
 	symArticleHref := ""
-
 	hasHref := nil != form.Value["href"]
 	isPartClip := nil != form.Value["clipType"] && form.Value["clipType"][0] == "part"
-
 	if hasHref && !isPartClip {
 		// 剪藏链滴帖子时直接使用 Markdown 接口的返回
 		// https://ld246.com/article/raw/1724850322251
@@ -82,7 +80,6 @@ func extensionCopy(c *gin.Context) {
 
 		if "" != baseURL {
 			articleID := strings.TrimPrefix(symArticleHref, originalPrefix)
-
 			if idx := strings.IndexAny(articleID, "/?#"); -1 != idx {
 				articleID = articleID[:idx]
 			}

@@ -60,6 +60,12 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 			break
 		}
 	}
+
+	if ast.NodeParagraph == insertPoint.Type && nil == insertPoint.FirstChild {
+		// 删除空段落
+		// Ignore the last empty paragraph block when exporting merged sub-documents https://github.com/siyuan-note/siyuan/issues/15028
+		insertPoint.Unlink()
+	}
 	return
 }
 

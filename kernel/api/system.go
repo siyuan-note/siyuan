@@ -173,7 +173,8 @@ func getEmojiConf(c *gin.Context) {
 
 				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
 					emojiFullName := filepath.Join(customConfDir, name)
-					fullPathFilteredName := filepath.Join(customConfDir, util.FilterUploadFileName(name))
+					name = util.FilterUploadFileName(name)
+					fullPathFilteredName := filepath.Join(customConfDir, name)
 					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 					logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
 					if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
@@ -194,22 +195,22 @@ func getEmojiConf(c *gin.Context) {
 							continue
 						}
 
-						name = subCustomEmoji.Name()
-						if strings.HasPrefix(name, ".") {
+						subName := subCustomEmoji.Name()
+						if strings.HasPrefix(subName, ".") {
 							continue
 						}
 
-						if !util.IsValidUploadFileName(html.UnescapeString(name)) {
-							emojiFullName := filepath.Join(customConfDir, name)
-							fullPathFilteredName := filepath.Join(customConfDir, util.FilterUploadFileName(name))
+						if !util.IsValidUploadFileName(html.UnescapeString(subName)) {
+							emojiFullName := filepath.Join(customConfDir, name, subName)
+							fullPathFilteredName := filepath.Join(customConfDir, name, util.FilterUploadFileName(subName))
 							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-							logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
+							logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", subName, fullPathFilteredName)
 							if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
 								logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
 							}
 						}
 
-						addCustomEmoji(customEmoji.Name()+"/"+name, &items)
+						addCustomEmoji(name+"/"+subName, &items)
 					}
 					continue
 				}

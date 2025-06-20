@@ -124,7 +124,9 @@ export class Preview {
                     if (actionCustom) {
                         actionCustom.click(type);
                     } else if ((type === "mp-wechat" || type === "zhihu" || type === "yuque")) {
-                        this.copyToX(this.element.lastElementChild.cloneNode(true) as HTMLElement, protyle, type);
+                        const clonedElement = this.element.lastElementChild.cloneNode(true) as HTMLElement;
+                        const backgroundColor = getComputedStyle(this.element).backgroundColor;
+                        this.copyToX(clonedElement, protyle, type, backgroundColor);
                     } else if (type === "desktop") {
                         previewElement.style.width = "";
                         previewElement.style.padding = protyle.wysiwyg.element.style.padding;
@@ -215,7 +217,7 @@ export class Preview {
         });
     }
 
-    private async copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
+    private async copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string, backgroundColor?: string) {
         // fix math render
         if (type === "mp-wechat") {
             this.link2online(copyElement);
@@ -273,15 +275,32 @@ export class Preview {
             });
             return;
         }
-        // 防止背景色被粘贴到公众号中
-        copyElement.style.backgroundColor = "#fff";
-        // 代码背景
-        copyElement.querySelectorAll("code").forEach((item) => {
-            item.style.backgroundImage = "none";
-        });
+
+        if (window.siyuan.config.appearance.mode === 1) {
+            // 暗黑模式添加一层 section 设置背景色
+            const sectionElement = document.createElement("section");
+            sectionElement.innerHTML = copyElement.innerHTML;
+            // 背景色可以粘贴到公众号中，不会粘贴到知乎
+            if (!backgroundColor || backgroundColor === "rgba(0, 0, 0, 0)" || backgroundColor === "transparent") {
+                backgroundColor = "#1e1e1e";
+            }
+            sectionElement.style.backgroundColor = backgroundColor;
+            sectionElement.style.padding = "10px";
+            copyElement.innerHTML = "";
+            copyElement.removeAttribute("style");
+            copyElement.appendChild(sectionElement);
+            // b3-typography 类名移动，否则选择器不匹配
+            sectionElement.classList.add("b3-typography");
+            copyElement.classList.add("b3-typography--copy");
+            copyElement.classList.remove("b3-typography");
+        } else {
+            // 明亮模式防止背景色被粘贴到公众号中
+            copyElement.style.backgroundColor = "#fff";
+        }
+
         this.element.append(copyElement);
-        // 最后一个块是公式块时无法复制下来
-        copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
+        // 最后一个块是公式块时无法复制下来；section 元素后面还需要一个其他元素才能被复制
+        copyElement.insertAdjacentHTML("beforeend", "<p style='background-color: transparent;'> &zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();

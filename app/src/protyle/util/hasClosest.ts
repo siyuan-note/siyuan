@@ -122,3 +122,10 @@ export const isInEmbedBlock = (element: Element) => {
         return false;
     }
 };
+
+export const isInAVBlock = (element: Element) => {
+    if (hasClosestByClassName(element, "av__gallery-cover")) {
+        return hasClosestByClassName(element, "av");
+    }
+    return false;
+};

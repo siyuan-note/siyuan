@@ -169,49 +169,6 @@ export const initAssets = () => {
     });
 };
 
-export const addGA = () => {
-    if (!window.siyuan.config.system.disableGoogleAnalytics) {
-        addScript("https://www.googletagmanager.com/gtag/js?id=G-L7WEXVQCR9", "gaScript");
-        window.dataLayer = window.dataLayer || [];
-        /*eslint-disable */
-        const gtag = function (...args: any[]) {
-            window.dataLayer.push(arguments);
-        };
-        /*eslint-enable */
-        gtag("js", new Date());
-        gtag("config", "G-L7WEXVQCR9", {send_page_view: false});
-        const para = {
-            version: Constants.SIYUAN_VERSION,
-            container: window.siyuan.config.system.container,
-            os: window.siyuan.config.system.os,
-            osPlatform: window.siyuan.config.system.osPlatform,
-            isLoggedIn: false,
-            subscriptionStatus: -1,
-            subscriptionPlan: -1,
-            subscriptionType: -1,
-            oneTimePayStatus: -1,
-            syncEnabled: false,
-            syncProvider: -1,
-            cTreeCount: window.siyuan.config.stat.cTreeCount,
-            cBlockCount: window.siyuan.config.stat.cBlockCount,
-            cDataSize: window.siyuan.config.stat.cDataSize,
-            cAssetsSize: window.siyuan.config.stat.cAssetsSize,
-        };
-        if (window.siyuan.user) {
-            para.isLoggedIn = true;
-            para.subscriptionStatus = window.siyuan.user.userSiYuanSubscriptionStatus;
-            para.subscriptionPlan = window.siyuan.user.userSiYuanSubscriptionPlan;
-            para.subscriptionType = window.siyuan.user.userSiYuanSubscriptionType;
-            para.oneTimePayStatus = window.siyuan.user.userSiYuanOneTimePayStatus;
-        }
-        if (window.siyuan.config.sync) {
-            para.syncEnabled = window.siyuan.config.sync.enabled;
-            para.syncProvider = window.siyuan.config.sync.provider;
-        }
-        gtag("event", Constants.ANALYTICS_EVT_ON_GET_CONFIG, para);
-    }
-};
-
 export const setInlineStyle = async (set = true) => {
     const height = Math.floor(window.siyuan.config.editor.fontSize * 1.625);
     let style;

@@ -80,7 +80,12 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	ret.Path = fileInfo.path
 	ret.Size = uint64(fileInfo.size)
 	ret.Name = ial["title"] + ".sy"
-	ret.Icon = ial["icon"]
+	icon := ial["icon"]
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+	}
+	ret.Icon = icon
 	ret.ID = ial["id"]
 	ret.Name1 = ial["name"]
 	ret.Alias = ial["alias"]

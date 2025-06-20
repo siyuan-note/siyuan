@@ -17,7 +17,6 @@
 package model
 
 import (
-	"github.com/emirpasic/gods/sets/hashset"
 	"os"
 	"path/filepath"
 	"sort"
@@ -28,6 +27,7 @@ import (
 	"github.com/88250/lute/ast"
 	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
+	"github.com/emirpasic/gods/sets/hashset"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -65,6 +65,13 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	title := tree.Root.IALAttr("title")
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
+	icon := ret.IAL["icon"]
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+		ret.IAL["icon"] = icon
+	}
+
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
 		scroll := map[string]interface{}{}
@@ -131,7 +138,12 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 	ret.SubFileCount = subFileCount
-	ret.Icon = tree.Root.IALAttr("icon")
+	icon = tree.Root.IALAttr("icon")
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+	}
+	ret.Icon = icon
 	return
 }
 

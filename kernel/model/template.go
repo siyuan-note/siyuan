@@ -388,7 +388,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 			if nil != parseErr {
 				logging.LogErrorf("parse attribute view [%s] failed: %s", n.AttributeViewID, parseErr)
 			} else {
-				cloned := attrView.ShallowClone()
+				cloned := attrView.Clone()
 				if nil == cloned {
 					logging.LogErrorf("clone attribute view [%s] failed", n.AttributeViewID)
 					return ast.WalkContinue
@@ -409,7 +409,7 @@ func RenderTemplate(p, id string, preview bool) (tree *parse.Tree, dom string, e
 						return ast.WalkContinue
 					}
 
-					table := sql.RenderAttributeViewTable(attrView, view, "")
+					table := getAttrViewTable(attrView, view, "")
 
 					var aligns []int
 					for range table.Columns {

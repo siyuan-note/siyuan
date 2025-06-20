@@ -3,6 +3,7 @@ import {getColIconByType} from "./col";
 import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
 import {unicode2Emoji} from "../../../emoji";
+import {getFieldsByData} from "./view";
 
 export const addSort = (options: {
     data: IAV,
@@ -14,7 +15,8 @@ export const addSort = (options: {
     blockID: string,
 }) => {
     const menu = new Menu("av-add-sort");
-    options.data.view.columns.forEach((column) => {
+    const fields = getFieldsByData(options.data);
+    fields.forEach((column) => {
         let hasSort = false;
 
         // 如果该列是行号类型列，不允许添加排序
@@ -28,7 +30,7 @@ export const addSort = (options: {
                 }
             });
         }
-        
+
         if (!hasSort) {
             menu.addItem({
                 label: column.name,
@@ -50,7 +52,7 @@ export const addSort = (options: {
                         data: oldSorts,
                         blockID: options.blockID,
                     }]);
-                    options.menuElement.innerHTML = getSortsHTML(options.data.view.columns, options.data.view.sorts);
+                    options.menuElement.innerHTML = getSortsHTML(fields, options.data.view.sorts);
                     bindSortsEvent(options.protyle, options.menuElement, options.data, options.blockID);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                 }

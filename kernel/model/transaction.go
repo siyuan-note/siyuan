@@ -21,7 +21,6 @@ import (
 	"errors"
 	"fmt"
 	"path/filepath"
-	"runtime/debug"
 	"slices"
 	"strings"
 	"sync"
@@ -155,8 +154,7 @@ func performTx(tx *Transaction) (ret *TxErr) {
 
 	defer func() {
 		if e := recover(); nil != e {
-			stack := debug.Stack()
-			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, stack)
+			msg := fmt.Sprintf("PANIC RECOVERED: %v\n\t%s\n", e, logging.ShortStack())
 			logging.LogErrorf(msg)
 
 			if 1 == tx.state.Load() {
@@ -278,6 +276,24 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doUnbindAttrViewBlock(op)
 		case "duplicateAttrViewKey":
 			ret = tx.doDuplicateAttrViewKey(op)
+		case "setAttrViewCoverFrom":
+			ret = tx.doSetAttrViewCoverFrom(op)
+		case "setAttrViewCoverFromAssetKeyID":
+			ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
+		case "setAttrViewCardSize":
+			ret = tx.doSetAttrViewCardSize(op)
+		case "setAttrViewFitImage":
+			ret = tx.doSetAttrViewFitImage(op)
+		case "setAttrViewShowIcon":
+			ret = tx.doSetAttrViewShowIcon(op)
+		case "setAttrViewWrapField":
+			ret = tx.doSetAttrViewWrapField(op)
+		case "changeAttrViewLayout":
+			ret = tx.doChangeAttrViewLayout(op)
+		case "setAttrViewBlockView":
+			ret = tx.doSetAttrViewBlockView(op)
+		case "setAttrViewCardAspectRatio":
+			ret = tx.doSetAttrViewCardAspectRatio(op)
 		}
 
 		if nil != ret {

@@ -654,7 +654,12 @@ func setEmoji(c *gin.Context) {
 	argEmoji := arg["emoji"].([]interface{})
 	var emoji []string
 	for _, ae := range argEmoji {
-		emoji = append(emoji, ae.(string))
+		e := ae.(string)
+		if strings.Contains(e, ".") {
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			e = util.FilterUploadFileName(e)
+		}
+		emoji = append(emoji, e)
 	}
 
 	model.Conf.Editor.Emoji = emoji

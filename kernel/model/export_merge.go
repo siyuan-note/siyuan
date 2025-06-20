@@ -60,6 +60,12 @@ func mergeSubDocs(rootTree *parse.Tree) (ret *parse.Tree, err error) {
 			break
 		}
 	}
+
+	if ast.NodeParagraph == insertPoint.Type && nil == insertPoint.FirstChild {
+		// 删除空段落
+		// Ignore the last empty paragraph block when exporting merged sub-documents https://github.com/siyuan-note/siyuan/issues/15028
+		insertPoint.Unlink()
+	}
 	return
 }
 
@@ -76,8 +82,15 @@ func walkBlock(insertPoint *ast.Node, block *Block, level int) (err error) {
 			return
 		}
 
-		for j := len(nodes) - 1; -1 < j; j-- {
-			insertPoint.InsertAfter(nodes[j])
+		lastIndex := len(nodes) - 1
+		for j := lastIndex; -1 < j; j-- {
+			node := nodes[j]
+			if j == lastIndex && ast.NodeParagraph == node.Type && nil == node.FirstChild {
+				// 跳过最后一个空段落块
+				// Ignore the last empty paragraph block when exporting merged sub-documents https://github.com/siyuan-note/siyuan/issues/15028
+				continue
+			}
+			insertPoint.InsertAfter(node)
 		}
 	}
 	block.Children = nil

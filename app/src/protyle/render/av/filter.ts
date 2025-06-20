@@ -11,6 +11,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {fetchSyncPost} from "../../../util/fetch";
 import {showMessage} from "../../../dialog/message";
 import {upDownHint} from "../../../util/upDownHint";
+import {getFieldsByData} from "./view";
 
 export const getDefaultOperatorByType = (type: TAVCol) => {
     if (["select", "number", "date", "created", "updated"].includes(type)) {
@@ -190,7 +191,7 @@ export const setFilter = async (options: {
         }]);
         const menuElement = hasClosestByClassName(options.target, "b3-menu");
         if (menuElement) {
-            menuElement.innerHTML = getFiltersHTML(options.data.view);
+            menuElement.innerHTML = getFiltersHTML(options.data);
         }
     });
     if (menu.isOpen) {
@@ -198,7 +199,8 @@ export const setFilter = async (options: {
     }
     let selectHTML = "";
     let colData: IAVColumn;
-    options.data.view.columns.find((column) => {
+    const fields = getFieldsByData(options.data);
+    fields.find((column) => {
         if (column.id === options.filter.column) {
             colData = column;
             return true;
@@ -217,7 +219,7 @@ export const setFilter = async (options: {
             return;
         }
         let targetAVId = "";
-        options.data.view.columns.find((column) => {
+        fields.find((column) => {
             if (column.id === colData.rollup.relationKeyID) {
                 targetAVId = column.relation.avID;
                 return true;
@@ -499,7 +501,7 @@ export const setFilter = async (options: {
             }]);
             const menuElement = hasClosestByClassName(options.target, "b3-menu");
             if (menuElement) {
-                menuElement.innerHTML = getFiltersHTML(options.data.view);
+                menuElement.innerHTML = getFiltersHTML(options.data);
             }
         }
     });
@@ -571,7 +573,7 @@ export const addFilter = (options: {
     blockElement: Element
 }) => {
     const menu = new Menu("av-add-filter");
-    options.data.view.columns.forEach((column) => {
+    getFieldsByData(options.data).forEach((column) => {
         let filter: IAVFilter;
         options.data.view.filters.find((item) => {
             if (item.column === column.id && item.value.type === column.type) {
@@ -592,7 +594,7 @@ export const addFilter = (options: {
                         value: cellValue,
                     };
                     options.data.view.filters.push(filter);
-                    options.menuElement.innerHTML = getFiltersHTML(options.data.view);
+                    options.menuElement.innerHTML = getFiltersHTML(options.data);
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
@@ -613,11 +615,12 @@ export const addFilter = (options: {
     });
 };
 
-export const getFiltersHTML = (data: IAVTable) => {
+export const getFiltersHTML = (data: IAV) => {
     let html = "";
+    const fields = getFieldsByData(data);
     const genFilterItem = (filter: IAVFilter) => {
         let filterHTML = "";
-        data.columns.find((item) => {
+        fields.find((item) => {
             if (item.id === filter.column && item.type === filter.value.type) {
                 let filterText = "";
                 const filterValue = item.type === "rollup" ? (filter.value.rollup?.contents?.length > 0 ? filter.value.rollup.contents[0] : {type: "rollup"} as IAVCellValue) : filter.value;
@@ -717,8 +720,7 @@ export const getFiltersHTML = (data: IAVTable) => {
         });
         return filterHTML;
     };
-
-    data.filters.forEach((item: IAVFilter) => {
+    data.view.filters.forEach((item: IAVFilter) => {
         const filterHTML = genFilterItem(item);
         if (filterHTML) {
             html += `<button class="b3-menu__item" draggable="true" data-id="${item.column}" data-filter-type="${item.value.type}">
@@ -737,7 +739,7 @@ export const getFiltersHTML = (data: IAVTable) => {
 </button>
 <button class="b3-menu__separator"></button>
 ${html}
-<button class="b3-menu__item${data.filters.length === data.columns.length ? " fn__none" : ""}" data-type="addFilter">
+<button class="b3-menu__item${data.view.filters.length === fields.length ? " fn__none" : ""}" data-type="addFilter">
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
 </button>

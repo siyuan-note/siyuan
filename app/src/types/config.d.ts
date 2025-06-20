@@ -270,17 +270,18 @@ declare namespace Config {
      */
     export type TLang =
         "en_US"
+        | "ar_SA"
+        | "de_DE"
         | "es_ES"
         | "fr_FR"
-        | "zh_CHT"
-        | "zh_CN"
-        | "ja_JP"
-        | "it_IT"
-        | "de_DE"
         | "he_IL"
-        | "ru_RU"
+        | "it_IT"
+        | "ja_JP"
         | "pl_PL"
-        | "ar_SA";
+        | "pt_BR"
+        | "ru_RU"
+        | "zh_CN"
+        | "zh_CHT";
 
     /**
      * SiYuan bazaar related configuration
@@ -1514,10 +1515,6 @@ declare namespace Config {
          * The absolute path of the `data` directory of the current workspace
          */
         dataDir: string;
-        /**
-         * Whether to disable Google Analytics
-         */
-        disableGoogleAnalytics: boolean;
         /**
          * Whether to automatically download the installation package for the new version
          */

@@ -7,7 +7,7 @@ const getRightBlock = (element: HTMLElement, x: number, y: number) => {
     let index = 1;
     let nodeElement = element;
     if (nodeElement && nodeElement.classList.contains("protyle-action")) {
-        return nodeElement.parentElement;
+        return nodeElement;
     }
     while (nodeElement && (nodeElement.classList.contains("list") || nodeElement.classList.contains("li"))) {
         nodeElement = document.elementFromPoint(x + 73 * index, y) as HTMLElement;

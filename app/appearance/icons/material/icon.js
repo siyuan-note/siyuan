@@ -1,6 +1,9 @@
 document.body.insertAdjacentHTML('afterbegin', `<svg style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>
   <symbol id="iconGallery" viewBox="0 0 32 32">
+    <path d="M1 13v-12h12v12h-12zM4 10h6v-6h-6v6zM1 31v-12h12v12h-12zM4 28h6v-6h-6v6zM19 13v-12h12v12h-12zM22 10h6v-6h-6v6zM19 31v-12h12v12h-12zM22 28h6v-6h-6v6z"></path>
+  </symbol>
+  <symbol id="iconBoard" viewBox="0 0 32 32">
     <path d="M27.8 4.2h-23.6c-1.623 0-2.95 1.327-2.95 2.95v17.7c0 1.622 1.327 2.95 2.95 2.95h23.6c1.622 0 2.95-1.328 2.95-2.95v-17.7c0-1.623-1.328-2.95-2.95-2.95zM10.1 24.85h-5.9v-17.7h5.9v17.7zM18.95 24.85h-5.9v-17.7h5.9v17.7zM27.8 24.85h-5.9v-17.7h5.9v17.7z"></path>
   </symbol>
   <symbol id="iconTerminal" viewBox="0 0 32 32">

@@ -380,7 +380,7 @@ func putFile(c *gin.Context) {
 		return
 	}
 
-	if !isValidFileName(fileAbsPath) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
+	if !util.IsValidUploadFileName(filepath.Base(fileAbsPath)) { // Improve kernel API `/api/file/putFile` parameter validation https://github.com/siyuan-note/siyuan/issues/14658
 		ret.Code = http.StatusBadRequest
 		ret.Msg = "invalid file path, please check https://github.com/siyuan-note/siyuan/issues/14658 for more details"
 		return
@@ -464,9 +464,4 @@ func millisecond2Time(t int64) time.Time {
 	sec := t / 1000
 	msec := t % 1000
 	return time.Unix(sec, msec*int64(time.Millisecond))
-}
-
-func isValidFileName(p string) bool {
-	name := filepath.Base(p)
-	return name == util.FilterUploadFileName(name)
 }

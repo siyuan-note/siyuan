@@ -21,13 +21,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707384570000,
-					"updatedAt": 1707384570000,
+					"updatedAt": 1749978930206,
 					"block": {
 						"id": "20240208172930-3n32s4x",
 						"icon": "",
 						"content": "Twenty Thousand Leagues Under The Sea",
 						"created": 1707384570935,
-						"updated": 1707384599291
+						"updated": 1749978930206
 					}
 				},
 				{
@@ -37,13 +37,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707384642000,
-					"updatedAt": 1707384642000,
+					"updatedAt": 1749979387056,
 					"block": {
 						"id": "20240208173041-9utmfv2",
 						"icon": "",
 						"content": "The Three-Body Problem",
 						"created": 1707384642526,
-						"updated": 1707384666857
+						"updated": 1749979387056
 					}
 				},
 				{
@@ -53,13 +53,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707384654000,
-					"updatedAt": 1707384654000,
+					"updatedAt": 1749979392633,
 					"block": {
 						"id": "20240208173054-6k25xnw",
 						"icon": "",
 						"content": "The Wandering Earth",
 						"created": 1707384654904,
-						"updated": 1707384668746
+						"updated": 1749979392633
 					}
 				}
 			]
@@ -185,10 +185,68 @@
 					}
 				}
 			]
+		},
+		{
+			"key": {
+				"id": "20250615171115-3g32dmi",
+				"name": "Cover",
+				"type": "mAsset",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20250615171137-fnqsi3y",
+					"keyID": "20250615171115-3g32dmi",
+					"blockID": "20240208172930-3n32s4x",
+					"type": "mAsset",
+					"createdAt": 1749978930206,
+					"updatedAt": 1749978931206,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "Twenty Thousand Leagues Under The Sea.jpg",
+							"content": "assets/Twenty Thousand Leagues Under The Sea-20250615171529-xe6m1pq.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615171630-rs10akx",
+					"keyID": "20250615171115-3g32dmi",
+					"blockID": "20240208173041-9utmfv2",
+					"type": "mAsset",
+					"createdAt": 1749979387056,
+					"updatedAt": 1749979388056,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Three-Body Problem.jpg",
+							"content": "assets/The Three-Body Problem-20250615172306-m3x7sjf.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615172307-y7nof00",
+					"keyID": "20250615171115-3g32dmi",
+					"blockID": "20240208173054-6k25xnw",
+					"type": "mAsset",
+					"createdAt": 1749979392633,
+					"updatedAt": 1749979393633,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Wandering Earth.jpg",
+							"content": "assets/The Wandering Earth-20250615172312-gsrhh7s.jpg"
+						}
+					]
+				}
+			]
 		}
 	],
 	"keyIDs": null,
-	"viewID": "20240208172742-16mbtpr",
+	"viewID": "20250615171046-3ucugf9",
 	"views": [
 		{
 			"id": "20240208172742-16mbtpr",
@@ -200,6 +258,9 @@
 			"table": {
 				"spec": 0,
 				"id": "20240208172742-mhhmma3",
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50,
 				"columns": [
 					{
 						"id": "20240208172742-dwysfvj",
@@ -213,24 +274,72 @@
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": ""
+						"width": "151px"
 					},
 					{
 						"id": "20240208173226-6666dv2",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": ""
+						"width": "245px"
+					},
+					{
+						"id": "20250615171115-3g32dmi",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "89px"
 					}
 				],
 				"rowIds": [
 					"20240208172930-3n32s4x",
 					"20240208173041-9utmfv2",
 					"20240208173054-6k25xnw"
-				],
+				]
+			}
+		},
+		{
+			"id": "20250615171046-3ucugf9",
+			"icon": "",
+			"name": "Gallery",
+			"hideAttrViewName": false,
+			"desc": "",
+			"type": "gallery",
+			"gallery": {
+				"spec": 0,
+				"id": "20250615171047-4emh3qi",
 				"filters": [],
 				"sorts": [],
-				"pageSize": 50
+				"pageSize": 50,
+				"coverFrom": 2,
+				"coverFromAssetKeyID": "20250615171115-3g32dmi",
+				"cardSize": 2,
+				"fitImage": true,
+				"showIcon": true,
+				"wrapField": false,
+				"fields": [
+					{
+						"id": "20240208172742-dwysfvj",
+						"hidden": false
+					},
+					{
+						"id": "20240208172937-fxi3h2s",
+						"hidden": false
+					},
+					{
+						"id": "20240208173226-6666dv2",
+						"hidden": false
+					},
+					{
+						"id": "20250615171115-3g32dmi",
+						"hidden": true
+					}
+				],
+				"cardIds": [
+					"20240208172930-3n32s4x",
+					"20240208173041-9utmfv2",
+					"20240208173054-6k25xnw"
+				]
 			}
 		}
 	]

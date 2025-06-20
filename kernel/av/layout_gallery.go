@@ -16,17 +16,65 @@
 
 package av
 
-import "sort"
+import (
+	"github.com/88250/lute/ast"
+)
 
 // LayoutGallery 描述了画廊布局的结构。
 type LayoutGallery struct {
 	*BaseLayout
 
-	CoverFrom           CoverFrom               `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
-	CoverFromAssetKeyID string                  `json:"coverFromAssetKeyId,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
-	CardFields          []*ViewGalleryCardField `json:"fields"`                        // 画廊卡片字段
-	CardIDs             []string                `json:"cardIds"`                       // 卡片 ID，用于自定义排序
+	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源，0：无，1：内容图，2：资源字段
+	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 2 时有效
+	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
+	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
+	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
+
+	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
+	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
 }
+
+func (layoutGallery *LayoutGallery) GetItemIDs() (ret []string) {
+	return layoutGallery.CardIDs
+}
+
+func NewLayoutGallery() *LayoutGallery {
+	return &LayoutGallery{
+		BaseLayout: &BaseLayout{
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			Filters:  []*ViewFilter{},
+			Sorts:    []*ViewSort{},
+			PageSize: GalleryViewDefaultPageSize,
+		},
+		CoverFrom:       CoverFromContentImage,
+		CardAspectRatio: CardAspectRatio16_9,
+		CardSize:        CardSizeMedium,
+		ShowIcon:        true,
+	}
+}
+
+type CardAspectRatio int
+
+const (
+	CardAspectRatio16_9 CardAspectRatio = iota // 16:9
+	CardAspectRatio9_16                        // 9:16
+	CardAspectRatio4_3                         // 4:3
+	CardAspectRatio3_4                         // 3:4
+	CardAspectRatio3_2                         // 3:2
+	CardAspectRatio2_3                         // 2:3
+	CardAspectRatio1_1                         // 1:1
+)
+
+type CardSize int
+
+const (
+	CardSizeSmall  CardSize = iota // 小卡片
+	CardSizeMedium                 // 中卡片
+	CardSizeLarge                  // 大卡片
+)
 
 // CoverFrom 描述了画廊中的卡片封面来源的枚举类型。
 type CoverFrom int
@@ -49,6 +97,14 @@ type ViewGalleryCardField struct {
 type Gallery struct {
 	*BaseInstance
 
+	CoverFrom           CoverFrom       `json:"coverFrom"`                     // 封面来源
+	CoverFromAssetKeyID string          `json:"coverFromAssetKeyID,omitempty"` // 资源字段 ID，CoverFrom 为 CoverFromAssetField 时有效
+	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
+	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
+	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
+	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
+
 	Fields    []*GalleryField `json:"fields"`    // 画廊字段
 	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
 	CardCount int             `json:"cardCount"` // 画廊总卡片数
@@ -59,7 +115,8 @@ type GalleryCard struct {
 	ID     string               `json:"id"`     // 卡片 ID
 	Values []*GalleryFieldValue `json:"values"` // 卡片字段值
 
-	CoverURL string `json:"coverURL"` // 卡片封面超链接
+	CoverURL     string `json:"coverURL"`     // 卡片封面超链接
+	CoverContent string `json:"coverContent"` // 卡片封面文本内容
 }
 
 // GalleryField 描述了画廊实例卡片字段的结构。
@@ -72,6 +129,10 @@ type GalleryFieldValue struct {
 	*BaseValue
 }
 
+func (card *GalleryCard) GetID() string {
+	return card.ID
+}
+
 func (card *GalleryCard) GetBlockValue() (ret *Value) {
 	for _, v := range card.Values {
 		if KeyTypeBlock == v.ValueType {
@@ -80,6 +141,47 @@ func (card *GalleryCard) GetBlockValue() (ret *Value) {
 		}
 	}
 	return
+}
+
+func (card *GalleryCard) GetValues() (ret []*Value) {
+	ret = []*Value{}
+	for _, v := range card.Values {
+		ret = append(ret, v.Value)
+	}
+	return
+}
+
+func (card *GalleryCard) GetValue(keyID string) (ret *Value) {
+	for _, value := range card.Values {
+		if nil != value.Value && keyID == value.Value.KeyID {
+			ret = value.Value
+			break
+		}
+	}
+	return
+}
+
+func (gallery *Gallery) GetItems() (ret []Item) {
+	ret = []Item{}
+	for _, card := range gallery.Cards {
+		ret = append(ret, card)
+	}
+	return
+}
+
+func (gallery *Gallery) SetItems(items []Item) {
+	gallery.Cards = []*GalleryCard{}
+	for _, item := range items {
+		gallery.Cards = append(gallery.Cards, item.(*GalleryCard))
+	}
+}
+
+func (gallery *Gallery) GetFields() (ret []Field) {
+	ret = []Field{}
+	for _, field := range gallery.Fields {
+		ret = append(ret, field)
+	}
+	return ret
 }
 
 func (gallery *Gallery) GetType() LayoutType {
@@ -91,163 +193,9 @@ func (gallery *Gallery) GetID() string {
 }
 
 func (gallery *Gallery) Sort(attrView *AttributeView) {
-	if 1 > len(gallery.Sorts) {
-		return
-	}
-
-	type FieldIndexSort struct {
-		Index int
-		Order SortOrder
-	}
-
-	var fieldIndexSorts []*FieldIndexSort
-	for _, s := range gallery.Sorts {
-		for i, c := range gallery.Fields {
-			if c.ID == s.Column {
-				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{Index: i, Order: s.Order})
-				break
-			}
-		}
-	}
-
-	editedValCards := map[string]bool{}
-	for i, card := range gallery.Cards {
-		for _, fieldIndexSort := range fieldIndexSorts {
-			val := gallery.Cards[i].Values[fieldIndexSort.Index].Value
-			if KeyTypeCheckbox == val.Type {
-				if block := card.GetBlockValue(); nil != block && block.IsEdited() {
-					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
-					editedValCards[card.ID] = true
-					break
-				}
-			}
-
-			if val.IsEdited() {
-				// 如果该卡片某字段的值已经编辑过，则该卡片可参与排序
-				editedValCards[card.ID] = true
-				break
-			}
-		}
-	}
-
-	// 将未编辑的卡片和已编辑的卡片分开排序
-	var uneditedCards, editedCards []*GalleryCard
-	for _, card := range gallery.Cards {
-		if _, ok := editedValCards[card.ID]; ok {
-			editedCards = append(editedCards, card)
-		} else {
-			uneditedCards = append(uneditedCards, card)
-		}
-	}
-
-	sort.Slice(uneditedCards, func(i, j int) bool {
-		val1 := uneditedCards[i].GetBlockValue()
-		if nil == val1 {
-			return true
-		}
-		val2 := uneditedCards[j].GetBlockValue()
-		if nil == val2 {
-			return false
-		}
-		return val1.CreatedAt < val2.CreatedAt
-	})
-
-	sort.Slice(editedCards, func(i, j int) bool {
-		sorted := true
-		for _, fieldIndexSort := range fieldIndexSorts {
-			val1 := editedCards[i].Values[fieldIndexSort.Index].Value
-			val2 := editedCards[j].Values[fieldIndexSort.Index].Value
-			if nil == val1 || val1.IsEmpty() {
-				if nil != val2 && !val2.IsEmpty() {
-					return false
-				}
-				sorted = false
-				continue
-			} else {
-				if nil == val2 || val2.IsEmpty() {
-					return true
-				}
-			}
-
-			result := val1.Compare(val2, attrView)
-			if 0 == result {
-				sorted = false
-				continue
-			}
-			sorted = true
-
-			if fieldIndexSort.Order == SortOrderAsc {
-				return 0 > result
-			}
-			return 0 < result
-		}
-
-		if !sorted {
-			key1 := editedCards[i].GetBlockValue()
-			if nil == key1 {
-				return false
-			}
-			key2 := editedCards[j].GetBlockValue()
-			if nil == key2 {
-				return false
-			}
-			return key1.CreatedAt < key2.CreatedAt
-		}
-		return false
-	})
-
-	// 将包含未编辑的卡片放在最后
-	gallery.Cards = append(editedCards, uneditedCards...)
-	if 1 > len(gallery.Cards) {
-		gallery.Cards = []*GalleryCard{}
-	}
+	sort0(gallery, attrView)
 }
 
 func (gallery *Gallery) Filter(attrView *AttributeView) {
-	if 1 > len(gallery.Filters) {
-		return
-	}
-
-	var fieldIndexes []int
-	for _, f := range gallery.Filters {
-		for i, c := range gallery.Cards {
-			if c.ID == f.Column {
-				fieldIndexes = append(fieldIndexes, i)
-				break
-			}
-		}
-	}
-
-	cards := []*GalleryCard{}
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
-	for _, card := range gallery.Cards {
-		pass := true
-		for j, index := range fieldIndexes {
-			operator := gallery.Filters[j].Operator
-
-			if nil == card.Values[index].Value {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != card.Values[index].ValueType {
-					pass = false
-				}
-				break
-			}
-
-			if !card.Values[index].Value.Filter(gallery.Filters[j], attrView, card.ID, &attrViewCache) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			cards = append(cards, card)
-		}
-	}
-	gallery.Cards = cards
+	filter0(gallery, attrView)
 }

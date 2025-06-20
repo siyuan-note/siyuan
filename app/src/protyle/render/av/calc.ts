@@ -2,6 +2,7 @@ import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
 import {fetchSyncPost} from "../../../util/fetch";
+import {getFieldsByData} from "./view";
 
 const calcItem = (options: {
     menu: Menu,
@@ -38,7 +39,7 @@ const calcItem = (options: {
                 }]);
             } else {
                 options.target.querySelector(".b3-menu__accelerator").textContent = getNameByOperator(options.operator, true);
-                const colData = options.data.view.columns.find((item) => {
+                const colData = getFieldsByData(options.data).find((item) => {
                     if (item.id === options.colId) {
                         if (!item.rollup) {
                             item.rollup = {};
@@ -274,7 +275,8 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
             const avResponse = await fetchSyncPost("api/av/renderAttributeView", {id: avId});
             avData = avResponse.data;
         }
-        avData.view.columns.find((item) => {
+
+        getFieldsByData(avData).find((item) => {
             if (item.id === colId) {
                 relationKeyID = item.rollup?.relationKeyID;
                 keyID = item.rollup?.keyID;
@@ -283,7 +285,7 @@ export const openCalcMenu = async (protyle: IProtyle, calcElement: HTMLElement, 
         });
         if (relationKeyID && keyID) {
             let relationAvId: string;
-            avData.view.columns.find((item) => {
+            getFieldsByData(avData).find((item) => {
                 if (item.id === relationKeyID) {
                     relationAvId = item.relation?.avID;
                     return true;

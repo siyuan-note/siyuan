@@ -21,13 +21,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707379172000,
-					"updatedAt": 1707379172000,
+					"updatedAt": 1749980107324,
 					"block": {
 						"id": "20240208155931-cr0e00b",
 						"icon": "",
 						"content": "三体",
 						"created": 1707379172031,
-						"updated": 1707379343663
+						"updated": 1749980107324
 					}
 				},
 				{
@@ -37,13 +37,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707379735000,
-					"updatedAt": 1707379735000,
+					"updatedAt": 1749980100892,
 					"block": {
 						"id": "20240208160855-iv1fsnu",
 						"icon": "",
 						"content": "海底两万里",
 						"created": 1707379735892,
-						"updated": 1707379740371
+						"updated": 1749980100892
 					}
 				},
 				{
@@ -53,13 +53,13 @@
 					"type": "block",
 					"isDetached": true,
 					"createdAt": 1707380186000,
-					"updatedAt": 1707380186000,
+					"updatedAt": 1749980112064,
 					"block": {
 						"id": "20240208161625-9lg8l80",
 						"icon": "",
 						"content": "流浪地球",
 						"created": 1707380186247,
-						"updated": 1707380195276
+						"updated": 1749980112064
 					}
 				}
 			]
@@ -185,10 +185,68 @@
 					}
 				}
 			]
+		},
+		{
+			"key": {
+				"id": "20250615173428-ju0itho",
+				"name": "封面",
+				"type": "mAsset",
+				"icon": "",
+				"desc": "",
+				"numberFormat": "",
+				"template": ""
+			},
+			"values": [
+				{
+					"id": "20250615173433-svspbwc",
+					"keyID": "20250615173428-ju0itho",
+					"blockID": "20240208160855-iv1fsnu",
+					"type": "mAsset",
+					"createdAt": 1749980100892,
+					"updatedAt": 1749980101892,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "Twenty Thousand Leagues Under The Sea.jpg",
+							"content": "assets/Twenty Thousand Leagues Under The Sea-20250615173500-6sma6sy.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615173501-94zjwlg",
+					"keyID": "20250615173428-ju0itho",
+					"blockID": "20240208155931-cr0e00b",
+					"type": "mAsset",
+					"createdAt": 1749980107324,
+					"updatedAt": 1749980108324,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Three-Body Problem.jpg",
+							"content": "assets/The Three-Body Problem-20250615173506-ula0eyp.jpg"
+						}
+					]
+				},
+				{
+					"id": "20250615173507-lo49vy0",
+					"keyID": "20250615173428-ju0itho",
+					"blockID": "20240208161625-9lg8l80",
+					"type": "mAsset",
+					"createdAt": 1749980112064,
+					"updatedAt": 1749980113064,
+					"mAsset": [
+						{
+							"type": "image",
+							"name": "The Wandering Earth.jpg",
+							"content": "assets/The Wandering Earth-20250615173511-2kignim.jpg"
+						}
+					]
+				}
+			]
 		}
 	],
 	"keyIDs": null,
-	"viewID": "20240208155918-7wjzu7p",
+	"viewID": "20250615173530-5yn6s87",
 	"views": [
 		{
 			"id": "20240208155918-7wjzu7p",
@@ -200,6 +258,9 @@
 			"table": {
 				"spec": 0,
 				"id": "20240208155918-j5lys77",
+				"filters": [],
+				"sorts": [],
+				"pageSize": 50,
 				"columns": [
 					{
 						"id": "20240208155918-gex3vhc",
@@ -213,24 +274,72 @@
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": ""
+						"width": "124px"
 					},
 					{
 						"id": "20240208160313-c1j9gn3",
 						"wrap": false,
 						"hidden": false,
 						"pin": false,
-						"width": ""
+						"width": "147px"
+					},
+					{
+						"id": "20250615173428-ju0itho",
+						"wrap": false,
+						"hidden": false,
+						"pin": false,
+						"width": "132px"
 					}
 				],
 				"rowIds": [
 					"20240208160855-iv1fsnu",
 					"20240208155931-cr0e00b",
 					"20240208161625-9lg8l80"
-				],
+				]
+			}
+		},
+		{
+			"id": "20250615173530-5yn6s87",
+			"icon": "",
+			"name": "画廊",
+			"hideAttrViewName": false,
+			"desc": "",
+			"type": "gallery",
+			"gallery": {
+				"spec": 0,
+				"id": "20250615173532-wtdqm1z",
 				"filters": [],
 				"sorts": [],
-				"pageSize": 50
+				"pageSize": 50,
+				"coverFrom": 2,
+				"coverFromAssetKeyID": "20250615173428-ju0itho",
+				"cardSize": 1,
+				"fitImage": true,
+				"showIcon": true,
+				"wrapField": false,
+				"fields": [
+					{
+						"id": "20240208155918-gex3vhc",
+						"hidden": false
+					},
+					{
+						"id": "20240208160021-bpcl3hm",
+						"hidden": false
+					},
+					{
+						"id": "20240208160313-c1j9gn3",
+						"hidden": false
+					},
+					{
+						"id": "20250615173428-ju0itho",
+						"hidden": true
+					}
+				],
+				"cardIds": [
+					"20240208160855-iv1fsnu",
+					"20240208155931-cr0e00b",
+					"20240208161625-9lg8l80"
+				]
 			}
 		}
 	]

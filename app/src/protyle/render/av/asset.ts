@@ -13,12 +13,14 @@ import {previewAttrViewImages} from "../../preview/image";
 import {genAVValueHTML} from "./blockAttr";
 import {hideMessage, showMessage} from "../../../dialog/message";
 import {fetchPost} from "../../../util/fetch";
-import {hasClosestBlock, hasClosestByClassName} from "../../util/hasClosest";
+import {hasClosestBlock} from "../../util/hasClosest";
 import {genCellValueByElement, getTypeByCellElement} from "./cell";
 import {writeText} from "../../util/compatibility";
 import {escapeAttr} from "../../../util/escape";
 import {renameAsset} from "../../../editor/rename";
 import * as dayjs from "dayjs";
+import {getColId} from "./col";
+import {getFieldIdByCellElement} from "./row";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -97,22 +99,22 @@ export const updateAssetCell = (options: {
     removeIndex?: number,
     blockElement: Element
 }) => {
-    const colId = options.cellElements[0].dataset.colId;
+    const viewType = options.blockElement.getAttribute("data-av-type") as TAVView;
+    const colId = getColId(options.cellElements[0], viewType);
     const cellDoOperations: IOperation[] = [];
     const cellUndoOperations: IOperation[] = [];
     let mAssetValue: IAVCellAssetValue[];
     options.cellElements.forEach((item, elementIndex) => {
+        const rowID = getFieldIdByCellElement(item, viewType);
         if (!options.blockElement.contains(item)) {
-            const rowElement = hasClosestByClassName(item, "av__row");
-            if (rowElement) {
-                item = options.cellElements[elementIndex] =
-                    (options.blockElement.querySelector(`.av__row[data-id="${rowElement.dataset.id}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
-                        // block attr
-                        options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
+            if (viewType === "table") {
+                item = options.cellElements[elementIndex] = (options.blockElement.querySelector(`.av__row[data-id="${rowID}"] .av__cell[data-col-id="${item.dataset.colId}"]`) ||
+                    options.blockElement.querySelector(`.fn__flex-1[data-col-id="${item.dataset.colId}"]`)) as HTMLElement;
+            } else {
+                item = options.cellElements[elementIndex] = (options.blockElement.querySelector(`.av__gallery-item[data-id="${rowID}"] .av__cell[data-field-id="${item.dataset.fieldId}"]`)) as HTMLElement;
             }
         }
         const cellValue = genCellValueByElement(getTypeByCellElement(item) || item.dataset.type as TAVCol, item);
-        const rowID = (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id;
         const oldValue = JSON.parse(JSON.stringify(cellValue));
         if (elementIndex === 0) {
             if (typeof options.removeIndex === "number") {

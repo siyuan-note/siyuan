@@ -127,10 +127,16 @@ func ListNotebooks() (ret []*Box, err error) {
 		}
 
 		id := dir.Name()
+		icon := boxConf.Icon
+		if strings.Contains(icon, ".") { // 说明是自定义图标
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			icon = util.FilterUploadFileName(icon)
+		}
+
 		box := &Box{
 			ID:       id,
 			Name:     boxConf.Name,
-			Icon:     boxConf.Icon,
+			Icon:     icon,
 			Sort:     boxConf.Sort,
 			SortMode: boxConf.SortMode,
 			Closed:   boxConf.Closed,
@@ -189,6 +195,13 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		logging.LogErrorf("parse box conf [%s] failed: %s", confPath, err)
 		return
+	}
+
+	icon := ret.Icon
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+		ret.Icon = icon
 	}
 	return
 }
@@ -693,6 +706,11 @@ func ChangeBoxSort(boxIDs []string) {
 }
 
 func SetBoxIcon(boxID, icon string) {
+	if strings.Contains(icon, ".") {
+		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+		icon = util.FilterUploadFileName(icon)
+	}
+
 	box := &Box{ID: boxID}
 	boxConf := box.GetConf()
 	boxConf.Icon = icon

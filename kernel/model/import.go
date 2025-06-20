@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	util2 "github.com/88250/lute/util"
 	"image"
 	"image/jpeg"
 	"image/png"
@@ -44,6 +43,7 @@ import (
 	"github.com/88250/lute/html/atom"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	util2 "github.com/88250/lute/util"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/riff"
@@ -126,7 +126,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-
+		if d == nil {
+			return nil
+		}
 		if !d.IsDir() && strings.HasSuffix(d.Name(), ".sy") {
 			syPaths = append(syPaths, path)
 		}
@@ -231,6 +233,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	if gulu.File.IsExist(storageAvDir) {
 		// 重新生成数据库数据
 		filelock.Walk(storageAvDir, func(path string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if !strings.HasSuffix(path, ".json") || !ast.IsNodeIDPattern(strings.TrimSuffix(d.Name(), ".json")) {
 				return nil
 			}
@@ -468,7 +476,9 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 		if err != nil {
 			return err
 		}
-
+		if d == nil {
+			return nil
+		}
 		if d.IsDir() && ast.IsNodeIDPattern(d.Name()) {
 			renamePaths[path] = path
 		}
@@ -540,6 +550,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	// 将包含的资源文件统一移动到 data/assets/ 下
 	var assetsDirs []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if strings.Contains(path, "assets") && d.IsDir() {
 			assetsDirs = append(assetsDirs, path)
 		}
@@ -557,8 +573,33 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 	}
 
 	// 将包含的自定义表情统一移动到 data/emojis/ 下
+	unzipRootEmojisPath := filepath.Join(unzipRootPath, "emojis")
+	filelock.Walk(unzipRootEmojisPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
+		if !util.IsValidUploadFileName(d.Name()) {
+			emojiFullName := path
+			fullPathFilteredName := filepath.Join(filepath.Dir(path), util.FilterUploadFileName(d.Name()))
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
+			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
+			}
+		}
+		return nil
+	})
 	var emojiDirs []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if strings.Contains(path, "emojis") && d.IsDir() {
 			emojiDirs = append(emojiDirs, path)
 		}
@@ -594,6 +635,12 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 
 	var treePaths []string
 	filelock.Walk(unzipRootPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
 		if d.IsDir() {
 			if strings.HasPrefix(d.Name(), ".") {
 				return filepath.SkipDir
@@ -675,6 +722,25 @@ func ImportData(zipPath string) (err error) {
 	}
 
 	tmpDataPath := filepath.Join(unzipPath, dirs[0].Name())
+	tmpDataEmojisPath := filepath.Join(tmpDataPath, "emojis")
+	filelock.Walk(tmpDataEmojisPath, func(path string, d fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		if d == nil {
+			return nil
+		}
+		if !util.IsValidUploadFileName(d.Name()) {
+			emojiFullName := path
+			fullPathFilteredName := filepath.Join(filepath.Dir(path), util.FilterUploadFileName(d.Name()))
+			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+			logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", d.Name(), fullPathFilteredName)
+			if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {
+				logging.LogErrorf("renaming invalid custom emoji file to [%s] failed: %s", fullPathFilteredName, removeErr)
+			}
+		}
+		return nil
+	})
 	if err = filelock.Copy(tmpDataPath, util.DataDir); err != nil {
 		logging.LogErrorf("copy data dir from [%s] to [%s] failed: %s", tmpDataPath, util.DataDir, err)
 		err = errors.New("copy data failed")
@@ -728,6 +794,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		// 收集所有资源文件
 		assets := map[string]string{}
 		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if localPath == currentPath {
 				return nil
 			}
@@ -749,6 +821,12 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 		count := 0
 		// md 转换 sy
 		filelock.Walk(localPath, func(currentPath string, d fs.DirEntry, err error) error {
+			if err != nil {
+				return err
+			}
+			if d == nil {
+				return nil
+			}
 			if strings.HasPrefix(d.Name(), ".") {
 				if d.IsDir() {
 					return filepath.SkipDir

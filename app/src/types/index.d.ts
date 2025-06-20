@@ -51,10 +51,18 @@ type TOperation =
     | "moveOutlineHeading"
     | "updateAttrViewColRollup"
     | "hideAttrViewName"
+    | "setAttrViewCardSize"
+    | "setAttrViewCardAspectRatio"
+    | "setAttrViewCoverFrom"
+    | "setAttrViewCoverFromAssetKeyID"
+    | "setAttrViewFitImage"
+    | "setAttrViewShowIcon"
+    | "setAttrViewWrapField"
     | "setAttrViewColDate"
     | "unbindAttrViewBlock"
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
+    | "setAttrViewBlockView"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -71,6 +79,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "destroy-protyle" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"
+type TAVView = "table" | "gallery"
 type TAVCol =
     "text"
     | "date"
@@ -526,6 +535,7 @@ interface IOperation {
     deckID?: string // add/removeFlashcards 专享
     blockIDs?: string[] // add/removeFlashcards 专享
     removeDest?: boolean // removeAttrViewCol 专享
+    layout?: string // addAttrViewView 专享
 }
 
 interface IOperationSrcs {
@@ -813,9 +823,9 @@ interface IBazaarItem {
 interface IAV {
     id: string;
     name: string;
-    view: IAVTable;
+    view: IAVTable | IAVGallery;
     viewID: string;
-    viewType: string;
+    viewType: TAVView;
     views: IAVView[];
 }
 
@@ -823,10 +833,10 @@ interface IAVView {
     name: string;
     desc: string;
     id: string;
-    type: string;
+    type: TAVView;
     icon: string;
     hideAttrViewName: boolean;
-    pageSize: number;
+    pageSize: number,
 }
 
 interface IAVTable extends IAVView {
@@ -835,7 +845,22 @@ interface IAVTable extends IAVView {
     sorts: IAVSort[],
     rows: IAVRow[],
     rowCount: number,
-    pageSize: number,
+}
+
+interface IAVGallery extends IAVView {
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段
+    coverFromAssetKeyID?: string;
+    cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
+    cardAspectRatio: number;
+    fitImage: boolean;
+    showIcon: boolean;
+    wrapField: boolean;
+    cards: IAVGalleryItem[],
+    desc: string
+    fields: IAVColumn[]
+    filters: IAVFilter[],
+    sorts: IAVSort[],
+    cardCount: number,
 }
 
 interface IAVFilter {
@@ -886,6 +911,13 @@ interface IAVColumn {
 interface IAVRow {
     id: string,
     cells: IAVCell[]
+}
+
+interface IAVGalleryItem {
+    coverURL?: string;
+    coverContent?: string;
+    id: string;
+    values: IAVCell[];
 }
 
 interface IAVCell {

@@ -106,7 +106,6 @@ export class WYSIWYG {
     public element: HTMLDivElement;
     public preventKeyup: boolean;
 
-    private shiftStartElement: HTMLElement;
     private preventClick: boolean;
 
     constructor(protyle: IProtyle) {
@@ -227,7 +226,6 @@ export class WYSIWYG {
     }
 
     private setEmptyOutline(protyle: IProtyle, element: HTMLElement) {
-        clearSelect(["img" ,"av"], protyle.wysiwyg.element);
         let nodeElement = element;
         if (!element.getAttribute("data-node-id")) {
             const tempElement = hasClosestBlock(element);
@@ -443,19 +441,189 @@ export class WYSIWYG {
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
             protyle.wysiwyg.element.classList.remove("protyle-wysiwyg--hiderange");
-            if (event.button === 2 || window.siyuan.ctrlIsPressed) {
+            if (event.button === 2) {
                 // 右键
                 return;
             }
-            // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
-            if (window.siyuan.shiftIsPressed && getSelection().rangeCount > 0) {
-                this.shiftStartElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer) as HTMLElement;
-            }
-            if (!window.siyuan.shiftIsPressed) {
-                // https://github.com/siyuan-note/siyuan/issues/3026
-                hideElements(["select"], protyle);
-            }
             let target = event.target as HTMLElement;
+            let nodeElement = hasClosestBlock(target);
+            const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
+            const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
+            if (event.shiftKey) {
+                let startElement;
+                let endElement = nodeElement;
+                // Electron 更新后 shift 向上点击获取的 range 不为上一个位置的 https://github.com/siyuan-note/siyuan/issues/9334
+                if (getSelection().rangeCount > 0) {
+                    startElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer) as HTMLElement;
+                }
+                // shift 多选
+                if (!hasSelectClassElement && galleryItemElement) {
+                    galleryItemElement.classList.add("av__gallery-item--select");
+                    let sideElement = galleryItemElement.previousElementSibling;
+                    let previousList: Element[] = [];
+                    while (sideElement) {
+                        if (sideElement.classList.contains("av__gallery-item--select")) {
+                            break;
+                        } else {
+                            previousList.push(sideElement);
+                        }
+                        sideElement = sideElement.previousElementSibling;
+                        if (!sideElement) {
+                            previousList = [];
+                            break;
+                        }
+                    }
+                    sideElement = galleryItemElement.nextElementSibling;
+                    let nextList: Element[] = [];
+                    while (sideElement) {
+                        if (sideElement.classList.contains("av__gallery-item--select")) {
+                            break;
+                        } else {
+                            nextList.push(sideElement);
+                        }
+                        sideElement = sideElement.nextElementSibling as HTMLElement;
+                        if (!sideElement || sideElement.classList.contains("av-add-bottom")) {
+                            nextList = [];
+                            break;
+                        }
+                    }
+                    previousList.concat(nextList).forEach(item => {
+                        item.classList.add("av__gallery-item--select");
+                    });
+                } else if (startElement && endElement && !startElement.isSameNode(endElement)) {
+                    let toDown = true;
+                    const startRect = startElement.getBoundingClientRect();
+                    const endRect = endElement.getBoundingClientRect();
+                    let startTop = startRect.top;
+                    let endTop = endRect.top;
+                    if (startTop === endTop) {
+                        // 横排 https://ld246.com/article/1663036247544
+                        startTop = startRect.left;
+                        endTop = endRect.left;
+                    }
+                    if (startTop > endTop) {
+                        const tempElement = endElement;
+                        endElement = startElement;
+                        startElement = tempElement;
+                        const tempTop = endTop;
+                        endTop = startTop;
+                        startTop = tempTop;
+                        toDown = false;
+                    }
+                    let selectElements: Element[] = [];
+                    let currentElement: HTMLElement = startElement;
+                    let hasJump = false;
+                    while (currentElement) {
+                        if (currentElement && !currentElement.classList.contains("protyle-attr")) {
+                            const currentRect = currentElement.getBoundingClientRect();
+                            if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
+                                if (hasJump) {
+                                    // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
+                                    if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
+                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
+                                        if (startRect.top === endRect.top ?
+                                            (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
+                                            (currentNextRect.top <= endTop)) {
+                                            selectElements = [currentElement];
+                                            currentElement = currentElement.nextElementSibling as HTMLElement;
+                                            hasJump = false;
+                                        } else if (currentElement.parentElement.classList.contains("sb")) {
+                                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                                            hasJump = true;
+                                        } else {
+                                            break;
+                                        }
+                                    } else {
+                                        currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                                        hasJump = true;
+                                    }
+                                } else {
+                                    selectElements.push(currentElement);
+                                    currentElement = currentElement.nextElementSibling as HTMLElement;
+                                }
+                            } else if (currentElement.parentElement.classList.contains("sb")) {
+                                // 跳出超级块横向排版中的未选中元素
+                                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                                hasJump = true;
+                            } else {
+                                break;
+                            }
+                        } else {
+                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
+                            hasJump = true;
+                        }
+                    }
+                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
+                        // 单个 p 不选中
+                    } else {
+                        const ids: string[] = [];
+                        if (!hasSelectClassElement && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
+                            (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
+                            showMessage(window.siyuan.languages.crossKeepLazyLoad);
+                        }
+                        selectElements.forEach(item => {
+                            item.classList.add("protyle-wysiwyg--select");
+                            ids.push(item.getAttribute("data-node-id"));
+                            // 清除选中的子块 https://ld246.com/article/1667826582251
+                            item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
+                                subItem.classList.remove("protyle-wysiwyg--select");
+                            });
+                        });
+                        countBlockWord(ids);
+                        if (toDown) {
+                            focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
+                        } else {
+                            focusBlock(selectElements[0], protyle.wysiwyg.element, false);
+                        }
+                    }
+                }
+                return;
+            }
+
+            if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {
+                let ctrlElement = nodeElement;
+                if (!hasSelectClassElement && galleryItemElement) {
+                    galleryItemElement.classList.toggle("av__gallery-item--select");
+                } else if (ctrlElement) {
+                    const embedBlockElement = isInEmbedBlock(ctrlElement);
+                    if (embedBlockElement) {
+                        ctrlElement = embedBlockElement;
+                    }
+                    ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
+                    if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
+                        ctrlElement.classList.remove("protyle-wysiwyg--select");
+                        ctrlElement.removeAttribute("select-start");
+                        ctrlElement.removeAttribute("select-end");
+                    } else {
+                        ctrlElement.classList.add("protyle-wysiwyg--select");
+                    }
+                    ctrlElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                        item.classList.remove("protyle-wysiwyg--select");
+                        item.removeAttribute("select-start");
+                        item.removeAttribute("select-end");
+                    });
+                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
+                    if (ctrlParentElement) {
+                        ctrlParentElement.classList.remove("protyle-wysiwyg--select");
+                        ctrlParentElement.removeAttribute("select-start");
+                        ctrlParentElement.removeAttribute("select-end");
+                    }
+                    const ids: string[] = [];
+                    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
+                        ids.push(item.getAttribute("data-node-id"));
+                    });
+                    countBlockWord(ids);
+                }
+                return;
+            }
+            // https://github.com/siyuan-note/siyuan/issues/3026
+            hideElements(["select"], protyle);
+            if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
+                clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
+            } else {
+                clearSelect(["img", "av"], protyle.wysiwyg.element);
+            }
+
             if (hasClosestByClassName(target, "protyle-action") ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
@@ -472,7 +640,6 @@ export class WYSIWYG {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             // av col resize
             if (!protyle.disabled && target.classList.contains("av__widthdrag")) {
-                const nodeElement = hasClosestBlock(target);
                 if (!nodeElement) {
                     return;
                 }
@@ -524,7 +691,6 @@ export class WYSIWYG {
             // av drag fill
             const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
             if (!protyle.disabled && avDragFillElement) {
-                const nodeElement = hasClosestBlock(avDragFillElement);
                 if (!nodeElement) {
                     return;
                 }
@@ -596,7 +762,6 @@ export class WYSIWYG {
             // av cell select
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (!protyle.disabled && avCellElement && avCellElement.dataset.id && !isInEmbedBlock(avCellElement)) {
-                const nodeElement = hasClosestBlock(avCellElement);
                 if (!nodeElement || nodeElement.dataset.avType !== "table") {
                     return;
                 }
@@ -666,7 +831,6 @@ export class WYSIWYG {
             }
             // 图片、iframe、video 缩放
             if (!protyle.disabled && target.classList.contains("protyle-action__drag")) {
-                const nodeElement = hasClosestBlock(target);
                 if (!nodeElement) {
                     return;
                 }
@@ -731,13 +895,14 @@ export class WYSIWYG {
                 target = targetCellElement;
             }
             if (target.tagName === "TH" || target.tagName === "TD" || target.firstElementChild?.tagName === "TABLE" || target.classList.contains("table__resize") || target.classList.contains("table__select")) {
-                tableBlockElement = hasClosestBlock(target);
+                tableBlockElement = nodeElement;
                 if (tableBlockElement) {
                     tableBlockElement.querySelector(".table__select").removeAttribute("style");
                     window.siyuan.menus.menu.remove();
                     hideElements(["toolbar"], protyle);
                     if (target.classList.contains("table__select")) {
                         target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
+                        nodeElement = hasClosestBlock(target);
                     }
                     event.stopPropagation();
                 }
@@ -745,7 +910,6 @@ export class WYSIWYG {
             }
             // table col resize
             if (!protyle.disabled && target.classList.contains("table__resize")) {
-                const nodeElement = hasClosestBlock(target);
                 if (!nodeElement) {
                     return;
                 }
@@ -1787,7 +1951,6 @@ export class WYSIWYG {
             }
             const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             if (avGalleryItemElement) {
-                avGalleryItemElement.classList.add("av__gallery-item--select");
                 const menu = openGalleryItemMenu({
                     target: avGalleryItemElement.querySelector(".protyle-icon--last"),
                     blockElement: nodeElement,
@@ -2184,6 +2347,7 @@ export class WYSIWYG {
 
             if (event.eventPhase !== 3 && !event.shiftKey && (event.key.indexOf("Arrow") > -1 || event.key === "Home" || event.key === "End" || event.key === "PageUp" || event.key === "PageDown") && !event.isComposing) {
                 if (nodeElement) {
+                    clearSelect(["img", "av"], protyle.wysiwyg.element);
                     this.setEmptyOutline(protyle, nodeElement);
                     if (range.toString() === "" && !nodeElement.classList.contains("protyle-wysiwyg--select")) {
                         countSelectWord(range, protyle.block.rootID);
@@ -2275,9 +2439,6 @@ export class WYSIWYG {
                 return;
             }
 
-            if (!event.shiftKey) {
-                this.shiftStartElement = undefined;
-            }
             this.setEmptyOutline(protyle, event.target);
             const tableElement = hasClosestByClassName(event.target, "table");
             this.element.querySelectorAll(".table").forEach(item => {
@@ -2757,142 +2918,13 @@ export class WYSIWYG {
                 /// #endif
                 mobileBlur = false;
             }, (isMobile() || isInIOS()) ? 520 : 0); // Android/iPad 双击慢了出不来
+
             protyle.hint.enableExtend = false;
-            if (event.shiftKey) {
-                event.preventDefault();
-                event.stopPropagation();
-                // shift 多选
-                let startElement = this.shiftStartElement;
-                let endElement = hasClosestBlock(event.target);
-                if (this.shiftStartElement && endElement && !this.shiftStartElement.isSameNode(endElement)) {
-                    let toDown = true;
-                    range.collapse(true);
-                    const startRect = startElement.getBoundingClientRect();
-                    const endRect = endElement.getBoundingClientRect();
-                    let startTop = startRect.top;
-                    let endTop = endRect.top;
-                    if (startTop === endTop) {
-                        // 横排 https://ld246.com/article/1663036247544
-                        startTop = startRect.left;
-                        endTop = endRect.left;
-                    }
-                    if (startTop > endTop) {
-                        const tempElement = endElement;
-                        endElement = startElement;
-                        startElement = tempElement;
-                        const tempTop = endTop;
-                        endTop = startTop;
-                        startTop = tempTop;
-                        toDown = false;
-                    }
-                    let selectElements: Element[] = [];
-                    let currentElement: HTMLElement = startElement;
-                    let hasJump = false;
-                    while (currentElement) {
-                        if (currentElement && !currentElement.classList.contains("protyle-attr")) {
-                            const currentRect = currentElement.getBoundingClientRect();
-                            if (startRect.top === endRect.top ? (currentRect.left <= endTop) : (currentRect.top <= endTop)) {
-                                if (hasJump) {
-                                    // 父节点的下个节点在选中范围内才可使用父节点作为选中节点
-                                    if (currentElement.nextElementSibling && !currentElement.nextElementSibling.classList.contains("protyle-attr")) {
-                                        const currentNextRect = currentElement.nextElementSibling.getBoundingClientRect();
-                                        if (startRect.top === endRect.top ?
-                                            (currentNextRect.left <= endTop && currentNextRect.bottom <= endRect.bottom) :
-                                            (currentNextRect.top <= endTop)) {
-                                            selectElements = [currentElement];
-                                            currentElement = currentElement.nextElementSibling as HTMLElement;
-                                            hasJump = false;
-                                        } else if (currentElement.parentElement.classList.contains("sb")) {
-                                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                            hasJump = true;
-                                        } else {
-                                            break;
-                                        }
-                                    } else {
-                                        currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                        hasJump = true;
-                                    }
-                                } else {
-                                    selectElements.push(currentElement);
-                                    currentElement = currentElement.nextElementSibling as HTMLElement;
-                                }
-                            } else if (currentElement.parentElement.classList.contains("sb")) {
-                                // 跳出超级块横向排版中的未选中元素
-                                currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                                hasJump = true;
-                            } else {
-                                break;
-                            }
-                        } else {
-                            currentElement = hasClosestBlock(currentElement.parentElement) as HTMLElement;
-                            hasJump = true;
-                        }
-                    }
-                    if (selectElements.length === 1 && !selectElements[0].classList.contains("list") && !selectElements[0].classList.contains("bq") && !selectElements[0].classList.contains("sb")) {
-                        // 单个 p 不选中
-                        this.shiftStartElement = undefined;
-                    } else {
-                        const ids: string[] = [];
-                        if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && protyle.scroll && !protyle.scroll.element.classList.contains("fn__none") && !protyle.scroll.keepLazyLoad &&
-                            (startElement.getBoundingClientRect().top < -protyle.contentElement.clientHeight * 2 || endElement.getBoundingClientRect().bottom > protyle.contentElement.clientHeight * 2)) {
-                            showMessage(window.siyuan.languages.crossKeepLazyLoad);
-                        }
-                        selectElements.forEach(item => {
-                            item.classList.add("protyle-wysiwyg--select");
-                            ids.push(item.getAttribute("data-node-id"));
-                            // 清除选中的子块 https://ld246.com/article/1667826582251
-                            item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
-                                subItem.classList.remove("protyle-wysiwyg--select");
-                            });
-                        });
-                        countBlockWord(ids);
-                        if (toDown) {
-                            focusBlock(selectElements[selectElements.length - 1], protyle.wysiwyg.element, false);
-                        } else {
-                            focusBlock(selectElements[0], protyle.wysiwyg.element, false);
-                        }
-                    }
-                }
-            }
 
             if (this.element.querySelector(".protyle-wysiwyg--select") && range.toString() !== "") {
                 // 选中块后，文字不能被选中。需在 shift click 之后，防止shift点击单个块出现文字选中
                 range.collapse(false);
                 focusByRange(range);
-            }
-
-            if (ctrlIsPressed && range.toString() === "" && !event.shiftKey && !event.altKey) {
-                let ctrlElement = hasClosestBlock(event.target);
-                if (ctrlElement) {
-                    const embedBlockElement = isInEmbedBlock(ctrlElement);
-                    if (embedBlockElement) {
-                        ctrlElement = embedBlockElement;
-                    }
-                    ctrlElement = getTopAloneElement(ctrlElement) as HTMLElement;
-                    if (ctrlElement.classList.contains("protyle-wysiwyg--select")) {
-                        ctrlElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlElement.removeAttribute("select-start");
-                        ctrlElement.removeAttribute("select-end");
-                    } else {
-                        ctrlElement.classList.add("protyle-wysiwyg--select");
-                    }
-                    ctrlElement.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        item.classList.remove("protyle-wysiwyg--select");
-                        item.removeAttribute("select-start");
-                        item.removeAttribute("select-end");
-                    });
-                    const ctrlParentElement = hasClosestByClassName(ctrlElement.parentElement, "protyle-wysiwyg--select");
-                    if (ctrlParentElement) {
-                        ctrlParentElement.classList.remove("protyle-wysiwyg--select");
-                        ctrlParentElement.removeAttribute("select-start");
-                        ctrlParentElement.removeAttribute("select-end");
-                    }
-                    const ids: string[] = [];
-                    protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--select").forEach(item => {
-                        ids.push(item.getAttribute("data-node-id"));
-                    });
-                    countBlockWord(ids);
-                }
             }
         });
     }

@@ -524,10 +524,6 @@ func InitConf() {
 	Conf.Save()
 	logging.SetLogLevel(Conf.LogLevel)
 
-	if Conf.System.DisableGoogleAnalytics {
-		logging.LogInfof("user has disabled [Google Analytics]")
-	}
-
 	util.SetNetworkProxy(Conf.System.NetworkProxy.String())
 
 	go util.InitPandoc()

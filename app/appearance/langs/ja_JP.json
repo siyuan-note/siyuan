@@ -509,8 +509,6 @@
   "backlinkExpandTip": "<code class='fn__code'>0</code> の場合は展開されません",
   "backmentionExpand": "逆参照のデフォルト展開数",
   "backmentionExpandTip": "<code class='fn__code'>0</code> の場合は展開されません、<code class='fn__code'>-1</code> の場合はパネルが最小化されます",
-  "googleAnalytics": "Google アナリティクス",
-  "googleAnalyticsTip": "<a href=\"https://analytics.google.com/\" target=\"_blank\">Google アナリティクス</a>を使用してアプリケーションの起動状況をカウントします。ユーザーデータや操作内容は収集されません",
   "floatWindowMode": "フローティングウィンドウのトリガー方法",
   "floatWindowModeTip": "ブロックアイコンやパンくずリストアイコンなどにマウスカーソルを合わせたときにフローティングウィンドウを表示する方法を選択します",
   "floatWindowMode0": "ホバー",

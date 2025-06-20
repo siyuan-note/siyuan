@@ -11,7 +11,7 @@ import {onWindowsMsg} from "../window/onWindowsMsg";
 import {Constants} from "../constants";
 import {appearance} from "../config/appearance";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
-import {addGA, initAssets, setInlineStyle} from "../util/assets";
+import {initAssets, setInlineStyle} from "../util/assets";
 import {renderSnippet} from "../config/util/snippets";
 import {openFile, openFileById} from "../editor/util";
 import {exitSiYuan} from "../dialog/processSystem";
@@ -87,7 +87,6 @@ export const onGetConfig = (isStart: boolean, app: App) => {
             firstResize = true;
         }, 200);
     });
-    addGA();
 };
 
 const winOnMaxRestore = async () => {

@@ -509,8 +509,6 @@
   "backlinkExpandTip": "配置为 <code class='fn__code'>0</code> 则不展开",
   "backmentionExpand": "反向提及默认展开数",
   "backmentionExpandTip": "配置为 <code class='fn__code'>0</code> 则不展开，配置为 <code class='fn__code'>-1</code> 则收起面板",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "启用后会通过 <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> 统计应用打开状态，不会收集用户数据和操作",
   "floatWindowMode": "浮窗触发方式",
   "floatWindowModeTip": "选择鼠标悬停块引、面包屑块标等位置触发浮窗的方式",
   "floatWindowMode0": "悬停",

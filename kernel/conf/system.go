@@ -39,10 +39,9 @@ type System struct {
 	NetworkServe bool          `json:"networkServe"` // 是否开启网络伺服
 	NetworkProxy *NetworkProxy `json:"networkProxy"`
 
-	DisableGoogleAnalytics bool `json:"disableGoogleAnalytics"`
-	DownloadInstallPkg     bool `json:"downloadInstallPkg"`
-	AutoLaunch2            int  `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
-	LockScreenMode         int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
+	DownloadInstallPkg bool `json:"downloadInstallPkg"`
+	AutoLaunch2        int  `json:"autoLaunch2"`    // 0：不自动启动，1：自动启动，2：自动启动+隐藏主窗口
+	LockScreenMode     int  `json:"lockScreenMode"` // 0：手动，1：手动+跟随系统 https://github.com/siyuan-note/siyuan/issues/9087
 
 	DisabledFeatures []string `json:"disabledFeatures"`
 
@@ -51,12 +50,11 @@ type System struct {
 
 func NewSystem() *System {
 	return &System{
-		ID:                     util.GetDeviceID(),
-		Name:                   util.GetDeviceName(),
-		KernelVersion:          util.Ver,
-		NetworkProxy:           &NetworkProxy{},
-		DownloadInstallPkg:     true,
-		DisableGoogleAnalytics: true,
+		ID:                 util.GetDeviceID(),
+		Name:               util.GetDeviceName(),
+		KernelVersion:      util.Ver,
+		NetworkProxy:       &NetworkProxy{},
+		DownloadInstallPkg: true,
 	}
 }
 

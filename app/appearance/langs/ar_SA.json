@@ -509,8 +509,6 @@
   "backlinkExpandTip": "‫عدم توسيع إذا تم إعداده كـ‪<code class='fn__code'>0</code>‬‬",
   "backmentionExpand": "عدد الإشارات المرجعية الموسَّعة افتراضياً",
   "backmentionExpandTip": "‫إذا تم إعداده كـ‪<code class='fn__code'>0</code>‬، فلن يتم توسيعه، وإذا تم إعداده كـ‪<code class='fn__code'>-1</code>‬، سيتم إغلاق اللوحة‬",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "‫بعد التمكين، سوف يستخدم <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> لحساب حالة فتح التطبيق ولن يجمع بيانات المستخدمين وعملياتهم‬",
   "floatWindowMode": "طريقة تشغيل النافذة العائمة",
   "floatWindowModeTip": "اختيار كيفية تشغيل النافذة العائمة عندما ينتقل الماوس فوق أيقونة الكتلة، أيقونة شريط التنقل، إلخ",
   "floatWindowMode0": "تحويم",

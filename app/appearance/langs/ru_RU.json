@@ -509,8 +509,6 @@
   "backlinkExpandTip": "Если настроено как <code class='fn__code'>0</code>",
   "backmentionExpand": "По умолчанию раскрыть обратные упоминания",
   "backmentionExpandTip": "Если настроено как <code class='fn__code'>0</code>, оно не будет раскрываться, если настроено как <code class='fn__code'>-1</code>, панель будет закрыта",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "После включения будет использован <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> для подсчета состояния открытия приложения и не будет собирать данные и операции пользователей",
   "floatWindowMode": "Способ активации плавающего окна",
   "floatWindowModeTip": "Выберите способ вызова плавающего окна, когда мышь наводится на значок блока, значок хлебных крошек и т. д.",
   "floatWindowMode0": "Наведение",

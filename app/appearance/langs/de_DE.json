@@ -509,8 +509,6 @@
   "backlinkExpandTip": "Wenn auf <code class='fn__code'>0</code> konfiguriert, wird es nicht erweitert.",
   "backmentionExpand": "Standarderweiterung der Rückverweismarken",
   "backmentionExpandTip": "Wenn auf <code class='fn__code'>0</code> konfiguriert, wird es nicht erweitert, wenn auf <code class='fn__code'>-1</code> konfiguriert, wird das Panel geschlossen.",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "Nach der Aktivierung wird <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> verwendet, um den Öffnungsstatus der Anwendung zu zählen und es werden keine Benutzerdaten und -operationen gesammelt.",
   "floatWindowMode": "Auslösermethode für schwebendes Fenster",
   "floatWindowModeTip": "Wählen Sie, wie das schwebende Fenster ausgelöst wird, wenn die Maus über das Blocksymbol, das Breadcrumb-Symbol usw. schwebt.",
   "floatWindowMode0": "Schweben",

@@ -797,7 +797,4 @@ export abstract class Constants {
         "inline-math",
         "inline-memo",
     ];
-
-    // Google Analytics 事件
-    public static readonly ANALYTICS_EVT_ON_GET_CONFIG: string = "siyuan.onGetConfig";
 }

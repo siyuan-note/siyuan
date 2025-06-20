@@ -509,8 +509,6 @@
   "backlinkExpandTip": "אם מוגדר כ<code class='fn__code'>0</code>",
   "backmentionExpand": "ברירת מחדל להרחבת אזכור",
   "backmentionExpandTip": "אם מוגדר כ<code class='fn__code'>0</code>, הוא לא יתרחב, אם מוגדר כ<code class='fn__code'>-1</code>, הפנל ייסגר",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "לאחר ההפעלת השירות, ישתמש ב<a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> לספור את מצב הפתיחה של היישום ולא יאסוף נתוני משתמש ופעולות",
   "floatWindowMode": "שיטת הפעלת חלון צף",
   "floatWindowModeTip": "בחר כיצד להפעיל את חלון הצף כאשר העכבר מרחף מעל אייקון הבלוק, אייקוןBreadcrumb וכדומה.",
   "floatWindowMode0": "מרחף",

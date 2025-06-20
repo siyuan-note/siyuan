@@ -509,8 +509,6 @@
   "backlinkExpandTip": "Si se configura como <code class='fn__code'>0</code>",
   "backmentionExpand": "Expansión predeterminada de la mención",
   "backmentionExpandTip": "Si se configura como <code class='fn__code'>0</code>, no se expandirá, , si se configura como <code class='fn__code'>-1</code>, el panel se cerrará",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "Después de habilitarlo, usará <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> para contar el estado de apertura del aplicación y no recopilará datos y operaciones de los usuarios",
   "floatWindowMode": "Método de activación de ventana flotante",
   "floatWindowModeTip": "Elija cómo activar la ventana flotante cuando el mouse pasa sobre el ícono de bloque, el ícono de ruta de navegación, etc.",
   "floatWindowMode0": "Flotar",

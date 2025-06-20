@@ -693,20 +693,6 @@ func setNetworkServe(c *gin.Context) {
 	time.Sleep(time.Second * 3)
 }
 
-func setGoogleAnalytics(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	googleAnalytics := arg["googleAnalytics"].(bool)
-	model.Conf.System.DisableGoogleAnalytics = !googleAnalytics
-	model.Conf.Save()
-}
-
 func setAutoLaunch(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)

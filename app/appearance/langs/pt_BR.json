@@ -509,8 +509,6 @@
   "backlinkExpandTip": "Se configurado como <code class='fn__code'>0</code>",
   "backmentionExpand": "Backmention expandir padrão",
   "backmentionExpandTip": "Se configurado como <code class='fn__code'>0</code>, não será expandido, se configurado como <code class='fn__code'>-1</code>, o painel será fechado",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "Quando ativado, usará <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> para estatísticas do status de abertura do aplicativo e não coletará dados e operações dos usuários",
   "floatWindowMode": "Método de acionamento da janela flutuante",
   "floatWindowModeTip": "Escolha como acionar a janela flutuante quando o mouse passar sobre o ícone do bloco, ícone de navegação estrutural, etc.",
   "floatWindowMode0": "Passar o mouse",

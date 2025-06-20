@@ -509,8 +509,6 @@
   "backlinkExpandTip": "If configured as <code class='fn__code'>0</code>",
   "backmentionExpand": "Backmention default expand",
   "backmentionExpandTip": "If configured as <code class='fn__code'>0</code>, it will not be expanded, if configured as <code class='fn__code'>-1</code>, the panel will be closed",
-  "googleAnalytics": "Google Analytics",
-  "googleAnalyticsTip": "When enabled, it will use <a href=\"https://analytics.google.com/\" target=\"_blank\">Google Analytics</a> to count the opening status of the application and will not collect users data and operations",
   "floatWindowMode": "Floating window trigger method",
   "floatWindowModeTip": "Choose how to trigger the floating window when the mouse hovers over the block icon, breadcrumb icon, etc.",
   "floatWindowMode0": "Hover",

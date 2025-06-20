@@ -99,6 +99,7 @@ import {img3115} from "../../boot/compatibleVersion";
 import {globalClickHideMenu} from "../../boot/globalEvent/click";
 import {hideTooltip} from "../../dialog/tooltip";
 import {openGalleryItemMenu} from "../render/av/gallery/util";
+import {clearSelect} from "../util/clearSelect";
 
 export class WYSIWYG {
     public lastHTMLs: { [key: string]: string } = {};
@@ -226,18 +227,7 @@ export class WYSIWYG {
     }
 
     private setEmptyOutline(protyle: IProtyle, element: HTMLElement) {
-        // 图片移除选择状态应放在前面，否则 https://github.com/siyuan-note/siyuan/issues/4173
-        protyle.wysiwyg.element.querySelectorAll(".img--select, .av__cell--select, .av__cell--active, .av__row--select").forEach((item: HTMLElement) => {
-            if (item.classList.contains("av__row--select") && !hasClosestByClassName(element, "av")) {
-                item.classList.remove("av__row--select");
-                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
-                updateHeader(item);
-            } else {
-                item.classList.remove("img--select", "av__cell--select", "av__cell--active");
-                item.querySelector(".av__drag-fill")?.remove();
-            }
-        });
-
+        clearSelect(["img" ,"av"], protyle.wysiwyg.element);
         let nodeElement = element;
         if (!element.getAttribute("data-node-id")) {
             const tempElement = hasClosestBlock(element);
@@ -1799,7 +1789,7 @@ export class WYSIWYG {
             if (avGalleryItemElement) {
                 avGalleryItemElement.classList.add("av__gallery-item--select");
                 const menu = openGalleryItemMenu({
-                    target: avGalleryItemElement.querySelector('.protyle-icon--last'),
+                    target: avGalleryItemElement.querySelector(".protyle-icon--last"),
                     blockElement: nodeElement,
                     protyle,
                     returnMenu: true

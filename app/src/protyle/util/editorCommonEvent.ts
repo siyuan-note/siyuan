@@ -34,6 +34,7 @@ import {webUtils} from "electron";
 import {addDragFill} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
+import {clearSelect} from "./clearSelect";
 
 const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: Element, newSourceElement: Element,
                    isSameDoc: boolean, isBottom: boolean, isCopy: boolean) => {
@@ -1285,10 +1286,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 } else {
                     paste(protyle, event);
                 }
-                protyle.wysiwyg.element.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
-                    item.classList.remove("av__cell--select", "av__cell--active");
-                    item.querySelector(".av__drag-fill")?.remove();
-                });
+                clearSelect(["av", "img"], protyle.wysiwyg.element);
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
@@ -1336,10 +1334,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 const blockElement = hasClosestBlock(targetElement);
                 if (blockElement) {
-                    protyle.wysiwyg.element.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
-                        item.classList.remove("av__cell--select", "av__cell--active");
-                        item.querySelector(".av__drag-fill")?.remove();
-                    });
+                    clearSelect(["cell", "row"], protyle.wysiwyg.element);
                     targetElement.classList.add("av__cell--select");
                     addDragFill(targetElement);
                     dragoverElement = targetElement;

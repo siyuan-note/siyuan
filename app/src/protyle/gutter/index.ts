@@ -61,6 +61,7 @@ import {openFileById} from "../../editor/util";
 /// #endif
 import {checkFold} from "../../util/noRelyPCFunction";
 import {copyTextByType} from "../toolbar/util";
+import {clearSelect} from "../util/clearSelect";
 
 export class Gutter {
     public element: HTMLElement;
@@ -169,6 +170,7 @@ export class Gutter {
             event.preventDefault();
             event.stopPropagation();
             hideTooltip();
+            clearSelect(["av", "img"], protyle.wysiwyg.element);
             const id = buttonElement.getAttribute("data-node-id");
             if (!id) {
                 if (buttonElement.getAttribute("disabled")) {
@@ -258,10 +260,6 @@ export class Gutter {
                     return;
                 }
                 if (buttonElement.dataset.type === "NodeAttributeViewRow") {
-                    blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach((cellElement: HTMLElement) => {
-                        cellElement.classList.remove("av__cell--select", "av__cell--active");
-                        cellElement.querySelector(".av__drag-fill")?.remove();
-                    });
                     const avID = blockElement.getAttribute("data-av-id");
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
@@ -408,6 +406,7 @@ export class Gutter {
             }
             if (!window.siyuan.ctrlIsPressed && !window.siyuan.altIsPressed && !window.siyuan.shiftIsPressed) {
                 hideTooltip();
+                clearSelect(["av", "img"], protyle.wysiwyg.element);
                 const gutterRect = buttonElement.getBoundingClientRect();
                 if (buttonElement.dataset.type === "NodeAttributeViewRowMenu") {
                     const rowElement = Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-node-id="${buttonElement.dataset.nodeId}"] .av__row[data-id="${buttonElement.dataset.rowId}"]`)).find((item: HTMLElement) => {

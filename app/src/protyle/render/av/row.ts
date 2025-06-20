@@ -15,6 +15,7 @@ import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
+import {clearSelect} from "../../util/clearSelect";
 
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
     return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
@@ -143,10 +144,7 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
     ${colHTML}
 </div>`;
         } else {
-            blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
-                item.classList.remove("av__cell--select", "av__cell--active");
-                item.querySelector(".av__drag-fill")?.remove();
-            });
+            clearSelect(["cell"], blockElement);
             addDragFill(blockCellElement);
             blockCellElement.classList.add("av__cell--select");
         }

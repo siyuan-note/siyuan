@@ -35,6 +35,7 @@ import {fetchPost, fetchSyncPost} from "../../../util/fetch";
 import {scrollCenter} from "../../../util/highlightById";
 import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
+import {clearSelect} from "../../util/clearSelect";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -300,19 +301,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (!blockElement) {
         return false;
     }
-    blockElement.querySelectorAll(".av__cell--select, .av__cell--active").forEach(item => {
-        item.classList.remove("av__cell--select", "av__cell--active");
-        item.querySelector(".av__drag-fill")?.remove();
-    });
-    if (!rowElement.classList.contains("av__row--select")) {
-        blockElement.querySelectorAll(".av__row--select").forEach(item => {
-            item.classList.remove("av__row--select");
-        });
-        blockElement.querySelectorAll(".av__firstcol use").forEach(item => {
-            item.setAttribute("xlink:href", "#iconUncheck");
-        });
-    }
-
+    clearSelect(["cell", "row"], blockElement);
     const menu = new Menu();
     rowElement.classList.add("av__row--select");
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");

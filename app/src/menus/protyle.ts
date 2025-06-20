@@ -66,6 +66,7 @@ import {popSearch} from "../mobile/menu/search";
 import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
+import {clearSelect} from "../protyle/util/clearSelect";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -2464,16 +2465,7 @@ export const setFold = (protyle: IProtyle, nodeElement: Element, isOpen?: boolea
                 focusBlock(nodeElement, undefined, false);
             }
         }
-        nodeElement.querySelectorAll(".img--select, .av__cell--select, .av__cell--active, .av__row--select").forEach((item: HTMLElement) => {
-            if (item.classList.contains("av__row--select")) {
-                item.classList.remove("av__row--select");
-                item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
-                updateHeader(item);
-            } else {
-                item.querySelector(".av__drag-fill")?.remove();
-                item.classList.remove("img--select", "av__cell--select", "av__cell--active");
-            }
-        });
+        clearSelect(["img", "av"], nodeElement);
     }
     const id = nodeElement.getAttribute("data-node-id");
     if (nodeElement.getAttribute("data-type") === "NodeHeading") {

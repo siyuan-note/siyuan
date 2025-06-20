@@ -426,7 +426,7 @@ export class Files extends Model {
                 event.preventDefault();
                 return;
             }
-            this.element.classList.add("file-tree__dragover");
+            this.element.classList.add("file-tree--dragover");
             window.getSelection().removeAllRanges();
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
@@ -471,7 +471,7 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragend", () => {
-            this.element.classList.remove("file-tree__dragover");
+            this.element.classList.remove("file-tree--dragover");
             this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
                 // https://github.com/siyuan-note/siyuan/issues/11587

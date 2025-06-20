@@ -1,6 +1,6 @@
 import {updateHeader} from "../render/av/row";
 
-export const clearSelect = (types: ("av" | "img" | "cell" | "row")[], element: Element) => {
+export const clearSelect = (types: ("av" | "img" | "cell" | "row"|"galleryItem")[], element: Element) => {
     if (types.includes("cell")) {
         element.querySelectorAll(".av__cell--select, .av__cell--active").forEach((item: HTMLElement) => {
             item.querySelector(".av__drag-fill")?.remove();
@@ -12,6 +12,11 @@ export const clearSelect = (types: ("av" | "img" | "cell" | "row")[], element: E
             item.classList.remove("av__row--select");
             item.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconUncheck");
             updateHeader(item);
+        });
+    }
+    if (types.includes("galleryItem")) {
+        element.querySelectorAll(".av__gallery-item--select").forEach((item: HTMLElement) => {
+            item.classList.remove("av__gallery-item--select");
         });
     }
     if (types.includes("av")) {

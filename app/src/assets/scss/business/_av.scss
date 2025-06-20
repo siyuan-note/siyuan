@@ -290,8 +290,13 @@
         }
       }
 
-      &--select {
+      &--select:before {
+        content: "";
         background-color: var(--b3-theme-primary-lightest);
+        height: 100%;
+        width: 100%;
+        z-index: 1;
+        position: absolute;
       }
 
       &.dragover__left::after,
@@ -445,6 +450,7 @@
       display: flex;
       opacity: 0;
       transition: var(--b3-transition);
+      z-index: 2;
     }
   }
 

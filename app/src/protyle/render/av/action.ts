@@ -282,7 +282,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-gallery-more") {
-            openGalleryItemMenu({target, blockElement, protyle});
+            openGalleryItemMenu({target, blockElement, protyle, returnMenu: false});
             event.preventDefault();
             event.stopPropagation();
             return true;

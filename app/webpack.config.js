@@ -10,7 +10,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: argv.mode !== "production",
-        devtool: argv.mode !== "production" ? "eval" : false,
+        devtool: argv.mode !== "production" ? "cheap-source-map" : false,
         target: "electron-renderer",
         output: {
             publicPath: "auto",
@@ -25,9 +25,12 @@ module.exports = (env, argv) => {
             extensions: [".ts", ".js", ".tpl", ".scss", ".png", ".svg"],
         },
         optimization: {
-            minimize: true,
+            minimize: argv.mode === "production",
             minimizer: [
-                new EsbuildPlugin({target: "es2021"}),
+                new EsbuildPlugin({
+                    target: "es2021",
+                    sourcemap: argv.mode !== "production",
+                }),
             ],
         },
         module: {
@@ -50,6 +53,7 @@ module.exports = (env, argv) => {
                             loader: "esbuild-loader",
                             options: {
                                 target: "es2021",
+                                sourcemap: argv.mode !== "production",
                             },
                         },
                         {
@@ -69,9 +73,15 @@ module.exports = (env, argv) => {
                         MiniCssExtractPlugin.loader,
                         {
                             loader: "css-loader", // translates CSS into CommonJS
+                            options: {
+                                sourceMap: argv.mode !== "production",
+                            },
                         },
                         {
                             loader: "sass-loader", // compiles Sass to CSS
+                            options: {
+                                sourceMap: argv.mode !== "production",
+                            },
                         },
                     ],
                 },

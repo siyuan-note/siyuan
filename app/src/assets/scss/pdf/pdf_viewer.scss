@@ -12,9 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-@import "annotation_layer_builder";
-@import "text_layer_builder";
-@import "xfa_layer_builder";
+@use "annotation_layer_builder" as *;
+@use "text_layer_builder" as *;
+@use "xfa_layer_builder" as *;
 
 :root {
   --viewer-container-height: 0;

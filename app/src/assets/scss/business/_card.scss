@@ -1,6 +1,8 @@
+@use "../util/function";
+
 .card {
   &__main {
-    @extend .fn__flex-column;
+    @extend %fn__flex-column;
     box-sizing: border-box;
     max-height: 100%;
     background-color: var(--b3-theme-surface);

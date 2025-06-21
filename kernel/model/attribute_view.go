@@ -3268,40 +3268,44 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		attrView.KeyValues = append(attrView.KeyValues, &av.KeyValues{Key: key})
 
 		for _, view := range attrView.Views {
-			switch view.LayoutType {
-			case av.LayoutTypeTable:
+			if nil != view.Table {
 				if "" == previousKeyID {
-					view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
-					break
-				}
-
-				added := false
-				for i, column := range view.Table.Columns {
-					if column.ID == previousKeyID {
-						view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
-						added = true
-						break
+					if av.LayoutTypeGallery == view.LayoutType {
+						// 如果当前视图是画廊视图则添加到最后
+						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+					} else {
+						view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
+					}
+				} else {
+					added := false
+					for i, column := range view.Table.Columns {
+						if column.ID == previousKeyID {
+							view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
+							added = true
+							break
+						}
+					}
+					if !added {
+						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
 					}
 				}
-				if !added {
-					view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
-				}
-			case av.LayoutTypeGallery:
+			}
+
+			if nil != view.Gallery {
 				if "" == previousKeyID {
 					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
-					break
-				}
-
-				added := false
-				for i, field := range view.Gallery.CardFields {
-					if field.ID == previousKeyID {
-						view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields[i+1:]...)...)
-						added = true
-						break
+				} else {
+					added := false
+					for i, field := range view.Gallery.CardFields {
+						if field.ID == previousKeyID {
+							view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields[i+1:]...)...)
+							added = true
+							break
+						}
 					}
-				}
-				if !added {
-					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
+					if !added {
+						view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
+					}
 				}
 			}
 		}

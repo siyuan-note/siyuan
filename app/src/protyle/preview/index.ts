@@ -190,6 +190,11 @@ export class Preview {
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
+                if (response.data.fillCSSVar) {
+                    protyle.preview.previewElement.classList.add("b3-typography--fill");
+                } else {
+                    protyle.preview.previewElement.classList.remove("b3-typography--fill");
+                }
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);
@@ -276,7 +281,7 @@ export class Preview {
             return;
         }
 
-        if (window.siyuan.config.appearance.mode === 1) {
+        if (!copyElement.classList.contains("b3-typography--fill") && window.siyuan.config.appearance.mode === 1) {
             // 暗黑模式添加一层 section 设置背景色
             const sectionElement = document.createElement("section");
             sectionElement.innerHTML = copyElement.innerHTML;

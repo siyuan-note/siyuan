@@ -475,7 +475,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     });
                     addDragFill(item.querySelector(".av__cell--select"));
                 }
-               if (operation.action === "setAttrViewBlockView") {
+                if (operation.action === "setAttrViewBlockView") {
                     const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
                     if (viewTabElement) {
                         item.dataset.pageSize = viewTabElement.dataset.page;
@@ -487,10 +487,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         // 更新属性面板
                         renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                     } else {
-                        if (operation.action === "insertAttrViewBlock" && updateRow &&
-                            !item.querySelector(`[data-id="${updateRow.getAttribute("data-id")}"]`)) {
-                            showMessage(window.siyuan.languages.insertRowTip);
-                            document.querySelector(".av__mask")?.remove();
+                        if (operation.action === "insertAttrViewBlock") {
+                            if (updateRow && !item.querySelector(`[data-id="${updateRow.getAttribute("data-id")}"]`)) {
+                                showMessage(window.siyuan.languages.insertRowTip);
+                                document.querySelector(".av__mask")?.remove();
+                            }
+                            if (item.getAttribute("data-av-type") === "gallery") {
+                                item.querySelector(`.av__gallery-item[data-id="${operation.srcs[0].id}"]`)?.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+                            }
                         }
                     }
                     item.removeAttribute("data-loading");

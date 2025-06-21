@@ -482,7 +482,7 @@ export class WYSIWYG {
                             nextList.push(sideElement);
                         }
                         sideElement = sideElement.nextElementSibling as HTMLElement;
-                        if (!sideElement || sideElement.classList.contains("av-add-bottom")) {
+                        if (!sideElement || sideElement.classList.contains("av__gallery-add")) {
                             nextList = [];
                             break;
                         }

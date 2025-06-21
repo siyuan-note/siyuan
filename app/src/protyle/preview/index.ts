@@ -303,6 +303,11 @@ export class Preview {
             copyElement.style.backgroundColor = "#fff";
         }
 
+        // 代码块之间没有间距
+        copyElement.querySelectorAll("pre").forEach((item: HTMLElement) => {
+            item.style.margin = "16px 0";
+        });
+
         this.element.append(copyElement);
         // 最后一个块是公式块时无法复制下来；section 元素后面还需要一个其他元素才能被复制
         copyElement.insertAdjacentHTML("beforeend", "<p style='background-color: transparent;'> &zwj;</p>");

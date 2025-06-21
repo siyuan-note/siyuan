@@ -446,7 +446,7 @@ export class WYSIWYG {
                 return;
             }
             let target = event.target as HTMLElement;
-            let nodeElement = hasClosestBlock(target);
+            let nodeElement = hasClosestBlock(target) as HTMLElement;
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
             const galleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             if (event.shiftKey) {
@@ -902,7 +902,7 @@ export class WYSIWYG {
                     hideElements(["toolbar"], protyle);
                     if (target.classList.contains("table__select")) {
                         target = document.elementFromPoint(event.clientX, event.clientY) as HTMLElement;
-                        nodeElement = hasClosestBlock(target);
+                        nodeElement = hasClosestBlock(target) as HTMLElement;
                     }
                     event.stopPropagation();
                 }

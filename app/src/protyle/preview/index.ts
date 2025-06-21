@@ -310,7 +310,7 @@ export class Preview {
 
         this.element.append(copyElement);
         // 最后一个块是公式块时无法复制下来；section 元素后面还需要一个其他元素才能被复制
-        copyElement.insertAdjacentHTML("beforeend", "<p style='background-color: transparent;'> &zwj;</p>");
+        copyElement.insertAdjacentHTML("beforeend", "<p style='background-color: transparent;'>&zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();

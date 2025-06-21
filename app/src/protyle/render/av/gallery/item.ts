@@ -26,14 +26,14 @@ export const insertGalleryItemAnimation = (options: {
         !options.blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
         needUpdate = ' data-need-update="true"';
     }
-    const coverClass = sideItemElement.querySelector(".av__gallery-cover").className;
+    const coverClass = sideItemElement?.querySelector(".av__gallery-cover").className || "av__gallery-cover av__gallery-cover--0";
     options.srcIDs.forEach((id) => {
         html += `<div class="av__gallery-item"${needUpdate} data-type="ghost" data-id="${id}">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
     <div class="av__gallery-fields"><span class="av__pulse"></span></div>
 </div>`;
     });
-    if (options.previousId) {
+    if (options.previousId && sideItemElement) {
         sideItemElement.insertAdjacentHTML("afterend", html);
     } else {
         options.blockElement.querySelector(".av__gallery").insertAdjacentHTML("afterbegin", html);

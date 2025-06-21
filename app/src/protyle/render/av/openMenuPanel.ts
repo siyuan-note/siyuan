@@ -901,12 +901,13 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "updateColType") {
+                    const colId = options.colId || menuElement.querySelector(".b3-menu__item").getAttribute("data-col-id");
                     if (target.dataset.newType !== target.dataset.oldType) {
                         const nameElement = avPanelElement.querySelector('.b3-text-field[data-type="name"]') as HTMLInputElement;
                         const name = nameElement.value;
                         let newName = name;
                         fields.find((item: IAVColumn) => {
-                            if (item.id === options.colId) {
+                            if (item.id === colId) {
                                 item.type = target.dataset.newType as TAVCol;
                                 if (getColNameByType(target.dataset.oldType as TAVCol) === name) {
                                     newName = getColNameByType(target.dataset.newType as TAVCol);
@@ -918,13 +919,13 @@ export const openMenuPanel = (options: {
 
                         transaction(options.protyle, [{
                             action: "updateAttrViewCol",
-                            id: options.colId,
+                            id: colId,
                             avID,
                             name: newName,
                             type: target.dataset.newType as TAVCol,
                         }], [{
                             action: "updateAttrViewCol",
-                            id: options.colId,
+                            id: colId,
                             avID,
                             name,
                             type: target.dataset.oldType as TAVCol,
@@ -932,10 +933,10 @@ export const openMenuPanel = (options: {
 
                         // 需要取消 lineNumber 列的排序和过滤
                         if (target.dataset.newType === "lineNumber") {
-                            const sortExist = data.view.sorts.find((sort) => sort.column === options.colId);
+                            const sortExist = data.view.sorts.find((sort) => sort.column === colId);
                             if (sortExist) {
                                 const oldSorts = Object.assign([], data.view.sorts);
-                                const newSorts = data.view.sorts.filter((sort) => sort.column !== options.colId);
+                                const newSorts = data.view.sorts.filter((sort) => sort.column !== colId);
 
                                 transaction(options.protyle, [{
                                     action: "setAttrViewSorts",
@@ -950,10 +951,10 @@ export const openMenuPanel = (options: {
                                 }]);
                             }
 
-                            const filterExist = data.view.filters.find((filter) => filter.column === options.colId);
+                            const filterExist = data.view.filters.find((filter) => filter.column === colId);
                             if (filterExist) {
                                 const oldFilters = JSON.parse(JSON.stringify(data.view.filters));
-                                const newFilters = data.view.filters.filter((filter) => filter.column !== options.colId);
+                                const newFilters = data.view.filters.filter((filter) => filter.column !== colId);
 
                                 transaction(options.protyle, [{
                                     action: "setAttrViewFilters",
@@ -972,7 +973,7 @@ export const openMenuPanel = (options: {
                     menuElement.innerHTML = getEditHTML({
                         protyle: options.protyle,
                         data,
-                        colId: options.colId,
+                        colId,
                         isCustomAttr
                     });
                     bindEditEvent({protyle: options.protyle, data, menuElement, isCustomAttr, blockID});

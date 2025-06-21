@@ -61,7 +61,7 @@ export const renderGallery = (options: {
         view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
             galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
             if (view.coverFrom !== 0) {
-                const coverClass= "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio
+                const coverClass= "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
                         galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;

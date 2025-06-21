@@ -56,7 +56,6 @@ import {hideElements} from "../protyle/ui/hideElements";
 import {emitOpenMenu} from "../plugin/EventBus";
 import {openMobileFileById} from "../mobile/editor";
 import {openBacklink, openGraph} from "../layout/dock/util";
-import {updateHeader} from "../protyle/render/av/row";
 import {renderAssetsPreview} from "../asset/renderAssets";
 import {upDownHint} from "../util/upDownHint";
 import {hintRenderAssets} from "../protyle/hint/extend";

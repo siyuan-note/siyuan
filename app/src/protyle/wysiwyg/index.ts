@@ -78,7 +78,7 @@ import {removeSearchMark} from "../toolbar/util";
 import {activeBlur} from "../../mobile/util/keyboardToolbar";
 import {commonClick} from "./commonClick";
 import {avClick, avContextmenu, updateAVName} from "../render/av/action";
-import {selectRow, stickyRow, updateHeader} from "../render/av/row";
+import {selectRow, stickyRow} from "../render/av/row";
 import {showColMenu} from "../render/av/col";
 import {openViewMenu} from "../render/av/view";
 import {checkFold} from "../../util/noRelyPCFunction";

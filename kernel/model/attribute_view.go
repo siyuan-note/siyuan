@@ -3507,15 +3507,16 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 	}
 
 	for _, view := range attrView.Views {
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
+		if nil != view.Table {
 			for i, column := range view.Table.Columns {
 				if column.ID == keyID {
 					view.Table.Columns = append(view.Table.Columns[:i], view.Table.Columns[i+1:]...)
 					break
 				}
 			}
-		case av.LayoutTypeGallery:
+		}
+
+		if nil != view.Gallery {
 			for i, field := range view.Gallery.CardFields {
 				if field.ID == keyID {
 					view.Gallery.CardFields = append(view.Gallery.CardFields[:i], view.Gallery.CardFields[i+1:]...)

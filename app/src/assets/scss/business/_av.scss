@@ -402,6 +402,11 @@
         &:hover .block__icon {
           opacity: 0;
         }
+
+        &:hover .b3-chip[data-type=block-more] {
+          top: 2px;
+          display: block;
+        }
       }
 
       &--wrap {

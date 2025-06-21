@@ -574,8 +574,10 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
                     }
                     protyle.toolbar.range.selectNodeContents(cellElements[0].lastChild);
                     focusByRange(protyle.toolbar.range);
-                    cellElements[0].classList.add("av__cell--select");
-                    addDragFill(cellElements[0]);
+                    if (viewType === "table") {
+                        cellElements[0].classList.add("av__cell--select");
+                        addDragFill(cellElements[0]);
+                    }
                     let textPlain = inputElement.value;
                     if (isDynamicRef(textPlain)) {
                         textPlain = textPlain.substring(2, 22 + 2);

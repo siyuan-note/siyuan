@@ -1188,7 +1188,7 @@ export const cellValueIsEmpty = (value: IAVCellValue) => {
         return !value[value.type as "text"]?.content;
     }
     if (["mSelect", "mAsset", "select"].includes(value.type)) {
-        if (value[value.type as "mSelect"]?.length > 0) {
+        if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {
             return false;
         }
         return true;

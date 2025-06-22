@@ -493,7 +493,10 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 document.querySelector(".av__mask")?.remove();
                             }
                             if (item.getAttribute("data-av-type") === "gallery") {
-                                item.querySelector(`.av__gallery-item[data-id="${operation.srcs[0].id}"]`)?.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+                                const filesElement = item.querySelector(`.av__gallery-item[data-id="${operation.srcs[0].id}"]`)?.querySelector(".av__gallery-fields");
+                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
+                                    filesElement.classList.add("av__gallery-fields--edit");
+                                }
                             }
                         }
                     }

@@ -109,7 +109,11 @@ export const openMenuPanel = (options: {
                         }
                     });
                 } else {
-                    fields.splice(0, 0, options.editData.colData);
+                    if (data.viewType === "table") {
+                        fields.splice(0, 0, options.editData.colData);
+                    } else {
+                        fields.push(options.editData.colData);
+                    }
                 }
             }
             html = getEditHTML({protyle: options.protyle, data, colId: options.colId, isCustomAttr});

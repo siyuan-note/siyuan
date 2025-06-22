@@ -135,7 +135,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     if (protyle.disabled) {
         return false;
     }
-
+    const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
         const type = target.getAttribute("data-type");
@@ -190,8 +190,10 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             protyle.toolbar.range = document.createRange();
             protyle.toolbar.range.selectNodeContents(target);
             focusByRange(protyle.toolbar.range);
-            target.parentElement.classList.add("av__cell--select");
-            addDragFill(target.parentElement);
+            if (viewType === "table") {
+                target.parentElement.classList.add("av__cell--select");
+                addDragFill(target.parentElement);
+            }
             hintRef(target.previousElementSibling.textContent.trim(), protyle, "av");
             event.preventDefault();
             event.stopPropagation();
@@ -225,7 +227,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     return;
                 }
                 const cellType = getTypeByCellElement(target);
-                if (blockElement.getAttribute("data-av-type") === "gallery") {
+                if (viewType === "gallery") {
                     const itemElement = hasClosestByClassName(target, "av__gallery-item");
                     if (itemElement)
                         if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {

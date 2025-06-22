@@ -3257,6 +3257,11 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		return
 	}
 
+	currentView, err := attrView.GetCurrentView(attrView.ViewID)
+	if nil != err {
+		return
+	}
+
 	keyTyp := av.KeyType(keyType)
 	switch keyTyp {
 	case av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
@@ -3273,7 +3278,7 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 		for _, view := range attrView.Views {
 			if nil != view.Table {
 				if "" == previousKeyID {
-					if av.LayoutTypeGallery == view.LayoutType {
+					if av.LayoutTypeGallery == currentView.LayoutType {
 						// 如果当前视图是画廊视图则添加到最后
 						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
 					} else {

@@ -881,6 +881,9 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			}
 
 			if 0 < len(kValues.Values) {
+				for _, v := range kValues.Values {
+					sql.FillAttributeViewNilValue(v, v.Type)
+				}
 				keyValues = append(keyValues, kValues)
 			} else {
 				// 如果没有值，那么就补一个默认值

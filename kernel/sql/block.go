@@ -276,6 +276,34 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 	return buf.String()
 }
 
+func BatchGetBlockAttrsWitTrees(ids []string, trees map[string]*parse.Tree) (ret map[string]map[string]string) {
+	ret = map[string]map[string]string{}
+
+	hitCache := true
+	for _, id := range ids {
+		ial := cache.GetBlockIAL(id)
+		if nil != ial {
+			ret[id] = ial
+			continue
+		}
+		hitCache = false
+		break
+	}
+	if hitCache {
+		return
+	}
+
+	for _, id := range ids {
+		tree := trees[id]
+		if nil == tree {
+			continue
+		}
+
+		ret[id] = getBlockAttrsFromTree(id, tree)
+	}
+	return
+}
+
 func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 	ret = map[string]map[string]string{}
 

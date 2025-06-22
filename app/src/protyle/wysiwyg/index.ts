@@ -616,6 +616,12 @@ export class WYSIWYG {
                 }
                 return;
             }
+
+            // https://github.com/siyuan-note/siyuan/issues/15100
+            if (galleryItemElement) {
+                return;
+            }
+
             // https://github.com/siyuan-note/siyuan/issues/3026
             hideElements(["select"], protyle);
             if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {

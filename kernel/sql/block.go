@@ -278,6 +278,21 @@ func nodeStaticContent(node *ast.Node, excludeTypes []string, includeTextMarkATi
 
 func BatchGetBlockAttrs(ids []string) (ret map[string]map[string]string) {
 	ret = map[string]map[string]string{}
+
+	hitCache := true
+	for _, id := range ids {
+		ial := cache.GetBlockIAL(id)
+		if nil != ial {
+			ret[id] = ial
+			continue
+		}
+		hitCache = false
+		break
+	}
+	if hitCache {
+		return
+	}
+
 	trees := filesys.LoadTrees(ids)
 	for _, id := range ids {
 		tree := trees[id]
@@ -308,6 +323,15 @@ func GetBlockAttrs(id string) (ret map[string]string) {
 
 func getBlockAttrsFromTree(id string, tree *parse.Tree) (ret map[string]string) {
 	ret = map[string]string{}
+
+	ial := cache.GetBlockIAL(id)
+	if nil != ial {
+		for k, v := range ial {
+			ret[k] = v
+		}
+		return
+	}
+
 	node := treenode.GetNodeInTree(tree, id)
 	if nil == node {
 		logging.LogWarnf("block [%s] not found", id)

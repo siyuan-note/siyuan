@@ -1069,7 +1069,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // gallery item 内部拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
                                     doOperations.push({

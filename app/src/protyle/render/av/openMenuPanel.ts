@@ -84,7 +84,7 @@ export const openMenuPanel = (options: {
         const isCustomAttr = !options.blockElement.classList.contains("av");
         let data = response.data as IAV;
         let html;
-        const fields = getFieldsByData(data);
+        let fields = getFieldsByData(data);
         if (options.type === "config") {
             html = getViewHTML(data);
         } else if (options.type === "properties") {
@@ -1416,6 +1416,7 @@ export const openMenuPanel = (options: {
                         nodeElement: options.blockElement,
                         data: data
                     });
+                    fields = getFieldsByData(data);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

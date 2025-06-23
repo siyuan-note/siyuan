@@ -69,10 +69,12 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 	// 批量加载绑定块对应的树
 	var ialIDs []string
-	for _, card := range ret.Cards {
-		block := card.GetBlockValue()
-		if nil != block && !block.IsDetached {
-			ialIDs = append(ialIDs, card.ID)
+	for cardID, keyValues := range cardsValues {
+		for _, kValues := range keyValues {
+			block := kValues.GetBlockValue()
+			if nil != block && !block.IsDetached {
+				ialIDs = append(ialIDs, cardID)
+			}
 		}
 	}
 	boundTrees := filesys.LoadTrees(ialIDs)

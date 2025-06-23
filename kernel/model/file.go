@@ -83,7 +83,7 @@ func (box *Box) docFromFileInfo(fileInfo *FileInfo, ial map[string]string) (ret 
 	icon := ial["icon"]
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 	}
 	ret.Icon = icon
 	ret.ID = ial["id"]

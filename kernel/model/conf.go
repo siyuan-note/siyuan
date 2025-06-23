@@ -234,7 +234,7 @@ func InitConf() {
 	for i, emoji := range Conf.Editor.Emoji {
 		if strings.Contains(emoji, ".") {
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			emoji = util.FilterUploadFileName(emoji)
+			emoji = util.FilterUploadEmojiFileName(emoji)
 			Conf.Editor.Emoji[i] = emoji
 		}
 	}

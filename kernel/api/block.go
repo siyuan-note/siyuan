@@ -629,7 +629,7 @@ func getBlockInfo(c *gin.Context) {
 	icon := root.IAL["icon"]
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 	}
 	ret.Data = map[string]string{
 		"box":         block.Box,

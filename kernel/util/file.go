@@ -188,6 +188,13 @@ func IsValidUploadFileName(name string) bool {
 	return name == FilterUploadFileName(name)
 }
 
+func FilterUploadEmojiFileName(name string) string {
+	name = strings.ReplaceAll(name, "/", "_@slash@_")
+	name = FilterUploadFileName(name)
+	name = strings.ReplaceAll(name, "_@slash@_", "/")
+	return name
+}
+
 func FilterUploadFileName(name string) string {
 	ret := FilterFileName(name)
 

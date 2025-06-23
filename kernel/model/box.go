@@ -130,7 +130,7 @@ func ListNotebooks() (ret []*Box, err error) {
 		icon := boxConf.Icon
 		if strings.Contains(icon, ".") { // 说明是自定义图标
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			icon = util.FilterUploadFileName(icon)
+			icon = util.FilterUploadEmojiFileName(icon)
 		}
 
 		box := &Box{
@@ -200,7 +200,7 @@ func (box *Box) GetConf() (ret *conf.BoxConf) {
 	icon := ret.Icon
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 		ret.Icon = icon
 	}
 	return
@@ -708,7 +708,7 @@ func ChangeBoxSort(boxIDs []string) {
 func SetBoxIcon(boxID, icon string) {
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 	}
 
 	box := &Box{ID: boxID}

@@ -68,7 +68,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	icon := ret.IAL["icon"]
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 		ret.IAL["icon"] = icon
 	}
 
@@ -141,7 +141,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	icon = tree.Root.IALAttr("icon")
 	if strings.Contains(icon, ".") {
 		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadFileName(icon)
+		icon = util.FilterUploadEmojiFileName(icon)
 	}
 	ret.Icon = icon
 	return

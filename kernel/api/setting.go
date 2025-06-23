@@ -657,7 +657,7 @@ func setEmoji(c *gin.Context) {
 		e := ae.(string)
 		if strings.Contains(e, ".") {
 			// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-			e = util.FilterUploadFileName(e)
+			e = util.FilterUploadEmojiFileName(e)
 		}
 		emoji = append(emoji, e)
 	}

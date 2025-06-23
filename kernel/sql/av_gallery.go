@@ -232,6 +232,9 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 			// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
 			ial := parse.IAL2Map(n.KramdownIAL)
 			delete(ial, av.NodeAttrNameAvs)
+
+			// 重置 data-node-id 的值，避免触发前端绑定的事件 https://github.com/siyuan-note/siyuan/issues/15088
+			ial["id"] = ast.NewNodeID()
 			n.KramdownIAL = parse.Map2IAL(ial)
 		}
 		rendererFunc := blockRenderer.RendererFuncs[n.Type]

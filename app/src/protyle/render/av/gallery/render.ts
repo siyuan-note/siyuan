@@ -9,6 +9,7 @@ import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
 import {updateSearch} from "../render";
 import {getViewIcon} from "../view";
+import {processRender} from "../../../util/processCode";
 
 export const renderGallery = (options: {
     blockElement: HTMLElement,
@@ -184,6 +185,9 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
             } else {
                 galleryElement.classList.remove("av__gallery--top");
             }
+        }
+        if (view.coverFrom === 1) {
+            processRender(options.blockElement);
         }
         if (typeof oldOffset === "number") {
             options.protyle.contentElement.scrollTop = oldOffset;

@@ -1607,6 +1607,7 @@
     "254": "[Region ID] ID regione non corretto, si prega di consultare la documentazione del fornitore di servizi S3 per configurare l'ID regione",
     "255": "Il sito di destinazione ha abilitato la protezione hotlink, quindi non è possibile scaricare [%d] risorse",
     "256": "Il percorso specificato [%s] ha un percorso di spazio di lavoro padre [%s]",
-    "257": "Ricordati di me per 30 giorni"
+    "257": "Ricordati di me per 30 giorni",
+    "258": "Operazione fallita, riprova più tardi"
   }
 }

@@ -1217,7 +1217,8 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		view = attrView.Views[0]
 	}
 
-	// 做一些数据兼容和订正处理，保存的时候也会做 av.SaveAttributeView()
+	// 做一些数据兼容和订正处理
+	checkViewInstance(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
 	switch view.LayoutType {
@@ -1964,31 +1965,37 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 }
 
 func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
-	var err error
-	avID := operation.AvID
+	err := addAttrViewView(operation.AvID, operation.ID, operation.BlockID, operation.Layout)
+	if nil != err {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		return
 	}
 
 	if 1 > len(attrView.Views) {
 		logging.LogErrorf("no view in attribute view [%s]", avID)
-		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		return
 	}
 
 	firstView := attrView.Views[0]
 	if nil == firstView {
 		logging.LogErrorf("get first view failed: %s", avID)
-		return &TxErr{code: TxErrWriteAttributeView, id: avID}
+		return
 	}
 
-	if "" == operation.Layout {
-		operation.Layout = av.LayoutTypeTable
+	if "" == layout {
+		layout = av.LayoutTypeTable
 	}
 
 	var view *av.View
-	switch operation.Layout {
+	switch layout {
 	case av.LayoutTypeTable:
 		view = av.NewTableView()
 		switch firstView.LayoutType {
@@ -2027,32 +2034,32 @@ func (tx *Transaction) doAddAttrViewView(operation *Operation) (ret *TxErr) {
 		}
 	default:
 		err = av.ErrWrongLayoutType
-		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", operation.Layout, avID)
+		logging.LogErrorf("wrong layout type [%s] for attribute view [%s]", layout, avID)
 		return
 	}
 
-	view.ID = operation.ID
+	attrView.ViewID = viewID
+	view.ID = viewID
 	attrView.Views = append(attrView.Views, view)
-	attrView.ViewID = view.ID
 
-	node, tree, _ := getNodeByBlockID(nil, operation.BlockID)
+	node, tree, _ := getNodeByBlockID(nil, blockID)
 	if nil == node {
-		logging.LogErrorf("get node by block ID [%s] failed", operation.BlockID)
-		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID}
+		logging.LogErrorf("get node by block ID [%s] failed", blockID)
+		return
 	}
 
 	node.AttributeViewType = string(view.LayoutType)
 	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[av.NodeAttrView] = operation.ID
+	attrs[av.NodeAttrView] = viewID
 	err = setNodeAttrs(node, tree, attrs)
 	if err != nil {
-		logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
 		return
 	}
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return &TxErr{code: TxErrWriteAttributeView, msg: err.Error(), id: avID}
+		return
 	}
 	return
 }

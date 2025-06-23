@@ -1607,6 +1607,7 @@
     "254": "[Region ID] Falsche Regions-ID, bitte konsultieren Sie die Dokumentation des S3-Dienstanbieters zur Konfiguration der Regions-ID",
     "255": "Die Zielseite hat den Hotlink-Schutz aktiviert, daher ist es nicht möglich, [%d] Ressourcen herunterzuladen",
     "256": "Der angegebene Pfad [%s] hat einen übergeordneten Arbeitsbereichspfad [%s]",
-    "257": "Erinnere dich 30 Tage an mich"
+    "257": "Erinnere dich 30 Tage an mich",
+    "258": "Vorgang fehlgeschlagen, bitte versuchen Sie es später erneut"
   }
 }

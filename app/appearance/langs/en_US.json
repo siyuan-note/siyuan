@@ -1607,6 +1607,7 @@
     "254": "[Region ID] Incorrect Region ID, please refer to the S3 service provider's documentation to configure the Region ID",
     "255": "The target site has enabled hotlink protection, so it is not possible to download [%d] resources",
     "256": "The specified path [%s] has a parent workspace path [%s]",
-    "257": "Remember me for 30 days"
+    "257": "Remember me for 30 days",
+    "258": "Operation failed, please try again later"
   }
 }

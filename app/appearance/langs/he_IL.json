@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "הסתר שדות ריקים",
+  "displayEmptyFields": "הצג שדות ריקים",
   "cardAspectRatio": "יחס גובה-רוחב של כרטיס",
   "cardPreview1": "תצוגה מקדימה של כרטיס",
   "contentImage": "תמונת תוכן",

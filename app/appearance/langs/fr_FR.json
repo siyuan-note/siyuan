@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Masquer les champs vides",
+  "displayEmptyFields": "Afficher les champs vides",
   "cardAspectRatio": "Proportions de la carte",
   "cardPreview1": "Aperçu de la carte",
   "contentImage": "Image du contenu",

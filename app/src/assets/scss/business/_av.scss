@@ -271,7 +271,7 @@
     }
 
     &-item {
-      border: 1px solid var(--b3-border-color);
+      box-shadow: var(--b3-av-gallery-shadow);
       border-radius: var(--b3-border-radius);
       display: flex;
       flex-direction: column;
@@ -431,7 +431,7 @@
     }
 
     &-add {
-      border: 1px solid var(--b3-border-color);
+      box-shadow: var(--b3-av-gallery-shadow);
       border-radius: var(--b3-border-radius);
       display: flex;
       justify-content: center;

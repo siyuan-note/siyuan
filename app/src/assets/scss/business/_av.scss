@@ -395,10 +395,10 @@
       white-space: nowrap;
       font-size: 85%;
       min-height: 23px;
-      padding: 5px;
+      padding: 5px 4px;
 
       .av__cell {
-        padding: 0;
+        padding: 0 4px;
         border-right: 0;
 
         &:hover .block__icon {

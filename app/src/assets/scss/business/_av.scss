@@ -373,11 +373,16 @@
     &-content {
       margin: 8px 8px 0;
       color: var(--b3-theme-on-surface);
-      transform: scale(0.85);
-      left: 0;
-      right: 0;
-      transform-origin: 0 0;
-      width: calc(100% / 0.85 - 16px);
+
+      @supports (zoom: 1) {
+        zoom: .85;
+      }
+
+      @supports not (zoom: 1) {
+        transform: scale(0.85);
+        transform-origin: 0 0;
+        width: calc(100% / 0.85 - 16px);
+      }
 
       & ~ div {
         position: absolute;

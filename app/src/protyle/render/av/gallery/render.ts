@@ -7,7 +7,7 @@ import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
-import {updateSearch} from "../render";
+import {avRender, updateSearch} from "../render";
 import {getViewIcon} from "../view";
 import {processRender} from "../../../util/processCode";
 
@@ -54,6 +54,11 @@ export const renderGallery = (options: {
         query: query.trim()
     }, (response) => {
         const view: IAVGallery = response.data.view;
+        if (response.data.viewType === "table") {
+            options.blockElement.setAttribute("data-av-type", "table");
+            avRender(options.blockElement, options.protyle, options.cb, options.renderAll);
+            return;
+        }
         if (!options.blockElement.dataset.pageSize) {
             options.blockElement.dataset.pageSize = view.pageSize.toString();
         }

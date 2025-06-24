@@ -95,6 +95,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 query: query.trim()
             }, (response) => {
                 const data = response.data.view as IAVTable;
+                if (response.data.viewType === "gallery") {
+                    e.setAttribute("data-av-type", "table");
+                    renderGallery({blockElement: e, protyle, cb, renderAll});
+                    return;
+                }
                 if (!e.dataset.pageSize) {
                     e.dataset.pageSize = data.pageSize.toString();
                 }

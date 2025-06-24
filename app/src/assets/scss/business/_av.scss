@@ -376,6 +376,7 @@
       left: 0;
       right: 0;
       transform-origin: 0 0;
+      width: calc(100% / 0.85 - 16px);
 
       & ~ div {
         position: absolute;

@@ -29,6 +29,7 @@ import (
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -179,6 +180,18 @@ func renderBlockDOMByNodes(nodes []*ast.Node, luteEngine *lute.Lute) string {
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	for _, node := range nodes {
 		ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if entering {
+				if n.IsBlock() {
+					if avs := n.IALAttr(av.NodeAttrNameAvs); "" != avs {
+						// 填充属性视图角标 Display the database title on the block superscript https://github.com/siyuan-note/siyuan/issues/10545
+						avNames := getAvNames(n.IALAttr(av.NodeAttrNameAvs))
+						if "" != avNames {
+							n.SetIALAttr(av.NodeAttrViewNames, avNames)
+						}
+					}
+				}
+			}
+
 			rendererFunc := blockRenderer.RendererFuncs[n.Type]
 			return rendererFunc(n, entering)
 		})

@@ -1456,6 +1456,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement.classList.contains("av") || !galleryElement ||
                 !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
                 targetElement = false;
+                editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
+                    item.classList.remove("dragover__left", "dragover__right");
+                });
             }
         }
         if (!targetElement) {

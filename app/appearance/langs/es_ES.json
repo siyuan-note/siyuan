@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Ocultar campos vacíos",
+  "displayEmptyFields": "Mostrar campos vacíos",
   "cardAspectRatio": "Proporción de la tarjeta",
   "cardPreview1": "Vista previa de la tarjeta",
   "contentImage": "Imagen del contenido",

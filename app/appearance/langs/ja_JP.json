@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "空のフィールドを非表示",
+  "displayEmptyFields": "空のフィールドを表示",
   "cardAspectRatio": "カードのアスペクト比",
   "cardPreview1": "カードプレビュー",
   "contentImage": "コンテンツ画像",

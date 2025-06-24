@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Leere Felder ausblenden",
+  "displayEmptyFields": "Leere Felder anzeigen",
   "cardAspectRatio": "Seitenverhältnis der Karte",
   "cardPreview1": "Kartenansicht",
   "contentImage": "Inhaltsbild",

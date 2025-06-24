@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Nascondi campi vuoti",
+  "displayEmptyFields": "Mostra campi vuoti",
   "cardAspectRatio": "Proporzioni della carta",
   "cardPreview1": "Anteprima della carta",
   "contentImage": "Immagine del contenuto",

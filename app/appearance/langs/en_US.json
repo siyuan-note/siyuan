@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Hide empty fields",
+  "displayEmptyFields": "Display empty fields",
   "cardAspectRatio": "Card aspect ratio",
   "cardPreview1": "Card preview",
   "contentImage": "Content image",

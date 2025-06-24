@@ -1,4 +1,6 @@
 {
+  "hideEmptyFields": "Скрыть пустые поля",
+  "displayEmptyFields": "Показать пустые поля",
   "cardAspectRatio": "Соотношение сторон карточки",
   "cardPreview1": "Предпросмотр карты",
   "contentImage": "Изображение содержимого",

@@ -4,6 +4,8 @@ import * as dayjs from "dayjs";
 import {hasClosestByClassName} from "../../../util/hasClosest";
 import {genCellValueByElement} from "../cell";
 import {clearSelect} from "../../../util/clearSelect";
+import {unicode2Emoji} from "../../../../emoji";
+import {getColIconByType} from "../col";
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -55,10 +57,15 @@ export const setGalleryCover = (options: {
             targetNameElement.textContent = window.siyuan.languages.contentImage;
         }
     });
+    let addedSeparator = false
     options.view.fields.forEach(item => {
         if (item.type === "mAsset") {
+            if (!addedSeparator) {
+                menu.addSeparator();
+                addedSeparator = true;
+            }
             menu.addItem({
-                iconHTML: "",
+                iconHTML: item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`,
                 checked: options.view.coverFrom === 2 && options.view.coverFromAssetKeyID === item.id,
                 label: item.name,
                 click() {

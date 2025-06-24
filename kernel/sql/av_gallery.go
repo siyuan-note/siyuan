@@ -227,22 +227,39 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	blockRenderer.Options.ProtyleContenteditable = false
+	resetIDs := map[string]string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
-			// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
-			ial := parse.IAL2Map(n.KramdownIAL)
-			delete(ial, av.NodeAttrNameAvs)
+			if n.IsBlock() {
+				// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
+				ial := parse.IAL2Map(n.KramdownIAL)
+				delete(ial, av.NodeAttrNameAvs)
 
-			// 重置 data-node-id 的值，避免触发前端绑定的事件 https://github.com/siyuan-note/siyuan/issues/15088
-			ial["id"] = ast.NewNodeID()
-			n.KramdownIAL = parse.Map2IAL(ial)
+				// 重置 data-node-id 的值，避免触发前端绑定的事件 https://github.com/siyuan-note/siyuan/issues/15088
+				newID := ast.NewNodeID()
+				resetIDs[newID] = n.ID
+				n.ID, ial["id"] = newID, newID
+				n.KramdownIAL = parse.Map2IAL(ial)
+			}
 		}
 		rendererFunc := blockRenderer.RendererFuncs[n.Type]
 		return rendererFunc(n, entering)
 	})
-	h := strings.TrimSpace(blockRenderer.Writer.String())
-	if strings.HasPrefix(h, "<li") {
-		h = "<ul>" + h + "</ul>"
+	ret := strings.TrimSpace(blockRenderer.Writer.String())
+	if strings.HasPrefix(ret, "<li") {
+		ret = "<ul>" + ret + "</ul>"
 	}
-	return h
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			if n.IsBlock() {
+				// 还原上面重置 data-node-id 的值
+				ial := parse.IAL2Map(n.KramdownIAL)
+				oldID := resetIDs[n.ID]
+				n.ID, ial["id"] = oldID, oldID
+				n.KramdownIAL = parse.Map2IAL(ial)
+			}
+		}
+		return ast.WalkContinue
+	})
+	return ret
 }

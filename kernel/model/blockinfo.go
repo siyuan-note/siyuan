@@ -65,13 +65,6 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 	title := tree.Root.IALAttr("title")
 	ret = &BlockInfo{ID: blockID, RootID: tree.Root.ID, Name: title}
 	ret.IAL = parse.IAL2Map(tree.Root.KramdownIAL)
-	icon := ret.IAL["icon"]
-	if strings.Contains(icon, ".") {
-		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadEmojiFileName(icon)
-		ret.IAL["icon"] = icon
-	}
-
 	scrollData := ret.IAL["scroll"]
 	if 0 < len(scrollData) {
 		scroll := map[string]interface{}{}
@@ -138,12 +131,7 @@ func GetDocInfo(blockID string) (ret *BlockInfo) {
 		}
 	}
 	ret.SubFileCount = subFileCount
-	icon = tree.Root.IALAttr("icon")
-	if strings.Contains(icon, ".") {
-		// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-		icon = util.FilterUploadEmojiFileName(icon)
-	}
-	ret.Icon = icon
+	ret.Icon = tree.Root.IALAttr("icon")
 	return
 }
 

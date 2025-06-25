@@ -406,8 +406,14 @@
         padding: 0 4px;
         border-right: 0;
 
-        &:hover .block__icon {
-          opacity: 0;
+        .block__icon {
+          display: none;
+        }
+
+        &[data-dtype="mAsset"],
+        &[data-dtype="mSelect"],
+        &[data-dtype="select"] {
+          margin-left: -2px;
         }
 
         &:hover .b3-chip[data-type=block-more] {

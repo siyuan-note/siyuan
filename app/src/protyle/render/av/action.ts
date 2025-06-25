@@ -4,7 +4,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
 import {
-    addDragFill,
+    addDragFill, cellValueIsEmpty,
     genCellValueByElement,
     getCellText,
     getTypeByCellElement,
@@ -731,7 +731,9 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         if (viewType === "gallery") {
             const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-            cellElement.innerHTML = renderCell(value, undefined, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType);
+            cellElement.innerHTML = renderCell(value, undefined, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
+                cellElement.querySelector(".av__gallery-tip").outerHTML;
+            cellElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
         } else {
             cellElement.innerHTML = renderCell(value);
         }

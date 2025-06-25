@@ -57,7 +57,7 @@ export const setGalleryCover = (options: {
             targetNameElement.textContent = window.siyuan.languages.contentImage;
         }
     });
-    let addedSeparator = false
+    let addedSeparator = false;
     options.view.fields.forEach(item => {
         if (item.type === "mAsset") {
             if (!addedSeparator) {
@@ -302,9 +302,13 @@ export const openGalleryItemMenu = (options: {
     });
 };
 
-export const editGalleryItem = (taget: Element) => {
-    const itemElement = hasClosestByClassName(taget, "av__gallery-item");
+export const editGalleryItem = (target: Element) => {
+    const itemElement = hasClosestByClassName(target, "av__gallery-item");
     if (itemElement) {
-        itemElement.querySelector(".av__gallery-fields")?.classList.toggle("av__gallery-fields--edit");
+        const fieldsElement = itemElement.querySelector(".av__gallery-fields");
+        if (fieldsElement) {
+            target.setAttribute("aria-label", window.siyuan.languages[fieldsElement.classList.contains("av__gallery-fields--edit") ? "displayEmptyFields" : "hideEmptyFields"]);
+            fieldsElement.classList.toggle("av__gallery-fields--edit");
+        }
     }
 };

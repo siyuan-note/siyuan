@@ -91,6 +91,7 @@ export const renderGallery = (options: {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                 }
                 const isEmpty = cellValueIsEmpty(cell.value);
+                // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 data-empty="${isEmpty}" 
 aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
@@ -101,13 +102,7 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">
-    ${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}
-    <div class="av__gallery-tip">
-        ${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}
-        ${window.siyuan.languages.edit} ${ Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}
-    </div>
-</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}<div class="av__gallery-tip">${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${ Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}</div></div>`;
             });
             galleryHTML += `</div>
     <div class="av__gallery-actions">

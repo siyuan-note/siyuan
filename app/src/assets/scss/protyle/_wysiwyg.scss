@@ -761,7 +761,8 @@
     .av__row--header > .block__icons,
     .av__views .fn__space,
     .av__views .block__icon:not([data-type="av-search-icon"]),
-    .av__widthdrag {
+    .av__widthdrag,
+    .av__gallery-actions {
       display: none;
     }
 

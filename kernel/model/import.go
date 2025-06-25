@@ -180,6 +180,13 @@ func ImportSY(zipPath, boxID, toPath string) (err error) {
 			blockIDs[n.ID] = newNodeID
 			n.ID = newNodeID
 			n.SetIALAttr("id", newNodeID)
+
+			if icon := n.IALAttr("icon"); "" != icon {
+				// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
+				icon = util.FilterUploadEmojiFileName(icon)
+				n.SetIALAttr("icon", icon)
+			}
+
 			return ast.WalkContinue
 		})
 		tree.ID = tree.Root.ID

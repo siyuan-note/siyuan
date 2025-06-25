@@ -250,21 +250,6 @@ func setNodeAttrs0(node *ast.Node, nameValues map[string]string) (oldAttrs map[s
 
 func pushBroadcastAttrTransactions(oldAttrs map[string]string, node *ast.Node) {
 	newAttrs := parse.IAL2Map(node.KramdownIAL)
-
-	// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
-	for name, value := range oldAttrs {
-		if "icon" == name {
-			value = util.FilterUploadEmojiFileName(value)
-			oldAttrs[name] = value
-		}
-	}
-	for name, value := range newAttrs {
-		if "icon" == name {
-			value = util.FilterUploadEmojiFileName(value)
-			newAttrs[name] = value
-		}
-	}
-
 	data := map[string]interface{}{"old": oldAttrs, "new": newAttrs}
 	if "" != node.AttributeViewType {
 		data["data-av-type"] = node.AttributeViewType

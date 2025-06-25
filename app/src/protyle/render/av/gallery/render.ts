@@ -10,6 +10,7 @@ import {addClearButton} from "../../../../util/addClearButton";
 import {avRender, updateSearch} from "../render";
 import {getViewIcon} from "../view";
 import {processRender} from "../../../util/processCode";
+import {getColIconByType} from "../col";
 
 export const renderGallery = (options: {
     blockElement: HTMLElement,
@@ -92,7 +93,7 @@ export const renderGallery = (options: {
                 const isEmpty = cellValueIsEmpty(cell.value);
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 data-empty="${isEmpty}" 
-aria-label="${isEmpty ? window.siyuan.languages.edit + " " : ""}${escapeAttr(view.fields[fieldsIndex].name)}" 
+aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"
@@ -100,7 +101,13 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">
+    ${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}
+    <div class="av__gallery-tip">
+        ${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}
+        ${window.siyuan.languages.edit} ${ Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}
+    </div>
+</div>`;
             });
             galleryHTML += `</div>
     <div class="av__gallery-actions">

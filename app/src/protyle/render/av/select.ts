@@ -659,7 +659,6 @@ export const getSelectHTML = (fields: IAVColumn[], cellElements: HTMLElement[], 
             return item;
         }
     });
-
     let selectedHTML = "";
     const selected: string[] = [];
     cellValues[0].mSelect?.forEach((item) => {

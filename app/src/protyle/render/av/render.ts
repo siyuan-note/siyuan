@@ -30,7 +30,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
     }
     if (avElements.length > 0) {
         avElements.forEach((e: HTMLElement) => {
-            if (e.getAttribute("data-render") === "true") {
+            if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
                 return;
             }
             if (isMobile() || isInIOS() || isInAndroid() || isInHarmony()) {

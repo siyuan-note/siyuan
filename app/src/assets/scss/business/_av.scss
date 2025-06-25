@@ -410,9 +410,14 @@
           display: none;
         }
 
-        &:hover .b3-chip[data-type=block-more] {
-          top: 2px;
-          display: block;
+        &:hover {
+          background-color: var(--b3-list-hover);
+          border-radius: var(--b3-border-radius);
+
+          .b3-chip[data-type=block-more] {
+            top: 2px;
+            display: block;
+          }
         }
       }
 

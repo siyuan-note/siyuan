@@ -22,6 +22,12 @@
       width: 16px;
       height: 26px;
     }
+
+    &[data-type="mAsset"],
+    &[data-type="mSelect"],
+    &[data-type="select"] {
+      padding-left: 6px;
+    }
   }
 
   &__avheader {

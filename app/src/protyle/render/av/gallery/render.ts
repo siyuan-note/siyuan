@@ -7,8 +7,10 @@ import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
-import {updateSearch} from "../render";
+import {avRender, updateSearch} from "../render";
 import {getViewIcon} from "../view";
+import {processRender} from "../../../util/processCode";
+import {getColIconByType, getColNameByType} from "../col";
 
 export const renderGallery = (options: {
     blockElement: HTMLElement,
@@ -53,6 +55,11 @@ export const renderGallery = (options: {
         query: query.trim()
     }, (response) => {
         const view: IAVGallery = response.data.view;
+        if (response.data.viewType === "table") {
+            options.blockElement.setAttribute("data-av-type", "table");
+            avRender(options.blockElement, options.protyle, options.cb, options.renderAll);
+            return;
+        }
         if (!options.blockElement.dataset.pageSize) {
             options.blockElement.dataset.pageSize = view.pageSize.toString();
         }
@@ -61,12 +68,12 @@ export const renderGallery = (options: {
         view.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
             galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
             if (view.coverFrom !== 0) {
-                const coverClass= "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
+                const coverClass = "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
                         galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;
                     } else {
-                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL}')"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL.replace(/'/g, "\\'")}')"></div></div>`;
                     }
                 } else if (item.coverContent) {
                     galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
@@ -84,9 +91,10 @@ export const renderGallery = (options: {
                     checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
                 }
                 const isEmpty = cellValueIsEmpty(cell.value);
+                // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 data-empty="${isEmpty}" 
-aria-label="${isEmpty ? window.siyuan.languages.edit + " " : ""}${escapeAttr(view.fields[fieldsIndex].name)}" 
+aria-label="${escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type)}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"
@@ -94,12 +102,12 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}<div class="av__gallery-tip">${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${ Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}</div></div>`;
             });
             galleryHTML += `</div>
     <div class="av__gallery-actions">
-        <span class="protyle-icon protyle-icon--first" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
-        <span class="protyle-icon protyle-icon--last" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
+        <span class="protyle-icon protyle-icon--first b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.displayEmptyFields}" data-type="av-gallery-edit"><svg><use xlink:href="#iconEdit"></use></svg></span>
+        <span class="protyle-icon protyle-icon--last b3-tooltips b3-tooltips__n" aria-label="${window.siyuan.languages.more}" data-type="av-gallery-more"><svg><use xlink:href="#iconMore"></use></svg></span>
     </div>
 </div>`;
         });
@@ -184,6 +192,9 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
             } else {
                 galleryElement.classList.remove("av__gallery--top");
             }
+        }
+        if (view.coverFrom === 1) {
+            processRender(options.blockElement);
         }
         if (typeof oldOffset === "number") {
             options.protyle.contentElement.scrollTop = oldOffset;

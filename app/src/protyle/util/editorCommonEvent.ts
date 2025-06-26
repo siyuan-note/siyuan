@@ -842,8 +842,15 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 return;
             } else if (target.classList.contains("av__gallery-item")) {
                 window.siyuan.dragElement = target;
-                event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${[target.getAttribute("data-id")]}`,
-                    target.outerHTML);
+                const blockElement = hasClosestBlock(target);
+                if (blockElement) {
+                    const selectIds: string[] = [];
+                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                        selectIds.push(item.getAttribute("data-id"));
+                    });
+                    event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
+                        target.outerHTML);
+                }
                 return;
             }
         }

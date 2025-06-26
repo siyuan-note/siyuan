@@ -229,12 +229,9 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 const cellType = getTypeByCellElement(target);
                 if (viewType === "gallery") {
                     const itemElement = hasClosestByClassName(target, "av__gallery-item");
-                    if (itemElement)
-                        if (cellType === "updated" || cellType === "created" || cellType === "lineNumber") {
-                            itemElement.classList.add("av__gallery-item--select");
-                        } else {
-                            popTextCell(protyle, [target]);
-                        }
+                    if (itemElement && cellType !== "updated" && cellType !== "created" && cellType !== "lineNumber") {
+                        popTextCell(protyle, [target]);
+                    }
                 } else {
                     const scrollElement = hasClosestByClassName(target, "av__scroll");
                     if (!scrollElement) {

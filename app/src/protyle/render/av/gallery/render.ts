@@ -10,7 +10,7 @@ import {addClearButton} from "../../../../util/addClearButton";
 import {avRender, updateSearch} from "../render";
 import {getViewIcon} from "../view";
 import {processRender} from "../../../util/processCode";
-import {getColIconByType} from "../col";
+import {getColIconByType, getColNameByType} from "../col";
 
 export const renderGallery = (options: {
     blockElement: HTMLElement,
@@ -94,7 +94,7 @@ export const renderGallery = (options: {
                 // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 data-empty="${isEmpty}" 
-aria-label="${escapeAttr(view.fields[fieldsIndex].name)}" 
+aria-label="${escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type)}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"

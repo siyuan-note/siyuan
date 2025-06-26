@@ -419,6 +419,12 @@
             display: block;
           }
         }
+
+        &[data-dtype="created"],
+        &[data-dtype="updated"],
+        &[data-dtype="lineNumber"] {
+          cursor: default;
+        }
       }
 
       &--wrap {

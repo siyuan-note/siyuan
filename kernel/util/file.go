@@ -189,6 +189,11 @@ func IsValidUploadFileName(name string) bool {
 }
 
 func FilterUploadEmojiFileName(name string) string {
+	if strings.HasPrefix(name, "api/icon/") {
+		// 忽略动态图标 https://github.com/siyuan-note/siyuan/issues/15139
+		return name
+	}
+
 	name = strings.ReplaceAll(name, "/", "_@slash@_")
 	name = FilterUploadFileName(name)
 	name = strings.ReplaceAll(name, "_@slash@_", "/")

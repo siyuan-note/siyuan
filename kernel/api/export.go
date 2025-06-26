@@ -630,8 +630,7 @@ func exportPreview(c *gin.Context) {
 		ua := useragent.New(userAgentStr)
 		name, _ := ua.Browser()
 		// Chrome、Edge、SiYuan 桌面端不需要替换 CSS 变量
-		isMobile := strings.Contains(userAgentStr, " ios/") || strings.Contains(userAgentStr, " android/")
-		if !isMobile && (name == "Chrome" || name == "Edge" || strings.Contains(userAgentStr, "Electron") || strings.Contains(userAgentStr, "SiYuan/")) {
+		if !ua.Mobile() && (name == "Chrome" || name == "Edge" || strings.Contains(userAgentStr, "Electron") || strings.Contains(userAgentStr, "SiYuan/")) {
 			fillCSSVar = false
 		}
 	}

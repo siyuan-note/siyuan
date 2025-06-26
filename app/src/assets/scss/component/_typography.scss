@@ -436,7 +436,7 @@
     vertical-align: top; // https://ld246.com/article/1647522074722
     margin: 0 auto;
     max-width: 100%;
-    user-select: none;
+    // user-select: none; 会导致图片无法复制 https://github.com/siyuan-note/siyuan/issues/15151
     word-break: keep-all;
     white-space: nowrap;
 

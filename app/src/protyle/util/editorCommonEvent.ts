@@ -1054,7 +1054,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
                         }
                     }
-                } else if (targetElement.classList.contains("av__gallery-item")) {
+                } else if (targetElement.classList.contains("av__gallery-item") || targetElement.classList.contains("av__gallery-add")) {
                     // 拖拽到属性视图 gallery 内
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
@@ -1374,11 +1374,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
         // 编辑器内文字拖拽或资源文件拖拽或按住 alt/shift 拖拽反链图标进入编辑器时不能运行 event.preventDefault()， 否则无光标; 需放在 !window.siyuan.dragElement 之后
         event.preventDefault();
-        targetElement = hasClosestByClassName(event.target, "av__gallery-item") ||
+        targetElement = hasClosestByClassName(event.target, "av__gallery-item") || hasClosestByClassName(event.target, "av__gallery-add") ||
             hasClosestByClassName(event.target, "av__row") || hasClosestByClassName(event.target, "av__row--util") ||
             hasClosestBlock(event.target);
-        if (targetElement && targetElement.getAttribute("data-av-type") === "gallery" &&
-            (event.target.classList.contains("av__gallery") || event.target.classList.contains("av__gallery-add"))) {
+        if (targetElement && targetElement.getAttribute("data-av-type") === "gallery" && event.target.classList.contains("av__gallery")) {
             // 拖拽到属性视图 gallery 内，但没选中 item
             return;
         }
@@ -1461,6 +1460,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 });
             }
         }
+
         if (!targetElement) {
             return;
         }
@@ -1515,6 +1515,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
+            // gallery
             if (targetElement.classList.contains("av__gallery-item")) {
                 const midLeft = nodeRect.left + nodeRect.width / 2;
                 if (event.clientX < midLeft && event.clientX > nodeRect.left - 13) {
@@ -1524,6 +1525,11 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
                 return;
             }
+            if (targetElement.classList.contains("av__gallery-add")) {
+                targetElement.classList.add("dragover__left");
+                return;
+            }
+
             if (event.clientX < nodeRect.left + 32 && event.clientX >= nodeRect.left - 1 &&
                 !targetElement.classList.contains("av__row")) {
                 targetElement.classList.add("dragover__left");

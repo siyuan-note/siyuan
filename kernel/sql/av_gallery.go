@@ -10,6 +10,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/siyuan-note/siyuan/kernel/av"
+	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -66,6 +67,18 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	cardsValues := generateAttrViewItems(attrView) // 生成卡片
 	filterNotFoundAttrViewItems(&cardsValues)      // 过滤掉不存在的卡片
 
+	// 批量加载绑定块对应的树
+	var ialIDs []string
+	for cardID, keyValues := range cardsValues {
+		for _, kValues := range keyValues {
+			block := kValues.GetBlockValue()
+			if nil != block && !block.IsDetached {
+				ialIDs = append(ialIDs, cardID)
+			}
+		}
+	}
+	boundTrees := filesys.LoadTrees(ialIDs)
+
 	// 生成卡片字段值
 	for cardID, cardValues := range cardsValues {
 		var galleryCard av.GalleryCard
@@ -97,19 +110,12 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			galleryCard.Values = append(galleryCard.Values, fieldValue)
 		}
 
-		fillAttributeViewGalleryCardCover(attrView, view, cardValues, &galleryCard, cardID, luteEngine)
+		fillAttributeViewGalleryCardCover(attrView, view, cardValues, &galleryCard, cardID, luteEngine, boundTrees)
 		ret.Cards = append(ret.Cards, &galleryCard)
 	}
 
 	// 批量获取块属性以提升性能
-	var ialIDs []string
-	for _, card := range ret.Cards {
-		block := card.GetBlockValue()
-		if nil != block && !block.IsDetached {
-			ialIDs = append(ialIDs, card.ID)
-		}
-	}
-	ials := BatchGetBlockAttrs(ialIDs)
+	ials := BatchGetBlockAttrsWitTrees(ialIDs, boundTrees)
 
 	// 渲染自动生成的字段值，比如关联字段、汇总字段、创建时间字段和更新时间字段
 	avCache := map[string]*av.AttributeView{}
@@ -139,7 +145,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	return
 }
 
-func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard *av.GalleryCard, cardID string, luteEngine *lute.Lute) {
+func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View, cardValues []*av.KeyValues, galleryCard *av.GalleryCard, cardID string, luteEngine *lute.Lute, trees map[string]*parse.Tree) {
 	switch view.Gallery.CoverFrom {
 	case av.CoverFromNone:
 	case av.CoverFromContentImage:
@@ -148,7 +154,7 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 			break
 		}
 
-		tree := loadTreeByBlockID(blockValue.BlockID)
+		tree := trees[blockValue.BlockID]
 		if nil == tree {
 			break
 		}
@@ -221,19 +227,39 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 	tree := &parse.Tree{Root: &ast.Node{Type: ast.NodeDocument}, Context: &parse.Context{ParseOption: luteEngine.ParseOptions}}
 	blockRenderer := render.NewProtyleRenderer(tree, luteEngine.RenderOptions)
 	blockRenderer.Options.ProtyleContenteditable = false
+	resetIDs := map[string]string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if entering {
-			// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
-			ial := parse.IAL2Map(n.KramdownIAL)
-			delete(ial, av.NodeAttrNameAvs)
-			n.KramdownIAL = parse.Map2IAL(ial)
+			if n.IsBlock() {
+				// 内容图中不需要渲染数据库角标 https://github.com/siyuan-note/siyuan/issues/15057
+				ial := parse.IAL2Map(n.KramdownIAL)
+				delete(ial, av.NodeAttrNameAvs)
+
+				// 重置 data-node-id 的值，避免触发前端绑定的事件 https://github.com/siyuan-note/siyuan/issues/15088
+				newID := ast.NewNodeID()
+				resetIDs[newID] = n.ID
+				n.ID, ial["id"] = newID, newID
+				n.KramdownIAL = parse.Map2IAL(ial)
+			}
 		}
 		rendererFunc := blockRenderer.RendererFuncs[n.Type]
 		return rendererFunc(n, entering)
 	})
-	h := strings.TrimSpace(blockRenderer.Writer.String())
-	if strings.HasPrefix(h, "<li") {
-		h = "<ul>" + h + "</ul>"
+	ret := strings.TrimSpace(blockRenderer.Writer.String())
+	if strings.HasPrefix(ret, "<li") {
+		ret = "<ul>" + ret + "</ul>"
 	}
-	return h
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if entering {
+			if n.IsBlock() {
+				// 还原上面重置 data-node-id 的值
+				ial := parse.IAL2Map(n.KramdownIAL)
+				oldID := resetIDs[n.ID]
+				n.ID, ial["id"] = oldID, oldID
+				n.KramdownIAL = parse.Map2IAL(ial)
+			}
+		}
+		return ast.WalkContinue
+	})
+	return ret
 }

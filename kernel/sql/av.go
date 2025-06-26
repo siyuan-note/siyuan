@@ -257,7 +257,7 @@ func fillAttributeViewBaseValue(baseValue *av.BaseValue, fieldID, itemID string,
 	if nil == baseValue.Value {
 		baseValue.Value = av.GetAttributeViewDefaultValue(baseValue.ID, fieldID, itemID, baseValue.ValueType)
 	} else {
-		fillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
+		FillAttributeViewNilValue(baseValue.Value, baseValue.ValueType)
 	}
 }
 
@@ -425,7 +425,7 @@ func fillAttributeViewTemplateValue(value *av.Value, item av.Item, attrView *av.
 	return
 }
 
-func fillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
+func FillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 	value.Type = typ
 	switch typ {
 	case av.KeyTypeText:

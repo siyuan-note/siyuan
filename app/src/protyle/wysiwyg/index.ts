@@ -562,12 +562,14 @@ export class WYSIWYG {
                             showMessage(window.siyuan.languages.crossKeepLazyLoad);
                         }
                         selectElements.forEach(item => {
-                            item.classList.add("protyle-wysiwyg--select");
-                            ids.push(item.getAttribute("data-node-id"));
-                            // 清除选中的子块 https://ld246.com/article/1667826582251
-                            item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
-                                subItem.classList.remove("protyle-wysiwyg--select");
-                            });
+                            if (!hasClosestByClassName(currentElement, "protyle-wysiwyg--select")) {
+                                item.classList.add("protyle-wysiwyg--select");
+                                ids.push(item.getAttribute("data-node-id"));
+                                // 清除选中的子块 https://ld246.com/article/1667826582251
+                                item.querySelectorAll(".protyle-wysiwyg--select").forEach(subItem => {
+                                    subItem.classList.remove("protyle-wysiwyg--select");
+                                });
+                            }
                         });
                         countBlockWord(ids);
                         if (toDown) {
@@ -577,6 +579,7 @@ export class WYSIWYG {
                         }
                     }
                 }
+                event.preventDefault();
                 return;
             }
 
@@ -616,11 +619,17 @@ export class WYSIWYG {
                 }
                 return;
             }
+
+            // https://github.com/siyuan-note/siyuan/issues/15100
+            if (galleryItemElement) {
+                return;
+            }
+
             // https://github.com/siyuan-note/siyuan/issues/3026
             hideElements(["select"], protyle);
             if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                 clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
-            } else {
+            } else if (!hasClosestByClassName(target, "av__firstcol")) {
                 clearSelect(["img", "av"], protyle.wysiwyg.element);
             }
 

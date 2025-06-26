@@ -26,16 +26,16 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${coverFromTitle}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item" data-type="set-gallery-size">
-    <span class="fn__flex-center">${window.siyuan.languages.cardSize}</span>
-    <span class="fn__flex-1"></span>
-    <span class="b3-menu__accelerator">${view.cardSize === 0 ? window.siyuan.languages.small : (view.cardSize === 1 ? window.siyuan.languages.medium : window.siyuan.languages.large)}</span>
-    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
-</button>
 <button class="b3-menu__item" data-type="set-gallery-ratio">
     <span class="fn__flex-center">${window.siyuan.languages.cardAspectRatio}</span>
     <span class="fn__flex-1"></span>
     <span class="b3-menu__accelerator">${getCardAspectRatio(view.cardAspectRatio)}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item" data-type="set-gallery-size">
+    <span class="fn__flex-center">${window.siyuan.languages.cardSize}</span>
+    <span class="fn__flex-1"></span>
+    <span class="b3-menu__accelerator">${view.cardSize === 0 ? window.siyuan.languages.small : (view.cardSize === 1 ? window.siyuan.languages.medium : window.siyuan.languages.large)}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <label class="b3-menu__item">

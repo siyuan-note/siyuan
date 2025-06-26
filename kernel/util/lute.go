@@ -58,7 +58,6 @@ func NewLute() (ret *lute.Lute) {
 	ret.SetSuperBlock(true)
 	ret.SetImgPathAllowSpace(true)
 	ret.SetGitConflict(true)
-	ret.SetMark(true)
 	ret.SetInlineAsterisk(MarkdownSettings.InlineAsterisk)
 	ret.SetInlineUnderscore(MarkdownSettings.InlineUnderscore)
 	ret.SetSup(MarkdownSettings.InlineSup)

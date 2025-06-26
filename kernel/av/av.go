@@ -61,7 +61,7 @@ func (kValues *KeyValues) GetValue(blockID string) (ret *Value) {
 
 func (kValues *KeyValues) GetBlockValue() (ret *Value) {
 	for _, v := range kValues.Values {
-		if KeyTypeBlock != v.Type {
+		if KeyTypeBlock == v.Type {
 			ret = v
 			return
 		}

@@ -23,6 +23,16 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
+func checkViewInstance(attrView *av.AttributeView, view *av.View) {
+	if av.LayoutTypeGallery == view.LayoutType && nil == view.Gallery {
+		// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
+		if nil != view.Table {
+			view.LayoutType = av.LayoutTypeTable
+			av.SaveAttributeView(attrView)
+		}
+	}
+}
+
 func upgradeAttributeViewSpec(attrView *av.AttributeView) {
 	currentSpec := attrView.Spec
 

@@ -124,7 +124,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
     } else if (colType === "mAsset") {
         const mAsset: IAVCellAssetValue[] = [];
         Array.from(cellElement.children).forEach((item) => {
-            if (item.classList.contains("av__drag-fill")) {
+            if (!item.classList.contains("av__celltext--url") && !item.classList.contains("av__cellassetimg")) {
                 return;
             }
             const isImg = item.classList.contains("av__cellassetimg");
@@ -1188,7 +1188,7 @@ export const cellValueIsEmpty = (value: IAVCellValue) => {
         return !value[value.type as "text"]?.content;
     }
     if (["mSelect", "mAsset", "select"].includes(value.type)) {
-        if (value[value.type as "mSelect"]?.length > 0) {
+        if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {
             return false;
         }
         return true;

@@ -398,7 +398,7 @@ export class Outline extends Model {
         });
         if (!needReload && ops.undoOperations) {
             ops.undoOperations.find((item: IOperation) => {
-                if (item.action === "update" && item.data.indexOf('data-type="NodeHeading"') > -1) {
+                if (item.action === "update" && item.data?.indexOf('data-type="NodeHeading"') > -1) {
                     needReload = true;
                     return true;
                 }

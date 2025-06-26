@@ -4,6 +4,8 @@ import * as dayjs from "dayjs";
 import {hasClosestByClassName} from "../../../util/hasClosest";
 import {genCellValueByElement} from "../cell";
 import {clearSelect} from "../../../util/clearSelect";
+import {unicode2Emoji} from "../../../../emoji";
+import {getColIconByType} from "../col";
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -55,10 +57,15 @@ export const setGalleryCover = (options: {
             targetNameElement.textContent = window.siyuan.languages.contentImage;
         }
     });
+    let addedSeparator = false;
     options.view.fields.forEach(item => {
         if (item.type === "mAsset") {
+            if (!addedSeparator) {
+                menu.addSeparator();
+                addedSeparator = true;
+            }
             menu.addItem({
-                iconHTML: "",
+                iconHTML: item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`,
                 checked: options.view.coverFrom === 2 && options.view.coverFromAssetKeyID === item.id,
                 label: item.name,
                 click() {
@@ -295,9 +302,13 @@ export const openGalleryItemMenu = (options: {
     });
 };
 
-export const editGalleryItem = (taget: Element) => {
-    const itemElement = hasClosestByClassName(taget, "av__gallery-item");
+export const editGalleryItem = (target: Element) => {
+    const itemElement = hasClosestByClassName(target, "av__gallery-item");
     if (itemElement) {
-        itemElement.querySelector(".av__gallery-fields")?.classList.toggle("av__gallery-fields--edit");
+        const fieldsElement = itemElement.querySelector(".av__gallery-fields");
+        if (fieldsElement) {
+            target.setAttribute("aria-label", window.siyuan.languages[fieldsElement.classList.contains("av__gallery-fields--edit") ? "displayEmptyFields" : "hideEmptyFields"]);
+            fieldsElement.classList.toggle("av__gallery-fields--edit");
+        }
     }
 };

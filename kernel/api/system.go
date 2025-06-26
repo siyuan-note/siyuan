@@ -173,7 +173,7 @@ func getEmojiConf(c *gin.Context) {
 
 				if !util.IsValidUploadFileName(html.UnescapeString(name)) {
 					emojiFullName := filepath.Join(customConfDir, name)
-					name = util.FilterUploadFileName(name)
+					name = util.FilterUploadEmojiFileName(name)
 					fullPathFilteredName := filepath.Join(customConfDir, name)
 					// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 					logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", name, fullPathFilteredName)
@@ -202,7 +202,7 @@ func getEmojiConf(c *gin.Context) {
 
 						if !util.IsValidUploadFileName(html.UnescapeString(subName)) {
 							emojiFullName := filepath.Join(customConfDir, name, subName)
-							fullPathFilteredName := filepath.Join(customConfDir, name, util.FilterUploadFileName(subName))
+							fullPathFilteredName := filepath.Join(customConfDir, name, util.FilterUploadEmojiFileName(subName))
 							// XSS through emoji name https://github.com/siyuan-note/siyuan/issues/15034
 							logging.LogWarnf("renaming invalid custom emoji file [%s] to [%s]", subName, fullPathFilteredName)
 							if removeErr := filelock.Rename(emojiFullName, fullPathFilteredName); nil != removeErr {

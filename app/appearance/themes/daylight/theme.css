@@ -186,6 +186,9 @@
     /* 表格 */
     --b3-table-even-background: rgba(0, 0, 0, .02);
 
+    /* 数据库 */
+    --b3-av-gallery-shadow: rgba(0, 0, 0, 0.04) 0px 2px 4px 0px, var(--b3-border-color) 0px 0px 0px 1px;
+
     /* 嵌入块 */
     --b3-embed-background: transparent;
 

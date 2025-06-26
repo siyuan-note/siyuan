@@ -1,7 +1,7 @@
 {
   "hideEmptyFields": "إخفاء الحقول الفارغة",
   "displayEmptyFields": "عرض الحقول الفارغة",
-  "cardAspectRatio": "نسبة العرض إلى الارتفاع للبطاقة",
+  "cardAspectRatio": "نسبة العرض إلى الارتفاع لمنطقة المعاينة",
   "cardPreview1": "معاينة البطاقة",
   "contentImage": "صورة المحتوى",
   "cardSize": "حجم البطاقة",

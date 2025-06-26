@@ -300,7 +300,10 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (!blockElement) {
         return false;
     }
-    clearSelect(["cell", "row"], blockElement);
+    if (!rowElement.classList.contains("av__row--select")) {
+        clearSelect(["row"], blockElement);
+    }
+    clearSelect(["cell"], blockElement);
     const menu = new Menu();
     rowElement.classList.add("av__row--select");
     rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");

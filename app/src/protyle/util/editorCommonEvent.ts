@@ -1158,7 +1158,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         } else if (event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE)?.split("-").length > 1) {
             // 文件树拖拽
             const ids = event.dataTransfer.getData(Constants.SIYUAN_DROP_FILE).split(",");
-            if (!event.altKey && (!targetElement || !targetElement.classList.contains("av__row"))) {
+            if (!event.altKey && (!targetElement || (
+                !targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__gallery-item") &&
+                !targetElement.classList.contains("av__gallery-add")
+            ))) {
                 if (event.y > protyle.wysiwyg.element.lastElementChild.getBoundingClientRect().bottom) {
                     insertEmptyBlock(protyle, "afterend", protyle.wysiwyg.element.lastElementChild.getAttribute("data-node-id"));
                 } else {
@@ -1183,15 +1186,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 insertHTML(protyle.lute.Md2BlockDOM(html), protyle);
             } else if (targetElement && !protyle.options.backlinkData && targetElement.className.indexOf("dragover__") > -1) {
                 const scrollTop = protyle.contentElement.scrollTop;
-                if (targetElement.classList.contains("av__row")) {
+                if (targetElement.classList.contains("av__row") ||
+                    targetElement.classList.contains("av__gallery-item") ||
+                    targetElement.classList.contains("av__gallery-add")) {
                     // 拖拽到属性视图内
                     const blockElement = hasClosestBlock(targetElement);
                     if (blockElement) {
                         let previousID = "";
                         if (targetElement.classList.contains("dragover__bottom")) {
                             previousID = targetElement.getAttribute("data-id") || "";
-                        } else {
+                        } else if (targetElement.classList.contains("dragover__top")) {
                             previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        } else if (targetElement.classList.contains("dragover__left")) {
+                            previousID = targetElement.previousElementSibling?.getAttribute("data-id") || "";
+                        } else if (targetElement.classList.contains("dragover__right")) {
+                            previousID = targetElement.getAttribute("data-id") || "";
                         }
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
@@ -1464,6 +1473,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (!targetElement) {
             return;
         }
+        const isNotAvItem = !targetElement.classList.contains("av__row") &&
+            !targetElement.classList.contains("av__row--util") &&
+            !targetElement.classList.contains("av__gallery-item") &&
+            !targetElement.classList.contains("av__gallery-add");
         if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
@@ -1473,8 +1486,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 item.removeAttribute("select-end");
             });
             // 文档树拖拽限制
-            if (fileTreeIds.indexOf("-") > -1 && !targetElement.classList.contains("av__row") &&
-                !targetElement.classList.contains("av__row--util")) {
+            if (fileTreeIds.indexOf("-") > -1 && isNotAvItem) {
                 if (!event.altKey) {
                     return;
                 } else if (fileTreeIds.split(",").includes(protyle.block.rootID) && event.altKey) {
@@ -1555,8 +1567,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         }
 
         if (fileTreeIds.indexOf("-") > -1) {
-            if (fileTreeIds.split(",").includes(protyle.block.rootID) && !targetElement.classList.contains("av__row") &&
-                !targetElement.classList.contains("av__row--util") && event.altKey) {
+            if (fileTreeIds.split(",").includes(protyle.block.rootID) && isNotAvItem && event.altKey) {
                 dragoverElement = undefined;
                 editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover__left", "dragover__right", "dragover");

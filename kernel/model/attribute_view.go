@@ -1216,7 +1216,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 
 	// 做一些数据兼容和订正处理
-	checkViewInstance(attrView, view)
+	checkViewInstance(attrView)
 	upgradeAttributeViewSpec(attrView)
 
 	switch view.LayoutType {

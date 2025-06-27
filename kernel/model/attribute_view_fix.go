@@ -23,13 +23,22 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-func checkViewInstance(attrView *av.AttributeView, view *av.View) {
-	if av.LayoutTypeGallery == view.LayoutType && nil == view.Gallery {
-		// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
-		if nil != view.Table {
-			view.LayoutType = av.LayoutTypeTable
-			av.SaveAttributeView(attrView)
+func checkViewInstance(attrView *av.AttributeView) {
+	changed := false
+	for i, view := range attrView.Views {
+		if av.LayoutTypeGallery == view.LayoutType && nil == view.Gallery {
+			// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
+			if nil != view.Table {
+				view.LayoutType = av.LayoutTypeTable
+				changed = true
+			} else {
+				attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
+				changed = true
+			}
 		}
+	}
+	if changed {
+		av.SaveAttributeView(attrView)
 	}
 }
 

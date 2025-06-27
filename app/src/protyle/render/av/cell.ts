@@ -1184,8 +1184,11 @@ export const cellValueIsEmpty = (value: IAVCellValue) => {
     if (value.type === "checkbox") {
         return false;
     }
-    if (["text", "number", "block", "url", "phone", "email", "template"].includes(value.type)) {
+    if (["text", "block", "url", "phone", "email", "template"].includes(value.type)) {
         return !value[value.type as "text"]?.content;
+    }
+    if (value.type === "number") {
+        return !value.number?.isNotEmpty;
     }
     if (["mSelect", "mAsset", "select"].includes(value.type)) {
         if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {

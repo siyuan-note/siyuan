@@ -424,12 +424,12 @@
 			"Type": "NodeAttributeView",
 			"Properties": {
 				"ID": "20240530101000-ftsbbgi",
-				"custom-sy-av-view": "20240530101000-16mbtpr",
+				"custom-sy-av-view": "20250615173942-0xk5p5h",
 				"id": "20240530101000-ab5ovyw",
 				"updated": "20250615173941"
 			},
 			"AttributeViewID": "20240530133134-c2251lc",
-			"AttributeViewType": "table"
+			"AttributeViewType": "gallery"
 		},
 		{
 			"ID": "20240530101000-snvlmxi",

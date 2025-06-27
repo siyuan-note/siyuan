@@ -54,9 +54,9 @@ require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible
 	github.com/pdfcpu/pdfcpu v0.11.0
 	github.com/radovskyb/watcher v1.0.7
-	github.com/rqlite/sql v0.0.0-20250617025740-b9fa9ec5d0a0
+	github.com/rqlite/sql v0.0.0-20250623131620-453fa49cad04
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
-	github.com/sashabaranov/go-openai v1.40.2
+	github.com/sashabaranov/go-openai v1.40.3
 	github.com/shirou/gopsutil/v4 v4.25.5
 	github.com/siyuan-note/dejavu v0.0.0-20250627075836-32feab45fb60
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec

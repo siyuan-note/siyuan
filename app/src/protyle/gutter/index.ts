@@ -1289,6 +1289,13 @@ export class Gutter {
             }
         }]);
         if (type === "NodeAttributeView") {
+            copyMenu.splice(6, 0, {
+                iconHTML: "",
+                label: window.siyuan.languages.copyAVID,
+                click() {
+                    writeText(nodeElement.getAttribute("data-av-id"));
+                }
+            });
             copyMenu.push({
                 id: "duplicateCompletely",
                 iconHTML: "",
@@ -1519,13 +1526,6 @@ export class Gutter {
             }
         } else if (type === "NodeAttributeView") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
-            window.siyuan.menus.menu.append(new MenuItem({
-                icon: "iconCopy",
-                label: window.siyuan.languages.copyAVID,
-                click() {
-                    writeText(nodeElement.getAttribute("data-av-id"));
-                }
-            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "exportCSV",
                 icon: "iconDatabase",

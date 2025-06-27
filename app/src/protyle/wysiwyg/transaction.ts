@@ -294,7 +294,7 @@ const updateEmbed = (protyle: IProtyle, operation: IOperation) => {
         } else {
             item.querySelectorAll(".protyle-wysiwyg__embed").forEach(embedBlockItem => {
                 const newTempElement = allTempElement.content.querySelector(`[data-node-id="${embedBlockItem.getAttribute("data-id")}"]`);
-                if (newTempElement) {
+                if (newTempElement && !isInEmbedBlock(newTempElement)) {
                     updateHTML(embedBlockItem.querySelector("[data-node-id]"), newTempElement.outerHTML);
                 }
             });

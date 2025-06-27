@@ -114,21 +114,6 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: checked
         }]);
-        if (checked) {
-            options.blockElement.querySelector(".av__title").classList.remove("fn__none");
-        } else {
-            // hide
-            options.blockElement.querySelector(".av__title").classList.add("fn__none");
-        }
-        if (options.data.viewType === "gallery") {
-            const galleryElement = options.blockElement.querySelector(".av__gallery");
-            if (checked) {
-                galleryElement.classList.remove("av__gallery--top");
-            } else {
-                // hide
-                galleryElement.classList.add("av__gallery--top");
-            }
-        }
     });
     if (options.data.viewType !== "gallery") {
         return;

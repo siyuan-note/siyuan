@@ -485,6 +485,24 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
                 });
             });
+        } else if (operation.action === "hideAttrViewName") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                if (!operation.data) {
+                    item.querySelector(".av__title").classList.remove("fn__none");
+                } else {
+                    // hide
+                    item.querySelector(".av__title").classList.add("fn__none");
+                }
+                if (item.getAttribute("data-av-type") === "gallery") {
+                    const galleryElement = item.querySelector(".av__gallery");
+                    if (!operation.data) {
+                        galleryElement.classList.remove("av__gallery--top");
+                    } else {
+                        // hide
+                        galleryElement.classList.add("av__gallery--top");
+                    }
+                }
+            });
         } else {
             // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
             const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;

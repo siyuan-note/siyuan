@@ -384,7 +384,7 @@
       padding: 5px 4px;
 
       .av__cell {
-        padding: 0 4px;
+        padding: 2px 4px;
         border-right: 0;
 
         .block__icon {
@@ -414,6 +414,10 @@
       }
 
       &:not(.av__gallery-fields--edit) .av__cell {
+         &[data-empty="true"] {
+             padding: 0 4px;
+         }
+
         &[data-dtype="mAsset"],
         &[data-dtype="mSelect"],
         &[data-dtype="select"] {

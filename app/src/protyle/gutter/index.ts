@@ -1517,8 +1517,15 @@ export class Gutter {
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range).menus as IMenu[]
                 }).element);
             }
-        } else if (type === "NodeAttributeView" && !protyle.disabled) {
+        } else if (type === "NodeAttributeView") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
+            window.siyuan.menus.menu.append(new MenuItem({
+                icon: "iconCopy",
+                label: window.siyuan.languages.copyAVID,
+                click() {
+                    writeText(nodeElement.getAttribute("data-av-id"));
+                }
+            }).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "exportCSV",
                 icon: "iconDatabase",

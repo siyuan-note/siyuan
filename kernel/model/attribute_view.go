@@ -150,18 +150,20 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 	view.LayoutType = newLayout
 	err = av.SaveAttributeView(attrView)
 
-	node, tree, err := getNodeByBlockID(nil, blockID)
-	if err != nil {
-		return
-	}
+	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
+	for _, blockID := range blockIDs {
+		node, tree, err := getNodeByBlockID(nil, blockID)
+		if err != nil {
+			continue
+		}
 
-	node.AttributeViewType = string(view.LayoutType)
-	attrs := parse.IAL2Map(node.KramdownIAL)
-	attrs[av.NodeAttrView] = view.ID
-	err = setNodeAttrs(node, tree, attrs)
-	if err != nil {
-		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
-		return
+		node.AttributeViewType = string(view.LayoutType)
+		attrs := parse.IAL2Map(node.KramdownIAL)
+		attrs[av.NodeAttrView] = view.ID
+		err = setNodeAttrs(node, tree, attrs)
+		if err != nil {
+			logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		}
 	}
 
 	ReloadAttrView(avID)

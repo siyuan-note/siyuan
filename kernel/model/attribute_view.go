@@ -148,12 +148,12 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 	}
 
 	view.LayoutType = newLayout
-	err = av.SaveAttributeView(attrView)
 
 	blockIDs := treenode.GetMirrorAttrViewBlockIDs(avID)
-	for _, blockID := range blockIDs {
-		node, tree, err := getNodeByBlockID(nil, blockID)
-		if err != nil {
+	for _, bID := range blockIDs {
+		node, tree, _ := getNodeByBlockID(nil, bID)
+		if nil == node || nil == tree {
+			logging.LogErrorf("get node by block ID [%s] failed", bID)
 			continue
 		}
 
@@ -162,8 +162,14 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		attrs[av.NodeAttrView] = view.ID
 		err = setNodeAttrs(node, tree, attrs)
 		if err != nil {
-			logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+			logging.LogWarnf("set node [%s] attrs failed: %s", bID, err)
+			return
 		}
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return
 	}
 
 	ReloadAttrView(avID)

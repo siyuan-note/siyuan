@@ -487,19 +487,22 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         } else if (operation.action === "hideAttrViewName") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                if (!operation.data) {
-                    item.querySelector(".av__title").classList.remove("fn__none");
-                } else {
-                    // hide
-                    item.querySelector(".av__title").classList.add("fn__none");
-                }
-                if (item.getAttribute("data-av-type") === "gallery") {
-                    const galleryElement = item.querySelector(".av__gallery");
+                const titleElement = item.querySelector(".av__title");
+                if (titleElement) {
                     if (!operation.data) {
-                        galleryElement.classList.remove("av__gallery--top");
+                        titleElement.classList.remove("fn__none");
                     } else {
                         // hide
-                        galleryElement.classList.add("av__gallery--top");
+                        titleElement.classList.add("fn__none");
+                    }
+                    if (item.getAttribute("data-av-type") === "gallery") {
+                        const galleryElement = item.querySelector(".av__gallery");
+                        if (!operation.data) {
+                            galleryElement.classList.remove("av__gallery--top");
+                        } else {
+                            // hide
+                            galleryElement.classList.add("av__gallery--top");
+                        }
                     }
                 }
             });

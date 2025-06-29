@@ -178,35 +178,18 @@ type SelectOption struct {
 
 // View 描述了视图的结构。
 type View struct {
-	ID               string `json:"id"`               // 视图 ID
-	Icon             string `json:"icon"`             // 视图图标
-	Name             string `json:"name"`             // 视图名称
-	HideAttrViewName bool   `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Desc             string `json:"desc"`             // 视图描述
+	ID               string        `json:"id"`               // 视图 ID
+	Icon             string        `json:"icon"`             // 视图图标
+	Name             string        `json:"name"`             // 视图名称
+	HideAttrViewName bool          `json:"hideAttrViewName"` // 是否隐藏属性视图名称
+	Desc             string        `json:"desc"`             // 视图描述
+	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
+	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
+	PageSize         int           `json:"pageSize"`         // 每页条目数
 
 	LayoutType LayoutType     `json:"type"`              // 当前布局类型
 	Table      *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery    *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
-}
-
-func (view *View) GetFilters() (ret []*ViewFilter) {
-	switch view.LayoutType {
-	case LayoutTypeTable:
-		return view.Table.Filters
-	case LayoutTypeGallery:
-		return view.Gallery.Filters
-	}
-	return
-}
-
-func (view *View) GetSorts() (ret []*ViewSort) {
-	switch view.LayoutType {
-	case LayoutTypeTable:
-		return view.Table.Sorts
-	case LayoutTypeGallery:
-		return view.Gallery.Sorts
-	}
-	return
 }
 
 // LayoutType 描述了视图布局类型。
@@ -218,8 +201,7 @@ const (
 )
 
 const (
-	TableViewDefaultPageSize   = 50 // 表格视图默认分页大小
-	GalleryViewDefaultPageSize = 50 // 画廊视图默认分页大小
+	ViewDefaultPageSize = 50 // 视图默认分页大小
 )
 
 func NewTableView() (ret *View) {
@@ -252,6 +234,9 @@ func NewGalleryView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("gallery"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeGallery,
 		Gallery:    NewLayoutGallery(),
 	}
@@ -416,18 +401,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		if nil != view.Table {
 			// 行去重
 			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
-			// 分页大小
-			if 1 > view.Table.PageSize {
-				view.Table.PageSize = TableViewDefaultPageSize
-			}
 		}
 		if nil != view.Gallery {
 			// 行去重
 			view.Gallery.CardIDs = gulu.Str.RemoveDuplicatedElem(view.Gallery.CardIDs)
-			// 分页大小
-			if 1 > view.Gallery.PageSize {
-				view.Gallery.PageSize = GalleryViewDefaultPageSize
-			}
+		}
+
+		// 分页大小
+		if 1 > view.PageSize {
+			view.Table.PageSize = ViewDefaultPageSize
 		}
 	}
 
@@ -595,31 +577,25 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
 		view.Table.ID = ast.NewNodeID()
+
+		for _, f := range view.Filters {
+			f.Column = keyIDMap[f.Column]
+		}
+		for _, s := range view.Sorts {
+			s.Column = keyIDMap[s.Column]
+		}
+
 		switch view.LayoutType {
 		case LayoutTypeTable:
 			for _, column := range view.Table.Columns {
 				column.ID = keyIDMap[column.ID]
 			}
 			view.Table.RowIDs = []string{}
-
-			for _, f := range view.Table.Filters {
-				f.Column = keyIDMap[f.Column]
-			}
-			for _, s := range view.Table.Sorts {
-				s.Column = keyIDMap[s.Column]
-			}
 		case LayoutTypeGallery:
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}
 			view.Gallery.CardIDs = []string{}
-
-			for _, f := range view.Gallery.Filters {
-				f.Column = keyIDMap[f.Column]
-			}
-			for _, s := range view.Gallery.Sorts {
-				s.Column = keyIDMap[s.Column]
-			}
 		}
 	}
 	ret.ViewID = ret.Views[0].ID

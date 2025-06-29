@@ -592,16 +592,8 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 		}
 	}
 
-	filters = []*av.ViewFilter{}
-	sorts = []*av.ViewSort{}
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		filters = view.Table.Filters
-		sorts = view.Table.Sorts
-	case av.LayoutTypeGallery:
-		filters = view.Gallery.Filters
-		sorts = view.Gallery.Sorts
-	}
+	filters = view.Filters
+	sorts = view.Sorts
 	return
 }
 
@@ -1227,42 +1219,22 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkViewInstance(attrView)
 	upgradeAttributeViewSpec(attrView)
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		// 列删除以后需要删除设置的过滤和排序
-		tmpFilters := []*av.ViewFilter{}
-		for _, f := range view.Table.Filters {
-			if k, _ := attrView.GetKey(f.Column); nil != k {
-				tmpFilters = append(tmpFilters, f)
-			}
+	// 字段删除以后需要删除设置的过滤和排序
+	tmpFilters := []*av.ViewFilter{}
+	for _, f := range view.Filters {
+		if k, _ := attrView.GetKey(f.Column); nil != k {
+			tmpFilters = append(tmpFilters, f)
 		}
-		view.Table.Filters = tmpFilters
-
-		tmpSorts := []*av.ViewSort{}
-		for _, s := range view.Table.Sorts {
-			if k, _ := attrView.GetKey(s.Column); nil != k {
-				tmpSorts = append(tmpSorts, s)
-			}
-		}
-		view.Table.Sorts = tmpSorts
-	case av.LayoutTypeGallery:
-		// 字段删除以后需要删除设置的过滤和排序
-		tmpFilters := []*av.ViewFilter{}
-		for _, f := range view.Gallery.Filters {
-			if k, _ := attrView.GetKey(f.Column); nil != k {
-				tmpFilters = append(tmpFilters, f)
-			}
-		}
-		view.Gallery.Filters = tmpFilters
-
-		tmpSorts := []*av.ViewSort{}
-		for _, s := range view.Gallery.Sorts {
-			if k, _ := attrView.GetKey(s.Column); nil != k {
-				tmpSorts = append(tmpSorts, s)
-			}
-		}
-		view.Gallery.Sorts = tmpSorts
 	}
+	view.Filters = tmpFilters
+
+	tmpSorts := []*av.ViewSort{}
+	for _, s := range view.Sorts {
+		if k, _ := attrView.GetKey(s.Column); nil != k {
+			tmpSorts = append(tmpSorts, s)
+		}
+	}
+	view.Sorts = tmpSorts
 
 	viewable = sql.RenderView(view, attrView, query)
 	if nil == viewable {
@@ -1280,10 +1252,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	case av.LayoutTypeTable:
 		table := viewable.(*av.Table)
 		table.RowCount = len(table.Rows)
-		if 1 > view.Table.PageSize {
-			view.Table.PageSize = av.TableViewDefaultPageSize
-		}
-		table.PageSize = view.Table.PageSize
+		table.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = table.PageSize
 		}
@@ -1296,10 +1265,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	case av.LayoutTypeGallery:
 		gallery := viewable.(*av.Gallery)
 		gallery.CardCount = len(gallery.Cards)
-		if 1 > view.Gallery.PageSize {
-			view.Gallery.PageSize = av.GalleryViewDefaultPageSize
-		}
-		gallery.PageSize = view.Gallery.PageSize
+		gallery.PageSize = view.PageSize
 		if 1 > pageSize {
 			pageSize = gallery.PageSize
 		}
@@ -1893,6 +1859,25 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	view.Desc = masterView.Desc
 	view.LayoutType = masterView.LayoutType
 
+	for _, filter := range masterView.Filters {
+		view.Filters = append(view.Filters, &av.ViewFilter{
+			Column:        filter.Column,
+			Operator:      filter.Operator,
+			Value:         filter.Value,
+			RelativeDate:  filter.RelativeDate,
+			RelativeDate2: filter.RelativeDate2,
+		})
+	}
+
+	for _, s := range masterView.Sorts {
+		view.Sorts = append(view.Sorts, &av.ViewSort{
+			Column: s.Column,
+			Order:  s.Order,
+		})
+	}
+
+	view.PageSize = masterView.PageSize
+
 	switch masterView.LayoutType {
 	case av.LayoutTypeTable:
 		for _, col := range masterView.Table.Columns {
@@ -1907,24 +1892,6 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			})
 		}
 
-		for _, filter := range masterView.Table.Filters {
-			view.Table.Filters = append(view.Table.Filters, &av.ViewFilter{
-				Column:        filter.Column,
-				Operator:      filter.Operator,
-				Value:         filter.Value,
-				RelativeDate:  filter.RelativeDate,
-				RelativeDate2: filter.RelativeDate2,
-			})
-		}
-
-		for _, s := range masterView.Table.Sorts {
-			view.Table.Sorts = append(view.Table.Sorts, &av.ViewSort{
-				Column: s.Column,
-				Order:  s.Order,
-			})
-		}
-
-		view.Table.PageSize = masterView.Table.PageSize
 		view.Table.RowIDs = masterView.Table.RowIDs
 	case av.LayoutTypeGallery:
 		for _, field := range masterView.Gallery.CardFields {
@@ -1935,26 +1902,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			})
 		}
 
-		for _, filter := range masterView.Gallery.Filters {
-			view.Gallery.Filters = append(view.Gallery.Filters, &av.ViewFilter{
-				Column:        filter.Column,
-				Operator:      filter.Operator,
-				Value:         filter.Value,
-				RelativeDate:  filter.RelativeDate,
-				RelativeDate2: filter.RelativeDate2,
-			})
-		}
-
-		for _, s := range masterView.Gallery.Sorts {
-			view.Gallery.Sorts = append(view.Gallery.Sorts, &av.ViewSort{
-				Column: s.Column,
-				Order:  s.Order,
-			})
-		}
-
-		view.Gallery.PageSize = masterView.Gallery.PageSize
 		view.Gallery.CardIDs = masterView.Gallery.CardIDs
-
 		view.Gallery.CoverFrom = masterView.Gallery.CoverFrom
 		view.Gallery.CoverFromAssetKeyID = masterView.Gallery.CoverFromAssetKeyID
 		view.Gallery.CardSize = masterView.Gallery.CardSize
@@ -2256,15 +2204,8 @@ func setAttributeViewFilters(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Filters); err != nil {
-			return
-		}
-	case av.LayoutTypeGallery:
-		if err = gulu.JSON.UnmarshalJSON(data, &view.Gallery.Filters); err != nil {
-			return
-		}
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Filters); err != nil {
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2296,15 +2237,8 @@ func setAttributeViewSorts(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		if err = gulu.JSON.UnmarshalJSON(data, &view.Table.Sorts); err != nil {
-			return
-		}
-	case av.LayoutTypeGallery:
-		if err = gulu.JSON.UnmarshalJSON(data, &view.Gallery.Sorts); err != nil {
-			return
-		}
+	if err = gulu.JSON.UnmarshalJSON(data, &view.Sorts); err != nil {
+		return
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -2330,12 +2264,7 @@ func setAttributeViewPageSize(operation *Operation) (err error) {
 		return
 	}
 
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		view.Table.PageSize = int(operation.Data.(float64))
-	case av.LayoutTypeGallery:
-		view.Gallery.PageSize = int(operation.Data.(float64))
-	}
+	view.PageSize = int(operation.Data.(float64))
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -2487,12 +2416,8 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
-	var filters []*av.ViewFilter
-	if nil != view {
-		filters = view.GetFilters()
-	}
 
-	if nil != view && 0 < len(filters) && !ignoreFillFilter {
+	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
 		viewable := sql.RenderView(view, attrView, "")
 		viewable.Filter(attrView)
 		viewable.Sort(attrView)
@@ -2517,13 +2442,12 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 		}
 
 		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
-		sorts := view.GetSorts()
-		if 0 < len(sorts) {
+		if 0 < len(view.Sorts) {
 			filterKeys, sortKeys := map[string]bool{}, map[string]bool{}
-			for _, f := range filters {
+			for _, f := range view.Filters {
 				filterKeys[f.Column] = true
 			}
-			for _, s := range sorts {
+			for _, s := range view.Sorts {
 				sortKeys[s.Column] = true
 			}
 
@@ -2537,7 +2461,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 
 		if !sameKeyFilterSort {
 			// 如果在同一个字段上仅存在过滤条件，则将过滤条件应用到新添加的块上
-			for _, filter := range filters {
+			for _, filter := range view.Filters {
 				for _, keyValues := range attrView.KeyValues {
 					if keyValues.Key.ID == filter.Column {
 						var defaultVal *av.Value
@@ -4233,36 +4157,17 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 	// 如果存在选项对应的过滤器，需要更新过滤器中设置的选项值
 	// Database select field filters follow option editing changes https://github.com/siyuan-note/siyuan/issues/10881
 	for _, view := range attrView.Views {
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			for _, filter := range view.Table.Filters {
-				if filter.Column != key.ID {
-					continue
-				}
-
-				if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
-					for i, opt := range filter.Value.MSelect {
-						if oldName == opt.Content {
-							filter.Value.MSelect[i].Content = newName
-							filter.Value.MSelect[i].Color = newColor
-							break
-						}
-					}
-				}
+		for _, filter := range view.Filters {
+			if filter.Column != key.ID {
+				continue
 			}
-		case av.LayoutTypeGallery:
-			for _, filter := range view.Gallery.Filters {
-				if filter.Column != key.ID {
-					continue
-				}
 
-				if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
-					for i, opt := range filter.Value.MSelect {
-						if oldName == opt.Content {
-							filter.Value.MSelect[i].Content = newName
-							filter.Value.MSelect[i].Color = newColor
-							break
-						}
+			if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+				for i, opt := range filter.Value.MSelect {
+					if oldName == opt.Content {
+						filter.Value.MSelect[i].Content = newName
+						filter.Value.MSelect[i].Color = newColor
+						break
 					}
 				}
 			}

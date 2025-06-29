@@ -32,6 +32,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			HideAttrViewName: view.HideAttrViewName,
 			Filters:          view.Filters,
 			Sorts:            view.Sorts,
+			Group:            view.Group,
 		},
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},

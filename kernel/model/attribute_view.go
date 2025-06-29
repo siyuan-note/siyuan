@@ -1876,6 +1876,13 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		})
 	}
 
+	if nil != masterView.Group {
+		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
+			logging.LogErrorf("copy group failed: %s", copyErr)
+			return &TxErr{code: TxErrWriteAttributeView, id: avID, msg: copyErr.Error()}
+		}
+	}
+
 	view.PageSize = masterView.PageSize
 
 	switch masterView.LayoutType {

@@ -360,7 +360,7 @@ export const setMode = (modeElementValue: number) => {
                 }
             }
         }
-        appearance.onSetappearance(response.data);
+        appearance.onSetAppearance(response.data);
     });
     /// #endif
 };

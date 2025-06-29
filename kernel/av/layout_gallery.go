@@ -43,11 +43,8 @@ func (layoutGallery *LayoutGallery) GetItemIDs() (ret []string) {
 func NewLayoutGallery() *LayoutGallery {
 	return &LayoutGallery{
 		BaseLayout: &BaseLayout{
-			Spec:     0,
-			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: GalleryViewDefaultPageSize,
+			Spec: 0,
+			ID:   ast.NewNodeID(),
 		},
 		CoverFrom:       CoverFromContentImage,
 		CardAspectRatio: CardAspectRatio16_9,

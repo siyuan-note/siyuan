@@ -600,14 +600,6 @@ func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.R
 
 	var views []map[string]interface{}
 	for _, v := range attrView.Views {
-		pSize := 10
-		switch v.LayoutType {
-		case av.LayoutTypeTable:
-			pSize = v.Table.PageSize
-		case av.LayoutTypeGallery:
-			pSize = v.Gallery.PageSize
-		}
-
 		view := map[string]interface{}{
 			"id":               v.ID,
 			"icon":             v.Icon,
@@ -615,7 +607,7 @@ func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.R
 			"desc":             v.Desc,
 			"hideAttrViewName": v.HideAttrViewName,
 			"type":             v.LayoutType,
-			"pageSize":         pSize,
+			"pageSize":         v.PageSize,
 		}
 
 		views = append(views, view)

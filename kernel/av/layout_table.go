@@ -35,11 +35,8 @@ func (layoutTable *LayoutTable) GetItemIDs() (ret []string) {
 func NewLayoutTable() *LayoutTable {
 	return &LayoutTable{
 		BaseLayout: &BaseLayout{
-			Spec:     0,
-			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: TableViewDefaultPageSize,
+			Spec: 0,
+			ID:   ast.NewNodeID(),
 		},
 	}
 }

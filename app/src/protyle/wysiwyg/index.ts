@@ -622,6 +622,7 @@ export class WYSIWYG {
 
             // https://github.com/siyuan-note/siyuan/issues/15100
             if (galleryItemElement) {
+                clearSelect(["galleryItem"], protyle.wysiwyg.element);
                 return;
             }
             const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");

@@ -619,10 +619,18 @@ export class WYSIWYG {
                 }
                 return;
             }
-
+            const documentSelf = document;
             // https://github.com/siyuan-note/siyuan/issues/15100
             if (galleryItemElement) {
-                clearSelect(["galleryItem"], protyle.wysiwyg.element);
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    clearSelect(["galleryItem"], protyle.wysiwyg.element);
+                    return false;
+                };
                 return;
             }
             const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
@@ -638,7 +646,6 @@ export class WYSIWYG {
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }
-            const documentSelf = document;
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;

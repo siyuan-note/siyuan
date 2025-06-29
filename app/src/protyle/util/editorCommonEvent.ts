@@ -809,12 +809,19 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragstart", (event) => {
-        const target = event.target as HTMLElement;
+        let target = event.target as HTMLElement;
+        if (target.classList.contains("av__gallery-img")) {
+            target = hasClosestByClassName(target, "av__gallery-item") as HTMLElement;
+        }
+        if (!target) {
+            return;
+        }
         if (target.tagName === "IMG") {
             window.siyuan.dragElement = undefined;
             event.preventDefault();
             return;
         }
+
         if (target.classList) {
             if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
                 window.siyuan.dragElement = undefined;
@@ -848,6 +855,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
                         selectIds.push(item.getAttribute("data-id"));
                     });
+                    if (selectIds.length === 0) {
+                        selectIds.push(target.getAttribute("data-id"));
+                    }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         target.outerHTML);
                 }

@@ -300,3 +300,7 @@ func filter0(collection Collection, attrView *AttributeView) {
 	}
 	collection.SetItems(items)
 }
+
+func group0(collection Collection, attrView *AttributeView) {
+	// TODO 分组 Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
+}

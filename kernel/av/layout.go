@@ -26,11 +26,11 @@ type BaseLayout struct {
 	// 以下三个字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15162
 
 	//Deprecated
-	Filters []*ViewFilter `json:"filters,omitempty"` //Deprecated 过滤规则
+	Filters []*ViewFilter `json:"filters,omitempty"` // 过滤规则
 	//Deprecated
-	Sorts []*ViewSort `json:"sorts,omitempty"` //Deprecated 排序规则
+	Sorts []*ViewSort `json:"sorts,omitempty"` // 排序规则
 	//Deprecated
-	PageSize int `json:"pageSize,omitempty"` //Deprecated 每页条目数
+	PageSize int `json:"pageSize,omitempty"` // 每页条目数
 }
 
 // BaseValue 描述了字段值的基础结构。

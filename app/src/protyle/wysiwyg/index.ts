@@ -624,12 +624,12 @@ export class WYSIWYG {
             if (galleryItemElement) {
                 return;
             }
-
+            const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
             // https://github.com/siyuan-note/siyuan/issues/3026
             hideElements(["select"], protyle);
             if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                 clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
-            } else if (!hasClosestByClassName(target, "av__firstcol")) {
+            } else if (!hasClosestByClassName(target, "av__firstcol") && !avDragFillElement) {
                 clearSelect(["img", "av"], protyle.wysiwyg.element);
             }
 
@@ -698,7 +698,6 @@ export class WYSIWYG {
                 return;
             }
             // av drag fill
-            const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
             if (!protyle.disabled && avDragFillElement) {
                 if (!nodeElement) {
                     return;

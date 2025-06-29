@@ -34,9 +34,6 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
     }
     fetch(url, init).then((response) => {
         switch (response.status) {
-            case 401:
-                // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
-                window.location.reload();
             case 403:
             case 404:
                 return {
@@ -45,6 +42,13 @@ export const fetchPost = (url: string, data?: any, cb?: (response: IWebSocketDat
                     code: -response.status,
                 };
             default:
+                if (401 == response.status) {
+                    // 返回鉴权失败的话直接刷新页面，避免用户在当前页面操作 https://github.com/siyuan-note/siyuan/issues/15163
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 3000);
+                }
+
                 if (response.headers.get("content-type")?.indexOf("application/json") > -1) {
                     return response.json();
                 } else {

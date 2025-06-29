@@ -342,12 +342,12 @@
 
     &-img {
       height: 100%;
-      background-position: center center;
-      background-repeat: no-repeat;
-      background-size: cover;
+      object-fit: cover;
+      width: 100%;
+      object-position: center;
 
       &--fit {
-        background-size: contain;
+        object-fit: contain;
       }
     }
 

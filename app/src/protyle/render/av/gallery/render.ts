@@ -71,9 +71,9 @@ export const renderGallery = (options: {
                 const coverClass = "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
-                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${item.coverURL}"></div>`;
                     } else {
-                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL.replace(/'/g, "\\'")}')"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" src="${item.coverURL}"></div>`;
                     }
                 } else if (item.coverContent) {
                     galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;

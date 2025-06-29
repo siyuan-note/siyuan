@@ -25,6 +25,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			HideAttrViewName: view.HideAttrViewName,
 			Filters:          view.Filters,
 			Sorts:            view.Sorts,
+			Group:            view.Group,
 		},
 		CoverFrom:           view.Gallery.CoverFrom,
 		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,

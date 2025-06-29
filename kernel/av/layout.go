@@ -49,7 +49,8 @@ type BaseInstance struct {
 	HideAttrViewName bool          `json:"hideAttrViewName"` // 是否隐藏属性视图名称
 	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
 	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
-	PageSize         int           `json:"pageSize"`         // 每页项目
+	Group            *ViewGroup    `json:"group"`            // 分组规则
+	PageSize         int           `json:"pageSize"`         // 每页项目数
 }
 
 func (baseInstance *BaseInstance) GetSorts() []*ViewSort {

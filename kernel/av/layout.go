@@ -23,7 +23,7 @@ type BaseLayout struct {
 	Spec int    `json:"spec"` // 布局格式版本
 	ID   string `json:"id"`   // 布局 ID
 
-	// 以下三个字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15162
+	// TODO 以下三个字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15162
 
 	//Deprecated
 	Filters []*ViewFilter `json:"filters,omitempty"` // 过滤规则

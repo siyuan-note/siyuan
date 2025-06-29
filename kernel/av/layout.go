@@ -24,7 +24,7 @@ type BaseLayout struct {
 	ID       string        `json:"id"`       // 布局 ID
 	Filters  []*ViewFilter `json:"filters"`  // 过滤规则
 	Sorts    []*ViewSort   `json:"sorts"`    // 排序规则
-	PageSize int           `json:"pageSize"` // 每页行数
+	PageSize int           `json:"pageSize"` // 每页条目数
 }
 
 // BaseValue 描述了字段值的基础结构。

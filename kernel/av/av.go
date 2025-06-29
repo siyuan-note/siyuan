@@ -409,7 +409,7 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 		// 分页大小
 		if 1 > view.PageSize {
-			view.Table.PageSize = ViewDefaultPageSize
+			view.PageSize = ViewDefaultPageSize
 		}
 	}
 

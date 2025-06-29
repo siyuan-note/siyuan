@@ -34,7 +34,7 @@ func upgradeSpec2(av *AttributeView) {
 		return
 	}
 
-	// 如果存在 view.table.filters/sorts/pageSize 则复制覆盖到 view.filters/sorts/pageSize 下后置空
+	// 如果存在 view.table.filters/sorts/pageSize 则复制覆盖到 view.filters/sorts/pageSize
 	for _, view := range av.Views {
 		if 1 > len(view.Filters) {
 			view.Filters = []*ViewFilter{}
@@ -47,17 +47,14 @@ func upgradeSpec2(av *AttributeView) {
 		}
 
 		if nil != view.Table {
-			if 0 < len(view.Table.Filters) {
+			if 0 < len(view.Table.Filters) && 1 > len(view.Filters) {
 				view.Filters = append(view.Filters, view.Table.Filters...)
-				view.Table.Filters = nil
 			}
-			if 0 < len(view.Table.Sorts) {
+			if 0 < len(view.Table.Sorts) && 1 > len(view.Sorts) {
 				view.Sorts = append(view.Sorts, view.Table.Sorts...)
-				view.Table.Sorts = nil
 			}
 			if 0 < view.Table.PageSize {
 				view.PageSize = view.Table.PageSize
-				view.Table.PageSize = 0
 			}
 		}
 
@@ -80,7 +77,7 @@ func upgradeSpec2(av *AttributeView) {
 	}
 
 	av.Spec = 2
-	logging.LogInfof("av [%s] upgraded to spec 2", av.ID)
+	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }
 
 func upgradeSpec1(av *AttributeView) {
@@ -213,5 +210,5 @@ func upgradeSpec1(av *AttributeView) {
 	}
 
 	av.Spec = 1
-	logging.LogInfof("av [%s] upgraded to spec 1", av.ID)
+	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }

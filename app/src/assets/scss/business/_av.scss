@@ -383,22 +383,33 @@
       min-height: 23px;
       padding: 5px 4px;
 
+      &--wrap {
+        word-break: break-all;
+        white-space: pre-wrap;
+      }
+
       .av__cell {
         padding: 2px 4px;
         border-right: 0;
+        min-height: calc(1.625em + 4px);
 
-        .block__icon {
-          display: none;
+        &:not([data-dtype="block"])[data-empty="true"] {
+          padding: 0 4px;
+          min-height: auto;
         }
 
         &:hover {
           background-color: var(--b3-list-hover);
           border-radius: var(--b3-border-radius);
 
-          .b3-chip[data-type=block-more] {
-            top: 2px;
+          .b3-chip[data-type="block-more"] {
+            top: 4px;
             display: block;
           }
+        }
+
+        .block__icon {
+          display: none;
         }
 
         &[data-dtype="created"],
@@ -406,17 +417,6 @@
         &[data-dtype="lineNumber"] {
           cursor: default;
         }
-      }
-
-      &--wrap {
-        word-break: break-all;
-        white-space: pre-wrap;
-      }
-
-      &:not(.av__gallery-fields--edit) .av__cell {
-         &[data-empty="true"] {
-             padding: 0 4px;
-         }
 
         &[data-dtype="mAsset"],
         &[data-dtype="mSelect"],
@@ -425,21 +425,18 @@
         }
       }
 
-      &--edit {
-        .av__cell {
-          min-height: 1.625em;
+      &--edit .av__cell {
+        padding: 2px 4px !important;
+        min-height: calc(1.625em + 4px) !important;
+
+        &[data-dtype="mAsset"][data-empty="true"],
+        &[data-dtype="mSelect"][data-empty="true"],
+        &[data-dtype="select"][data-empty="true"] {
+          margin-left: 0;
         }
 
-        .av__cell[data-empty="true"] .av__gallery-tip {
+        &[data-empty="true"] .av__gallery-tip {
           display: flex;
-        }
-
-        .av__cell {
-          &[data-dtype="mAsset"][data-empty="false"],
-          &[data-dtype="mSelect"][data-empty="false"],
-          &[data-dtype="select"][data-empty="false"] {
-            margin-left: -2px;
-          }
         }
       }
     }

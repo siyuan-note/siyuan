@@ -496,9 +496,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             height = contentRect.bottom - cellRect.top;
         }
         const width = Math.min(Math.max(cellRect.width, 25), contentRect.width);
-        style = `style="padding-top: ${viewType === "table" ? 6.5 : 1}px;position:absolute;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;top: ${cellRect.top}px;width:${width}px;height: ${height}px"`;
+        style = `style="padding: ${viewType === "table" ? 6 : 3}px 8px;position:absolute;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;top: ${cellRect.top}px;width:${width}px;height: ${height}px"`;
     } else {
-        style = `style="padding-top: ${viewType === "table" ? 6.5 : 1}px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
+        style = `style="padding: ${viewType === "table" ? 6 : 3}px 8px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     }
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {

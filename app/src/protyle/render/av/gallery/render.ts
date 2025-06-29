@@ -92,9 +92,13 @@ export const renderGallery = (options: {
                 }
                 const isEmpty = cellValueIsEmpty(cell.value);
                 // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
+                let ariaLabel = escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type);
+                if (view.fields[fieldsIndex].desc) {
+                    ariaLabel += escapeAttr(`<div class="ft__on-surface">${view.fields[fieldsIndex].desc}</div>`);
+                }
                 galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
 data-empty="${isEmpty}" 
-aria-label="${escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type)}" 
+aria-label="${ariaLabel}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"

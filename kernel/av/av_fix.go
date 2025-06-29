@@ -80,6 +80,7 @@ func upgradeSpec2(av *AttributeView) {
 	}
 
 	av.Spec = 2
+	logging.LogInfof("av [%s] upgraded to spec 2", av.ID)
 }
 
 func upgradeSpec1(av *AttributeView) {
@@ -212,4 +213,5 @@ func upgradeSpec1(av *AttributeView) {
 	}
 
 	av.Spec = 1
+	logging.LogInfof("av [%s] upgraded to spec 1", av.ID)
 }

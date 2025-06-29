@@ -178,14 +178,14 @@ type SelectOption struct {
 
 // View 描述了视图的结构。
 type View struct {
-	ID               string        `json:"id"`               // 视图 ID
-	Icon             string        `json:"icon"`             // 视图图标
-	Name             string        `json:"name"`             // 视图名称
-	HideAttrViewName bool          `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Desc             string        `json:"desc"`             // 视图描述
-	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
-	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
-	PageSize         int           `json:"pageSize"`         // 每页条目数
+	ID               string        `json:"id"`                // 视图 ID
+	Icon             string        `json:"icon"`              // 视图图标
+	Name             string        `json:"name"`              // 视图名称
+	HideAttrViewName bool          `json:"hideAttrViewName"`  // 是否隐藏属性视图名称
+	Desc             string        `json:"desc"`              // 视图描述
+	Filters          []*ViewFilter `json:"filters,omitempty"` // 过滤规则
+	Sorts            []*ViewSort   `json:"sorts,omitempty"`   // 排序规则
+	PageSize         int           `json:"pageSize"`          // 每页条目数
 
 	LayoutType LayoutType     `json:"type"`              // 当前布局类型
 	Table      *LayoutTable   `json:"table,omitempty"`   // 表格布局

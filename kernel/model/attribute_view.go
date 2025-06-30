@@ -120,7 +120,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		switch view.LayoutType {
 		case av.LayoutTypeGallery:
 			for _, field := range view.Gallery.CardFields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: field.ID})
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 			}
 			for _, cardID := range view.Gallery.CardIDs {
 				view.Table.RowIDs = append(view.Table.RowIDs, cardID)
@@ -139,7 +139,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			for _, col := range view.Table.Columns {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: col.ID})
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: col.ID}})
 			}
 			for _, rowID := range view.Table.RowIDs {
 				view.Gallery.CardIDs = append(view.Gallery.CardIDs, rowID)
@@ -1636,9 +1636,9 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		for _, v := range destAv.Views {
 			switch v.LayoutType {
 			case av.LayoutTypeTable:
-				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{ID: operation.BackRelationKeyID})
+				v.Table.Columns = append(v.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: operation.BackRelationKeyID}})
 			case av.LayoutTypeGallery:
-				v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{ID: operation.BackRelationKeyID})
+				v.Gallery.CardFields = append(v.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: operation.BackRelationKeyID}})
 			}
 		}
 
@@ -1896,13 +1896,15 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	case av.LayoutTypeTable:
 		for _, col := range masterView.Table.Columns {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{
-				ID:     col.ID,
-				Wrap:   col.Wrap,
-				Hidden: col.Hidden,
-				Pin:    col.Pin,
-				Width:  col.Width,
-				Desc:   col.Desc,
-				Calc:   col.Calc,
+				BaseField: &av.BaseField{
+					ID:     col.ID,
+					Wrap:   col.Wrap,
+					Hidden: col.Hidden,
+					Desc:   col.Desc,
+				},
+				Pin:   col.Pin,
+				Width: col.Width,
+				Calc:  col.Calc,
 			})
 		}
 
@@ -1912,10 +1914,12 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	case av.LayoutTypeGallery:
 		for _, field := range masterView.Gallery.CardFields {
 			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{
-				ID:     field.ID,
-				Wrap:   field.Wrap,
-				Hidden: field.Hidden,
-				Desc:   field.Desc,
+				BaseField: &av.BaseField{
+					ID:     field.ID,
+					Wrap:   field.Wrap,
+					Hidden: field.Hidden,
+					Desc:   field.Desc,
+				},
 			})
 		}
 
@@ -1972,14 +1976,14 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		switch firstView.LayoutType {
 		case av.LayoutTypeTable:
 			for _, col := range firstView.Table.Columns {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: col.ID})
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: col.ID}})
 			}
 			for _, rowID := range firstView.Table.RowIDs {
 				view.Table.RowIDs = append(view.Table.RowIDs, rowID)
 			}
 		case av.LayoutTypeGallery:
 			for _, field := range firstView.Gallery.CardFields {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: field.ID})
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 			}
 			for _, cardID := range firstView.Gallery.CardIDs {
 				view.Table.RowIDs = append(view.Table.RowIDs, cardID)
@@ -1990,14 +1994,14 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		switch firstView.LayoutType {
 		case av.LayoutTypeTable:
 			for _, col := range firstView.Table.Columns {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: col.ID})
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: col.ID}})
 			}
 			for _, rowID := range firstView.Table.RowIDs {
 				view.Gallery.CardIDs = append(view.Gallery.CardIDs, rowID)
 			}
 		case av.LayoutTypeGallery:
 			for _, field := range firstView.Gallery.CardFields {
-				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: field.ID})
+				view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: field.ID}})
 			}
 			for _, cardID := range firstView.Gallery.CardIDs {
 				view.Gallery.CardIDs = append(view.Gallery.CardIDs, cardID)
@@ -2743,12 +2747,14 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 				if column.ID == key.ID {
 					view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{
 						{
-							ID:     copyKey.ID,
-							Wrap:   column.Wrap,
-							Hidden: column.Hidden,
-							Pin:    column.Pin,
-							Width:  column.Width,
-							Desc:   column.Desc,
+							BaseField: &av.BaseField{
+								ID:     copyKey.ID,
+								Wrap:   column.Wrap,
+								Hidden: column.Hidden,
+								Desc:   column.Desc,
+							},
+							Pin:   column.Pin,
+							Width: column.Width,
 						},
 					}, view.Table.Columns[i+1:]...)...)
 					break
@@ -2759,10 +2765,12 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 				if field.ID == key.ID {
 					view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{
 						{
-							ID:     copyKey.ID,
-							Wrap:   field.Wrap,
-							Hidden: field.Hidden,
-							Desc:   field.Desc,
+							BaseField: &av.BaseField{
+								ID:     copyKey.ID,
+								Wrap:   field.Wrap,
+								Hidden: field.Hidden,
+								Desc:   field.Desc,
+							},
 						},
 					}, view.Gallery.CardFields[i+1:]...)...)
 					break
@@ -3245,39 +3253,39 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 				if "" == previousKeyID {
 					if av.LayoutTypeGallery == currentView.LayoutType {
 						// 如果当前视图是画廊视图则添加到最后
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
 					} else {
-						view.Table.Columns = append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns...)
+						view.Table.Columns = append([]*av.ViewTableColumn{{BaseField: &av.BaseField{ID: key.ID}}}, view.Table.Columns...)
 					}
 				} else {
 					added := false
 					for i, column := range view.Table.Columns {
 						if column.ID == previousKeyID {
-							view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{ID: key.ID}}, view.Table.Columns[i+1:]...)...)
+							view.Table.Columns = append(view.Table.Columns[:i+1], append([]*av.ViewTableColumn{{BaseField: &av.BaseField{ID: key.ID}}}, view.Table.Columns[i+1:]...)...)
 							added = true
 							break
 						}
 					}
 					if !added {
-						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{ID: key.ID})
+						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
 					}
 				}
 			}
 
 			if nil != view.Gallery {
 				if "" == previousKeyID {
-					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
+					view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: key.ID}})
 				} else {
 					added := false
 					for i, field := range view.Gallery.CardFields {
 						if field.ID == previousKeyID {
-							view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{ID: key.ID}}, view.Gallery.CardFields[i+1:]...)...)
+							view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{{BaseField: &av.BaseField{ID: key.ID}}}, view.Gallery.CardFields[i+1:]...)...)
 							added = true
 							break
 						}
 					}
 					if !added {
-						view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{ID: key.ID})
+						view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{BaseField: &av.BaseField{ID: key.ID}})
 					}
 				}
 			}

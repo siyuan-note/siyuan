@@ -82,11 +82,7 @@ const (
 
 // ViewGalleryCardField 描述了画廊卡片字段的结构。
 type ViewGalleryCardField struct {
-	ID string `json:"id"` // 字段 ID
-
-	Wrap   bool   `json:"wrap"`           // 是否换行
-	Hidden bool   `json:"hidden"`         // 是否隐藏
-	Desc   string `json:"desc,omitempty"` // 字段描述
+	*BaseField
 }
 
 // Gallery 描述了画廊实例的结构。
@@ -98,12 +94,9 @@ type Gallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
-
-	Fields    []*GalleryField `json:"fields"`    // 画廊字段
-	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
-	CardCount int             `json:"cardCount"` // 画廊总卡片数
+	Fields              []*GalleryField `json:"fields"`                        // 画廊字段
+	Cards               []*GalleryCard  `json:"cards"`                         // 画廊卡片
+	CardCount           int             `json:"cardCount"`                     // 画廊总卡片数
 }
 
 // GalleryCard 描述了画廊实例卡片的结构。

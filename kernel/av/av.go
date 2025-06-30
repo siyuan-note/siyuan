@@ -223,10 +223,10 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 		Table:      NewLayoutTable(),
 	}
 	blockKey = NewKey(blockKeyID, GetAttributeViewI18n("key"), "", KeyTypeBlock)
-	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
+	view.Table.Columns = []*ViewTableColumn{{BaseField: &BaseField{ID: blockKeyID}}}
 
 	selectKey = NewKey(ast.NewNodeID(), GetAttributeViewI18n("select"), "", KeyTypeSelect)
-	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{ID: selectKey.ID})
+	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{BaseField: &BaseField{ID: selectKey.ID}})
 	return
 }
 

@@ -36,6 +36,14 @@ type BaseLayout struct {
 	PageSize int `json:"pageSize,omitempty"` // 每页条目数
 }
 
+// BaseField 描述了字段的基础结构。
+type BaseField struct {
+	ID     string `json:"id"`             // 字段 ID
+	Wrap   bool   `json:"wrap"`           // 是否换行
+	Hidden bool   `json:"hidden"`         // 是否隐藏
+	Desc   string `json:"desc,omitempty"` // 字段描述
+}
+
 // BaseValue 描述了字段值的基础结构。
 type BaseValue struct {
 	ID        string  `json:"id"`        // 字段值 ID

@@ -44,14 +44,11 @@ func NewLayoutTable() *LayoutTable {
 
 // ViewTableColumn 描述了表格列的结构。
 type ViewTableColumn struct {
-	ID string `json:"id"` // 列 ID
+	*BaseField
 
-	Wrap   bool        `json:"wrap"`           // 是否换行
-	Hidden bool        `json:"hidden"`         // 是否隐藏
-	Pin    bool        `json:"pin"`            // 是否固定
-	Width  string      `json:"width"`          // 列宽度
-	Desc   string      `json:"desc,omitempty"` // 列描述
-	Calc   *ColumnCalc `json:"calc,omitempty"` // 计算
+	Pin   bool        `json:"pin"`            // 是否固定
+	Width string      `json:"width"`          // 列宽度
+	Calc  *ColumnCalc `json:"calc,omitempty"` // 计算
 }
 
 // Table 描述了表格实例的结构。

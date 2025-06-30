@@ -35,8 +35,9 @@ func (layoutTable *LayoutTable) GetItemIDs() (ret []string) {
 func NewLayoutTable() *LayoutTable {
 	return &LayoutTable{
 		BaseLayout: &BaseLayout{
-			Spec: 0,
-			ID:   ast.NewNodeID(),
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			ShowIcon: true,
 		},
 	}
 }
@@ -66,7 +67,6 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
-	Wrap  bool        `json:"wrap"`  // 是否换行
 	Pin   bool        `json:"pin"`   // 是否固定
 	Width string      `json:"width"` // 列宽度
 	Calc  *ColumnCalc `json:"calc"`  // 计算

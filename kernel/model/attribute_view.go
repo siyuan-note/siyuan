@@ -195,11 +195,18 @@ func setAttrViewWrapField(operation *Operation) (err error) {
 		return
 	}
 
+	allFieldWrap := operation.Data.(bool)
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		return
+		view.Table.WrapField = allFieldWrap
+		for _, col := range view.Table.Columns {
+			col.Wrap = allFieldWrap
+		}
 	case av.LayoutTypeGallery:
-		view.Gallery.WrapField = operation.Data.(bool)
+		view.Gallery.WrapField = allFieldWrap
+		for _, field := range view.Gallery.CardFields {
+			field.Wrap = allFieldWrap
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -227,7 +234,7 @@ func setAttrViewShowIcon(operation *Operation) (err error) {
 
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
-		return
+		view.Table.ShowIcon = operation.Data.(bool)
 	case av.LayoutTypeGallery:
 		view.Gallery.ShowIcon = operation.Data.(bool)
 	}
@@ -1900,10 +1907,13 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		}
 
 		view.Table.RowIDs = masterView.Table.RowIDs
+		view.Table.ShowIcon = masterView.Table.ShowIcon
+		view.Table.WrapField = masterView.Table.WrapField
 	case av.LayoutTypeGallery:
 		for _, field := range masterView.Gallery.CardFields {
 			view.Gallery.CardFields = append(view.Gallery.CardFields, &av.ViewGalleryCardField{
 				ID:     field.ID,
+				Wrap:   field.Wrap,
 				Hidden: field.Hidden,
 				Desc:   field.Desc,
 			})
@@ -2749,8 +2759,10 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 				if field.ID == key.ID {
 					view.Gallery.CardFields = append(view.Gallery.CardFields[:i+1], append([]*av.ViewGalleryCardField{
 						{
-							ID:   copyKey.ID,
-							Desc: field.Desc,
+							ID:     copyKey.ID,
+							Wrap:   field.Wrap,
+							Hidden: field.Hidden,
+							Desc:   field.Desc,
 						},
 					}, view.Gallery.CardFields[i+1:]...)...)
 					break
@@ -2817,16 +2829,25 @@ func setAttributeViewColWrap(operation *Operation) (err error) {
 		return
 	}
 
+	newWrap := operation.Data.(bool)
+	allFieldWrap := true
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.ID {
-				column.Wrap = operation.Data.(bool)
-				break
+				column.Wrap = newWrap
 			}
+			allFieldWrap = allFieldWrap && column.Wrap
 		}
+		view.Table.WrapField = allFieldWrap
 	case av.LayoutTypeGallery:
-		return
+		for _, field := range view.Gallery.CardFields {
+			if field.ID == operation.ID {
+				field.Wrap = newWrap
+			}
+			allFieldWrap = allFieldWrap && field.Wrap
+		}
+		view.Gallery.WrapField = allFieldWrap
 	}
 
 	err = av.SaveAttributeView(attrView)

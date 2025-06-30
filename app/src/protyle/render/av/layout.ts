@@ -44,7 +44,7 @@ export const getLayoutHTML = (data: IAV) => {
     <input data-type="toggle-gallery-fit" type="checkbox" class="b3-switch b3-switch--menu" ${view.fitImage ? "checked" : ""}>
 </label>
 <label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.showIcon}</span>
+    <span class="fn__flex-center">${window.siyuan.languages.showAllFieldsIcon}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
 </label>

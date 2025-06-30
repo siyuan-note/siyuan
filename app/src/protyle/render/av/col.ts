@@ -184,9 +184,14 @@ export const getEditHTML = (options: {
     <input data-type="fillCreated" type="checkbox" class="b3-switch b3-switch--menu" ${colData.date?.autoFillNow ? "checked" : ""}>
 </label>`;
     }
+    html += `<button class="b3-menu__separator" data-id="separator_3"></button>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.wrap}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>
+</label>`;
     if (colData.type !== "block") {
-        html += `<button class="b3-menu__separator" data-id="separator_3"></button>
-<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
+        html += `<button class="b3-menu__item" data-type="${colData.hidden ? "showCol" : "hideCol"}">
     <svg class="b3-menu__icon" style=""><use xlink:href="#icon${colData.hidden ? "Eye" : "Eyeoff"}"></use></svg>
     <span class="b3-menu__label">${colData.hidden ? window.siyuan.languages.showCol : window.siyuan.languages.hideCol}</span>
 </button>
@@ -1052,29 +1057,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         });
         menu.addSeparator({id: "separator_3"});
     }
-    menu.addItem({
-        id: "wrap",
-        label: `<label class="fn__flex"><span class="fn__flex-center">${window.siyuan.languages.wrap}</span><span class="fn__space fn__flex-1"></span>
-<input type="checkbox" class="b3-switch b3-switch--menu"${cellElement.dataset.wrap === "true" ? " checked" : ""}></label>`,
-        bind(element) {
-            const inputElement = element.querySelector("input") as HTMLInputElement;
-            inputElement.addEventListener("change", () => {
-                transaction(protyle, [{
-                    action: "setAttrViewColWrap",
-                    id: colId,
-                    avID,
-                    data: inputElement.checked,
-                    blockID
-                }], [{
-                    action: "setAttrViewColWrap",
-                    id: colId,
-                    avID,
-                    data: !inputElement.checked,
-                    blockID
-                }]);
-            });
-        }
-    });
     const cellRect = cellElement.getBoundingClientRect();
     menu.open({
         x: cellRect.left,

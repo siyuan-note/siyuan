@@ -81,7 +81,7 @@ export const renderGallery = (options: {
                     galleryHTML += `<div class="${coverClass}"></div>`;
                 }
             }
-            galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;
+            galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}">`;
             item.values.forEach((cell, fieldsIndex) => {
                 if (view.fields[fieldsIndex].hidden) {
                     return;
@@ -96,7 +96,7 @@ export const renderGallery = (options: {
                 if (view.fields[fieldsIndex].desc) {
                     ariaLabel += escapeAttr(`<div class="ft__on-surface">${view.fields[fieldsIndex].desc}</div>`);
                 }
-                galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
+                galleryHTML += `<div class="av__cell${checkClass} ariaLabel" data-wrap="${view.fields[fieldsIndex].wrap}" 
 data-empty="${isEmpty}" 
 aria-label="${ariaLabel}" 
 data-position="5west"

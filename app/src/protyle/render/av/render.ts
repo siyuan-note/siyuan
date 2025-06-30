@@ -508,13 +508,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         } else if (operation.action === "setAttrViewWrapField") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll(".av__gallery-fields").forEach(fieldItem => {
-                    if (operation.data) {
-                        fieldItem.classList.add("av__gallery-fields--wrap");
-                    } else {
-                        fieldItem.classList.remove("av__gallery-fields--wrap");
-                    }
-                });
                 item.querySelectorAll(".av__cell").forEach(fieldItem => {
                     fieldItem.setAttribute("data-wrap", operation.data.toString());
                 });

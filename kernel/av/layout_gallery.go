@@ -29,8 +29,6 @@ type LayoutGallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
 
 	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
@@ -43,13 +41,13 @@ func (layoutGallery *LayoutGallery) GetItemIDs() (ret []string) {
 func NewLayoutGallery() *LayoutGallery {
 	return &LayoutGallery{
 		BaseLayout: &BaseLayout{
-			Spec: 0,
-			ID:   ast.NewNodeID(),
+			Spec:     0,
+			ID:       ast.NewNodeID(),
+			ShowIcon: true,
 		},
 		CoverFrom:       CoverFromContentImage,
 		CardAspectRatio: CardAspectRatio16_9,
 		CardSize:        CardSizeMedium,
-		ShowIcon:        true,
 	}
 }
 
@@ -86,6 +84,7 @@ const (
 type ViewGalleryCardField struct {
 	ID string `json:"id"` // 字段 ID
 
+	Wrap   bool   `json:"wrap"`           // 是否换行
 	Hidden bool   `json:"hidden"`         // 是否隐藏
 	Desc   string `json:"desc,omitempty"` // 字段描述
 }

@@ -131,13 +131,6 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-        options.blockElement.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji,.av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(item => {
-            if (checked) {
-                item.classList.remove("fn__none");
-            } else {
-                item.classList.add("fn__none");
-            }
-        });
     });
     const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {
@@ -155,13 +148,6 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-        options.blockElement.querySelectorAll(".av__gallery-fields").forEach(item => {
-            if (checked) {
-                item.classList.add("av__gallery-fields--wrap");
-            } else {
-                item.classList.remove("av__gallery-fields--wrap");
-            }
-        });
     });
     if (options.data.viewType !== "gallery") {
         return;

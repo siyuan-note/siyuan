@@ -506,6 +506,29 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     }
                 }
             });
+        } else if (operation.action === "setAttrViewWrapField") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__gallery-fields").forEach(fieldItem => {
+                    if (operation.data) {
+                        fieldItem.classList.add("av__gallery-fields--wrap");
+                    } else {
+                        fieldItem.classList.remove("av__gallery-fields--wrap");
+                    }
+                });
+                item.querySelectorAll(".av__cell").forEach(fieldItem => {
+                    fieldItem.setAttribute("data-wrap", operation.data.toString());
+                });
+            });
+        } else if (operation.action === "setAttrViewShowIcon") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(item => {
+                    if (operation.data) {
+                        item.classList.remove("fn__none");
+                    } else {
+                        item.classList.add("fn__none");
+                    }
+                });
+            });
         } else {
             // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
             const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;

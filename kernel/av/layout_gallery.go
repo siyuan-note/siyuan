@@ -94,12 +94,9 @@ type Gallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
-
-	Fields    []*GalleryField `json:"fields"`    // 画廊字段
-	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
-	CardCount int             `json:"cardCount"` // 画廊总卡片数
+	Fields              []*GalleryField `json:"fields"`                        // 画廊字段
+	Cards               []*GalleryCard  `json:"cards"`                         // 画廊卡片
+	CardCount           int             `json:"cardCount"`                     // 画廊总卡片数
 }
 
 // GalleryCard 描述了画廊实例卡片的结构。

@@ -162,7 +162,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
             </div>
             <div class="fn__space"></div>
             <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
-                <svg><use xlink:href="#iconMore"></use></svg>
+                <svg><use xlink:href="#iconSettings"></use></svg>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newRow}">

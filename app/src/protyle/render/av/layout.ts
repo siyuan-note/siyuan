@@ -115,33 +115,6 @@ export const bindLayoutEvent = (options: {
             data: checked
         }]);
     });
-    if (options.data.viewType !== "gallery") {
-        return;
-    }
-    const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
-    toggleFitElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
-        const checked = toggleFitElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewFitImage",
-            avID,
-            blockID,
-            data: checked
-        }], [{
-            action: "setAttrViewFitImage",
-            avID,
-            blockID,
-            data: !checked
-        }]);
-        options.blockElement.querySelectorAll(".av__gallery-img").forEach(item => {
-            if (checked) {
-                item.classList.add("av__gallery-img--fit");
-            } else {
-                item.classList.remove("av__gallery-img--fit");
-            }
-        });
-    });
     const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
     toggleIconElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
@@ -158,7 +131,7 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-        options.blockElement.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji').forEach(item => {
+        options.blockElement.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji,.av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(item => {
             if (checked) {
                 item.classList.remove("fn__none");
             } else {
@@ -187,6 +160,33 @@ export const bindLayoutEvent = (options: {
                 item.classList.add("av__gallery-fields--wrap");
             } else {
                 item.classList.remove("av__gallery-fields--wrap");
+            }
+        });
+    });
+    if (options.data.viewType !== "gallery") {
+        return;
+    }
+    const toggleFitElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-fit"]') as HTMLInputElement;
+    toggleFitElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const checked = toggleFitElement.checked;
+        transaction(options.protyle, [{
+            action: "setAttrViewFitImage",
+            avID,
+            blockID,
+            data: checked
+        }], [{
+            action: "setAttrViewFitImage",
+            avID,
+            blockID,
+            data: !checked
+        }]);
+        options.blockElement.querySelectorAll(".av__gallery-img").forEach(item => {
+            if (checked) {
+                item.classList.add("av__gallery-img--fit");
+            } else {
+                item.classList.remove("av__gallery-img--fit");
             }
         });
     });

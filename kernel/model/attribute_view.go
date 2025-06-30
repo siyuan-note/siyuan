@@ -601,6 +601,12 @@ func GetAttributeViewFilterSort(avID, blockID string) (filters []*av.ViewFilter,
 
 	filters = view.Filters
 	sorts = view.Sorts
+	if 1 > len(filters) {
+		filters = []*av.ViewFilter{}
+	}
+	if 1 > len(sorts) {
+		sorts = []*av.ViewSort{}
+	}
 	return
 }
 

@@ -729,13 +729,13 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             return;
         }
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
+        const iconElement = cellElement.querySelector(".b3-menu__avemoji");
         if (viewType === "gallery") {
-            const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-            cellElement.innerHTML = renderCell(value, undefined, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
+            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
                 cellElement.querySelector(".av__gallery-tip").outerHTML;
             cellElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
         } else {
-            cellElement.innerHTML = renderCell(value);
+            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
         }
         if (hasDragFill) {
             addDragFill(cellElement);

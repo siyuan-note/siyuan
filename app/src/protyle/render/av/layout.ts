@@ -42,16 +42,6 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__flex-center">${window.siyuan.languages.fitImage}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-gallery-fit" type="checkbox" class="b3-switch b3-switch--menu" ${view.fitImage ? "checked" : ""}>
-</label>
-<label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.showIcon}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
-</label>
-<label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input data-type="toggle-gallery-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
 </label>`;
     }
     return `<div class="b3-menu__items">
@@ -83,6 +73,16 @@ export const getLayoutHTML = (data: IAV) => {
         <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${view.hideAttrViewName ? "" : "checked"}>
     </label>
     ${html}
+    <label class="b3-menu__item">
+        <span class="fn__flex-center">${window.siyuan.languages.showIcon}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
+    </label>
+    <label class="b3-menu__item">
+        <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input data-type="toggle-gallery-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
+    </label>
     <button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
         <span class="fn__flex-1"></span>

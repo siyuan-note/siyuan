@@ -27,7 +27,10 @@
     overflow-x: auto;
     overflow-y: hidden;
     cursor: auto;
-    padding: 2px;
+
+    &.fn__block {
+      overflow: visible;
+    }
   }
 
   &__pulse {

@@ -622,6 +622,14 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
                 }
             });
             if (data["data-av-type"]) {
+                // https://github.com/siyuan-note/siyuan/pull/15178#discussion_r2173842215
+                const oldAvType = item.getAttribute("data-av-type");
+                const containerElement = item.querySelector(".av__container") as HTMLElement;
+                if (containerElement && data["data-av-type"] === "table" && oldAvType === "gallery") {
+                    containerElement.style.overflow = "inherit";
+                } else if (containerElement && data["data-av-type"] === "gallery" && oldAvType === "table") {
+                    containerElement.style.overflow = "";
+                }
                 item.setAttribute("data-av-type", data["data-av-type"]);
             }
             const attrElements = item.querySelectorAll(".protyle-attr");

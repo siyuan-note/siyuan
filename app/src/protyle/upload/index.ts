@@ -159,6 +159,14 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
                     cellElements.push(item);
                 }
             });
+            if (cellElements.length === 0) {
+                document.querySelector(".av__panel .b3-menu__items")?.getAttribute("data-ids")?.split(",").forEach((id: string) => {
+                    const item = protyle.wysiwyg.element.querySelector(`.av__gallery-fields [data-dtype="mAsset"][data-id="${id}"]`) as HTMLElement;
+                    if (item) {
+                        cellElements.push(item);
+                    }
+                });
+            }
         }
         if (cellElements.length > 0) {
             const blockElement = hasClosestBlock(cellElements[0]);

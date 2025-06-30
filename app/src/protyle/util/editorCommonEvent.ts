@@ -848,9 +848,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     target.outerHTML);
                 return;
             } else if (target.classList.contains("av__gallery-item")) {
-                window.siyuan.dragElement = target;
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
+                    const ghostElement = document.createElement("div");
+                    ghostElement.className = 'protyle-wysiwyg protyle-wysiwyg--attr';
+                    ghostElement.append(processClonePHElement(target.cloneNode(true) as Element));
+                    ghostElement.setAttribute("style", `position:fixed;opacity:.1;padding:0;
+width:${target.clientWidth}px;;height:${target.clientHeight}px;`);
+                    ghostElement.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
+                    document.body.append(ghostElement);
+                    event.dataTransfer.setDragImage(ghostElement, -10, -10);
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                    window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
                         selectIds.push(item.getAttribute("data-id"));

@@ -56,6 +56,7 @@ func upgradeSpec2(av *AttributeView) {
 			if 0 < view.Table.PageSize {
 				view.PageSize = view.Table.PageSize
 			}
+			view.Table.ShowIcon = true
 		}
 
 		// 清理过滤和排序规则中不存在的键

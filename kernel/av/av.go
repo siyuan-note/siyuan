@@ -190,6 +190,12 @@ type View struct {
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
+
+	Groups       []*View `json:"groups,omitempty"`       // 分组视图列表
+	GroupCalcSum bool    `json:"groupCalcSum,omitempty"` // 分组是否计算总和
+	GroupName    string  `json:"groupName,omitempty"`    // 分组名称
+	GroupFolded  bool    `json:"groupFolded,omitempty"`  // 分组是否折叠
+	GroupHidden  bool    `json:"groupHidden,omitempty"`  // 分组是否隐藏
 }
 
 // LayoutType 描述了视图布局类型。
@@ -577,7 +583,6 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
-		view.Table.ID = ast.NewNodeID()
 
 		for _, f := range view.Filters {
 			f.Column = keyIDMap[f.Column]
@@ -592,11 +597,13 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 
 		switch view.LayoutType {
 		case LayoutTypeTable:
+			view.Table.ID = ast.NewNodeID()
 			for _, column := range view.Table.Columns {
 				column.ID = keyIDMap[column.ID]
 			}
 			view.Table.RowIDs = []string{}
 		case LayoutTypeGallery:
+			view.Gallery.ID = ast.NewNodeID()
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}

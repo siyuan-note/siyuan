@@ -445,6 +445,8 @@ export class WYSIWYG {
                 // 右键
                 return;
             }
+            const documentSelf = document;
+            documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
@@ -582,7 +584,6 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {
                 let ctrlElement = nodeElement;
                 if (!hasSelectClassElement && galleryItemElement) {
@@ -619,7 +620,7 @@ export class WYSIWYG {
                 }
                 return;
             }
-            const documentSelf = document;
+
             // https://github.com/siyuan-note/siyuan/issues/15100
             if (galleryItemElement) {
                 documentSelf.onmouseup = () => {

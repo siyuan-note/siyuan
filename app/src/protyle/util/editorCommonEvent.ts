@@ -851,7 +851,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
                     const ghostElement = document.createElement("div");
-                    ghostElement.className = 'protyle-wysiwyg protyle-wysiwyg--attr';
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     ghostElement.append(processClonePHElement(target.cloneNode(true) as Element));
                     ghostElement.setAttribute("style", `position:fixed;opacity:.1;padding:0;
 width:${target.clientWidth}px;;height:${target.clientHeight}px;`);

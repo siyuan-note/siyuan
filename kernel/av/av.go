@@ -196,6 +196,7 @@ type View struct {
 	GroupName    string  `json:"groupName,omitempty"`    // 分组名称
 	GroupFolded  bool    `json:"groupFolded,omitempty"`  // 分组是否折叠
 	GroupHidden  bool    `json:"groupHidden,omitempty"`  // 分组是否隐藏
+	GroupDefault bool    `json:"groupDefault,omitempty"` // 是否为默认分组
 }
 
 // LayoutType 描述了视图布局类型。

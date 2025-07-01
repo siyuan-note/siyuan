@@ -186,6 +186,7 @@ export const getEditHTML = (options: {
     }
     html += `<button class="b3-menu__separator" data-id="separator_3"></button>
 <label class="b3-menu__item">
+    <svg class="b3-menu__icon" style=""><use xlink:href="#iconSoftWrap"></use></svg>
     <span class="fn__flex-center">${window.siyuan.languages.wrap}</span>
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" data-type="wrap" class="b3-switch b3-switch--menu"${colData.wrap ? " checked" : ""}>

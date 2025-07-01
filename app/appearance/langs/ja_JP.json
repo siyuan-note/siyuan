@@ -1,4 +1,6 @@
 {
+  "allViews": "すべてのビュー",
+  "copyAVID": "データベース ID をコピー",
   "hideEmptyFields": "空のフィールドを非表示",
   "displayEmptyFields": "空のフィールドを表示",
   "cardAspectRatio": "プレビューエリアのアスペクト比",
@@ -10,6 +12,7 @@
   "small": "小",
   "fitImage": "画像サイズを自動調整",
   "showIcon": "アイコンを表示",
+  "showAllFieldsIcon": "フィールドアイコンを表示",
   "wrapAllFields": "フィールドを自動折り返し",
   "gallery": "ギャラリー",
   "newTag": "新しいタグ",

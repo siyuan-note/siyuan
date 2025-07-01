@@ -568,7 +568,7 @@ export class Graph extends Model {
                 item.color = {color: rootStyle.getPropertyValue("--b3-graph-line").trim()};
             }
         });
-        addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.2`, "protyleVisScript").then(() => {
+        addScript(`${Constants.PROTYLE_CDN}/js/vis/vis-network.min.js?v=9.1.13`, "protyleVisScript").then(() => {
             this.network?.destroy();
             if (!this.graphData || !this.graphData.nodes || this.graphData.nodes.length === 0) {
                 return;

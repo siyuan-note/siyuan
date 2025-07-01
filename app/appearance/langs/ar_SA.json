@@ -1,4 +1,6 @@
 {
+  "allViews": "جميع العروض",
+  "copyAVID": "نسخ معرف قاعدة البيانات",
   "hideEmptyFields": "إخفاء الحقول الفارغة",
   "displayEmptyFields": "عرض الحقول الفارغة",
   "cardAspectRatio": "نسبة العرض إلى الارتفاع لمنطقة المعاينة",
@@ -9,7 +11,8 @@
   "medium": "متوسط",
   "small": "صغير",
   "fitImage": "تعديل حجم الصورة تلقائيًا",
-  "showIcon": "إظهار الأيقونة",
+  "showIcon": "عرض الأيقونة",
+  "showAllFieldsIcon": "عرض أيقونات الحقول",
   "wrapAllFields": "التفاف الحقول تلقائيًا",
   "gallery": "معرض",
   "newTag": "علامة جديدة",

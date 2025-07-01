@@ -1,4 +1,6 @@
 {
+  "allViews": "כל התצוגות",
+  "copyAVID": "העתק את מזהה מסד הנתונים",
   "hideEmptyFields": "הסתר שדות ריקים",
   "displayEmptyFields": "הצג שדות ריקים",
   "cardAspectRatio": "יחס גובה-רוחב של אזור התצוגה המקדימה",
@@ -9,7 +11,8 @@
   "medium": "בינוני",
   "small": "קטן",
   "fitImage": "התאמה אוטומטית לגודל התמונה",
-  "showIcon": "הצג אייקון",
+  "showIcon": "הצג סמל",
+  "showAllFieldsIcon": "הצג סמלי שדות",
   "wrapAllFields": "עטיפת שדות אוטומטית",
   "gallery": "גלריה",
   "newTag": "תג חדש",

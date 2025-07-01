@@ -20,11 +20,28 @@ import "sort"
 
 // BaseLayout 描述了布局的基础结构。
 type BaseLayout struct {
-	Spec     int           `json:"spec"`     // 布局格式版本
-	ID       string        `json:"id"`       // 布局 ID
-	Filters  []*ViewFilter `json:"filters"`  // 过滤规则
-	Sorts    []*ViewSort   `json:"sorts"`    // 排序规则
-	PageSize int           `json:"pageSize"` // 每页行数
+	Spec int    `json:"spec"` // 布局格式版本
+	ID   string `json:"id"`   // 布局 ID
+
+	ShowIcon  bool `json:"showIcon"`  // 是否显示字段图标
+	WrapField bool `json:"wrapField"` // 是否换行字段内容
+
+	// TODO 以下三个字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15162
+
+	//Deprecated
+	Filters []*ViewFilter `json:"filters,omitempty"` // 过滤规则
+	//Deprecated
+	Sorts []*ViewSort `json:"sorts,omitempty"` // 排序规则
+	//Deprecated
+	PageSize int `json:"pageSize,omitempty"` // 每页条目数
+}
+
+// BaseField 描述了字段的基础结构。
+type BaseField struct {
+	ID     string `json:"id"`             // 字段 ID
+	Wrap   bool   `json:"wrap"`           // 是否换行
+	Hidden bool   `json:"hidden"`         // 是否隐藏
+	Desc   string `json:"desc,omitempty"` // 字段描述
 }
 
 // BaseValue 描述了字段值的基础结构。
@@ -43,7 +60,14 @@ type BaseInstance struct {
 	HideAttrViewName bool          `json:"hideAttrViewName"` // 是否隐藏属性视图名称
 	Filters          []*ViewFilter `json:"filters"`          // 过滤规则
 	Sorts            []*ViewSort   `json:"sorts"`            // 排序规则
-	PageSize         int           `json:"pageSize"`         // 每页项目
+	Group            *ViewGroup    `json:"group"`            // 分组规则
+	PageSize         int           `json:"pageSize"`         // 每页项目数
+	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
+	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
+	Folded           bool          `json:"folded,omitempty"` // 是否折叠
+	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
+
+	Groups []Viewable `json:"groups,omitempty"` // 分组实例列表
 }
 
 func (baseInstance *BaseInstance) GetSorts() []*ViewSort {
@@ -54,14 +78,23 @@ func (baseInstance *BaseInstance) GetFilters() []*ViewFilter {
 	return baseInstance.Filters
 }
 
+func (baseInstance *BaseInstance) SetGroups(viewables []Viewable) {
+	baseInstance.Groups = viewables
+}
+
+func (baseInstance *BaseInstance) GetID() string {
+	return baseInstance.ID
+}
+
 // BaseInstanceField 描述了实例字段的基础结构。
 type BaseInstanceField struct {
 	ID     string  `json:"id"`     // ID
-	Name   string  `json:"name"`   // 字段名
-	Type   KeyType `json:"type"`   // 字段类型
-	Icon   string  `json:"icon"`   // 字段图标
+	Name   string  `json:"name"`   // 名称
+	Type   KeyType `json:"type"`   // 类型
+	Icon   string  `json:"icon"`   // 图标
+	Wrap   bool    `json:"wrap"`   // 是否换行
 	Hidden bool    `json:"hidden"` // 是否隐藏
-	Desc   string  `json:"desc"`   // 字段描述
+	Desc   string  `json:"desc"`   // 描述
 
 	// 以下是某些字段类型的特有属性
 

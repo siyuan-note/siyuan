@@ -313,8 +313,9 @@
 				"pageSize": 50,
 				"coverFrom": 2,
 				"coverFromAssetKeyID": "20250615173428-ju0itho",
-				"cardSize": 1,
-				"fitImage": true,
+				"cardAspectRatio": 3,
+				"cardSize": 0,
+				"fitImage": false,
 				"showIcon": true,
 				"wrapField": false,
 				"fields": [

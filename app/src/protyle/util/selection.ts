@@ -485,7 +485,11 @@ export const focusByOffset = (container: Element, start: number, end: number, is
 };
 
 export const setInsertWbrHTML = (nodeElement: HTMLElement, range: Range, protyle: IProtyle) => {
-    const offset = getSelectionOffset(getContenteditableElement(nodeElement), nodeElement, range);
+    const editElement = getContenteditableElement(nodeElement);
+    if (!editElement) {
+        return;
+    }
+    const offset = getSelectionOffset(editElement, nodeElement, range);
     const cloneNode = nodeElement.cloneNode(true) as HTMLElement;
     const cloneRange = focusByOffset(cloneNode, offset.end, offset.end, false);
     if (cloneRange) {

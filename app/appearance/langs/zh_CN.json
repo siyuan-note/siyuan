@@ -1,4 +1,6 @@
 {
+  "allViews": "所有视图",
+  "copyAVID": "复制数据库 ID",
   "hideEmptyFields": "隐藏空字段",
   "displayEmptyFields": "显示空字段",
   "cardAspectRatio": "预览区宽高比",
@@ -10,6 +12,7 @@
   "small": "小",
   "fitImage": "自适应图片大小",
   "showIcon": "显示图标",
+  "showAllFieldsIcon": "显示字段图标",
   "wrapAllFields": "字段自动换行",
   "gallery": "画廊",
   "newTag": "新建标签",

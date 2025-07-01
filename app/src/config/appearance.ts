@@ -213,7 +213,7 @@ export const appearance = {
                     }
                 }
             }
-            appearance.onSetappearance(response.data);
+            appearance.onSetAppearance(response.data);
             if (response.data.hideStatusBar) {
                 document.getElementById("status").classList.add("fn__none");
             } else {
@@ -253,7 +253,7 @@ export const appearance = {
             });
         });
     },
-    onSetappearance(data: Config.IAppearance) {
+    onSetAppearance(data: Config.IAppearance) {
         if (data.lang !== window.siyuan.config.appearance.lang) {
             exportLayout({
                 cb() {

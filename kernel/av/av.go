@@ -178,35 +178,26 @@ type SelectOption struct {
 
 // View 描述了视图的结构。
 type View struct {
-	ID               string `json:"id"`               // 视图 ID
-	Icon             string `json:"icon"`             // 视图图标
-	Name             string `json:"name"`             // 视图名称
-	HideAttrViewName bool   `json:"hideAttrViewName"` // 是否隐藏属性视图名称
-	Desc             string `json:"desc"`             // 视图描述
+	ID               string         `json:"id"`                // 视图 ID
+	Icon             string         `json:"icon"`              // 视图图标
+	Name             string         `json:"name"`              // 视图名称
+	HideAttrViewName bool           `json:"hideAttrViewName"`  // 是否隐藏属性视图名称
+	Desc             string         `json:"desc"`              // 视图描述
+	Filters          []*ViewFilter  `json:"filters,omitempty"` // 过滤规则
+	Sorts            []*ViewSort    `json:"sorts,omitempty"`   // 排序规则
+	Group            *ViewGroup     `json:"group,omitempty"`   // 分组规则
+	PageSize         int            `json:"pageSize"`          // 每页条目数
+	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
+	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
+	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
 
-	LayoutType LayoutType     `json:"type"`              // 当前布局类型
-	Table      *LayoutTable   `json:"table,omitempty"`   // 表格布局
-	Gallery    *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
-}
-
-func (view *View) GetFilters() (ret []*ViewFilter) {
-	switch view.LayoutType {
-	case LayoutTypeTable:
-		return view.Table.Filters
-	case LayoutTypeGallery:
-		return view.Gallery.Filters
-	}
-	return
-}
-
-func (view *View) GetSorts() (ret []*ViewSort) {
-	switch view.LayoutType {
-	case LayoutTypeTable:
-		return view.Table.Sorts
-	case LayoutTypeGallery:
-		return view.Gallery.Sorts
-	}
-	return
+	Groups       []*View  `json:"groups,omitempty"`       // 分组视图列表
+	GroupItemIDs []string `json:"groupItemIds,omitempty"` // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalcSum bool     `json:"groupCalcSum,omitempty"` // 分组是否计算总和
+	GroupName    string   `json:"groupName,omitempty"`    // 分组名称
+	GroupFolded  bool     `json:"groupFolded,omitempty"`  // 分组是否折叠
+	GroupHidden  bool     `json:"groupHidden,omitempty"`  // 分组是否隐藏
+	GroupDefault bool     `json:"groupDefault,omitempty"` // 是否为默认分组
 }
 
 // LayoutType 描述了视图布局类型。
@@ -218,8 +209,7 @@ const (
 )
 
 const (
-	TableViewDefaultPageSize   = 50 // 表格视图默认分页大小
-	GalleryViewDefaultPageSize = 50 // 画廊视图默认分页大小
+	ViewDefaultPageSize = 50 // 视图默认分页大小
 )
 
 func NewTableView() (ret *View) {
@@ -241,10 +231,10 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 		Table:      NewLayoutTable(),
 	}
 	blockKey = NewKey(blockKeyID, GetAttributeViewI18n("key"), "", KeyTypeBlock)
-	view.Table.Columns = []*ViewTableColumn{{ID: blockKeyID}}
+	view.Table.Columns = []*ViewTableColumn{{BaseField: &BaseField{ID: blockKeyID}}}
 
 	selectKey = NewKey(ast.NewNodeID(), GetAttributeViewI18n("select"), "", KeyTypeSelect)
-	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{ID: selectKey.ID})
+	view.Table.Columns = append(view.Table.Columns, &ViewTableColumn{BaseField: &BaseField{ID: selectKey.ID}})
 	return
 }
 
@@ -252,6 +242,9 @@ func NewGalleryView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("gallery"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeGallery,
 		Gallery:    NewLayoutGallery(),
 	}
@@ -260,18 +253,30 @@ func NewGalleryView() (ret *View) {
 
 // Viewable 描述了视图的接口。
 type Viewable interface {
-	Filterable
-	Sortable
-	Calculable
 
+	// Filter 根据视图中设置的过滤器进行过滤。
+	Filter(attrView *AttributeView)
+
+	// Sort 根据视图中设置的排序规则进行排序。
+	Sort(attrView *AttributeView)
+
+	// Calc 根据视图中设置的计算规则进行计算。
+	Calc()
+
+	// GetType 获取视图的布局类型。
 	GetType() LayoutType
+
+	// GetID 获取视图的 ID。
 	GetID() string
+
+	// SetGroups 设置视图分组列表。
+	SetGroups(viewables []Viewable)
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:      0,
+		Spec:      2,
 		ID:        id,
 		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		ViewID:    view.ID,
@@ -416,18 +421,15 @@ func SaveAttributeView(av *AttributeView) (err error) {
 		if nil != view.Table {
 			// 行去重
 			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
-			// 分页大小
-			if 1 > view.Table.PageSize {
-				view.Table.PageSize = TableViewDefaultPageSize
-			}
 		}
 		if nil != view.Gallery {
 			// 行去重
 			view.Gallery.CardIDs = gulu.Str.RemoveDuplicatedElem(view.Gallery.CardIDs)
-			// 分页大小
-			if 1 > view.Gallery.PageSize {
-				view.Gallery.PageSize = GalleryViewDefaultPageSize
-			}
+		}
+
+		// 分页大小
+		if 1 > view.PageSize {
+			view.PageSize = ViewDefaultPageSize
 		}
 	}
 
@@ -594,32 +596,31 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 
 	for _, view := range ret.Views {
 		view.ID = ast.NewNodeID()
-		view.Table.ID = ast.NewNodeID()
+
+		for _, f := range view.Filters {
+			f.Column = keyIDMap[f.Column]
+		}
+		for _, s := range view.Sorts {
+			s.Column = keyIDMap[s.Column]
+		}
+
+		if nil != view.Group {
+			view.Group.Field = keyIDMap[view.Group.Field]
+		}
+
 		switch view.LayoutType {
 		case LayoutTypeTable:
+			view.Table.ID = ast.NewNodeID()
 			for _, column := range view.Table.Columns {
 				column.ID = keyIDMap[column.ID]
 			}
 			view.Table.RowIDs = []string{}
-
-			for _, f := range view.Table.Filters {
-				f.Column = keyIDMap[f.Column]
-			}
-			for _, s := range view.Table.Sorts {
-				s.Column = keyIDMap[s.Column]
-			}
 		case LayoutTypeGallery:
+			view.Gallery.ID = ast.NewNodeID()
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}
 			view.Gallery.CardIDs = []string{}
-
-			for _, f := range view.Gallery.Filters {
-				f.Column = keyIDMap[f.Column]
-			}
-			for _, s := range view.Gallery.Sorts {
-				s.Column = keyIDMap[s.Column]
-			}
 		}
 	}
 	ret.ViewID = ret.Views[0].ID

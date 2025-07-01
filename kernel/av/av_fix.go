@@ -17,14 +17,68 @@
 package av
 
 import (
+	"time"
+
 	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/util"
-	"time"
 )
 
 func UpgradeSpec(av *AttributeView) {
 	upgradeSpec1(av)
+	upgradeSpec2(av)
+}
+
+func upgradeSpec2(av *AttributeView) {
+	if 2 <= av.Spec {
+		return
+	}
+
+	// 如果存在 view.table.filters/sorts/pageSize 则复制覆盖到 view.filters/sorts/pageSize
+	for _, view := range av.Views {
+		if 1 > len(view.Filters) {
+			view.Filters = []*ViewFilter{}
+		}
+		if 1 > len(view.Sorts) {
+			view.Sorts = []*ViewSort{}
+		}
+		if 1 > view.PageSize {
+			view.PageSize = ViewDefaultPageSize
+		}
+
+		if nil != view.Table {
+			if 0 < len(view.Table.Filters) && 1 > len(view.Filters) {
+				view.Filters = append(view.Filters, view.Table.Filters...)
+			}
+			if 0 < len(view.Table.Sorts) && 1 > len(view.Sorts) {
+				view.Sorts = append(view.Sorts, view.Table.Sorts...)
+			}
+			if 0 < view.Table.PageSize {
+				view.PageSize = view.Table.PageSize
+			}
+			view.Table.ShowIcon = true
+		}
+
+		// 清理过滤和排序规则中不存在的键
+		tmpFilters := []*ViewFilter{}
+		for _, f := range view.Filters {
+			if k, _ := av.GetKey(f.Column); nil != k {
+				tmpFilters = append(tmpFilters, f)
+			}
+		}
+		view.Filters = tmpFilters
+
+		tmpSorts := []*ViewSort{}
+		for _, s := range view.Sorts {
+			if k, _ := av.GetKey(s.Column); nil != k {
+				tmpSorts = append(tmpSorts, s)
+			}
+		}
+		view.Sorts = tmpSorts
+	}
+
+	av.Spec = 2
+	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }
 
 func upgradeSpec1(av *AttributeView) {
@@ -157,4 +211,5 @@ func upgradeSpec1(av *AttributeView) {
 	}
 
 	av.Spec = 1
+	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }

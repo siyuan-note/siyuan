@@ -2,6 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getCardAspectRatio} from "./gallery/util";
+import {getFieldsByData} from "./view";
 
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
@@ -42,16 +43,6 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__flex-center">${window.siyuan.languages.fitImage}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-gallery-fit" type="checkbox" class="b3-switch b3-switch--menu" ${view.fitImage ? "checked" : ""}>
-</label>
-<label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.showIcon}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
-</label>
-<label class="b3-menu__item">
-    <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
-    <span class="fn__space fn__flex-1"></span>
-    <input data-type="toggle-gallery-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
 </label>`;
     }
     return `<div class="b3-menu__items">
@@ -83,6 +74,16 @@ export const getLayoutHTML = (data: IAV) => {
         <input data-type="toggle-view-title" type="checkbox" class="b3-switch b3-switch--menu" ${view.hideAttrViewName ? "" : "checked"}>
     </label>
     ${html}
+    <label class="b3-menu__item">
+        <span class="fn__flex-center">${window.siyuan.languages.showAllFieldsIcon}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
+    </label>
+    <label class="b3-menu__item">
+        <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
+        <span class="fn__space fn__flex-1"></span>
+        <input data-type="toggle-gallery-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
+    </label>
     <button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
         <span class="fn__flex-1"></span>
@@ -114,21 +115,44 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: checked
         }]);
-        if (checked) {
-            options.blockElement.querySelector(".av__title").classList.remove("fn__none");
-        } else {
-            // hide
-            options.blockElement.querySelector(".av__title").classList.add("fn__none");
-        }
-        if (options.data.viewType === "gallery") {
-            const galleryElement = options.blockElement.querySelector(".av__gallery");
-            if (checked) {
-                galleryElement.classList.remove("av__gallery--top");
-            } else {
-                // hide
-                galleryElement.classList.add("av__gallery--top");
-            }
-        }
+    });
+    const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
+    toggleIconElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const checked = toggleIconElement.checked;
+        transaction(options.protyle, [{
+            action: "setAttrViewShowIcon",
+            avID,
+            blockID,
+            data: checked
+        }], [{
+            action: "setAttrViewShowIcon",
+            avID,
+            blockID,
+            data: !checked
+        }]);
+    });
+    const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-wrap"]') as HTMLInputElement;
+    toggleWrapElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const checked = toggleWrapElement.checked;
+        transaction(options.protyle, [{
+            action: "setAttrViewWrapField",
+            avID,
+            blockID,
+            data: checked
+        }], [{
+            action: "setAttrViewWrapField",
+            avID,
+            blockID,
+            data: !checked
+        }]);
+        getFieldsByData(options.data).forEach(item => {
+            item.wrap = checked;
+        });
+        options.data.view.wrapField = checked;
     });
     if (options.data.viewType !== "gallery") {
         return;
@@ -154,54 +178,6 @@ export const bindLayoutEvent = (options: {
                 item.classList.add("av__gallery-img--fit");
             } else {
                 item.classList.remove("av__gallery-img--fit");
-            }
-        });
-    });
-    const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
-    toggleIconElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
-        const checked = toggleIconElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewShowIcon",
-            avID,
-            blockID,
-            data: checked
-        }], [{
-            action: "setAttrViewShowIcon",
-            avID,
-            blockID,
-            data: !checked
-        }]);
-        options.blockElement.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji').forEach(item => {
-            if (checked) {
-                item.classList.remove("fn__none");
-            } else {
-                item.classList.add("fn__none");
-            }
-        });
-    });
-    const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-wrap"]') as HTMLInputElement;
-    toggleWrapElement.addEventListener("change", () => {
-        const avID = options.blockElement.getAttribute("data-av-id");
-        const blockID = options.blockElement.getAttribute("data-node-id");
-        const checked = toggleWrapElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewWrapField",
-            avID,
-            blockID,
-            data: checked
-        }], [{
-            action: "setAttrViewWrapField",
-            avID,
-            blockID,
-            data: !checked
-        }]);
-        options.blockElement.querySelectorAll(".av__gallery-fields").forEach(item => {
-            if (checked) {
-                item.classList.add("av__gallery-fields--wrap");
-            } else {
-                item.classList.remove("av__gallery-fields--wrap");
             }
         });
     });

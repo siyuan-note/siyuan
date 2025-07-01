@@ -1,4 +1,6 @@
 {
+  "allViews": "Alle Ansichten",
+  "copyAVID": "Datenbank-ID kopieren",
   "hideEmptyFields": "Leere Felder ausblenden",
   "displayEmptyFields": "Leere Felder anzeigen",
   "cardAspectRatio": "Seitenverhältnis des Vorschau-Bereichs",
@@ -10,6 +12,7 @@
   "small": "Klein",
   "fitImage": "Bildgröße automatisch anpassen",
   "showIcon": "Symbol anzeigen",
+  "showAllFieldsIcon": "Feldsymbole anzeigen",
   "wrapAllFields": "Felder automatisch umbrechen",
   "gallery": "Galerie",
   "newTag": "Neuer Tag",

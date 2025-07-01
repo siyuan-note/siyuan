@@ -29,8 +29,6 @@ type LayoutGallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
 
 	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
 	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
@@ -45,14 +43,11 @@ func NewLayoutGallery() *LayoutGallery {
 		BaseLayout: &BaseLayout{
 			Spec:     0,
 			ID:       ast.NewNodeID(),
-			Filters:  []*ViewFilter{},
-			Sorts:    []*ViewSort{},
-			PageSize: GalleryViewDefaultPageSize,
+			ShowIcon: true,
 		},
 		CoverFrom:       CoverFromContentImage,
 		CardAspectRatio: CardAspectRatio16_9,
 		CardSize:        CardSizeMedium,
-		ShowIcon:        true,
 	}
 }
 
@@ -87,10 +82,7 @@ const (
 
 // ViewGalleryCardField 描述了画廊卡片字段的结构。
 type ViewGalleryCardField struct {
-	ID string `json:"id"` // 字段 ID
-
-	Hidden bool   `json:"hidden"`         // 是否隐藏
-	Desc   string `json:"desc,omitempty"` // 字段描述
+	*BaseField
 }
 
 // Gallery 描述了画廊实例的结构。
@@ -102,12 +94,9 @@ type Gallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	ShowIcon            bool            `json:"showIcon"`                      // 是否显示字段图标
-	WrapField           bool            `json:"wrapField"`                     // 是否换行字段内容
-
-	Fields    []*GalleryField `json:"fields"`    // 画廊字段
-	Cards     []*GalleryCard  `json:"cards"`     // 画廊卡片
-	CardCount int             `json:"cardCount"` // 画廊总卡片数
+	Fields              []*GalleryField `json:"fields"`                        // 画廊字段
+	Cards               []*GalleryCard  `json:"cards"`                         // 画廊卡片
+	CardCount           int             `json:"cardCount"`                     // 画廊总卡片数
 }
 
 // GalleryCard 描述了画廊实例卡片的结构。
@@ -186,10 +175,6 @@ func (gallery *Gallery) GetFields() (ret []Field) {
 
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
-}
-
-func (gallery *Gallery) GetID() string {
-	return gallery.ID
 }
 
 func (gallery *Gallery) Sort(attrView *AttributeView) {

@@ -130,6 +130,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                         }
                     }
                 });
+                if (eWidth === 0) {
+                    pinMaxIndex = pinIndex;
+                }
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
                 if (pinIndex > -1) {
                     tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -199,7 +202,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";
@@ -249,29 +252,29 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
             </span>
             <div class="fn__flex-1"></div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
                 <span class="fn__space"></span>
                 <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${hasFilter ? " block__icon--active" : ""}">
+            <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${hasFilter ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-sort" aria-label="${window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${data.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <button data-type="av-search-icon" class="block__icon">
+            <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
             <div style="position: relative" class="fn__flex">
                 <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
-            <span data-type="av-more" class="block__icon">
-                <svg><use xlink:href="#iconMore"></use></svg>
+            <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
+                <svg><use xlink:href="#iconSettings"></use></svg>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newRow}">
@@ -322,18 +325,21 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                     if (newCellElement) {
                         newCellElement.classList.add("av__cell--select");
+                        cellScrollIntoView(e, newCellElement);
                     }
                     const avMaskElement = document.querySelector(".av__mask");
+                    const avPanelElement = document.querySelector(".av__panel");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel") && !isSearching && getSelection().rangeCount > 0) {
+                    } else if (!avPanelElement && !isSearching && getSelection().rangeCount > 0) {
                         const range = getSelection().getRangeAt(0);
                         const blockElement = hasClosestBlock(range.startContainer);
                         if (blockElement && e.isSameNode(blockElement)) {
                             focusBlock(e);
                         }
+                    } else if (avPanelElement && !newCellElement) {
+                        avPanelElement.remove();
                     }
-                    cellScrollIntoView(e, newCellElement);
                 }
                 selectRowIds.forEach((selectRowId, index) => {
                     const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
@@ -465,6 +471,67 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
                 item.querySelectorAll(".av__row").forEach(rowItem => {
                     (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+                });
+            });
+        } else if (operation.action === "setAttrViewCardSize") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                const galleryElement = item.querySelector(".av__gallery") as HTMLElement;
+                if (galleryElement) {
+                    galleryElement.classList.remove("av__gallery--small", "av__gallery--big");
+                    if (operation.data === 0) {
+                        galleryElement.classList.add("av__gallery--small");
+                    } else if (operation.data === 2) {
+                        galleryElement.classList.add("av__gallery--big");
+                    }
+                }
+            });
+        } else if (operation.action === "setAttrViewCardAspectRatio") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
+                    coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
+                });
+            });
+        } else if (operation.action === "hideAttrViewName") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                const titleElement = item.querySelector(".av__title");
+                if (titleElement) {
+                    if (!operation.data) {
+                        titleElement.classList.remove("fn__none");
+                    } else {
+                        // hide
+                        titleElement.classList.add("fn__none");
+                    }
+                    if (item.getAttribute("data-av-type") === "gallery") {
+                        const galleryElement = item.querySelector(".av__gallery");
+                        if (!operation.data) {
+                            galleryElement.classList.remove("av__gallery--top");
+                        } else {
+                            // hide
+                            galleryElement.classList.add("av__gallery--top");
+                        }
+                    }
+                }
+            });
+        } else if (operation.action === "setAttrViewWrapField") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__cell").forEach(fieldItem => {
+                    fieldItem.setAttribute("data-wrap", operation.data.toString());
+                });
+            });
+        } else if (operation.action === "setAttrViewShowIcon") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
+                    if (operation.data) {
+                        cellItem.classList.remove("fn__none");
+                    } else {
+                        cellItem.classList.add("fn__none");
+                    }
+                });
+            });
+        } else if (operation.action === "setAttrViewColWrap") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
+                    cellItem.setAttribute("data-wrap", operation.data.toString());
                 });
             });
         } else {

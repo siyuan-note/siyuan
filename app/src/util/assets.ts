@@ -272,6 +272,9 @@ export const setInlineStyle = async (set = true) => {
 .protyle-wysiwyg [data-node-id].li::before {
     right: 17px;
     left: auto;
+}
+.b3-typography table:not([style*="text-align: left"]) {
+  margin-left: auto;
 }`;
     }
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}
@@ -360,7 +363,7 @@ export const setMode = (modeElementValue: number) => {
                 }
             }
         }
-        appearance.onSetappearance(response.data);
+        appearance.onSetAppearance(response.data);
     });
     /// #endif
 };

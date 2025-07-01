@@ -496,9 +496,9 @@ export const popTextCell = (protyle: IProtyle, cellElements: HTMLElement[], type
             height = contentRect.bottom - cellRect.top;
         }
         const width = Math.min(Math.max(cellRect.width, 25), contentRect.width);
-        style = `style="padding-top: ${viewType === "table" ? 6.5 : 1}px;position:absolute;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;top: ${cellRect.top}px;width:${width}px;height: ${height}px"`;
+        style = `style="padding: ${viewType === "table" ? 6 : 3}px 8px;position:absolute;left: ${(cellRect.left < contentRect.left || cellRect.left + width > contentRect.right) ? contentRect.left : cellRect.left}px;top: ${cellRect.top}px;width:${width}px;height: ${height}px"`;
     } else {
-        style = `style="padding-top: ${viewType === "table" ? 6.5 : 1}px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
+        style = `style="padding: ${viewType === "table" ? 6 : 3}px 8px;position:absolute;left: ${cellRect.left}px;top: ${cellRect.top}px;width:${Math.max(cellRect.width, 25)}px;height: ${height}px"`;
     }
 
     if (["text", "email", "phone", "block", "template"].includes(type)) {
@@ -994,7 +994,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         cellValue?.relation?.contents?.forEach((item) => {
             if (item && item.block) {
                 if (item?.isDetached) {
-                    text += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    text += `<span class="av__cell--relation"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}">➖</span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                 } else {
                     // data-block-id 用于更新 emoji
                     text += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
@@ -1150,7 +1150,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            item.element.innerHTML = renderCell(data);
+            const iconElement = item.element.querySelector(".b3-menu__avemoji");
+            item.element.innerHTML = renderCell(data, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
             renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;
@@ -1184,8 +1185,11 @@ export const cellValueIsEmpty = (value: IAVCellValue) => {
     if (value.type === "checkbox") {
         return false;
     }
-    if (["text", "number", "block", "url", "phone", "email", "template"].includes(value.type)) {
+    if (["text", "block", "url", "phone", "email", "template"].includes(value.type)) {
         return !value[value.type as "text"]?.content;
+    }
+    if (value.type === "number") {
+        return !value.number?.isNotEmpty;
     }
     if (["mSelect", "mAsset", "select"].includes(value.type)) {
         if (value[(value.type === "select" ? "mSelect" : value.type) as "mSelect"]?.length > 0) {

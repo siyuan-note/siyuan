@@ -16,13 +16,6 @@
 
 package av
 
-// Calculable 接口定义了可计算的视图类型。
-type Calculable interface {
-
-	// Calc 根据视图中设置的计算规则进行计算。
-	Calc()
-}
-
 // ColumnCalc 描述了列（字段）计算操作和结果的结构。
 type ColumnCalc struct {
 	Operator CalcOperator `json:"operator"` // 计算操作符

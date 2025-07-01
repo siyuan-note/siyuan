@@ -130,6 +130,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                         }
                     }
                 });
+                if (eWidth === 0) {
+                    pinMaxIndex = pinIndex;
+                }
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
                 if (pinIndex > -1) {
                     tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -525,7 +528,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         } else if (operation.action === "setAttrViewColWrap") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
                 item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
-                   cellItem.setAttribute("data-wrap", operation.data.toString());
+                    cellItem.setAttribute("data-wrap", operation.data.toString());
                 });
             });
         } else {

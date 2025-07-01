@@ -1229,7 +1229,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 
 	// 做一些数据兼容和订正处理
-	checkViewInstance(attrView, view)
+	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
 	viewable = sql.RenderView(view, attrView, query)

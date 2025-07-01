@@ -23,7 +23,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-func checkViewInstance(attrView *av.AttributeView, view *av.View) {
+func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	// 字段删除以后需要删除设置的过滤和排序
 	tmpFilters := []*av.ViewFilter{}
 	for _, f := range view.Filters {

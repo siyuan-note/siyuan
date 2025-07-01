@@ -44,6 +44,59 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
+	err := setAttrViewGroup(operation)
+	if err != nil {
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func setAttrViewGroup(operation *Operation) error {
+	attrView, err := av.ParseAttributeView(operation.AvID)
+	if err != nil {
+		return err
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	if err != nil {
+		return err
+	}
+
+	group := operation.Data.(*av.ViewGroup)
+	view.Group = group
+
+	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
+	// 生成分组数据
+	switch view.LayoutType {
+	case av.LayoutTypeTable:
+		table := sql.RenderAttributeViewTable(attrView, view, "")
+		groupRows := map[string][]*av.TableRow{}
+		for _, row := range table.Rows {
+			value := row.GetValue(group.Field)
+			switch group.Method {
+			case av.GroupMethodValue:
+				strVal := value.String(false)
+				groupRows[strVal] = append(groupRows[strVal], row)
+			}
+		}
+
+		for _, rows := range groupRows {
+			v := av.NewTableView()
+			v.Table = av.NewLayoutTable()
+			for _, row := range rows {
+				v.Table.RowIDs = append(v.Table.RowIDs, row.ID)
+			}
+			view.Groups = append(view.Groups, v)
+		}
+	case av.LayoutTypeGallery:
+
+	}
+
+	err = av.SaveAttributeView(attrView)
+	return err
+}
+
 func (tx *Transaction) doSetAttrViewCardAspectRatio(operation *Operation) (ret *TxErr) {
 	err := setAttrViewCardAspectRatio(operation)
 	if err != nil {
@@ -1232,7 +1285,37 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
+	if nil != view.Group && 0 < len(view.Groups) {
+		var instances []av.Viewable
+		for _, groupView := range view.Groups {
+			groupViewable := sql.RenderView(groupView, attrView, query)
+			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+			if nil != err {
+				return
+			}
+			instances = append(instances, groupViewable)
+		}
+
+		viewable = instances[0]
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			for i := 1; i < len(instances); i++ {
+				viewable.(*av.Table).Groups = append(viewable.(*av.Table).Groups, instances[i].(*av.Table).Groups...)
+			}
+		case av.LayoutTypeGallery:
+			for i := 1; i < len(instances); i++ {
+				viewable.(*av.Gallery).Groups = append(viewable.(*av.Gallery).Groups, instances[i].(*av.Gallery).Groups...)
+			}
+		}
+		return
+	}
+
 	viewable = sql.RenderView(view, attrView, query)
+	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
+	return
+}
+
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {
 	if nil == viewable {
 		err = av.ErrViewNotFound
 		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)

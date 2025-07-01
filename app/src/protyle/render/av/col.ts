@@ -1055,7 +1055,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 });
             }
         });
-        menu.addSeparator({id: "separator_3"});
     }
     const cellRect = cellElement.getBoundingClientRect();
     menu.open({

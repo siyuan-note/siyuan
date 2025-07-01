@@ -1229,25 +1229,8 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 
 	// 做一些数据兼容和订正处理
-	checkViewInstance(attrView)
+	checkViewInstance(attrView, view)
 	upgradeAttributeViewSpec(attrView)
-
-	// 字段删除以后需要删除设置的过滤和排序
-	tmpFilters := []*av.ViewFilter{}
-	for _, f := range view.Filters {
-		if k, _ := attrView.GetKey(f.Column); nil != k {
-			tmpFilters = append(tmpFilters, f)
-		}
-	}
-	view.Filters = tmpFilters
-
-	tmpSorts := []*av.ViewSort{}
-	for _, s := range view.Sorts {
-		if k, _ := attrView.GetKey(s.Column); nil != k {
-			tmpSorts = append(tmpSorts, s)
-		}
-	}
-	view.Sorts = tmpSorts
 
 	viewable = sql.RenderView(view, attrView, query)
 	if nil == viewable {

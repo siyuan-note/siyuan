@@ -27,10 +27,10 @@
     overflow-x: auto;
     overflow-y: hidden;
     cursor: auto;
-  }
 
-  &[data-av-type="gallery"] > .av__container {
-    overflow: inherit;
+    &.fn__block {
+      overflow: visible;
+    }
   }
 
   &__pulse {

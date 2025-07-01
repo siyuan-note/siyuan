@@ -66,8 +66,8 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		})
 	}
 
-	cardsValues := generateAttrViewItems(attrView) // 生成卡片
-	filterNotFoundAttrViewItems(&cardsValues)      // 过滤掉不存在的卡片
+	cardsValues := generateAttrViewItems(attrView, view) // 生成卡片
+	filterNotFoundAttrViewItems(&cardsValues)            // 过滤掉不存在的卡片
 
 	// 批量加载绑定块对应的树
 	var ialIDs []string

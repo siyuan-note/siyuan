@@ -71,8 +71,8 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 		})
 	}
 
-	rowsValues := generateAttrViewItems(attrView) // 生成行
-	filterNotFoundAttrViewItems(&rowsValues)      // 过滤掉不存在的行
+	rowsValues := generateAttrViewItems(attrView, view) // 生成行
+	filterNotFoundAttrViewItems(&rowsValues)            // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {

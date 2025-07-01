@@ -66,6 +66,8 @@ type BaseInstance struct {
 	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
 	Folded           bool          `json:"folded,omitempty"` // 是否折叠
 	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
+
+	Groups []Viewable `json:"groups,omitempty"` // 分组实例列表
 }
 
 func (baseInstance *BaseInstance) GetSorts() []*ViewSort {
@@ -74,6 +76,14 @@ func (baseInstance *BaseInstance) GetSorts() []*ViewSort {
 
 func (baseInstance *BaseInstance) GetFilters() []*ViewFilter {
 	return baseInstance.Filters
+}
+
+func (baseInstance *BaseInstance) SetGroups(viewables []Viewable) {
+	baseInstance.Groups = viewables
+}
+
+func (baseInstance *BaseInstance) GetID() string {
+	return baseInstance.ID
 }
 
 // BaseInstanceField 描述了实例字段的基础结构。

@@ -45,26 +45,26 @@ import (
 )
 
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
-	err := setAttrViewGroup(operation)
+	err := SetAttributeViewGroup(operation.AvID, operation.BlockID, operation.Data.(*av.ViewGroup))
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func setAttrViewGroup(operation *Operation) error {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) error {
+	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
 	if err != nil {
 		return err
 	}
 
-	group := operation.Data.(*av.ViewGroup)
 	view.Group = group
+	view.Groups = nil
 
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
@@ -85,7 +85,7 @@ func setAttrViewGroup(operation *Operation) error {
 			v := av.NewTableView()
 			v.Table = av.NewLayoutTable()
 			for _, row := range rows {
-				v.Table.RowIDs = append(v.Table.RowIDs, row.ID)
+				v.GroupItemIDs = append(v.GroupItemIDs, row.ID)
 			}
 			view.Groups = append(view.Groups, v)
 		}
@@ -1285,33 +1285,30 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
-	if nil != view.Group && 0 < len(view.Groups) {
-		var instances []av.Viewable
-		for _, groupView := range view.Groups {
-			groupViewable := sql.RenderView(groupView, attrView, query)
-			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
-			if nil != err {
-				return
-			}
-			instances = append(instances, groupViewable)
-		}
-
-		viewable = instances[0]
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			for i := 1; i < len(instances); i++ {
-				viewable.(*av.Table).Groups = append(viewable.(*av.Table).Groups, instances[i].(*av.Table).Groups...)
-			}
-		case av.LayoutTypeGallery:
-			for i := 1; i < len(instances); i++ {
-				viewable.(*av.Gallery).Groups = append(viewable.(*av.Gallery).Groups, instances[i].(*av.Gallery).Groups...)
-			}
-		}
+	viewable = sql.RenderView(view, attrView, query)
+	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
+	if nil != err {
 		return
 	}
 
-	viewable = sql.RenderView(view, attrView, query)
-	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
+	// 如果存在分组的话渲染分组视图视图
+	var groups []av.Viewable
+	for _, groupView := range view.Groups {
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = view.Gallery.CardFields
+		}
+
+		groupViewable := sql.RenderView(groupView, attrView, query)
+		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+		if nil != err {
+			return
+		}
+		groups = append(groups, groupViewable)
+	}
+	viewable.SetGroups(groups)
 	return
 }
 

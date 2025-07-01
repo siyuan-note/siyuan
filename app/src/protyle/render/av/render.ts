@@ -325,18 +325,21 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
                     const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                     if (newCellElement) {
                         newCellElement.classList.add("av__cell--select");
+                        cellScrollIntoView(e, newCellElement);
                     }
                     const avMaskElement = document.querySelector(".av__mask");
+                    const avPanelElement = document.querySelector(".av__panel");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel") && !isSearching && getSelection().rangeCount > 0) {
+                    } else if (!avPanelElement && !isSearching && getSelection().rangeCount > 0) {
                         const range = getSelection().getRangeAt(0);
                         const blockElement = hasClosestBlock(range.startContainer);
                         if (blockElement && e.isSameNode(blockElement)) {
                             focusBlock(e);
                         }
+                    } else if (avPanelElement && !newCellElement) {
+                        avPanelElement.remove();
                     }
-                    cellScrollIntoView(e, newCellElement);
                 }
                 selectRowIds.forEach((selectRowId, index) => {
                     const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;

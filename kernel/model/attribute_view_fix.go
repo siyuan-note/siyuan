@@ -23,13 +23,34 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 )
 
-func checkViewInstance(attrView *av.AttributeView) {
-	changed := false
-	for i, view := range attrView.Views {
-		if av.LayoutTypeGallery == view.LayoutType && nil == view.Gallery {
+func checkAttrView(attrView *av.AttributeView, view *av.View) {
+	// 字段删除以后需要删除设置的过滤和排序
+	tmpFilters := []*av.ViewFilter{}
+	for _, f := range view.Filters {
+		if k, _ := attrView.GetKey(f.Column); nil != k {
+			tmpFilters = append(tmpFilters, f)
+		}
+	}
+	changed := len(tmpFilters) != len(view.Filters)
+	view.Filters = tmpFilters
+
+	tmpSorts := []*av.ViewSort{}
+	for _, s := range view.Sorts {
+		if k, _ := attrView.GetKey(s.Column); nil != k {
+			tmpSorts = append(tmpSorts, s)
+		}
+	}
+	if !changed {
+		changed = len(tmpSorts) != len(view.Sorts)
+	}
+	view.Sorts = tmpSorts
+
+	// 视图类型不匹配时需要订正
+	for i, v := range attrView.Views {
+		if av.LayoutTypeGallery == v.LayoutType && nil == v.Gallery {
 			// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
-			if nil != view.Table {
-				view.LayoutType = av.LayoutTypeTable
+			if nil != v.Table {
+				v.LayoutType = av.LayoutTypeTable
 				changed = true
 			} else {
 				attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
@@ -37,6 +58,7 @@ func checkViewInstance(attrView *av.AttributeView) {
 			}
 		}
 	}
+
 	if changed {
 		av.SaveAttributeView(attrView)
 	}

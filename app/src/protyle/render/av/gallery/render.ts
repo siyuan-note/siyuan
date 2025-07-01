@@ -71,9 +71,9 @@ export const renderGallery = (options: {
                 const coverClass = "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
-                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="${item.coverURL}"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${item.coverURL}"></div>`;
                     } else {
-                        galleryHTML += `<div class="${coverClass}"><div class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" style="background-image:url('${item.coverURL.replace(/'/g, "\\'")}')"></div></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" src="${item.coverURL}"></div>`;
                     }
                 } else if (item.coverContent) {
                     galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;
@@ -81,7 +81,7 @@ export const renderGallery = (options: {
                     galleryHTML += `<div class="${coverClass}"></div>`;
                 }
             }
-            galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}${view.wrapField ? " av__gallery-fields--wrap" : ""}">`;
+            galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}">`;
             item.values.forEach((cell, fieldsIndex) => {
                 if (view.fields[fieldsIndex].hidden) {
                     return;
@@ -92,9 +92,13 @@ export const renderGallery = (options: {
                 }
                 const isEmpty = cellValueIsEmpty(cell.value);
                 // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
-                galleryHTML += `<div class="av__cell${checkClass} ariaLabel" 
+                let ariaLabel = escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type);
+                if (view.fields[fieldsIndex].desc) {
+                    ariaLabel += escapeAttr(`<div class="ft__on-surface">${view.fields[fieldsIndex].desc}</div>`);
+                }
+                galleryHTML += `<div class="av__cell${checkClass} ariaLabel" data-wrap="${view.fields[fieldsIndex].wrap}" 
 data-empty="${isEmpty}" 
-aria-label="${escapeAttr(view.fields[fieldsIndex].name) || getColNameByType(view.fields[fieldsIndex].type)}" 
+aria-label="${ariaLabel}" 
 data-position="5west"
 data-id="${cell.id}" 
 data-field-id="${view.fields[fieldsIndex].id}"
@@ -136,29 +140,29 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
             </span>
             <div class="fn__flex-1"></div>
             <div class="fn__space"></div>
-            <span data-type="av-switcher" class="block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
+            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
                 <svg><use xlink:href="#iconDown"></use></svg>
                 <span class="fn__space"></span>
                 <small>${response.data.views.length}</small>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-filter" class="block__icon${view.filters.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${view.filters.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconFilter"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <span data-type="av-sort" class="block__icon${view.sorts.length > 0 ? " block__icon--active" : ""}">
+            <span data-type="av-sort" aria-label="${window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${view.sorts.length > 0 ? " block__icon--active" : ""}">
                 <svg><use xlink:href="#iconSort"></use></svg>
             </span>
             <div class="fn__space"></div>
-            <button data-type="av-search-icon" class="block__icon">
+            <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon">
                 <svg><use xlink:href="#iconSearch"></use></svg>
             </button>
             <div style="position: relative" class="fn__flex">
                 <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
             </div>
             <div class="fn__space"></div>
-            <span data-type="av-more" class="block__icon">
-                <svg><use xlink:href="#iconMore"></use></svg>
+            <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
+                <svg><use xlink:href="#iconSettings"></use></svg>
             </span>
             <div class="fn__space"></div>
             <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newRow}">

@@ -756,6 +756,10 @@ export const bazaar = {
                             }, async response => {
                                 this._genMyHTML(bazaarType, app);
                                 bazaar._onBazaar(response, bazaarType, ["icons"].includes(bazaarType));
+                                // https://github.com/siyuan-note/siyuan/issues/15177
+                                if (bazaarType === "themes" && response.data.appearance?.themeVer) {
+                                    window.siyuan.config.appearance.themeVer = response.data.appearance.themeVer;
+                                }
                                 // 更新主题后不需要对该主题进行切换 https://github.com/siyuan-note/siyuan/issues/4966
                                 // https://github.com/siyuan-note/siyuan/issues/5411
                                 if (bazaarType === "themes" && (
@@ -1201,7 +1205,7 @@ export const bazaar = {
         }
         element.innerHTML = `<div class="b3-cards">${html}</div>`;
         if (reload) {
-            appearance.onSetappearance(response.data.appearance);
+            appearance.onSetAppearance(response.data.appearance);
         }
     }
 };

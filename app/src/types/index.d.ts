@@ -836,7 +836,9 @@ interface IAVView {
     type: TAVView;
     icon: string;
     hideAttrViewName: boolean;
-    pageSize: number,
+    pageSize: number;
+    showIcon: boolean;
+    wrapField: boolean;
 }
 
 interface IAVTable extends IAVView {
@@ -853,8 +855,6 @@ interface IAVGallery extends IAVView {
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
     fitImage: boolean;
-    showIcon: boolean;
-    wrapField: boolean;
     cards: IAVGalleryItem[],
     desc: string
     fields: IAVColumn[]

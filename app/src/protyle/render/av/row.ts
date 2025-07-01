@@ -242,7 +242,8 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
                     const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
                     const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
                     const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
-                    cellElement.innerHTML = renderCell(cellValue);
+                    const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+                    cellElement.innerHTML = renderCell(cellValue, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
                     renderCellAttr(cellElement, cellValue);
                 }
             });

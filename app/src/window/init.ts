@@ -51,7 +51,7 @@ export const init = (app: App) => {
     });
     initStatus(true);
     initWindow(app);
-    appearance.onSetappearance(window.siyuan.config.appearance);
+    appearance.onSetAppearance(window.siyuan.config.appearance);
     initAssets();
     setInlineStyle();
     renderSnippet();

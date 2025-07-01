@@ -1,4 +1,6 @@
 {
+  "allViews": "All views",
+  "copyAVID": "Copy database ID",
   "hideEmptyFields": "Hide empty fields",
   "displayEmptyFields": "Display empty fields",
   "cardAspectRatio": "Preview area aspect ratio",
@@ -10,6 +12,7 @@
   "small": "Small",
   "fitImage": "Auto-fit image size",
   "showIcon": "Show icon",
+  "showAllFieldsIcon": "Show field icons",
   "wrapAllFields": "Auto-wrap fields",
   "gallery": "Gallery",
   "newTag": "New tag",

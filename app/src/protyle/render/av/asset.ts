@@ -72,7 +72,11 @@ ${contentHTML}
 <svg class="b3-menu__action" data-type="editAssetItem"><use xlink:href="#iconEdit"></use></svg>
 </button>`;
     });
-    return `<div class="b3-menu__items">
+    const ids: string[] = [];
+    cellElements.forEach(item => {
+        ids.push(item.dataset.id);
+    });
+    return `<div class="b3-menu__items" data-ids="${ids}">
     ${html}
     <button data-type="addAssetExist" class="b3-menu__item b3-menu__item--current">
         <svg class="b3-menu__icon"><use xlink:href="#iconImage"></use></svg>

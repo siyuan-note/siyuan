@@ -1,4 +1,6 @@
 {
+  "allViews": "Tutte le viste",
+  "copyAVID": "Copia ID del database",
   "hideEmptyFields": "Nascondi campi vuoti",
   "displayEmptyFields": "Mostra campi vuoti",
   "cardAspectRatio": "Proporzioni dell'area di anteprima",
@@ -10,6 +12,7 @@
   "small": "Piccolo",
   "fitImage": "Adatta automaticamente la dimensione dell'immagine",
   "showIcon": "Mostra icona",
+  "showAllFieldsIcon": "Mostra icone dei campi",
   "wrapAllFields": "Avvolgi automaticamente i campi",
   "gallery": "Galleria",
   "newTag": "Nuova etichetta",

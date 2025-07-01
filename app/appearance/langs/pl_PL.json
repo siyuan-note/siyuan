@@ -1,4 +1,6 @@
 {
+  "allViews": "Wszystkie widoki",
+  "copyAVID": "Skopiuj ID bazy danych",
   "hideEmptyFields": "Ukryj puste pola",
   "displayEmptyFields": "Pokaż puste pola",
   "cardAspectRatio": "Proporcje obszaru podglądu",
@@ -10,6 +12,7 @@
   "small": "Mały",
   "fitImage": "Automatyczne dopasowanie rozmiaru obrazu",
   "showIcon": "Pokaż ikonę",
+  "showAllFieldsIcon": "Pokaż ikony pól",
   "wrapAllFields": "Automatyczne zawijanie pól",
   "gallery": "Galeria",
   "newTag": "Nowy tag",

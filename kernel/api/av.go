@@ -27,6 +27,40 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func setAttrViewGroup(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	blockID := arg["blockID"].(string)
+	groupArg := arg["group"].(map[string]interface{})
+
+	data, err := gulu.JSON.MarshalJSON(groupArg)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+	group := &av.ViewGroup{}
+	if err = gulu.JSON.UnmarshalJSON(data, group); nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	err = model.SetAttributeViewGroup(avID, blockID, group)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+}
+
 func changeAttrViewLayout(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	arg, ok := util.JsonArg(c, ret)
@@ -600,14 +634,6 @@ func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.R
 
 	var views []map[string]interface{}
 	for _, v := range attrView.Views {
-		pSize := 10
-		switch v.LayoutType {
-		case av.LayoutTypeTable:
-			pSize = v.Table.PageSize
-		case av.LayoutTypeGallery:
-			pSize = v.Gallery.PageSize
-		}
-
 		view := map[string]interface{}{
 			"id":               v.ID,
 			"icon":             v.Icon,
@@ -615,7 +641,7 @@ func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.R
 			"desc":             v.Desc,
 			"hideAttrViewName": v.HideAttrViewName,
 			"type":             v.LayoutType,
-			"pageSize":         pSize,
+			"pageSize":         v.PageSize,
 		}
 
 		views = append(views, view)

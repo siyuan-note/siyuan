@@ -1289,6 +1289,13 @@ export class Gutter {
             }
         }]);
         if (type === "NodeAttributeView") {
+            copyMenu.splice(6, 0, {
+                iconHTML: "",
+                label: window.siyuan.languages.copyAVID,
+                click() {
+                    writeText(nodeElement.getAttribute("data-av-id"));
+                }
+            });
             copyMenu.push({
                 id: "duplicateCompletely",
                 iconHTML: "",
@@ -1517,7 +1524,7 @@ export class Gutter {
                     submenu: tableMenu(protyle, nodeElement, cellElement as HTMLTableCellElement, range).menus as IMenu[]
                 }).element);
             }
-        } else if (type === "NodeAttributeView" && !protyle.disabled) {
+        } else if (type === "NodeAttributeView") {
             window.siyuan.menus.menu.append(new MenuItem({id: "separator_exportCSV", type: "separator"}).element);
             window.siyuan.menus.menu.append(new MenuItem({
                 id: "exportCSV",

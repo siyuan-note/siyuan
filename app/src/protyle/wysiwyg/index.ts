@@ -445,6 +445,8 @@ export class WYSIWYG {
                 // 右键
                 return;
             }
+            const documentSelf = document;
+            documentSelf.onmouseup = null;
             let target = event.target as HTMLElement;
             let nodeElement = hasClosestBlock(target) as HTMLElement;
             const hasSelectClassElement = this.element.querySelector(".protyle-wysiwyg--select");
@@ -582,7 +584,6 @@ export class WYSIWYG {
                 event.preventDefault();
                 return;
             }
-
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {
                 let ctrlElement = nodeElement;
                 if (!hasSelectClassElement && galleryItemElement) {
@@ -622,22 +623,30 @@ export class WYSIWYG {
 
             // https://github.com/siyuan-note/siyuan/issues/15100
             if (galleryItemElement) {
+                documentSelf.onmouseup = () => {
+                    documentSelf.onmousemove = null;
+                    documentSelf.onmouseup = null;
+                    documentSelf.ondragstart = null;
+                    documentSelf.onselectstart = null;
+                    documentSelf.onselect = null;
+                    clearSelect(["galleryItem"], protyle.wysiwyg.element);
+                    return false;
+                };
                 return;
             }
-
+            const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
             // https://github.com/siyuan-note/siyuan/issues/3026
             hideElements(["select"], protyle);
             if (hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                 clearSelect(["img", "row", "cell"], protyle.wysiwyg.element);
-            } else if (!hasClosestByClassName(target, "av__firstcol")) {
+            } else if (!hasClosestByClassName(target, "av__firstcol") && !avDragFillElement) {
                 clearSelect(["img", "av"], protyle.wysiwyg.element);
             }
 
-            if (hasClosestByClassName(target, "protyle-action") ||
+            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block")) ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }
-            const documentSelf = document;
             const wysiwygRect = protyle.wysiwyg.element.getBoundingClientRect();
             const wysiwygStyle = window.getComputedStyle(protyle.wysiwyg.element);
             const mostLeft = wysiwygRect.left + (parseInt(wysiwygStyle.paddingLeft) || 24) + 1;
@@ -698,7 +707,6 @@ export class WYSIWYG {
                 return;
             }
             // av drag fill
-            const avDragFillElement = hasClosestByClassName(target, "av__drag-fill");
             if (!protyle.disabled && avDragFillElement) {
                 if (!nodeElement) {
                     return;

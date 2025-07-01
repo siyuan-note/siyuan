@@ -313,8 +313,9 @@
 				"pageSize": 50,
 				"coverFrom": 2,
 				"coverFromAssetKeyID": "20250615171115-3g32dmi",
-				"cardSize": 2,
-				"fitImage": true,
+				"cardAspectRatio": 3,
+				"cardSize": 0,
+				"fitImage": false,
 				"showIcon": true,
 				"wrapField": false,
 				"fields": [

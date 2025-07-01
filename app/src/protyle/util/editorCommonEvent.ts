@@ -31,7 +31,7 @@ import {zoomOut} from "../../menus/protyle";
 /// #if !BROWSER
 import {webUtils} from "electron";
 /// #endif
-import {addDragFill} from "../render/av/cell";
+import {addDragFill, getTypeByCellElement} from "../render/av/cell";
 import {processClonePHElement} from "../render/util";
 import {insertGalleryItemAnimation} from "../render/av/gallery/item";
 import {clearSelect} from "./clearSelect";
@@ -809,12 +809,19 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragstart", (event) => {
-        const target = event.target as HTMLElement;
+        let target = event.target as HTMLElement;
+        if (target.classList.contains("av__gallery-img")) {
+            target = hasClosestByClassName(target, "av__gallery-item") as HTMLElement;
+        }
+        if (!target) {
+            return;
+        }
         if (target.tagName === "IMG") {
             window.siyuan.dragElement = undefined;
             event.preventDefault();
             return;
         }
+
         if (target.classList) {
             if (hasClosestByClassName(target, "protyle-wysiwyg__embed")) {
                 window.siyuan.dragElement = undefined;
@@ -841,15 +848,33 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     target.outerHTML);
                 return;
             } else if (target.classList.contains("av__gallery-item")) {
-                window.siyuan.dragElement = target;
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
+                    target.classList.add("av__gallery-item--select");
+                    const ghostElement = document.createElement("div");
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr " + target.parentElement.className;
+                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                        const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
+                        cloneItem.setAttribute("style", `width:${item.clientWidth}px;;height:${item.clientHeight}px;`);
+                        cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
+                        ghostElement.append(cloneItem);
+                    });
+                    ghostElement.setAttribute("style", "position:fixed;opacity:.1;padding:0;z-index:1;");
+                    document.body.append(ghostElement);
+                    event.dataTransfer.setDragImage(ghostElement, -10, -10);
+                    setTimeout(() => {
+                        ghostElement.remove();
+                    });
+                    window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
                         selectIds.push(item.getAttribute("data-id"));
                     });
+                    if (selectIds.length === 0) {
+                        selectIds.push(target.getAttribute("data-id"));
+                    }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
-                        target.outerHTML);
+                        ghostElement.outerHTML);
                 }
                 return;
             }
@@ -1306,13 +1331,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else {
                 const cellElement = hasClosestByClassName(event.target, "av__cell");
                 if (cellElement) {
-                    const cellType = avElement.querySelector(`.av__row--header [data-col-id="${cellElement.dataset.colId}"]`)?.getAttribute("data-dtype");
-                    if (cellType === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
+                    if (getTypeByCellElement(cellElement) === "mAsset" && event.dataTransfer.types[0] === "Files" && !isBrowser()) {
                         const files: string[] = [];
                         for (let i = 0; i < event.dataTransfer.files.length; i++) {
                             files.push(webUtils.getPathForFile(event.dataTransfer.files[i]));
                         }
                         dragUpload(files, protyle, cellElement);
+                        clearSelect(["cell"], avElement);
                     }
                 }
             }
@@ -1352,7 +1377,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 if (blockElement) {
                     clearSelect(["cell", "row"], protyle.wysiwyg.element);
                     targetElement.classList.add("av__cell--select");
-                    addDragFill(targetElement);
+                    if (blockElement.getAttribute("data-av-type") !== "gallery") {
+                        addDragFill(targetElement);
+                    }
                     dragoverElement = targetElement;
                 }
             }

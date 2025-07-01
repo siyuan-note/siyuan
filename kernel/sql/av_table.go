@@ -30,8 +30,11 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			Name:             view.Name,
 			Desc:             view.Desc,
 			HideAttrViewName: view.HideAttrViewName,
-			Filters:          view.Table.Filters,
-			Sorts:            view.Table.Sorts,
+			Filters:          view.Filters,
+			Sorts:            view.Sorts,
+			Group:            view.Group,
+			ShowIcon:         view.Table.ShowIcon,
+			WrapField:        view.Table.WrapField,
 		},
 		Columns: []*av.TableColumn{},
 		Rows:    []*av.TableRow{},
@@ -52,6 +55,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Name:         key.Name,
 				Type:         key.Type,
 				Icon:         key.Icon,
+				Wrap:         col.Wrap,
 				Hidden:       col.Hidden,
 				Desc:         key.Desc,
 				Options:      key.Options,
@@ -61,15 +65,14 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Rollup:       key.Rollup,
 				Date:         key.Date,
 			},
-			Wrap:  col.Wrap,
 			Width: col.Width,
 			Pin:   col.Pin,
 			Calc:  col.Calc,
 		})
 	}
 
-	rowsValues := generateAttrViewItems(attrView) // 生成行
-	filterNotFoundAttrViewItems(&rowsValues)      // 过滤掉不存在的行
+	rowsValues := generateAttrViewItems(attrView, view) // 生成行
+	filterNotFoundAttrViewItems(&rowsValues)            // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {

@@ -272,6 +272,10 @@ export const setInlineStyle = async (set = true) => {
 .protyle-wysiwyg [data-node-id].li::before {
     right: 17px;
     left: auto;
+}
+.b3-typography table {
+  margin-left: auto;
+  margin-right: unset;
 }`;
     }
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}

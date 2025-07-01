@@ -35,12 +35,29 @@ svg {
 }
 
 .protyle-wysiwyg .table[data-node-id] {
+  &[style*="direction: ltr"] {
+    margin-left: unset;
+    margin-right: auto;
+  }
+
+  &[style*="direction: rtl"] {
+    margin-left: auto;
+    margin-right: unset;
+  }
+
+  &[style*="text-align: left"] {
+    margin-left: unset;
+    margin-right: auto;
+  }
+
   &[style*="text-align: center"] {
-    margin: auto;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   &[style*="text-align: right"] {
     margin-left: auto;
+    margin-right: unset;
   }
 }
 

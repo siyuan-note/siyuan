@@ -514,12 +514,18 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             });
         } else if (operation.action === "setAttrViewShowIcon") {
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(item => {
+                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
                     if (operation.data) {
-                        item.classList.remove("fn__none");
+                        cellItem.classList.remove("fn__none");
                     } else {
-                        item.classList.add("fn__none");
+                        cellItem.classList.add("fn__none");
                     }
+                });
+            });
+        } else if (operation.action === "setAttrViewColWrap") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
+                   cellItem.setAttribute("data-wrap", operation.data.toString());
                 });
             });
         } else {

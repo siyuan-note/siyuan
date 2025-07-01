@@ -254,7 +254,6 @@ func NewGalleryView() (ret *View) {
 type Viewable interface {
 	Filterable
 	Sortable
-	Groupable
 	Calculable
 
 	GetType() LayoutType

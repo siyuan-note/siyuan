@@ -190,7 +190,3 @@ func (gallery *Gallery) Sort(attrView *AttributeView) {
 func (gallery *Gallery) Filter(attrView *AttributeView) {
 	filter0(gallery, attrView)
 }
-
-func (gallery *Gallery) Group(attrView *AttributeView) {
-	group0(gallery, attrView)
-}

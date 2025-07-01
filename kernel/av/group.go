@@ -16,13 +16,6 @@
 
 package av
 
-// Groupable 定义了可分组的视图类型。
-type Groupable interface {
-
-	// Group 根据视图中设置的分组规则进行分组。
-	Group(attrView *AttributeView)
-}
-
 type ViewGroup struct {
 	Field  string      `json:"field"`           // 分组字段 ID
 	Method GroupMethod `json:"method"`          // 分组方式

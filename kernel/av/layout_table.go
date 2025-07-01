@@ -168,7 +168,3 @@ func (table *Table) Sort(attrView *AttributeView) {
 func (table *Table) Filter(attrView *AttributeView) {
 	filter0(table, attrView)
 }
-
-func (table *Table) Group(attrView *AttributeView) {
-	group0(table, attrView)
-}

@@ -1232,7 +1232,37 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
+	if nil != view.Group && 0 < len(view.Groups) {
+		var instances []av.Viewable
+		for _, groupView := range view.Groups {
+			groupViewable := sql.RenderView(groupView, attrView, query)
+			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+			if nil != err {
+				return
+			}
+			instances = append(instances, groupViewable)
+		}
+
+		viewable = instances[0]
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			for i := 1; i < len(instances); i++ {
+				viewable.(*av.Table).Groups = append(viewable.(*av.Table).Groups, instances[i].(*av.Table).Groups...)
+			}
+		case av.LayoutTypeGallery:
+			for i := 1; i < len(instances); i++ {
+				viewable.(*av.Gallery).Groups = append(viewable.(*av.Gallery).Groups, instances[i].(*av.Gallery).Groups...)
+			}
+		}
+		return
+	}
+
 	viewable = sql.RenderView(view, attrView, query)
+	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
+	return
+}
+
+func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {
 	if nil == viewable {
 		err = av.ErrViewNotFound
 		logging.LogErrorf("render attribute view [%s] failed", attrView.ID)

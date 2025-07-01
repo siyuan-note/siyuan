@@ -1294,7 +1294,13 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	// 如果存在分组的话渲染分组视图视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
-		groupView.Table.Columns = view.Table.Columns
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = view.Gallery.CardFields
+		}
+
 		groupViewable := sql.RenderView(groupView, attrView, query)
 		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 		if nil != err {

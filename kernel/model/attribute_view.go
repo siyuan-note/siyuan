@@ -45,26 +45,26 @@ import (
 )
 
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
-	err := setAttrViewGroup(operation)
+	err := SetAttributeViewGroup(operation.AvID, operation.BlockID, operation.Data.(*av.ViewGroup))
 	if err != nil {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func setAttrViewGroup(operation *Operation) error {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) error {
+	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
 	}
 
-	view, err := getAttrViewViewByBlockID(attrView, operation.BlockID)
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
 	if err != nil {
 		return err
 	}
 
-	group := operation.Data.(*av.ViewGroup)
 	view.Group = group
+	view.Groups = nil
 
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
@@ -1288,6 +1288,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	if nil != view.Group && 0 < len(view.Groups) {
 		var instances []av.Viewable
 		for _, groupView := range view.Groups {
+			groupView.Table.Columns = view.Table.Columns
 			groupViewable := sql.RenderView(groupView, attrView, query)
 			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 			if nil != err {
@@ -1300,11 +1301,11 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
 			for i := 1; i < len(instances); i++ {
-				viewable.(*av.Table).Groups = append(viewable.(*av.Table).Groups, instances[i].(*av.Table).Groups...)
+				viewable.(*av.Table).Groups = append(viewable.(*av.Table).Groups, instances[i].(*av.Table))
 			}
 		case av.LayoutTypeGallery:
 			for i := 1; i < len(instances); i++ {
-				viewable.(*av.Gallery).Groups = append(viewable.(*av.Gallery).Groups, instances[i].(*av.Gallery).Groups...)
+				viewable.(*av.Gallery).Groups = append(viewable.(*av.Gallery).Groups, instances[i].(*av.Gallery))
 			}
 		}
 		return

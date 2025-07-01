@@ -44,10 +44,10 @@ type GroupRange struct {
 }
 
 // GroupOrder 描述了分组排序规则。
-type GroupOrder string
+type GroupOrder int
 
 const (
-	GroupOrderAsc  GroupOrder = "ASC"  // 升序
-	GroupOrderDesc GroupOrder = "DESC" // 降序
-	GroupOrderMan  GroupOrder = "Man"  // 手动排序
+	GroupOrderAsc  = iota // 升序
+	GroupOrderDesc        // 降序
+	GroupOrderMan         // 手动排序
 )

@@ -2,6 +2,7 @@ import {transaction} from "../../wysiwyg/transaction";
 import {Constants} from "../../../constants";
 import {fetchSyncPost} from "../../../util/fetch";
 import {getCardAspectRatio} from "./gallery/util";
+import {getFieldsByData} from "./view";
 
 export const getLayoutHTML = (data: IAV) => {
     let html = "";
@@ -148,6 +149,10 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
+        getFieldsByData(options.data).forEach(item => {
+            item.wrap = checked;
+        });
+        options.data.view.wrapField = checked;
     });
     if (options.data.viewType !== "gallery") {
         return;

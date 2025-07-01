@@ -380,6 +380,8 @@ export const bindEditEvent = (options: {
                 data: !wrapElement.checked,
                 blockID: options.blockID
             }]);
+            colData.wrap = wrapElement.checked;
+            options.data.view.wrapField = options.data.view.wrapField && wrapElement.checked;
         });
     }
 

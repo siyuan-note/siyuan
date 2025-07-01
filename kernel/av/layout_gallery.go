@@ -97,8 +97,6 @@ type Gallery struct {
 	Fields              []*GalleryField `json:"fields"`                        // 画廊字段
 	Cards               []*GalleryCard  `json:"cards"`                         // 画廊卡片
 	CardCount           int             `json:"cardCount"`                     // 画廊总卡片数
-
-	Groups []*Gallery `json:"groups,omitempty"` // 分组实例列表
 }
 
 // GalleryCard 描述了画廊实例卡片的结构。
@@ -177,10 +175,6 @@ func (gallery *Gallery) GetFields() (ret []Field) {
 
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
-}
-
-func (gallery *Gallery) GetID() string {
-	return gallery.ID
 }
 
 func (gallery *Gallery) Sort(attrView *AttributeView) {

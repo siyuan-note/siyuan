@@ -24,13 +24,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// Filterable 接口定义了可过滤的视图类型。
-type Filterable interface {
-
-	// Filter 根据视图中设置的过滤器进行过滤。
-	Filter(attrView *AttributeView)
-}
-
 // ViewFilter 描述了视图过滤器的结构。
 type ViewFilter struct {
 	Column        string         `json:"column"`        // 列（字段）ID

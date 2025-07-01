@@ -187,7 +187,7 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	return
 }
 
-func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.KeyValues) {
+func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
@@ -199,6 +199,17 @@ func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.Key
 			}
 			ret[val.BlockID] = values
 		}
+	}
+
+	// 如果是分组视图，则需要过滤掉不在分组中的项目
+	if 0 < len(view.GroupItemIDs) {
+		tmp := map[string][]*av.KeyValues{}
+		for _, groupItemID := range view.GroupItemIDs {
+			if _, ok := ret[groupItemID]; ok {
+				tmp[groupItemID] = ret[groupItemID]
+			}
+		}
+		ret = tmp
 	}
 	return
 }

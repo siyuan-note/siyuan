@@ -191,12 +191,13 @@ type View struct {
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
 
-	Groups       []*View `json:"groups,omitempty"`       // 分组视图列表
-	GroupCalcSum bool    `json:"groupCalcSum,omitempty"` // 分组是否计算总和
-	GroupName    string  `json:"groupName,omitempty"`    // 分组名称
-	GroupFolded  bool    `json:"groupFolded,omitempty"`  // 分组是否折叠
-	GroupHidden  bool    `json:"groupHidden,omitempty"`  // 分组是否隐藏
-	GroupDefault bool    `json:"groupDefault,omitempty"` // 是否为默认分组
+	Groups       []*View  `json:"groups,omitempty"`       // 分组视图列表
+	GroupItemIDs []string `json:"groupItemIds,omitempty"` // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalcSum bool     `json:"groupCalcSum,omitempty"` // 分组是否计算总和
+	GroupName    string   `json:"groupName,omitempty"`    // 分组名称
+	GroupFolded  bool     `json:"groupFolded,omitempty"`  // 分组是否折叠
+	GroupHidden  bool     `json:"groupHidden,omitempty"`  // 分组是否隐藏
+	GroupDefault bool     `json:"groupDefault,omitempty"` // 是否为默认分组
 }
 
 // LayoutType 描述了视图布局类型。
@@ -252,12 +253,24 @@ func NewGalleryView() (ret *View) {
 
 // Viewable 描述了视图的接口。
 type Viewable interface {
-	Filterable
-	Sortable
-	Calculable
 
+	// Filter 根据视图中设置的过滤器进行过滤。
+	Filter(attrView *AttributeView)
+
+	// Sort 根据视图中设置的排序规则进行排序。
+	Sort(attrView *AttributeView)
+
+	// Calc 根据视图中设置的计算规则进行计算。
+	Calc()
+
+	// GetType 获取视图的布局类型。
 	GetType() LayoutType
+
+	// GetID 获取视图的 ID。
 	GetID() string
+
+	// SetGroups 设置视图分组列表。
+	SetGroups(viewables []Viewable)
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {

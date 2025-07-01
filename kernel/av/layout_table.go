@@ -58,8 +58,6 @@ type Table struct {
 	Columns  []*TableColumn `json:"columns"`  // 表格列
 	Rows     []*TableRow    `json:"rows"`     // 表格行
 	RowCount int            `json:"rowCount"` // 表格总行数
-
-	Groups []*Table `json:"groups,omitempty"` // 分组实例列表
 }
 
 // TableColumn 描述了表格实例列的结构。

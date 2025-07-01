@@ -273,9 +273,8 @@ export const setInlineStyle = async (set = true) => {
     right: 17px;
     left: auto;
 }
-.b3-typography table {
+.b3-typography table:not([style*="text-align: left"]) {
   margin-left: auto;
-  margin-right: unset;
 }`;
     }
     style += `\n:root{--b3-font-size-editor:${window.siyuan.config.editor.fontSize}px}

@@ -504,29 +504,14 @@
   table {
     margin: 1em 0;
 
-    &[style*="direction: ltr"] {
-      margin-left: unset;
-      margin-right: auto;
-    }
-
-    &[style*="direction: rtl"] {
+    &[style*="direction: rtl"]:not([style*="text-align: left"]),
+    &[style*="text-align: right"] {
       margin-left: auto;
-      margin-right: unset;
-    }
-
-    &[style*="text-align: left"] {
-      margin-left: unset;
-      margin-right: auto;
     }
 
     &[style*="text-align: center"] {
       margin-left: auto;
       margin-right: auto;
-    }
-
-    &[style*="text-align: right"] {
-      margin-left: auto;
-      margin-right: unset;
     }
   }
 

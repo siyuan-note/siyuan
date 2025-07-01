@@ -345,6 +345,7 @@
       object-fit: cover;
       width: 100%;
       object-position: center;
+      pointer-events: none;
 
       &--fit {
         object-fit: contain;

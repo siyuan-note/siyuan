@@ -850,12 +850,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             } else if (target.classList.contains("av__gallery-item")) {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
+                    target.classList.add("av__gallery-item--select");
                     const ghostElement = document.createElement("div");
-                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
-                    ghostElement.append(processClonePHElement(target.cloneNode(true) as Element));
-                    ghostElement.setAttribute("style", `position:fixed;opacity:.1;padding:0;
-width:${target.clientWidth}px;;height:${target.clientHeight}px;`);
-                    ghostElement.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr " + target.parentElement.className;
+                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                        const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
+                        cloneItem.setAttribute("style", `width:${item.clientWidth}px;;height:${item.clientHeight}px;`);
+                        cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
+                        ghostElement.append(cloneItem);
+                    });
+                    ghostElement.setAttribute("style", "position:fixed;opacity:.1;padding:0;z-index:1;");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {
@@ -870,7 +874,7 @@ width:${target.clientWidth}px;;height:${target.clientHeight}px;`);
                         selectIds.push(target.getAttribute("data-id"));
                     }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
-                        target.outerHTML);
+                        ghostElement.outerHTML);
                 }
                 return;
             }

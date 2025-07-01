@@ -643,7 +643,7 @@ export class WYSIWYG {
                 clearSelect(["img", "av"], protyle.wysiwyg.element);
             }
 
-            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block") )||
+            if ((hasClosestByClassName(target, "protyle-action") && !hasClosestByClassName(target, "code-block")) ||
                 (hasClosestByClassName(target, "av__cell--header") && !hasClosestByClassName(target, "av__widthdrag"))) {
                 return;
             }

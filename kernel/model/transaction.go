@@ -296,6 +296,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewBlockView(op)
 		case "setAttrViewCardAspectRatio":
 			ret = tx.doSetAttrViewCardAspectRatio(op)
+		case "doSetAttrViewGroup":
+			ret = tx.doSetAttrViewGroup(op)
 		}
 
 		if nil != ret {

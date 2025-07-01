@@ -234,6 +234,22 @@ export class Preview {
                     }
                 });
             });
+            // 处理任务列表（微信公众号不能显示input[type="checkbox"]）
+            copyElement.querySelectorAll('li.protyle-task').forEach(taskItem => {
+                // Set checkbox input opacity to 0
+                const checkbox = taskItem.querySelector('input[type="checkbox"]');
+                if (checkbox) {
+                    checkbox.style.opacity = '0';
+                }
+    
+                const isDone = taskItem.classList.contains('protyle-task--done');
+                if (isDone) {
+                    taskItem.style.setProperty('list-style-type', "'✅'", 'important'); 
+                }
+                else {
+                    taskItem.style.setProperty('list-style-type', "'▢'", 'important');
+                }
+            });
             if(typeof  window.MathJax === "undefined") {
                 window.MathJax = {
                     svg: {

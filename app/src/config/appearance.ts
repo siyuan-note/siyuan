@@ -277,7 +277,7 @@ export const appearance = {
         ) {
             getAllEditor().forEach(editor => {
                 if (editor.protyle.preview && !editor.protyle.preview.element.classList.contains("fn__none") &&
-                    editor.protyle.preview.previewElement.classList.contains("b3-typography--fill")
+                    editor.protyle.preview.previewElement.dataset.fillCssVar === "true"
                 ) {
                     editor.protyle.preview.render(editor.protyle);
                 }

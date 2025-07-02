@@ -384,6 +384,14 @@
       min-height: 23px;
       padding: 5px 4px;
 
+      &:hover {
+        .b3-chip[data-type="block-more"] {
+          top: 4px;
+          display: block;
+          z-index: 1;
+        }
+      }
+
       .av__cell {
         padding: 2px 4px;
         border-right: 0;
@@ -397,16 +405,11 @@
         &:hover {
           background-color: var(--b3-list-hover);
           border-radius: var(--b3-border-radius);
-
-          .b3-chip[data-type="block-more"] {
-            top: 4px;
-            display: block;
-            z-index: 1;
-          }
         }
 
         .block__icon {
           display: none;
+          top: 1px;
         }
 
         &[data-dtype="created"],

@@ -190,6 +190,7 @@ type View struct {
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
+	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Groups       []*View  `json:"groups,omitempty"`       // 分组视图列表
 	GroupItemIDs []string `json:"groupItemIds,omitempty"` // 分组项目 ID 列表，用于维护分组中的所有项目
@@ -276,7 +277,7 @@ type Viewable interface {
 func NewAttributeView(id string) (ret *AttributeView) {
 	view, blockKey, selectKey := NewTableViewWithBlockKey(ast.NewNodeID())
 	ret = &AttributeView{
-		Spec:      2,
+		Spec:      3,
 		ID:        id,
 		KeyValues: []*KeyValues{{Key: blockKey}, {Key: selectKey}},
 		ViewID:    view.ID,
@@ -418,14 +419,8 @@ func SaveAttributeView(av *AttributeView) (err error) {
 
 	// 视图值去重
 	for _, view := range av.Views {
-		if nil != view.Table {
-			// 行去重
-			view.Table.RowIDs = gulu.Str.RemoveDuplicatedElem(view.Table.RowIDs)
-		}
-		if nil != view.Gallery {
-			// 行去重
-			view.Gallery.CardIDs = gulu.Str.RemoveDuplicatedElem(view.Gallery.CardIDs)
-		}
+		// 项目自定义排序去重
+		view.ItemIDs = gulu.Str.RemoveDuplicatedElem(view.ItemIDs)
 
 		// 分页大小
 		if 1 > view.PageSize {
@@ -614,14 +609,13 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 			for _, column := range view.Table.Columns {
 				column.ID = keyIDMap[column.ID]
 			}
-			view.Table.RowIDs = []string{}
 		case LayoutTypeGallery:
 			view.Gallery.ID = ast.NewNodeID()
 			for _, cardField := range view.Gallery.CardFields {
 				cardField.ID = keyIDMap[cardField.ID]
 			}
-			view.Gallery.CardIDs = []string{}
 		}
+		view.ItemIDs = []string{}
 	}
 	ret.ViewID = ret.Views[0].ID
 

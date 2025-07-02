@@ -3405,9 +3405,6 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 		for _, field := range view.Gallery.CardFields {
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 		}
-		for _, cardID := range view.Gallery.CardIDs {
-			view.Table.RowIDs = append(view.Table.RowIDs, cardID)
-		}
 	}
 	ret = sql.RenderAttributeViewTable(attrView, view, query)
 	return

@@ -27,6 +27,33 @@ import (
 func UpgradeSpec(av *AttributeView) {
 	upgradeSpec1(av)
 	upgradeSpec2(av)
+	upgradeSpec3(av)
+}
+
+func upgradeSpec3(av *AttributeView) {
+	if 3 <= av.Spec {
+		return
+	}
+
+	// 将 view.table.rowIds 或 view.gallery.cardIds 复制到 view.itemIds
+	for _, view := range av.Views {
+		if 0 < len(view.ItemIDs) {
+			continue
+		}
+
+		switch view.LayoutType {
+		case LayoutTypeTable:
+			if nil != view.Table {
+				view.ItemIDs = view.Table.RowIDs
+			}
+		case LayoutTypeGallery:
+			if nil != view.Gallery {
+				view.ItemIDs = view.Gallery.CardIDs
+			}
+		}
+	}
+
+	av.Spec = 3
 }
 
 func upgradeSpec2(av *AttributeView) {
@@ -78,7 +105,6 @@ func upgradeSpec2(av *AttributeView) {
 	}
 
 	av.Spec = 2
-	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }
 
 func upgradeSpec1(av *AttributeView) {
@@ -211,5 +237,4 @@ func upgradeSpec1(av *AttributeView) {
 	}
 
 	av.Spec = 1
-	logging.LogInfof("av [%s] upgraded to spec [%d]", av.ID, av.Spec)
 }

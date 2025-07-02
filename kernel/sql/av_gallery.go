@@ -143,7 +143,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 	}
 
 	filterByQuery(query, ret)
-	manualSort(view.Gallery, ret)
+	manualSort(view, ret)
 	return
 }
 

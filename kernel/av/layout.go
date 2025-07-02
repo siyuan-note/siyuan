@@ -110,13 +110,6 @@ func (baseInstanceField *BaseInstanceField) GetID() string {
 	return baseInstanceField.ID
 }
 
-// CollectionLayout 描述了集合布局的接口。
-type CollectionLayout interface {
-
-	// GetItemIDs 返回集合中所有项目的 ID。
-	GetItemIDs() []string
-}
-
 // Collection 描述了一个集合的接口。
 // 集合可以是表格、画廊等，包含多个项目。
 type Collection interface {

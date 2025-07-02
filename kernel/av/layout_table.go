@@ -25,11 +25,10 @@ type LayoutTable struct {
 	*BaseLayout
 
 	Columns []*ViewTableColumn `json:"columns"` // 表格列
-	RowIDs  []string           `json:"rowIds"`  // 行 ID，用于自定义排序
-}
 
-func (layoutTable *LayoutTable) GetItemIDs() (ret []string) {
-	return layoutTable.RowIDs
+	// TODO RowIDs 字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15194
+	//Deprecated
+	RowIDs []string `json:"rowIds"` // 行 ID，用于自定义排序
 }
 
 func NewLayoutTable() *LayoutTable {

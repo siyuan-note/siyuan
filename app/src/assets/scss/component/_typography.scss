@@ -513,6 +513,10 @@
       margin-left: auto;
       margin-right: auto;
     }
+
+    &[style*="direction: ltr"]:not([style*="text-align: right"]) {
+      margin-left: initial;
+    }
   }
 
   div[data-subtype="math"] {

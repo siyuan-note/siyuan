@@ -1,3 +1,6 @@
+@use "../util/function";
+@use "../component/form";
+
 .search {
   &__layout {
     display: flex;
@@ -78,7 +81,7 @@
   }
 
   &__history-icon {
-    @extend .fn__a;
+    @extend %fn__a;
     height: 42px;
     width: 42px;
     display: block;
@@ -141,7 +144,7 @@
   }
 
   &__rmpath {
-    @extend .b3-form__icon-clear;
+    @extend %b3-form__icon-clear;
   }
 
   &__tip {

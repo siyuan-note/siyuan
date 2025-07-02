@@ -63,6 +63,12 @@
     --highlight-backdrop-filter: none;
     --highlight-selected-backdrop-filter: none;
 
+    margin: -1px;
+    padding: 1px;
+    background-color: var(--highlight-bg-color);
+    backdrop-filter: var(--highlight-backdrop-filter);
+    border-radius: 4px;
+
     @media screen and (forced-colors: active) {
       --highlight-bg-color: transparent;
       --highlight-selected-bg-color: transparent;
@@ -71,12 +77,6 @@
                       --hcm-highlight-selected-filter
       );
     }
-
-    margin: -1px;
-    padding: 1px;
-    background-color: var(--highlight-bg-color);
-    backdrop-filter: var(--highlight-backdrop-filter);
-    border-radius: 4px;
 
     &.appended {
       position: initial;

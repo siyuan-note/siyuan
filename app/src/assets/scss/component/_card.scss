@@ -1,3 +1,5 @@
+@use "../util/mixin";
+
 .b3-card {
   box-shadow: var(--b3-point-shadow);
   background-color: var(--b3-theme-surface);
@@ -60,7 +62,7 @@
     font-size: 12px;
     margin-top: 4px;
     max-height: 54px;
-    @include text-clamp(3);
+    @include mixin.text-clamp(3);
   }
 
   &__actions {

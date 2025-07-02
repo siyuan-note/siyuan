@@ -809,6 +809,11 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
 
 export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
     editorElement.addEventListener("dragstart", (event) => {
+        if (protyle.disabled) {
+            event.preventDefault();
+            event.stopPropagation();
+            return;
+        }
         let target = event.target as HTMLElement;
         if (target.classList.contains("av__gallery-img")) {
             target = hasClosestByClassName(target, "av__gallery-item") as HTMLElement;

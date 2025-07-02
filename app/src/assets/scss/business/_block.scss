@@ -20,6 +20,161 @@
       opacity: 1;
     }
 
+    &--embed {
+      // 嵌入块模式样式 - 完全匹配嵌入块外观
+      border: 1px dashed var(--b3-theme-on-surface-light) !important;
+      background-color: var(--b3-embed-background) !important;
+      box-shadow: none !important;
+      border-radius: var(--b3-border-radius) !important;  // 默认圆角
+      width: auto !important;  // 确保宽度由JS控制
+      max-width: none !important;  // 移除最大宽度限制
+      min-width: none !important;  // 移除最小宽度限制
+      min-height: auto !important;  // 🔑 关键修复：移除最小高度限制
+      padding: 0 !important;  // 移除浮窗本身的padding，让内容区域处理
+      box-sizing: border-box !important;  // 确保正确的盒模型
+      overflow: hidden !important;  // 🔑 禁止内部滚动
+      
+      // 🔑 强制覆盖移动端样式设置 - 使用更具体的选择器
+      // 空选择器用于确保优先级
+      
+      // 完全隐藏顶部工具栏区域
+      .block__icons {
+        display: none !important;
+      }
+      
+      // 隐藏拖拽控制点（除了顶部）
+      .resize__rd, .resize__ld, .resize__lt, .resize__rt, 
+      .resize__r, .resize__d, .resize__l {
+        display: none;
+      }
+      
+      // 🔑 优化顶部拖拽条，更容易触发转换
+      .resize__t {
+        cursor: move;
+        height: 12px !important;  // 🔑 显著增加拖拽区域高度
+        background: linear-gradient(to bottom, 
+          rgba(var(--b3-theme-primary-lighter-rgb), 0.15), 
+          rgba(var(--b3-theme-primary-lighter-rgb), 0.05));  // 🔑 渐变背景更明显
+        border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;
+        transition: all 0.2s;
+        
+        &:hover {
+          background: linear-gradient(to bottom, 
+            rgba(var(--b3-theme-primary-rgb), 0.3), 
+            rgba(var(--b3-theme-primary-rgb), 0.1));  // 🔑 悬停时更明显
+        }
+        
+        // 🔑 添加拖拽提示图标
+        &::after {
+          content: "⋮⋮⋮";
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          font-size: 8px;
+          line-height: 4px;
+          letter-spacing: 2px;
+          color: var(--b3-theme-on-surface);
+          opacity: 0.4;
+          pointer-events: none;
+        }
+        
+        &:hover::after {
+          opacity: 0.8;
+          color: var(--b3-theme-primary);
+        }
+      }
+      
+      // 内容区域样式匹配嵌入块  
+      .block__content {
+        padding: 2px 4px !important;  // 🔑 恢复：匹配嵌入块的padding
+        background-color: transparent !important;
+        border-radius: 0 !important;
+        border: none !important;
+        box-shadow: none !important;
+        
+        // 移除内层边框和装饰
+        .protyle-content {
+          padding: 0 !important;
+          margin: 0 !important;
+          border: none !important;
+          background: transparent !important;
+        }
+        
+        // 🔑 protyle-wysiwyg移除padding，因为外层已有
+        .protyle-wysiwyg {
+          padding: 0 !important;  // 移除padding，外层已处理
+          margin: 0 !important;   // 确保没有额外margin
+        }
+        
+        // 🔑 关键修复：移除protyle的最小高度限制
+        .protyle {
+          min-height: auto !important;  // 移除155px最小高度
+          // 保持其他默认样式
+        }
+        
+        // 🔑 面包屑不额外添加padding，外层已处理
+        .protyle-breadcrumb {
+          margin: 0 !important;
+          // 不设置额外padding，使用外层的padding
+          
+          // 隐藏面包屑区域的额外按钮，只保留纯净的面包屑
+          .protyle-breadcrumb__space,
+          .block__icon,
+          .fn__flex-center,
+          button {
+            display: none !important;
+          }
+          
+          // 确保面包屑栏本身的显示由JS控制
+          .protyle-breadcrumb__bar {
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+        }
+      }
+      
+      // 🔑 动态边框控制 - 根据裁剪状态调整样式
+      &.block__popover--embed-clipped-top {
+        border-top: none !important;
+        border-radius: 0 0 var(--b3-border-radius) var(--b3-border-radius) !important;
+      }
+      
+      &.block__popover--embed-clipped-bottom {
+        border-bottom: none !important;
+        border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0 !important;
+      }
+      
+      &.block__popover--embed-clipped-both {
+        border-top: none !important;
+        border-bottom: none !important;
+        border-radius: 0 !important;
+      }
+      
+      // 禁用浮窗内部所有滚动
+      .block__content {
+        overflow: hidden !important;
+        
+        // 🔑 只移除protyle的最小高度限制，保持其他默认样式
+        .protyle {
+          min-height: auto !important;  // 移除155px最小高度
+          // 保持其他默认样式不变
+        }
+      }
+      
+      .protyle-content {
+        overflow: hidden !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      
+      // 🔑 wysiwyg元素只调整外层padding，保持内部结构不变
+      .protyle-wysiwyg {
+        // 只设置外层padding匹配嵌入块，不干扰内部节点布局
+        // 内部节点保持原有的默认样式
+      }
+    }
+
     & > .block__icons {
       border-radius: var(--b3-border-radius-b) var(--b3-border-radius-b) 0 0;
 
@@ -125,4 +280,9 @@
     padding: 4px;
     flex-shrink: 0;
   }
+}
+
+// 🔑 强制覆盖mobile.scss中的80vw宽度设置 - 使用双类名选择器提高优先级
+.block__popover.block__popover--embed {
+  width: auto !important;
 }

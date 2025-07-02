@@ -384,14 +384,6 @@
       min-height: 23px;
       padding: 5px 4px;
 
-      &:hover {
-        .b3-chip[data-type="block-more"] {
-          top: 4px;
-          display: block;
-          z-index: 1;
-        }
-      }
-
       .av__cell {
         padding: 2px 4px;
         border-right: 0;
@@ -405,11 +397,20 @@
         &:hover {
           background-color: var(--b3-list-hover);
           border-radius: var(--b3-border-radius);
+
+          [data-type="block-more"] {
+            top: 4px;
+            display: block;
+            z-index: 1;
+          }
         }
 
         .block__icon {
-          display: none;
-          top: 1px;
+          top: .3em;
+
+          &:hover {
+            background-color: var(--b3-theme-background) !important;
+          }
         }
 
         &[data-dtype="created"],
@@ -689,7 +690,14 @@
     .block__icon {
       position: absolute;
       right: 5px;
-      top: 5px;
+      top: .5em;
+      line-height: 0;
+      transition: none;
+
+      svg {
+        width: .7em;
+        height: .7em;
+      }
     }
 
     &:hover .block__icon {

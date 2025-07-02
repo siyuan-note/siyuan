@@ -265,9 +265,12 @@
 }
 
 .protyle-top:hover .protyle-background--enable {
-  .protyle-background__action,
-  .protyle-background__img .protyle-icons {
+  .protyle-background__action  {
     opacity: .86;
+  }
+
+  .protyle-background__img .protyle-icons {
+    display: flex;
   }
 }
 
@@ -332,6 +335,7 @@
     }
 
     .protyle-icons {
+      display: none;
       position: absolute;
       top: 8px;
       right: 8px;

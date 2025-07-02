@@ -30,12 +30,11 @@ type LayoutGallery struct {
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 
-	CardFields []*ViewGalleryCardField `json:"fields"`  // 画廊卡片字段
-	CardIDs    []string                `json:"cardIds"` // 卡片 ID，用于自定义排序
-}
+	CardFields []*ViewGalleryCardField `json:"fields"` // 画廊卡片字段
 
-func (layoutGallery *LayoutGallery) GetItemIDs() (ret []string) {
-	return layoutGallery.CardIDs
+	// TODO CardIDs 字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15194
+	//Deprecated
+	CardIDs []string `json:"cardIds"` // 卡片 ID，用于自定义排序
 }
 
 func NewLayoutGallery() *LayoutGallery {

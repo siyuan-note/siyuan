@@ -142,6 +142,6 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	}
 
 	filterByQuery(query, ret)
-	manualSort(view.Table, ret)
+	manualSort(view, ret)
 	return
 }

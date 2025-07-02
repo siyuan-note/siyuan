@@ -859,7 +859,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
                         ghostElement.append(cloneItem);
                     });
-                    ghostElement.setAttribute("style", "position:fixed;opacity:.1;padding:0;z-index:1;");
+                    ghostElement.setAttribute("style", "position:fixed;opacity:.1;padding:0;");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {

@@ -3668,9 +3668,11 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 	}
 	data, err := gulu.JSON.MarshalJSON(valueData)
 	if err != nil {
+		logging.LogErrorf("marshal value [%+v] failed: %s", valueData, err)
 		return
 	}
 	if err = gulu.JSON.UnmarshalJSON(data, &val); err != nil {
+		logging.LogErrorf("unmarshal data [%s] failed: %s", data, err)
 		return
 	}
 

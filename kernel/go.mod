@@ -57,8 +57,8 @@ require (
 	github.com/rqlite/sql v0.0.0-20250623131620-453fa49cad04
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.40.3
-	github.com/shirou/gopsutil/v4 v4.25.5
-	github.com/siyuan-note/dejavu v0.0.0-20250627075836-32feab45fb60
+	github.com/shirou/gopsutil/v4 v4.25.6
+	github.com/siyuan-note/dejavu v0.0.0-20250703025817-45f00009d95a
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
 	github.com/siyuan-note/filelock v0.0.0-20250227145141-7d111cdf3c57
@@ -107,7 +107,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.7.4 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.12.17 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.18.17 // indirect
-	github.com/aws/aws-sdk-go-v2/service/s3 v1.82.0 // indirect
+	github.com/aws/aws-sdk-go-v2/service/s3 v1.83.0 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.25.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.30.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sts v1.34.0 // indirect

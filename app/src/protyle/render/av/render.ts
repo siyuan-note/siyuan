@@ -553,6 +553,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         item.dataset.pageSize = viewTabElement.dataset.page;
                     }
                 }
+                if (operation.action === "addAttrViewView") {
+                    item.dataset.pageSize = "50";
+                }
                 avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {

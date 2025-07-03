@@ -1970,6 +1970,9 @@ export class WYSIWYG {
             }
             const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             if (avGalleryItemElement) {
+                if (protyle.disabled) {
+                    return false;
+                }
                 const menu = openGalleryItemMenu({
                     target: avGalleryItemElement.querySelector(".protyle-icon--last"),
                     blockElement: nodeElement,
@@ -1982,7 +1985,7 @@ export class WYSIWYG {
                 });
                 event.stopPropagation();
                 event.preventDefault();
-                return;
+                return false;
             }
             const avCellElement = hasClosestByClassName(target, "av__cell");
             if (avCellElement) {

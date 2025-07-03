@@ -23,6 +23,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/siyuan-note/logging"
@@ -117,6 +118,7 @@ func indexNode(tx *sql.Tx, id string) (err error) {
 	}
 
 	content := NodeStaticContent(node, nil, true, indexAssetPath, true)
+	content = strings.ReplaceAll(content, editor.Zwsp, "")
 	stmt := "UPDATE blocks SET content = ? WHERE id = ?"
 	if err = execStmtTx(tx, stmt, content, id); err != nil {
 		tx.Rollback()

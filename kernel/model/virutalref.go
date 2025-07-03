@@ -26,6 +26,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/parse"
 	"github.com/ClarkThan/ahocorasick"
 	"github.com/dgraph-io/ristretto"
@@ -54,6 +55,7 @@ func getBlockVirtualRefKeywords(root *ast.Node) (ret []string) {
 			}
 
 			content := sql.NodeStaticContent(n, nil, false, false, false)
+			content = strings.ReplaceAll(content, editor.Zwsp, "")
 			buf.WriteString(content)
 			return ast.WalkContinue
 		})

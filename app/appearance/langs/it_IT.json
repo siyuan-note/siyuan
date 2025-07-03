@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "Inserisci ${x} elemento(i) prima",
+  "insertItemAfter": "Inserisci ${x} elemento(i) dopo",
   "allViews": "Tutte le viste",
   "copyAVID": "Copia ID del database",
   "hideEmptyFields": "Nascondi campi vuoti",
@@ -113,8 +115,8 @@
   "updateAll": "Aggiorna tutto",
   "confirmUpdateAll": "Sei sicuro di voler aggiornare tutto?",
   "confirmUpdate": "Sei sicuro di voler aggiornare?",
-  "insertRowBefore": "Inserisci righe ${x} sopra",
-  "insertRowAfter": "Inserisci righe ${x} sotto",
+  "insertRowBefore": "Inserisci ${x} riga(e) sopra",
+  "insertRowAfter": "Inserisci ${x} riga(e) sotto",
   "setDueTime": "Imposta tempo di scadenza",
   "showCardDay": "Dopo quanti giorni vuoi mostrare la carta?",
   "forgetCount": "Conteggio dimenticanze",

@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "Вставить ${x} элемент(ов) перед",
+  "insertItemAfter": "Вставить ${x} элемент(ов) после",
   "allViews": "Все виды",
   "copyAVID": "Копировать ID базы данных",
   "hideEmptyFields": "Скрыть пустые поля",
@@ -113,8 +115,8 @@
   "updateAll": "Обновить все",
   "confirmUpdateAll": "Вы уверены, что хотите обновить все?",
   "confirmUpdate": "Вы уверены, что хотите обновить?",
-  "insertRowBefore": "Вставить строки ${x} выше",
-  "insertRowAfter": "Вставить строки ${x} ниже",
+  "insertRowBefore": "Вставить ${x} строк(и) выше",
+  "insertRowAfter": "Вставить ${x} строк(и) ниже",
   "setDueTime": "Установить время истечения",
   "showCardDay": "Через сколько дней вы хотите показать карточку?",
   "forgetCount": "Забудьте считать",

@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "${x} Element(e) davor einfügen",
+  "insertItemAfter": "${x} Element(e) danach einfügen",
   "allViews": "Alle Ansichten",
   "copyAVID": "Datenbank-ID kopieren",
   "hideEmptyFields": "Leere Felder ausblenden",
@@ -113,8 +115,8 @@
   "updateAll": "Alle aktualisieren",
   "confirmUpdateAll": "Sind Sie sicher, dass Sie alles aktualisieren möchten?",
   "confirmUpdate": "Sind Sie sicher, dass Sie aktualisieren möchten?",
-  "insertRowBefore": "Reihen ${x} darüber einfügen",
-  "insertRowAfter": "Reihen ${x} darunter einfügen",
+  "insertRowBefore": "${x} Zeile(n) oben einfügen",
+  "insertRowAfter": "${x} Zeile(n) unten einfügen",
   "setDueTime": "Fälligkeitszeit setzen",
   "showCardDay": "Nach wie vielen Tagen möchten Sie die Karte anzeigen?",
   "forgetCount": "Vergessen zu zählen",

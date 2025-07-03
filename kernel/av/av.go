@@ -217,6 +217,9 @@ func NewTableView() (ret *View) {
 	ret = &View{
 		ID:         ast.NewNodeID(),
 		Name:       GetAttributeViewI18n("table"),
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
+		PageSize:   ViewDefaultPageSize,
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
 	}
@@ -228,8 +231,11 @@ func NewTableViewWithBlockKey(blockKeyID string) (view *View, blockKey, selectKe
 	view = &View{
 		ID:         ast.NewNodeID(),
 		Name:       name,
+		Filters:    []*ViewFilter{},
+		Sorts:      []*ViewSort{},
 		LayoutType: LayoutTypeTable,
 		Table:      NewLayoutTable(),
+		PageSize:   ViewDefaultPageSize,
 	}
 	blockKey = NewKey(blockKeyID, GetAttributeViewI18n("key"), "", KeyTypeBlock)
 	view.Table.Columns = []*ViewTableColumn{{BaseField: &BaseField{ID: blockKeyID}}}

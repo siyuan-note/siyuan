@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "在前方插入${x}条",
+  "insertItemAfter": "在后方插入${x}条",
   "allViews": "所有视图",
   "copyAVID": "复制数据库 ID",
   "hideEmptyFields": "隐藏空字段",

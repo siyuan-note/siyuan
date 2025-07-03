@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "Wstaw ${x} element(y) przed",
+  "insertItemAfter": "Wstaw ${x} element(y) po",
   "allViews": "Wszystkie widoki",
   "copyAVID": "Skopiuj ID bazy danych",
   "hideEmptyFields": "Ukryj puste pola",
@@ -113,8 +115,8 @@
   "updateAll": "Zaktualizuj wszystko",
   "confirmUpdateAll": "Czy na pewno chcesz zaktualizować wszystko?",
   "confirmUpdate": "Czy jesteś pewny, że chcesz to zaktualizować?",
-  "insertRowBefore": "Wstaw wiersze ${x} powyżej",
-  "insertRowAfter": "Wstaw wiersze ${x} poniżej",
+  "insertRowBefore": "Wstaw ${x} wiersz(e) powyżej",
+  "insertRowAfter": "Wstaw ${x} wiersz(e) poniżej",
   "setDueTime": "Ustaw czas wygaśnięcia",
   "showCardDay": "Po ilu dniach chcesz pokazać kartę?",
   "forgetCount": "Zapamiętaj liczbę",

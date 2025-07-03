@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "הוסף ${x} פריט(ים) לפני",
+  "insertItemAfter": "הוסף ${x} פריט(ים) אחרי",
   "allViews": "כל התצוגות",
   "copyAVID": "העתק את מזהה מסד הנתונים",
   "hideEmptyFields": "הסתר שדות ריקים",
@@ -113,8 +115,8 @@
   "updateAll": "עדכן הכל",
   "confirmUpdateAll": "האם אתה בטוח שברצונך לעדכן את הכל?",
   "confirmUpdate": "האם אתה בטוח שברצונך לעדכן?",
-  "insertRowBefore": "הכנס שורות ${x} מעל",
-  "insertRowAfter": "הכנס שורות ${x} מתחת",
+  "insertRowBefore": "הוסף ${x} שורה(ות) מעל",
+  "insertRowAfter": "הוסף ${x} שורה(ות) מתחת",
   "setDueTime": "קבע זמן תפוגה",
   "showCardDay": "לאחר כמה ימים אתה רוצה להראות את הכרטיס?",
   "forgetCount": "שכח לספור",

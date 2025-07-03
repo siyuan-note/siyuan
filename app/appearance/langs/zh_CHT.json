@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "在前方插入${x}條",
+  "insertItemAfter": "在後方插入${x}條",
   "allViews": "所有視圖",
   "copyAVID": "複製資料庫 ID",
   "hideEmptyFields": "隱藏空字段",

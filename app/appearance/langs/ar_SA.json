@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "إدراج ${x} عنصر(عناصر) قبل",
+  "insertItemAfter": "إدراج ${x} عنصر(عناصر) بعد",
   "allViews": "جميع العروض",
   "copyAVID": "نسخ معرف قاعدة البيانات",
   "hideEmptyFields": "إخفاء الحقول الفارغة",
@@ -113,8 +115,8 @@
   "updateAll": "تحديث الكل",
   "confirmUpdateAll": "هل أنت متأكد أنك تريد تحديث الكل؟",
   "confirmUpdate": "هل أنت متأكد من أنك تريد التحديث؟",
-  "insertRowBefore": "‫إدراج ${x} صف/صفوف أعلاه‬",
-  "insertRowAfter": "‫إدراج ${x} صف/صفوف أدناه‬",
+  "insertRowBefore": "إدراج ${x} صف(وف) أعلاه",
+  "insertRowAfter": "إدراج ${x} صف(وف) أدناه",
   "setDueTime": "تحديد وقت انتهاء الصلاحية",
   "showCardDay": "بعد كم من الأيام تريد إظهار البطاقة؟",
   "forgetCount": "مرات النسيان",

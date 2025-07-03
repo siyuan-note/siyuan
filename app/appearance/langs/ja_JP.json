@@ -1,4 +1,6 @@
 {
+  "insertItemBefore": "${x}項目を前に挿入",
+  "insertItemAfter": "${x}項目を後に挿入",
   "allViews": "すべてのビュー",
   "copyAVID": "データベース ID をコピー",
   "hideEmptyFields": "空のフィールドを非表示",
@@ -113,8 +115,8 @@
   "updateAll": "すべて更新",
   "confirmUpdateAll": "すべて更新してもよろしいですか？",
   "confirmUpdate": "更新してもよろしいですか？",
-  "insertRowBefore": "上に ${x} 行を挿入",
-  "insertRowAfter": "下に ${x} 行を挿入",
+  "insertRowBefore": "${x}行を上に挿入",
+  "insertRowAfter": "${x}行を下に挿入",
   "setDueTime": "期限を設定",
   "showCardDay": "何日後にカードを表示しますか？",
   "forgetCount": "忘れた回数",

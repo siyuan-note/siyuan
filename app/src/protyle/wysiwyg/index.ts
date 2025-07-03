@@ -493,6 +493,7 @@ export class WYSIWYG {
                     previousList.concat(nextList).forEach(item => {
                         item.classList.add("av__gallery-item--select");
                     });
+                    event.preventDefault();
                 } else if (startElement && endElement && !startElement.isSameNode(endElement)) {
                     let toDown = true;
                     const startRect = startElement.getBoundingClientRect();
@@ -581,8 +582,8 @@ export class WYSIWYG {
                             focusBlock(selectElements[0], protyle.wysiwyg.element, false);
                         }
                     }
+                    event.preventDefault();
                 }
-                event.preventDefault();
                 return;
             }
             if (isOnlyMeta(event) && !event.shiftKey && !event.altKey) {

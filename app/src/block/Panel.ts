@@ -317,13 +317,21 @@ export class BlockPanel {
             return;
         }
         
-        // 获取嵌入块容器（NodeBlockQueryEmbed）的位置，这是实际需要覆盖的元素
+        // 获取嵌入块容器（用于检查是否多结果）
         const embedContainer = this.targetElement.closest('[data-type="NodeBlockQueryEmbed"]') as HTMLElement;
         if (!embedContainer) {
             return;
         }
+
+        // 检查是否是多结果嵌入块
+        const embedResults = embedContainer.querySelectorAll('.protyle-wysiwyg__embed');
+        const isMultiResult = embedResults.length > 1;
+
+        // 根据是否多结果选择不同的定位目标
+        const targetRect = isMultiResult ? 
+            this.targetElement.getBoundingClientRect() : // 多结果：直接使用具体结果块
+            embedContainer.getBoundingClientRect();      // 单结果：使用整个容器
         
-        const targetRect = embedContainer.getBoundingClientRect();
         const contentElement = hasClosestByClassName(this.targetElement, "protyle-content", true);
         
         // 检查是否完全不可见

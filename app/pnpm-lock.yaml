@@ -10,7 +10,7 @@ importers:
     dependencies:
       '@electron/remote':
         specifier: ^2.1.2
-        version: 2.1.2(electron@37.1.0)
+        version: 2.1.2(electron@37.2.0)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
@@ -40,8 +40,8 @@ importers:
         specifier: ^1.11.5
         version: 1.11.13
       electron:
-        specifier: 37.1.0
-        version: 37.1.0
+        specifier: 37.2.0
+        version: 37.2.0
       electron-builder:
         specifier: 26.0.12
         version: 26.0.12(electron-builder-squirrel-windows@26.0.11)
@@ -1191,8 +1191,8 @@ packages:
     resolution: {integrity: sha512-bO3y10YikuUwUuDUQRM4KfwNkKhnpVO7IPdbsrejwN9/AABJzzTQ4GeHwyzNSrVO+tEH3/Np255a3sVZpZDjvg==}
     engines: {node: '>=8.0.0'}
 
-  electron@37.1.0:
-    resolution: {integrity: sha512-Fcr3yfAw4oU392waVZSlrFUQx4P+h/k31+PRgkBY9tFx9E/zxzdPQQj0achZlG1HRDusw3ooQB+OXb9PvufdzA==}
+  electron@37.2.0:
+    resolution: {integrity: sha512-dE6+qeg6SBUVd5d8CD2+GH82kh+gF1v40+hs+U+UOno681NMSGmBtgqwldQRpbvtnQDD7V2M9Cpfr3+Abw7aBg==}
     engines: {node: '>= 12.20.55'}
     hasBin: true
 
@@ -2858,9 +2858,9 @@ snapshots:
       - bluebird
       - supports-color
 
-  '@electron/remote@2.1.2(electron@37.1.0)':
+  '@electron/remote@2.1.2(electron@37.2.0)':
     dependencies:
-      electron: 37.1.0
+      electron: 37.2.0
 
   '@electron/universal@2.0.1':
     dependencies:
@@ -4025,7 +4025,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  electron@37.1.0:
+  electron@37.2.0:
     dependencies:
       '@electron/get': 2.0.3
       '@types/node': 22.15.3

@@ -1,11 +1,9 @@
 import {transaction} from "../../../wysiwyg/transaction";
 import {Menu} from "../../../../plugin/Menu";
-import * as dayjs from "dayjs";
 import {hasClosestByClassName} from "../../../util/hasClosest";
-import {genCellValueByElement} from "../cell";
-import {clearSelect} from "../../../util/clearSelect";
 import {unicode2Emoji} from "../../../../emoji";
 import {getColIconByType} from "../col";
+import {avContextmenu} from "../action";
 
 export const setGalleryCover = (options: {
     view: IAVGallery
@@ -233,73 +231,17 @@ export const setGalleryRatio = (options: {
 
 export const openGalleryItemMenu = (options: {
     target: HTMLElement,
-    blockElement: HTMLElement,
     protyle: IProtyle,
-    returnMenu: boolean
+    position: {
+        x:number,
+        y:number
+    }
 }) => {
-    const menu = new Menu();
-    const avID = options.blockElement.getAttribute("data-av-id");
     const cardElement = hasClosestByClassName(options.target, "av__gallery-item");
     if (!cardElement) {
         return;
     }
-    if (!cardElement.classList.contains("av__gallery-item--select")) {
-        clearSelect(["galleryItem"], options.blockElement);
-        cardElement.classList.add("av__gallery-item--select");
-    }
-    menu.addItem({
-        icon: "iconTrashcan",
-        warning: true,
-        label: window.siyuan.languages.delete,
-        click() {
-            const srcIDs: string[] = [];
-            const srcs: IOperationSrcs[] = [];
-            let previousID = "";
-            options.blockElement.querySelectorAll(".av__gallery-item--select").forEach((item, index) => {
-                const blockValue = genCellValueByElement("block", item.querySelector(".av__cell[data-block-id]"));
-                const id = item.getAttribute("data-id");
-                srcIDs.push(id);
-                srcs.push({
-                    id,
-                    isDetached: blockValue.isDetached,
-                    content: blockValue.block.content
-                });
-                item.remove();
-                if (index === 0) {
-                    previousID = item.previousElementSibling?.getAttribute("data-id") || "";
-                }
-            });
-            const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-            transaction(options.protyle, [{
-                action: "removeAttrViewBlock",
-                srcIDs,
-                avID,
-            }, {
-                action: "doUpdateUpdated",
-                id: options.blockElement.dataset.nodeId,
-                data: newUpdated,
-            }], [{
-                action: "insertAttrViewBlock",
-                avID,
-                previousID,
-                srcs,
-                blockID: options.blockElement.dataset.nodeId
-            }, {
-                action: "doUpdateUpdated",
-                id: options.blockElement.dataset.nodeId,
-                data: options.blockElement.getAttribute("updated")
-            }]);
-            options.blockElement.setAttribute("updated", newUpdated);
-        }
-    });
-    if (options.returnMenu) {
-        return menu;
-    }
-    const rect = options.target.getBoundingClientRect();
-    menu.open({
-        x: rect.left,
-        y: rect.bottom
-    });
+    avContextmenu(options.protyle, cardElement, options.position);
 };
 
 export const editGalleryItem = (target: Element) => {

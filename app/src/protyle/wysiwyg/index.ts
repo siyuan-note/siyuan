@@ -1973,15 +1973,13 @@ export class WYSIWYG {
                 if (protyle.disabled) {
                     return false;
                 }
-                const menu = openGalleryItemMenu({
+                openGalleryItemMenu({
                     target: avGalleryItemElement.querySelector(".protyle-icon--last"),
-                    blockElement: nodeElement,
                     protyle,
-                    returnMenu: true
-                });
-                menu.open({
-                    x: event.clientX,
-                    y: event.clientY
+                    position: {
+                        x: event.clientX,
+                        y: event.clientY
+                    }
                 });
                 event.stopPropagation();
                 event.preventDefault();

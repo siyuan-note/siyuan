@@ -281,7 +281,15 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-gallery-more") {
-            openGalleryItemMenu({target, blockElement, protyle, returnMenu: false});
+            const rect = target.getBoundingClientRect();
+            openGalleryItemMenu({
+                target,
+                protyle,
+                position: {
+                    x: rect.left,
+                    y: rect.bottom
+                }
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -300,15 +308,23 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     if (!blockElement) {
         return false;
     }
-    if (!rowElement.classList.contains("av__row--select")) {
-        clearSelect(["row"], blockElement);
+    const avType = blockElement.getAttribute("data-av-type") as TAVView;
+    if (avType === "table") {
+        if (!rowElement.classList.contains("av__row--select")) {
+            clearSelect(["row"], blockElement);
+        }
+        clearSelect(["cell"], blockElement);
+        rowElement.classList.add("av__row--select");
+        rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+        updateHeader(rowElement);
+    } else {
+        if (!rowElement.classList.contains("av__gallery-item--select")) {
+            clearSelect(["galleryItem"], blockElement);
+        }
+        rowElement.classList.add("av__gallery-item--select");
     }
-    clearSelect(["cell"], blockElement);
     const menu = new Menu();
-    rowElement.classList.add("av__row--select");
-    rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
-    updateHeader(rowElement);
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
     const keyCellElement = rowElements[0].querySelector(".av__cell[data-block-id]") as HTMLElement;
     const ids = Array.from(rowElements).map(item => item.getAttribute("data-id"));
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
@@ -558,7 +574,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                 id: "insertRowBefore",
                 icon: "iconBefore",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages.insertRowBefore.replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
+${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBefore"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" value="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");
@@ -581,7 +597,7 @@ ${window.siyuan.languages.insertRowBefore.replace("${x}", `<span class="fn__spac
                 id: "insertRowAfter",
                 icon: "iconAfter",
                 label: `<div class="fn__flex" style="align-items: center;">
-${window.siyuan.languages.insertRowAfter.replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}
+${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAfter"].replace("${x}", `<span class="fn__space"></span><input style="width:64px" type="number" step="1" min="1" placeholder="${window.siyuan.languages.enterKey}" class="b3-text-field" value="1"><span class="fn__space"></span>`)}
 </div>`,
                 bind(element) {
                     const inputElement = element.querySelector("input");

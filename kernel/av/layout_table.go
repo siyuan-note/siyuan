@@ -45,9 +45,9 @@ func NewLayoutTable() *LayoutTable {
 type ViewTableColumn struct {
 	*BaseField
 
-	Pin   bool        `json:"pin"`            // 是否固定
-	Width string      `json:"width"`          // 列宽度
-	Calc  *ColumnCalc `json:"calc,omitempty"` // 计算
+	Pin   bool       `json:"pin"`            // 是否固定
+	Width string     `json:"width"`          // 列宽度
+	Calc  *FieldCalc `json:"calc,omitempty"` // 计算规则
 }
 
 // Table 描述了表格视图实例的结构。
@@ -63,9 +63,9 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
-	Pin   bool        `json:"pin"`   // 是否固定
-	Width string      `json:"width"` // 列宽度
-	Calc  *ColumnCalc `json:"calc"`  // 计算
+	Pin   bool       `json:"pin"`   // 是否固定
+	Width string     `json:"width"` // 列宽度
+	Calc  *FieldCalc `json:"calc"`  // 计算规则和结果
 }
 
 // TableRow 描述了表格实例行的结构。

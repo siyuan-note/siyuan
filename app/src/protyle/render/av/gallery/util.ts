@@ -37,6 +37,26 @@ export const setGalleryCover = (options: {
     });
     menu.addItem({
         iconHTML: "",
+        checked: options.view.coverFrom === 3,
+        label: window.siyuan.languages.contentBlock,
+        click() {
+            transaction(options.protyle, [{
+                action: "setAttrViewCoverFrom",
+                avID,
+                blockID,
+                data: 3
+            }], [{
+                action: "setAttrViewCoverFrom",
+                avID,
+                blockID,
+                data: options.view.coverFrom
+            }]);
+            options.view.coverFrom = 3;
+            targetNameElement.textContent = window.siyuan.languages.contentBlock;
+        }
+    });
+    menu.addItem({
+        iconHTML: "",
         checked: options.view.coverFrom === 1,
         label: window.siyuan.languages.contentImage,
         click() {

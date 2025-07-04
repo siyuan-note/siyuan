@@ -106,7 +106,7 @@ ${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") +
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}<div class="av__gallery-tip">${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${ Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}</div></div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, view.showIcon, "gallery")}<div class="av__gallery-tip">${view.fields[fieldsIndex].icon ? unicode2Emoji(view.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(view.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(view.fields[fieldsIndex].name)}</div></div>`;
             });
             galleryHTML += `</div>
     <div class="av__gallery-actions">
@@ -197,7 +197,7 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
                 galleryElement.classList.remove("av__gallery--top");
             }
         }
-        if (view.coverFrom === 1) {
+        if (view.coverFrom === 1 || view.coverFrom === 3) {
             processRender(options.blockElement);
         }
         if (typeof oldOffset === "number") {

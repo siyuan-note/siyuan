@@ -3,12 +3,15 @@ package sql
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -261,6 +264,26 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 				resetIDs[newID] = n.ID
 				n.ID, ial["id"] = newID, newID
 				n.KramdownIAL = parse.Map2IAL(ial)
+
+				if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+					// 禁止自动播放 Disable automatic video playback in database card view https://github.com/siyuan-note/siyuan/issues/15212
+					dest := treenode.GetNodeSrcTokens(n)
+					oldDest := dest
+					if (strings.HasPrefix(dest, "http://") || strings.HasPrefix(dest, "https://")) && !strings.Contains(dest, "autoplay") {
+						dest = html.UnescapeHTMLStr(dest)
+						destURL, err := url.Parse(dest)
+						if nil == err {
+							q := destURL.Query()
+							q.Set("autoplay", "0")
+							destURL.RawQuery = q.Encode()
+							dest = destURL.String()
+							dest = html.EscapeHTMLStr(dest)
+							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(oldDest), []byte(dest))
+						} else {
+							logging.LogWarnf("parse url [%s] failed: %v", dest, err)
+						}
+					}
+				}
 			}
 		}
 		rendererFunc := blockRenderer.RendererFuncs[n.Type]

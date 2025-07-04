@@ -839,12 +839,15 @@ interface IAVView {
     pageSize: number;
     showIcon: boolean;
     wrapField: boolean;
+    filters: IAVFilter[],
+    sorts: IAVSort[],
+    groups: {
+        field: string,
+    }
 }
 
 interface IAVTable extends IAVView {
     columns: IAVColumn[],
-    filters: IAVFilter[],
-    sorts: IAVSort[],
     rows: IAVRow[],
     rowCount: number,
 }
@@ -858,8 +861,6 @@ interface IAVGallery extends IAVView {
     cards: IAVGalleryItem[],
     desc: string
     fields: IAVColumn[]
-    filters: IAVFilter[],
-    sorts: IAVSort[],
     cardCount: number,
 }
 

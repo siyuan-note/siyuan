@@ -639,20 +639,40 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
             }
         });
         const editAttrSubmenu: IMenu[] = [];
-        rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
-            const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
-            const type = cellElement.getAttribute("data-dtype") as TAVCol;
-            if (!["updated", "created"].includes(type)) {
-                const icon = cellElement.dataset.icon;
-                editAttrSubmenu.push({
-                    iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
-                    label: escapeHtml(cellElement.querySelector(".av__celltext").textContent.trim()),
-                    click() {
-                        popTextCell(protyle, selectElements);
-                    }
-                });
-            }
-        });
+        if (avType === "table") {
+            rowElement.parentElement.querySelectorAll(".av__row--header .av__cell").forEach((cellElement: HTMLElement) => {
+                const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__row--select:not(.av__row--header) .av__cell[data-col-id="${cellElement.dataset.colId}"]`));
+                const type = cellElement.getAttribute("data-dtype") as TAVCol;
+                if (!["updated", "created"].includes(type)) {
+                    const icon = cellElement.dataset.icon;
+                    editAttrSubmenu.push({
+                        iconHTML: icon ? unicode2Emoji(icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(type)}"></use></svg>`,
+                        label: escapeHtml(cellElement.querySelector(".av__celltext").textContent.trim()),
+                        click() {
+                            popTextCell(protyle, selectElements);
+                        }
+                    });
+                }
+            });
+        } else {
+            rowElement.querySelectorAll(".av__cell").forEach((cellElement: HTMLElement) => {
+                const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__gallery-item--select .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`));
+                const type = cellElement.getAttribute("data-dtype") as TAVCol;
+                if (!["updated", "created"].includes(type)) {
+                    const iconElement = cellElement.querySelector(".av__gallery-tip").firstElementChild.cloneNode(true) as HTMLElement;
+                    iconElement.classList.add("b3-menu__icon");
+                    editAttrSubmenu.push({
+                        iconHTML: iconElement.outerHTML,
+                        label: escapeHtml(cellElement.getAttribute("aria-label")),
+                        click() {
+                            rowElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+                            rowElement.querySelector('[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
+                            popTextCell(protyle, selectElements);
+                        }
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "fields",
             icon: "iconAttr",

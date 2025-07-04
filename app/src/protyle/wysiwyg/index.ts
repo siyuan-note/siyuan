@@ -624,7 +624,7 @@ export class WYSIWYG {
             }
 
             // https://github.com/siyuan-note/siyuan/issues/15100
-            if (galleryItemElement) {
+            if (galleryItemElement && !hasClosestByAttribute(target, "data-type", "av-gallery-more")) {
                 documentSelf.onmouseup = () => {
                     documentSelf.onmousemove = null;
                     documentSelf.onmouseup = null;

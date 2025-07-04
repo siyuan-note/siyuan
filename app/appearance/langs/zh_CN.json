@@ -1,4 +1,5 @@
 {
+  "contentBlock": "内容块",
   "insertItemBefore": "在前方插入${x}条",
   "insertItemAfter": "在后方插入${x}条",
   "allViews": "所有视图",

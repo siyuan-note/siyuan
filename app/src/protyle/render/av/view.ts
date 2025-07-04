@@ -216,6 +216,12 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${view.sorts.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
+<button class="b3-menu__item" data-type="goGroups">
+    <svg class="b3-menu__icon"><use xlink:href="#iconGroups"></use></svg>
+    <span class="b3-menu__label">${window.siyuan.languages.group}</span>
+    <span class="b3-menu__accelerator">${view.filters.length}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="duplicate-view">
     <svg class="b3-menu__icon">

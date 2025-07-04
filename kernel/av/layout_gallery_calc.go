@@ -17,5 +17,5 @@
 package av
 
 func (gallery *Gallery) Calc() {
-	// 画廊视图不支持计算
+	// 卡片视图不支持计算
 }

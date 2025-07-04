@@ -50,7 +50,7 @@ type ViewTableColumn struct {
 	Calc  *ColumnCalc `json:"calc,omitempty"` // 计算
 }
 
-// Table 描述了表格实例的结构。
+// Table 描述了表格视图实例的结构。
 type Table struct {
 	*BaseInstance
 

@@ -17,7 +17,7 @@
   "showIcon": "Pokaż ikonę",
   "showAllFieldsIcon": "Pokaż ikony pól",
   "wrapAllFields": "Automatyczne zawijanie pól",
-  "gallery": "Galeria",
+  "gallery": "Karta",
   "newTag": "Nowy tag",
   "pleaseWait": "Proszę czekać...",
   "reconnectPrompt": "Po przełączeniu aplikacji ponowne uruchomienie jądra SiYuan może zająć trochę czasu. Proszę poczekać kilka sekund lub kliknąć przycisk „Ponów próbę”",
@@ -1353,7 +1353,7 @@
   },
   "_attrView": {
     "table": "Tabela",
-    "gallery": "Galeria",
+    "gallery": "Karta",
     "key": "Klucz główny",
     "select": "Wybierz"
   },

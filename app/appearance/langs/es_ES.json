@@ -17,7 +17,7 @@
   "showIcon": "Mostrar ícono",
   "showAllFieldsIcon": "Mostrar íconos de campos",
   "wrapAllFields": "Ajuste automático de campos",
-  "gallery": "Galería",
+  "gallery": "Tarjeta",
   "newTag": "Nueva etiqueta",
   "pleaseWait": "Por favor, espere...",
   "reconnectPrompt": "Después de cambiar de aplicación, tomará algún tiempo restaurar el funcionamiento del núcleo de SiYuan. Espere unos segundos o haga clic en el botón \"Reintentar\"",
@@ -1353,7 +1353,7 @@
   },
   "_attrView": {
     "table": "Tabla",
-    "gallery": "Galería",
+    "gallery": "Tarjeta",
     "key": "Clave principal",
     "select": "Selección"
   },

@@ -17,7 +17,7 @@
   "showIcon": "Afficher l'icône",
   "showAllFieldsIcon": "Afficher les icônes des champs",
   "wrapAllFields": "Retour automatique des champs",
-  "gallery": "Galerie",
+  "gallery": "Carte",
   "newTag": "Nouvelle étiquette",
   "pleaseWait": "Veuillez patienter...",
   "reconnectPrompt": "Après avoir changé d'application, il faudra un certain temps pour rétablir le fonctionnement du noyau SiYuan. Veuillez patienter quelques secondes ou cliquer sur le bouton « Réessayer »",
@@ -1353,7 +1353,7 @@
   },
   "_attrView": {
     "table": "Tableau",
-    "gallery": "Galerie",
+    "gallery": "Carte",
     "key": "Clé primaire",
     "select": "Sélectionner"
   },

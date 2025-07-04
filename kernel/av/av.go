@@ -189,7 +189,7 @@ type View struct {
 	PageSize         int            `json:"pageSize"`          // 每页条目数
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
-	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 画廊布局
+	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Groups       []*View  `json:"groups,omitempty"`       // 分组视图列表
@@ -206,7 +206,7 @@ type LayoutType string
 
 const (
 	LayoutTypeTable   LayoutType = "table"   // 属性视图类型 - 表格
-	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 画廊
+	LayoutTypeGallery LayoutType = "gallery" // 属性视图类型 - 卡片
 )
 
 const (

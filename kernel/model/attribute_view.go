@@ -3234,7 +3234,7 @@ func AddAttributeViewKey(avID, keyID, keyName, keyType, keyIcon, previousKeyID s
 			if nil != view.Table {
 				if "" == previousKeyID {
 					if av.LayoutTypeGallery == currentView.LayoutType {
-						// 如果当前视图是画廊视图则添加到最后
+						// 如果当前视图是卡片视图则添加到最后
 						view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: key.ID}})
 					} else {
 						view.Table.Columns = append([]*av.ViewTableColumn{{BaseField: &av.BaseField{ID: key.ID}}}, view.Table.Columns...)

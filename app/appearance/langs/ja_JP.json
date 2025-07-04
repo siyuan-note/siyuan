@@ -17,7 +17,7 @@
   "showIcon": "アイコンを表示",
   "showAllFieldsIcon": "フィールドアイコンを表示",
   "wrapAllFields": "フィールドを自動折り返し",
-  "gallery": "ギャラリー",
+  "gallery": "カード",
   "newTag": "新しいタグ",
   "pleaseWait": "しばらくお待ちください...",
   "reconnectPrompt": "アプリを切り替えた後、思源カーネルの実行を再開するには少し時間がかかります。数秒待つか、「再試行」ボタンをクリックしてください",
@@ -1353,7 +1353,7 @@
   },
   "_attrView": {
     "table": "テーブル",
-    "gallery": "ギャラリー",
+    "gallery": "カード",
     "key": "プライマリキー",
     "select": "選択"
   },

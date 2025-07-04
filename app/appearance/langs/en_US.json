@@ -17,7 +17,7 @@
   "showIcon": "Show icon",
   "showAllFieldsIcon": "Show field icons",
   "wrapAllFields": "Auto-wrap fields",
-  "gallery": "Gallery",
+  "gallery": "Card",
   "newTag": "New tag",
   "pleaseWait": "Please wait...",
   "reconnectPrompt": "After switching applications, it will take some time to restore the SiYuan kernel operation. Please wait a few seconds or click the \"Retry\" button",
@@ -1353,7 +1353,7 @@
   },
   "_attrView": {
     "table": "Table",
-    "gallery": "Gallery",
+    "gallery": "Card",
     "key": "Primary Key",
     "select": "Select"
   },

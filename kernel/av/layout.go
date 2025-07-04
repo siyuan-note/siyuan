@@ -111,7 +111,7 @@ func (baseInstanceField *BaseInstanceField) GetID() string {
 }
 
 // Collection 描述了一个集合的接口。
-// 集合可以是表格、画廊等，包含多个项目。
+// 集合可以是表格、卡片等，包含多个项目。
 type Collection interface {
 
 	// GetItems 返回集合中的所有项目。
@@ -138,7 +138,7 @@ type Field interface {
 }
 
 // Item 描述了一个项目的接口。
-// 项目可以是表格行、画廊卡片等。
+// 项目可以是表格行、卡片等。
 type Item interface {
 
 	// GetBlockValue 返回主键的值。

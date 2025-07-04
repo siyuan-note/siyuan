@@ -1,5 +1,5 @@
 {
-	"spec": 1,
+	"spec": 3,
 	"id": "20240208171724-zfkzgwi",
 	"name": "書籍",
 	"keyValues": [
@@ -254,12 +254,13 @@
 			"name": "表格",
 			"hideAttrViewName": false,
 			"desc": "",
+			"pageSize": 50,
 			"type": "table",
 			"table": {
 				"spec": 0,
 				"id": "20240208171724-dpfg89v",
-				"filters": [],
-				"sorts": [],
+				"showIcon": true,
+				"wrapField": false,
 				"pageSize": 50,
 				"columns": [
 					{
@@ -296,43 +297,51 @@
 					"20240208171759-zc76r72",
 					"20240208171807-wbmr1ps"
 				]
-			}
+			},
+			"itemIds": [
+				"20240208171751-wmphpet",
+				"20240208171759-zc76r72",
+				"20240208171807-wbmr1ps"
+			]
 		},
 		{
 			"id": "20250615173733-4es9lsl",
 			"icon": "",
-			"name": "畫廊",
+			"name": "卡片",
 			"hideAttrViewName": false,
 			"desc": "",
+			"pageSize": 50,
 			"type": "gallery",
 			"gallery": {
 				"spec": 0,
 				"id": "20250615173734-3131lvi",
-				"filters": [],
-				"sorts": [],
+				"showIcon": true,
+				"wrapField": false,
 				"pageSize": 50,
 				"coverFrom": 2,
 				"coverFromAssetKeyID": "20250615173651-a3u5o6l",
 				"cardAspectRatio": 3,
 				"cardSize": 0,
 				"fitImage": false,
-				"showIcon": true,
-				"wrapField": false,
 				"fields": [
 					{
 						"id": "20240208171724-j0vptez",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20240208171815-ntngplo",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20240208171913-wcpom5u",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20250615173651-a3u5o6l",
+						"wrap": false,
 						"hidden": true
 					}
 				],
@@ -341,7 +350,12 @@
 					"20240208171759-zc76r72",
 					"20240208171807-wbmr1ps"
 				]
-			}
+			},
+			"itemIds": [
+				"20240208171751-wmphpet",
+				"20240208171759-zc76r72",
+				"20240208171807-wbmr1ps"
+			]
 		}
 	]
 }

@@ -1,4 +1,8 @@
 {
+  "groupMethod": "分组方式",
+  "hideEmptyGroup": "隐藏空白分组",
+  "groups": "组群",
+  "removeGroup": "移除分组",
   "contentBlock": "内容块",
   "insertItemBefore": "在前方插入${x}条",
   "insertItemAfter": "在后方插入${x}条",

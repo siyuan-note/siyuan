@@ -47,6 +47,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
+import {bindGroupsEvent, getGroupsHTML, getGroupsMethodHTML, setGroupMethod} from "./groups";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -572,6 +573,31 @@ export const openMenuPanel = (options: {
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroups") {
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view.groups);
+                    bindGroupsEvent(options.protyle, menuElement, data, blockID);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsMethod") {
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.groups);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "setGroupMethod") {
+                    setGroupMethod({
+                        protyle: options.protyle,
+                        fieldId: target.getAttribute("data-id"),
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement,
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

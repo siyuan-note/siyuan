@@ -63,6 +63,7 @@ type TOperation =
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
+    | "setAttrViewGroup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -841,9 +842,7 @@ interface IAVView {
     wrapField: boolean;
     filters: IAVFilter[],
     sorts: IAVSort[],
-    groups: {
-        field: string,
-    }
+    groups: IAVGroups
 }
 
 interface IAVTable extends IAVView {
@@ -876,6 +875,10 @@ interface relativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后
+}
+
+interface IAVGroups {
+    field: string,
 }
 
 interface IAVSort {

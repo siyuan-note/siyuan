@@ -850,7 +850,7 @@ interface IAVTable extends IAVView {
 }
 
 interface IAVGallery extends IAVView {
-    coverFrom: number;    // 0：无，1：内容图，2：资源字段
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段，3：内容块
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;

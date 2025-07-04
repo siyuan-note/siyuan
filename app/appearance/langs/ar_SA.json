@@ -1,4 +1,5 @@
 {
+  "contentBlock": "كتلة المحتوى",
   "insertItemBefore": "إدراج ${x} عنصر(عناصر) قبل",
   "insertItemAfter": "إدراج ${x} عنصر(عناصر) بعد",
   "allViews": "جميع العروض",

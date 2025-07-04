@@ -1,4 +1,5 @@
 {
+  "contentBlock": "Bloco de conteúdo",
   "insertItemBefore": "Inserir ${x} item(ns) antes",
   "insertItemAfter": "Inserir ${x} item(ns) depois",
   "allViews": "Todas as visualizações",

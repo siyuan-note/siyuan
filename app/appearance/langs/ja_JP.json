@@ -1,4 +1,5 @@
 {
+  "contentBlock": "コンテンツブロック",
   "insertItemBefore": "${x}項目を前に挿入",
   "insertItemAfter": "${x}項目を後に挿入",
   "allViews": "すべてのビュー",

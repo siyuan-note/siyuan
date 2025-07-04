@@ -1,4 +1,5 @@
 {
+  "contentBlock": "Inhaltsblock",
   "insertItemBefore": "${x} Element(e) davor einfügen",
   "insertItemAfter": "${x} Element(e) danach einfügen",
   "allViews": "Alle Ansichten",

@@ -1,4 +1,5 @@
 {
+  "contentBlock": "בלוק תוכן",
   "insertItemBefore": "הוסף ${x} פריט(ים) לפני",
   "insertItemAfter": "הוסף ${x} פריט(ים) אחרי",
   "allViews": "כל התצוגות",

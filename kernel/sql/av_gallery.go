@@ -195,19 +195,7 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 		})
 
 		if "" == galleryCard.CoverURL {
-			isDoc := ast.NodeDocument == node.Type
-			if isDoc {
-				node = node.FirstChild
-			}
-
-			buf := bytes.Buffer{}
-			for c := node; nil != c; c = c.Next {
-				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-				if !isDoc || 1024*4 < buf.Len() {
-					break
-				}
-			}
-			galleryCard.CoverContent = buf.String()
+			galleryCard.CoverContent = renderCoverContentBlock(node, luteEngine)
 			return
 		}
 	case av.CoverFromAssetField:
@@ -222,7 +210,38 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 
 		galleryCard.CoverURL = assetValue.MAsset[0].Content
 		return
+	case av.CoverFromContentBlock:
+		blockValue := getBlockValue(cardValues)
+		if blockValue.IsDetached {
+			break
+		}
+
+		tree := trees[blockValue.BlockID]
+		if nil == tree {
+			break
+		}
+		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		if nil == node {
+			break
+		}
+		galleryCard.CoverContent = renderCoverContentBlock(node, luteEngine)
 	}
+}
+
+func renderCoverContentBlock(node *ast.Node, luteEngine *lute.Lute) string {
+	isDoc := ast.NodeDocument == node.Type
+	if isDoc {
+		node = node.FirstChild
+	}
+
+	buf := bytes.Buffer{}
+	for c := node; nil != c; c = c.Next {
+		buf.WriteString(renderBlockDOMByNode(c, luteEngine))
+		if !isDoc || 1024*4 < buf.Len() {
+			break
+		}
+	}
+	return buf.String()
 }
 
 func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {

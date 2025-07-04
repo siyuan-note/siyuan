@@ -1,4 +1,5 @@
 {
+  "contentBlock": "Блок контента",
   "insertItemBefore": "Вставить ${x} элемент(ов) перед",
   "insertItemAfter": "Вставить ${x} элемент(ов) после",
   "allViews": "Все виды",

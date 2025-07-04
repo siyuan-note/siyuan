@@ -77,6 +77,7 @@ const (
 	CoverFromNone         CoverFrom = iota // 无封面
 	CoverFromContentImage                  // 内容图
 	CoverFromAssetField                    // 资源字段
+	CoverFromContentBlock                  // 内容块
 )
 
 // ViewGalleryCardField 描述了画廊卡片字段的结构。

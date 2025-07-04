@@ -67,7 +67,8 @@ type BaseInstance struct {
 	Folded           bool          `json:"folded,omitempty"` // 是否折叠
 	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
 
-	Groups []Viewable `json:"groups,omitempty"` // 分组实例列表
+	Groups    []Viewable `json:"groups,omitempty"`    // 分组实例列表
+	GroupCalc *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则和结果
 }
 
 func (baseInstance *BaseInstance) GetSorts() []*ViewSort {

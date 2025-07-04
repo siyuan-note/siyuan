@@ -16,8 +16,8 @@
 
 package av
 
-// ColumnCalc 描述了列（字段）计算操作和结果的结构。
-type ColumnCalc struct {
+// FieldCalc 描述了字段计算操作和结果的结构。
+type FieldCalc struct {
 	Operator CalcOperator `json:"operator"` // 计算操作符
 	Result   *Value       `json:"result"`   // 计算结果
 }

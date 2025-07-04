@@ -2346,7 +2346,7 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 		return
 	}
 
-	calc := &av.ColumnCalc{}
+	calc := &av.FieldCalc{}
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		if err = gulu.JSON.UnmarshalJSON(data, calc); err != nil {

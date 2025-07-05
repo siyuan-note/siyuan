@@ -24,20 +24,9 @@ import (
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {
 	ret = &av.Table{
-		BaseInstance: &av.BaseInstance{
-			ID:               view.ID,
-			Icon:             view.Icon,
-			Name:             view.Name,
-			Desc:             view.Desc,
-			HideAttrViewName: view.HideAttrViewName,
-			Filters:          view.Filters,
-			Sorts:            view.Sorts,
-			Group:            view.Group,
-			ShowIcon:         view.Table.ShowIcon,
-			WrapField:        view.Table.WrapField,
-		},
-		Columns: []*av.TableColumn{},
-		Rows:    []*av.TableRow{},
+		BaseInstance: av.NewViewBaseInstance(view),
+		Columns:      []*av.TableColumn{},
+		Rows:         []*av.TableRow{},
 	}
 
 	// 组装列
@@ -58,6 +47,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Wrap:         col.Wrap,
 				Hidden:       col.Hidden,
 				Desc:         key.Desc,
+				Calc:         col.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
 				Template:     key.Template,
@@ -67,7 +57,6 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			},
 			Width: col.Width,
 			Pin:   col.Pin,
-			Calc:  col.Calc,
 		})
 	}
 

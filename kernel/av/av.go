@@ -203,8 +203,8 @@ type View struct {
 
 // GroupCalc 描述了分组计算规则和结果的结构。
 type GroupCalc struct {
-	Field     string        `json:"field"` // 字段 ID
-	FieldCalc `json:"calc"` // 计算规则和结果
+	Field     string     `json:"field"` // 字段 ID
+	FieldCalc *FieldCalc `json:"calc"`  // 计算规则和结果
 }
 
 // LayoutType 描述了视图布局类型。
@@ -267,15 +267,6 @@ func NewGalleryView() (ret *View) {
 // Viewable 描述了视图的接口。
 type Viewable interface {
 
-	// Filter 根据视图中设置的过滤器进行过滤。
-	Filter(attrView *AttributeView)
-
-	// Sort 根据视图中设置的排序规则进行排序。
-	Sort(attrView *AttributeView)
-
-	// Calc 根据视图中设置的计算规则进行计算。
-	Calc()
-
 	// GetType 获取视图的布局类型。
 	GetType() LayoutType
 
@@ -284,6 +275,24 @@ type Viewable interface {
 
 	// SetGroups 设置视图分组列表。
 	SetGroups(viewables []Viewable)
+
+	// SetGroupCalc 设置视图分组计算规则和结果。
+	SetGroupCalc(group *GroupCalc)
+
+	// GetGroupCalc 获取视图分组计算规则和结果。
+	GetGroupCalc() *GroupCalc
+
+	// SetGroupName 设置分组名称。
+	SetGroupName(name string)
+
+	// SetGroupFolded 设置分组是否折叠。
+	SetGroupFolded(folded bool)
+
+	// SetGroupHidden 设置分组是否隐藏。
+	SetGroupHidden(hidden bool)
+
+	// SetGroupDefault 设置分组是否为默认分组。
+	SetGroupDefault(defaulted bool)
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {

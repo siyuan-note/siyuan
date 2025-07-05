@@ -75,6 +75,15 @@ type BaseInstance struct {
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
+	showIcon, wrapField := true, false
+	switch view.LayoutType {
+	case LayoutTypeTable:
+		showIcon = view.Table.ShowIcon
+		wrapField = view.Table.WrapField
+	case LayoutTypeGallery:
+		showIcon = view.Gallery.ShowIcon
+		wrapField = view.Gallery.WrapField
+	}
 	return &BaseInstance{
 		ID:               view.ID,
 		Icon:             view.Icon,
@@ -89,8 +98,8 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		GroupFolded:      view.GroupFolded,
 		GroupHidden:      view.GroupHidden,
 		GroupDefault:     view.GroupDefault,
-		ShowIcon:         view.Table.ShowIcon,
-		WrapField:        view.Table.WrapField,
+		ShowIcon:         showIcon,
+		WrapField:        wrapField,
 	}
 }
 

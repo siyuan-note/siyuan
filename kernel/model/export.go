@@ -571,7 +571,7 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string) (retStdHTML string) {
+func Preview(id string, fillCSSVar bool) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
 	tree, _ := LoadTreeByBlockID(id)
 	tree = exportTree(tree, false, false, true,
@@ -599,7 +599,9 @@ func Preview(id string) (retStdHTML string) {
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
-	fillThemeStyleVar(tree)
+	if fillCSSVar {
+		fillThemeStyleVar(tree)
+	}
 	luteEngine.RenderOptions.ProtyleMarkNetImg = false
 	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
 

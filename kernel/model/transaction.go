@@ -98,8 +98,9 @@ func flushTx(tx *Transaction) {
 			return
 		case TxErrCodeDataIsSyncing:
 			util.PushMsg(Conf.Language(222), 5000)
-		case TxErrWriteAttributeView:
+		case TxErrHandleAttributeView:
 			util.PushMsg(Conf.language(258), 5000)
+			logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
 		default:
 			txData, _ := gulu.JSON.MarshalJSON(tx)
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)
@@ -122,10 +123,10 @@ func PerformTransactions(transactions *[]*Transaction) {
 }
 
 const (
-	TxErrCodeBlockNotFound  = 0
-	TxErrCodeDataIsSyncing  = 1
-	TxErrCodeWriteTree      = 2
-	TxErrWriteAttributeView = 3
+	TxErrCodeBlockNotFound   = 0
+	TxErrCodeDataIsSyncing   = 1
+	TxErrCodeWriteTree       = 2
+	TxErrHandleAttributeView = 3
 )
 
 type TxErr struct {

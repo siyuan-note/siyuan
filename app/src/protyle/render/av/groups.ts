@@ -23,18 +23,24 @@ export const setGroupMethod = (options: {
     }], [{
         action: "setAttrViewGroup",
         data: {
-            field:  options.data.view.groups?.field || "",
+            field: options.data.view.groups?.field || "",
             method: null,
             order: null,
             range: null
         }
     }]);
-    options.data.view.groups.field = options.fieldId;
+    if (!options.data.view.groups) {
+        options.data.view.groups = {
+            field: options.fieldId
+        };
+    } else {
+        options.data.view.groups.field = options.fieldId;
+    }
     options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view.groups);
     // bindGroupsEvent(options.protyle, options.menuElement, options.data, blockID);
     const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
     setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
-}
+};
 
 export const getGroupsMethodHTML = (columns: IAVColumn[], groups: IAVGroups) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';

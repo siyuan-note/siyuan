@@ -100,6 +100,7 @@ func flushTx(tx *Transaction) {
 			util.PushMsg(Conf.Language(222), 5000)
 		case TxErrWriteAttributeView:
 			util.PushMsg(Conf.language(258), 5000)
+			logging.LogErrorf("handle attribute view failed: %s", txErr.msg)
 		default:
 			txData, _ := gulu.JSON.MarshalJSON(tx)
 			logging.LogFatalf(logging.ExitCodeFatal, "transaction failed [%d]: %s\n  tx [%s]", txErr.code, txErr.msg, txData)

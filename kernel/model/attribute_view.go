@@ -1316,9 +1316,74 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		return
 	}
 
-	viewable.Filter(attrView)
-	viewable.Sort(attrView)
-	viewable.Calc()
+	av.Filter(viewable, attrView)
+	av.Sort(viewable, attrView)
+	av.Calc(viewable)
+
+	if groupCalc := viewable.GetGroupCalc(); nil != groupCalc {
+		if groupCalcKey, _ := attrView.GetKey(groupCalc.Field); nil != groupCalcKey {
+			collection := viewable.(av.Collection)
+			var calcResult *av.GroupCalc
+			field := collection.GetField(groupCalcKey.ID)
+			if nil != field {
+				if calc := field.GetCalc(); nil != calc && field.GetID() == groupCalcKey.ID {
+					// 直接使用字段计算结果
+					calcResult = &av.GroupCalc{Field: groupCalcKey.ID, FieldCalc: calc}
+				}
+
+				if nil == calcResult {
+					for i, f := range collection.GetFields() {
+						if f.GetID() != groupCalcKey.ID {
+							continue
+						}
+
+						field.SetCalc(groupCalc.FieldCalc)
+
+						switch field.GetType() {
+						case av.KeyTypeBlock:
+							av.CalcFieldBlock(collection, field, i)
+						case av.KeyTypeText:
+							av.CalcFieldText(collection, field, i)
+						case av.KeyTypeNumber:
+							av.CalcFieldNumber(collection, field, i)
+						case av.KeyTypeDate:
+							av.CalcFieldDate(collection, field, i)
+						case av.KeyTypeSelect:
+							av.CalcFieldSelect(collection, field, i)
+						case av.KeyTypeMSelect:
+							av.CalcFieldMSelect(collection, field, i)
+						case av.KeyTypeURL:
+							av.CalcFieldURL(collection, field, i)
+						case av.KeyTypeEmail:
+							av.CalcFieldEmail(collection, field, i)
+						case av.KeyTypePhone:
+							av.CalcFieldPhone(collection, field, i)
+						case av.KeyTypeMAsset:
+							av.CalcFieldMAsset(collection, field, i)
+						case av.KeyTypeTemplate:
+							av.CalcFieldTemplate(collection, field, i)
+						case av.KeyTypeCreated:
+							av.CalcFieldCreated(collection, field, i)
+						case av.KeyTypeUpdated:
+							av.CalcFieldUpdated(collection, field, i)
+						case av.KeyTypeCheckbox:
+							av.CalcFieldCheckbox(collection, field, i)
+						case av.KeyTypeRelation:
+							av.CalcFieldRelation(collection, field, i)
+						case av.KeyTypeRollup:
+							av.CalcFieldRollup(collection, field, i)
+						}
+						break
+					}
+
+					calcResult = &av.GroupCalc{Field: groupCalcKey.ID, FieldCalc: field.GetCalc()}
+					field.SetCalc(nil)
+				}
+			}
+
+			viewable.SetGroupCalc(calcResult)
+		}
+	}
 
 	// 分页
 	switch viewable.GetType() {
@@ -1368,8 +1433,8 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	}
 
 	table := getAttrViewTable(attrView, view, query)
-	table.Filter(attrView)
-	table.Sort(attrView)
+	av.Filter(table, attrView)
+	av.Sort(table, attrView)
 
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
@@ -2480,8 +2545,8 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 
 	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
 		viewable := sql.RenderView(view, attrView, "")
-		viewable.Filter(attrView)
-		viewable.Sort(attrView)
+		av.Filter(viewable, attrView)
+		av.Sort(viewable, attrView)
 
 		collection := viewable.(av.Collection)
 		items := collection.GetItems()

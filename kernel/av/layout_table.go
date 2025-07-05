@@ -63,9 +63,8 @@ type Table struct {
 type TableColumn struct {
 	*BaseInstanceField
 
-	Pin   bool       `json:"pin"`   // 是否固定
-	Width string     `json:"width"` // 列宽度
-	Calc  *FieldCalc `json:"calc"`  // 计算规则和结果
+	Pin   bool   `json:"pin"`   // 是否固定
+	Width string `json:"width"` // 列宽度
 }
 
 // TableRow 描述了表格实例行的结构。
@@ -150,18 +149,15 @@ func (table *Table) GetFields() (ret []Field) {
 	return ret
 }
 
+func (table *Table) GetField(id string) Field {
+	for _, column := range table.Columns {
+		if column.ID == id {
+			return column
+		}
+	}
+	return nil
+}
+
 func (*Table) GetType() LayoutType {
 	return LayoutTypeTable
-}
-
-func (table *Table) GetID() string {
-	return table.ID
-}
-
-func (table *Table) Sort(attrView *AttributeView) {
-	sort0(table, attrView)
-}
-
-func (table *Table) Filter(attrView *AttributeView) {
-	filter0(table, attrView)
 }

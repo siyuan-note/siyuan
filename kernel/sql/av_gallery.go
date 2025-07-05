@@ -20,18 +20,7 @@ import (
 
 func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string) (ret *av.Gallery) {
 	ret = &av.Gallery{
-		BaseInstance: &av.BaseInstance{
-			ID:               view.ID,
-			Icon:             view.Icon,
-			Name:             view.Name,
-			Desc:             view.Desc,
-			HideAttrViewName: view.HideAttrViewName,
-			Filters:          view.Filters,
-			Sorts:            view.Sorts,
-			Group:            view.Group,
-			ShowIcon:         view.Gallery.ShowIcon,
-			WrapField:        view.Gallery.WrapField,
-		},
+		BaseInstance:        av.NewViewBaseInstance(view),
 		CoverFrom:           view.Gallery.CoverFrom,
 		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,
 		CardAspectRatio:     view.Gallery.CardAspectRatio,
@@ -59,6 +48,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 				Wrap:         field.Wrap,
 				Hidden:       field.Hidden,
 				Desc:         key.Desc,
+				Calc:         field.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
 				Template:     key.Template,

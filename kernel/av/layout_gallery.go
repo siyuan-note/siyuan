@@ -173,14 +173,15 @@ func (gallery *Gallery) GetFields() (ret []Field) {
 	return ret
 }
 
+func (gallery *Gallery) GetField(id string) Field {
+	for _, field := range gallery.Fields {
+		if field.ID == id {
+			return field
+		}
+	}
+	return nil
+}
+
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
-}
-
-func (gallery *Gallery) Sort(attrView *AttributeView) {
-	sort0(gallery, attrView)
-}
-
-func (gallery *Gallery) Filter(attrView *AttributeView) {
-	filter0(gallery, attrView)
 }

@@ -76,6 +76,58 @@ const (
 	FilterOperatorIsFalse          FilterOperator = "Is false"
 )
 
+func Filter(viewable Viewable, attrView *AttributeView) {
+	collection := viewable.(Collection)
+	filters := collection.GetFilters()
+	if 1 > len(filters) {
+		return
+	}
+
+	var colIndexes []int
+	for _, f := range filters {
+		for i, c := range collection.GetFields() {
+			if c.GetID() == f.Column {
+				colIndexes = append(colIndexes, i)
+				break
+			}
+		}
+	}
+
+	var items []Item
+	attrViewCache := map[string]*AttributeView{}
+	attrViewCache[attrView.ID] = attrView
+	for _, item := range collection.GetItems() {
+		pass := true
+		values := item.GetValues()
+		for j, index := range colIndexes {
+			operator := filters[j].Operator
+
+			if nil == values[index] {
+				if FilterOperatorIsNotEmpty == operator {
+					pass = false
+				} else if FilterOperatorIsEmpty == operator {
+					pass = true
+					break
+				}
+
+				if KeyTypeText != values[index].Type {
+					pass = false
+				}
+				break
+			}
+
+			if !values[index].Filter(filters[j], attrView, item.GetID(), &attrViewCache) {
+				pass = false
+				break
+			}
+		}
+		if pass {
+			items = append(items, item)
+		}
+	}
+	collection.SetItems(items)
+}
+
 func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID string, attrViewCache *map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true

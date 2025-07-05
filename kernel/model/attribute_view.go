@@ -45,8 +45,18 @@ import (
 )
 
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
-	err := SetAttributeViewGroup(operation.AvID, operation.BlockID, operation.Data.(*av.ViewGroup))
-	if err != nil {
+	data, err := gulu.JSON.MarshalJSON(operation.Data)
+	if nil != err {
+		logging.LogErrorf("marshal operation data failed: %s", err)
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	group := &av.ViewGroup{}
+	if err = gulu.JSON.UnmarshalJSON(data, &group); nil != err {
+		logging.LogErrorf("unmarshal operation data failed: %s", err)
+		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+
+	if err = SetAttributeViewGroup(operation.AvID, operation.BlockID, group); nil != err {
 		return &TxErr{code: TxErrWriteAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return

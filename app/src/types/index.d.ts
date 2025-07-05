@@ -842,7 +842,8 @@ interface IAVView {
     wrapField: boolean;
     filters: IAVFilter[],
     sorts: IAVSort[],
-    groups: IAVGroups
+    groups: IAVView[]
+    group: IAVGroup
 }
 
 interface IAVTable extends IAVView {
@@ -877,8 +878,10 @@ interface relativeDate {
     direction: number;   // 方向：-1: 前、0: 现在、1: 后
 }
 
-interface IAVGroups {
+interface IAVGroup {
     field: string,
+    method?: number
+    order?: number
 }
 
 interface IAVSort {

@@ -577,7 +577,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goGroups") {
-                    menuElement.innerHTML = getGroupsHTML(fields, data.view.groups);
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view.group);
                     bindGroupsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
@@ -585,7 +585,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goGroupsMethod") {
-                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.groups);
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

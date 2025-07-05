@@ -10,10 +10,13 @@ export const setGroupMethod = (options: {
     fieldId: string;
     data: IAV;
     menuElement: HTMLElement,
-    blockElement: HTMLElement,
+    blockElement: Element,
 }) => {
+    const blockID = options.blockElement.getAttribute("data-block-id");
     transaction(options.protyle, [{
         action: "setAttrViewGroup",
+        avID: options.data.id,
+        blockID,
         data: {
             field: options.fieldId,
             method: null,
@@ -22,31 +25,33 @@ export const setGroupMethod = (options: {
         }
     }], [{
         action: "setAttrViewGroup",
+        avID: options.data.id,
+        blockID,
         data: {
-            field: options.data.view.groups?.field || "",
+            field: options.data.view.group?.field || "",
             method: null,
             order: null,
             range: null
         }
     }]);
-    if (!options.data.view.groups) {
-        options.data.view.groups = {
+    if (!options.data.view.group) {
+        options.data.view.group = {
             field: options.fieldId
         };
     } else {
-        options.data.view.groups.field = options.fieldId;
+        options.data.view.group.field = options.fieldId;
     }
-    options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view.groups);
+    options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view.group);
     // bindGroupsEvent(options.protyle, options.menuElement, options.data, blockID);
     const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
     setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
 };
 
-export const getGroupsMethodHTML = (columns: IAVColumn[], groups: IAVGroups) => {
+export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
     let html = `<button class="b3-menu__item" data-type="setGroupMethod">
     <div class="b3-menu__label">${window.siyuan.languages.calcOperatorNone}</div>
-    ${groups ? "" : selectHTML}
+    ${group ? "" : selectHTML}
 </button>`;
     columns.forEach(item => {
         html += `<button class="b3-menu__item" data-id="${item.id}" data-type="setGroupMethod">
@@ -54,7 +59,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], groups: IAVGroups) => 
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
         ${escapeHtml(item.name) || "&nbsp;"}
     </div>
-    ${groups?.field === item.id ? selectHTML : ""}
+    ${group?.field === item.id ? selectHTML : ""}
 </button>`;
     });
     return `<div class="b3-menu__items">
@@ -69,9 +74,9 @@ ${html}
 </div>`;
 };
 
-export const getGroupsHTML = (columns: IAVColumn[], groups: IAVGroups) => {
+export const getGroupsHTML = (columns: IAVColumn[], group: IAVGroup) => {
     let html = "";
-    if (groups) {
+    if (group) {
         html = `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="removeGroups">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
@@ -88,7 +93,7 @@ export const getGroupsHTML = (columns: IAVColumn[], groups: IAVGroups) => {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="goGroupsMethod">
     <span class="b3-menu__label">${window.siyuan.languages.groupMethod}</span>
-    <span class="b3-menu__accelerator">${groups ? columns.filter(item => item.id === groups.field)[0].name : ""}</span>
+    <span class="b3-menu__accelerator">${group ? columns.filter(item => item.id === group.field)[0].name : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 ${html}

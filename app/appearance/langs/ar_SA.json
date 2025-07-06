@@ -1,4 +1,8 @@
 {
+  "groupMethod": "طريقة التجميع",
+  "hideEmptyGroup": "إخفاء المجموعة الفارغة",
+  "groups": "المجموعات",
+  "removeGroup": "إزالة المجموعة",
   "contentBlock": "كتلة المحتوى",
   "insertItemBefore": "إدراج ${x} عنصر(عناصر) قبل",
   "insertItemAfter": "إدراج ${x} عنصر(عناصر) بعد",

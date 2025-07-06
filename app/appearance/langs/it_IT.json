@@ -1,4 +1,8 @@
 {
+  "groupMethod": "Metodo di raggruppamento",
+  "hideEmptyGroup": "Nascondi gruppo vuoto",
+  "groups": "Gruppi",
+  "removeGroup": "Rimuovi gruppo",
   "contentBlock": "Blocco di contenuto",
   "insertItemBefore": "Inserisci ${x} elemento(i) prima",
   "insertItemAfter": "Inserisci ${x} elemento(i) dopo",

@@ -148,7 +148,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
 	groupItems := map[string][]av.Item{}
-	viewable := sql.RenderView(view, attrView, "")
+	viewable := sql.RenderView(attrView, view, "")
 	collection := viewable.(av.Collection)
 	for _, item := range collection.GetItems() {
 		value := item.GetValue(group.Field)
@@ -1353,7 +1353,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
-	viewable = sql.RenderView(view, attrView, query)
+	viewable = sql.RenderView(attrView, view, query)
 	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
 	if nil != err {
 		return
@@ -1369,7 +1369,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 			groupView.Gallery.CardFields = view.Gallery.CardFields
 		}
 
-		groupViewable := sql.RenderView(groupView, attrView, query)
+		groupViewable := sql.RenderView(attrView, groupView, query)
 		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 		if nil != err {
 			return
@@ -2550,7 +2550,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 
 	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
-		viewable := sql.RenderView(view, attrView, "")
+		viewable := sql.RenderView(attrView, view, "")
 		av.Filter(viewable, attrView)
 		av.Sort(viewable, attrView)
 

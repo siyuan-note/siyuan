@@ -1,4 +1,8 @@
 {
+  "groupMethod": "Способ группировки",
+  "hideEmptyGroup": "Скрыть пустую группу",
+  "groups": "Группы",
+  "removeGroup": "Удалить группу",
   "contentBlock": "Блок контента",
   "insertItemBefore": "Вставить ${x} элемент(ов) перед",
   "insertItemAfter": "Вставить ${x} элемент(ов) после",

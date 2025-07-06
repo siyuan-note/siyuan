@@ -1,4 +1,8 @@
 {
+  "groupMethod": "שיטת קיבוץ",
+  "hideEmptyGroup": "הסתר קבוצה ריקה",
+  "groups": "קבוצות",
+  "removeGroup": "הסר קבוצה",
   "contentBlock": "בלוק תוכן",
   "insertItemBefore": "הוסף ${x} פריט(ים) לפני",
   "insertItemAfter": "הוסף ${x} פריט(ים) אחרי",

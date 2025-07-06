@@ -24,7 +24,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-// ViewFilter 描述了视图过滤器的结构。
+// ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
 	Column        string         `json:"column"`        // 列（字段）ID
 	Operator      FilterOperator `json:"operator"`      // 过滤操作符
@@ -134,7 +134,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 	}
 
 	if nil != filter.Value && value.Type != filter.Value.Type {
-		// 由于字段类型被用户编辑过导致和过滤器值类型不匹配，该情况下不过滤
+		// 由于字段类型被用户编辑过导致和过滤规则值类型不匹配，该情况下不过滤
 		return true
 	}
 

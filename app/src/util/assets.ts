@@ -9,16 +9,57 @@ import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
 
-const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
-    addScript(iconURL, "iconDefaultScript").then(() => {
-        if (!["ant", "material"].includes(data.icon)) {
-            const iconScriptElement = document.getElementById("iconScript");
-            if (iconScriptElement) {
-                iconScriptElement.remove();
-            }
-            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
+const loadIcons = (data: Config.IAppearance) => {
+    const isBuiltInIcon = ["ant", "material"].includes(data.icon);
+    const iconDefaultName = isBuiltInIcon ? data.icon : "material";
+    // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
+    const iconDefaultURL = `/appearance/icons/${iconDefaultName}/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
+    const isDefaultIconUnchanged = iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL);
+    
+    const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+    const iconScriptElement = document.getElementById("iconScript");
+
+    if (
+        // 使用的内置图标不变
+        isDefaultIconUnchanged &&
+        // 使用的第三方图标不变
+        iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconURL)
+    ) {
+        return;
+    }
+
+    if (!isDefaultIconUnchanged) {
+        iconDefaultScriptElement?.remove();
+    }
+    iconScriptElement?.remove();
+
+    const oldSVGElements = Array.from(document.body.children).filter(child => {
+        if (
+            child.tagName !== "svg" ||
+            // 使用的内置图标不变就不需要移除
+            (isDefaultIconUnchanged && child.id === ("icons-" + iconDefaultName)) ||
+            // 插件添加的图标 data-name="icons-plugin"
+            child.getAttribute("data-name")
+        ) {
+            return false;
+        }
+        return true;
+    });
+
+    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+        if (!isBuiltInIcon) {
+            addScript(iconURL, "iconScript").then(removeOldSvgElements);
+        } else {
+            removeOldSvgElements();
         }
     });
+
+    function removeOldSvgElements() {
+        oldSVGElements.forEach(svgElement => {
+            svgElement.remove();
+        });
+    }
 };
 
 export const loadAssets = (data: Config.IAppearance) => {
@@ -98,25 +139,7 @@ export const loadAssets = (data: Config.IAppearance) => {
         addScript(themeScriptAddress, "themeScript");
     }
 
-    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
-    // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    if (iconDefaultScriptElement) {
-        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
-            iconDefaultScriptElement.remove();
-            let svgElement = document.body.firstElementChild;
-            while (svgElement.tagName === "svg") {
-                const currentSvgElement = svgElement;
-                svgElement = svgElement.nextElementSibling;
-                if (!currentSvgElement.getAttribute("data-name")) {
-                    currentSvgElement.remove();
-                }
-            }
-            loadThirdIcon(iconURL, data);
-        }
-    } else {
-        loadThirdIcon(iconURL, data);
-    }
+    loadIcons(data);
 };
 
 export const initAssets = () => {

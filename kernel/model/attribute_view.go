@@ -147,29 +147,31 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		table := sql.RenderAttributeViewTable(attrView, view, "")
-		groupRows := map[string][]*av.TableRow{}
-		for _, row := range table.Rows {
-			value := row.GetValue(group.Field)
-			switch group.Method {
-			case av.GroupMethodValue:
-				strVal := value.String(false)
-				groupRows[strVal] = append(groupRows[strVal], row)
-			}
+	groupItems := map[string][]av.Item{}
+	viewable := sql.RenderView(view, attrView, "")
+	collection := viewable.(av.Collection)
+	for _, item := range collection.GetItems() {
+		value := item.GetValue(group.Field)
+		switch group.Method {
+		case av.GroupMethodValue:
+			strVal := value.String(false)
+			groupItems[strVal] = append(groupItems[strVal], item)
 		}
-
-		for _, rows := range groupRows {
-			v := av.NewTableView()
+	}
+	for _, items := range groupItems {
+		var v *av.View
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			v = av.NewTableView()
 			v.Table = av.NewLayoutTable()
-			for _, row := range rows {
-				v.GroupItemIDs = append(v.GroupItemIDs, row.ID)
-			}
-			view.Groups = append(view.Groups, v)
+		case av.LayoutTypeGallery:
+			v = av.NewGalleryView()
+			v.Gallery = av.NewLayoutGallery()
 		}
-	case av.LayoutTypeGallery:
-
+		for _, item := range items {
+			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
+		}
+		view.Groups = append(view.Groups, v)
 	}
 
 	err = av.SaveAttributeView(attrView)

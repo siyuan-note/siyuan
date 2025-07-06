@@ -55,52 +55,82 @@ const (
 	CalcOperatorPercentUnchecked    CalcOperator = "Percent unchecked"
 )
 
-func Calc(viewable Viewable) {
+func Calc(viewable Viewable, attrView *AttributeView) {
 	collection := viewable.(Collection)
+
+	// 字段计算
 	for i, field := range collection.GetFields() {
 		calc := field.GetCalc()
 		if nil == calc || CalcOperatorNone == calc.Operator {
 			continue
 		}
 
-		switch field.GetType() {
-		case KeyTypeBlock:
-			CalcFieldBlock(collection, field, i)
-		case KeyTypeText:
-			CalcFieldText(collection, field, i)
-		case KeyTypeNumber:
-			CalcFieldNumber(collection, field, i)
-		case KeyTypeDate:
-			CalcFieldDate(collection, field, i)
-		case KeyTypeSelect:
-			CalcFieldSelect(collection, field, i)
-		case KeyTypeMSelect:
-			CalcFieldMSelect(collection, field, i)
-		case KeyTypeURL:
-			CalcFieldURL(collection, field, i)
-		case KeyTypeEmail:
-			CalcFieldEmail(collection, field, i)
-		case KeyTypePhone:
-			CalcFieldPhone(collection, field, i)
-		case KeyTypeMAsset:
-			CalcFieldMAsset(collection, field, i)
-		case KeyTypeTemplate:
-			CalcFieldTemplate(collection, field, i)
-		case KeyTypeCreated:
-			CalcFieldCreated(collection, field, i)
-		case KeyTypeUpdated:
-			CalcFieldUpdated(collection, field, i)
-		case KeyTypeCheckbox:
-			CalcFieldCheckbox(collection, field, i)
-		case KeyTypeRelation:
-			CalcFieldRelation(collection, field, i)
-		case KeyTypeRollup:
-			CalcFieldRollup(collection, field, i)
+		calcField(collection, field, i)
+	}
+
+	// 分组计算
+	if groupCalc := viewable.GetGroupCalc(); nil != groupCalc {
+		if groupCalcKey, _ := attrView.GetKey(groupCalc.Field); nil != groupCalcKey {
+			if field, fieldIndex := collection.GetField(groupCalcKey.ID); nil != field {
+				var calcResult *GroupCalc
+
+				if calc := field.GetCalc(); nil != calc && field.GetID() == groupCalcKey.ID {
+					// 直接使用字段计算结果
+					calcResult = &GroupCalc{Field: groupCalcKey.ID, FieldCalc: calc}
+				}
+
+				if nil == calcResult {
+					// 在字段上设置计算规则，使用字段结算结果作为分组计算结果，最后再清除字段上的计算规则
+					field.SetCalc(groupCalc.FieldCalc)
+					calcField(collection, field, fieldIndex)
+					calcResult = &GroupCalc{Field: groupCalcKey.ID, FieldCalc: field.GetCalc()}
+					field.SetCalc(nil)
+				}
+
+				viewable.SetGroupCalc(calcResult)
+			}
 		}
 	}
 }
 
-func CalcFieldTemplate(collection Collection, field Field, fieldIndex int) {
+func calcField(collection Collection, field Field, fieldIndex int) {
+	switch field.GetType() {
+	case KeyTypeBlock:
+		calcFieldBlock(collection, field, fieldIndex)
+	case KeyTypeText:
+		calcFieldText(collection, field, fieldIndex)
+	case KeyTypeNumber:
+		calcFieldNumber(collection, field, fieldIndex)
+	case KeyTypeDate:
+		calcFieldDate(collection, field, fieldIndex)
+	case KeyTypeSelect:
+		calcFieldSelect(collection, field, fieldIndex)
+	case KeyTypeMSelect:
+		calcFieldMSelect(collection, field, fieldIndex)
+	case KeyTypeURL:
+		calcFieldURL(collection, field, fieldIndex)
+	case KeyTypeEmail:
+		calcFieldEmail(collection, field, fieldIndex)
+	case KeyTypePhone:
+		calcFieldPhone(collection, field, fieldIndex)
+	case KeyTypeMAsset:
+		calcFieldMAsset(collection, field, fieldIndex)
+	case KeyTypeTemplate:
+		calcFieldTemplate(collection, field, fieldIndex)
+	case KeyTypeCreated:
+		calcFieldCreated(collection, field, fieldIndex)
+	case KeyTypeUpdated:
+		calcFieldUpdated(collection, field, fieldIndex)
+	case KeyTypeCheckbox:
+		calcFieldCheckbox(collection, field, fieldIndex)
+	case KeyTypeRelation:
+		calcFieldRelation(collection, field, fieldIndex)
+	case KeyTypeRollup:
+		calcFieldRollup(collection, field, fieldIndex)
+	}
+}
+
+func calcFieldTemplate(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -272,7 +302,7 @@ func CalcFieldTemplate(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldMAsset(collection Collection, field Field, fieldIndex int) {
+func calcFieldMAsset(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -361,7 +391,7 @@ func CalcFieldMAsset(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldMSelect(collection Collection, field Field, fieldIndex int) {
+func calcFieldMSelect(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -450,7 +480,7 @@ func CalcFieldMSelect(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldSelect(collection Collection, field Field, fieldIndex int) {
+func calcFieldSelect(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -535,7 +565,7 @@ func CalcFieldSelect(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldDate(collection Collection, field Field, fieldIndex int) {
+func calcFieldDate(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -674,7 +704,7 @@ func CalcFieldDate(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldNumber(collection Collection, field Field, fieldIndex int) {
+func calcFieldNumber(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -840,7 +870,7 @@ func CalcFieldNumber(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldText(collection Collection, field Field, fieldIndex int) {
+func calcFieldText(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -925,7 +955,7 @@ func CalcFieldText(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldURL(collection Collection, field Field, fieldIndex int) {
+func calcFieldURL(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1010,7 +1040,7 @@ func CalcFieldURL(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldEmail(collection Collection, field Field, fieldIndex int) {
+func calcFieldEmail(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1095,7 +1125,7 @@ func CalcFieldEmail(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldPhone(collection Collection, field Field, fieldIndex int) {
+func calcFieldPhone(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1180,7 +1210,7 @@ func CalcFieldPhone(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldBlock(collection Collection, field Field, fieldIndex int) {
+func calcFieldBlock(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1265,7 +1295,7 @@ func CalcFieldBlock(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldCreated(collection Collection, field Field, fieldIndex int) {
+func calcFieldCreated(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1393,7 +1423,7 @@ func CalcFieldCreated(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldUpdated(collection Collection, field Field, fieldIndex int) {
+func calcFieldUpdated(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1521,7 +1551,7 @@ func CalcFieldUpdated(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldCheckbox(collection Collection, field Field, fieldIndex int) {
+func calcFieldCheckbox(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1569,7 +1599,7 @@ func CalcFieldCheckbox(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldRelation(collection Collection, field Field, fieldIndex int) {
+func calcFieldRelation(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:
@@ -1658,7 +1688,7 @@ func CalcFieldRelation(collection Collection, field Field, fieldIndex int) {
 	}
 }
 
-func CalcFieldRollup(collection Collection, field Field, fieldIndex int) {
+func calcFieldRollup(collection Collection, field Field, fieldIndex int) {
 	calc := field.GetCalc()
 	switch calc.Operator {
 	case CalcOperatorCountAll:

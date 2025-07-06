@@ -299,6 +299,10 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewCardAspectRatio(op)
 		case "setAttrViewGroup":
 			ret = tx.doSetAttrViewGroup(op)
+		case "hideAttrViewGroup":
+			ret = tx.doHideAttrViewGroup(op)
+		case "setGroupHideEmpty":
+			ret = tx.doSetGroupHideEmpty(op)
 		}
 
 		if nil != ret {

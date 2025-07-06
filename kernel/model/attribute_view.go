@@ -44,6 +44,75 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSetGroupHideEmpty(operation *Operation) (ret *TxErr) {
+	if err := SetGroupHideEmpty(operation.AvID, operation.BlockID, operation.Data.(bool)); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func SetGroupHideEmpty(avID, blockID string, hidden bool) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	if nil == view.Group {
+		return
+	}
+
+	view.GroupHideEmpty = hidden
+
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
+func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
+	if err := HideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func HideAttributeViewGroup(avID, blockID, groupID string, hidden bool) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	if nil == view.Group {
+		return
+	}
+
+	for _, group := range view.Groups {
+		if group.ID == groupID {
+			group.GroupHidden = hidden
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
 func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
 	data, err := gulu.JSON.MarshalJSON(operation.Data)
 	if nil != err {
@@ -62,7 +131,7 @@ func (tx *Transaction) doSetAttrViewGroup(operation *Operation) (ret *TxErr) {
 	return
 }
 
-func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) error {
+func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
@@ -78,29 +147,31 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) error {
 
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
-	switch view.LayoutType {
-	case av.LayoutTypeTable:
-		table := sql.RenderAttributeViewTable(attrView, view, "")
-		groupRows := map[string][]*av.TableRow{}
-		for _, row := range table.Rows {
-			value := row.GetValue(group.Field)
-			switch group.Method {
-			case av.GroupMethodValue:
-				strVal := value.String(false)
-				groupRows[strVal] = append(groupRows[strVal], row)
-			}
+	groupItems := map[string][]av.Item{}
+	viewable := sql.RenderView(attrView, view, "")
+	collection := viewable.(av.Collection)
+	for _, item := range collection.GetItems() {
+		value := item.GetValue(group.Field)
+		switch group.Method {
+		case av.GroupMethodValue:
+			strVal := value.String(false)
+			groupItems[strVal] = append(groupItems[strVal], item)
 		}
-
-		for _, rows := range groupRows {
-			v := av.NewTableView()
+	}
+	for _, items := range groupItems {
+		var v *av.View
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			v = av.NewTableView()
 			v.Table = av.NewLayoutTable()
-			for _, row := range rows {
-				v.GroupItemIDs = append(v.GroupItemIDs, row.ID)
-			}
-			view.Groups = append(view.Groups, v)
+		case av.LayoutTypeGallery:
+			v = av.NewGalleryView()
+			v.Gallery = av.NewLayoutGallery()
 		}
-	case av.LayoutTypeGallery:
-
+		for _, item := range items {
+			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
+		}
+		view.Groups = append(view.Groups, v)
 	}
 
 	err = av.SaveAttributeView(attrView)
@@ -1282,7 +1353,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	checkAttrView(attrView, view)
 	upgradeAttributeViewSpec(attrView)
 
-	viewable = sql.RenderView(view, attrView, query)
+	viewable = sql.RenderView(attrView, view, query)
 	err = renderViewableInstance(viewable, view, attrView, page, pageSize)
 	if nil != err {
 		return
@@ -1298,7 +1369,7 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 			groupView.Gallery.CardFields = view.Gallery.CardFields
 		}
 
-		groupViewable := sql.RenderView(groupView, attrView, query)
+		groupViewable := sql.RenderView(attrView, groupView, query)
 		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 		if nil != err {
 			return
@@ -1318,72 +1389,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 
 	av.Filter(viewable, attrView)
 	av.Sort(viewable, attrView)
-	av.Calc(viewable)
-
-	if groupCalc := viewable.GetGroupCalc(); nil != groupCalc {
-		if groupCalcKey, _ := attrView.GetKey(groupCalc.Field); nil != groupCalcKey {
-			collection := viewable.(av.Collection)
-			var calcResult *av.GroupCalc
-			field := collection.GetField(groupCalcKey.ID)
-			if nil != field {
-				if calc := field.GetCalc(); nil != calc && field.GetID() == groupCalcKey.ID {
-					// 直接使用字段计算结果
-					calcResult = &av.GroupCalc{Field: groupCalcKey.ID, FieldCalc: calc}
-				}
-
-				if nil == calcResult {
-					for i, f := range collection.GetFields() {
-						if f.GetID() != groupCalcKey.ID {
-							continue
-						}
-
-						field.SetCalc(groupCalc.FieldCalc)
-
-						switch field.GetType() {
-						case av.KeyTypeBlock:
-							av.CalcFieldBlock(collection, field, i)
-						case av.KeyTypeText:
-							av.CalcFieldText(collection, field, i)
-						case av.KeyTypeNumber:
-							av.CalcFieldNumber(collection, field, i)
-						case av.KeyTypeDate:
-							av.CalcFieldDate(collection, field, i)
-						case av.KeyTypeSelect:
-							av.CalcFieldSelect(collection, field, i)
-						case av.KeyTypeMSelect:
-							av.CalcFieldMSelect(collection, field, i)
-						case av.KeyTypeURL:
-							av.CalcFieldURL(collection, field, i)
-						case av.KeyTypeEmail:
-							av.CalcFieldEmail(collection, field, i)
-						case av.KeyTypePhone:
-							av.CalcFieldPhone(collection, field, i)
-						case av.KeyTypeMAsset:
-							av.CalcFieldMAsset(collection, field, i)
-						case av.KeyTypeTemplate:
-							av.CalcFieldTemplate(collection, field, i)
-						case av.KeyTypeCreated:
-							av.CalcFieldCreated(collection, field, i)
-						case av.KeyTypeUpdated:
-							av.CalcFieldUpdated(collection, field, i)
-						case av.KeyTypeCheckbox:
-							av.CalcFieldCheckbox(collection, field, i)
-						case av.KeyTypeRelation:
-							av.CalcFieldRelation(collection, field, i)
-						case av.KeyTypeRollup:
-							av.CalcFieldRollup(collection, field, i)
-						}
-						break
-					}
-
-					calcResult = &av.GroupCalc{Field: groupCalcKey.ID, FieldCalc: field.GetCalc()}
-					field.SetCalc(nil)
-				}
-			}
-
-			viewable.SetGroupCalc(calcResult)
-		}
-	}
+	av.Calc(viewable, attrView)
 
 	// 分页
 	switch viewable.GetType() {
@@ -2544,7 +2550,7 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
 
 	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
-		viewable := sql.RenderView(view, attrView, "")
+		viewable := sql.RenderView(attrView, view, "")
 		av.Filter(viewable, attrView)
 		av.Sort(viewable, attrView)
 

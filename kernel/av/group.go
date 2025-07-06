@@ -16,6 +16,7 @@
 
 package av
 
+// ViewGroup 描述了视图分组规则的结构。
 type ViewGroup struct {
 	Field  string      `json:"field"`           // 分组字段 ID
 	Method GroupMethod `json:"method"`          // 分组方式

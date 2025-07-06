@@ -198,7 +198,7 @@ type Collection interface {
 	GetFields() []Field
 
 	// GetField 返回指定 ID 的字段。
-	GetField(id string) (ret Field)
+	GetField(id string) (ret Field, fieldIndex int)
 
 	// GetSorts 返回集合的排序规则。
 	GetSorts() []*ViewSort

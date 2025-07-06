@@ -173,13 +173,13 @@ func (gallery *Gallery) GetFields() (ret []Field) {
 	return ret
 }
 
-func (gallery *Gallery) GetField(id string) Field {
-	for _, field := range gallery.Fields {
+func (gallery *Gallery) GetField(id string) (ret Field, fieldIndex int) {
+	for i, field := range gallery.Fields {
 		if field.ID == id {
-			return field
+			return field, i
 		}
 	}
-	return nil
+	return nil, -1
 }
 
 func (gallery *Gallery) GetType() LayoutType {

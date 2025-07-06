@@ -149,13 +149,13 @@ func (table *Table) GetFields() (ret []Field) {
 	return ret
 }
 
-func (table *Table) GetField(id string) Field {
+func (table *Table) GetField(id string) (ret Field, fieldIndex int) {
 	for _, column := range table.Columns {
 		if column.ID == id {
-			return column
+			return column, fieldIndex
 		}
 	}
-	return nil
+	return nil, -1
 }
 
 func (*Table) GetType() LayoutType {

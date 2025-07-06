@@ -20,7 +20,7 @@ export const fillContent = (protyle: IProtyle, data: string, elements: Element[]
     }
     setLastNodeRange(getContenteditableElement(elements[elements.length - 1]), protyle.toolbar.range);
     protyle.toolbar.range.collapse(true);
-    insertHTML(data, protyle, true, true);
+    insertHTML(protyle.lute.SpinBlockDOM(data), protyle, true, true);
     blockRender(protyle, protyle.wysiwyg.element);
     processRender(protyle.wysiwyg.element);
     highlightRender(protyle.wysiwyg.element);
@@ -272,7 +272,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
                                 fillContent(protyle, response.data, elements);
                             });
                             if (target.dataset.action === clearContext) {
-                               showMessage(window.siyuan.languages.clearContextSucc);
+                                showMessage(window.siyuan.languages.clearContextSucc);
                             } else {
                                 menu.close();
                             }

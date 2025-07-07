@@ -162,7 +162,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	switch group.Method {
 	case av.GroupMethodValue:
 	case av.GroupMethodRangeNum:
-		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumEnd
+		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
 		sort.SliceStable(items, func(i, j int) bool {
 			if av.GroupOrderAsc == group.Order {
 				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
@@ -171,7 +171,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		})
 	}
 
-	groupItems := map[string][]av.Item{}
+	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)
 		if value.IsEmpty() {
@@ -187,11 +187,9 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 						break
 					}
 
-					for rangeEnd <= group.Range.NumEnd {
-						if rangeEnd < value.Number.Content {
-							rangeStart += group.Range.NumStep
-							rangeEnd += group.Range.NumStep
-						}
+					for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
+						rangeStart += group.Range.NumStep
+						rangeEnd += group.Range.NumStep
 					}
 
 					if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
@@ -200,10 +198,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 				}
 			}
 		}
-		groupItems[groupName] = append(groupItems[groupName], item)
+		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
 	}
 
-	for name, items := range groupItems {
+	for name, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
@@ -213,7 +211,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			v = av.NewGalleryView()
 			v.Gallery = av.NewLayoutGallery()
 		}
-		for _, item := range items {
+		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 		view.Groups = append(view.Groups, v)

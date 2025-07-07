@@ -395,19 +395,27 @@ type ValueNumber struct {
 type NumberFormat string
 
 const (
-	NumberFormatNone           NumberFormat = ""
-	NumberFormatCommas         NumberFormat = "commas"
-	NumberFormatPercent        NumberFormat = "percent"
-	NumberFormatUSDollar       NumberFormat = "usDollar"
-	NumberFormatYuan           NumberFormat = "yuan"
-	NumberFormatEuro           NumberFormat = "euro"
-	NumberFormatPound          NumberFormat = "pound"
-	NumberFormatYen            NumberFormat = "yen"
-	NumberFormatRuble          NumberFormat = "ruble"
-	NumberFormatRupee          NumberFormat = "rupee"
-	NumberFormatWon            NumberFormat = "won"
-	NumberFormatCanadianDollar NumberFormat = "canadianDollar"
-	NumberFormatFranc          NumberFormat = "franc"
+	NumberFormatNone    NumberFormat = ""
+	NumberFormatCommas  NumberFormat = "commas"
+	NumberFormatPercent NumberFormat = "percent"
+
+	NumberFormatUSDollar       NumberFormat = "usDollar"       // 美元
+	NumberFormatYuan           NumberFormat = "yuan"           // 人民币
+	NumberFormatEuro           NumberFormat = "euro"           // 欧元
+	NumberFormatPound          NumberFormat = "pound"          // 英镑
+	NumberFormatYen            NumberFormat = "yen"            // 日元
+	NumberFormatRuble          NumberFormat = "ruble"          // 卢布
+	NumberFormatRupee          NumberFormat = "rupee"          // 卢比
+	NumberFormatWon            NumberFormat = "won"            // 韩元
+	NumberFormatCanadianDollar NumberFormat = "canadianDollar" // 加拿大元
+	NumberFormatFranc          NumberFormat = "franc"          // 瑞士法郎
+	NumberFormatTHB            NumberFormat = "THB"            // 泰铢
+	NumberFormatAUD            NumberFormat = "AUD"            // 澳大利亚元
+	NumberFormatHKD            NumberFormat = "HKD"            // 港币
+	NumberFormatTWD            NumberFormat = "TWD"            // 新台币
+	NumberFormatMOP            NumberFormat = "MOP"            // 澳门币
+	NumberFormatSGD            NumberFormat = "SGD"            // 新加坡元
+	NumberFormatNZD            NumberFormat = "NZD"            // 新西兰元
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -473,6 +481,27 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatFranc:
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
+	case NumberFormatTHB:
+		p := message.NewPrinter(language.Thai)
+		return p.Sprintf("฿%.2f", content)
+	case NumberFormatAUD:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("A$%.2f", content)
+	case NumberFormatHKD:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("HK$%.2f", content)
+	case NumberFormatTWD:
+		p := message.NewPrinter(language.Chinese)
+		return p.Sprintf("NT$%.2f", content)
+	case NumberFormatMOP:
+		p := message.NewPrinter(language.Chinese)
+		return p.Sprintf("MOP$%.2f", content)
+	case NumberFormatSGD:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("S$%.2f", content)
+	case NumberFormatNZD:
+		p := message.NewPrinter(language.English)
+		return p.Sprintf("NZ$%.2f", content)
 	default:
 		return strconv.FormatFloat(content, 'f', -1, 64)
 	}

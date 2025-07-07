@@ -98,15 +98,14 @@ export const loadAssets = (data: Config.IAppearance) => {
         (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
         return;
     }
-    Array.from(document.body.children).forEach(item => {
-        if (item.tagName === "svg" && !item.getAttribute("data-name") && item.id !== "iconsMaterial") {
-            item.remove();
-        }
-    });
     if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
         iconDefaultScriptElement.remove();
         if (data.icon === "ant") {
             document.querySelectorAll("#iconsMaterial").forEach(item => {
+                item.remove();
+            });
+        } else {
+            document.querySelectorAll("#iconsAnt").forEach(item => {
                 item.remove();
             });
         }
@@ -114,7 +113,16 @@ export const loadAssets = (data: Config.IAppearance) => {
     addScript(iconDefaultURL, "iconDefaultScript").then(() => {
         if (!isBuiltInIcon) {
             iconScriptElement?.remove();
-            addScript(iconThirdURL, "iconScript");
+            addScript(iconThirdURL, "iconScript").then(() => {
+                Array.from(document.body.children).forEach((item, index) => {
+                    if (item.tagName === "svg" &&
+                        index !== 0 &&
+                        !item.getAttribute("data-name") &&
+                        !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                        item.remove();
+                    }
+                });
+            });
         }
     });
 };

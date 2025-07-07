@@ -145,20 +145,75 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	view.Group = group
 	view.Groups = nil
 
-	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
-	groupItems := map[string][]av.Item{}
+	const (
+		defaultGroupName = "_@default@_"
+		notInRange       = "_@notInRange@_"
+	)
+	var groupName string
 	viewable := sql.RenderView(attrView, view, "")
-	collection := viewable.(av.Collection)
-	for _, item := range collection.GetItems() {
-		value := item.GetValue(group.Field)
-		switch group.Method {
-		case av.GroupMethodValue:
-			strVal := value.String(false)
-			groupItems[strVal] = append(groupItems[strVal], item)
-		}
+
+	var items []av.Item
+	for _, item := range viewable.(av.Collection).GetItems() {
+		items = append(items, item)
 	}
-	for _, items := range groupItems {
+	var rangeStart, rangeEnd float64
+	switch group.Method {
+	case av.GroupMethodValue:
+	case av.GroupMethodRangeNum:
+		if nil == group.Range {
+			logging.LogWarnf("range is nil in av [%s]", avID)
+			return
+		}
+
+		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
+		sort.SliceStable(items, func(i, j int) bool {
+			if av.GroupOrderAsc == group.Order {
+				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
+			}
+			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
+		})
+		// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
+	}
+
+	groupItemsMap := map[string][]av.Item{}
+	for _, item := range items {
+		value := item.GetValue(group.Field)
+		if value.IsEmpty() {
+			groupName = defaultGroupName
+		} else {
+			switch group.Method {
+			case av.GroupMethodValue:
+				groupName = value.String(false)
+			case av.GroupMethodRangeNum:
+				if value.Type != av.KeyTypeNumber {
+					logging.LogWarnf("item [%s] value [%s] type is not number in av [%s]", item.GetID(), value.String(false), avID)
+					return
+				}
+				if nil == value.Number {
+					logging.LogWarnf("item [%s] value [%s] number is nil in av [%s]", item.GetID(), value.String(false), avID)
+					return
+				}
+
+				if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
+					groupName = notInRange
+					break
+				}
+
+				for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
+					rangeStart += group.Range.NumStep
+					rangeEnd += group.Range.NumStep
+				}
+
+				if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
+					groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+				}
+			}
+		}
+		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+	}
+
+	for name, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
@@ -168,10 +223,12 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			v = av.NewGalleryView()
 			v.Gallery = av.NewLayoutGallery()
 		}
-		for _, item := range items {
+		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
+		v.Name = name
 		view.Groups = append(view.Groups, v)
+		view.GroupDefault = name == defaultGroupName
 	}
 
 	err = av.SaveAttributeView(attrView)

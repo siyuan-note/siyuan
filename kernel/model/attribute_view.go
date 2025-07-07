@@ -161,6 +161,11 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	switch group.Method {
 	case av.GroupMethodValue:
 	case av.GroupMethodRangeNum:
+		if nil == group.Range {
+			logging.LogWarnf("range is nil in av [%s]", avID)
+			return
+		}
+
 		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
 		sort.SliceStable(items, func(i, j int) bool {
 			if av.GroupOrderAsc == group.Order {
@@ -181,20 +186,27 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			case av.GroupMethodValue:
 				groupName = value.String(false)
 			case av.GroupMethodRangeNum:
-				if nil != group.Range && value.Type == av.KeyTypeNumber {
-					if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
-						groupName = notInRange
-						break
-					}
+				if value.Type != av.KeyTypeNumber {
+					logging.LogWarnf("item [%s] value [%s] type is not number in av [%s]", item.GetID(), value.String(false), avID)
+					return
+				}
+				if nil == value.Number {
+					logging.LogWarnf("item [%s] value [%s] number is nil in av [%s]", item.GetID(), value.String(false), avID)
+					return
+				}
 
-					for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
-						rangeStart += group.Range.NumStep
-						rangeEnd += group.Range.NumStep
-					}
+				if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
+					groupName = notInRange
+					break
+				}
 
-					if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
-						groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
-					}
+				for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
+					rangeStart += group.Range.NumStep
+					rangeEnd += group.Range.NumStep
+				}
+
+				if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
+					groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
 				}
 			}
 		}

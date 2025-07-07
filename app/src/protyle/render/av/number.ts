@@ -158,6 +158,69 @@ export const formatNumber = (options: {
         oldFormat: options.oldFormat,
         avPanelElement: options.avPanelElement,
     });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "THB",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "AUD",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "HKD",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "TWD",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "MOP",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "SGD",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
+    addFormatItem({
+        menu,
+        protyle: options.protyle,
+        colId: options.colId,
+        avID: options.avID,
+        format: "NZD",
+        oldFormat: options.oldFormat,
+        avPanelElement: options.avPanelElement,
+    });
     const rect = options.element.getBoundingClientRect();
     menu.open({
         x: rect.left,
@@ -196,5 +259,19 @@ export const getLabelByNumberFormat = (format: string) => {
             return window.siyuan.languages.numberFormatCanadianDollar;
         case "franc":
             return window.siyuan.languages.numberFormatFranc;
+        case "THB":
+            return window.siyuan.languages.numberFormatTHB;
+        case "AUD":
+            return window.siyuan.languages.numberFormatAUD;
+        case "HKD":
+            return window.siyuan.languages.numberFormatHKD;
+        case "TWD":
+            return window.siyuan.languages.numberFormatTWD;
+        case "MOP":
+            return window.siyuan.languages.numberFormatMOP;
+        case "SGD":
+            return window.siyuan.languages.numberFormatSGD;
+        case "NZD":
+            return window.siyuan.languages.numberFormatNZD;
     }
 };

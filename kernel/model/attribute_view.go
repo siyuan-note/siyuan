@@ -147,18 +147,63 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 
 	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
-	groupItems := map[string][]av.Item{}
+	const (
+		defaultGroupName = "_@default@_"
+		notInRange       = "_@notInRange@_"
+	)
+	var groupName string
 	viewable := sql.RenderView(attrView, view, "")
-	collection := viewable.(av.Collection)
-	for _, item := range collection.GetItems() {
-		value := item.GetValue(group.Field)
-		switch group.Method {
-		case av.GroupMethodValue:
-			strVal := value.String(false)
-			groupItems[strVal] = append(groupItems[strVal], item)
-		}
+
+	var items []av.Item
+	for _, item := range viewable.(av.Collection).GetItems() {
+		items = append(items, item)
 	}
-	for _, items := range groupItems {
+	var rangeStart, rangeEnd float64
+	switch group.Method {
+	case av.GroupMethodValue:
+	case av.GroupMethodRangeNum:
+		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumEnd
+		sort.SliceStable(items, func(i, j int) bool {
+			if av.GroupOrderAsc == group.Order {
+				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
+			}
+			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
+		})
+	}
+
+	groupItems := map[string][]av.Item{}
+	for _, item := range items {
+		value := item.GetValue(group.Field)
+		if value.IsEmpty() {
+			groupName = defaultGroupName
+		} else {
+			switch group.Method {
+			case av.GroupMethodValue:
+				groupName = value.String(false)
+			case av.GroupMethodRangeNum:
+				if nil != group.Range && value.Type == av.KeyTypeNumber {
+					if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
+						groupName = notInRange
+						break
+					}
+
+					for rangeEnd <= group.Range.NumEnd {
+						if rangeEnd < value.Number.Content {
+							rangeStart += group.Range.NumStep
+							rangeEnd += group.Range.NumStep
+						}
+					}
+
+					if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
+						groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+					}
+				}
+			}
+		}
+		groupItems[groupName] = append(groupItems[groupName], item)
+	}
+
+	for name, items := range groupItems {
 		var v *av.View
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
@@ -172,6 +217,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 		view.Groups = append(view.Groups, v)
+		view.GroupDefault = name == defaultGroupName
 	}
 
 	err = av.SaveAttributeView(attrView)

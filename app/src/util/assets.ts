@@ -97,8 +97,8 @@ export const loadAssets = (data: Config.IAppearance) => {
     const iconDefaultName = isBuiltInIcon ? data.icon : "material";
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
     const iconDefaultURL = `/appearance/icons/${iconDefaultName}/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
-    const isDefaultIconUnchanged = iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL);
+    const iconDefaultScriptElement = document.getElementById("iconDefaultScript") || false;
+    const isDefaultIconUnchanged = !iconDefaultScriptElement || iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL);
 
     const iconURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
     const iconScriptElement = document.getElementById("iconScript");
@@ -112,7 +112,7 @@ export const loadAssets = (data: Config.IAppearance) => {
         return;
     }
 
-    if (!isDefaultIconUnchanged) {
+    if (!isDefaultIconUnchanged && iconDefaultScriptElement) {
         iconDefaultScriptElement?.remove();
     }
     iconScriptElement?.remove();
@@ -120,8 +120,8 @@ export const loadAssets = (data: Config.IAppearance) => {
         const oldSVGElements = Array.from(document.body.children).filter(child => {
             if (
                 child.tagName !== "svg" ||
-                // 使用的内置图标不变就不需要移除
-                (isDefaultIconUnchanged && child.id === ("icons-" + iconDefaultName)) ||
+                // 不需要移除切换后使用的内置图标
+                (child.id === "icons-" + iconDefaultName) ||
                 // 插件添加的图标 data-name="icons-plugin"
                 child.getAttribute("data-name")
             ) {

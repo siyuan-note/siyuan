@@ -145,7 +145,6 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	view.Group = group
 	view.Groups = nil
 
-	// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	// 生成分组数据
 	const (
 		defaultGroupName = "_@default@_"
@@ -169,6 +168,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			}
 			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
 		})
+		// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
 	}
 
 	groupItemsMap := map[string][]av.Item{}
@@ -214,6 +214,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
+		v.Name = name
 		view.Groups = append(view.Groups, v)
 		view.GroupDefault = name == defaultGroupName
 	}

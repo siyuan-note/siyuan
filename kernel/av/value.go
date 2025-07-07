@@ -399,23 +399,23 @@ const (
 	NumberFormatCommas  NumberFormat = "commas"
 	NumberFormatPercent NumberFormat = "percent"
 
-	NumberFormatUSDollar       NumberFormat = "usDollar"       // 美元
-	NumberFormatYuan           NumberFormat = "yuan"           // 人民币
-	NumberFormatEuro           NumberFormat = "euro"           // 欧元
-	NumberFormatPound          NumberFormat = "pound"          // 英镑
-	NumberFormatYen            NumberFormat = "yen"            // 日元
-	NumberFormatRuble          NumberFormat = "ruble"          // 卢布
-	NumberFormatRupee          NumberFormat = "rupee"          // 卢比
-	NumberFormatWon            NumberFormat = "won"            // 韩元
-	NumberFormatCanadianDollar NumberFormat = "canadianDollar" // 加拿大元
-	NumberFormatFranc          NumberFormat = "franc"          // 瑞士法郎
-	NumberFormatTHB            NumberFormat = "THB"            // 泰铢
-	NumberFormatAUD            NumberFormat = "AUD"            // 澳大利亚元
-	NumberFormatHKD            NumberFormat = "HKD"            // 港币
-	NumberFormatTWD            NumberFormat = "TWD"            // 新台币
-	NumberFormatMOP            NumberFormat = "MOP"            // 澳门币
-	NumberFormatSGD            NumberFormat = "SGD"            // 新加坡元
-	NumberFormatNZD            NumberFormat = "NZD"            // 新西兰元
+	NumberFormatUSD NumberFormat = "USD" // 美元
+	NumberFormatCNY NumberFormat = "CNY" // 人民币
+	NumberFormatEUR NumberFormat = "EUR" // 欧元
+	NumberFormatGBP NumberFormat = "GBP" // 英镑
+	NumberFormatJPY NumberFormat = "JPY" // 日元
+	NumberFormatRUB NumberFormat = "RUB" // 卢布
+	NumberFormatINR NumberFormat = "INR" // 卢比
+	NumberFormatKRW NumberFormat = "KRW" // 韩元
+	NumberFormatCAD NumberFormat = "CAD" // 加拿大元
+	NumberFormatCHF NumberFormat = "CHF" // 瑞士法郎
+	NumberFormatTHB NumberFormat = "THB" // 泰铢
+	NumberFormatAUD NumberFormat = "AUD" // 澳大利亚元
+	NumberFormatHKD NumberFormat = "HKD" // 港币
+	NumberFormatTWD NumberFormat = "TWD" // 新台币
+	NumberFormatMOP NumberFormat = "MOP" // 澳门币
+	NumberFormatSGD NumberFormat = "SGD" // 新加坡元
+	NumberFormatNZD NumberFormat = "NZD" // 新西兰元
 )
 
 func NewFormattedValueNumber(content float64, format NumberFormat) (ret *ValueNumber) {
@@ -451,34 +451,34 @@ func formatNumber(content float64, format NumberFormat) string {
 	case NumberFormatPercent:
 		s := fmt.Sprintf("%.2f", content*100)
 		return strings.TrimRight(strings.TrimRight(s, "0"), ".") + "%"
-	case NumberFormatUSDollar:
+	case NumberFormatUSD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("$%.2f", content)
-	case NumberFormatYuan:
+	case NumberFormatCNY:
 		p := message.NewPrinter(language.Chinese)
 		return p.Sprintf("CN¥%.2f", content)
-	case NumberFormatEuro:
+	case NumberFormatEUR:
 		p := message.NewPrinter(language.German)
 		return p.Sprintf("€%.2f", content)
-	case NumberFormatPound:
+	case NumberFormatGBP:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("£%.2f", content)
-	case NumberFormatYen:
+	case NumberFormatJPY:
 		p := message.NewPrinter(language.Japanese)
 		return p.Sprintf("¥%.0f", content)
-	case NumberFormatRuble:
+	case NumberFormatRUB:
 		p := message.NewPrinter(language.Russian)
 		return p.Sprintf("₽%.2f", content)
-	case NumberFormatRupee:
+	case NumberFormatINR:
 		p := message.NewPrinter(language.Hindi)
 		return p.Sprintf("₹%.2f", content)
-	case NumberFormatWon:
+	case NumberFormatKRW:
 		p := message.NewPrinter(language.Korean)
 		return p.Sprintf("₩%.0f", content)
-	case NumberFormatCanadianDollar:
+	case NumberFormatCAD:
 		p := message.NewPrinter(language.English)
 		return p.Sprintf("CA$%.2f", content)
-	case NumberFormatFranc:
+	case NumberFormatCHF:
 		p := message.NewPrinter(language.French)
 		return p.Sprintf("CHF%.2f", content)
 	case NumberFormatTHB:

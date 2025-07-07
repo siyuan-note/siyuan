@@ -88,22 +88,15 @@ export const loadAssets = (data: Config.IAppearance) => {
 
     // load icons
     const isBuiltInIcon = ["ant", "material"].includes(data.icon);
-    const iconScriptElement = document.getElementById("iconScript");
-    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
-    // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconDefaultURL = `/appearance/icons/${isBuiltInIcon ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
-
-    if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
-        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
-        return;
-    }
     Array.from(document.body.children).forEach(item => {
         if (item.tagName === "svg" && !item.getAttribute("data-name") && item.id !== "iconsMaterial") {
             item.remove();
         }
     });
-    if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
+    const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
+    // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
+    const iconURL = `/appearance/icons/${isBuiltInIcon ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
         iconDefaultScriptElement.remove();
         if (data.icon === "ant") {
             document.querySelectorAll("#iconsMaterial").forEach(item => {
@@ -111,10 +104,10 @@ export const loadAssets = (data: Config.IAppearance) => {
             });
         }
     }
-    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+    addScript(iconURL, "iconDefaultScript").then(() => {
         if (!isBuiltInIcon) {
-            iconScriptElement?.remove();
-            addScript(iconThirdURL, "iconScript");
+            document.getElementById("iconScript")?.remove();
+            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
         }
     });
 };

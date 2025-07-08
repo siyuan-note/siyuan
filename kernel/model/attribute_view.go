@@ -160,6 +160,14 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	var rangeStart, rangeEnd float64
 	switch group.Method {
 	case av.GroupMethodValue:
+		if av.GroupOrderMan != group.Order {
+			sort.SliceStable(items, func(i, j int) bool {
+				if av.GroupOrderAsc == group.Order {
+					return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
+				}
+				return items[i].GetValue(group.Field).String(false) > items[j].GetValue(group.Field).String(false)
+			})
+		}
 	case av.GroupMethodRangeNum:
 		if nil == group.Range {
 			logging.LogWarnf("range is nil in av [%s]", avID)
@@ -173,7 +181,13 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			}
 			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
 		})
-		// TODO Database grouping by field https://github.com/siyuan-note/siyuan/issues/10964
+	case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
+		sort.SliceStable(items, func(i, j int) bool {
+			if av.GroupOrderAsc == group.Order {
+				return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
+			}
+			return items[i].GetValue(group.Field).Date.Content > items[j].GetValue(group.Field).Date.Content
+		})
 	}
 
 	groupItemsMap := map[string][]av.Item{}
@@ -186,15 +200,6 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			case av.GroupMethodValue:
 				groupName = value.String(false)
 			case av.GroupMethodRangeNum:
-				if value.Type != av.KeyTypeNumber {
-					logging.LogWarnf("item [%s] value [%s] type is not number in av [%s]", item.GetID(), value.String(false), avID)
-					return
-				}
-				if nil == value.Number {
-					logging.LogWarnf("item [%s] value [%s] number is nil in av [%s]", item.GetID(), value.String(false), avID)
-					return
-				}
-
 				if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
 					groupName = notInRange
 					break
@@ -207,6 +212,29 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 
 				if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
 					groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+				}
+			case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
+				var contentTime time.Time
+				switch value.Type {
+				case av.KeyTypeDate:
+					contentTime = time.UnixMilli(value.Date.Content)
+				case av.KeyTypeCreated:
+					contentTime = time.UnixMilli(value.Created.Content)
+				case av.KeyTypeUpdated:
+					contentTime = time.UnixMilli(value.Updated.Content)
+				}
+				switch group.Method {
+				case av.GroupMethodDateDay:
+					groupName = contentTime.Format("2006-01-02")
+				case av.GroupMethodDateWeek:
+					year, week := contentTime.ISOWeek()
+					groupName = fmt.Sprintf("%d-W%02d", year, week)
+				case av.GroupMethodDateMonth:
+					groupName = contentTime.Format("2006-01")
+				case av.GroupMethodDateYear:
+					groupName = contentTime.Format("2006")
+				case av.GroupMethodDateRelative:
+
 				}
 			}
 		}

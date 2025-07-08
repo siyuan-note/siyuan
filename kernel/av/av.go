@@ -185,13 +185,13 @@ type View struct {
 	Desc             string         `json:"desc"`              // 视图描述
 	Filters          []*ViewFilter  `json:"filters,omitempty"` // 过滤规则
 	Sorts            []*ViewSort    `json:"sorts,omitempty"`   // 排序规则
-	Group            *ViewGroup     `json:"group,omitempty"`   // 分组规则
 	PageSize         int            `json:"pageSize"`          // 每页条目数
 	LayoutType       LayoutType     `json:"type"`              // 当前布局类型
 	Table            *LayoutTable   `json:"table,omitempty"`   // 表格布局
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
+	Group          *ViewGroup `json:"group,omitempty"`          // 分组规则
 	Groups         []*View    `json:"groups,omitempty"`         // 分组视图列表
 	GroupItemIDs   []string   `json:"groupItemIds,omitempty"`   // 分组项目 ID 列表，用于维护分组中的所有项目
 	GroupCalc      *GroupCalc `json:"groupCalc,omitempty"`      // 分组计算规则

@@ -143,146 +143,6 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	}
 
 	view.Group = group
-	view.Groups = nil
-
-	// 生成分组数据
-	const (
-		defaultGroupName = "_@default@_"
-		notInRange       = "_@notInRange@_"
-	)
-	var groupName string
-	viewable := sql.RenderView(attrView, view, "")
-
-	var items []av.Item
-	for _, item := range viewable.(av.Collection).GetItems() {
-		items = append(items, item)
-	}
-	var rangeStart, rangeEnd float64
-	switch group.Method {
-	case av.GroupMethodValue:
-		if av.GroupOrderMan != group.Order {
-			sort.SliceStable(items, func(i, j int) bool {
-				if av.GroupOrderAsc == group.Order {
-					return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
-				}
-				return items[i].GetValue(group.Field).String(false) > items[j].GetValue(group.Field).String(false)
-			})
-		}
-	case av.GroupMethodRangeNum:
-		if nil == group.Range {
-			logging.LogWarnf("range is nil in av [%s]", avID)
-			return
-		}
-
-		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
-		sort.SliceStable(items, func(i, j int) bool {
-			if av.GroupOrderAsc == group.Order {
-				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
-			}
-			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
-		})
-	case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
-		sort.SliceStable(items, func(i, j int) bool {
-			if av.GroupOrderAsc == group.Order {
-				return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
-			}
-			return items[i].GetValue(group.Field).Date.Content > items[j].GetValue(group.Field).Date.Content
-		})
-	}
-
-	groupItemsMap := map[string][]av.Item{}
-	for _, item := range items {
-		value := item.GetValue(group.Field)
-		if value.IsEmpty() {
-			groupName = defaultGroupName
-			groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
-			continue
-		}
-
-		switch group.Method {
-		case av.GroupMethodValue:
-			groupName = value.String(false)
-		case av.GroupMethodRangeNum:
-			if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
-				groupName = notInRange
-				break
-			}
-
-			for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
-				rangeStart += group.Range.NumStep
-				rangeEnd += group.Range.NumStep
-			}
-
-			if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
-				groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
-			}
-		case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
-			var contentTime time.Time
-			switch value.Type {
-			case av.KeyTypeDate:
-				contentTime = time.UnixMilli(value.Date.Content)
-			case av.KeyTypeCreated:
-				contentTime = time.UnixMilli(value.Created.Content)
-			case av.KeyTypeUpdated:
-				contentTime = time.UnixMilli(value.Updated.Content)
-			}
-			switch group.Method {
-			case av.GroupMethodDateDay:
-				groupName = contentTime.Format("2006-01-02")
-			case av.GroupMethodDateWeek:
-				year, week := contentTime.ISOWeek()
-				groupName = fmt.Sprintf("%d-W%02d", year, week)
-			case av.GroupMethodDateMonth:
-				groupName = contentTime.Format("2006-01")
-			case av.GroupMethodDateYear:
-				groupName = contentTime.Format("2006")
-			case av.GroupMethodDateRelative:
-				// 过去 30 天之前的按月分组
-				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
-				// 未来 30 天之后的按月分组
-				now := time.Now()
-				if contentTime.Before(now.AddDate(0, 0, -30)) {
-					groupName = contentTime.Format("2006-01")
-				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
-					groupName = fmt.Sprintf(Conf.language(259), 30)
-				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
-					groupName = fmt.Sprintf(Conf.language(259), 7)
-				} else if contentTime.Equal(now.AddDate(0, 0, -1)) {
-					groupName = Conf.language(260)
-				} else if contentTime.Equal(now) {
-					groupName = Conf.language(261)
-				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
-					groupName = Conf.language(262)
-				} else if contentTime.Before(now.AddDate(0, 0, 7)) {
-					groupName = fmt.Sprintf(Conf.language(263), 7)
-				} else if contentTime.Before(now.AddDate(0, 0, 30)) {
-					groupName = fmt.Sprintf(Conf.language(263), 30)
-				} else {
-					groupName = contentTime.Format("2006-01")
-				}
-			}
-		}
-		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
-	}
-
-	for name, groupItems := range groupItemsMap {
-		var v *av.View
-		switch view.LayoutType {
-		case av.LayoutTypeTable:
-			v = av.NewTableView()
-			v.Table = av.NewLayoutTable()
-		case av.LayoutTypeGallery:
-			v = av.NewGalleryView()
-			v.Gallery = av.NewLayoutGallery()
-		}
-		for _, item := range groupItems {
-			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
-		}
-		v.Name = name
-		view.Groups = append(view.Groups, v)
-		view.GroupDefault = name == defaultGroupName
-	}
-
 	err = av.SaveAttributeView(attrView)
 	return err
 }
@@ -1468,6 +1328,9 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		return
 	}
 
+	// 如果存在分组设置的话生成分组数据
+	genGroup(view, attrView)
+
 	// 如果存在分组的话渲染分组视图视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
@@ -1487,6 +1350,151 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 	}
 	viewable.SetGroups(groups)
 	return
+}
+
+func genGroup(view *av.View, attrView *av.AttributeView) {
+	if nil == view.Group {
+		return
+	}
+
+	group := view.Group
+	view.Groups = nil
+
+	const (
+		defaultGroupName = "_@default@_"
+		notInRange       = "_@notInRange@_"
+	)
+	var groupName string
+	viewable := sql.RenderView(attrView, view, "")
+
+	var items []av.Item
+	for _, item := range viewable.(av.Collection).GetItems() {
+		items = append(items, item)
+	}
+	var rangeStart, rangeEnd float64
+	switch group.Method {
+	case av.GroupMethodValue:
+		if av.GroupOrderMan != group.Order {
+			sort.SliceStable(items, func(i, j int) bool {
+				if av.GroupOrderAsc == group.Order {
+					return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
+				}
+				return items[i].GetValue(group.Field).String(false) > items[j].GetValue(group.Field).String(false)
+			})
+		}
+	case av.GroupMethodRangeNum:
+		if nil == group.Range {
+			return
+		}
+
+		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
+		sort.SliceStable(items, func(i, j int) bool {
+			if av.GroupOrderAsc == group.Order {
+				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
+			}
+			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
+		})
+	case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
+		sort.SliceStable(items, func(i, j int) bool {
+			if av.GroupOrderAsc == group.Order {
+				return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
+			}
+			return items[i].GetValue(group.Field).Date.Content > items[j].GetValue(group.Field).Date.Content
+		})
+	}
+
+	groupItemsMap := map[string][]av.Item{}
+	for _, item := range items {
+		value := item.GetValue(group.Field)
+		if value.IsEmpty() {
+			groupName = defaultGroupName
+			groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+			continue
+		}
+
+		switch group.Method {
+		case av.GroupMethodValue:
+			groupName = value.String(false)
+		case av.GroupMethodRangeNum:
+			if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
+				groupName = notInRange
+				break
+			}
+
+			for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
+				rangeStart += group.Range.NumStep
+				rangeEnd += group.Range.NumStep
+			}
+
+			if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
+				groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+			}
+		case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
+			var contentTime time.Time
+			switch value.Type {
+			case av.KeyTypeDate:
+				contentTime = time.UnixMilli(value.Date.Content)
+			case av.KeyTypeCreated:
+				contentTime = time.UnixMilli(value.Created.Content)
+			case av.KeyTypeUpdated:
+				contentTime = time.UnixMilli(value.Updated.Content)
+			}
+			switch group.Method {
+			case av.GroupMethodDateDay:
+				groupName = contentTime.Format("2006-01-02")
+			case av.GroupMethodDateWeek:
+				year, week := contentTime.ISOWeek()
+				groupName = fmt.Sprintf("%d-W%02d", year, week)
+			case av.GroupMethodDateMonth:
+				groupName = contentTime.Format("2006-01")
+			case av.GroupMethodDateYear:
+				groupName = contentTime.Format("2006")
+			case av.GroupMethodDateRelative:
+				// 过去 30 天之前的按月分组
+				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
+				// 未来 30 天之后的按月分组
+				now := time.Now()
+				if contentTime.Before(now.AddDate(0, 0, -30)) {
+					groupName = contentTime.Format("2006-01")
+				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
+					groupName = fmt.Sprintf(Conf.language(259), 30)
+				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
+					groupName = fmt.Sprintf(Conf.language(259), 7)
+				} else if contentTime.Equal(now.AddDate(0, 0, -1)) {
+					groupName = Conf.language(260)
+				} else if contentTime.Equal(now) {
+					groupName = Conf.language(261)
+				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
+					groupName = Conf.language(262)
+				} else if contentTime.Before(now.AddDate(0, 0, 7)) {
+					groupName = fmt.Sprintf(Conf.language(263), 7)
+				} else if contentTime.Before(now.AddDate(0, 0, 30)) {
+					groupName = fmt.Sprintf(Conf.language(263), 30)
+				} else {
+					groupName = contentTime.Format("2006-01")
+				}
+			}
+		}
+		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+	}
+
+	for name, groupItems := range groupItemsMap {
+		var v *av.View
+		switch view.LayoutType {
+		case av.LayoutTypeTable:
+			v = av.NewTableView()
+			v.Table = av.NewLayoutTable()
+		case av.LayoutTypeGallery:
+			v = av.NewGalleryView()
+			v.Gallery = av.NewLayoutGallery()
+		}
+		for _, item := range groupItems {
+			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
+		}
+		v.Name = name
+		view.Groups = append(view.Groups, v)
+		view.GroupDefault = name == defaultGroupName
+	}
 }
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {

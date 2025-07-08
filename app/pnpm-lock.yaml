@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@electron/remote':
-        specifier: ^2.1.2
-        version: 2.1.2(electron@37.2.0)
+        specifier: ^2.1.3
+        version: 2.1.3(electron@37.2.0)
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.1
@@ -151,8 +151,8 @@ packages:
     engines: {node: '>=12.13.0'}
     hasBin: true
 
-  '@electron/remote@2.1.2':
-    resolution: {integrity: sha512-EPwNx+nhdrTBxyCqXt/pftoQg/ybtWDW3DUWHafejvnB1ZGGfMpv6e15D8KeempocjXe78T7WreyGGb3mlZxdA==}
+  '@electron/remote@2.1.3':
+    resolution: {integrity: sha512-XlpxC8S4ttj/v2d+PKp9na/3Ev8bV7YWNL7Cw5b9MAWgTphEml7iYgbc7V0r9D6yDOfOkj06bchZgOZdlWJGNA==}
     peerDependencies:
       electron: '>= 13.0.0'
 
@@ -2858,7 +2858,7 @@ snapshots:
       - bluebird
       - supports-color
 
-  '@electron/remote@2.1.2(electron@37.2.0)':
+  '@electron/remote@2.1.3(electron@37.2.0)':
     dependencies:
       electron: 37.2.0
 

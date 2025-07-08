@@ -272,10 +272,10 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 
 func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
-	keywords := strings.Split(keyword, " ")
-
+	var keywords []string
+	keywords = append(keywords, keyword)
+	keywords = append(keywords, strings.Split(keyword, " ")...)
 	pathHitCount := map[string]int{}
-	count := 0
 	filterByExt := 0 < len(exts)
 	for _, asset := range cache.GetAssets() {
 		if filterByExt {
@@ -295,8 +295,18 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 		lowerHName := strings.ToLower(asset.HName)
 		lowerPath := strings.ToLower(asset.Path)
 		var hitNameCount, hitPathCount int
-		for _, k := range keywords {
+		for i, k := range keywords {
 			lowerKeyword := strings.ToLower(k)
+			if 0 == i {
+				// 第一个是完全匹配，权重最高
+				if strings.Contains(lowerHName, lowerKeyword) {
+					hitNameCount += 64
+				}
+				if strings.Contains(lowerPath, lowerKeyword) {
+					hitPathCount += 64
+				}
+			}
+
 			hitNameCount += strings.Count(lowerHName, lowerKeyword)
 			hitPathCount += strings.Count(lowerPath, lowerKeyword)
 			if 1 > hitNameCount && 1 > hitPathCount {
@@ -318,10 +328,6 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 			Path:    asset.Path,
 			Updated: asset.Updated,
 		})
-		count++
-		if Conf.Search.Limit <= count {
-			return
-		}
 	}
 
 	if 0 < len(pathHitCount) {
@@ -332,6 +338,10 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 		sort.Slice(ret, func(i, j int) bool {
 			return ret[i].Updated > ret[j].Updated
 		})
+	}
+
+	if Conf.Search.Limit <= len(ret) {
+		ret = ret[:Conf.Search.Limit]
 	}
 	return
 }

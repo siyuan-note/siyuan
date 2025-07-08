@@ -1627,6 +1627,12 @@
     "255": "El sitio de destino ha activado la protección contra hotlinking, por lo que no es posible descargar [%d] recursos",
     "256": "La ruta especificada [%s] tiene una ruta de espacio de trabajo padre [%s]",
     "257": "Recuérdame durante 30 días",
-    "258": "La operación falló, inténtelo de nuevo más tarde"
+    "258": "La operación falló, inténtelo de nuevo más tarde",
+    "259": "Últimos %d días",
+    "260": "Ayer",
+    "261": "Hoy",
+    "262": "Mañana",
+    "263": "Próximos %d días",
+    "264": "El campo [%s] está vacío"
   }
 }

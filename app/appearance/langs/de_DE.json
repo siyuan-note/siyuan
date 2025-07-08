@@ -1627,6 +1627,12 @@
     "255": "Die Zielseite hat den Hotlink-Schutz aktiviert, daher ist es nicht möglich, [%d] Ressourcen herunterzuladen",
     "256": "Der angegebene Pfad [%s] hat einen übergeordneten Arbeitsbereichspfad [%s]",
     "257": "Erinnere dich 30 Tage an mich",
-    "258": "Vorgang fehlgeschlagen, bitte versuchen Sie es später erneut"
+    "258": "Vorgang fehlgeschlagen, bitte versuchen Sie es später erneut",
+    "259": "Letzte %d Tage",
+    "260": "Gestern",
+    "261": "Heute",
+    "262": "Morgen",
+    "263": "Nächste %d Tage",
+    "264": "Das Feld [%s] ist leer"
   }
 }

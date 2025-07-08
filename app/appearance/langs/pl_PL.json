@@ -1627,6 +1627,12 @@
     "255": "Docelowa strona włączyła ochronę przed hotlinkowaniem, [%d] zasobów nie można pobrać",
     "256": "Określona ścieżka [%s] ma nadrzędną ścieżkę przestrzeni roboczej [%s]",
     "257": "Zapamiętaj mnie na 30 dni",
-    "258": "Operacja nie powiodła się, spróbuj ponownie później"
+    "258": "Operacja nie powiodła się, spróbuj ponownie później",
+    "259": "Ostatnie %d dni",
+    "260": "Wczoraj",
+    "261": "Dzisiaj",
+    "262": "Jutro",
+    "263": "Następne %d dni",
+    "264": "Pole [%s] jest puste"
   }
 }

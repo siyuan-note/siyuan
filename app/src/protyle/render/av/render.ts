@@ -556,6 +556,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 if (operation.action === "addAttrViewView") {
                     item.dataset.pageSize = "50";
                 }
+                if (operation.action === "removeAttrViewView") {
+                    item.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+                }
                 avRender(item, protyle, () => {
                     const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
                     if (attrElement) {

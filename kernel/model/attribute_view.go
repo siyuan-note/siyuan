@@ -1359,18 +1359,12 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 
 	group := view.Group
 	view.Groups = nil
-
-	const (
-		defaultGroupName = "_@default@_"
-		notInRange       = "_@notInRange@_"
-	)
-	var groupName string
 	viewable := sql.RenderView(attrView, view, "")
-
 	var items []av.Item
 	for _, item := range viewable.(av.Collection).GetItems() {
 		items = append(items, item)
 	}
+
 	var rangeStart, rangeEnd float64
 	switch group.Method {
 	case av.GroupMethodValue:
@@ -1403,6 +1397,8 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 		})
 	}
 
+	const defaultGroupName, notInRange = "_@default@_", "_@notInRange@_"
+	var groupName string
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)

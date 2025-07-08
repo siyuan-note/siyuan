@@ -195,46 +195,70 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		value := item.GetValue(group.Field)
 		if value.IsEmpty() {
 			groupName = defaultGroupName
-		} else {
+			groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+			continue
+		}
+
+		switch group.Method {
+		case av.GroupMethodValue:
+			groupName = value.String(false)
+		case av.GroupMethodRangeNum:
+			if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
+				groupName = notInRange
+				break
+			}
+
+			for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
+				rangeStart += group.Range.NumStep
+				rangeEnd += group.Range.NumStep
+			}
+
+			if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
+				groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+			}
+		case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
+			var contentTime time.Time
+			switch value.Type {
+			case av.KeyTypeDate:
+				contentTime = time.UnixMilli(value.Date.Content)
+			case av.KeyTypeCreated:
+				contentTime = time.UnixMilli(value.Created.Content)
+			case av.KeyTypeUpdated:
+				contentTime = time.UnixMilli(value.Updated.Content)
+			}
 			switch group.Method {
-			case av.GroupMethodValue:
-				groupName = value.String(false)
-			case av.GroupMethodRangeNum:
-				if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
-					groupName = notInRange
-					break
-				}
-
-				for rangeEnd <= group.Range.NumEnd && rangeEnd < value.Number.Content {
-					rangeStart += group.Range.NumStep
-					rangeEnd += group.Range.NumStep
-				}
-
-				if rangeStart <= value.Number.Content && rangeEnd >= value.Number.Content {
-					groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
-				}
-			case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
-				var contentTime time.Time
-				switch value.Type {
-				case av.KeyTypeDate:
-					contentTime = time.UnixMilli(value.Date.Content)
-				case av.KeyTypeCreated:
-					contentTime = time.UnixMilli(value.Created.Content)
-				case av.KeyTypeUpdated:
-					contentTime = time.UnixMilli(value.Updated.Content)
-				}
-				switch group.Method {
-				case av.GroupMethodDateDay:
-					groupName = contentTime.Format("2006-01-02")
-				case av.GroupMethodDateWeek:
-					year, week := contentTime.ISOWeek()
-					groupName = fmt.Sprintf("%d-W%02d", year, week)
-				case av.GroupMethodDateMonth:
+			case av.GroupMethodDateDay:
+				groupName = contentTime.Format("2006-01-02")
+			case av.GroupMethodDateWeek:
+				year, week := contentTime.ISOWeek()
+				groupName = fmt.Sprintf("%d-W%02d", year, week)
+			case av.GroupMethodDateMonth:
+				groupName = contentTime.Format("2006-01")
+			case av.GroupMethodDateYear:
+				groupName = contentTime.Format("2006")
+			case av.GroupMethodDateRelative:
+				// 过去 30 天之前的按月分组
+				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
+				// 未来 30 天之后的按月分组
+				now := time.Now()
+				if contentTime.Before(now.AddDate(0, 0, -30)) {
 					groupName = contentTime.Format("2006-01")
-				case av.GroupMethodDateYear:
-					groupName = contentTime.Format("2006")
-				case av.GroupMethodDateRelative:
-
+				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
+					groupName = fmt.Sprintf(Conf.language(259), 30)
+				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
+					groupName = fmt.Sprintf(Conf.language(259), 7)
+				} else if contentTime.Equal(now.AddDate(0, 0, -1)) {
+					groupName = Conf.language(260)
+				} else if contentTime.Equal(now) {
+					groupName = Conf.language(261)
+				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
+					groupName = Conf.language(262)
+				} else if contentTime.Before(now.AddDate(0, 0, 7)) {
+					groupName = fmt.Sprintf(Conf.language(263), 7)
+				} else if contentTime.Before(now.AddDate(0, 0, 30)) {
+					groupName = fmt.Sprintf(Conf.language(263), 30)
+				} else {
+					groupName = contentTime.Format("2006-01")
 				}
 			}
 		}

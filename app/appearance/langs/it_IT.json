@@ -1627,6 +1627,11 @@
     "255": "Il sito di destinazione ha abilitato la protezione hotlink, quindi non è possibile scaricare [%d] risorse",
     "256": "Il percorso specificato [%s] ha un percorso di spazio di lavoro padre [%s]",
     "257": "Ricordati di me per 30 giorni",
-    "258": "Operazione fallita, riprova più tardi"
+    "258": "Operazione fallita, riprova più tardi",
+    "259": "Ultimi %d giorni",
+    "260": "Ieri",
+    "261": "Oggi",
+    "262": "Domani",
+    "263": "Prossimi %d giorni"
   }
 }

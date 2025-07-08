@@ -1627,6 +1627,11 @@
     "255": "The target site has enabled hotlink protection, so it is not possible to download [%d] resources",
     "256": "The specified path [%s] has a parent workspace path [%s]",
     "257": "Remember me for 30 days",
-    "258": "Operation failed, please try again later"
+    "258": "Operation failed, please try again later",
+    "259": "Last %d days",
+    "260": "Yesterday",
+    "261": "Today",
+    "262": "Tomorrow",
+    "263": "Next %d days"
   }
 }

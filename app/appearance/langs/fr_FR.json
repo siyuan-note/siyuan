@@ -1627,6 +1627,11 @@
     "255": "Le site cible a activé la protection contre le hotlinking, il est donc impossible de télécharger [%d] ressources",
     "256": "Le chemin spécifié [%s] contient un chemin d'espace de travail parent [%s]",
     "257": "Souviens-toi de moi pendant 30 jours",
-    "258": "Échec de l'opération, veuillez réessayer plus tard"
+    "258": "Échec de l'opération, veuillez réessayer plus tard",
+    "259": "Les %d derniers jours",
+    "260": "Hier",
+    "261": "Aujourd'hui",
+    "262": "Demain",
+    "263": "Les %d prochains jours"
   }
 }

@@ -254,13 +254,26 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 			continue
 		}
 
-		node.AttributeViewType = string(view.LayoutType)
+		changed := false
 		attrs := parse.IAL2Map(node.KramdownIAL)
-		attrs[av.NodeAttrView] = view.ID
-		err = setNodeAttrs(node, tree, attrs)
-		if err != nil {
-			logging.LogWarnf("set node [%s] attrs failed: %s", bID, err)
-			return
+		if blockID == bID { // 当前操作的镜像库
+			attrs[av.NodeAttrView] = view.ID
+			node.AttributeViewType = string(view.LayoutType)
+			changed = true
+		} else {
+			if view.ID == attrs[av.NodeAttrView] {
+				// 仅更新和当前操作的镜像库指定的视图相同的镜像库
+				node.AttributeViewType = string(view.LayoutType)
+				changed = true
+			}
+		}
+
+		if changed {
+			err = setNodeAttrs(node, tree, attrs)
+			if err != nil {
+				logging.LogWarnf("set node [%s] attrs failed: %s", bID, err)
+				return
+			}
 		}
 	}
 

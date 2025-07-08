@@ -192,6 +192,7 @@ type View struct {
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
 	Group          *ViewGroup `json:"group,omitempty"`          // 分组规则
+	GroupUpdated   int64      `json:"groupUpdated"`             // 分组规则更新时间戳
 	Groups         []*View    `json:"groups,omitempty"`         // 分组视图列表
 	GroupItemIDs   []string   `json:"groupItemIds,omitempty"`   // 分组项目 ID 列表，用于维护分组中的所有项目
 	GroupCalc      *GroupCalc `json:"groupCalc,omitempty"`      // 分组计算规则

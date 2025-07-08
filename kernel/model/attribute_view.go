@@ -143,7 +143,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	}
 
 	view.Group = group
-	err = av.SaveAttributeView(attrView)
+	genGroup(view, attrView)
 	return err
 }
 
@@ -1289,6 +1289,12 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 	return
 }
 
+const (
+	groupNameLast30Days, groupNameLast7Days               = "_@last30Days@_", "_@last7Days@_"
+	groupNameYesterday, groupNameToday, groupNameTomorrow = "_@yesterday@_", "_@today@_", "_@tomorrow@_"
+	groupNameNext7Days, groupNameNext30Days               = "_@next7Days@_", "_@next30Days@_"
+)
+
 func renderAttributeView(attrView *av.AttributeView, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
@@ -1328,8 +1334,32 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		return
 	}
 
-	// 如果存在分组设置的话生成分组数据
-	genGroup(view, attrView)
+	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
+	if isGroupByDate(view) {
+		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
+		if time.Now().Format("2006-01-02") != updatedDate {
+			genGroup(view, attrView)
+		}
+
+		for _, groupView := range view.Groups {
+			switch groupView.Name {
+			case groupNameLast30Days:
+				groupView.Name = fmt.Sprintf(Conf.language(259), 30)
+			case groupNameLast7Days:
+				groupView.Name = fmt.Sprintf(Conf.language(259), 7)
+			case groupNameYesterday:
+				groupView.Name = Conf.language(260)
+			case groupNameToday:
+				groupView.Name = Conf.language(261)
+			case groupNameTomorrow:
+				groupView.Name = Conf.language(262)
+			case groupNameNext7Days:
+				groupView.Name = fmt.Sprintf(Conf.language(263), 7)
+			case groupNameNext30Days:
+				groupView.Name = fmt.Sprintf(Conf.language(263), 30)
+			}
+		}
+	}
 
 	// 如果存在分组的话渲染分组视图视图
 	var groups []av.Viewable
@@ -1458,19 +1488,19 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 				if contentTime.Before(now.AddDate(0, 0, -30)) {
 					groupName = contentTime.Format("2006-01")
 				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
-					groupName = fmt.Sprintf(Conf.language(259), 30)
+					groupName = groupNameLast30Days
 				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
-					groupName = fmt.Sprintf(Conf.language(259), 7)
+					groupName = groupNameLast7Days
 				} else if contentTime.Equal(now.AddDate(0, 0, -1)) {
-					groupName = Conf.language(260)
+					groupName = groupNameYesterday
 				} else if contentTime.Equal(now) {
-					groupName = Conf.language(261)
+					groupName = groupNameToday
 				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
-					groupName = Conf.language(262)
+					groupName = groupNameTomorrow
 				} else if contentTime.Before(now.AddDate(0, 0, 7)) {
-					groupName = fmt.Sprintf(Conf.language(263), 7)
+					groupName = groupNameNext7Days
 				} else if contentTime.Before(now.AddDate(0, 0, 30)) {
-					groupName = fmt.Sprintf(Conf.language(263), 30)
+					groupName = groupNameNext30Days
 				} else {
 					groupName = contentTime.Format("2006-01")
 				}
@@ -1502,6 +1532,19 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 		v.Name = name
 		view.Groups = append(view.Groups, v)
 	}
+
+	if isGroupByDate(view) {
+		view.GroupUpdated = time.Now().UnixMilli()
+	}
+
+	av.SaveAttributeView(attrView)
+}
+
+func isGroupByDate(view *av.View) bool {
+	if nil == view.Group {
+		return false
+	}
+	return av.GroupMethodDateDay == view.Group.Method || av.GroupMethodDateWeek == view.Group.Method || av.GroupMethodDateMonth == view.Group.Method || av.GroupMethodDateYear == view.Group.Method || av.GroupMethodDateRelative == view.Group.Method
 }
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {

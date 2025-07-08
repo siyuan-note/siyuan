@@ -571,10 +571,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 document.querySelector(".av__mask")?.remove();
                             }
                             if (item.getAttribute("data-av-type") === "gallery") {
-                                const filesElement = item.querySelector(`.av__gallery-item[data-id="${operation.srcs[0].id}"]`)?.querySelector(".av__gallery-fields");
-                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
-                                    filesElement.classList.add("av__gallery-fields--edit");
-                                }
+                                operation.srcs.forEach(srcItem => {
+                                    const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
+                                    if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
+                                        filesElement.classList.add("av__gallery-fields--edit");
+                                    }
+                                });
                             }
                         }
                     }

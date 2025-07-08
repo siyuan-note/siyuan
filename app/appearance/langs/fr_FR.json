@@ -1632,6 +1632,7 @@
     "260": "Hier",
     "261": "Aujourd'hui",
     "262": "Demain",
-    "263": "Les %d prochains jours"
+    "263": "Les %d prochains jours",
+    "264": "Le champ [%s] est vide"
   }
 }

@@ -1365,6 +1365,11 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 		items = append(items, item)
 	}
 
+	groupKey, _ := attrView.GetKey(group.Field)
+	if nil == groupKey {
+		return
+	}
+
 	var rangeStart, rangeEnd float64
 	switch group.Method {
 	case av.GroupMethodValue:
@@ -1487,9 +1492,12 @@ func genGroup(view *av.View, attrView *av.AttributeView) {
 		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
+
+		if defaultGroupName == name {
+			name = fmt.Sprintf(Conf.language(264), groupKey.Name)
+		}
 		v.Name = name
 		view.Groups = append(view.Groups, v)
-		view.GroupDefault = name == defaultGroupName
 	}
 }
 

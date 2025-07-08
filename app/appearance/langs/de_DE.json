@@ -1632,6 +1632,7 @@
     "260": "Gestern",
     "261": "Heute",
     "262": "Morgen",
-    "263": "Nächste %d Tage"
+    "263": "Nächste %d Tage",
+    "264": "Das Feld [%s] ist leer"
   }
 }

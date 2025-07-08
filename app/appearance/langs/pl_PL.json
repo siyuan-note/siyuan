@@ -1632,6 +1632,7 @@
     "260": "Wczoraj",
     "261": "Dzisiaj",
     "262": "Jutro",
-    "263": "Następne %d dni"
+    "263": "Następne %d dni",
+    "264": "Pole [%s] jest puste"
   }
 }

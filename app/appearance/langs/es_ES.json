@@ -1632,6 +1632,7 @@
     "260": "Ayer",
     "261": "Hoy",
     "262": "Mañana",
-    "263": "Próximos %d días"
+    "263": "Próximos %d días",
+    "264": "El campo [%s] está vacío"
   }
 }

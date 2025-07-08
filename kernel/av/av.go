@@ -199,7 +199,6 @@ type View struct {
 	GroupFolded    bool       `json:"groupFolded,omitempty"`    // 分组是否折叠
 	GroupHidden    bool       `json:"groupHidden,omitempty"`    // 分组是否隐藏
 	GroupHideEmpty bool       `json:"groupHideEmpty,omitempty"` // 分组是否隐藏空分组
-	GroupDefault   bool       `json:"groupDefault,omitempty"`   // 是否为默认分组
 }
 
 // GroupCalc 描述了分组计算规则和结果的结构。
@@ -291,9 +290,6 @@ type Viewable interface {
 
 	// SetGroupHidden 设置分组是否隐藏。
 	SetGroupHidden(hidden bool)
-
-	// SetGroupDefault 设置分组是否为默认分组。
-	SetGroupDefault(defaulted bool)
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {

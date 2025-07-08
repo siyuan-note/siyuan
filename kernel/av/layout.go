@@ -66,12 +66,11 @@ type BaseInstance struct {
 	Folded           bool          `json:"folded,omitempty"` // 是否折叠
 	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
 
-	Groups       []Viewable `json:"groups,omitempty"`       // 分组实例列表
-	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`    // 分组计算规则和结果
-	GroupName    string     `json:"groupName,omitempty"`    // 分组名称
-	GroupFolded  bool       `json:"groupFolded,omitempty"`  // 分组是否折叠
-	GroupHidden  bool       `json:"groupHidden,omitempty"`  // 分组是否隐藏
-	GroupDefault bool       `json:"groupDefault,omitempty"` // 是否为默认分组
+	Groups      []Viewable `json:"groups,omitempty"`      // 分组实例列表
+	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`   // 分组计算规则和结果
+	GroupName   string     `json:"groupName,omitempty"`   // 分组名称
+	GroupFolded bool       `json:"groupFolded,omitempty"` // 分组是否折叠
+	GroupHidden bool       `json:"groupHidden,omitempty"` // 分组是否隐藏
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
@@ -97,7 +96,6 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		GroupName:        view.GroupName,
 		GroupFolded:      view.GroupFolded,
 		GroupHidden:      view.GroupHidden,
-		GroupDefault:     view.GroupDefault,
 		ShowIcon:         showIcon,
 		WrapField:        wrapField,
 	}
@@ -133,10 +131,6 @@ func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 
 func (baseInstance *BaseInstance) SetGroupHidden(hidden bool) {
 	baseInstance.GroupHidden = hidden
-}
-
-func (baseInstance *BaseInstance) SetGroupDefault(defaulted bool) {
-	baseInstance.GroupDefault = defaulted
 }
 
 func (baseInstance *BaseInstance) GetID() string {

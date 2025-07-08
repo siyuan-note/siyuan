@@ -96,6 +96,17 @@ export const loadAssets = (data: Config.IAppearance) => {
 
     if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
         (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
+        // 第三方图标切换到 material
+        if (isBuiltInIcon) {
+            iconScriptElement?.remove();
+            Array.from(document.body.children).forEach((item) => {
+                if (item.tagName === "svg" &&
+                    !item.getAttribute("data-name") &&
+                    !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                    item.remove();
+                }
+            });
+        }
         return;
     }
     if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
@@ -111,8 +122,8 @@ export const loadAssets = (data: Config.IAppearance) => {
         }
     }
     addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+        iconScriptElement?.remove();
         if (!isBuiltInIcon) {
-            iconScriptElement?.remove();
             addScript(iconThirdURL, "iconScript").then(() => {
                 Array.from(document.body.children).forEach((item, index) => {
                     if (item.tagName === "svg" &&

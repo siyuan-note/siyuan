@@ -252,11 +252,15 @@ func getVirtualRefKeywords(root *ast.Node) (ret []string) {
 		if 0 < len(regexps) {
 			tmp = nil
 			for _, str := range ret {
+				matchExclude := false
 				for _, re := range regexps {
-					if ok, regErr := regexp.MatchString(re, str); !ok && nil == regErr {
-						tmp = append(tmp, str)
+					if ok, _ := regexp.MatchString(re, str); ok {
+						matchExclude = true
 						break
 					}
+				}
+				if !matchExclude {
+					tmp = append(tmp, str)
 				}
 			}
 			ret = tmp

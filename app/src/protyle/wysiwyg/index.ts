@@ -1970,9 +1970,6 @@ export class WYSIWYG {
             }
             const avGalleryItemElement = hasClosestByClassName(target, "av__gallery-item");
             if (avGalleryItemElement) {
-                if (protyle.disabled) {
-                    return false;
-                }
                 openGalleryItemMenu({
                     target: avGalleryItemElement.querySelector(".protyle-icon--last"),
                     protyle,

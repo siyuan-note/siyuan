@@ -5,6 +5,7 @@ import {openMenuPanel} from "./openMenuPanel";
 import {focusBlock} from "../../util/selection";
 import {upDownHint} from "../../../util/upDownHint";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
+import {hasClosestByClassName} from "../../util/hasClosest";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
@@ -384,4 +385,27 @@ export const getViewName = (type: string) => {
 
 export const getFieldsByData = (data: IAV) => {
     return data.viewType === "table" ? (data.view as IAVTable).columns : (data.view as IAVGallery).fields;
+};
+
+export const dragoverTab = (event: DragEvent) => {
+    const target = hasClosestByClassName(document.elementFromPoint(event.clientX, window.siyuan.dragElement.getBoundingClientRect().top + 10), "item");
+    if (!target) {
+        return;
+    }
+    if (!target.parentElement.isSameNode(window.siyuan.dragElement.parentElement) || target.isSameNode(window.siyuan.dragElement)) {
+        return;
+    }
+
+    const targetRect = target.getBoundingClientRect();
+    if (targetRect.left + targetRect.width / 2 < event.clientX) {
+        if (target.nextElementSibling?.isSameNode(window.siyuan.dragElement)) {
+            return;
+        }
+        target.after(window.siyuan.dragElement);
+    } else {
+        if (target.previousElementSibling?.isSameNode(window.siyuan.dragElement)) {
+            return;
+        }
+        target.before(window.siyuan.dragElement);
+    }
 };

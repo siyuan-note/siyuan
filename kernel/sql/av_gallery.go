@@ -201,7 +201,10 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 			break
 		}
 
-		galleryCard.CoverURL = assetValue.MAsset[0].Content
+		p := assetValue.MAsset[0].Content
+		if util.IsAssetsImage(p) {
+			galleryCard.CoverURL = p
+		}
 		return
 	case av.CoverFromContentBlock:
 		blockValue := getBlockValue(cardValues)

@@ -81,7 +81,7 @@ func NeedGenerateAssetsThumbnail(sourceImgPath string) bool {
 	if info.IsDir() {
 		return false
 	}
-	return info.Size() > 1024*10
+	return info.Size() > 1024*1024
 }
 
 func GenerateAssetsThumbnail(sourceImgPath, resizedImgPath string) (err error) {

@@ -475,6 +475,12 @@ func serveAssets(ginServer *gin.Engine) {
 
 	ginServer.GET("/assets/*path", model.CheckAuth, func(context *gin.Context) {
 		requestPath := context.Param("path")
+		if "/" == requestPath || "" == requestPath {
+			// 禁止访问根目录 Disable HTTP access to the /assets/ path https://github.com/siyuan-note/siyuan/issues/15257
+			context.Status(http.StatusForbidden)
+			return
+		}
+
 		relativePath := path.Join("assets", requestPath)
 		p, err := model.GetAssetAbsPath(relativePath)
 		if err != nil {

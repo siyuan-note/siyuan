@@ -11,6 +11,7 @@ import {avRender, updateSearch} from "../render";
 import {getViewIcon} from "../view";
 import {processRender} from "../../../util/processCode";
 import {getColIconByType, getColNameByType} from "../col";
+import {getCompressURL} from "../../../../util/image";
 
 export const renderGallery = (options: {
     blockElement: HTMLElement,
@@ -71,9 +72,9 @@ export const renderGallery = (options: {
                 const coverClass = "av__gallery-cover av__gallery-cover--" + view.cardAspectRatio;
                 if (item.coverURL) {
                     if (item.coverURL.startsWith("background")) {
-                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${item.coverURL}"></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img class="av__gallery-img" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=" style="${item.coverURL}"></div>`;
                     } else {
-                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" src="${item.coverURL}"></div>`;
+                        galleryHTML += `<div class="${coverClass}"><img loading="lazy" class="av__gallery-img${view.fitImage ? " av__gallery-img--fit" : ""}" src="${getCompressURL(item.coverURL)}"></div>`;
                     }
                 } else if (item.coverContent) {
                     galleryHTML += `<div class="${coverClass}"><div class="av__gallery-content">${item.coverContent}</div><div></div></div>`;

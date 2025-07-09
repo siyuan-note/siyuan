@@ -21,6 +21,7 @@ import {renameAsset} from "../../../editor/rename";
 import * as dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
+import {getCompressURL} from "../../../util/image";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -59,7 +60,7 @@ export const getAssetHTML = (cellElements: HTMLElement[]) => {
     genCellValueByElement("mAsset", cellElements[0]).mAsset.forEach((item, index) => {
         let contentHTML;
         if (item.type === "image") {
-            contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${item.content}">
+            contentHTML = `<span data-type="openAssetItem" class="fn__flex-1 ariaLabel" aria-label="${getCompressURL(item.content)}">
     <img style="max-height: 180px;max-width: 360px;border-radius: var(--b3-border-radius);margin: 4px 0;" src="${item.content}"/>
 </span>`;
         } else {

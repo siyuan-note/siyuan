@@ -18,6 +18,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
+import {getCompressURL} from "../../../util/image";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -969,7 +970,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
-                text += `<img class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${item.content}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}">`;
             } else {
                 text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
             }

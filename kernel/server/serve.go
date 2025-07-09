@@ -491,14 +491,40 @@ func serveAssets(ginServer *gin.Engine) {
 				return
 			}
 		}
+
+		if serveThumbnail(context, p, requestPath) {
+			// 如果请求缩略图服务成功则返回
+			return
+		}
+
+		// 返回原始文件
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})
+
 	ginServer.GET("/history/*path", model.CheckAuth, model.CheckAdminRole, func(context *gin.Context) {
 		p := filepath.Join(util.HistoryDir, context.Param("path"))
 		http.ServeFile(context.Writer, context.Request, p)
 		return
 	})
+}
+
+func serveThumbnail(context *gin.Context, assetAbsPath, requestPath string) bool {
+	if style := context.Query("style"); style == "thumb" && model.NeedGenerateAssetsThumbnail(assetAbsPath) { // 请求缩略图
+		thumbnailPath := filepath.Join(util.TempDir, "thumbnails", "assets", requestPath)
+		if !gulu.File.IsExist(thumbnailPath) {
+			// 如果缩略图不存在，则生成缩略图
+			err := model.GenerateAssetsThumbnail(assetAbsPath, thumbnailPath)
+			if err != nil {
+				logging.LogErrorf("generate thumbnail failed: %s", err)
+				return false
+			}
+		}
+
+		http.ServeFile(context.Writer, context.Request, thumbnailPath)
+		return true
+	}
+	return false
 }
 
 func serveRepoDiff(ginServer *gin.Engine) {

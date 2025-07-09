@@ -36,6 +36,7 @@ import {scrollCenter} from "../../../util/highlightById";
 import {escapeHtml} from "../../../util/escape";
 import {editGalleryItem, openGalleryItemMenu} from "./gallery/util";
 import {clearSelect} from "../../util/clearSelect";
+import {removeCompressURL} from "../../../util/image";
 
 export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLElement }) => {
     if (isOnlyMeta(event)) {
@@ -70,7 +71,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
     if (imgElement) {
         previewAttrViewImages(
-            (imgElement as HTMLImageElement).src,
+            removeCompressURL((imgElement as HTMLImageElement).src),
             blockElement.getAttribute("data-av-id"),
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
             (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""

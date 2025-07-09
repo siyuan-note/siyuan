@@ -18,7 +18,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
-import {getCompressURL} from "../../../util/image";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -131,7 +131,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
-                content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
+                content: isImg ? removeCompressURL(item.getAttribute("src")) : item.getAttribute("data-url"),
                 name: isImg ? "" : item.getAttribute("data-name")
             });
         });

@@ -4,3 +4,11 @@ export const getCompressURL = (url: string) => {
         return url + "?style=thumb";
     }
 };
+
+export const removeCompressURL = (url: string) => {
+    if (url.startsWith("assets/") &&
+        (url.endsWith(".png?style=thumb") || url.endsWith(".jpg?style=thumb") || url.endsWith(".jpeg?style=thumb"))) {
+        return url.replace("?style=thumb", "");
+    }
+    return url;
+};

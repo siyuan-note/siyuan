@@ -6,6 +6,7 @@ import {focusBlock} from "../../util/selection";
 import {upDownHint} from "../../../util/upDownHint";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {hasClosestByClassName} from "../../util/hasClosest";
+import {Constants} from "../../../constants";
 
 export const openViewMenu = (options: { protyle: IProtyle, blockElement: HTMLElement, element: HTMLElement }) => {
     if (options.protyle.disabled) {
@@ -388,14 +389,28 @@ export const getFieldsByData = (data: IAV) => {
 };
 
 export const dragoverTab = (event: DragEvent) => {
+    const viewTabElement = window.siyuan.dragElement.parentElement;
+    if (viewTabElement.scrollWidth > viewTabElement.clientWidth) {
+        const viewTabRect = viewTabElement.getBoundingClientRect();
+        if (event.clientX < viewTabRect.left) {
+            viewTabElement.scroll({
+                left: viewTabElement.scrollLeft - Constants.SIZE_SCROLL_STEP,
+                behavior: "smooth"
+            });
+        } else if (event.clientX > viewTabRect.right) {
+            viewTabElement.scroll({
+                left: viewTabElement.scrollLeft + Constants.SIZE_SCROLL_STEP,
+                behavior: "smooth"
+            });
+        }
+    }
     const target = hasClosestByClassName(document.elementFromPoint(event.clientX, window.siyuan.dragElement.getBoundingClientRect().top + 10), "item");
     if (!target) {
         return;
     }
-    if (!target.parentElement.isSameNode(window.siyuan.dragElement.parentElement) || target.isSameNode(window.siyuan.dragElement)) {
+    if (!viewTabElement.isSameNode(window.siyuan.dragElement.parentElement) || target.isSameNode(window.siyuan.dragElement)) {
         return;
     }
-
     const targetRect = target.getBoundingClientRect();
     if (targetRect.left + targetRect.width / 2 < event.clientX) {
         if (target.nextElementSibling?.isSameNode(window.siyuan.dragElement)) {

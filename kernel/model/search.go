@@ -617,8 +617,8 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 							unlinks = append(unlinks, n.Parent)
 
 							prev, next := n.Parent.Previous, n.Parent.Next
-							for ; prev != nil && ast.NodeText == prev.Type && prev.Tokens == nil; prev = prev.Previous {
-								// Tokens 为空的节点是之前处理过的节点，需要跳过
+							for ; prev != nil && ((ast.NodeText == prev.Type && prev.Tokens == nil) || ast.NodeBackslash == prev.Type); prev = prev.Previous {
+								// Tokens 为空的节点或者转义节点之前已经处理，需要跳过
 							}
 							if nil != prev && ast.NodeText == prev.Type && nil != next && ast.NodeText == next.Type {
 								prev.Tokens = append(prev.Tokens, next.Tokens...)

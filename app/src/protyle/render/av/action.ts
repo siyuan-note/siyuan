@@ -71,7 +71,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
     const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
     if (imgElement) {
         previewAttrViewImages(
-            removeCompressURL((imgElement as HTMLImageElement).src),
+            removeCompressURL((imgElement as HTMLImageElement).getAttribute("src")),
             blockElement.getAttribute("data-av-id"),
             blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
             (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""

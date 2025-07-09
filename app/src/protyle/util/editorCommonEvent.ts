@@ -928,7 +928,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     avID,
                     blockID,
                     id,
-                    previousID: window.siyuan.dragElement.previousElementSibling?.getAttribute("data-id")
+                    previousID: window.siyuan.dragElement.previousElementSibling?.getAttribute("data-id"),
+                    data: "unRefresh"   // 不需要重新渲染
                 }], [{
                     action: "sortAttrViewView",
                     avID,
@@ -1741,6 +1742,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
         if (window.siyuan.dragElement) {
             window.siyuan.dragElement.style.opacity = "";
             window.siyuan.dragElement = undefined;
+            document.onmousemove = null;
         }
     });
 };

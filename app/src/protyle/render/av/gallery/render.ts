@@ -217,7 +217,7 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
                 }
             }
         }
-        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
+        options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
         if (options.cb) {
             options.cb(response.data);
         }

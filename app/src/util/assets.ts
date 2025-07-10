@@ -29,12 +29,10 @@ export const loadAssets = (data: Config.IAppearance) => {
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
             const newStyleElement = document.createElement("link");
-            newStyleElement.id = "themeDefaultStyleNew";
-            newStyleElement.rel = "stylesheet";
-            newStyleElement.href = defaultThemeAddress;
-            
             // 等待新样式表加载完成再移除旧样式表
             new Promise((resolve) => {
+                newStyleElement.rel = "stylesheet";
+                newStyleElement.href = defaultThemeAddress;
                 newStyleElement.onload = resolve;
                 defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
             }).then(() => {

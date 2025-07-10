@@ -856,7 +856,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID",
         "setAttrViewBlockView", "setAttrViewCardSize", "setAttrViewCardAspectRatio", "hideAttrViewName", "setAttrViewShowIcon",
         "setAttrViewWrapField", "setAttrViewGroup"].includes(operation.action)) {
-        if (!isUndo && operation.data !== "unRefresh") {
+        if (!isUndo) {
             // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
             refreshAV(protyle, operation);
         } else if (operation.action === "setAttrViewName") {

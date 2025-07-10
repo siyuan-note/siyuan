@@ -1,3 +1,5 @@
+@use "../util/mixin";
+
 .graph {
   display: flex;
   flex-direction: column;
@@ -57,7 +59,7 @@
       color: var(--b3-theme-on-surface);
       max-width: 10vw;
       white-space: break-spaces;
-      @include text-clamp(3);
+      @include mixin.text-clamp(3);
     }
   }
 }

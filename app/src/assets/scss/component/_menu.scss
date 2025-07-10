@@ -1,3 +1,6 @@
+@use "../util/mixin";
+@use "../component/list";
+
 .b3-menu {
   position: fixed;
   border-radius: var(--b3-border-radius-b);
@@ -157,7 +160,7 @@
     }
 
     .b3-menu__label {
-      @include text-clamp(1);
+      @include mixin.text-clamp(1);
       max-width: 30vw;
       white-space: nowrap;
       overflow: hidden;

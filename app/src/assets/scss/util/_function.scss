@@ -1,10 +1,12 @@
+@use "mixin";
+
 .fn {
   &__hidescrollbar::-webkit-scrollbar {
     display: none;
   }
 
   &__ellipsis {
-    @include text-clamp(1);
+    @include mixin.text-clamp(1);
     display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
   }
 

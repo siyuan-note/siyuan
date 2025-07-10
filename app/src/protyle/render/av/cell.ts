@@ -18,6 +18,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
 import {getFieldIdByCellElement} from "./row";
 import {getFieldsByData} from "./view";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
 
 const renderCellURL = (urlContent: string) => {
     let host = urlContent;
@@ -130,7 +131,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
             const isImg = item.classList.contains("av__cellassetimg");
             mAsset.push({
                 type: isImg ? "image" : "file",
-                content: isImg ? item.getAttribute("src") : item.getAttribute("data-url"),
+                content: isImg ? removeCompressURL(item.getAttribute("src")) : item.getAttribute("data-url"),
                 name: isImg ? "" : item.getAttribute("data-name")
             });
         });
@@ -187,11 +188,11 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
         }
     } else if (["text", "block", "url", "phone", "email", "template"].includes(colType)) {
         newValue[colType as "text"] = {
-            content: getCellValueContent(value)
+            content: getCellValueContent(value).toString()
         };
     } else if (colType === "mSelect" || colType === "select") {
         newValue.mSelect = [{
-            content: getCellValueContent(value),
+            content: getCellValueContent(value).toString(),
             color: "1"
         }];
     } else if (colType === "rollup") {
@@ -210,7 +211,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
             newValue.relation = {blockIDs: [], contents: []};
         }
     } else if (colType === "mAsset") {
-        const content = getCellValueContent(value);
+        const content = getCellValueContent(value).toString();
         newValue.mAsset = [{
             type: Constants.SIYUAN_ASSETS_IMAGE.includes(pathPosix().extname(content).toLowerCase()) ? "image" : "file",
             content,
@@ -799,7 +800,7 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
                     });
                 }
             }
-        } else if (type === "mSelect") {
+        } else if (type === "mSelect" || type === "select") {
             // 不传入为删除
             if (typeof value === "string") {
                 const newMSelectValue: IAVCellSelectValue[] = [];
@@ -969,7 +970,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
     } else if (cellValue.type === "mAsset") {
         cellValue?.mAsset?.forEach((item) => {
             if (item.type === "image") {
-                text += `<img class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${item.content}">`;
+                text += `<img loading="lazy" class="av__cellassetimg ariaLabel" aria-label="${item.content}" src="${getCompressURL(item.content)}">`;
             } else {
                 text += `<span class="b3-chip av__celltext--url ariaLabel" aria-label="${escapeAttr(item.content)}" data-name="${escapeAttr(item.name)}" data-url="${escapeAttr(item.content)}">${item.name || item.content}</span>`;
             }
@@ -994,7 +995,7 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         cellValue?.relation?.contents?.forEach((item) => {
             if (item && item.block) {
                 if (item?.isDetached) {
-                    text += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    text += `<span class="av__cell--relation"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}">➖</span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                 } else {
                     // data-block-id 用于更新 emoji
                     text += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
@@ -1006,8 +1007,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         }
     }
 
-    if ((["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+    if ((["text", "template", "url", "email", "phone", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
         cellValue.type === "lineNumber" ||
+        (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
         (cellValue.type === "block" && cellValue.block?.content)) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }
@@ -1150,7 +1152,8 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            item.element.innerHTML = renderCell(data);
+            const iconElement = item.element.querySelector(".b3-menu__avemoji");
+            item.element.innerHTML = renderCell(data, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
             renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;

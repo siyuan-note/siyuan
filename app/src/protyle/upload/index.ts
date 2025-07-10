@@ -11,6 +11,10 @@ import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {getTypeByCellElement, updateCellsValue} from "../render/av/cell";
 import {scrollCenter} from "../../util/highlightById";
 
+interface FileWithPath extends File {
+    path: string;
+}
+
 export class Upload {
     public element: HTMLElement;
     public isUploading: boolean;
@@ -159,6 +163,14 @@ const genUploadedLabel = (responseText: string, protyle: IProtyle) => {
                     cellElements.push(item);
                 }
             });
+            if (cellElements.length === 0) {
+                document.querySelector(".av__panel .b3-menu__items")?.getAttribute("data-ids")?.split(",").forEach((id: string) => {
+                    const item = protyle.wysiwyg.element.querySelector(`.av__gallery-fields [data-dtype="mAsset"][data-id="${id}"]`) as HTMLElement;
+                    if (item) {
+                        cellElements.push(item);
+                    }
+                });
+            }
         }
         if (cellElements.length > 0) {
             const blockElement = hasClosestBlock(cellElements[0]);
@@ -257,7 +269,7 @@ export const uploadFiles = (protyle: IProtyle, files: FileList | DataTransferIte
         }
         if (0 === fileItem.size && "" === fileItem.type && -1 === fileItem.name.indexOf(".")) {
             // 文件夹
-            uploadLocalFiles([fileItem.path], protyle, false);
+            uploadLocalFiles([(fileItem as FileWithPath).path], protyle, false);
         } else {
             fileList.push(fileItem);
         }

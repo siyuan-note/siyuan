@@ -24,18 +24,9 @@ import (
 
 func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {
 	ret = &av.Table{
-		BaseInstance: &av.BaseInstance{
-			ID:               view.ID,
-			Icon:             view.Icon,
-			Name:             view.Name,
-			Desc:             view.Desc,
-			HideAttrViewName: view.HideAttrViewName,
-			Filters:          view.Filters,
-			Sorts:            view.Sorts,
-			Group:            view.Group,
-		},
-		Columns: []*av.TableColumn{},
-		Rows:    []*av.TableRow{},
+		BaseInstance: av.NewViewBaseInstance(view),
+		Columns:      []*av.TableColumn{},
+		Rows:         []*av.TableRow{},
 	}
 
 	// 组装列
@@ -53,8 +44,10 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Name:         key.Name,
 				Type:         key.Type,
 				Icon:         key.Icon,
+				Wrap:         col.Wrap,
 				Hidden:       col.Hidden,
 				Desc:         key.Desc,
+				Calc:         col.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
 				Template:     key.Template,
@@ -62,15 +55,13 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 				Rollup:       key.Rollup,
 				Date:         key.Date,
 			},
-			Wrap:  col.Wrap,
 			Width: col.Width,
 			Pin:   col.Pin,
-			Calc:  col.Calc,
 		})
 	}
 
-	rowsValues := generateAttrViewItems(attrView) // 生成行
-	filterNotFoundAttrViewItems(&rowsValues)      // 过滤掉不存在的行
+	rowsValues := generateAttrViewItems(attrView, view) // 生成行
+	filterNotFoundAttrViewItems(&rowsValues)            // 过滤掉不存在的行
 
 	// 生成行单元格
 	for rowID, rowValues := range rowsValues {
@@ -140,6 +131,6 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	}
 
 	filterByQuery(query, ret)
-	manualSort(view.Table, ret)
+	manualSort(view, ret)
 	return
 }

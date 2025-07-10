@@ -384,9 +384,13 @@
       font-size: 85%;
       padding: 10px 5px;
 
-      &--wrap {
-        word-break: break-all;
-        white-space: pre-wrap;
+      &:hover {
+        .b3-chip[data-type="block-more"] {
+          display: block;
+          top: 5px;
+          margin: 0;
+          z-index: 1;
+        }
       }
 
       .av__cell {
@@ -402,17 +406,11 @@
         &:hover {
           background-color: var(--b3-list-hover);
           border-radius: var(--b3-border-radius);
-
-          .b3-chip[data-type="block-more"] {
-            display: block;
-            top: 5px;
-            margin: 0;
-            z-index: 1;
-          }
         }
 
         .block__icon {
           display: none;
+          top: 1px;
         }
 
         &[data-dtype="created"],
@@ -485,10 +483,10 @@
       }
 
       span {
-        width: calc(1.625em - 8px);
+        width: calc(1.9em - 10px);
         margin: 0 5px 0 0;
         height: 1.625em;
-        font-size: 1em;
+        font-size: .85em;
       }
     }
 

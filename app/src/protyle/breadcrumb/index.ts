@@ -226,7 +226,7 @@ ${padHTML}
                     icon: getIconByType(item.type, item.subType),
                     label: item.name,
                     click() {
-                        zoomOut({protyle, id: item.id, focusId: id});
+                        zoomOut({protyle, id: item.id});
                     }
                 });
             });

@@ -292,7 +292,7 @@ func buildAssetContentOrderBy(orderBy int) string {
 
 var assetContentSearcher = NewAssetsSearcher()
 
-func RemoveIndexAssetContent(absPath string) {
+func removeIndexAssetContent(absPath string) {
 	defer logging.Recover()
 
 	assetsDir := util.GetDataAssetsAbsPath()
@@ -300,7 +300,7 @@ func RemoveIndexAssetContent(absPath string) {
 	sql.DeleteAssetContentsByPathQueue(p)
 }
 
-func IndexAssetContent(absPath string) {
+func indexAssetContent(absPath string) {
 	defer logging.Recover()
 
 	ext := filepath.Ext(absPath)

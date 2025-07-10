@@ -52,21 +52,9 @@ func LoadSysFonts() (ret []string) {
 		ret = append(ret, font.Family)
 	}
 	ret = gulu.Str.RemoveDuplicatedElem(ret)
-	ret = removeUnusedFonts(ret)
 	sort.Strings(ret)
 	sysFonts = ret
 	logging.LogInfof("loaded system fonts [%d] in [%dms]", len(sysFonts), time.Since(start).Milliseconds())
-	return
-}
-
-func removeUnusedFonts(fonts []string) (ret []string) {
-	ret = []string{}
-	for _, font := range fonts {
-		if strings.HasPrefix(font, "Noto Sans") {
-			continue
-		}
-		ret = append(ret, font)
-	}
 	return
 }
 

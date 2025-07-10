@@ -130,6 +130,9 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                         }
                     }
                 });
+                if (eWidth === 0) {
+                    pinMaxIndex = pinIndex;
+                }
                 pinIndex = Math.min(pinIndex, pinMaxIndex);
                 if (pinIndex > -1) {
                     tableHTML = '<div class="av__row av__row--header"><div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
@@ -199,7 +202,7 @@ ${cell.value?.isDetached ? ' data-detached="true"' : ""}
 style="width: ${data.columns[index].width || "200px"};
 ${cell.valueType === "number" ? "text-align: right;" : ""}
 ${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}</div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon)}</div>`;
 
                         if (pinIndex === index) {
                             tableHTML += "</div>";
@@ -210,7 +213,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                 let tabHTML = "";
                 let viewData: IAVView;
                 response.data.views.forEach((item: IAVView) => {
-                    tabHTML += `<div data-position="north" data-av-type="${item.type}" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
+                    tabHTML += `<div draggable="true" data-position="north" data-av-type="${item.type}" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
     ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : `<svg class="item__graphic"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
     <span class="item__text">${escapeHtml(item.name)}</span>
 </div>`;
@@ -322,18 +325,21 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                     const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
                     if (newCellElement) {
                         newCellElement.classList.add("av__cell--select");
+                        cellScrollIntoView(e, newCellElement);
                     }
                     const avMaskElement = document.querySelector(".av__mask");
+                    const avPanelElement = document.querySelector(".av__panel");
                     if (avMaskElement) {
                         (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!document.querySelector(".av__panel") && !isSearching && getSelection().rangeCount > 0) {
+                    } else if (!avPanelElement && !isSearching && getSelection().rangeCount > 0) {
                         const range = getSelection().getRangeAt(0);
                         const blockElement = hasClosestBlock(range.startContainer);
                         if (blockElement && e.isSameNode(blockElement)) {
                             focusBlock(e);
                         }
+                    } else if (avPanelElement && !newCellElement) {
+                        avPanelElement.remove();
                     }
-                    cellScrollIntoView(e, newCellElement);
                 }
                 selectRowIds.forEach((selectRowId, index) => {
                     const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
@@ -363,7 +369,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex)}
                         }
                     }
                 }
-                e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft;
+                e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
                 if (cb) {
                     cb(response.data);
                 }
@@ -506,6 +512,28 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     }
                 }
             });
+        } else if (operation.action === "setAttrViewWrapField") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(".av__cell").forEach(fieldItem => {
+                    fieldItem.setAttribute("data-wrap", operation.data.toString());
+                });
+            });
+        } else if (operation.action === "setAttrViewShowIcon") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
+                    if (operation.data) {
+                        cellItem.classList.remove("fn__none");
+                    } else {
+                        cellItem.classList.add("fn__none");
+                    }
+                });
+            });
+        } else if (operation.action === "setAttrViewColWrap") {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+                item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
+                    cellItem.setAttribute("data-wrap", operation.data.toString());
+                });
+            });
         } else {
             // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
             const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
@@ -518,11 +546,21 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         item.querySelector(".av__drag-fill")?.remove();
                     });
                     addDragFill(item.querySelector(".av__cell--select"));
-                }
-                if (operation.action === "setAttrViewBlockView") {
+                } else if (operation.action === "setAttrViewBlockView") {
                     const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
                     if (viewTabElement) {
                         item.dataset.pageSize = viewTabElement.dataset.page;
+                    }
+                } else if (operation.action === "addAttrViewView") {
+                    item.dataset.pageSize = "50";
+                } else if (operation.action === "removeAttrViewView") {
+                    item.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+                } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
+                    const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
+                    if (viewTabElement && !operation.previousID && !viewTabElement.previousElementSibling) {
+                        return;
+                    } else if (viewTabElement && operation.previousID && viewTabElement.previousElementSibling?.getAttribute("data-id") === operation.previousID) {
+                        return;
                     }
                 }
                 avRender(item, protyle, () => {
@@ -537,10 +575,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 document.querySelector(".av__mask")?.remove();
                             }
                             if (item.getAttribute("data-av-type") === "gallery") {
-                                const filesElement = item.querySelector(`.av__gallery-item[data-id="${operation.srcs[0].id}"]`)?.querySelector(".av__gallery-fields");
-                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
-                                    filesElement.classList.add("av__gallery-fields--edit");
-                                }
+                                operation.srcs.forEach(srcItem => {
+                                    const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
+                                    if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
+                                        filesElement.classList.add("av__gallery-fields--edit");
+                                    }
+                                });
                             }
                         }
                     }

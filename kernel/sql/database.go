@@ -36,6 +36,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/editor"
 	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/mattn/go-sqlite3"
@@ -866,6 +867,11 @@ func buildBlockFromNode(n *ast.Node, tree *parse.Tree) (block *Block, attributes
 		}
 		length = utf8.RuneCountInString(content)
 	}
+
+	// 剔除零宽空格 Database index content/markdown values no longer contain zero-width spaces https://github.com/siyuan-note/siyuan/issues/15204
+	fcontent = strings.ReplaceAll(fcontent, editor.Zwsp, "")
+	content = strings.ReplaceAll(content, editor.Zwsp, "")
+	markdown = strings.ReplaceAll(markdown, editor.Zwsp, "")
 
 	block = &Block{
 		ID:       n.ID,

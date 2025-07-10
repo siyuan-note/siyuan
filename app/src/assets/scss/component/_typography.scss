@@ -1,3 +1,5 @@
+@use "../util/function";
+
 @font-face {
   font-family: 'JetBrainsMono-Regular';
   /*! /* webpackIgnore: true */
@@ -504,12 +506,18 @@
   table {
     margin: 1em 0;
 
-    &[style*="text-align: center"] {
-      margin: auto;
-    }
-
+    &[style*="direction: rtl"]:not([style*="text-align: left"]),
     &[style*="text-align: right"] {
       margin-left: auto;
+    }
+
+    &[style*="text-align: center"] {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    &[style*="direction: ltr"]:not([style*="text-align: right"]) {
+      margin-left: initial;
     }
   }
 

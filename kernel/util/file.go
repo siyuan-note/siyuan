@@ -300,6 +300,12 @@ func IsSubPath(absPath, toCheckPath string) bool {
 	return false
 }
 
+func IsCompressibleAssetImage(p string) bool {
+	lowerName := strings.ToLower(p)
+	return strings.HasPrefix(lowerName, "assets/") &&
+		(strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg"))
+}
+
 func SizeOfDirectory(path string) (size int64, err error) {
 	err = filelock.Walk(path, func(path string, d fs.DirEntry, err error) error {
 		if err != nil {

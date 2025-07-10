@@ -16,42 +16,39 @@
 
 package av
 
-// Groupable 定义了可分组的视图类型。
-type Groupable interface {
-
-	// Group 根据视图中设置的分组规则进行分组。
-	Group(attrView *AttributeView)
-}
-
+// ViewGroup 描述了视图分组规则的结构。
 type ViewGroup struct {
 	Field  string      `json:"field"`           // 分组字段 ID
 	Method GroupMethod `json:"method"`          // 分组方式
 	Range  *GroupRange `json:"range,omitempty"` // 分组范围
-	Order  GroupOrder  `json:"order"`           // 分组顺序
+	Order  GroupOrder  `json:"order"`           // 分组排序规则
 }
 
+// GroupMethod 描述了分组方式。
 type GroupMethod int
 
 const (
 	GroupMethodValue        GroupMethod = iota // 按值分组
 	GroupMethodRangeNum                        // 按数字范围分组
-	GroupMethodDateRelative                    // 按相对日期日期分组
+	GroupMethodDateRelative                    // 按相对日期分组
 	GroupMethodDateDay                         // 按天日期分组
 	GroupMethodDateWeek                        // 按周日期分组
 	GroupMethodDateMonth                       // 按月日期分组
 	GroupMethodDateYear                        // 按年日期分组
 )
 
-// GroupRange 定义了分组范围的结构。
+// GroupRange 描述了分组范围的结构。
 type GroupRange struct {
 	NumStart float64 `json:"numStart"` // 数字范围起始值
 	NumEnd   float64 `json:"numEnd"`   // 数字范围结束值
 	NumStep  float64 `json:"numStep"`  // 数字范围步长
 }
 
-type GroupOrder string
+// GroupOrder 描述了分组排序规则。
+type GroupOrder int
 
 const (
-	GroupOrderAsc  GroupOrder = "ASC"
-	GroupOrderDesc GroupOrder = "DESC"
+	GroupOrderAsc  = iota // 升序
+	GroupOrderDesc        // 降序
+	GroupOrderMan         // 手动排序
 )

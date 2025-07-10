@@ -32,7 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderView(view *av.View, attrView *av.AttributeView, query string) (ret av.Viewable) {
+func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		ret = RenderAttributeViewTable(attrView, view, query)
@@ -187,7 +187,7 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 	return
 }
 
-func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.KeyValues) {
+func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
 	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
@@ -199,6 +199,17 @@ func generateAttrViewItems(attrView *av.AttributeView) (ret map[string][]*av.Key
 			}
 			ret[val.BlockID] = values
 		}
+	}
+
+	// 如果是分组视图，则需要过滤掉不在分组中的项目
+	if 0 < len(view.GroupItemIDs) {
+		tmp := map[string][]*av.KeyValues{}
+		for _, groupItemID := range view.GroupItemIDs {
+			if _, ok := ret[groupItemID]; ok {
+				tmp[groupItemID] = ret[groupItemID]
+			}
+		}
+		ret = tmp
 	}
 	return
 }
@@ -608,16 +619,16 @@ func filterByQuery(query string, collection av.Collection) {
 }
 
 // manualSort 处理用户手动排序。
-func manualSort(collectionLayout av.CollectionLayout, collection av.Collection) {
-	sortRowIDs := map[string]int{}
-	for i, itemID := range collectionLayout.GetItemIDs() {
-		sortRowIDs[itemID] = i
+func manualSort(view *av.View, collection av.Collection) {
+	sortItemIDs := map[string]int{}
+	for i, itemID := range view.ItemIDs {
+		sortItemIDs[itemID] = i
 	}
 
 	items := collection.GetItems()
 	sort.Slice(items, func(i, j int) bool {
-		iv := sortRowIDs[items[i].GetID()]
-		jv := sortRowIDs[items[j].GetID()]
+		iv := sortItemIDs[items[i].GetID()]
+		jv := sortItemIDs[items[j].GetID()]
 		if iv == jv {
 			return items[i].GetID() < items[j].GetID()
 		}

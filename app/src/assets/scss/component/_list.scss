@@ -1,3 +1,5 @@
+@use "../util/mixin";
+
 .b3-list {
   mark {
     background-color: var(--b3-protyle-inline-mark-background);
@@ -233,7 +235,7 @@
       border: 0;
       padding: 0;
       color: var(--b3-theme-on-background);
-      @include text-clamp(1);
+      @include mixin.text-clamp(1);
 
       // 搜索列表中自定义图标
       & > img:not(.emoji),

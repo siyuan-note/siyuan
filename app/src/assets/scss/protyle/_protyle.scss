@@ -1,7 +1,7 @@
-@import "content";
-@import "toolbar";
-@import "wysiwyg";
-@import "attr";
+@use "content" as *;
+@use "toolbar" as *;
+@use "wysiwyg" as *;
+@use "attr" as *;
 
 .protyle-scroll {
   --b3-dynamicscroll-width: 200px;
@@ -273,6 +273,10 @@
 
 .protyle-background {
   position: relative;
+
+  &:not(.protyle-background--enable) .protyle-background__img .protyle-icons {
+    display: none;
+  }
 
   &--enable {
     .protyle-background__img:hover .protyle-icons,

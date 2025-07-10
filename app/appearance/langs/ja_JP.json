@@ -438,7 +438,7 @@
   "apiVersion": "API バージョン",
   "apiVersionTip": "Azure OpenAI サービスを使用する場合にのみ必要です",
   "apiProvider": "API プロバイダー",
-  "apiProviderTip": "選択した API プロバイダーを使用して AI 関連の機能を実装します",
+  "apiProviderTip": "選択すると、このプロバイダーの API サービスを使用して AI 関連機能を実現します（ChatGPT、Claude、DeepSeek などのモデルは OpenAI インターフェースをサポートしています）",
   "skip": "スキップ",
   "nextRound": "次のラウンド",
   "save": "保存",

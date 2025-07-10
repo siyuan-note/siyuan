@@ -438,7 +438,7 @@
   "apiVersion": "Wersja API",
   "apiVersionTip": "Wymagane tylko podczas korzystania z usługi Azure OpenAI",
   "apiProvider": "Dostawca API",
-  "apiProviderTip": "Użyj wybranego dostawcy API do wdrożenia funkcji związanych z AI",
+  "apiProviderTip": "Wybór tego dostawcy pozwoli na korzystanie z jego API w celu realizacji funkcji AI (ChatGPT, Claude, DeepSeek i inne modele obsługują interfejs OpenAI)",
   "skip": "Pomiń",
   "nextRound": "Następna runda",
   "save": "Zapisz",

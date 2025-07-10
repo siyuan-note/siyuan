@@ -34,5 +34,5 @@
 @use "business/av" as *;
 @use "business/emojis" as *;
 @use "component/svg" as *;
-@use "base-styles" as *;
+@use "main/main" as *;
 @use "util/responsive" as *; // 需放置最后，否则 https://github.com/siyuan-note/siyuan/issues/7056

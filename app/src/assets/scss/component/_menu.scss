@@ -312,7 +312,7 @@
   }
 
   &__avemoji {
-    @extend %b3-list-item__icon;
+    @extend .b3-list-item__icon;
     align-self: center;
     margin-left: -4px;
     font-size: 14px;

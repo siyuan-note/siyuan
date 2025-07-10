@@ -1,46 +1,13 @@
 @use "mixin";
 
-%fn {
-  &__ellipsis {
-    @include mixin.text-clamp(1);
-    display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
-  }
-
-  &__flex-column {
-    min-height: 100%;
-    display: flex;
-    flex-direction: column;
-  }
-
-  &__a {
-    color: var(--b3-theme-on-surface);
-    cursor: pointer;
-
-    &:hover {
-      color: var(--b3-theme-on-background);
-    }
-  }
-
-  &__code {
-    padding: .2em .4em;
-    margin: 0;
-    font-size: 85%;
-    border-radius: var(--b3-border-radius);
-    font-family: var(--b3-font-family-code);
-    word-break: break-word;
-    background-size: 20px 20px;
-    white-space: pre-wrap;
-    background-color: var(--b3-protyle-code-background);
-  }
-}
-
 .fn {
   &__hidescrollbar::-webkit-scrollbar {
     display: none;
   }
 
   &__ellipsis {
-    @extend %fn__ellipsis;
+    @include mixin.text-clamp(1);
+    display: block; // 集市挂件名称过长遮挡星标 https://github.com/siyuan-note/siyuan/issues/4782
   }
 
   &__space {
@@ -87,7 +54,9 @@
     }
 
     &-column {
-      @extend %fn__flex-column;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
     &-shrink {
@@ -116,7 +85,12 @@
   }
 
   &__a {
-    @extend %fn__a;
+    color: var(--b3-theme-on-surface);
+    cursor: pointer;
+
+    &:hover {
+      color: var(--b3-theme-on-background);
+    }
   }
 
   &__block {
@@ -153,7 +127,15 @@
   }
 
   &__code {
-    @extend %fn__code;
+    padding: .2em .4em;
+    margin: 0;
+    font-size: 85%;
+    border-radius: var(--b3-border-radius);
+    font-family: var(--b3-font-family-code);
+    word-break: break-word;
+    background-size: 20px 20px;
+    white-space: pre-wrap;
+    background-color: var(--b3-protyle-code-background);
   }
 
   &__kbd {

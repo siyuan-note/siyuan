@@ -1,32 +1,5 @@
 @use "../util/mixin";
 
-%b3-list-item__icon {
-  svg, img {
-    height: 16px;
-    width: 16px;
-    color: var(--b3-theme-on-surface);
-  }
-
-  text-align: center;
-  font-size: 14px;
-  font-family: var(--b3-font-family-emoji);
-  margin-right: 4px;
-  line-height: 22px;
-  transition: var(--b3-transition);
-  height: 22px;
-  padding: 0 4px;
-  flex-shrink: 0;
-  border-radius: var(--b3-border-radius);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  &:hover {
-    color: var(--b3-theme-on-background);
-    background-color: var(--b3-list-icon-hover);
-  }
-}
-
 .b3-list {
   mark {
     background-color: var(--b3-protyle-inline-mark-background);
@@ -185,7 +158,30 @@
     }
 
     &__icon {
-      @extend %b3-list-item__icon;
+      svg, img {
+        height: 16px;
+        width: 16px;
+        color: var(--b3-theme-on-surface);
+      }
+
+      text-align: center;
+      font-size: 14px;
+      font-family: var(--b3-font-family-emoji);
+      margin-right: 4px;
+      line-height: 22px;
+      transition: var(--b3-transition);
+      height: 22px;
+      padding: 0 4px;
+      flex-shrink: 0;
+      border-radius: var(--b3-border-radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
     }
 
     &__hinttext {

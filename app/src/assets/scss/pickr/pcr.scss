@@ -6,7 +6,7 @@
   border-radius: var(--b3-border-radius);
 
   .pcr-interaction .pcr-result {
-    @extend %b3-text-field;
+    @extend .b3-text-field;
     background: transparent;
     font-size: 12px;
   }

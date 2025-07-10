@@ -1,5 +1,5 @@
-@use "util/mixin";
-@use "util/function";
+@use "../util/mixin";
+@use "../util/function";
 
 .block__popover {
   width: 80vw;
@@ -462,7 +462,7 @@
   width: 100%;
   box-sizing: border-box;
   background-color: var(--b3-theme-background);
-  @extend %fn__ellipsis;
+  @extend .fn__ellipsis;
   z-index: 2;
 }
 

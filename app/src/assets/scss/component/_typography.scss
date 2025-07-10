@@ -263,7 +263,7 @@
 
   code:not(.hljs),
   span[data-type~="code"] {
-    @extend %fn__code;
+    @extend .fn__code;
     tab-size: 4;
   }
 

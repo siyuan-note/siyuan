@@ -1,17 +1,3 @@
-%b3-form__icon-clear {
-  position: absolute;
-  height: 18px;
-  width: 16px;
-  opacity: .68;
-  transition: var(--b3-transition);
-  right: 0;
-  cursor: pointer;
-
-  &:hover {
-    opacity: 1;
-  }
-}
-
 .b3-form {
   &__space {
     margin: 16px 24px;
@@ -61,7 +47,17 @@
   }
 
   &__icon-clear {
-    @extend %b3-form__icon-clear;
+    position: absolute;
+    height: 18px;
+    width: 16px;
+    opacity: .68;
+    transition: var(--b3-transition);
+    right: 0;
+    cursor: pointer;
+
+    &:hover {
+      opacity: 1;
+    }
   }
 
   // repo password & av description

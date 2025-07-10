@@ -13,6 +13,8 @@ export const getLayoutHTML = (data: IAV) => {
             coverFromTitle = window.siyuan.languages.calcOperatorNone;
         } else if (view.coverFrom === 1) {
             coverFromTitle = window.siyuan.languages.contentImage;
+        } else if (view.coverFrom === 3) {
+            coverFromTitle = window.siyuan.languages.contentBlock;
         } else {
             view.fields.find(item => {
                 if (item.type === "mAsset" && item.id === view.coverFromAssetKeyID) {

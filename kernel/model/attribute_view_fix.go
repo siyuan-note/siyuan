@@ -48,7 +48,7 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	// 视图类型不匹配时需要订正
 	for i, v := range attrView.Views {
 		if av.LayoutTypeGallery == v.LayoutType && nil == v.Gallery {
-			// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
+			// 切换为卡片视图时可能没有初始化卡片实例 https://github.com/siyuan-note/siyuan/issues/15122
 			if nil != v.Table {
 				v.LayoutType = av.LayoutTypeTable
 				changed = true

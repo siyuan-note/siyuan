@@ -405,7 +405,7 @@ export const setPageSize = (options: {
 };
 
 export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
-    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)");
+    const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
     if (rowElements.length === 0) {
         return;
     }

@@ -32,7 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderView(view *av.View, attrView *av.AttributeView, query string) (ret av.Viewable) {
+func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		ret = RenderAttributeViewTable(attrView, view, query)
@@ -619,16 +619,16 @@ func filterByQuery(query string, collection av.Collection) {
 }
 
 // manualSort 处理用户手动排序。
-func manualSort(collectionLayout av.CollectionLayout, collection av.Collection) {
-	sortRowIDs := map[string]int{}
-	for i, itemID := range collectionLayout.GetItemIDs() {
-		sortRowIDs[itemID] = i
+func manualSort(view *av.View, collection av.Collection) {
+	sortItemIDs := map[string]int{}
+	for i, itemID := range view.ItemIDs {
+		sortItemIDs[itemID] = i
 	}
 
 	items := collection.GetItems()
 	sort.Slice(items, func(i, j int) bool {
-		iv := sortRowIDs[items[i].GetID()]
-		jv := sortRowIDs[items[j].GetID()]
+		iv := sortItemIDs[items[i].GetID()]
+		jv := sortItemIDs[items[j].GetID()]
 		if iv == jv {
 			return items[i].GetID() < items[j].GetID()
 		}

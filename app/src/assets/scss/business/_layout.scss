@@ -2,12 +2,10 @@
   overflow-y: hidden; // https://github.com/siyuan-note/siyuan/issues/6706
 
   &__wnd--active .layout-tab-bar .item--focus {
+    color: var(--b3-theme-on-background);
+
     &::after {
       background-color: var(--b3-theme-primary);
-    }
-
-    & > .item__text {
-      color: var(--b3-theme-on-background);
     }
   }
 
@@ -219,6 +217,7 @@
         max-width: 186px;
         flex-shrink: 0;
         overflow: hidden;
+        color: var(--b3-theme-on-surface);
 
         &--full {
           max-width: none;
@@ -229,7 +228,7 @@
           }
         }
 
-        &:hover:not(.item--focus):not(.item--readonly) .item__text {
+        &:hover:not(.item--focus):not(.item--readonly) {
           color: var(--b3-theme-on-background);
         }
 
@@ -308,7 +307,6 @@
         &__text {
           text-align: center;
           -webkit-font-smoothing: subpixel-antialiased;
-          color: var(--b3-theme-on-surface);
           transition: var(--b3-transition);
           padding: 0 8px;
           white-space: nowrap;
@@ -373,7 +371,7 @@
 
   svg {
     height: 14px;
-    width: 14px;
+    width: 15.5px;
   }
 
   &--vertical {

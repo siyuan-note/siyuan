@@ -317,6 +317,14 @@ var (
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 
+func IsAssetsImage(p string) bool {
+	ext := strings.ToLower(filepath.Ext(p))
+	if "" == ext {
+		return false
+	}
+	return gulu.Str.Contains(ext, SiYuanAssetsImage)
+}
+
 func IsDisplayableAsset(p string) bool {
 	ext := strings.ToLower(filepath.Ext(p))
 	if "" == ext {

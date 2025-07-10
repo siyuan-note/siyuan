@@ -274,6 +274,10 @@
 .protyle-background {
   position: relative;
 
+  &:not(.protyle-background--enable) .protyle-background__img .protyle-icons {
+    display: none;
+  }
+
   &--enable {
     .protyle-background__img:hover .protyle-icons,
     .protyle-background__icon:hover {

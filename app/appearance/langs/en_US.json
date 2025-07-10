@@ -438,7 +438,7 @@
   "apiVersion": "API version",
   "apiVersionTip": "Only required when using the Azure OpenAI service",
   "apiProvider": "API Provider",
-  "apiProviderTip": "Use the selected API provider to implement AI-related functions",
+  "apiProviderTip": "Selecting this will use the provider's API service to implement AI-related features (ChatGPT, Claude, DeepSeek, and other models support the OpenAI interface)",
   "skip": "Skip",
   "nextRound": "Next round",
   "save": "Save",

@@ -438,7 +438,7 @@
   "apiVersion": "‫إصدار API‬",
   "apiVersionTip": "‫مطلوب فقط عند استخدام خدمة Azure OpenAI‬",
   "apiProvider": "‫موفر API‬",
-  "apiProviderTip": "‫استخدام موفر API المحدد لتنفيذ الوظائف المتصلة بـAI‬",
+  "apiProviderTip": "سيتم استخدام خدمة API الخاصة بالمزود لتنفيذ ميزات الذكاء الاصطناعي (ChatGPT، Claude، DeepSeek والنماذج الأخرى تدعم واجهة OpenAI)",
   "skip": "تخطى",
   "nextRound": "الجولة التالية",
   "save": "حفظ",

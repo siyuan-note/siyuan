@@ -1007,8 +1007,9 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         }
     }
 
-    if ((["text", "template", "url", "email", "phone", "number", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
+    if ((["text", "template", "url", "email", "phone", "date", "created", "updated"].includes(cellValue.type) && cellValue[cellValue.type as "url"]?.content) ||
         cellValue.type === "lineNumber" ||
+        (cellValue.type === "number" && cellValue.number?.isNotEmpty) ||
         (cellValue.type === "block" && cellValue.block?.content)) {
         text += `<span ${cellValue.type !== "number" ? "" : 'style="right:auto;left:5px"'} data-type="copy" class="block__icon"><svg><use xlink:href="#iconCopy"></use></svg></span>`;
     }

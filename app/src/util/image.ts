@@ -3,6 +3,7 @@ export const getCompressURL = (url: string) => {
         (url.endsWith(".png") || url.endsWith(".jpg") || url.endsWith(".jpeg"))) {
         return url + "?style=thumb";
     }
+    return url;
 };
 
 export const removeCompressURL = (url: string) => {

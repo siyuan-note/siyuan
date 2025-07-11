@@ -64,7 +64,6 @@ export const initRightMenu = (app: App) => {
     <span class="b3-menu__label">${window.siyuan.languages.back}</span>
 </div>
 <div class="b3-menu__items">
-    ${accountHTML}
     <div id="menuRecent" class="b3-menu__item">
         <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg><span class="b3-menu__label">${window.siyuan.languages.recentDocs}</span>
     </div>

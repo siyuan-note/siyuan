@@ -148,6 +148,10 @@ export const syncGuide = (app?: App) => {
     if (window.siyuan.config.readonly) {
         return;
     }
+    if (!window.siyuan.config.sync.enabled) {
+        showMessage(`${window.siyuan.languages.cloudConfigTip}`);
+        return;
+    }
     /// #if MOBILE
     if (0 === window.siyuan.config.sync.provider) {
         if (needSubscribe()) {

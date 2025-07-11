@@ -1,4 +1,4 @@
-name: Release Docker Image
+name: Release Docker Image By ulquiola
 
 on:
   workflow_dispatch:
@@ -9,7 +9,7 @@ on:
         default: ''
   push:
     branches:
-      - master
+      - dev
 
 # ref https://docs.github.com/zh/actions/learn-github-actions/variables
 env:
@@ -17,7 +17,7 @@ env:
   repo_name: "siyuan"
   repo_owner: "siyuan-note"
   package_json: "app/package.json"
-  docker_hub_owner: "b3log"
+  docker_hub_owner: "ulquiola"
   docker_hub_repo: "siyuan"
 
 jobs:
@@ -72,8 +72,8 @@ jobs:
       - name: Build the Docker image use Workflow Dispatch inputs' version
         if: ${{ github.event_name == 'workflow_dispatch' && !github.event.inputs.image_tag == '' }}
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ github.event.inputs.image_tag }} .
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ github.event.inputs.image_tag }} .
       - name: Build the Docker image use package_json version
         if: ${{ github.event_name == 'push' || github.event.inputs.image_tag == '' }}
         run: |
-          docker buildx build --push --platform linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v8 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .
+          docker buildx build --push --platform linux/amd64,linux/arm64 -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:latest -t ${{ env.docker_hub_owner }}/${{ env.docker_hub_repo }}:v${{ steps.version.outputs.value }} .

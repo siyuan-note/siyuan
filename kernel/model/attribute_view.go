@@ -70,7 +70,7 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 	case av.LayoutTypeTable:
 		for _, column := range view.Table.Columns {
 			if column.ID == operation.KeyID {
-				width = operation.Data.(string)
+				width = column.Width
 				break
 			}
 		}

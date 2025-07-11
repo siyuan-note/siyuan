@@ -2802,7 +2802,6 @@ func addAttributeViewBlock(now int64, avID, blockID, previousBlockID, addingBloc
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	view, _ := getAttrViewViewByBlockID(attrView, blockID)
-
 	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
 		viewable := sql.RenderView(attrView, view, "")
 		av.Filter(viewable, attrView)

@@ -16,6 +16,7 @@ import {isInAndroid, isInHarmony, isInIOS} from "../../util/compatibility";
 import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
 import {getViewIcon} from "./view";
+import {openMenuPanel} from "./openMenuPanel";
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true) => {
     let avElements: Element[] = [];
@@ -582,6 +583,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                     }
                                 });
                             }
+                        } else if (operation.action === "addAttrViewView") {
+                            openMenuPanel({protyle, blockElement: item, type: "config"});
                         }
                     }
                     item.removeAttribute("data-loading");

@@ -1681,7 +1681,7 @@ export class WYSIWYG {
         protyle.observer = new ResizeObserver(() => {
             const contentRect = protyle.contentElement.getBoundingClientRect();
             protyle.wysiwyg.element.querySelectorAll(".av").forEach((item: HTMLElement) => {
-                if (item.querySelector(".av__title")) {
+                if (item.querySelector(".av__scroll")) {
                     stickyRow(item, contentRect, "all");
                 }
             });

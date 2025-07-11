@@ -259,6 +259,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		if blockID == bID { // 当前操作的镜像库
 			attrs[av.NodeAttrView] = view.ID
 			node.AttributeViewType = string(view.LayoutType)
+			attrView.ViewID = view.ID
 			changed = true
 		} else {
 			if view.ID == attrs[av.NodeAttrView] {

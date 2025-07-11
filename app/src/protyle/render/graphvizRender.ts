@@ -24,6 +24,10 @@ export const graphvizRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
+            if (!e.getAttribute("data-content")) {
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;
+                return;
+            }
             try {
                 Viz.instance().then((viz) => {
                     const svgElement = viz.renderSVGElement(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")));

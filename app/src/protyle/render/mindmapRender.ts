@@ -28,9 +28,15 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
+            if (!e.getAttribute("data-content")) {
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;
+                return;
+            }
             try {
-                renderElement.style.height = e.style.height;
-                window.echarts.init(renderElement, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
+                if (!renderElement.lastElementChild || renderElement.childElementCount === 1) {
+                    renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div style="height:420px" contenteditable="false"></div>`;
+                }
+                window.echarts.init(renderElement.lastElementChild, window.siyuan.config.appearance.mode === 1 ? "dark" : undefined, {
                     width,
                 }).setOption({
                     series: [
@@ -73,15 +79,11 @@ export const mindmapRender = (element: Element, cdn = Constants.PROTYLE_CDN) => 
                     },
                     backgroundColor: "transparent",
                 });
-                e.setAttribute("data-render", "true");
-                if (!renderElement.textContent.endsWith(Constants.ZWSP)) {
-                    renderElement.firstElementChild.insertAdjacentText("beforeend", Constants.ZWSP);
-                }
-                renderElement.classList.remove("ft__error");
             } catch (error) {
-                renderElement.classList.add("ft__error");
-                renderElement.innerHTML = `Mindmap render error: <br>${error}`;
+                window.echarts.dispose(renderElement.lastElementChild);
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div class="ft__error" contenteditable="false">Mindmap render error: <br>${error}</div>`;
             }
+            e.setAttribute("data-render", "true");
         });
     });
 };

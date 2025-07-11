@@ -141,7 +141,7 @@ interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
 
 interface Window {
     echarts: {
-        init(element: HTMLElement, theme?: string, options?: {
+        init(element: Element, theme?: string, options?: {
             width: number
         }): {
             setOption(option: any): void;

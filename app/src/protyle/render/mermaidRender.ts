@@ -70,9 +70,13 @@ const initMermaid = (mermaidElements: Element[]) => {
             item.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
         }
         const renderElement = item.firstElementChild.nextElementSibling as HTMLElement;
+        if (!item.getAttribute("data-content")) {
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;
+            return;
+        }
         const id = "mermaid" + Lute.NewNodeID();
-        renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
         try {
+            renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span><div contenteditable="false"><span id="${id}"></span></div>`;
             const mermaidData = await window.mermaid.render(id, Lute.UnEscapeHTMLStr(item.getAttribute("data-content")));
             renderElement.lastElementChild.innerHTML = mermaidData.svg;
         } catch (e) {
@@ -80,7 +84,6 @@ const initMermaid = (mermaidElements: Element[]) => {
             renderElement.lastElementChild.innerHTML = `${errorElement.outerHTML}<div class="fn__hr"></div><div class="ft__error">${e.message.replace(/\n/, "<br>")}</div>`;
             errorElement.parentElement.remove();
         }
-
         item.setAttribute("data-render", "true");
     });
 };

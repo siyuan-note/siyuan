@@ -24,14 +24,22 @@ export const plantumlRender = (element: Element, cdn = Constants.PROTYLE_CDN) =>
                 e.insertAdjacentHTML("afterbegin", genIconHTML(wysiswgElement));
             }
             const renderElement = e.firstElementChild.nextElementSibling as HTMLElement;
+            if (!e.getAttribute("data-content")) {
+                renderElement.innerHTML = `<span style="position: absolute;left:0;top:0;width: 1px;">${Constants.ZWSP}</span>`;
+                return;
+            }
             try {
-                renderElement.innerHTML = `<object type="image/svg+xml" data="${window.siyuan.config.editor.plantUMLServePath}${window.plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}"/>`;
+                const url = `${window.siyuan.config.editor.plantUMLServePath}${window.plantumlEncoder.encode(Lute.UnEscapeHTMLStr(e.getAttribute("data-content")))}`;
+                renderElement.innerHTML = `<object type="image/svg+xml" data="${url}"/>`;
                 renderElement.classList.remove("ft__error");
-                e.setAttribute("data-render", "true");
+                renderElement.firstElementChild.addEventListener("error", () => {
+                    renderElement.innerHTML = `<img src=${url}">`;
+                });
             } catch (error) {
                 renderElement.classList.add("ft__error");
                 renderElement.innerHTML = `plantuml render error: <br>${error}`;
             }
+            e.setAttribute("data-render", "true");
         });
     });
 };

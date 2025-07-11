@@ -960,7 +960,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
         label: window.siyuan.languages.syncColWidth,
         click() {
             transaction(protyle, [{
-                action: "syncColWidth",
+                action: "syncAttrViewTableColWidth",
                 keyID: colId,
                 avID,
                 id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),

@@ -64,6 +64,7 @@ type TOperation =
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
     | "setAttrViewGroup"
+    | "syncColWidth"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |

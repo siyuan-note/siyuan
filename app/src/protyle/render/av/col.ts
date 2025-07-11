@@ -955,6 +955,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
             updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
         }
     });
+    menu.addItem({
+        icon: "iconRefresh",
+        label: window.siyuan.languages.syncColWidth,
+        click() {
+            transaction(protyle, [{
+                action: "syncColWidth",
+                keyID: colId,
+                avID,
+                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            }]);
+        }
+    });
     if (type !== "block") {
         if (type !== "relation") {
             menu.addItem({

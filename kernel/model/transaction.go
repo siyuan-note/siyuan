@@ -303,6 +303,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doHideAttrViewGroup(op)
 		case "setGroupHideEmpty":
 			ret = tx.doSetGroupHideEmpty(op)
+		case "syncAttrViewTableColWidth":
+			ret = tx.doSyncAttrViewTableColWidth(op)
 		}
 
 		if nil != ret {
@@ -1502,7 +1504,7 @@ type Operation struct {
 	Name                string                   `json:"name"`              // 属性视图列名
 	Typ                 string                   `json:"type"`              // 属性视图列类型
 	Format              string                   `json:"format"`            // 属性视图列格式化
-	KeyID               string                   `json:"keyID"`             // 属性视列 ID
+	KeyID               string                   `json:"keyID"`             // 属性视图字段 ID
 	RowID               string                   `json:"rowID"`             // 属性视图行 ID
 	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
 	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID

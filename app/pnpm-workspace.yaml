@@ -1,2 +1,4 @@
+packages:
+  - 'app'
 onlyBuiltDependencies:
   - electron

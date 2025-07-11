@@ -797,7 +797,7 @@
       }
     }
 
-    .av__cell[data-block-id] > .block__icon[data-type="copy"] {
+    .av__row .av__cell[data-block-id] > .block__icon[data-type="copy"] {
       display: flex;
     }
   }

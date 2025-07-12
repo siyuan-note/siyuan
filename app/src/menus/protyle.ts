@@ -620,7 +620,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         });
         window.siyuan.menus.menu.append(new MenuItem({
-            id: "iconRefresh",
+            id: "turnInto",
             label: window.siyuan.languages.turnInto,
             icon: "iconRefresh",
             submenu

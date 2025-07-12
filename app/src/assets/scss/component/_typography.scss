@@ -529,6 +529,34 @@
   .protyle-icons {
     display: none;
   }
+
+  &[data-copy-to="mp-wechat"] {
+    input[type="checkbox"] {
+      display: none;
+    }
+
+    li {
+      &.protyle-task:not(.protyle-task--done) {
+        list-style-type: "▢";
+      }
+
+      &.protyle-task--done {
+        list-style-type: "☑︎";
+      }
+    }
+
+    pre {
+      margin: 16px 0;
+    }
+  }
+}
+
+// 暗黑模式
+section.b3-typography {
+  &[data-copy-to="mp-wechat"] {
+    background-color: var(--b3-theme-background);
+    padding: 10px;
+  }
 }
 
 .protyle {

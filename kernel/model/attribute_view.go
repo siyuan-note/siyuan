@@ -78,10 +78,6 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 		return
 	}
 
-	if "" == width {
-		return
-	}
-
 	for _, v := range attrView.Views {
 		if av.LayoutTypeTable == v.LayoutType {
 			for _, column := range v.Table.Columns {

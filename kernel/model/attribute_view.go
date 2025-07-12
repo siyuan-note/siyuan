@@ -1572,12 +1572,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 					groupName = groupNameToday
 				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
 					groupName = groupNameTomorrow
-				} else if contentTime.Before(now.AddDate(0, 0, 7)) {
-					groupName = groupNameNext7Days
-				} else if contentTime.Before(now.AddDate(0, 0, 30)) {
-					groupName = groupNameNext30Days
-				} else {
+				} else if contentTime.After(now.AddDate(0, 0, 30)) {
 					groupName = contentTime.Format("2006-01")
+				} else if contentTime.After(now.AddDate(0, 0, 7)) {
+					groupName = groupNameNext30Days
+				} else if contentTime.After(now.AddDate(0, 0, 1)) {
+					groupName = groupNameNext7Days
+				} else {
+					groupName = notInRange
 				}
 			}
 		}

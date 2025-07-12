@@ -135,7 +135,7 @@ const setHTML = (options: {
     }
 
     if (DOMPurify) {
-        // XSS in inline-memo https://github.com/siyuan-note/siyuan/issues/15280
+        // XSS in inline memo elements https://github.com/siyuan-note/siyuan/issues/15280
         const parser = new DOMParser();
         const doc = parser.parseFromString(options.content, "text/html");
         doc.querySelectorAll("[data-inline-memo-content]").forEach(item => {

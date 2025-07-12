@@ -815,7 +815,7 @@
   "syncMode3": "Manuelle Complète (pas de synchronisation au démarrage et à l'arrêt, contrôle manuel complet de la synchronisation et du sens de synchronisation)",
   "cloudSync": "Cloud Sync",
   "cloudSyncDir": "Répertoire de sync cloud",
-  "cloudSyncDirTip": "Les répertoires de synchronisation cloud correspondent un à un aux espaces de travail, ils ne doivent pas être mélangés. Après avoir modifié la clé de référentiel de données, il est nécessaire de remplacer le nouveau répertoire de synchronisation cloud",
+  "cloudSyncDirTip": "Chaque répertoire de synchronisation cloud ne stocke que les données d'un espace de travail, et un espace de travail local ne peut utiliser qu'un seul répertoire de synchronisation cloud. Veuillez ne pas basculer d'avant en arrière. Après avoir modifié la clé de référentiel de données, vous devez basculer vers un nouveau répertoire de synchronisation cloud",
   "emptyCloudSyncList": "La liste de sync du cloud est videy",
   "retry": "Réessayer",
   "insertVideoURL": "Insérer lien vidéo",

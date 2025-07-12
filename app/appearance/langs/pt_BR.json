@@ -815,7 +815,7 @@
   "syncMode3": "Sincronização totalmente manual (sem sincronização na inicialização e desligamento, controle totalmente manual do tempo de sincronização e direção de sincronização)",
   "cloudSync": "Sincronização em nuvem",
   "cloudSyncDir": "Diretório de sincronização em nuvem",
-  "cloudSyncDirTip": "O diretório de sincronização em nuvem corresponde um a um com o espaço de trabalho e não pode ser misturado. Após alterar a chave do repositório de dados, um novo diretório de sincronização em nuvem precisa ser substituído",
+  "cloudSyncDirTip": "Cada diretório de sincronização em nuvem armazena apenas dados para um espaço de trabalho, e um espaço de trabalho local pode usar apenas um diretório de sincronização em nuvem. Por favor, não alterne de um lado para o outro. Após alterar a chave do repositório de dados, você precisa alternar para um novo diretório de sincronização em nuvem",
   "emptyCloudSyncList": "A lista de sincronização em nuvem está vazia",
   "retry": "Tentar novamente",
   "insertVideoURL": "Inserir link de vídeo",

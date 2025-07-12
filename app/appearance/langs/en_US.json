@@ -815,7 +815,7 @@
   "syncMode3": "Full manual sync (no sync on startup and shutdown, full manual control of sync timing and sync direction)",
   "cloudSync": "Cloud sync",
   "cloudSyncDir": "Cloud sync directory",
-  "cloudSyncDirTip": "The cloud sync directory corresponds one-to-one with the workspace and cannot be mixed. After changing the data repo key, a new cloud sync directory needs to be replaced",
+  "cloudSyncDirTip": "Each cloud sync directory only stores data for one workspace, and one local workspace can only use one cloud sync directory. Please do not switch back and forth. After changing the data repo key, you need to switch to a new cloud sync directory",
   "emptyCloudSyncList": "The cloud sync list is empty",
   "retry": "Retry",
   "insertVideoURL": "Insert video link",

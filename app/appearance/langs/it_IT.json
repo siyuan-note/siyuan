@@ -815,7 +815,7 @@
   "syncMode3": "Sincronizzazione completamente manuale (nessuna sincronizzazione all'avvio e alla chiusura, controllo manuale completo del momento e della direzione della sincronizzazione)",
   "cloudSync": "Sincronizzazione cloud",
   "cloudSyncDir": "Directory di sincronizzazione cloud",
-  "cloudSyncDirTip": "La directory di sincronizzazione cloud corrisponde uno a uno con l'area di lavoro e non può essere mescolata. Dopo aver cambiato la chiave del repository dati, è necessario sostituire una nuova directory di sincronizzazione cloud",
+  "cloudSyncDirTip": "Ogni directory di sincronizzazione cloud memorizza solo i dati per un'area di lavoro, e un'area di lavoro locale può utilizzare solo una directory di sincronizzazione cloud. Si prega di non passare avanti e indietro. Dopo aver cambiato la chiave del repository dati, è necessario passare a una nuova directory di sincronizzazione cloud",
   "emptyCloudSyncList": "L'elenco di sincronizzazione cloud è vuoto",
   "retry": "Riprova",
   "insertVideoURL": "Inserisci collegamento video",

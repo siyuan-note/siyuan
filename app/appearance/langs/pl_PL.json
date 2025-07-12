@@ -815,7 +815,7 @@
   "syncMode3": "W pełni ręczna synchronizacja (brak synchronizacji przy uruchamianiu i zamykaniu, pełna ręczna kontrola nad czasem synchronizacji i kierunkiem synchronizacji)",
   "cloudSync": "Synchronizacja w chmurze",
   "cloudSyncDir": "Katalog synchronizacji w chmurze",
-  "cloudSyncDirTip": "Katalog synchronizacji w chmurze odpowiada 1:1 z obszarem roboczym i nie może być mieszany. Po zmianie klucza repozytorium danych konieczne jest zastąpienie katalogu synchronizacji w chmurze",
+  "cloudSyncDirTip": "Każdy katalog synchronizacji w chmurze przechowuje tylko dane dla jednego obszaru roboczego, a jeden lokalny obszar roboczy może używać tylko jednego katalogu synchronizacji w chmurze. Proszę nie przełączać w tę i z powrotem. Po zmianie klucza repozytorium danych należy przełączyć na nowy katalog synchronizacji w chmurze",
   "emptyCloudSyncList": "Lista synchronizacji w chmurze jest pusta",
   "retry": "Spróbuj ponownie",
   "insertVideoURL": "Wstaw link do wideo",

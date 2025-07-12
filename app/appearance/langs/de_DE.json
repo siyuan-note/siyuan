@@ -815,7 +815,7 @@
   "syncMode3": "Vollständige manuelle Synchronisation (keine Synchronisation beim Start und beim Schließen, vollständige manuelle Kontrolle über den Synchronisationszeitpunkt und die Synchronisationsrichtung)",
   "cloudSync": "Cloud-Synchronisation",
   "cloudSyncDir": "Cloud-Synchronisationsverzeichnis",
-  "cloudSyncDirTip": "Das cloud-Synchronisationsverzeichnis entspricht eins zu eins dem Arbeitsbereich und kann nicht gemischt werden. Nach dem Ändern des Datenrepo-Schlüssels muss ein neues Cloud-Synchronisationsverzeichnis ersetzt werden.",
+  "cloudSyncDirTip": "Jedes Cloud-Synchronisationsverzeichnis speichert nur Daten für einen Arbeitsbereich, und ein lokaler Arbeitsbereich kann nur ein Cloud-Synchronisationsverzeichnis verwenden. Bitte wechseln Sie nicht hin und her. Nach dem Ändern des Datenrepo-Schlüssels müssen Sie zu einem neuen Cloud-Synchronisationsverzeichnis wechseln.",
   "emptyCloudSyncList": "Die Cloud-Synchronisationsliste ist leer.",
   "retry": "Erneut versuchen",
   "insertVideoURL": "Videolink einfügen",

@@ -815,7 +815,7 @@
   "syncMode3": "Manual Completa (sin sincronización al iniciar y apagar, control manual completo de sincronización y dirección de sincronización)",
   "cloudSync": "Sincronización en la nube",
   "cloudSyncDir": "Directorio de sincronización en la nube",
-  "cloudSyncDirTip": "El Directorio de sincronización en la nube corresponde uno a uno con el Espacio de trabajo, no se pueden mezclar. Después de cambiar la Clave del repositorio de datos, es necesario cambiar el nuevo Directorio de sincronización en la nube",
+  "cloudSyncDirTip": "Cada directorio de sincronización en la nube solo almacena datos para un espacio de trabajo, y un espacio de trabajo local solo puede usar un directorio de sincronización en la nube. Por favor, no cambie de un lado a otro. Después de cambiar la clave del repositorio de datos, debe cambiar a un nuevo directorio de sincronización en la nube",
   "emptyCloudSyncList": "La lista de sincronización con la nube está vacía",
   "retry": "Reintentar",
   "insertVideoURL": "Insertar enlace de vídeo",

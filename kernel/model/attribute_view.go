@@ -2348,7 +2348,7 @@ func addAttrViewView(avID, viewID, blockID string, layout av.LayoutType) (err er
 		switch firstView.LayoutType {
 		case av.LayoutTypeTable:
 			for _, col := range firstView.Table.Columns {
-				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: col.ID}})
+				view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: col.ID}, Width: col.Width})
 			}
 		case av.LayoutTypeGallery:
 			for _, field := range firstView.Gallery.CardFields {

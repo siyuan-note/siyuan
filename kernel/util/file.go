@@ -78,7 +78,13 @@ func GetUniqueFilename(filePath string) string {
 func GetMimeTypeByExt(filePath string) (ret string) {
 	ret = mime.TypeByExtension(filepath.Ext(filePath))
 	if "" == ret {
-		m, err := mimetype.DetectFile(filePath)
+		f, err := filelock.OpenFile(filePath, os.O_RDONLY, 0644)
+		if err != nil {
+			logging.LogErrorf("open file [%s] failed: %s", filePath, err)
+			return
+		}
+		defer filelock.CloseFile(f)
+		m, err := mimetype.DetectReader(f)
 		if err != nil {
 			logging.LogErrorf("detect mime type of [%s] failed: %s", filePath, err)
 			return

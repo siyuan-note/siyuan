@@ -2686,11 +2686,23 @@ export class WYSIWYG {
                             keepCursor: true,
                         });
                     } else if (!protyle.disabled) {
+                        // 🔑 计算点击位置信息
+                        const targetRect = embedItemElement.getBoundingClientRect();
+                        const relativeX = event.clientX - targetRect.left;
+                        const relativeY = event.clientY - targetRect.top;
+                        
                         window.siyuan.blockPanels.push(new BlockPanel({
                             app: protyle.app,
                             targetElement: embedItemElement,
                             isBacklink: false,
-                            refDefs: [{refID: embedId}]
+                            refDefs: [{refID: embedId}],
+                            clickInfo: {
+                                clientX: event.clientX,
+                                clientY: event.clientY,
+                                targetRect: targetRect,
+                                relativeX: relativeX,
+                                relativeY: relativeY
+                            }
                         }));
                     }
                     /// #endif

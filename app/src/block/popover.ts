@@ -279,7 +279,15 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                                 return true;
                             }
                         });
-                        if (hasToolbar) {
+                        
+                        // 🔑 检查嵌入块无感编辑模式是否有焦点
+                        const hasEmbedFocus = item.element.classList.contains("block__popover--embed") && 
+                            item.editors.some(editItem => {
+                                const wysiwygElement = editItem.protyle.wysiwyg.element;
+                                return wysiwygElement && wysiwygElement.contains(document.activeElement);
+                            });
+                        
+                        if (hasToolbar || hasEmbedFocus) {
                             break;
                         }
                         item.destroy();
@@ -304,7 +312,15 @@ const hidePopover = (event: MouseEvent & { path: HTMLElement[] }) => {
                                 return true;
                             }
                         });
-                        if (hasToolbar) {
+                        
+                        // 🔑 检查嵌入块无感编辑模式是否有焦点
+                        const hasEmbedFocus = item.element.classList.contains("block__popover--embed") && 
+                            item.editors.some(editItem => {
+                                const wysiwygElement = editItem.protyle.wysiwyg.element;
+                                return wysiwygElement && wysiwygElement.contains(document.activeElement);
+                            });
+                        
+                        if (hasToolbar || hasEmbedFocus) {
                            break;
                         }
                         item.destroy();

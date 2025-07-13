@@ -1676,6 +1676,7 @@ func fullTextSearchByLikeWithRoot(query, boxFilter, pathFilter, typeFilter, igno
 }
 
 func highlightByFTS(query, typeFilter, id string) (ret []string) {
+	query = strings.ReplaceAll(query, " ", " OR ")
 	const limit = 256
 	table := "blocks_fts"
 	if !Conf.Search.CaseSensitive {

@@ -584,7 +584,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 });
                             }
                         } else if (operation.action === "addAttrViewView") {
-                            openMenuPanel({protyle, blockElement: item, type: "config"});
+                            if (item.getAttribute("data-node-id") === operation.blockID) {
+                                openMenuPanel({protyle, blockElement: item, type: "config"});
+                            }
                         }
                     }
                     item.removeAttribute("data-loading");

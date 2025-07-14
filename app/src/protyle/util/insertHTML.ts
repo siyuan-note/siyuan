@@ -374,7 +374,14 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         isBlock = false;
         block2text = true;
     }
-
+    // 通过右键粘贴包含属性的块需保留整个块 https://github.com/siyuan-note/siyuan/issues/15268
+    for (let i = 0; i < tempElement.content.firstElementChild.attributes.length; i++) {
+        const attribute = tempElement.content.firstElementChild.attributes[i];
+        if (["memo", "name", "alias", "bookmark"].includes(attribute.name) || attribute.name.startsWith("custom-")) {
+            isBlock = true;
+            break;
+        }
+    }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
         if (tempElement.content.firstChild.nodeType === 3 || block2text ||

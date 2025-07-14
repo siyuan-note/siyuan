@@ -32,7 +32,8 @@ import {assetMenu} from "../../../menus/protyle";
 import {
     addView,
     bindSwitcherEvent,
-    bindViewEvent, getFieldsByData,
+    bindViewEvent,
+    getFieldsByData,
     getSwitcherHTML,
     getViewHTML,
     openViewMenu
@@ -961,7 +962,7 @@ export const openMenuPanel = (options: {
                             type: target.dataset.oldType as TAVCol,
                         }]);
 
-                        // 需要取消 lineNumber 列的排序和过滤
+                        // 需要取消行号列的筛选和排序
                         if (target.dataset.newType === "lineNumber") {
                             const sortExist = data.view.sorts.find((sort) => sort.column === colId);
                             if (sortExist) {

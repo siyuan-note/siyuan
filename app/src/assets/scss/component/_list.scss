@@ -9,18 +9,9 @@
   &--background .b3-list-item {
     border-radius: var(--b3-border-radius);
 
-    &:hover,
+    &:hover:not(.b3-list-item--focus):not(.dragover):not(.dragover__current):not(.dragover__top):not(.dragover__bottom),
     &--focus {
       background-color: var(--b3-list-hover);
-    }
-
-    &.dragover,
-    &.dragover__top,
-    &.dragover__bottom,
-    &.dragover__current {
-      &:hover {
-        background-color: var(--b3-list-hover);
-      }
     }
 
     &.dragover,

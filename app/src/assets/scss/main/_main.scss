@@ -284,22 +284,6 @@ html {
     overflow: hidden;
     transition: var(--b3-transition);
   }
-
-  &--dragover {
-    .b3-list--background .b3-list-item:not(.b3-list-item--focus) {
-      background-color: transparent;
-    }
-
-    .b3-list-item {
-      &--hide-action .b3-list-item__action {
-        display: none;
-      }
-
-      > * {
-        pointer-events: none;
-      }
-    }
-  }
 }
 
 .counter {

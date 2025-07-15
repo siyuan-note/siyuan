@@ -597,9 +597,6 @@ func updateBlock(c *gin.Context) {
 		for _, n := range toAppends {
 			oldTree.Root.AppendChild(n)
 		}
-
-		model.WriteTreeUpsertQueue(oldTree)
-		model.ReloadProtyle(id)
 	} else {
 		if ast.NodeListItem == node.Type && ast.NodeList == tree.Root.FirstChild.Type {
 			// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658

@@ -1994,7 +1994,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 }
 
 func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []string, singleFile bool, treeCache *map[string]*parse.Tree) (tree *parse.Tree, exportedMd string, isEmpty bool) {
-	tree, err := loadTreeWithCache(id, treeCache)
+	tree, err := LoadTreeWithCache(id, treeCache)
 	if err != nil {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
@@ -2788,7 +2788,7 @@ func resolveFootnotesDefs(refFootnotes *[]*refAsFootnotes, currentTree *parse.Tr
 	footnotesDefBlock = &ast.Node{Type: ast.NodeFootnotesDefBlock}
 	var rendered []string
 	for _, foot := range *refFootnotes {
-		t, err := loadTreeWithCache(foot.defID, treeCache)
+		t, err := LoadTreeWithCache(foot.defID, treeCache)
 		if nil != err {
 			return
 		}
@@ -2924,7 +2924,7 @@ func blockLink2Ref(currentTree *parse.Tree, id string, treeCache *map[string]*pa
 	if nil == b {
 		return
 	}
-	t, err := loadTreeWithCache(b.RootID, treeCache)
+	t, err := LoadTreeWithCache(b.RootID, treeCache)
 	if nil != err {
 		return
 	}
@@ -2974,7 +2974,7 @@ func collectFootnotesDefs(currentTree *parse.Tree, id string, refFootnotes *[]*r
 	if nil == b {
 		return
 	}
-	t, err := loadTreeWithCache(b.RootID, treeCache)
+	t, err := LoadTreeWithCache(b.RootID, treeCache)
 	if nil != err {
 		return
 	}
@@ -3265,7 +3265,7 @@ func prepareExportTrees(docPaths []string) (defBlockIDs []string, trees *map[str
 			continue
 		}
 
-		tree, err := loadTreeWithCache(rootID, treeCache)
+		tree, err := LoadTreeWithCache(rootID, treeCache)
 		if err != nil {
 			continue
 		}
@@ -3307,7 +3307,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			if (*treeCache)[defBlock.RootID] != nil {
 				defTree = (*treeCache)[defBlock.RootID]
 			} else {
-				defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
+				defTree, err = LoadTreeWithCache(defBlock.RootID, treeCache)
 				if err != nil {
 					return ast.WalkSkipChildren
 				}
@@ -3331,7 +3331,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			if (*treeCache)[defBlock.RootID] != nil {
 				defTree = (*treeCache)[defBlock.RootID]
 			} else {
-				defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
+				defTree, err = LoadTreeWithCache(defBlock.RootID, treeCache)
 				if err != nil {
 					return ast.WalkSkipChildren
 				}
@@ -3370,7 +3370,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 				if (*treeCache)[defBlock.RootID] != nil {
 					defTree = (*treeCache)[defBlock.RootID]
 				} else {
-					defTree, err = loadTreeWithCache(defBlock.RootID, treeCache)
+					defTree, err = LoadTreeWithCache(defBlock.RootID, treeCache)
 					if err != nil {
 						continue
 					}
@@ -3385,17 +3385,6 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 	})
 
 	*defBlockIDs = gulu.Str.RemoveDuplicatedElem(*defBlockIDs)
-}
-
-func loadTreeWithCache(id string, treeCache *map[string]*parse.Tree) (tree *parse.Tree, err error) {
-	if tree = (*treeCache)[id]; nil != tree {
-		return
-	}
-	tree, err = LoadTreeByBlockID(id)
-	if nil == err && nil != tree {
-		(*treeCache)[id] = tree
-	}
-	return
 }
 
 func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (ret *av.Table) {

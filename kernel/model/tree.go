@@ -207,6 +207,17 @@ func LoadTreeByBlockIDWithReindex(id string) (ret *parse.Tree, err error) {
 	return
 }
 
+func LoadTreeWithCache(id string, treeCache *map[string]*parse.Tree) (tree *parse.Tree, err error) {
+	if tree = (*treeCache)[id]; nil != tree {
+		return
+	}
+	tree, err = LoadTreeByBlockID(id)
+	if nil == err && nil != tree {
+		(*treeCache)[id] = tree
+	}
+	return
+}
+
 func LoadTreeByBlockID(id string) (ret *parse.Tree, err error) {
 	if !ast.IsNodeIDPattern(id) {
 		stack := logging.ShortStack()

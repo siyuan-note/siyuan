@@ -59,7 +59,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const firstColIndex = cellElements[0].getAttribute("data-col-id");
             values.find(rowItem => {
                 if (!currentRowElement) {
-                    currentRowElement = cellElements[0].parentElement;
+                    currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                 } else {
                     currentRowElement = currentRowElement.nextElementSibling;
                 }
@@ -71,7 +71,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     if (!cellElement) {
                         cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                     } else {
-                        cellElement = cellElement.nextElementSibling as HTMLElement;
+                        if (cellElement.nextElementSibling) {
+                            cellElement = cellElement.nextElementSibling as HTMLElement;
+                        } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
+                            cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
+                        }
                     }
                     if (!cellElement.classList.contains("av__cell")) {
                         return true;
@@ -156,7 +160,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
                 textJSON.forEach((rowValue) => {
                     if (!currentRowElement) {
-                        currentRowElement = cellElements[0].parentElement;
+                        currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                     } else {
                         currentRowElement = currentRowElement.nextElementSibling;
                     }
@@ -168,7 +172,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         if (!cellElement) {
                             cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                         } else {
-                            cellElement = cellElement.nextElementSibling as HTMLElement;
+                            if (cellElement.nextElementSibling) {
+                                cellElement = cellElement.nextElementSibling as HTMLElement;
+                            } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
+                                cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
+                            }
                         }
                         if (!cellElement.classList.contains("av__cell")) {
                             return true;

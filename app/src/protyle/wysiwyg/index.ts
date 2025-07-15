@@ -318,14 +318,22 @@ export class WYSIWYG {
                     html = "[";
                     cellElements.forEach((item: HTMLElement, index) => {
                         const cellText = getCellText(item);
-                        if (index === 0 || !cellElements[index - 1].isSameNode(item.previousElementSibling)) {
+                        if (index === 0 || (
+                            !cellElements[index - 1].isSameNode(item.previousElementSibling) &&
+                            !(item.previousElementSibling?.classList.contains("av__colsticky") && !cellElements[index - 1].nextElementSibling && cellElements[index - 1].parentElement.isSameNode(item.previousElementSibling))
+                        )) {
                             html += "[";
                         }
                         html += JSON.stringify(genCellValueByElement(getTypeByCellElement(item), item)) + ",";
-                        if (index === cellElements.length - 1 || !cellElements[index + 1].isSameNode(item.nextElementSibling)) {
+                        if (index === cellElements.length - 1 || (
+                            !cellElements[index + 1].isSameNode(item.nextElementSibling) &&
+                            !(!item.nextElementSibling && item.parentElement.nextElementSibling.isSameNode(cellElements[index + 1]))
+                        )) {
                             html = html.substring(0, html.length - 1) + "],";
+                            textPlain += cellText + "\n";
+                        } else {
+                            textPlain += cellText + "\t";
                         }
-                        textPlain += cellText + ((cellElements[index + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[index + 1])) ? "\t" : "\n\n");
                     });
                     textPlain = textPlain.substring(0, textPlain.length - 2);
                     html = html.substring(0, html.length - 1) + "]";

@@ -1650,6 +1650,12 @@ export class WYSIWYG {
                     }
                     if (selectElement.length > 0) {
                         range.collapse(true);
+                        if (range.commonAncestorContainer.nodeType === 1 &&
+                            range.startContainer.childNodes[range.startOffset] &&
+                            range.startContainer.childNodes[range.startOffset].nodeType === 1 &&
+                            (range.commonAncestorContainer as HTMLElement).classList.contains("protyle-wysiwyg")) {
+                            focusBlock(range.startContainer.childNodes[range.startOffset] as Element);
+                        }
                         return;
                     }
                     const startBlockElement = hasClosestBlock(range.startContainer);

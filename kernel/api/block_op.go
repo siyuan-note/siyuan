@@ -610,7 +610,11 @@ func updateBlock(c *gin.Context) {
 		node.Unlink()
 	}
 
-	model.WriteTreeUpsertQueue(oldTree)
+	if err = model.WriteTreeUpsertQueue(oldTree); err != nil {
+		ret.Code = -1
+		ret.Msg = "write tree upsert queue failed: " + err.Error()
+		return
+	}
 	model.ReloadProtyle(oldTree.ID)
 }
 
@@ -700,7 +704,11 @@ func batchUpdateBlock(c *gin.Context) {
 	}
 
 	for _, tree := range trees {
-		model.WriteTreeUpsertQueue(tree)
+		if err := model.WriteTreeUpsertQueue(tree); nil != err {
+			ret.Code = -1
+			ret.Msg = "write tree upsert queue failed: " + err.Error()
+			return
+		}
 		model.ReloadProtyle(tree.ID)
 	}
 }

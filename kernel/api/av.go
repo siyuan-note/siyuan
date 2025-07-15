@@ -80,7 +80,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(avID, "", "", 1, -1)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -596,6 +596,11 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	blockIDArg := arg["blockID"]
+	var blockID string
+	if nil != blockIDArg {
+		blockID = blockIDArg.(string)
+	}
 	viewIDArg := arg["viewID"]
 	var viewID string
 	if nil != viewIDArg {
@@ -619,13 +624,13 @@ func renderAttributeView(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	ret = renderAttrView(id, viewID, query, page, pageSize)
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize)
 	c.JSON(http.StatusOK, ret)
 }
 
-func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, err := model.RenderAttributeView(avID, viewID, query, page, pageSize)
+	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

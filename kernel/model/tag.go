@@ -96,7 +96,7 @@ func RemoveTag(label string) (err error) {
 			n.Unlink()
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if err = WriteTreeUpsertQueue(tree); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}
@@ -195,7 +195,7 @@ func RenameTag(oldLabel, newLabel string) (err error) {
 			updateNodes[node.ID] = node
 		}
 		util.PushEndlessProgress(fmt.Sprintf(Conf.Language(111), util.EscapeHTML(tree.Root.IALAttr("title"))))
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if err = WriteTreeUpsertQueue(tree); err != nil {
 			util.ClearPushProgress(100)
 			return
 		}

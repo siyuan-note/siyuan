@@ -932,7 +932,7 @@ func FindReplace(keyword, replacement string, replaceTypes map[string]bool, ids 
 			}
 		}
 
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if err = WriteTreeUpsertQueue(tree); err != nil {
 			return
 		}
 		updateNodes[id] = node

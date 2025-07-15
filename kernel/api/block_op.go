@@ -575,7 +575,6 @@ func updateBlock(c *gin.Context) {
 		return
 	}
 
-	var transactions []*model.Transaction
 	if "NodeDocument" == block.Type {
 		oldTree, err := filesys.LoadTree(block.Box, block.Path, luteEngine)
 		if err != nil {
@@ -584,39 +583,46 @@ func updateBlock(c *gin.Context) {
 			return
 		}
 		var toRemoves []*ast.Node
-		var ops []*model.Operation
 		for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 			toRemoves = append(toRemoves, n)
-			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID})
 		}
 		for _, n := range toRemoves {
 			n.Unlink()
 		}
-		ops = append(ops, &model.Operation{Action: "appendInsert", Data: data, ParentID: id})
-		transactions = append(transactions, &model.Transaction{
-			DoOperations: ops,
-		})
-	} else {
-		if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
-			// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
-			tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
-			tree.Root.FirstChild.Unlink()                          // 删除列表
-			tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL
-		}
-		tree.Root.FirstChild.SetIALAttr("id", id)
 
-		data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
-		transactions = []*model.Transaction{
-			{
-				DoOperations: []*model.Operation{
-					{
-						Action: "update",
-						ID:     id,
-						Data:   data,
-					},
+		var toAppends []*ast.Node
+		for n := tree.Root.FirstChild; nil != n; n = n.Next {
+			toAppends = append(toAppends, n)
+		}
+		for _, n := range toAppends {
+			oldTree.Root.AppendChild(n)
+		}
+
+		model.WriteTreeUpsertQueue(oldTree)
+		model.ReloadProtyle(id)
+		return
+	}
+
+	var transactions []*model.Transaction
+	if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
+		// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
+		tree.Root.AppendChild(tree.Root.FirstChild.FirstChild) // 将列表下的第一个列表项移到文档结尾，移动以后根下面直接挂列表项，渲染器可以正常工作
+		tree.Root.FirstChild.Unlink()                          // 删除列表
+		tree.Root.FirstChild.Unlink()                          // 继续删除列表 IAL
+	}
+	tree.Root.FirstChild.SetIALAttr("id", id)
+
+	data = luteEngine.Tree2BlockDOM(tree, luteEngine.RenderOptions)
+	transactions = []*model.Transaction{
+		{
+			DoOperations: []*model.Operation{
+				{
+					Action: "update",
+					ID:     id,
+					Data:   data,
 				},
 			},
-		}
+		},
 	}
 
 	model.PerformTransactions(&transactions)
@@ -704,15 +710,22 @@ func batchUpdateBlock(c *gin.Context) {
 				return
 			}
 			var toRemoves []*ast.Node
-
 			for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 				toRemoves = append(toRemoves, n)
-				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID})
 			}
 			for _, n := range toRemoves {
 				n.Unlink()
 			}
-			ops = append(ops, &model.Operation{Action: "appendInsert", Data: data, ParentID: id})
+			var toAppends []*ast.Node
+			for n := tree.Root.FirstChild; nil != n; n = n.Next {
+				toAppends = append(toAppends, n)
+			}
+			for _, n := range toAppends {
+				oldTree.Root.AppendChild(n)
+			}
+
+			model.WriteTreeUpsertQueue(oldTree)
+			model.ReloadProtyle(id)
 		} else {
 			if "NodeListItem" == block.Type && ast.NodeList == tree.Root.FirstChild.Type {
 				// 使用 API `api/block/updateBlock` 更新列表项时渲染错误 https://github.com/siyuan-note/siyuan/issues/4658
@@ -731,13 +744,14 @@ func batchUpdateBlock(c *gin.Context) {
 		}
 	}
 
-	tx.DoOperations = ops
-	model.PerformTransactions(&transactions)
-	model.FlushTxQueue()
+	if 0 < len(ops) {
+		tx.DoOperations = ops
+		model.PerformTransactions(&transactions)
+		model.FlushTxQueue()
 
-	ret.Data = transactions
-	broadcastTransactions(transactions)
-
+		ret.Data = transactions
+		broadcastTransactions(transactions)
+	}
 }
 
 func deleteBlock(c *gin.Context) {

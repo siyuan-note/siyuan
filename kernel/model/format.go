@@ -68,7 +68,7 @@ func AutoSpace(rootID string) (err error) {
 	newTree.Path = tree.Path
 	newTree.HPath = tree.HPath
 	newTree.Box = tree.Box
-	err = writeTreeUpsertQueue(newTree)
+	err = WriteTreeUpsertQueue(newTree)
 	if err != nil {
 		return
 	}

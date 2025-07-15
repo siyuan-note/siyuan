@@ -1553,7 +1553,7 @@ func (tx *Transaction) begin() (err error) {
 
 func (tx *Transaction) commit() (err error) {
 	for _, tree := range tx.trees {
-		if err = writeTreeUpsertQueue(tree); err != nil {
+		if err = WriteTreeUpsertQueue(tree); err != nil {
 			return
 		}
 

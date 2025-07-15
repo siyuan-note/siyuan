@@ -1284,7 +1284,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1)
 	return
 }
 
@@ -1327,11 +1327,11 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1)
 	return
 }
 
-func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -1348,7 +1348,7 @@ func RenderAttributeView(avID, viewID, query string, page, pageSize int) (viewab
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, viewID, query, page, pageSize)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize)
 	return
 }
 
@@ -1358,7 +1358,7 @@ const (
 	groupNameNext7Days, groupNameNext30Days               = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -1366,6 +1366,17 @@ func renderAttributeView(attrView *av.AttributeView, viewID, query string, page,
 		if err = av.SaveAttributeView(attrView); err != nil {
 			logging.LogErrorf("save attribute view [%s] failed: %s", attrView.ID, err)
 			return
+		}
+	}
+
+	if "" == viewID && "" != blockID {
+		if "" != blockID {
+			node, _, getErr := getNodeByBlockID(nil, blockID)
+			if nil != getErr {
+				logging.LogWarnf("get node by block ID [%s] failed: %s", blockID, getErr)
+			} else {
+				viewID = node.IALAttr(av.NodeAttrView)
+			}
 		}
 	}
 

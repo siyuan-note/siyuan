@@ -3,6 +3,7 @@
   position: relative;
   transition: transform 256ms cubic-bezier(.45, .05, .55, .95) 0ms;
   text-align: right;
+  justify-self: end;
   font-size: var(--b3-font-size);
 
   &--hide {

@@ -35,7 +35,7 @@ export const processMessage = (response: IWebSocketData) => {
     if ("reloadui" === response.cmd) {
         const reloadByMode = (mode: string) => {
             if (mode) {
-                window.location.pathname = "stage/build/" + mode;
+                window.location.pathname = `stage/build/${mode}/`;
             } else {
                 window.location.reload();
             }

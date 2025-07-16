@@ -66,7 +66,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
+import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -451,7 +451,7 @@ export class WYSIWYG {
             
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
             const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
-            const siyuanComment = `<!--siyuan-data:${btoa(encodeURIComponent(siyuanData))}-->`;
+            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
             event.clipboardData.setData("text/html", siyuanComment + textHTML);
         });
 
@@ -1956,7 +1956,7 @@ export class WYSIWYG {
             
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
             const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
-            const siyuanComment = `<!--siyuan-data:${btoa(encodeURIComponent(siyuanData))}-->`;
+            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
             event.clipboardData.setData("text/html", siyuanComment + textHTML);
         });
 

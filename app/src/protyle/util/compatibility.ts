@@ -2,6 +2,22 @@ import {focusByRange} from "./selection";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 
+export const encodeBase64 = (text: string): string => {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(text);
+    const binaryString = String.fromCharCode(...bytes);
+    const base64 = btoa(binaryString);
+    return base64;
+};
+
+export const decodeBase64 = (base64: string): string => {
+    const decoder = new TextDecoder();
+    const binaryString = atob(base64);
+    const bytes = Uint8Array.from(binaryString, char => char.charCodeAt(0));
+    const text = decoder.decode(bytes);
+    return text;
+};
+
 export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
@@ -72,7 +88,7 @@ export const readClipboard = async () => {
                 const siyuanMatch = text.textHTML.match(/<!--siyuan-data:([^>]+)-->/);
                 if (siyuanMatch) {
                     try {
-                        text.siyuanHTML = decodeURIComponent(atob(siyuanMatch[1]));
+                        text.siyuanHTML = decodeBase64(siyuanMatch[1]);
                         // 移除注释节点，保持原有的 text/html 内容
                         text.textHTML = text.textHTML.replace(/<!--siyuan-data:[^>]+-->/, "");
                     } catch (e) {

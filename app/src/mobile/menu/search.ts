@@ -266,7 +266,8 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
         const inputElement = document.getElementById("toolbarSearch") as HTMLInputElement;
-        if (inputElement.value === "" && (!config.idPath || config.idPath.length === 0)) {
+        config.query = inputElement.value;
+        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 onRecentBlocks(response.data, config, undefined, focusId);
                 loadingElement.classList.add("fn__none");
@@ -283,7 +284,7 @@ export const updateSearchResult = (config: Config.IUILayoutTabSearchConfig, elem
                 previousElement.setAttribute("disabled", "disabled");
             }
             fetchPost("/api/search/fullTextSearchBlock", {
-                query: inputElement.value,
+                query: config.query,
                 method: config.method,
                 types: config.types,
                 paths: config.idPath || [],

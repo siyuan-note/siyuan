@@ -27,6 +27,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func batchReplaceAttributeViewBlocks(c *gin.Context) {
+	// Add kernel API `/api/av/batchReplaceAttributeViewBlocks` https://github.com/siyuan-note/siyuan/issues/15313
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	isDetached := arg["isDetached"].(bool)
+	oldNewArg := arg["oldNew"].([]interface{})
+	var oldNew []map[string]string
+	for _, v := range oldNewArg {
+		for o, n := range v.(map[string]interface{}) {
+			oldNew = append(oldNew, map[string]string{o: n.(string)})
+		}
+	}
+
+	err := model.BatchReplaceAttributeViewBlocks(avID, isDetached, oldNew)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.ReloadAttrView(avID)
+}
+
 func setAttrViewGroup(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -737,6 +767,7 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 }
 
 func batchSetAttributeViewBlockAttrs(c *gin.Context) {
+	// Add kernel API `/api/av/batchSetAttributeViewBlockAttrs` https://github.com/siyuan-note/siyuan/issues/15310
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 

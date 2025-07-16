@@ -3837,32 +3837,44 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 }
 
 func (tx *Transaction) doReplaceAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := replaceAttributeViewBlock(operation, tx)
+	err := replaceAttributeViewBlock(operation.AvID, operation.PreviousID, operation.NextID, operation.IsDetached, tx)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID}
 	}
 	return
 }
 
-func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error) {
-	attrView, err := av.ParseAttributeView(operation.AvID)
+func replaceAttributeViewBlock(avID, oldBlockID, newBlockID string, isDetached bool, tx *Transaction) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
+	if err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, tx); nil != err {
+		return
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+	return
+}
+
+func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlockID string, isDetached bool, tx *Transaction) (err error) {
+	avID := attrView.ID
 	var node *ast.Node
 	var tree *parse.Tree
-	if !operation.IsDetached {
-		node, tree, _ = getNodeByBlockID(tx, operation.NextID)
+	if !isDetached {
+		node, tree, _ = getNodeByBlockID(tx, newBlockID)
 	}
 
 	now := util.CurrentTimeMillis()
 	// 检查是否已经存在绑定块，如果存在的话则重新绑定
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
-			if av.KeyTypeBlock == value.Type && nil != value.Block && value.BlockID == operation.NextID {
-				if !operation.IsDetached {
-					bindBlockAv0(tx, operation.AvID, node, tree)
+			if av.KeyTypeBlock == value.Type && nil != value.Block && value.BlockID == newBlockID {
+				if !isDetached {
+					bindBlockAv0(tx, avID, node, tree)
 					value.IsDetached = false
 					icon, content := getNodeAvBlockText(node)
 					content = util.UnescapeHTML(content)
@@ -3881,38 +3893,38 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 			if av.KeyTypeRelation == value.Type {
 				if nil != value.Relation {
 					for i, relBlockID := range value.Relation.BlockIDs {
-						if relBlockID == operation.PreviousID {
-							value.Relation.BlockIDs[i] = operation.NextID
+						if relBlockID == oldBlockID {
+							value.Relation.BlockIDs[i] = newBlockID
 							changedAvIDs = append(changedAvIDs, attrView.ID)
 						}
 					}
 				}
 			}
 
-			if value.BlockID != operation.PreviousID {
+			if value.BlockID != oldBlockID {
 				continue
 			}
 
-			if av.KeyTypeBlock == value.Type && value.BlockID != operation.NextID {
+			if av.KeyTypeBlock == value.Type && value.BlockID != newBlockID {
 				// 换绑
-				unbindBlockAv(tx, operation.AvID, value.BlockID)
+				unbindBlockAv(tx, avID, value.BlockID)
 			}
 
-			value.BlockID = operation.NextID
+			value.BlockID = newBlockID
 			if av.KeyTypeBlock == value.Type && nil != value.Block {
-				value.Block.ID = operation.NextID
-				value.IsDetached = operation.IsDetached
-				if !operation.IsDetached {
+				value.Block.ID = newBlockID
+				value.IsDetached = isDetached
+				if !isDetached {
 					icon, content := getNodeAvBlockText(node)
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
 				}
 			}
 
-			if av.KeyTypeBlock == value.Type && !operation.IsDetached {
-				bindBlockAv(tx, operation.AvID, operation.NextID)
+			if av.KeyTypeBlock == value.Type && !isDetached {
+				bindBlockAv(tx, avID, newBlockID)
 
-				avIDs := replaceRelationAvValues(operation.AvID, operation.PreviousID, operation.NextID)
+				avIDs := replaceRelationAvValues(avID, oldBlockID, newBlockID)
 				changedAvIDs = append(changedAvIDs, avIDs...)
 			}
 		}
@@ -3921,23 +3933,41 @@ func replaceAttributeViewBlock(operation *Operation, tx *Transaction) (err error
 	replacedRowID := false
 	for _, v := range attrView.Views {
 		for i, itemID := range v.ItemIDs {
-			if itemID == operation.PreviousID {
-				v.ItemIDs[i] = operation.NextID
+			if itemID == oldBlockID {
+				v.ItemIDs[i] = newBlockID
 				replacedRowID = true
 				break
 			}
 		}
 
 		if !replacedRowID {
-			v.ItemIDs = append(v.ItemIDs, operation.NextID)
+			v.ItemIDs = append(v.ItemIDs, newBlockID)
 		}
 	}
 
-	err = av.SaveAttributeView(attrView)
-
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
-	for _, avID := range changedAvIDs {
-		ReloadAttrView(avID)
+	for _, id := range changedAvIDs {
+		ReloadAttrView(id)
+	}
+	return
+}
+
+func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[string]string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return
+	}
+
+	for _, oldNewMap := range oldNew {
+		for oldBlockID, newBlockID := range oldNewMap {
+			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, nil); nil != err {
+				return
+			}
+		}
+	}
+
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
 	}
 	return
 }

@@ -776,7 +776,21 @@
   {
     "code": 0,
     "msg": "",
-    "data": null
+    "data": [
+      {
+        "doOperations": [
+          {
+            "action": "update",
+            "data": "<div data-node-id=\"20211230161520-querkps\" data-node-index=\"1\" data-type=\"NodeParagraph\" class=\"p\"><div contenteditable=\"true\" spellcheck=\"false\">foo<strong>bar</strong>baz</div><div class=\"protyle-attr\" contenteditable=\"false\"></div></div>",
+            "id": "20211230161520-querkps",
+            "parentID": "",
+            "previousID": "",
+            "retData": null
+            }
+          ],
+        "undoOperations": null
+      }
+    ]
   }
   ```
 

@@ -321,7 +321,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 	util.PushClearMsg(msgId)
 	if 0 < files {
 		msgId = util.PushMsg(Conf.Language(113), 7000)
-		if err = WriteTreeUpsertQueue(tree); err != nil {
+		if err = writeTreeUpsertQueue(tree); err != nil {
 			return
 		}
 		util.PushUpdateMsg(msgId, fmt.Sprintf(Conf.Language(120), files), 5000)

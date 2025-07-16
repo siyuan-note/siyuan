@@ -32,47 +32,27 @@ export const initMessage = () => {
             target = target.parentElement;
         }
     });
-    
-    const tempMessages = document.getElementById("tempMessages");
-    if (tempMessages) {
-        const items = tempMessages.querySelectorAll("[temp-message]");
-        items.forEach((item) => {
-            const timeoutString = item.getAttribute("data-timeout");
-            let timeout;
-            if (timeoutString) {
-                timeout = parseInt(timeoutString);
-            }
-            const type = item.getAttribute("data-type");
-            const messageId = item.getAttribute("data-message-id");
-            showMessage(item.innerHTML, timeout, type, messageId);
-        });
-        tempMessages.remove();
-    }
+
+    document.querySelectorAll("#tempMessage > div").forEach((item) => {
+        showMessage(item.innerHTML, parseInt(item.getAttribute("data-timeout")), item.getAttribute("data-type"), item.getAttribute("data-message-id"));
+        item.remove();
+    });
 };
 
 // type: info/error; timeout: 0 手动关闭；-1 永不关闭
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
     if (!messagesElement) {
-        let tempMessages = document.getElementById("tempMessages");
+        let tempMessages = document.getElementById("tempMessage");
         if (!tempMessages) {
-            document.body.insertAdjacentHTML("beforeend", "<div id='tempMessages'></div>");
-            tempMessages = document.getElementById("tempMessages");
+            document.body.insertAdjacentHTML("beforeend", `<div style="top: 22px;position: fixed;z-index: 100;right: 12px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
+id="tempMessage"></div>`);
+            tempMessages = document.getElementById("tempMessage");
         }
-        
-        tempMessages.insertAdjacentHTML("beforeend", `<div style="
-            top: 10px;
-            position: fixed;
-            z-index: 100;
-            background: white;
-            padding: 10px;
-            border-radius: 5px;
-            right: 10px;
-            border: 1px solid #e0e0e0;"
-            data-timeout='${timeout}'
-            data-type="${type}"
-            data-message-id='${messageId || ""}'
-            temp-message>${message}</div>`);
+        tempMessages.insertAdjacentHTML("beforeend", `<div style="background: white;padding: 8px 16px;border-radius: 6px;margin-bottom: 16px;"  
+data-timeout="${timeout}" 
+data-type="${type}" 
+data-message-id="${messageId || ""}">${message}</div>`);
         return;
     }
     const id = messageId || genUUID();

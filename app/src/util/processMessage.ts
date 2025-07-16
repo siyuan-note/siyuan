@@ -33,22 +33,15 @@ export const processMessage = (response: IWebSocketData) => {
         return false;
     }
     if ("reloadui" === response.cmd) {
-        const reloadByMode = (mode: string) => {
-            if (mode) {
-                window.location.pathname = `stage/build/${mode}/`;
-            } else {
-                window.location.reload();
-            }
-        };
         if (response.data?.resetScroll) {
             window.siyuan.storage[Constants.LOCAL_FILEPOSITION] = {};
             setStorageVal(Constants.LOCAL_FILEPOSITION, window.siyuan.storage[Constants.LOCAL_FILEPOSITION], () => {
                 /// #if MOBILE
-                reloadByMode(response.data?.mode);
+                window.location.reload();
                 /// #else
                 exportLayout({
                     cb() {
-                        reloadByMode(response.data?.mode);
+                        window.location.reload();
                     },
                     errorExit: false,
                 });
@@ -56,11 +49,11 @@ export const processMessage = (response: IWebSocketData) => {
             });
         } else {
             /// #if MOBILE
-            reloadByMode(response.data?.mode);
+            window.location.reload();
             /// #else
             exportLayout({
                 cb() {
-                    reloadByMode(response.data?.mode);
+                    window.location.reload();
                 },
                 errorExit: false,
             });

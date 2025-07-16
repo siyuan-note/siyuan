@@ -69,15 +69,5 @@ func reloadUI(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
-	arg, ok := util.JsonArg(c, ret)
-	if !ok {
-		return
-	}
-
-	modeArg := arg["mode"]
-	if nil != modeArg {
-		util.ReloadUIWithMode(modeArg.(string))
-	} else {
-		util.ReloadUI()
-	}
+	util.ReloadUI()
 }

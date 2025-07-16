@@ -148,10 +148,6 @@ func ReloadUI() {
 	BroadcastByType("main", "reloadui", 0, "", nil)
 }
 
-func ReloadUIWithMode(mode string) {
-	BroadcastByType("main", "reloadui", 0, "", map[string]interface{}{"mode": mode})
-}
-
 func PushTxErr(msg string, code int, data interface{}) {
 	BroadcastByType("main", "txerr", code, msg, data)
 }

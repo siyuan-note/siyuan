@@ -3955,12 +3955,58 @@ func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) 
 	return
 }
 
+func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interface{}) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return
+	}
+
+	for _, value := range values {
+		v := value.(map[string]interface{})
+		keyID := v["keyID"].(string)
+		rowID := v["rowID"].(string)
+		valueData := v["value"]
+		_, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
+		if err != nil {
+			return
+		}
+	}
+
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return
+	}
+
+	relatedAvIDs := av.GetSrcAvIDs(avID)
+	for _, relatedAvID := range relatedAvIDs {
+		ReloadAttrView(relatedAvID)
+	}
+	return
+}
+
 func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
+	val, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
+	if nil != err {
+		return
+	}
+
+	if err = av.SaveAttributeView(attrView); err != nil {
+		return
+	}
+
+	relatedAvIDs := av.GetSrcAvIDs(avID)
+	for _, relatedAvID := range relatedAvIDs {
+		ReloadAttrView(relatedAvID)
+	}
+	return
+}
+
+func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, rowID string, valueData interface{}) (val *av.Value, err error) {
+	avID := attrView.ID
 	var blockVal *av.Value
 	for _, kv := range attrView.KeyValues {
 		if av.KeyTypeBlock == kv.Key.Type {
@@ -4202,15 +4248,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 				av.SaveAttributeView(destAv)
 			}
 		}
-	}
-
-	relatedAvIDs := av.GetSrcAvIDs(avID)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
-	}
-
-	if err = av.SaveAttributeView(attrView); err != nil {
-		return
 	}
 	return
 }

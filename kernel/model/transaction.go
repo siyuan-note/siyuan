@@ -1176,7 +1176,15 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			v := attrView.GetView(attrView.ViewID)
 			if nil != v {
 				insertedNode.AttributeViewType = string(v.LayoutType)
-				insertedNode.SetIALAttr(av.NodeAttrView, v.ID)
+				attrs := parse.IAL2Map(insertedNode.KramdownIAL)
+				if "" == attrs[av.NodeAttrView] {
+					attrs[av.NodeAttrView] = v.ID
+					err = setNodeAttrs(insertedNode, tree, attrs)
+					if err != nil {
+						logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+						return
+					}
+				}
 			}
 		}
 	}

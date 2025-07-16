@@ -335,7 +335,7 @@ export class WYSIWYG {
                             textPlain += cellText + "\t";
                         }
                     });
-                    textPlain = textPlain.substring(0, textPlain.length - 2);
+                    textPlain = textPlain.substring(0, textPlain.length - 1);
                     html = html.substring(0, html.length - 1) + "]";
                 }
             } else if (selectTableElement) {

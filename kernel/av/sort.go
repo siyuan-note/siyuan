@@ -397,7 +397,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeRelation:
 		if nil != value.Relation && nil != other.Relation {
-			if 1 < len(value.Relation.Contents) && 1 < len(other.Relation.Contents) && KeyTypeNumber == value.Relation.Contents[0].Type && KeyTypeNumber == other.Relation.Contents[0].Type {
+			if 0 < len(value.Relation.Contents) && 0 < len(other.Relation.Contents) && KeyTypeNumber == value.Relation.Contents[0].Type && KeyTypeNumber == other.Relation.Contents[0].Type {
 				v1, ok1 := util.Convert2Float(value.Relation.Contents[0].String(false))
 				v2, ok2 := util.Convert2Float(other.Relation.Contents[0].String(false))
 				if ok1 && ok2 {
@@ -435,7 +435,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeRollup:
 		if nil != value.Rollup && nil != other.Rollup {
-			if 1 < len(value.Rollup.Contents) && 1 < len(other.Rollup.Contents) && KeyTypeNumber == value.Rollup.Contents[0].Type && KeyTypeNumber == other.Rollup.Contents[0].Type {
+			if 0 < len(value.Rollup.Contents) && 0 < len(other.Rollup.Contents) && KeyTypeNumber == value.Rollup.Contents[0].Type && KeyTypeNumber == other.Rollup.Contents[0].Type {
 				v1, ok1 := util.Convert2Float(value.Rollup.Contents[0].String(false))
 				v2, ok2 := util.Convert2Float(other.Rollup.Contents[0].String(false))
 				if ok1 && ok2 {

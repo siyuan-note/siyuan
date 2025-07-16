@@ -735,3 +735,24 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 
 	model.ReloadAttrView(avID)
 }
+
+func batchSetAttributeViewBlockAttrs(c *gin.Context) {
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	values := arg["values"].([]interface{})
+	err := model.BatchUpdateAttributeViewCells(nil, avID, values)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.ReloadAttrView(avID)
+}

@@ -587,7 +587,9 @@ func updateBlock(c *gin.Context) {
 		var ops []*model.Operation
 		for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 			toRemoves = append(toRemoves, n)
-			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID})
+			ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]interface{}{
+				"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
+			}})
 		}
 		for _, n := range toRemoves {
 			n.Unlink()
@@ -707,7 +709,9 @@ func batchUpdateBlock(c *gin.Context) {
 
 			for n := oldTree.Root.FirstChild; nil != n; n = n.Next {
 				toRemoves = append(toRemoves, n)
-				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID})
+				ops = append(ops, &model.Operation{Action: "delete", ID: n.ID, Data: map[string]interface{}{
+					"createEmptyParagraph": false, // 清空文档后前端不要创建空段落
+				}})
 			}
 			for _, n := range toRemoves {
 				n.Unlink()

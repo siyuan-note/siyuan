@@ -132,25 +132,23 @@ export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-    block.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
-    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
 
-    const codeElementStyle = window.getComputedStyle(codeElement);
-    const lineNumberTemp = document.createElement("div");
-    lineNumberTemp.className = "hljs";
-    // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
-    lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
+    let lineNumberHTML = "";
+    if (codeElement.style.wordBreak === "break-word") {
+        // 代码块开启了换行
+        const codeElementStyle = window.getComputedStyle(codeElement);
+        const lineNumberTemp = document.createElement("div");
+        lineNumberTemp.className = "hljs";
+        // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
+        lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
 width: ${codeElement.getBoundingClientRect().width / zoom}px;
 white-space:${codeElementStyle.whiteSpace};
 word-break:${codeElementStyle.wordBreak};
 font-variant-ligatures:${codeElementStyle.fontVariantLigatures};
 padding-right:0;max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
-    lineNumberTemp.setAttribute("contenteditable", "true");
-    block.insertAdjacentElement("afterend", lineNumberTemp);
+        lineNumberTemp.setAttribute("contenteditable", "true");
+        block.insertAdjacentElement("afterend", lineNumberTemp);
 
-    let lineNumberHTML = "";
-    if (codeElement.style.wordBreak === "break-word") {
-        // 代码块开启了换行
         lineList.map((line) => {
             // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
             lineNumberTemp.textContent = line.trim() ? line : "<br>";
@@ -160,12 +158,21 @@ padding-right:0;max-height: none;box-sizing: border-box;position: absolute;paddi
             // https://github.com/siyuan-note/siyuan/issues/9140
             lineNumberHTML += `<span style="height:${lineNumberTemp.clientHeight}px"></span>`;
         });
+        lineNumberTemp.remove();
     } else {
         lineNumberHTML = "<span></span>".repeat(lineList.length);
     }
 
-    lineNumberTemp.remove();
     block.firstElementChild.innerHTML = lineNumberHTML;
+    
+    // 用最后一个行号元素计算宽度
+    const lastLineNumberElement = block.firstElementChild.lastElementChild as HTMLElement;
+    if (lastLineNumberElement) {
+        lastLineNumberElement.textContent = lineList.length.toString();
+        codeElement.style.paddingLeft = `${lastLineNumberElement.offsetWidth + 16}px`;
+        lastLineNumberElement.textContent = "";
+    }
+
     // https://github.com/siyuan-note/siyuan/issues/12726
     if (block.scrollHeight > block.clientHeight) {
         if (getSelection().rangeCount > 0) {

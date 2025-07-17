@@ -148,18 +148,10 @@ padding-right:0;max-height: none;box-sizing: border-box;position: absolute;paddi
     lineNumberTemp.setAttribute("contenteditable", "true");
     block.insertAdjacentElement("afterend", lineNumberTemp);
 
+    let lineNumberHTML = "";
     if (codeElement.style.wordBreak === "break-word") {
         // 代码块开启了换行
-
-        // TODO 1 检查 block.firstElementChild 的 span 子元素数量（行号元素的数量），如果多了就在末尾移除多余的，如果少了就在末尾插入缺少的
-
-        let lineNumberHTML = "";
         lineList.map((line) => {
-
-            // TODO 2 然后逐个行号元素更新 span.style.height = `${height}px`;
-            //  另外，看看更新 height 之前是否需要检查原始值与更新值不相等，看看性能怎么样
-            // TODO 3 如果更新这个 block 的行号的过程中又对这个 block 调用了 lineNumberRender，则立即停止本次函数执行不继续更新行号，执行新一次 lineNumberRender 来更新行号
-
             // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
             lineNumberTemp.textContent = line.trim() ? line : "<br>";
             // 不能使用 lineNumberTemp.getBoundingClientRect().height.toFixed(1) 否则
@@ -168,14 +160,12 @@ padding-right:0;max-height: none;box-sizing: border-box;position: absolute;paddi
             // https://github.com/siyuan-note/siyuan/issues/9140
             lineNumberHTML += `<span style="height:${lineNumberTemp.clientHeight}px"></span>`;
         });
-        lineNumberTemp.remove();
-        block.firstElementChild.innerHTML = lineNumberHTML;
     } else {
-        // TODO 看看获取行号元素数量需要消耗多少时间
-        //  如果性能够好，则行号元素数量有变化的话才执行：
-        block.firstElementChild.innerHTML = "<span></span>".repeat(lineList.length);
+        lineNumberHTML = "<span></span>".repeat(lineList.length);
     }
 
+    lineNumberTemp.remove();
+    block.firstElementChild.innerHTML = lineNumberHTML;
     // https://github.com/siyuan-note/siyuan/issues/12726
     if (block.scrollHeight > block.clientHeight) {
         if (getSelection().rangeCount > 0) {

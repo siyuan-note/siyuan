@@ -655,6 +655,7 @@ func GetHeadingLevelTransaction(id string, level int) (transaction *Transaction,
 		ccH := c.ChildrenByType(ast.NodeHeading)
 		childrenHeadings = append(childrenHeadings, ccH...)
 	}
+	fillBlockRefCount(childrenHeadings)
 
 	transaction = &Transaction{}
 	luteEngine := util.NewLute()

@@ -66,7 +66,7 @@ import {openGlobalSearch} from "../../search/util";
 import {popSearch} from "../../mobile/menu/search";
 /// #endif
 import {BlockPanel} from "../../block/Panel";
-import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard} from "../util/compatibility";
+import {copyPlainText, isInIOS, isMac, isOnlyMeta, readClipboard, encodeBase64} from "../util/compatibility";
 import {MenuItem} from "../../menus/Menu";
 import {fetchPost} from "../../util/fetch";
 import {onGet} from "../util/onGet";
@@ -442,10 +442,17 @@ export class WYSIWYG {
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            
+            // 获取 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);
-            event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
+            const siyuanData = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+            event.clipboardData.setData("text/siyuan", siyuanData);
             restoreLuteMarkdownSyntax(protyle);
+            
+            // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
+            const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
+            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
+            event.clipboardData.setData("text/html", siyuanComment + textHTML);
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1940,10 +1947,17 @@ export class WYSIWYG {
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            event.clipboardData.setData("text/html", selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html));
+            
+            // 获取 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);
-            event.clipboardData.setData("text/siyuan", selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html);
+            const siyuanData = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+            event.clipboardData.setData("text/siyuan", siyuanData);
             restoreLuteMarkdownSyntax(protyle);
+            
+            // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
+            const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
+            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
+            event.clipboardData.setData("text/html", siyuanComment + textHTML);
         });
 
         let beforeContextmenuRange: Range;

@@ -2,6 +2,22 @@ import {focusByRange} from "./selection";
 import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 
+export const encodeBase64 = (text: string): string => {
+    const encoder = new TextEncoder();
+    const bytes = encoder.encode(text);
+    const binaryString = String.fromCharCode(...bytes);
+    const base64 = btoa(binaryString);
+    return base64;
+};
+
+export const decodeBase64 = (base64: string): string => {
+    const decoder = new TextDecoder();
+    const binaryString = atob(base64);
+    const bytes = Uint8Array.from(binaryString, char => char.charCodeAt(0));
+    const text = decoder.decode(bytes);
+    return text;
+};
+
 export const openByMobile = (uri: string) => {
     if (!uri) {
         return;
@@ -58,14 +74,27 @@ export const readClipboard = async () => {
     const text: {
         textHTML?: string,
         textPlain?: string,
+        siyuanHTML?: string,
         files?: File[],
-    } = {textPlain: "", textHTML: ""};
+    } = {textPlain: "", textHTML: "", siyuanHTML: ""};
     try {
         const clipboardContents = await navigator.clipboard.read();
         for (const item of clipboardContents) {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");
                 text.textHTML = await blob.text();
+                
+                // 从 text/html 中的注释节点提取 text/siyuan 数据
+                const siyuanMatch = text.textHTML.match(/<!--siyuan-data:([^>]+)-->/);
+                if (siyuanMatch) {
+                    try {
+                        text.siyuanHTML = decodeBase64(siyuanMatch[1]);
+                        // 移除注释节点，保持原有的 text/html 内容
+                        text.textHTML = text.textHTML.replace(/<!--siyuan-data:[^>]+-->/, "");
+                    } catch (e) {
+                        console.log("Failed to decode siyuan data from HTML comment:", e);
+                    }
+                }
             }
             if (item.types.includes("text/plain")) {
                 const blob = await item.getType("text/plain");

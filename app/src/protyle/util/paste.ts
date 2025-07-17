@@ -245,12 +245,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
     uploadLocalFiles(localFiles, protyle, true);
 };
 
-export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | {
-    textHTML?: string,
-    textPlain?: string,
-    siyuanHTML?: string,
-    files?: File[],
-}) & {
+export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
 }) => {
     if ("clipboardData" in event || "dataTransfer" in event) {

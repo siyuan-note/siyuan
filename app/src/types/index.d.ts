@@ -260,6 +260,13 @@ interface Window {
     destroyTheme(): Promise<void>;
 }
 
+interface IClipboardData {
+    textHTML?: string,
+    textPlain?: string,
+    siyuanHTML?: string,
+    files?: File[],
+}
+
 interface IRefDefs {
     refID: string,
     defIDs?: string[]

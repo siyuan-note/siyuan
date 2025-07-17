@@ -442,17 +442,15 @@ export class WYSIWYG {
                 // Remove ZWSP when copying inline elements https://github.com/siyuan-note/siyuan/issues/13882
                 .replace(new RegExp(Constants.ZWSP, "g"), "");
             event.clipboardData.setData("text/plain", textPlain);
-            
-            // 获取 text/siyuan 数据
+
+            // 设置 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);
-            const siyuanData = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
-            event.clipboardData.setData("text/siyuan", siyuanData);
+            const siyuanHTML = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+            event.clipboardData.setData("text/siyuan", siyuanHTML);
             restoreLuteMarkdownSyntax(protyle);
-            
+
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
-            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
-            event.clipboardData.setData("text/html", siyuanComment + textHTML);
+            event.clipboardData.setData("text/html", `<!--siyuan-data:${encodeBase64(siyuanHTML)}-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1947,17 +1945,15 @@ export class WYSIWYG {
             }
             textPlain = textPlain.replace(/\u00A0/g, " "); // Replace non-breaking spaces with normal spaces when copying https://github.com/siyuan-note/siyuan/issues/9382
             event.clipboardData.setData("text/plain", textPlain);
-            
-            // 获取 text/siyuan 数据
+
+            // 设置 text/siyuan 数据
             enableLuteMarkdownSyntax(protyle);
-            const siyuanData = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
-            event.clipboardData.setData("text/siyuan", siyuanData);
+            const siyuanHTML = selectTableElement ? protyle.lute.HTML2BlockDOM(html) : html;
+            event.clipboardData.setData("text/siyuan", siyuanHTML);
             restoreLuteMarkdownSyntax(protyle);
-            
+
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            const textHTML = selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html);
-            const siyuanComment = `<!--siyuan-data:${encodeBase64(siyuanData)}-->`;
-            event.clipboardData.setData("text/html", siyuanComment + textHTML);
+            event.clipboardData.setData("text/html", `<!--siyuan-data:${encodeBase64(siyuanHTML)}-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         let beforeContextmenuRange: Range;

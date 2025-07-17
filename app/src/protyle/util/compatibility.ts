@@ -5,17 +5,22 @@ import {Constants} from "../../constants";
 export const encodeBase64 = (text: string): string => {
     const encoder = new TextEncoder();
     const bytes = encoder.encode(text);
-    const binaryString = String.fromCharCode(...bytes);
-    const base64 = btoa(binaryString);
-    return base64;
+    return btoa(String.fromCharCode(...bytes));
 };
 
-export const decodeBase64 = (base64: string): string => {
-    const decoder = new TextDecoder();
-    const binaryString = atob(base64);
-    const bytes = Uint8Array.from(binaryString, char => char.charCodeAt(0));
-    const text = decoder.decode(bytes);
-    return text;
+const getSiyuanHTML = (text: IClipboardData) => {
+    const siyuanMatch = text.textHTML.match(/<!--siyuan-data:([^>]+)-->/);
+    if (siyuanMatch) {
+        try {
+            const decoder = new TextDecoder();
+            const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
+            text.siyuanHTML = decoder.decode(bytes);
+            // 移除注释节点，保持原有的 text/html 内容
+            text.textHTML = text.textHTML.replace(/<!--siyuan-data:[^>]+-->/, "");
+        } catch (e) {
+            console.log("Failed to decode siyuan data from HTML comment:", e);
+        }
+    }
 };
 
 export const openByMobile = (uri: string) => {
@@ -71,30 +76,14 @@ export const readText = () => {
 };
 
 export const readClipboard = async () => {
-    const text: {
-        textHTML?: string,
-        textPlain?: string,
-        siyuanHTML?: string,
-        files?: File[],
-    } = {textPlain: "", textHTML: "", siyuanHTML: ""};
+    const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
     try {
         const clipboardContents = await navigator.clipboard.read();
         for (const item of clipboardContents) {
             if (item.types.includes("text/html")) {
                 const blob = await item.getType("text/html");
                 text.textHTML = await blob.text();
-                
-                // 从 text/html 中的注释节点提取 text/siyuan 数据
-                const siyuanMatch = text.textHTML.match(/<!--siyuan-data:([^>]+)-->/);
-                if (siyuanMatch) {
-                    try {
-                        text.siyuanHTML = decodeBase64(siyuanMatch[1]);
-                        // 移除注释节点，保持原有的 text/html 内容
-                        text.textHTML = text.textHTML.replace(/<!--siyuan-data:[^>]+-->/, "");
-                    } catch (e) {
-                        console.log("Failed to decode siyuan data from HTML comment:", e);
-                    }
-                }
+                getSiyuanHTML(text);
             }
             if (item.types.includes("text/plain")) {
                 const blob = await item.getType("text/plain");
@@ -110,9 +99,11 @@ export const readClipboard = async () => {
         if (isInAndroid()) {
             text.textPlain = window.JSAndroid.readClipboard();
             text.textHTML = window.JSAndroid.readHTMLClipboard();
+            getSiyuanHTML(text);
         } else if (isInHarmony()) {
             text.textPlain = window.JSHarmony.readClipboard();
             text.textHTML = window.JSHarmony.readHTMLClipboard();
+            getSiyuanHTML(text);
         }
         return text;
     }

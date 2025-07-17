@@ -33,6 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/search"
 	"github.com/siyuan-note/siyuan/kernel/sql"
+	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
@@ -43,14 +44,20 @@ func RefreshBacklink(id string) {
 }
 
 func refreshRefsByDefID(defID string) {
-	refs := sql.QueryRefsByDefID(defID, false)
+	refs := sql.QueryRefsByDefID(defID, true)
 	var rootIDs []string
 	for _, ref := range refs {
 		rootIDs = append(rootIDs, ref.RootID)
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, ref.DefBlockID)
 	}
+	rootIDs = gulu.Str.RemoveDuplicatedElem(rootIDs)
 	trees := filesys.LoadTrees(rootIDs)
 	for _, tree := range trees {
 		sql.UpdateRefsTreeQueue(tree)
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, tree.ID)
+	}
+	if bt := treenode.GetBlockTree(defID); nil != bt {
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
 }
 

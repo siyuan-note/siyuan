@@ -1599,13 +1599,7 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 	refDefIDs := getRefDefIDs(tree.Root)
 	// 推送定义节点引用计数
 	for _, defID := range refDefIDs {
-		defTree, _ := LoadTreeByBlockID(defID)
-		if nil != defTree {
-			defNode := treenode.GetNodeInTree(defTree, defID)
-			if nil != defNode {
-				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defTree.ID, defNode.ID)
-			}
-		}
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)

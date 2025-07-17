@@ -138,10 +138,9 @@ func ListItem2Doc(srcListItemID, targetBoxID, targetPath, previousPath string) (
 		return "", "", err
 	}
 	IncSync()
-	RefreshBacklink(srcTree.ID)
-	RefreshBacklink(newTree.ID)
 	go func() {
-		sql.FlushQueue()
+		RefreshBacklink(srcTree.ID)
+		RefreshBacklink(newTree.ID)
 		ResetVirtualBlockRefCache()
 	}()
 	return

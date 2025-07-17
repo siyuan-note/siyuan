@@ -22,6 +22,7 @@ import (
 	"path"
 	"path/filepath"
 	"strings"
+	"time"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -273,10 +274,10 @@ func Doc2Heading(srcID, targetID string, after bool) (srcTreeBox, srcTreePath st
 	treenode.RemoveBlockTreesByRootID(targetTree.ID)
 	err = indexWriteTreeUpsertQueue(targetTree)
 	IncSync()
-	RefreshBacklink(srcTree.ID)
-	RefreshBacklink(targetTree.ID)
 	go func() {
-		sql.FlushQueue()
+		time.Sleep(util.SQLFlushInterval)
+		RefreshBacklink(srcTree.ID)
+		RefreshBacklink(targetTree.ID)
 		ResetVirtualBlockRefCache()
 	}()
 	return
@@ -413,10 +414,9 @@ func Heading2Doc(srcHeadingID, targetBoxID, targetPath, previousPath string) (sr
 		return "", "", err
 	}
 	IncSync()
-	RefreshBacklink(srcTree.ID)
-	RefreshBacklink(newTree.ID)
 	go func() {
-		sql.FlushQueue()
+		RefreshBacklink(srcTree.ID)
+		RefreshBacklink(newTree.ID)
 		ResetVirtualBlockRefCache()
 	}()
 	return

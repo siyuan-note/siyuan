@@ -992,12 +992,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 					for rNode := tree.Root.FirstChild.FirstChild; nil != rNode; rNode = rNode.Next {
 						replaceNodes = append(replaceNodes, rNode)
 						if blockRefID, _, _ := treenode.GetBlockRef(rNode); "" != blockRefID {
-							bt := treenode.GetBlockTree(blockRefID)
-							if nil == bt {
-								continue
-							}
-
-							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, bt.RootID, blockRefID)
+							task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, blockRefID)
 						}
 					}
 

@@ -151,7 +151,7 @@ func ReloadProtyle(rootID string) {
 }
 
 // refreshRefCount 用于刷新定义块处的引用计数。
-func refreshRefCount(rootID, blockID string) {
+func refreshRefCount(blockID string) {
 	sql.FlushQueue()
 
 	bt := treenode.GetBlockTree(blockID)
@@ -177,7 +177,7 @@ func refreshRefCount(rootID, blockID string) {
 		defIDs = append(defIDs, bt.ID)
 	}
 
-	util.PushSetDefRefCount(rootID, blockID, defIDs, refCount, rootRefCount)
+	util.PushSetDefRefCount(bt.RootID, blockID, defIDs, refCount, rootRefCount)
 }
 
 // refreshDynamicRefText 用于刷新块引用的动态锚文本。

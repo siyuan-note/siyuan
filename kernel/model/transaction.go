@@ -1612,10 +1612,10 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	return
 }
 
-func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentNodes []*ast.Node) {
+func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentNodes, changedChildNodes []*ast.Node) {
 	ret = sql.GetRefsCacheByDefID(updateNode.ID)
 	if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
-		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) { // 容器块下第一个叶子块
+		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) {
 		// 如果是容器块下第一个叶子块，则需要向上查找引用
 		for parent := updateNode.Parent; nil != parent; parent = parent.Parent {
 			if ast.NodeDocument == parent.Type {
@@ -1628,6 +1628,21 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentN
 				changedParentNodes = append(changedParentNodes, parent)
 			}
 		}
+	}
+	if ast.NodeDocument != updateNode.Type && updateNode.IsContainerBlock() {
+		// 如果是容器块，则需要向下查找引用
+		ast.Walk(updateNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+			if !entering || !n.IsBlock() {
+				return ast.WalkContinue
+			}
+
+			childRefs := sql.GetRefsCacheByDefID(n.ID)
+			if 0 < len(childRefs) {
+				ret = append(ret, childRefs...)
+				changedChildNodes = append(changedChildNodes, n)
+			}
+			return ast.WalkContinue
+		})
 	}
 	return
 }

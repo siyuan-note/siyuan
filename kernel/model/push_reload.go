@@ -206,9 +206,9 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 
 	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
-	var changedParentNodes []*ast.Node
+	var changedNodes []*ast.Node
 	for _, updateNode := range updatedDefNodes {
-		refs, parentNodes := getRefsCacheByDefNode(updateNode)
+		refs, parentNodes, childNodes := getRefsCacheByDefNode(updateNode)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -219,13 +219,14 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 			}
 		}
 		if 0 < len(parentNodes) {
-			changedParentNodes = append(changedParentNodes, parentNodes...)
+			changedNodes = append(changedNodes, parentNodes...)
+		}
+		if 0 < len(childNodes) {
+			changedNodes = append(changedNodes, childNodes...)
 		}
 	}
-	if 0 < len(changedParentNodes) {
-		for _, parent := range changedParentNodes {
-			updatedDefNodes[parent.ID] = parent
-		}
+	for _, n := range changedNodes {
+		updatedDefNodes[n.ID] = n
 	}
 
 	changedRefTree := map[string]*parse.Tree{}

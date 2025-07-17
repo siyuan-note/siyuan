@@ -1594,7 +1594,8 @@ func (tx *Transaction) writeTree(tree *parse.Tree) (err error) {
 	return
 }
 
-func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentNodes, changedChildNodes []*ast.Node) {
+func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedNodes []*ast.Node) {
+	changedNodesMap := map[string]*ast.Node{}
 	ret = sql.GetRefsCacheByDefID(updateNode.ID)
 	if nil != updateNode.Parent && ast.NodeDocument != updateNode.Parent.Type &&
 		updateNode.Parent.IsContainerBlock() && updateNode == treenode.FirstLeafBlock(updateNode.Parent) {
@@ -1607,7 +1608,9 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentN
 			parentRefs := sql.GetRefsCacheByDefID(parent.ID)
 			if 0 < len(parentRefs) {
 				ret = append(ret, parentRefs...)
-				changedParentNodes = append(changedParentNodes, parent)
+				if _, ok := changedNodesMap[parent.ID]; !ok {
+					changedNodesMap[parent.ID] = parent
+				}
 			}
 		}
 	}
@@ -1621,10 +1624,24 @@ func getRefsCacheByDefNode(updateNode *ast.Node) (ret []*sql.Ref, changedParentN
 			childRefs := sql.GetRefsCacheByDefID(n.ID)
 			if 0 < len(childRefs) {
 				ret = append(ret, childRefs...)
-				changedChildNodes = append(changedChildNodes, n)
+				changedNodesMap[n.ID] = n
 			}
 			return ast.WalkContinue
 		})
+	}
+	if ast.NodeHeading == updateNode.Type && "1" == updateNode.IALAttr("fold") {
+		// 如果是折叠标题，则需要向下查找引用
+		children := treenode.HeadingChildren(updateNode)
+		for _, child := range children {
+			childRefs := sql.GetRefsCacheByDefID(child.ID)
+			if 0 < len(childRefs) {
+				ret = append(ret, childRefs...)
+				changedNodesMap[child.ID] = child
+			}
+		}
+	}
+	for _, n := range changedNodesMap {
+		changedNodes = append(changedNodes, n)
 	}
 	return
 }

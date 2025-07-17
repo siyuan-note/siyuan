@@ -1422,12 +1422,6 @@ export class Gutter {
                             if (event.target.tagName !== "INPUT") {
                                 inputElement.checked = !inputElement.checked;
                             }
-                            if (!inputElement.checked) {
-                                const lineNumberRows = nodeElement.querySelector(".protyle-linenumber__rows");
-                                if (lineNumberRows) {
-                                    lineNumberRows.innerHTML = "";
-                                }
-                            }
                             nodeElement.setAttribute("linewrap", inputElement.checked.toString());
                             nodeElement.querySelector(".hljs").removeAttribute("data-render");
                             highlightRender(nodeElement);

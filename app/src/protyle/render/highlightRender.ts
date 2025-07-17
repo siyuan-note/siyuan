@@ -116,9 +116,6 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
     });
 };
 
-// 添加一个 Map 来跟踪正在渲染的代码块，用于停止前一次调用
-const renderingBlocks = new Map<HTMLElement, symbol>();
-
 export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
     const lineNumber = block.parentElement.getAttribute("lineNumber");
     if (lineNumber === "false") {
@@ -127,122 +124,68 @@ export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
     if (!window.siyuan.config.editor.codeSyntaxHighlightLineNum && lineNumber !== "true") {
         return;
     }
+    // clientHeight 总是取的整数
+    block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
+    const codeElement = block.lastElementChild as HTMLElement;
 
-    // 生成唯一 token，配合下方循环内的检查，实现“如果更新这个 block 的行号的过程中又对这个 block 调用了 lineNumberRender，则立即停止本次函数执行不继续更新行号，执行新一次 lineNumberRender 来更新行号”
-    const renderToken = Symbol();
-    renderingBlocks.set(block, renderToken);
+    const lineList = codeElement.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
+    if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
+        lineList.pop();
+    }
+    block.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
+    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
 
-    try {
-        // clientHeight 总是取的整数
-        block.parentElement.style.lineHeight = `${((parseInt(block.parentElement.style.fontSize) || window.siyuan.config.editor.fontSize) * 1.625 * 0.85).toFixed(0)}px`;
-        const codeElement = block.lastElementChild as HTMLElement;
-
-        const lineList = codeElement.textContent.split(/\r\n|\r|\n|\u2028|\u2029/g);
-        if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
-            lineList.pop();
-        }
-
-        if (codeElement.style.wordBreak === "break-word") {
-            // 代码块开启了换行
-            const codeElementStyle = window.getComputedStyle(codeElement);
-            const lineNumberTemp = document.createElement("div");
-            lineNumberTemp.className = "hljs";
-            // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
-            lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
+    const codeElementStyle = window.getComputedStyle(codeElement);
+    const lineNumberTemp = document.createElement("div");
+    lineNumberTemp.className = "hljs";
+    // 不能使用 codeElement.clientWidth，被忽略小数点导致宽度不一致
+    lineNumberTemp.setAttribute("style", `padding-left:${codeElement.style.paddingLeft};
 width: ${codeElement.getBoundingClientRect().width / zoom}px;
 white-space:${codeElementStyle.whiteSpace};
 word-break:${codeElementStyle.wordBreak};
 font-variant-ligatures:${codeElementStyle.fontVariantLigatures};
 padding-right:0;max-height: none;box-sizing: border-box;position: absolute;padding-top:0 !important;padding-bottom:0 !important;min-height:auto !important;`);
-            lineNumberTemp.setAttribute("contenteditable", "true");
-            block.insertAdjacentElement("afterend", lineNumberTemp);
+    lineNumberTemp.setAttribute("contenteditable", "true");
+    block.insertAdjacentElement("afterend", lineNumberTemp);
 
-            // TODO 1 检查 block.firstElementChild 的 span 子元素数量（行号元素的数量），如果多了就在末尾移除多余的，如果少了就在末尾插入缺少的
-            const existingSpans = block.firstElementChild.querySelectorAll("span");
-            const expectedSpanCount = lineList.length;
-            if (existingSpans.length > expectedSpanCount) {
-                // 移除多余的 span 元素 - 使用 DocumentFragment 批量操作
-                const fragment = document.createDocumentFragment();
-                for (let i = 0; i < expectedSpanCount; i++) {
-                    fragment.appendChild(existingSpans[i]);
-                }
-                // 检查是否被中断
-                if (renderingBlocks.get(block) !== renderToken) {
-                    lineNumberTemp.remove();
-                    return;
-                }
-                block.firstElementChild.innerHTML = "";
-                block.firstElementChild.appendChild(fragment);
-            } else if (existingSpans.length < expectedSpanCount) {
-                // 插入缺少的 span 元素
-                const missingCount = expectedSpanCount - existingSpans.length;
-                const newSpansHTML = "<span></span>".repeat(missingCount);
-                block.firstElementChild.insertAdjacentHTML("beforeend", newSpansHTML);
-            }
+    if (codeElement.style.wordBreak === "break-word") {
+        // 代码块开启了换行
+
+        // TODO 1 检查 block.firstElementChild 的 span 子元素数量（行号元素的数量），如果多了就在末尾移除多余的，如果少了就在末尾插入缺少的
+
+        let lineNumberHTML = "";
+        lineList.map((line) => {
 
             // TODO 2 然后逐个行号元素更新 span.style.height = `${height}px`;
             //  另外，看看更新 height 之前是否需要检查原始值与更新值不相等，看看性能怎么样
             // TODO 3 如果更新这个 block 的行号的过程中又对这个 block 调用了 lineNumberRender，则立即停止本次函数执行不继续更新行号，执行新一次 lineNumberRender 来更新行号
-            const currentSpans = block.firstElementChild.querySelectorAll("span");
-            for (let index = 0; index < lineList.length; index++) {
-                // 检查是否被中断（即有新一次 lineNumberRender 调用）
-                if (renderingBlocks.get(block) !== renderToken) {
-                    lineNumberTemp.remove();
-                    return;
-                }
-                const line = lineList[index];
-                if (index < currentSpans.length) {
-                    const span = currentSpans[index] as HTMLElement;
-                    // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
-                    lineNumberTemp.textContent = line.trim() ? line : "<br>";
-                    // 不能使用 lineNumberTemp.getBoundingClientRect().height.toFixed(1) 否则
-                    // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
-                    // https://github.com/siyuan-note/siyuan/issues/9029
-                    // https://github.com/siyuan-note/siyuan/issues/9140
-                    const newHeight = lineNumberTemp.clientHeight;
-                    // 检查原始值与更新值是否相等，避免不必要的样式更新
-                    const currentHeight = parseInt(span.style.height) || 0;
-                    if (currentHeight !== newHeight) {
-                        span.style.height = `${newHeight}px`;
-                    }
-                }
-            }
-            lineNumberTemp.remove();
-        } else {
-            // TODO 看看获取行号元素数量需要消耗多少时间
-            //  如果性能够好，则行号元素数量有变化的话才执行：
-            const existingSpans = block.firstElementChild.querySelectorAll("span");
-            if (existingSpans.length !== lineList.length) {
-                block.firstElementChild.innerHTML = "<span></span>".repeat(lineList.length);
-            }
-        }
 
-        // 在行号更新完毕后再计算宽度
-        const finalSpans = block.firstElementChild.querySelectorAll("span");
-        if (finalSpans.length > 0) {
-            // 使用最后一个行号元素来计算宽度
-            const lastSpan = finalSpans[finalSpans.length - 1] as HTMLElement;
-            lastSpan.textContent = lineList.length.toString();
-            codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
-            lastSpan.textContent = ""; // 恢复为空字符串
-        }
+            // windows 下空格高度为 0 https://github.com/siyuan-note/siyuan/issues/12346
+            lineNumberTemp.textContent = line.trim() ? line : "<br>";
+            // 不能使用 lineNumberTemp.getBoundingClientRect().height.toFixed(1) 否则
+            // windows 需等待字体下载完成再计算，否则导致不换行，高度计算错误
+            // https://github.com/siyuan-note/siyuan/issues/9029
+            // https://github.com/siyuan-note/siyuan/issues/9140
+            lineNumberHTML += `<span style="height:${lineNumberTemp.clientHeight}px"></span>`;
+        });
+        lineNumberTemp.remove();
+        block.firstElementChild.innerHTML = lineNumberHTML;
+    } else {
+        // TODO 看看获取行号元素数量需要消耗多少时间
+        //  如果性能够好，则行号元素数量有变化的话才执行：
+        block.firstElementChild.innerHTML = "<span></span>".repeat(lineList.length);
+    }
 
-        // https://github.com/siyuan-note/siyuan/issues/12726
-        if (block.scrollHeight > block.clientHeight) {
-            if (getSelection().rangeCount > 0) {
-                const range = getSelection().getRangeAt(0);
-                if (block.contains(range.startContainer)) {
-                    const brElement = document.createElement("br");
-                    range.insertNode(brElement);
-                    brElement.scrollIntoView({block: "nearest"});
-                    brElement.remove();
-                }
+    // https://github.com/siyuan-note/siyuan/issues/12726
+    if (block.scrollHeight > block.clientHeight) {
+        if (getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            if (block.contains(range.startContainer)) {
+                const brElement = document.createElement("br");
+                range.insertNode(brElement);
+                brElement.scrollIntoView({block: "nearest"});
+                brElement.remove();
             }
-        }
-    } finally {
-        // 只清理当前 token，防止误删后续渲染的 token
-        if (renderingBlocks.get(block) === renderToken) {
-            renderingBlocks.delete(block);
         }
     }
 };

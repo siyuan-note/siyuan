@@ -21,6 +21,9 @@ export class Options {
         classes: {
             preview: "",
         },
+        click: {
+            preventInsetEmptyBlock: false
+        },
         hint: {
             delay: 200,
             emoji: {

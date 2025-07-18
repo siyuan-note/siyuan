@@ -141,9 +141,11 @@ export const initUI = (protyle: IProtyle) => {
             const range = document.createRange();
             if (event.y > lastRect.bottom) {
                 const lastEditElement = getContenteditableElement(getLastBlock(protyle.wysiwyg.element.lastElementChild));
-                if (!lastEditElement ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem" && !protyle.options.backlinkData) ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== "")) {
+                if (!protyle.options.click.preventInsetEmptyBlock && (
+                    !lastEditElement ||
+                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
+                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
+                ) {
                     const emptyElement = genEmptyElement(false, false);
                     protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);
                     transaction(protyle, [{

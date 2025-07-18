@@ -13,7 +13,7 @@ export const encodeBase64 = (text: string): string => {
 
         for (let i = 0; i < bytes.length; i += chunkSize) {
             const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
-            binary += String.fromCharCode.apply(null, chunk);
+            binary += String.fromCharCode(...chunk);
         }
 
         return btoa(binary);

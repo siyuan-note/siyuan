@@ -1283,6 +1283,26 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	upsertAvBlockRel(updatedNode)
 
+	if ast.NodeAttributeView == updatedNode.Type {
+		// 设置视图 https://github.com/siyuan-note/siyuan/issues/15279
+		attrView, parseErr := av.ParseAttributeView(updatedNode.AttributeViewID)
+		if nil == parseErr {
+			v := attrView.GetView(attrView.ViewID)
+			if nil != v {
+				updatedNode.AttributeViewType = string(v.LayoutType)
+				attrs := parse.IAL2Map(updatedNode.KramdownIAL)
+				if "" == attrs[av.NodeAttrView] {
+					attrs[av.NodeAttrView] = v.ID
+					err = setNodeAttrs(updatedNode, tree, attrs)
+					if err != nil {
+						logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+						return &TxErr{code: TxErrCodeBlockNotFound, id: id}
+					}
+				}
+			}
+		}
+	}
+
 	checkUpsertInUserGuide(tree)
 	return
 }

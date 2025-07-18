@@ -450,7 +450,7 @@ export class WYSIWYG {
             restoreLuteMarkdownSyntax(protyle);
 
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            event.clipboardData.setData("text/html", `<!--siyuan-data:${encodeBase64(siyuanHTML)}-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+            event.clipboardData.setData("text/html", `<!--data-siyuan='${encodeBase64(siyuanHTML)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         this.element.addEventListener("mousedown", (event: MouseEvent) => {
@@ -1953,7 +1953,7 @@ export class WYSIWYG {
             restoreLuteMarkdownSyntax(protyle);
 
             // 在 text/html 中插入注释节点，用于右键菜单粘贴时获取 text/siyuan 数据
-            event.clipboardData.setData("text/html", `<!--siyuan-data:${encodeBase64(siyuanHTML)}-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
+            event.clipboardData.setData("text/html", `<!--data-siyuan='${encodeBase64(siyuanHTML)}'-->` + (selectTableElement ? html : protyle.lute.BlockDOM2HTML(selectAVElement ? textPlain : html)));
         });
 
         let beforeContextmenuRange: Range;

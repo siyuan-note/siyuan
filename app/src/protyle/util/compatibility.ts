@@ -3,20 +3,37 @@ import {fetchPost} from "../../util/fetch";
 import {Constants} from "../../constants";
 
 export const encodeBase64 = (text: string): string => {
-    const encoder = new TextEncoder();
-    const bytes = encoder.encode(text);
-    return btoa(String.fromCharCode(...bytes));
+    if (typeof Buffer !== "undefined") {
+        return Buffer.from(text, "utf8").toString("base64");
+    } else {
+        const encoder = new TextEncoder();
+        const bytes = encoder.encode(text);
+        let binary = "";
+        const chunkSize = 0x8000; // 避免栈溢出
+
+        for (let i = 0; i < bytes.length; i += chunkSize) {
+            const chunk = bytes.subarray(i, Math.min(i + chunkSize, bytes.length));
+            binary += String.fromCharCode.apply(null, chunk);
+        }
+
+        return btoa(binary);
+    }
 };
 
 const getSiyuanHTML = (text: IClipboardData) => {
-    const siyuanMatch = text.textHTML.match(/<!--siyuan-data:([^>]+)-->/);
+    const siyuanMatch = text.textHTML.match(/<!--data-siyuan='([^']+)'-->/);
     if (siyuanMatch) {
         try {
-            const decoder = new TextDecoder();
-            const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
-            text.siyuanHTML = decoder.decode(bytes);
+            if (typeof Buffer !== "undefined") {
+                const decodedBytes = Buffer.from(siyuanMatch[1], "base64");
+                text.siyuanHTML = decodedBytes.toString("utf8");
+            } else {
+                const decoder = new TextDecoder();
+                const bytes = Uint8Array.from(atob(siyuanMatch[1]), char => char.charCodeAt(0));
+                text.siyuanHTML = decoder.decode(bytes);
+            }
             // 移除注释节点，保持原有的 text/html 内容
-            text.textHTML = text.textHTML.replace(/<!--siyuan-data:[^>]+-->/, "");
+            text.textHTML = text.textHTML.replace(/<!--data-siyuan='[^']+'-->/, "");
         } catch (e) {
             console.log("Failed to decode siyuan data from HTML comment:", e);
         }

@@ -134,18 +134,16 @@ const setHTML = (options: {
         return;
     }
 
-    if (DOMPurify) {
-        // XSS in inline memo elements https://github.com/siyuan-note/siyuan/issues/15280
-        const parser = new DOMParser();
-        const doc = parser.parseFromString(options.content, "text/html");
-        doc.querySelectorAll("[data-inline-memo-content]").forEach(item => {
-            const content = item.getAttribute("data-inline-memo-content");
-            if (content) {
-                item.setAttribute("data-inline-memo-content", DOMPurify.sanitize(content));
-            }
-        });
-        options.content = doc.body.innerHTML;
-    }
+    // XSS in inline memo elements https://github.com/siyuan-note/siyuan/issues/15280
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(options.content, "text/html");
+    doc.querySelectorAll("[data-inline-memo-content]").forEach(item => {
+        const content = item.getAttribute("data-inline-memo-content");
+        if (content) {
+            item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(content));
+        }
+    });
+    options.content = doc.body.innerHTML;
 
     protyle.block.showAll = options.action.includes(Constants.CB_GET_ALL);
     const REMOVED_OVER_HEIGHT = protyle.contentElement.clientHeight * 8;

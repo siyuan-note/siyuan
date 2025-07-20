@@ -285,7 +285,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				name, _ = url.PathUnescape(name)
 				name = util.FilterUploadFileName(name)
 				ext := util.Ext(name)
-				if "" == ext {
+				if !util.IsCommonExt(ext) {
 					if mtype := mimetype.Detect(data); nil != mtype {
 						ext = mtype.Extension()
 						name += ext

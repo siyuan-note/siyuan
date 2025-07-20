@@ -148,6 +148,22 @@ func RemoveID(name string) string {
 	return name + ext
 }
 
+var commonSuffixes = []string{
+	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tiff",
+	".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".md", ".rtf",
+	".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
+	".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a",
+	".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv",
+	".exe", ".bat", ".sh", ".app",
+	".js", ".ts", ".html", ".css", ".go", ".py", ".java", ".c", ".cpp", ".json", ".xml", ".yaml", ".toml",
+	".sql", ".db", ".sqlite", ".csv",
+	".iso", ".dmg", ".apk", ".bin",
+}
+
+func IsCommonExt(ext string) bool {
+	return strings.HasPrefix(ext, ".") && gulu.Str.Contains(strings.ToLower(ext), commonSuffixes)
+}
+
 func Ext(name string) (ret string) {
 	ret = path.Ext(name)
 	if "." == ret {

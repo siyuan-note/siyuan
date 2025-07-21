@@ -977,35 +977,37 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 }
 
 func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
-	var err error
-	opParentID := operation.ParentID
-	block := treenode.GetBlockTree(opParentID)
-	if nil == block {
-		block = treenode.GetBlockTree(operation.PreviousID)
-		if nil == block {
-			block = treenode.GetBlockTree(operation.NextID)
+	var bt *treenode.BlockTree
+	bts := treenode.GetBlockTrees([]string{operation.ParentID, operation.PreviousID, operation.NextID})
+	for _, b := range bts {
+		if "" != b.ID {
+			bt = b
+			break
 		}
 	}
-	if nil == block {
-		logging.LogWarnf("not found block [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
+	if nil == bt {
+		logging.LogWarnf("not found block tree [%s, %s, %s]", operation.ParentID, operation.PreviousID, operation.NextID)
 		util.ReloadUI() // 比如分屏后编辑器状态不一致，这里强制重新载入界面
 		return
 	}
 
-	tree, err := tx.loadTree(block.ID)
+	var err error
+	tree, err := tx.loadTreeByBlockTree(bt)
 	if err != nil {
-		msg := fmt.Sprintf("load tree [%s] failed: %s", block.ID, err)
+		msg := fmt.Sprintf("load tree [%s] failed: %s", bt.ID, err)
 		logging.LogErrorf(msg)
-		return &TxErr{code: TxErrCodeBlockNotFound, id: block.ID}
+		return &TxErr{code: TxErrCodeBlockNotFound, id: bt.ID}
 	}
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
 
-	p := block.Path
-	assets := getAssetsDir(filepath.Join(util.DataDir, block.BoxID), filepath.Dir(filepath.Join(util.DataDir, block.BoxID, p)))
-	isGlobalAssets := strings.HasPrefix(assets, filepath.Join(util.DataDir, "assets"))
-	if !isGlobalAssets {
+	if !tx.isGlobalAssetsInit {
+		tx.assetsDir = getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), filepath.Dir(filepath.Join(util.DataDir, bt.BoxID, bt.Path)))
+		tx.isGlobalAssets = strings.HasPrefix(tx.assetsDir, filepath.Join(util.DataDir, "assets"))
+		tx.isGlobalAssetsInit = true
+	}
+	if !tx.isGlobalAssets {
 		// 本地资源文件需要移动到用户手动建立的 assets 下 https://github.com/siyuan-note/siyuan/issues/2410
 		ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 			if !entering {
@@ -1026,7 +1028,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 				}
 
 				// 只有全局 assets 才移动到相对 assets
-				targetP := filepath.Join(assets, filepath.Base(assetPath))
+				targetP := filepath.Join(tx.assetsDir, filepath.Base(assetPath))
 				if e = filelock.Rename(assetPath, targetP); err != nil {
 					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
 					return ast.WalkContinue
@@ -1035,9 +1037,10 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			return ast.WalkContinue
 		})
 	}
+
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
-		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: block.ID}
+		return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: bt.ID}
 	}
 	var remains []*ast.Node
 	for remain := insertedNode.Next; nil != remain; remain = remain.Next {
@@ -1123,7 +1126,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	createdUpdated(insertedNode)
 	tx.nodes[insertedNode.ID] = insertedNode
 	if err = tx.writeTree(tree); err != nil {
-		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: block.ID}
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: bt.ID}
 	}
 
 	// 收集引用的定义块 ID
@@ -1179,8 +1182,6 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
-
-	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1302,8 +1303,6 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 			}
 		}
 	}
-
-	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1408,8 +1407,6 @@ func (tx *Transaction) doUpdateUpdated(operation *Operation) (ret *TxErr) {
 func (tx *Transaction) doCreate(operation *Operation) (ret *TxErr) {
 	tree := operation.Data.(*parse.Tree)
 	tx.writeTree(tree)
-
-	checkUpsertInUserGuide(tree)
 	return
 }
 
@@ -1534,8 +1531,12 @@ type Transaction struct {
 	DoOperations   []*Operation `json:"doOperations"`
 	UndoOperations []*Operation `json:"undoOperations"`
 
-	trees map[string]*parse.Tree
-	nodes map[string]*ast.Node
+	trees map[string]*parse.Tree // 事务中变更的树
+	nodes map[string]*ast.Node   // 事务中变更的节点
+
+	isGlobalAssetsInit bool   // 是否初始化过全局资源判断
+	isGlobalAssets     bool   // 是否属于全局资源
+	assetsDir          string // 资源目录路径
 
 	luteEngine *lute.Lute
 	m          *sync.Mutex
@@ -1570,6 +1571,8 @@ func (tx *Transaction) commit() (err error) {
 		var sources []interface{}
 		sources = append(sources, tx)
 		util.PushSaveDoc(tree.ID, "tx", sources)
+
+		checkUpsertInUserGuide(tree)
 	}
 	refreshDynamicRefTexts(tx.nodes, tx.trees)
 	IncSync()
@@ -1582,6 +1585,24 @@ func (tx *Transaction) rollback() {
 	tx.trees, tx.nodes = nil, nil
 	tx.state.Store(3)
 	tx.m.Unlock()
+	return
+}
+
+func (tx *Transaction) loadTreeByBlockTree(bt *treenode.BlockTree) (ret *parse.Tree, err error) {
+	if nil == bt {
+		return nil, ErrBlockNotFound
+	}
+
+	ret = tx.trees[bt.RootID]
+	if nil != ret {
+		return
+	}
+
+	ret, err = filesys.LoadTree(bt.BoxID, bt.Path, tx.luteEngine)
+	if err != nil {
+		return
+	}
+	tx.trees[bt.RootID] = ret
 	return
 }
 

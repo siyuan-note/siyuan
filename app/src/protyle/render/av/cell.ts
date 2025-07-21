@@ -743,9 +743,9 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
         const colId = getColId(item, viewType);
 
-        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
+        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && (item.nextElementSibling === cellElements[elementIndex + 1])) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
-        if (elementIndex === 0 || !cellElements[elementIndex - 1].isSameNode(item.previousElementSibling)) {
+        if (elementIndex === 0 || (cellElements[elementIndex - 1] !== item.previousElementSibling)) {
             json.push([]);
         }
         json[json.length - 1].push(oldValue);

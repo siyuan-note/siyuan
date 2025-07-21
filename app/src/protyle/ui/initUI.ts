@@ -226,10 +226,10 @@ export const initUI = (protyle: IProtyle) => {
                 if (!isInEmbedBlock(item) && protyle.gutter.isMatchNode(item)) {
                     const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                     Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                        if (!item.isSameNode(hlItem)) {
+                        if (item !== hlItem) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
                         }
-                        if (rowItem && !rowItem.isSameNode(hlItem)) {
+                        if (rowItem && (rowItem !== hlItem)) {
                             rowItem.classList.remove("av__row--hl");
                         }
                     });

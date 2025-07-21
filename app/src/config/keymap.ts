@@ -475,7 +475,7 @@ export const keymap = {
                         hasConflict = true;
                     }
                     Array.from(keymap.element.querySelectorAll("label.b3-list-item input")).find((inputItem: HTMLElement) => {
-                        if (!inputItem.isSameNode(this) && inputItem.getAttribute("data-value") === keymapStr) {
+                        if ((inputItem !== this) && inputItem.getAttribute("data-value") === keymapStr) {
                             const inputValueList = inputItem.getAttribute("data-key").split(Constants.ZWSP);
                             if (inputValueList[1] === "list") {
                                 inputValueList[1] = "list1";

@@ -475,11 +475,11 @@ export const openMenuPanel = (options: {
             if (!targetElement) {
                 targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
             }
-            if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
+            if (!targetElement || (targetElement === window.siyuan.dragElement)) {
                 return;
             }
             event.preventDefault();
-            if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+            if (dragoverElement && (targetElement === dragoverElement)) {
                 const nodeRect = targetElement.getBoundingClientRect();
                 avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__bottom", "dragover__top");
@@ -526,7 +526,7 @@ export const openMenuPanel = (options: {
                 type = (event.detail as { type: string }).type;
                 target = (event.detail as { target: HTMLElement }).target;
             }
-            while (target && !target.isSameNode(avPanelElement) || type) {
+            while (target && (target !== avPanelElement) || type) {
                 type = target?.dataset.type || type;
                 if (type === "close") {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
@@ -1181,7 +1181,7 @@ export const openMenuPanel = (options: {
                         dialog.element.addEventListener("click", (dialogEvent) => {
                             let target = dialogEvent.target as HTMLElement;
                             const isDispatch = typeof dialogEvent.detail === "string";
-                            while (target && !target.isSameNode(dialog.element) || isDispatch) {
+                            while (target && (target !== dialog.element) || isDispatch) {
                                 const action = target.getAttribute("data-action");
                                 if (action === "delete" || (isDispatch && dialogEvent.detail === "Enter")) {
                                     removeCol({

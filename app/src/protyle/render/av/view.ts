@@ -408,17 +408,17 @@ export const dragoverTab = (event: DragEvent) => {
     if (!target) {
         return;
     }
-    if (!viewTabElement.isSameNode(window.siyuan.dragElement.parentElement) || target.isSameNode(window.siyuan.dragElement)) {
+    if ((viewTabElement !== window.siyuan.dragElement.parentElement) || (target === window.siyuan.dragElement)) {
         return;
     }
     const targetRect = target.getBoundingClientRect();
     if (targetRect.left + targetRect.width / 2 < event.clientX) {
-        if (target.nextElementSibling?.isSameNode(window.siyuan.dragElement)) {
+        if (target.nextElementSibling && (target.nextElementSibling === window.siyuan.dragElement)) {
             return;
         }
         target.after(window.siyuan.dragElement);
     } else {
-        if (target.previousElementSibling?.isSameNode(window.siyuan.dragElement)) {
+        if (target.previousElementSibling && (target.previousElementSibling === window.siyuan.dragElement)) {
             return;
         }
         target.before(window.siyuan.dragElement);

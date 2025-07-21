@@ -80,7 +80,7 @@ import {bindAVPanelKeydown} from "../../protyle/render/av/keydown";
 const switchDialogEvent = (app: App, event: MouseEvent) => {
     event.preventDefault();
     let target = event.target as HTMLElement;
-    while (!target.isSameNode(switchDialog.element)) {
+    while (target !== switchDialog.element) {
         if (target.classList.contains("b3-list-item")) {
             const currentType = target.getAttribute("data-type");
             if (currentType) {

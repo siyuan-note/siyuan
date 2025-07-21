@@ -298,11 +298,11 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 if (!targetElement) {
                     targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 1), "av__row");
                 }
-                if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement) || !dragBlockElement) {
+                if (!targetElement || (targetElement === window.siyuan.dragElement) || !dragBlockElement) {
                     return;
                 }
                 const targetBlockElement = hasClosestBlock(targetElement);
-                if (!targetBlockElement || !targetBlockElement.isSameNode(dragBlockElement)) {
+                if (!targetBlockElement || (targetBlockElement !== dragBlockElement)) {
                     return;
                 }
                 event.preventDefault();
@@ -455,13 +455,13 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     if (!blockElement) {
         return;
     }
-    while (target && !element.isSameNode(target)) {
+    while (target && (element !== target)) {
         const type = target.getAttribute("data-type");
         if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
             if (event.type === "contextmenu" || (!target.dataset.url && target.tagName !== "IMG")) {
                 let index = 0;
                 Array.from(target.parentElement.children).find((item, i) => {
-                    if (item.isSameNode(target)) {
+                    if (item === target) {
                         index = i;
                         return true;
                     }

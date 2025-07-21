@@ -580,7 +580,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     element.addEventListener("click", () => {
-                        if (document.activeElement.isSameNode(inputElement)) {
+                        if (document.activeElement === inputElement) {
                             return;
                         }
                         insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
@@ -603,7 +603,7 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     element.addEventListener("click", () => {
-                        if (document.activeElement.isSameNode(inputElement)) {
+                        if (document.activeElement === inputElement) {
                             return;
                         }
                         insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
@@ -735,7 +735,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 
     // 当前页面不能进行推送，否则光标会乱跳
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-        if (blockElement.isSameNode(item)) {
+        if (blockElement === item) {
             return;
         }
         const titleElement = item.querySelector(".av__title") as HTMLElement;

@@ -564,7 +564,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             item.parentElement) {
             topSourceElement = getTopAloneElement(item);
             sideElement = topSourceElement.nextElementSibling || topSourceElement.previousElementSibling;
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
             }
         }

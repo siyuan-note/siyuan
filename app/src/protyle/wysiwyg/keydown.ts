@@ -115,7 +115,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
 
         // https://ld246.com/article/1694506408293
         const endElement = hasClosestBlock(range.endContainer);
-        if (!matchHotKey("⌘C", event) && endElement && !nodeElement.isSameNode(endElement)) {
+        if (!matchHotKey("⌘C", event) && endElement && (nodeElement !== endElement)) {
             event.stopPropagation();
             event.preventDefault();
             return;
@@ -540,7 +540,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 centerElement = document.elementFromPoint(contentRect.x + contentRect.width / 2, contentRect.y + contentRect.height / 2 + Constants.SIZE_TOOLBAR_HEIGHT);
             }
             const centerBlockElement = hasClosestBlock(centerElement);
-            if (centerBlockElement && !centerBlockElement.isSameNode(nodeElement)) {
+            if (centerBlockElement && (centerBlockElement !== nodeElement)) {
                 focusBlock(centerBlockElement, undefined, false);
             }
             event.stopPropagation();
@@ -594,7 +594,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return;
                     } else if (!previousSibling &&
                         range.startContainer.parentElement.previousSibling &&
-                        range.startContainer.parentElement.previousSibling.isSameNode(range.startContainer.parentElement.previousElementSibling) &&
+                        (range.startContainer.parentElement.previousSibling === range.startContainer.parentElement.previousElementSibling) &&
                         range.startContainer.parentElement.previousElementSibling.getAttribute("data-type")?.indexOf("inline-math") > -1
                     ) {
                         inlineMathMenu(protyle, range.startContainer.parentElement.previousElementSibling);
@@ -649,7 +649,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         !getPreviousBlock(nodeElement) &&  // 列表第一个块为嵌入块，第二个块为段落块，上键应选中第一个块 https://ld246.com/article/1652667912155
                         nodeElement.contains(firstEditElement)
                     ) ||
-                    (!firstEditElement && nodeElement.isSameNode(protyle.wysiwyg.element.firstElementChild))) {
+                    (!firstEditElement && (nodeElement === protyle.wysiwyg.element.firstElementChild))) {
                     // 不能用\n判断，否则文字过长折行将错误 https://github.com/siyuan-note/siyuan/issues/6156
                     if (getSelectionPosition(nodeEditableElement, range).top - nodeEditableElement.getBoundingClientRect().top < 20 || nodeElement.classList.contains("av")) {
                         if (protyle.title && protyle.title.editElement &&
@@ -704,7 +704,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         }
                     }
                 }
-            } else if (selectText === "" && (event.key === "ArrowDown" || event.key === "ArrowRight") && nodeElement.isSameNode(getLastBlock(protyle.wysiwyg.element.lastElementChild)) &&
+            } else if (selectText === "" && (event.key === "ArrowDown" || event.key === "ArrowRight") && (nodeElement === getLastBlock(protyle.wysiwyg.element.lastElementChild)) &&
                 // 表格无法右移动 https://ld246.com/article/1631434502215
                 !hasClosestByTag(range.startContainer, "TD") && !hasClosestByTag(range.startContainer, "TH")) {
                 // 页面按向下/右箭头丢失焦点 https://ld246.com/article/1629954026096
@@ -715,7 +715,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     event.preventDefault();
                     focusByRange(range);
                 }
-            } else if (selectText === "" && event.key === "ArrowLeft" && nodeElement.isSameNode(getFirstBlock(protyle.wysiwyg.element.firstElementChild))) {
+            } else if (selectText === "" && event.key === "ArrowLeft" && (nodeElement === getFirstBlock(protyle.wysiwyg.element.firstElementChild))) {
                 // 页面向左箭头丢失焦点 https://github.com/siyuan-note/siyuan/issues/2768
                 const firstEditElement = getContenteditableElement(nodeElement);
                 if (firstEditElement && getSelectionOffset(firstEditElement, undefined, range).start === 0) {
@@ -726,7 +726,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
             if (event.key === "ArrowDown") {
                 if (nodeEditableElement?.innerText.trimRight().substr(position.start).indexOf("\n") === -1 &&
-                    nodeElement.isSameNode(protyle.wysiwyg.element.lastElementChild)) {
+                    (nodeElement === protyle.wysiwyg.element.lastElementChild)) {
                     setLastNodeRange(getContenteditableElement(nodeEditableElement), range, false);
                     range.collapse(false);
                     event.stopPropagation();
@@ -1465,7 +1465,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
-                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                        if (selectElements[index + 1] !== item.nextElementSibling) {
                             isContinuous = false;
                         }
                     }
@@ -1491,7 +1491,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                 let isContinuous = true;
                 selectElements.forEach((item, index) => {
                     if (item.nextElementSibling && selectElements[index + 1]) {
-                        if (!selectElements[index + 1].isSameNode(item.nextElementSibling)) {
+                        if (selectElements[index + 1] !== item.nextElementSibling) {
                             isContinuous = false;
                         }
                     }
@@ -1580,7 +1580,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         return true;
                     }
                     if (item.nextElementSibling && selectsElement[index + 1] &&
-                        item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                        (item.nextElementSibling === selectsElement[index + 1])) {
                         isContinue = true;
                     } else if (index !== selectsElement.length - 1) {
                         isContinue = false;
@@ -1807,7 +1807,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (snippetClassName.startsWith("language-")) {
                         language = snippetClassName.replace("language-", "");
                         // https://github.com/siyuan-note/siyuan/issues/14767
-                        if (!wbrElement.parentElement.isSameNode(range.commonAncestorContainer)) {
+                        if (wbrElement.parentElement !== range.commonAncestorContainer) {
                             wbrElement.parentElement.after(wbrElement);
                             wbrElement.previousElementSibling.remove();
                         }

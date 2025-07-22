@@ -150,7 +150,7 @@ hljs.registerLanguage('template', function (hljs) {
     relevance: 15
   };
 
-  // 变量规则 - 支持点号访问
+  // 变量规则 - 以$开头，不包括.号
   const VARIABLE_RULE = {
     className: 'variable',
     begin: /\$[a-zA-Z_][a-zA-Z0-9_]*/,

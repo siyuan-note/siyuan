@@ -136,6 +136,8 @@ hljs.registerLanguage("gdscript",function(){"use strict";var e=e||{};function r(
 
 
 // https://github.com/siyuan-note/siyuan/pull/15345
+
+// https://github.com/siyuan-note/siyuan/pull/15345
 hljs.registerLanguage('template', function (hljs) {
     const markdown = hljs.getLanguage('markdown');
     const go = hljs.getLanguage('go');
@@ -199,12 +201,20 @@ hljs.registerLanguage('template', function (hljs) {
         begin: /\{:/,
         end: /\}(?=\s*$)/,  // 匹配行尾附近的}
         contains: [
+
             {
                 className: 'string',
-                begin: /\{/,
-                end: /\}/,
+                begin: /\"/,
+                end: /\"/,
                 contains: [
-                    VARIABLE_RULE  // 支持变量高亮，如 $docIconUrl
+                    {
+                        className: 'selector-pseudo',
+                        begin: /\{/,
+                        end: /\}/,
+                        contains: [
+                            VARIABLE_RULE  // 支持变量高亮，如 $docIconUrl
+                        ]
+                    },
                 ]
             },
             {

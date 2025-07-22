@@ -135,7 +135,6 @@ hljs.registerLanguage("hlsl",(()=>{"use strict";const e={className:"number",
 hljs.registerLanguage("gdscript",function(){"use strict";var e=e||{};function r(e){return{aliases:["godot","gdscript"],keywords:{keyword:"and in not or self void as assert breakpoint class class_name extends is func setget signal tool yield const enum export onready static var break continue if elif else for pass return match while remote sync master puppet remotesync mastersync puppetsync",built_in:"Color8 ColorN abs acos asin atan atan2 bytes2var cartesian2polar ceil char clamp convert cos cosh db2linear decimals dectime deg2rad dict2inst ease exp floor fmod fposmod funcref get_stack hash inst2dict instance_from_id inverse_lerp is_equal_approx is_inf is_instance_valid is_nan is_zero_approx len lerp lerp_angle linear2db load log max min move_toward nearest_po2 ord parse_json polar2cartesian posmod pow preload print_stack push_error push_warning rad2deg rand_range rand_seed randf randi randomize range_lerp round seed sign sin sinh smoothstep sqrt step_decimals stepify str str2var tan tanh to_json type_exists typeof validate_json var2bytes var2str weakref wrapf wrapi bool int float String NodePath Vector2 Rect2 Transform2D Vector3 Rect3 Plane Quat Basis Transform Color RID Object NodePath Dictionary Array PoolByteArray PoolIntArray PoolRealArray PoolStringArray PoolVector2Array PoolVector3Array PoolColorArray",literal:"true false null"},contains:[e.NUMBER_MODE,e.HASH_COMMENT_MODE,{className:"comment",begin:/"""/,end:/"""/},e.QUOTE_STRING_MODE,{variants:[{className:"function",beginKeywords:"func"},{className:"class",beginKeywords:"class"}],end:/:/,contains:[e.UNDERSCORE_TITLE_MODE]}]}}return e.exports=function(e){e.registerLanguage("gdscript",r)},e.exports.definer=r,e.exports.definer||e.exports}());
 
 
-// https://github.com/siyuan-note/siyuan/pull/15345
 
 // https://github.com/siyuan-note/siyuan/pull/15345
 hljs.registerLanguage('template', function (hljs) {
@@ -149,14 +148,14 @@ hljs.registerLanguage('template', function (hljs) {
     const BUILT_IN_FUNCTIONS = {
         className: 'built_in',
         begin: /\b(queryBlocks|querySpans|parseTime|Weekday|WeekdayCN|WeekdayCN2|ISOWeek|pow|powf|log|logf|FormatFloat|now|date|toDate|duration|AddDate|Sub|sub|add|mul|mod|div|min|max|Compare|Year|Month|Day|Hour|Minute|Second|Hours|Minutes|Seconds|String|trim|repeat|substr|trunc|abbrev|contains|cat|replace|join|splitList|list|first|last|append|prepend|concat|reverse|has|index|slice|len|atoi|float64|int|int64|toDecimal|toString|toStrings|dict|get)\b/,
-        relevance: 15
+        relevance: 10
     };
 
     // 变量规则 - 以$开头，不包括.号
     const VARIABLE_RULE = {
         className: 'variable',
         begin: /\$[a-zA-Z_][a-zA-Z0-9_]*/,
-        relevance: 20
+        relevance: 10
     };
 
     // 关键字和操作符
@@ -183,7 +182,7 @@ hljs.registerLanguage('template', function (hljs) {
         beginScope: 'selector-pseudo',
         endScope: 'selector-pseudo',
         contains: TEMPLATE_CONTENT,
-        relevance: 30
+        relevance: 10
     };
 
     // 双大括号块规则 - 只高亮边界
@@ -193,7 +192,7 @@ hljs.registerLanguage('template', function (hljs) {
         beginScope: 'selector-pseudo',
         endScope: 'selector-pseudo',
         contains: TEMPLATE_CONTENT,
-        relevance: 30
+        relevance: 10
     };
     // 思源块属性设置语法 - 贪婪匹配
     const BLOCK_ATTR_RULE = {
@@ -208,12 +207,12 @@ hljs.registerLanguage('template', function (hljs) {
                 end: /\"/,
                 contains: [
                     {
-                        className: 'selector-pseudo',
-                        begin: /\{/,
-                        end: /\}/,
-                        contains: [
-                            VARIABLE_RULE  // 支持变量高亮，如 $docIconUrl
-                        ]
+                        begin: /(\.action\{)/,
+                        end: /(\})/,
+                        beginScope: 'selector-pseudo',
+                        endScope: 'selector-pseudo',
+                        contains: TEMPLATE_CONTENT,
+                        relevance: 10
                     },
                 ]
             },

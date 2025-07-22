@@ -100,6 +100,6 @@ ${html}
 </div>`;
 };
 
-export const bindGroupsEvent = (protyle: IProtyle, menuElement: HTMLElement, data: IAV, blockID: string) => {
+export const bindGroupsEvent = () => {
 
 };

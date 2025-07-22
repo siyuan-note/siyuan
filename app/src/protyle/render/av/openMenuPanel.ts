@@ -579,7 +579,7 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goGroups") {
                     menuElement.innerHTML = getGroupsHTML(fields, data.view.group);
-                    bindGroupsEvent(options.protyle, menuElement, data, blockID);
+                    bindGroupsEvent();
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
                     event.preventDefault();

@@ -240,6 +240,5 @@ export const getLabelByNumberFormat = (format: string) => {
         return window.siyuan.languages.numberFormatPercent;
     }
 
-    let key = "numberFormat" + format;
-    return window.siyuan.languages[key]
+    return window.siyuan.languages["numberFormat" + format];
 };

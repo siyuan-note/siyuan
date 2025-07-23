@@ -1,4 +1,11 @@
 {
+  "groupStep": "Group interval",
+  "groupRange": "Group range",
+  "groupMethodDateRelative": "Relative date",
+  "groupMethodDateDay": "Day",
+  "groupMethodDateWeek": "Week",
+  "groupMethodDateMonth": "Month",
+  "groupMethodDateYear": "Year",
   "syncColWidth": "Sync column width",
   "groupMethod": "Grouping method",
   "hideEmptyGroup": "Hide empty group",

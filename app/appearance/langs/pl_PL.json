@@ -1,4 +1,11 @@
 {
+  "groupStep": "Odstęp grupowania",
+  "groupRange": "Zakres grupowania",
+  "groupMethodDateRelative": "Data względna",
+  "groupMethodDateDay": "Dzień",
+  "groupMethodDateWeek": "Tydzień",
+  "groupMethodDateMonth": "Miesiąc",
+  "groupMethodDateYear": "Rok",
   "syncColWidth": "Synchronizuj szerokość kolumny",
   "groupMethod": "Metoda grupowania",
   "hideEmptyGroup": "Ukryj pustą grupę",

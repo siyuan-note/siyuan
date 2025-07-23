@@ -1,4 +1,11 @@
 {
+  "groupStep": "分组间隔",
+  "groupRange": "分组范围",
+  "groupMethodDateRelative": "相对日期",
+  "groupMethodDateDay": "天",
+  "groupMethodDateWeek": "周",
+  "groupMethodDateMonth": "月",
+  "groupMethodDateYear": "年",
   "syncColWidth": "同步列宽",
   "groupMethod": "分组方式",
   "hideEmptyGroup": "隐藏空白分组",

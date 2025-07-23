@@ -1,4 +1,11 @@
 {
+  "groupStep": "グループ間隔",
+  "groupRange": "グループ範囲",
+  "groupMethodDateRelative": "相対日付",
+  "groupMethodDateDay": "日",
+  "groupMethodDateWeek": "週",
+  "groupMethodDateMonth": "月",
+  "groupMethodDateYear": "年",
   "syncColWidth": "列幅を同期",
   "groupMethod": "グループ方法",
   "hideEmptyGroup": "空のグループを隠す",

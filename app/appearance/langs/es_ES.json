@@ -1,4 +1,11 @@
 {
+  "groupStep": "Intervalo de agrupación",
+  "groupRange": "Rango de agrupación",
+  "groupMethodDateRelative": "Fecha relativa",
+  "groupMethodDateDay": "Día",
+  "groupMethodDateWeek": "Semana",
+  "groupMethodDateMonth": "Mes",
+  "groupMethodDateYear": "Año",
   "syncColWidth": "Sincronizar ancho de columna",
   "groupMethod": "Método de agrupación",
   "hideEmptyGroup": "Ocultar grupo vacío",

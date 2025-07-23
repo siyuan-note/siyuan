@@ -1,4 +1,11 @@
 {
+  "groupStep": "Gruppierungsintervall",
+  "groupRange": "Gruppierungsbereich",
+  "groupMethodDateRelative": "Relatives Datum",
+  "groupMethodDateDay": "Tag",
+  "groupMethodDateWeek": "Woche",
+  "groupMethodDateMonth": "Monat",
+  "groupMethodDateYear": "Jahr",
   "syncColWidth": "Spaltenbreite synchronisieren",
   "groupMethod": "Gruppierungsmethode",
   "hideEmptyGroup": "Leere Gruppe ausblenden",

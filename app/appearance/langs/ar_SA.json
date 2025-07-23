@@ -1,4 +1,11 @@
 {
+  "groupStep": "فاصل التجميع",
+  "groupRange": "نطاق التجميع",
+  "groupMethodDateRelative": "تاريخ نسبي",
+  "groupMethodDateDay": "يوم",
+  "groupMethodDateWeek": "أسبوع",
+  "groupMethodDateMonth": "شهر",
+  "groupMethodDateYear": "سنة",
   "syncColWidth": "مزامنة عرض العمود",
   "groupMethod": "طريقة التجميع",
   "hideEmptyGroup": "إخفاء المجموعة الفارغة",

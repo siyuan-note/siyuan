@@ -1,4 +1,11 @@
 {
+  "groupStep": "מרווח קיבוץ",
+  "groupRange": "טווח קיבוץ",
+  "groupMethodDateRelative": "תאריך יחסי",
+  "groupMethodDateDay": "יום",
+  "groupMethodDateWeek": "שבוע",
+  "groupMethodDateMonth": "חודש",
+  "groupMethodDateYear": "שנה",
   "syncColWidth": "סנכרון רוחב עמודה",
   "groupMethod": "שיטת קיבוץ",
   "hideEmptyGroup": "הסתר קבוצה ריקה",

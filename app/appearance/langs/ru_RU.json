@@ -1,4 +1,11 @@
 {
+  "groupStep": "Интервал группировки",
+  "groupRange": "Диапазон группировки",
+  "groupMethodDateRelative": "Относительная дата",
+  "groupMethodDateDay": "День",
+  "groupMethodDateWeek": "Неделя",
+  "groupMethodDateMonth": "Месяц",
+  "groupMethodDateYear": "Год",
   "syncColWidth": "Синхронизация ширины столбца",
   "groupMethod": "Способ группировки",
   "hideEmptyGroup": "Скрыть пустую группу",

@@ -26,7 +26,7 @@ const removeTopElement = (updateElement: Element, protyle: IProtyle) => {
     // TODO 文档没有打开时，需要通过后台获取 getTopAloneElement
     const topAloneElement = getTopAloneElement(updateElement);
     const doOperations: IOperation[] = [];
-    if (!topAloneElement.isSameNode(updateElement)) {
+    if (topAloneElement !== updateElement) {
         updateElement.remove();
         doOperations.push({
             action: "delete",
@@ -104,7 +104,7 @@ const promiseTransaction = () => {
                     // 反链中有多个相同块的情况
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            if (range && (item.isSameNode(range.startContainer) || item.contains(range.startContainer))) {
+                            if (range && ((item === range.startContainer) || item.contains(range.startContainer))) {
                                 // 正在编辑的块不能进行更新
                             } else {
                                 item.outerHTML = operation.data.replace("<wbr>", "");
@@ -1026,7 +1026,7 @@ export const turnsIntoTransaction = (options: {
                 hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
-                item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                (item.nextElementSibling === selectsElement[index + 1])) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
                 isContinue = false;
@@ -1092,7 +1092,7 @@ export const turnsIntoTransaction = (options: {
                     action: "delete",
                     id,
                 });
-                if (item.isSameNode(selectsElement[index + 1]?.previousElementSibling)) {
+                if (item === selectsElement[index + 1]?.previousElementSibling) {
                     previousId = id;
                 } else {
                     previousId = undefined;

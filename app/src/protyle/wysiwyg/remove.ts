@@ -202,7 +202,7 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
                 if (backLinkTab instanceof Tab && backLinkTab.model instanceof Backlink) {
                     const editors = backLinkTab.model.editors;
                     editors.find((item, index) => {
-                        if (item.protyle.element.isSameNode(protyle.element)) {
+                        if (item.protyle.element === protyle.element) {
                             item.destroy();
                             editors.splice(index, 1);
                             item.protyle.element.previousElementSibling.remove();

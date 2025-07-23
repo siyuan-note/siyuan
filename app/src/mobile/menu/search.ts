@@ -352,7 +352,7 @@ const initSearchEvent = (app: App, element: Element, config: Config.IUILayoutTab
     const localSearch = window.siyuan.storage[Constants.LOCAL_SEARCHASSET] as ISearchAssetOption;
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
-        while (target && !target.isSameNode(element)) {
+        while (target && (target !== element)) {
             const type = target.getAttribute("data-type");
             if (type === "replaceHistory") {
                 toggleReplaceHistory(target.nextElementSibling as HTMLInputElement);

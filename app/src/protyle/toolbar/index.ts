@@ -134,7 +134,7 @@ export class Toolbar {
         // shift+方向键或三击选中，不同的块 https://github.com/siyuan-note/siyuan/issues/3891
         const startElement = hasClosestBlock(range.startContainer);
         const endElement = hasClosestBlock(range.endContainer);
-        if (startElement && endElement && !startElement.isSameNode(endElement)) {
+        if (startElement && endElement && (startElement !== endElement)) {
             if (event) { // 在 keyup 中使用 shift+方向键选中
                 if (event.key === "ArrowLeft") {
                     this.range = setLastNodeRange(getContenteditableElement(startElement), range, false);
@@ -212,7 +212,7 @@ export class Toolbar {
         if (types.length === 0 && (!endElement || endElement.nodeType === 3)) {
             return [];
         }
-        if (endElement && !["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && !startElement.isSameNode(endElement)) {
+        if (endElement && !["DIV", "TD", "TH", "TR"].includes(endElement.tagName) && (startElement !== endElement)) {
             types = types.concat((endElement.getAttribute("data-type") || "").split(" "));
         }
         range.cloneContents().childNodes.forEach((item: HTMLElement) => {
@@ -240,7 +240,7 @@ export class Toolbar {
             return;
         }
         // 三击后还没有重新纠正 range 时使用快捷键标记会导致异常 https://github.com/siyuan-note/siyuan/issues/7068
-        if (!nodeElement.isSameNode(endElement)) {
+        if (nodeElement !== endElement) {
             this.range = setLastNodeRange(getContenteditableElement(nodeElement), this.range, false);
         }
 
@@ -251,9 +251,9 @@ export class Toolbar {
             }
         });
         const rangeStartNextSibling = hasNextSibling(this.range.startContainer);
-        const isSameNode = this.range.startContainer.isSameNode(this.range.endContainer) ||
-            (rangeStartNextSibling && rangeStartNextSibling.isSameNode(this.range.endContainer) &&
-                this.range.startContainer.parentElement.isSameNode(this.range.endContainer.parentElement));
+        const isSameNode = (this.range.startContainer === this.range.endContainer) ||
+            (rangeStartNextSibling && (rangeStartNextSibling === this.range.endContainer) &&
+                (this.range.startContainer.parentElement === this.range.endContainer.parentElement));
         if (this.range.startContainer.nodeType === 3 && this.range.startContainer.parentElement.tagName === "SPAN" &&
             isSameNode &&
             this.range.startOffset > -1 && this.range.endOffset <= this.range.endContainer.textContent.length) {
@@ -284,7 +284,7 @@ export class Toolbar {
             }
         }
         // https://github.com/siyuan-note/siyuan/issues/14534
-        if (rangeTypes.includes("text") && type === "text" && textObj && this.range.startContainer.nodeType === 3 && this.range.startContainer.isSameNode(this.range.endContainer)) {
+        if (rangeTypes.includes("text") && type === "text" && textObj && this.range.startContainer.nodeType === 3 && (this.range.startContainer === this.range.endContainer)) {
             const selectParentElement = this.range.startContainer.parentElement;
             if (selectParentElement && hasSameTextStyle(null, selectParentElement, textObj)) {
                 return;
@@ -304,14 +304,14 @@ export class Toolbar {
                     this.range.startOffset !== 0 ||
                     // https://github.com/siyuan-note/siyuan/issues/14869
                     (this.range.startOffset === 0 && this.range.startContainer.previousSibling?.nodeType === 3 &&
-                        this.range.startContainer.previousSibling.parentElement.isSameNode(this.range.startContainer.parentElement))
+                        (this.range.startContainer.previousSibling.parentElement === this.range.startContainer.parentElement))
                 ) && (
                     this.range.endOffset !== this.range.endContainer.textContent.length ||
                     // https://github.com/siyuan-note/siyuan/issues/14869#issuecomment-2911553387
                     (
                         this.range.endOffset === this.range.endContainer.textContent.length &&
                         this.range.endContainer.nextSibling?.nodeType === 3 &&
-                        this.range.endContainer.nextSibling.parentElement.isSameNode(this.range.endContainer.parentElement)
+                        (this.range.endContainer.nextSibling.parentElement === this.range.endContainer.parentElement)
                     )
                 ) &&
                 !(this.range.startOffset === 1 && this.range.startContainer.textContent.startsWith(Constants.ZWSP))) {
@@ -722,7 +722,7 @@ export class Toolbar {
                                 endOffset = previousElement.textContent.length;
                                 if (!startContainer) {
                                     startContainer = currentNode;
-                                } else if (startContainer.isSameNode(previousElement)) {
+                                } else if (startContainer === previousElement) {
                                     startContainer = currentNode;
                                 }
                             }

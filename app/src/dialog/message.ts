@@ -12,7 +12,7 @@ export const initMessage = () => {
                 hideMessage(target.parentElement.getAttribute("data-id"));
                 event.preventDefault();
                 break;
-            } else if (target.isSameNode(messageElement.lastElementChild)) {
+            } else if (target === messageElement.lastElementChild) {
                 target.parentElement.classList.remove("b3-snackbars--show");
                 setTimeout(() => {
                     target.parentElement.firstElementChild.innerHTML = "";

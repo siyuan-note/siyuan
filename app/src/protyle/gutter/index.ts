@@ -563,7 +563,7 @@ export class Gutter {
                 hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
-                item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                (item.nextElementSibling === selectsElement[index + 1])) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
                 isContinue = false;
@@ -2329,7 +2329,7 @@ export class Gutter {
                         listItem = undefined;
                     }
                     // 标题必须显示
-                    if (!topElement.isSameNode(nodeElement) && type !== "NodeHeading") {
+                    if ((topElement !== nodeElement) && type !== "NodeHeading") {
                         nodeElement = topElement;
                         parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");

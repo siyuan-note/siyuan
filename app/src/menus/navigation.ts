@@ -447,7 +447,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     const paths: string[] = [];
                     Array.from(liElement.parentElement.children).forEach((item) => {
                         if (item.tagName === "LI") {
-                            if (item.isSameNode(liElement)) {
+                            if (item === liElement) {
                                 paths.push(undefined);
                             }
                             paths.push(item.getAttribute("data-path"));
@@ -472,7 +472,7 @@ export const initFileMenu = (app: App, notebookId: string, pathString: string, l
                     Array.from(liElement.parentElement.children).forEach((item) => {
                         if (item.tagName === "LI") {
                             paths.push(item.getAttribute("data-path"));
-                            if (item.isSameNode(liElement)) {
+                            if (item === liElement) {
                                 paths.push(undefined);
                             }
                         }

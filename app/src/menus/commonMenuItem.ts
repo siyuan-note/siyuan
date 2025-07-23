@@ -259,7 +259,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         if (typeof event.detail === "string") {
             target = dialog.element.querySelector(`.item--full[data-type="${event.detail}"]`);
         }
-        while (!target.isSameNode(dialog.element)) {
+        while (target !== dialog.element) {
             const type = target.dataset.action;
             if (target.classList.contains("item--full")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");

@@ -184,7 +184,7 @@ export class Preview {
         }
         this.mdTimeoutId = window.setTimeout(() => {
             fetchPost("/api/export/preview", {
-                id: protyle.block.parentID || protyle.options.blockId,
+                id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;

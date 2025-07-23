@@ -573,7 +573,12 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 
 func Preview(id string) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
-	tree, _ := LoadTreeByBlockID(id)
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	tree := prepareExportTree(bt)
 	tree = exportTree(tree, false, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
@@ -583,6 +588,48 @@ func Preview(id string) (retStdHTML string) {
 	enableLuteInlineSyntax(luteEngine)
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
+
+	// 聚焦导出的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）
+	// Export preview mode supports focus use https://github.com/siyuan-note/siyuan/issues/15340
+	if "d" != bt.Type {
+		level := 1
+		var firstHeading *ast.Node
+		if !Conf.Export.AddTitle {
+			for n := tree.Root.FirstChild; nil != n; n = n.Next {
+				if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+					firstHeading = n
+					break
+				}
+			}
+		} else {
+			for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
+				if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+					firstHeading = n
+					break
+				}
+			}
+			level = 2
+		}
+		if nil != firstHeading {
+			hLevel := firstHeading.HeadingLevel
+			diff := level - hLevel
+			var children, childrenHeadings []*ast.Node
+			children = append(children, firstHeading)
+			children = append(children, treenode.HeadingChildren(firstHeading)...)
+			for _, c := range children {
+				ccH := c.ChildrenByType(ast.NodeHeading)
+				childrenHeadings = append(childrenHeadings, ccH...)
+			}
+			for _, h := range childrenHeadings {
+				h.HeadingLevel += diff
+				if 6 < h.HeadingLevel {
+					h.HeadingLevel = 6
+				} else if 1 > h.HeadingLevel {
+					h.HeadingLevel = 1
+				}
+			}
+		}
+	}
 
 	// 移除超级块的属性列表 https://github.com/siyuan-note/siyuan/issues/13451
 	var unlinks []*ast.Node

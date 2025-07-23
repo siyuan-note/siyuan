@@ -85,7 +85,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
             let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-            const isSearching = searchInputElement && (document.activeElement === searchInputElement);
+            const isSearching = searchInputElement && document.activeElement === searchInputElement;
             const query = searchInputElement?.value || "";
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
@@ -336,7 +336,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
                     } else if (!avPanelElement && !isSearching && getSelection().rangeCount > 0) {
                         const range = getSelection().getRangeAt(0);
                         const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && (e === blockElement)) {
+                        if (blockElement && e === blockElement) {
                             focusBlock(e);
                         }
                     } else if (avPanelElement && !newCellElement) {
@@ -366,7 +366,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
                     const range = getSelection().getRangeAt(0);
                     if (!hasClosestByClassName(range.startContainer, "av__title")) {
                         const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && (e === blockElement) && !isSearching) {
+                        if (blockElement && e === blockElement && !isSearching) {
                             focusBlock(e);
                         }
                     }
@@ -398,7 +398,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
                     if (event.isComposing) {
                         return;
                     }
-                    if (searchInputElement.value || (document.activeElement === searchInputElement)) {
+                    if (searchInputElement.value || document.activeElement === searchInputElement) {
                         viewsElement.classList.add("av__views--show");
                     } else {
                         viewsElement.classList.remove("av__views--show");

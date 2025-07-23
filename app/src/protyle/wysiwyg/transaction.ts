@@ -104,7 +104,7 @@ const promiseTransaction = () => {
                     // 反链中有多个相同块的情况
                     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.id}"]`)).forEach(item => {
                         if (!isInEmbedBlock(item)) {
-                            if (range && ((item === range.startContainer) || item.contains(range.startContainer))) {
+                            if (range && (item === range.startContainer || item.contains(range.startContainer))) {
                                 // 正在编辑的块不能进行更新
                             } else {
                                 item.outerHTML = operation.data.replace("<wbr>", "");
@@ -1026,7 +1026,7 @@ export const turnsIntoTransaction = (options: {
                 hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
-                (item.nextElementSibling === selectsElement[index + 1])) {
+                item.nextElementSibling === selectsElement[index + 1]) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
                 isContinue = false;

@@ -42,7 +42,7 @@ export class Menu {
             }
             const subMenuElement = itemElement.querySelector(".b3-menu__submenu") as HTMLElement;
             this.element.querySelectorAll(".b3-menu__item--show").forEach((item) => {
-                if (!item.contains(itemElement) && (item !== itemElement) && !itemElement.contains(item)) {
+                if (!item.contains(itemElement) && item !== itemElement && !itemElement.contains(item)) {
                     item.classList.remove("b3-menu__item--show");
                 }
             });

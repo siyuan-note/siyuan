@@ -229,7 +229,7 @@ export const initUI = (protyle: IProtyle) => {
                         if (item !== hlItem) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
                         }
-                        if (rowItem && (rowItem !== hlItem)) {
+                        if (rowItem && rowItem !== hlItem) {
                             rowItem.classList.remove("av__row--hl");
                         }
                     });

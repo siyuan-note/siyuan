@@ -153,7 +153,8 @@ const setHTML = (options: {
         if (!protyle.wysiwyg.element.querySelector(".protyle-wysiwyg--select") && !protyle.scroll.keepLazyLoad && protyle.contentElement.scrollHeight > REMOVED_OVER_HEIGHT) {
             let removeElement = protyle.wysiwyg.element.firstElementChild as HTMLElement;
             const removeElements = [];
-            while (protyle.wysiwyg.element.childElementCount > 2 && removeElements && (protyle.wysiwyg.element.lastElementChild !== removeElement)) {
+            while (protyle.wysiwyg.element.childElementCount > 2 && removeElements &&
+            protyle.wysiwyg.element.lastElementChild !== removeElement) {
                 if (protyle.contentElement.scrollHeight - removeElement.offsetTop > REMOVED_OVER_HEIGHT) {
                     removeElements.push(removeElement);
                 } else {
@@ -508,7 +509,7 @@ const focusElementById = (protyle: IProtyle, action: string[], scrollAttr?: IScr
         protyle.observer.observe(protyle.wysiwyg.element);
     }, 1000 * 3);
 
-    if ((focusElement === protyle.wysiwyg.element.firstElementChild) && !hasScrollTop) {
+    if (focusElement === protyle.wysiwyg.element.firstElementChild && !hasScrollTop) {
         protyle.observerLoad.disconnect();
     }
 };

@@ -220,7 +220,7 @@ export class Wnd {
                 return;
             }
             it.classList.remove("layout-tab-bars--drag");
-            if ((newTabHeaderElement !== oldTabHeaderElement) &&
+            if (newTabHeaderElement !== oldTabHeaderElement &&
                 ((oldTabHeaderElement.classList.contains("item--pin") && newTabHeaderElement.classList.contains("item--pin")) ||
                     (!oldTabHeaderElement.classList.contains("item--pin") && !newTabHeaderElement.classList.contains("item--pin")))) {
                 const rect = newTabHeaderElement.getClientRects()[0];
@@ -816,7 +816,7 @@ export class Wnd {
                     if (item.headElement.classList.contains("item--focus")) {
                         let latestHeadElement: HTMLElement;
                         Array.from(item.headElement.parentElement.children).forEach((headItem: HTMLElement) => {
-                            if ((headItem !== item.headElement) &&
+                            if (headItem !== item.headElement &&
                                 headItem.style.maxWidth !== "0px"   // 不对比已移除但还在动画效果中的元素 https://github.com/siyuan-note/siyuan/issues/7878
                             ) {
                                 if (!latestHeadElement) {

@@ -1015,7 +1015,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;
                             const isDispatch = typeof event.detail === "string";
-                            while (target && (target !== dialog.element) || isDispatch) {
+                            while (target && target !== dialog.element || isDispatch) {
                                 const action = target.getAttribute("data-action");
                                 if (action === "delete" || (isDispatch && event.detail === "Enter")) {
                                     removeColByMenu({

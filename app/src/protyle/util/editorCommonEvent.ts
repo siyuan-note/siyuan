@@ -481,7 +481,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     // https://github.com/siyuan-note/insider/issues/536
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        (oldSourceParentElement !== sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -676,7 +676,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         isSameDoc &&    // 同一文档分屏后，oldSourceParentElement 已经被移走，不可再 update https://github.com/siyuan-note/siyuan/issues/8863
         oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        (oldSourceParentElement !== sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -1423,7 +1423,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement && targetElement.getAttribute("data-dtype") === "mAsset" &&
                 !targetElement.classList.contains("av__cell--header")) {
                 event.preventDefault(); // 不使用导致无法触发 drop
-                if (dragoverElement && (targetElement === dragoverElement)) {
+                if (dragoverElement && targetElement === dragoverElement) {
                     return;
                 }
                 const blockElement = hasClosestBlock(targetElement);
@@ -1528,8 +1528,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement) {
                 const targetRowElement = hasClosestByClassName(targetElement, "av__row--header");
                 const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header");
-                if ((targetElement === window.siyuan.dragElement) || !targetRowElement || !dragRowElement ||
-                    (targetRowElement && dragRowElement && (targetRowElement !== dragRowElement))
+                if (targetElement === window.siyuan.dragElement || !targetRowElement || !dragRowElement ||
+                    (targetRowElement && dragRowElement && targetRowElement !== dragRowElement)
                 ) {
                     targetElement = false;
                 }
@@ -1544,7 +1544,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             // gallery item 只能拖拽当前 av 中
             const galleryElement = hasClosestByClassName(event.target, "av__gallery");
             if (targetElement.classList.contains("av") || !galleryElement ||
-                !galleryElement.contains(window.siyuan.dragElement) || (targetElement === window.siyuan.dragElement)) {
+                !galleryElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
                 targetElement = false;
                 editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__left", "dragover__right");
@@ -1559,7 +1559,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
-        if (targetElement && dragoverElement && (targetElement === dragoverElement)) {
+        if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
@@ -1597,11 +1597,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
             if (targetElement.classList.contains("av__cell")) {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
-                    !targetElement.classList.contains("av__row") && (targetElement.previousElementSibling !== window.siyuan.dragElement)) {
+                    !targetElement.classList.contains("av__row") && targetElement.previousElementSibling !== window.siyuan.dragElement) {
                     targetElement.classList.add("dragover__left");
                 } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX <= nodeRect.right + 1 &&
-                    !targetElement.classList.contains("av__row") && (targetElement !== window.siyuan.dragElement.previousElementSibling)) {
-                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") && (targetElement === window.siyuan.dragElement.previousElementSibling.lastElementChild)) {
+                    !targetElement.classList.contains("av__row") && targetElement !== window.siyuan.dragElement.previousElementSibling) {
+                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") &&
+                        targetElement === window.siyuan.dragElement.previousElementSibling.lastElementChild) {
                         // 拖拽到固定列的最后一个元素
                     } else {
                         targetElement.classList.add("dragover__right");

@@ -857,17 +857,17 @@ export const addResize = (obj: Layout | Wnd) => {
                 if (previousNowSize < 8 || nextNowSize < 8) {
                     return;
                 }
-                if (window.siyuan.layout.leftDock && (window.siyuan.layout.leftDock.layout.element === previousElement) &&
+                if (window.siyuan.layout.leftDock && window.siyuan.layout.leftDock.layout.element === previousElement &&
                     previousNowSize < getMinSize(previousElement) &&
                     // https://github.com/siyuan-note/siyuan/issues/10506
                     previousNowSize < previousSize) {
                     return;
                 }
-                if (window.siyuan.layout.rightDock && (window.siyuan.layout.rightDock.layout.element === nextElement) &&
+                if (window.siyuan.layout.rightDock && window.siyuan.layout.rightDock.layout.element === nextElement &&
                     nextNowSize < getMinSize(nextElement) && nextNowSize < nextSize) {
                     return;
                 }
-                if (window.siyuan.layout.bottomDock && (window.siyuan.layout.bottomDock.layout.element === nextElement) &&
+                if (window.siyuan.layout.bottomDock && window.siyuan.layout.bottomDock.layout.element === nextElement &&
                     nextNowSize < 64 && nextNowSize < nextSize) {
                     return;
                 }

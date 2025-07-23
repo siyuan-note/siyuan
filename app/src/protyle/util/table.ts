@@ -422,7 +422,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         // 表格后无内容时，按右键需新建空块
         if (event.key === "ArrowRight" && range.toString() === "" &&
             !nodeElement.nextElementSibling &&
-            (cellElement === nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
+            cellElement === nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild &&
             getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
             event.preventDefault();
             insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));

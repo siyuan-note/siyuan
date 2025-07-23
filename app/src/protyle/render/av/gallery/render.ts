@@ -45,7 +45,7 @@ export const renderGallery = (options: {
     const created = options.protyle.options.history?.created;
     const snapshot = options.protyle.options.history?.snapshot;
     let searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    const isSearching = searchInputElement && (document.activeElement === searchInputElement);
+    const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.value || "";
     fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
         id: options.blockElement.getAttribute("data-av-id"),
@@ -213,7 +213,7 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
             const range = getSelection().getRangeAt(0);
             if (!hasClosestByClassName(range.startContainer, "av__title")) {
                 const blockElement = hasClosestBlock(range.startContainer);
-                if (blockElement && (options.blockElement === blockElement) && !isSearching) {
+                if (blockElement && options.blockElement === blockElement && !isSearching) {
                     focusBlock(options.blockElement);
                 }
             }
@@ -245,7 +245,7 @@ ${view.hideAttrViewName ? " av__gallery--top" : ""}">
             if (event.isComposing) {
                 return;
             }
-            if (searchInputElement.value || (document.activeElement === searchInputElement)) {
+            if (searchInputElement.value || document.activeElement === searchInputElement) {
                 viewsElement.classList.add("av__views--show");
             } else {
                 viewsElement.classList.remove("av__views--show");

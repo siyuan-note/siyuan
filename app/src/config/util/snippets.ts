@@ -114,7 +114,7 @@ export const openSnippets = () => {
         dialog.element.setAttribute("data-key", Constants.DIALOG_SNIPPETS);
         dialog.element.addEventListener("click", (event) => {
             let target = event.target as HTMLElement;
-            while (target && (target !== dialog.element)) {
+            while (target && target !== dialog.element) {
                 if (target.id === "addCodeSnippetCSS" || target.id === "addCodeSnippetJS") {
                     target.parentElement.insertAdjacentHTML("afterend", genSnippet({
                         type: target.id === "addCodeSnippetCSS" ? "css" : "js",

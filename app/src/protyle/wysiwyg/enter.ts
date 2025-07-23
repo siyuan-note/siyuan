@@ -384,7 +384,7 @@ const listEnter = (protyle: IProtyle, blockElement: HTMLElement, range: Range) =
     let newElement;
     if (subListElement && listItemElement.getAttribute("fold") !== "1" &&
         // 子列表下的段落块回车 https://ld246.com/article/1623919354587
-        (blockElement.nextElementSibling === subListElement)) {
+        blockElement.nextElementSibling === subListElement) {
         // 含有子列表的换行
         if (position.end >= editableElement.textContent.length -
             // 数学公式结尾会有 zwsp https://github.com/siyuan-note/siyuan/issues/6679

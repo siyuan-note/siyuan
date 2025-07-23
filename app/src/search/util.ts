@@ -337,7 +337,7 @@ export const genSearch = (app: App, config: Config.IUILayoutTabSearchConfig, ele
     element.addEventListener("click", (event: MouseEvent) => {
         let target = event.target as HTMLElement;
         const searchPathInputElement = element.querySelector("#searchPathInput");
-        while (target && (target !== element)) {
+        while (target && target !== element) {
             const type = target.getAttribute("data-type");
             if (type === "removeCriterion") {
                 updateConfig(element, {

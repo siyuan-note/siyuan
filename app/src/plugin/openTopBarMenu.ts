@@ -10,6 +10,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
     const menu = new Menu("topBarPlugin");
     /// #if !MOBILE
         menu.addItem({
+            id: "manage",
             icon: "iconSettings",
             label: window.siyuan.languages.manage,
             ignore: isHuawei() || window.siyuan.config.readonly,
@@ -17,7 +18,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
             }
         });
-        menu.addSeparator(undefined, isHuawei() || window.siyuan.config.readonly);
+        menu.addSeparator({id: "separator_1"}, isHuawei() || window.siyuan.config.readonly);
     /// #endif
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
@@ -27,6 +28,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         plugin.topBarIcons.forEach(item => {
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
+                id: hasUnpin ? "pin" : "unpin",
                 icon: hasUnpin ? "iconPin" : "iconUnpin",
                 label: hasUnpin ? window.siyuan.languages.pin : window.siyuan.languages.unpin,
                 click() {
@@ -43,6 +45,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             }];
             if (hasSetting) {
                 submenu.push({
+                    id: "config",
                     icon: "iconSettings",
                     label: window.siyuan.languages.config,
                     click() {
@@ -53,6 +56,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             const itemLabel = target ? item.getAttribute("aria-label") : item.textContent.trim();
             if (!target) {
                 submenu.push({
+                    id: "play",
                     icon: "iconPlay",
                     label: itemLabel,
                     click() {
@@ -62,6 +66,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
                 });
             }
             const menuOption: IMenu = {
+                id: item.id,
                 icon: "iconInfo",
                 label: itemLabel,
                 click: target ? () => {
@@ -84,6 +89,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         if (!hasTopBar && hasSetting) {
             hasPlugin = true;
             menu.addItem({
+                id: plugin.name,
                 icon: "iconSettings",
                 label: plugin.displayName,
                 click() {
@@ -97,6 +103,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             window.siyuan.menus.menu.element.querySelector(".b3-menu__separator")?.remove();
         } else {
             menu.addItem({
+                id: "emptyContent",
                 iconHTML: "",
                 type: "readonly",
                 label: window.siyuan.languages.emptyContent,

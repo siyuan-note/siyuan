@@ -76,11 +76,26 @@ ${html}
 
 export const getGroupsHTML = (columns: IAVColumn[], group: IAVGroup) => {
     let html = "";
-    if (group) {
-        html = `<button class="b3-menu__separator"></button>
+    if (group && group.field) {
+        html = `<button class="b3-menu__item" data-type="goGroupsMethod">
+    <span class="b3-menu__label">${window.siyuan.languages.date}</span>
+    <span class="b3-menu__accelerator">${group.method}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item" data-type="goGroupsSort">
+    <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
+    <span class="b3-menu__accelerator">${group.order}</span>
+    <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
+</button>
+<button class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.hideEmptyGroup}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input type="checkbox" class="b3-switch b3-switch--menu">
+</button>
+<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="removeGroups">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
-    <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
+    <span class="b3-menu__label">${window.siyuan.languages.removeGroup}</span>
 </button>`;
     }
     return `<div class="b3-menu__items">
@@ -93,7 +108,7 @@ export const getGroupsHTML = (columns: IAVColumn[], group: IAVGroup) => {
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="goGroupsMethod">
     <span class="b3-menu__label">${window.siyuan.languages.groupMethod}</span>
-    <span class="b3-menu__accelerator">${group ? columns.filter(item => item.id === group.field)[0].name : ""}</span>
+    <span class="b3-menu__accelerator">${(group && group.field) ? columns.filter(item => item.id === group.field)[0].name : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 ${html}

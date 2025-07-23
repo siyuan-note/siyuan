@@ -851,6 +851,7 @@ interface IAVView {
     pageSize: number;
     showIcon: boolean;
     wrapField: boolean;
+    groupHidden?: boolean,
     filters: IAVFilter[],
     sorts: IAVSort[],
     groups: IAVView[]
@@ -893,9 +894,9 @@ interface IAVGroup {
     field: string,
     method?: number //  0: 按值分组、1: 按数字范围分组、2: 按相对日期分组、3: 按天日期分组、4: 按周日期分组、5: 按月日期分组、6: 按年日期分组
     range?: {
-        numStart: number // 数字范围起始值
-        numEnd: number   // 数字范围结束值
-        numStep: number  // 数字范围步长
+        numStart: number // 数字范围起始值 0
+        numEnd: number   // 数字范围结束值 1000
+        numStep: number  // 数字范围步长 100
     }
     order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
 }

@@ -132,7 +132,8 @@ export const lineNumberRender = (block: HTMLElement, zoom = 1) => {
     if (lineList[lineList.length - 1] === "" && lineList.length > 1) {
         lineList.pop();
     }
-
+    block.firstElementChild.innerHTML = `<span>${lineList.length}</span>`;
+    codeElement.style.paddingLeft = `${block.firstElementChild.clientWidth + 16}px`;
     let lineNumberHTML = "";
     if (codeElement.style.wordBreak === "break-word") {
         // 代码块开启了换行
@@ -164,14 +165,6 @@ padding-right:0;max-height: none;box-sizing: border-box;position: absolute;paddi
     }
 
     block.firstElementChild.innerHTML = lineNumberHTML;
-    
-    // 用最后一个行号元素计算宽度
-    const lastLineNumberElement = block.firstElementChild.lastElementChild as HTMLElement;
-    if (lastLineNumberElement) {
-        lastLineNumberElement.textContent = lineList.length.toString();
-        codeElement.style.paddingLeft = `${lastLineNumberElement.offsetWidth + 16}px`;
-        lastLineNumberElement.textContent = "";
-    }
 
     // https://github.com/siyuan-note/siyuan/issues/12726
     if (block.scrollHeight > block.clientHeight) {

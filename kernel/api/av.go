@@ -89,6 +89,9 @@ func setAttrViewGroup(c *gin.Context) {
 		ret.Msg = err.Error()
 		return
 	}
+
+	ret = renderAttrView(blockID, avID, "", "", 1, -1)
+	c.JSON(http.StatusOK, ret)
 }
 
 func changeAttrViewLayout(c *gin.Context) {

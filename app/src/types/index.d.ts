@@ -898,6 +898,7 @@ interface IAVGroup {
         numEnd: number   // 数字范围结束值 1000
         numStep: number  // 数字范围步长 100
     }
+    hideEmpty?: boolean
     order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
 }
 

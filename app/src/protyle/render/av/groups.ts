@@ -1,20 +1,20 @@
 import {unicode2Emoji} from "../../../emoji";
 import {getColIconByType} from "./col";
 import {escapeHtml} from "../../../util/escape";
-import {transaction} from "../../wysiwyg/transaction";
 import {setPosition} from "../../../util/setPosition";
 import {getFieldsByData} from "./view";
+import {fetchSyncPost} from "../../../util/fetch";
 
-export const setGroupMethod = (options: {
+export const setGroupMethod = async (options: {
     protyle: IProtyle;
     fieldId: string;
     data: IAV;
     menuElement: HTMLElement,
     blockElement: Element,
 }) => {
-    const blockID = options.blockElement.getAttribute("data-block-id");
+    const blockID = options.blockElement.getAttribute("data-node-id");
     const column: IAVColumn = getFieldsByData(options.data).find(item => item.id === options.fieldId);
-    const data = {
+    const data = column ? {
         field: options.fieldId,
         method: column.type === "number" ? 1 : (["date", "updated", "created"].includes(column.type) ? 2 : 0),
         order: 0,
@@ -23,24 +23,13 @@ export const setGroupMethod = (options: {
             numEnd: 1000,
             numStep: 100,
         } : null
-    };
-    transaction(options.protyle, [{
-        action: "setAttrViewGroup",
-        avID: options.data.id,
+    } : {field: null, method: null, order: null, range: null};
+    const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
         blockID,
-        data
-    }], [{
-        action: "setAttrViewGroup",
-        avID: options.data.id,
-        blockID,
-        data: {
-            field: options.data.view.group?.field || "",
-            method: options.data.view.group?.method || "",
-            order: options.data.view.group?.order || "",
-            range: options.data.view.group?.range || ""
-        }
-    }]);
-    options.data.view.group = data;
+        avID: options.blockElement.getAttribute("data-av-id"),
+        group: data
+    });
+    options.data.view = response.data.view;
     options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
     // bindGroupsEvent(options.protyle, options.menuElement, options.data, blockID);
     const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
@@ -141,7 +130,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
 <button class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.hideEmptyGroup}</span>
     <span class="fn__space fn__flex-1"></span>
-    <input type="checkbox" class="b3-switch b3-switch--menu">
+    <input type="checkbox" class="b3-switch b3-switch--menu"${view.group.hideEmpty ? " checked" : ""}>
 </button>
 ${groupHTML}
 <button class="b3-menu__separator"></button>

@@ -1441,7 +1441,7 @@ export const openMenuPanel = (options: {
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,
-                        data: data
+                        data
                     });
                     fields = getFieldsByData(data);
                     event.preventDefault();

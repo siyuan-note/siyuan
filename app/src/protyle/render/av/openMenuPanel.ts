@@ -48,7 +48,14 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
-import {bindGroupsEvent, getGroupsHTML, getGroupsMethodHTML, setGroupMethod} from "./groups";
+import {
+    bindGroupsEvent,
+    getGroupsHTML,
+    getGroupsMethodHTML,
+    goGroupsDate,
+    goGroupsSort,
+    setGroupMethod
+} from "./groups";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -574,31 +581,6 @@ export const openMenuPanel = (options: {
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "goGroups") {
-                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
-                    bindGroupsEvent();
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "goGroupsMethod") {
-                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "setGroupMethod") {
-                    setGroupMethod({
-                        protyle: options.protyle,
-                        fieldId: target.getAttribute("data-id"),
-                        data,
-                        menuElement,
-                        blockElement: options.blockElement,
-                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -1444,6 +1426,53 @@ export const openMenuPanel = (options: {
                         data
                     });
                     fields = getFieldsByData(data);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsDate") {
+                    goGroupsDate({
+                        target,
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        data
+                    });
+                    fields = getFieldsByData(data);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "goGroupsSort") {
+                    goGroupsSort({
+                        target,
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        data
+                    });
+                    fields = getFieldsByData(data);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "setGroupMethod") {
+                    setGroupMethod({
+                        protyle: options.protyle,
+                        fieldId: target.getAttribute("data-id"),
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement,
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroups") {
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                    bindGroupsEvent();
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsMethod") {
+                    window.siyuan.menus.menu.remove();
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

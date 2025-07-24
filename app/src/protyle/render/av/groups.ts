@@ -4,6 +4,8 @@ import {escapeHtml} from "../../../util/escape";
 import {setPosition} from "../../../util/setPosition";
 import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
+import {Menu} from "../../../plugin/Menu";
+import {transaction} from "../../wysiwyg/transaction";
 
 export const setGroupMethod = async (options: {
     protyle: IProtyle;
@@ -43,6 +45,9 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     ${group ? "" : selectHTML}
 </button>`;
     columns.forEach(item => {
+        if (["rollup", "mAsset"].includes(item.type)) {
+            return;
+        }
         html += `<button class="b3-menu__item" data-id="${item.id}" data-type="setGroupMethod">
     <div class="b3-menu__label fn__flex">
         ${item.icon ? unicode2Emoji(item.icon, "b3-menu__icon", true) : `<svg class="b3-menu__icon"><use xlink:href="#${getColIconByType(item.type)}"></use></svg>`}
@@ -98,20 +103,21 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     let column: IAVColumn;
     if (view.group && view.group.field) {
         let groupHTML = "";
+        column = columns.find(item => item.id === view.group.field);
         if (view.groups.length > 0) {
             groupHTML = `<button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label">${window.siyuan.languages.groups}</span>
 </button>`;
+            const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
             view.groups.forEach(item => {
-                groupHTML += `<button class="b3-menu__item" draggable="true">
-    <svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>
+                groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}">
+    ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     <div class="b3-menu__label fn__flex">${item.name || ""}</div>
     <svg class="b3-menu__action"><use xlink:href="#iconEye${item.groupHidden ? "off" : ""}"></use></svg>
 </button>`;
             });
         }
-        column = columns.find(item => item.id === view.group.field);
         html = `<button class="b3-menu__item${["date", "updated", "created"].includes(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">
     <span class="b3-menu__label">${window.siyuan.languages.date}</span>
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.method, "date")}</span>
@@ -122,7 +128,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="b3-menu__accelerator">${(view.group.range && typeof view.group.range.numStart === "number") ? `${view.group.range.numStart} - ${view.group.range.numEnd}` : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item" data-type="goGroupsSort">
+<button class="b3-menu__item${["checkbox", "rollup", "mAsset"].includes(column.type) ? " fn__none" : ""}" data-type="goGroupsSort">
     <span class="b3-menu__label">${window.siyuan.languages.sort}</span>
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.order, "sort")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -158,4 +164,97 @@ ${html}
 
 export const bindGroupsEvent = () => {
 
+};
+
+export const goGroupsDate = (options: {
+    protyle: IProtyle;
+    target: Element;
+    data: IAV;
+    blockElement: Element;
+}) => {
+    const menu = new Menu("avGroupDate");
+    if (menu.isOpen) {
+        return;
+    }
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    [2, 3, 4, 5, 6].forEach((item) => {
+        const label = getLanguageByIndex(item, "date");
+        menu.addItem({
+            iconHTML: "",
+            checked: options.data.view.group.method === item,
+            label,
+            click() {
+                transaction(options.protyle, [{
+                    action: "setAttrViewGroup",
+                    avID: options.data.id,
+                    blockID,
+                    data: {
+                        method: item,
+                    }
+                }], [{
+                    action: "setAttrViewGroup",
+                    avID: options.data.id,
+                    blockID,
+                    data: {
+                        method: options.data.view.group?.method || null,
+                    }
+                }]);
+                options.data.view.group.method = item;
+                options.target.querySelector(".b3-menu__accelerator").textContent = label;
+            }
+        });
+    });
+    const rect = options.target.getBoundingClientRect();
+    menu.open({
+        isLeft: true,
+        x: rect.right,
+        y: rect.bottom
+    });
+};
+
+export const goGroupsSort = (options: {
+    protyle: IProtyle;
+    target: Element;
+    data: IAV;
+    blockElement: Element;
+}) => {
+    const menu = new Menu("avGroupSort");
+    if (menu.isOpen) {
+        return;
+    }
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    const column = getFieldsByData(options.data).find(item => item.id === options.data.view.group.field);
+    (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : [0, 1, 2]).forEach((item) => {
+        const label = getLanguageByIndex(item, "sort");
+        menu.addItem({
+            iconHTML: "",
+            checked: options.data.view.group.order === item,
+            label,
+            click() {
+                transaction(options.protyle, [{
+                    action: "setAttrViewGroup",
+                    avID: options.data.id,
+                    blockID,
+                    data: {
+                        order: item,
+                    }
+                }], [{
+                    action: "setAttrViewGroup",
+                    avID: options.data.id,
+                    blockID,
+                    data: {
+                        order: options.data.view.group?.order || null,
+                    }
+                }]);
+                options.data.view.group.order = item;
+                options.target.querySelector(".b3-menu__accelerator").textContent = label;
+            }
+        });
+    });
+    const rect = options.target.getBoundingClientRect();
+    menu.open({
+        isLeft: true,
+        x: rect.right,
+        y: rect.bottom
+    });
 };

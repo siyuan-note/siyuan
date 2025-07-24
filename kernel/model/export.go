@@ -589,47 +589,7 @@ func Preview(id string) (retStdHTML string) {
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
 
-	// 聚焦导出的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）
-	// Export preview mode supports focus use https://github.com/siyuan-note/siyuan/issues/15340
-	if "d" != bt.Type {
-		level := 1
-		var firstHeading *ast.Node
-		if !Conf.Export.AddTitle {
-			for n := tree.Root.FirstChild; nil != n; n = n.Next {
-				if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
-					firstHeading = n
-					break
-				}
-			}
-		} else {
-			for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
-				if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
-					firstHeading = n
-					break
-				}
-			}
-			level = 2
-		}
-		if nil != firstHeading {
-			hLevel := firstHeading.HeadingLevel
-			diff := level - hLevel
-			var children, childrenHeadings []*ast.Node
-			children = append(children, firstHeading)
-			children = append(children, treenode.HeadingChildren(firstHeading)...)
-			for _, c := range children {
-				ccH := c.ChildrenByType(ast.NodeHeading)
-				childrenHeadings = append(childrenHeadings, ccH...)
-			}
-			for _, h := range childrenHeadings {
-				h.HeadingLevel += diff
-				if 6 < h.HeadingLevel {
-					h.HeadingLevel = 6
-				} else if 1 > h.HeadingLevel {
-					h.HeadingLevel = 1
-				}
-			}
-		}
-	}
+	adjustHeadingLevel(bt, tree)
 
 	// 移除超级块的属性列表 https://github.com/siyuan-note/siyuan/issues/13451
 	var unlinks []*ast.Node
@@ -907,6 +867,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true, &map[string]*parse.Tree{})
+	adjustHeadingLevel(bt, tree)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -3455,4 +3416,50 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 	}
 	ret = sql.RenderAttributeViewTable(attrView, view, query)
 	return
+}
+
+// adjustHeadingLevel 聚焦导出（即非文档块）的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）。
+// Export preview mode supports focus use https://github.com/siyuan-note/siyuan/issues/15340
+func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree) {
+	if "d" == bt.Type {
+		return
+	}
+
+	level := 1
+	var firstHeading *ast.Node
+	if !Conf.Export.AddTitle {
+		for n := tree.Root.FirstChild; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+				firstHeading = n
+				break
+			}
+		}
+	} else {
+		for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+				firstHeading = n
+				break
+			}
+		}
+		level = 2
+	}
+	if nil != firstHeading {
+		hLevel := firstHeading.HeadingLevel
+		diff := level - hLevel
+		var children, childrenHeadings []*ast.Node
+		children = append(children, firstHeading)
+		children = append(children, treenode.HeadingChildren(firstHeading)...)
+		for _, c := range children {
+			ccH := c.ChildrenByType(ast.NodeHeading)
+			childrenHeadings = append(childrenHeadings, ccH...)
+		}
+		for _, h := range childrenHeadings {
+			h.HeadingLevel += diff
+			if 6 < h.HeadingLevel {
+				h.HeadingLevel = 6
+			} else if 1 > h.HeadingLevel {
+				h.HeadingLevel = 1
+			}
+		}
+	}
 }

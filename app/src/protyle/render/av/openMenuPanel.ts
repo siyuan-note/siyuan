@@ -1464,7 +1464,12 @@ export const openMenuPanel = (options: {
                     break;
                 } else if (type === "goGroups") {
                     menuElement.innerHTML = getGroupsHTML(fields, data.view);
-                    bindGroupsEvent();
+                    bindGroupsEvent({
+                        protyle: options.protyle,
+                        menuElement: menuElement,
+                        blockElement: options.blockElement,
+                        data
+                    });
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

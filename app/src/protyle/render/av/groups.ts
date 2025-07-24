@@ -33,7 +33,12 @@ export const setGroupMethod = async (options: {
     });
     options.data.view = response.data.view;
     options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
-    // bindGroupsEvent(options.protyle, options.menuElement, options.data, blockID);
+    bindGroupsEvent({
+        protyle: options.protyle,
+        menuElement: options.menuElement,
+        blockElement: options.blockElement,
+        data: options.data
+    });
     const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
     setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
 };
@@ -105,10 +110,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         let groupHTML = "";
         column = columns.find(item => item.id === view.group.field);
         if (view.groups.length > 0) {
-            groupHTML = `<button class="b3-menu__separator"></button>
-<button class="b3-menu__item" data-type="nobg">
-    <span class="b3-menu__label">${window.siyuan.languages.groups}</span>
-</button>`;
+            groupHTML = '<button class="b3-menu__separator"></button>';
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
             view.groups.forEach(item => {
                 groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}">
@@ -133,11 +135,11 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.order, "sort")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item">
+<label class="b3-menu__item">
     <span class="fn__flex-center">${window.siyuan.languages.hideEmptyGroup}</span>
     <span class="fn__space fn__flex-1"></span>
     <input type="checkbox" class="b3-switch b3-switch--menu"${view.group.hideEmpty ? " checked" : ""}>
-</button>
+</label>
 ${groupHTML}
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item b3-menu__item--warning" data-type="removeGroups">
@@ -162,8 +164,32 @@ ${html}
 </div>`;
 };
 
-export const bindGroupsEvent = () => {
-
+export const bindGroupsEvent = (options: {
+    protyle: IProtyle;
+    menuElement: HTMLElement;
+    blockElement: Element;
+    data: IAV;
+}) => {
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    const checkElement = options.menuElement.querySelector("input");
+    checkElement.addEventListener("change", () => {
+        transaction(options.protyle, [{
+            action: "setAttrViewGroup",
+            avID: options.data.id,
+            blockID,
+            data: {
+                hideEmpty: checkElement.checked,
+            }
+        }], [{
+            action: "setAttrViewGroup",
+            avID: options.data.id,
+            blockID,
+            data: {
+                hideEmpty: options.data.view.group?.hideEmpty || null,
+            }
+        }]);
+        options.data.view.group.hideEmpty = checkElement.checked;
+    });
 };
 
 export const goGroupsDate = (options: {

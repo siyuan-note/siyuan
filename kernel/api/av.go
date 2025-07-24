@@ -59,10 +59,9 @@ func batchReplaceAttributeViewBlocks(c *gin.Context) {
 
 func setAttrViewGroup(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
 	arg, ok := util.JsonArg(c, ret)
 	if !ok {
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 
@@ -74,12 +73,14 @@ func setAttrViewGroup(c *gin.Context) {
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 	group := &av.ViewGroup{}
 	if err = gulu.JSON.UnmarshalJSON(data, group); nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 
@@ -87,6 +88,8 @@ func setAttrViewGroup(c *gin.Context) {
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
+
+		c.JSON(http.StatusOK, ret)
 		return
 	}
 

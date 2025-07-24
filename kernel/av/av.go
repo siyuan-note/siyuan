@@ -191,15 +191,14 @@ type View struct {
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group          *ViewGroup `json:"group,omitempty"`          // 分组规则
-	GroupUpdated   int64      `json:"groupUpdated"`             // 分组规则更新时间戳
-	Groups         []*View    `json:"groups,omitempty"`         // 分组视图列表
-	GroupItemIDs   []string   `json:"groupItemIds,omitempty"`   // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc      *GroupCalc `json:"groupCalc,omitempty"`      // 分组计算规则
-	GroupName      string     `json:"groupName,omitempty"`      // 分组名称
-	GroupFolded    bool       `json:"groupFolded,omitempty"`    // 分组是否折叠
-	GroupHidden    bool       `json:"groupHidden,omitempty"`    // 分组是否隐藏
-	GroupHideEmpty bool       `json:"groupHideEmpty,omitempty"` // 分组是否隐藏空分组
+	Group        *ViewGroup `json:"group,omitempty"`        // 分组规则
+	GroupUpdated int64      `json:"groupUpdated"`           // 分组规则更新时间戳
+	Groups       []*View    `json:"groups,omitempty"`       // 分组视图列表
+	GroupItemIDs []string   `json:"groupItemIds,omitempty"` // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`    // 分组计算规则
+	GroupName    string     `json:"groupName,omitempty"`    // 分组名称
+	GroupFolded  bool       `json:"groupFolded,omitempty"`  // 分组是否折叠
+	GroupHidden  bool       `json:"groupHidden,omitempty"`  // 分组是否隐藏
 }
 
 // GroupCalc 描述了分组计算规则和结果的结构。

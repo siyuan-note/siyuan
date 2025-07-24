@@ -301,8 +301,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doSetAttrViewGroup(op)
 		case "hideAttrViewGroup":
 			ret = tx.doHideAttrViewGroup(op)
-		case "setGroupHideEmpty":
-			ret = tx.doSetGroupHideEmpty(op)
+		case "setAttrViewHideEmptyGroup":
+			ret = tx.doSetAttrViewHideEmptyGroup(op)
 		case "syncAttrViewTableColWidth":
 			ret = tx.doSyncAttrViewTableColWidth(op)
 		}

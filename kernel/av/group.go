@@ -18,10 +18,11 @@ package av
 
 // ViewGroup 描述了视图分组规则的结构。
 type ViewGroup struct {
-	Field  string      `json:"field"`           // 分组字段 ID
-	Method GroupMethod `json:"method"`          // 分组方式
-	Range  *GroupRange `json:"range,omitempty"` // 分组范围
-	Order  GroupOrder  `json:"order"`           // 分组排序规则
+	Field     string      `json:"field"`               // 分组字段 ID
+	Method    GroupMethod `json:"method"`              // 分组方式
+	Range     *GroupRange `json:"range,omitempty"`     // 分组范围
+	Order     GroupOrder  `json:"order"`               // 分组排序规则
+	HideEmpty bool        `json:"hideEmpty,omitempty"` // 是否隐藏空分组
 }
 
 // GroupMethod 描述了分组方式。

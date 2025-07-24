@@ -93,14 +93,14 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 	return
 }
 
-func (tx *Transaction) doSetGroupHideEmpty(operation *Operation) (ret *TxErr) {
-	if err := SetGroupHideEmpty(operation.AvID, operation.BlockID, operation.Data.(bool)); nil != err {
+func (tx *Transaction) doSetAttrViewHideEmptyGroup(operation *Operation) (ret *TxErr) {
+	if err := setAttrViewHideEmptyGroup(operation.AvID, operation.BlockID, operation.Data.(bool)); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func SetGroupHideEmpty(avID, blockID string, hidden bool) (err error) {
+func setAttrViewHideEmptyGroup(avID, blockID string, hidden bool) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
@@ -115,7 +115,14 @@ func SetGroupHideEmpty(avID, blockID string, hidden bool) (err error) {
 		return
 	}
 
-	view.GroupHideEmpty = hidden
+	view.Group.HideEmpty = hidden
+	for _, group := range view.Groups {
+		if hidden {
+			group.GroupHidden = true
+		} else {
+			group.GroupHidden = false
+		}
+	}
 
 	err = av.SaveAttributeView(attrView)
 	if err != nil {

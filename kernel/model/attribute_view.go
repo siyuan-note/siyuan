@@ -198,7 +198,14 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	view.Group = group
+	if nil == view.Group {
+		view.Group = group
+	} else {
+		if err = copier.Copy(view.Group, group); nil != err {
+			return
+		}
+	}
+
 	genAttrViewViewGroups(view, attrView)
 	return err
 }

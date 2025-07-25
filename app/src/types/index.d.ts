@@ -853,7 +853,7 @@ interface IAVView {
     pageSize: number;
     showIcon: boolean;
     wrapField: boolean;
-    groupHidden?: boolean,
+    groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
     filters: IAVFilter[],
     sorts: IAVSort[],
     groups: IAVView[]

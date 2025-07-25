@@ -1519,10 +1519,10 @@ export const openMenuPanel = (options: {
                         data: !isHide
                     }]);
                     data.view.groups.find((item) => {
-                       if (item.id === target.dataset.id) {
-                           item.groupHidden = isHide;
-                           return true;
-                       }
+                        if (item.id === target.dataset.id) {
+                            item.groupHidden = isHide ? 2 : 0;
+                            return true;
+                        }
                     });
                     event.preventDefault();
                     event.stopPropagation();

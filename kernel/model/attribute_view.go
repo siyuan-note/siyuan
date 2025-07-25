@@ -44,6 +44,51 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
+	if err := sortAttributeViewGroup(operation.AvID, operation.BlockID, operation.PreviousID, operation.ID); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	var group *av.View
+	var index, previousIndex int
+	for i, g := range view.Groups {
+		if g.ID == groupID {
+			group = g
+			index = i
+			break
+		}
+	}
+	if nil == group {
+		return
+	}
+
+	view.Groups = append(view.Groups[:index], view.Groups[index+1:]...)
+	for i, g := range group.Groups {
+		if g.ID == previousGroupID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	view.Groups = util.InsertElem(view.Groups, previousIndex, group)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doRemoveAttrViewGroup(operation *Operation) (ret *TxErr) {
 	if err := removeAttributeViewGroup(operation.AvID, operation.BlockID); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -2133,9 +2178,6 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 			index = i
 			break
 		}
-	}
-	if nil == view {
-		return
 	}
 
 	attrView.Views = append(attrView.Views[:index], attrView.Views[index+1:]...)

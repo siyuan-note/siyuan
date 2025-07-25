@@ -121,13 +121,13 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
-	if err := hideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
+	if err := hideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, int(operation.Data.(float64))); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func hideAttributeViewGroup(avID, blockID, groupID string, hidden bool) (err error) {
+func hideAttributeViewGroup(avID, blockID, groupID string, hidden int) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
@@ -186,8 +186,29 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
+	oldHideEmpty := false
+	if nil != view.Group {
+		oldHideEmpty = view.Group.HideEmpty
+	}
+
 	view.Group = group
 	genAttrViewViewGroups(view, attrView)
+
+	if view.Group.HideEmpty != oldHideEmpty {
+		for _, g := range view.Groups {
+			if view.Group.HideEmpty {
+				if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
+					g.GroupHidden = 1
+				}
+			} else {
+				if 2 != g.GroupHidden {
+					g.GroupHidden = 0
+				}
+			}
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
 	return
 }
 
@@ -1406,6 +1427,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != updatedDate {
 			genAttrViewViewGroups(view, attrView)
+			av.SaveAttributeView(attrView)
 		}
 
 		for _, groupView := range view.Groups {
@@ -1468,7 +1490,10 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	}
 
 	// 如果是按日期分组，则需要记录每个分组视图的一些状态字段，以便后面重新计算分组后可以恢复这些状态
-	type GroupState struct{ Folded, Hidden bool }
+	type GroupState struct {
+		Folded bool
+		Hidden int
+	}
 	groupStates := map[string]*GroupState{}
 	if isGroupByDate(view) {
 		for _, groupView := range view.Groups {
@@ -1637,8 +1662,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 		}
 	}
-
-	av.SaveAttributeView(attrView)
 }
 
 func isGroupByDate(view *av.View) bool {

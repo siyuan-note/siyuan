@@ -68,7 +68,7 @@ type BaseInstance struct {
 	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则和结果
 	GroupName   string     `json:"groupName,omitempty"` // 分组名称
 	GroupFolded bool       `json:"groupFolded"`         // 分组是否折叠
-	GroupHidden bool       `json:"groupHidden"`         // 分组是否隐藏
+	GroupHidden int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
@@ -127,7 +127,7 @@ func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 	baseInstance.GroupFolded = folded
 }
 
-func (baseInstance *BaseInstance) SetGroupHidden(hidden bool) {
+func (baseInstance *BaseInstance) SetGroupHidden(hidden int) {
 	baseInstance.GroupHidden = hidden
 }
 

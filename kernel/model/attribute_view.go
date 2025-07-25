@@ -107,13 +107,17 @@ func removeAttributeViewGroup(avID, blockID string) (err error) {
 		return err
 	}
 
-	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
+	removeAttributeViewGroup0(view)
 	err = av.SaveAttributeView(attrView)
 	if err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return err
 	}
 	return nil
+}
+
+func removeAttributeViewGroup0(view *av.View) {
+	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
 }
 
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
@@ -3909,6 +3913,10 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 				}
 			}
 		}
+	}
+
+	for _, view := range attrView.Views {
+		removeAttributeViewGroup0(view)
 	}
 
 	err = av.SaveAttributeView(attrView)

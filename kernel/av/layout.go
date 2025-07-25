@@ -64,11 +64,11 @@ type BaseInstance struct {
 	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
 	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
 
-	Groups      []Viewable `json:"groups,omitempty"`      // 分组实例列表
-	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`   // 分组计算规则和结果
-	GroupName   string     `json:"groupName,omitempty"`   // 分组名称
-	GroupFolded bool       `json:"groupFolded,omitempty"` // 分组是否折叠
-	GroupHidden bool       `json:"groupHidden,omitempty"` // 分组是否隐藏
+	Groups      []Viewable `json:"groups,omitempty"`    // 分组实例列表
+	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则和结果
+	GroupName   string     `json:"groupName,omitempty"` // 分组名称
+	GroupFolded bool       `json:"groupFolded"`         // 分组是否折叠
+	GroupHidden int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
@@ -127,7 +127,7 @@ func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 	baseInstance.GroupFolded = folded
 }
 
-func (baseInstance *BaseInstance) SetGroupHidden(hidden bool) {
+func (baseInstance *BaseInstance) SetGroupHidden(hidden int) {
 	baseInstance.GroupHidden = hidden
 }
 

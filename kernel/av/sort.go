@@ -67,7 +67,7 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 			val := items[i].GetValues()[fieldIndexSort.Index]
 			if KeyTypeCheckbox == val.Type {
 				if block := item.GetBlockValue(); nil != block && block.IsEdited() {
-					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
+					// 如果主键编辑过，则复选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
 					editedValItems[item.GetID()] = true
 					break
 				}

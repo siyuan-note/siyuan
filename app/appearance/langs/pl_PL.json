@@ -1642,6 +1642,7 @@
     "262": "Jutro",
     "263": "Następne %d dni",
     "264": "Pole [%s] jest puste",
-    "265": "Poza zakresem"
+    "265": "Poza zakresem",
+    "266": "Tesseract OCR nie jest zainstalowany lub skonfigurowany, zapoznaj się z Podręcznikiem użytkownika - Sekcja plików zasobów, aby skonfigurować"
   }
 }

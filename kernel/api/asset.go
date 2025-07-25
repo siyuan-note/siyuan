@@ -153,7 +153,14 @@ func ocr(c *gin.Context) {
 
 	path := arg["path"].(string)
 
-	ocrJSON := util.OcrAsset(path)
+	ocrJSON, err := util.OcrAsset(path)
+	if nil != err {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		ret.Data = map[string]interface{}{"closeTimeout": 7000}
+		return
+	}
+
 	ret.Data = map[string]interface{}{
 		"text":    util.GetOcrJsonText(ocrJSON),
 		"ocrJSON": ocrJSON,

@@ -44,6 +44,51 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
+	if err := sortAttributeViewGroup(operation.AvID, operation.BlockID, operation.PreviousID, operation.ID); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	var group *av.View
+	var index, previousIndex int
+	for i, g := range view.Groups {
+		if g.ID == groupID {
+			group = g
+			index = i
+			break
+		}
+	}
+	if nil == group {
+		return
+	}
+
+	view.Groups = append(view.Groups[:index], view.Groups[index+1:]...)
+	for i, g := range group.Groups {
+		if g.ID == previousGroupID {
+			previousIndex = i + 1
+			break
+		}
+	}
+	view.Groups = util.InsertElem(view.Groups, previousIndex, group)
+
+	err = av.SaveAttributeView(attrView)
+	return
+}
+
 func (tx *Transaction) doRemoveAttrViewGroup(operation *Operation) (ret *TxErr) {
 	if err := removeAttributeViewGroup(operation.AvID, operation.BlockID); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -121,13 +166,13 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
-	if err := hideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
+	if err := hideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, int(operation.Data.(float64))); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func hideAttributeViewGroup(avID, blockID, groupID string, hidden bool) (err error) {
+func hideAttributeViewGroup(avID, blockID, groupID string, hidden int) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
@@ -186,16 +231,29 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
+	oldHideEmpty := false
+	if nil != view.Group {
+		oldHideEmpty = view.Group.HideEmpty
+	}
+
 	view.Group = group
-	for _, g := range view.Groups {
-		if group.HideEmpty {
-			g.GroupHidden = true
-		} else {
-			g.GroupHidden = false
+	genAttrViewViewGroups(view, attrView)
+
+	if view.Group.HideEmpty != oldHideEmpty {
+		for _, g := range view.Groups {
+			if view.Group.HideEmpty {
+				if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
+					g.GroupHidden = 1
+				}
+			} else {
+				if 2 != g.GroupHidden {
+					g.GroupHidden = 0
+				}
+			}
 		}
 	}
 
-	genAttrViewViewGroups(view, attrView)
+	err = av.SaveAttributeView(attrView)
 	return
 }
 
@@ -1414,6 +1472,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != updatedDate {
 			genAttrViewViewGroups(view, attrView)
+			av.SaveAttributeView(attrView)
 		}
 
 		for _, groupView := range view.Groups {
@@ -1476,7 +1535,10 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	}
 
 	// 如果是按日期分组，则需要记录每个分组视图的一些状态字段，以便后面重新计算分组后可以恢复这些状态
-	type GroupState struct{ Folded, Hidden bool }
+	type GroupState struct {
+		Folded bool
+		Hidden int
+	}
 	groupStates := map[string]*GroupState{}
 	if isGroupByDate(view) {
 		for _, groupView := range view.Groups {
@@ -1598,6 +1660,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
 	}
 
+	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+		for _, o := range groupKey.Options {
+			if _, ok := groupItemsMap[o.Name]; !ok {
+				groupItemsMap[o.Name] = []av.Item{}
+			}
+		}
+	}
+
 	for name, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {
@@ -1611,6 +1681,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			logging.LogWarnf("unknown layout type [%s] for group view", view.LayoutType)
 			return
 		}
+
+		v.GroupItemIDs = []string{}
 		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
@@ -1636,7 +1708,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	av.SaveAttributeView(attrView)
+	if av.GroupOrderMan != view.Group.Order {
+		sort.SliceStable(view.Groups, func(i, j int) bool {
+			if av.GroupOrderAsc == view.Group.Order {
+				return view.Groups[i].Name < view.Groups[j].Name
+			}
+			return view.Groups[i].Name > view.Groups[j].Name
+		})
+	}
 }
 
 func isGroupByDate(view *av.View) bool {
@@ -2099,9 +2178,6 @@ func (tx *Transaction) doSortAttrViewView(operation *Operation) (ret *TxErr) {
 			index = i
 			break
 		}
-	}
-	if nil == view {
-		return
 	}
 
 	attrView.Views = append(attrView.Views[:index], attrView.Views[index+1:]...)

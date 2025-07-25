@@ -1642,6 +1642,7 @@
     "262": "Tomorrow",
     "263": "Next %d days",
     "264": "Field [%s] is empty",
-    "265": "Out of range"
+    "265": "Out of range",
+    "266": "Tesseract OCR is not installed or configured, please refer to the User Guide - Assets section for configuration"
   }
 }

@@ -62,8 +62,7 @@ func removeAttributeViewGroup(avID, blockID string) (err error) {
 		return err
 	}
 
-	view.Group, view.Groups = nil, nil
-
+	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
 	err = av.SaveAttributeView(attrView)
 	if err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

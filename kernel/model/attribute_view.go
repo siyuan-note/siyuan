@@ -1619,6 +1619,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			logging.LogWarnf("unknown layout type [%s] for group view", view.LayoutType)
 			return
 		}
+
+		v.GroupItemIDs = []string{}
 		for _, item := range groupItems {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}

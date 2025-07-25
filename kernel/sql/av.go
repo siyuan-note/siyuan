@@ -202,7 +202,7 @@ func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[s
 	}
 
 	// 如果是分组视图，则需要过滤掉不在分组中的项目
-	if 0 < len(view.GroupItemIDs) {
+	if nil != view.GroupItemIDs {
 		tmp := map[string][]*av.KeyValues{}
 		for _, groupItemID := range view.GroupItemIDs {
 			if _, ok := ret[groupItemID]; ok {

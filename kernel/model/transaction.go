@@ -303,6 +303,8 @@ func performTx(tx *Transaction) (ret *TxErr) {
 			ret = tx.doHideAttrViewGroup(op)
 		case "syncAttrViewTableColWidth":
 			ret = tx.doSyncAttrViewTableColWidth(op)
+		case "removeAttrViewGroup":
+			ret = tx.doRemoveAttrViewGroup(op)
 		}
 
 		if nil != ret {

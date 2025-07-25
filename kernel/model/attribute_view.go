@@ -2129,6 +2129,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+					regenAttrViewViewGroups(srcAv, destVal.KeyID)
 					destKeyValues.Values = append(destKeyValues.Values, destVal)
 				}
 			}
@@ -3958,6 +3959,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
+					regenAttrViewViewGroups(attrView, value.KeyID)
 					err = av.SaveAttributeView(attrView)
 				}
 				return
@@ -4290,9 +4292,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 	val.SetUpdatedAt(now)
 
-	if err = regenAttrViewViewGroups(attrView, keyID); nil != err {
-		return
-	}
+	regenAttrViewViewGroups(attrView, keyID)
 
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
@@ -4330,6 +4330,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 						destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
 						destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+						regenAttrViewViewGroups(destAv, key.Relation.BackKeyID)
 						break
 					}
 				}
@@ -4349,9 +4350,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 							if value.BlockID == blockID {
 								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
 								value.SetUpdatedAt(now)
-								if err = regenAttrViewViewGroups(destAv, key.Relation.BackKeyID); nil != err {
-									return
-								}
+								regenAttrViewViewGroups(destAv, key.Relation.BackKeyID)
 								break
 							}
 						}
@@ -4367,7 +4366,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	return
 }
 
-func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) (err error) {
+func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 	for _, view := range attrView.Views {
 		if nil != view.Group && view.Group.Field == keyID {
 			groupKey, _ := attrView.GetKey(view.Group.Field)
@@ -4390,7 +4389,6 @@ func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) (err erro
 			}
 		}
 	}
-	return
 }
 
 func unbindBlockAv(tx *Transaction, avID, blockID string) {
@@ -4787,6 +4785,7 @@ func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []
 				srcAvChanged := false
 				srcValue.Relation.BlockIDs, srcAvChanged = util.ReplaceStr(srcValue.Relation.BlockIDs, previousID, nextID)
 				if srcAvChanged {
+					regenAttrViewViewGroups(srcAv, srcValue.KeyID)
 					changed = true
 				}
 			}

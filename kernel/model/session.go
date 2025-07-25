@@ -274,10 +274,8 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 放过 /appearance/
-	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
-		strings.HasPrefix(c.Request.RequestURI, "/stage/build/export/") ||
-		strings.HasPrefix(c.Request.RequestURI, "/stage/protyle/") {
+	// 放过静态资源请求
+	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") || strings.HasPrefix(c.Request.RequestURI, "/stage/") {
 		c.Next()
 		return
 	}

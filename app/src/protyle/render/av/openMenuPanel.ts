@@ -49,9 +49,9 @@ import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
-    bindGroupsEvent,
+    bindGroupsEvent, bindGroupsNumber,
     getGroupsHTML,
-    getGroupsMethodHTML,
+    getGroupsMethodHTML, getGroupsNumberHTML,
     goGroupsDate,
     goGroupsSort,
     setGroupMethod
@@ -1463,6 +1463,7 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goGroups") {
+                    closeCB = undefined;
                     menuElement.innerHTML = getGroupsHTML(fields, data.view);
                     bindGroupsEvent({
                         protyle: options.protyle,
@@ -1478,6 +1479,19 @@ export const openMenuPanel = (options: {
                     window.siyuan.menus.menu.remove();
                     menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "getGroupsNumber") {
+                    window.siyuan.menus.menu.remove();
+                    menuElement.innerHTML = getGroupsNumberHTML(data.view.group);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    closeCB = bindGroupsNumber({
+                        protyle: options.protyle,
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement
+                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

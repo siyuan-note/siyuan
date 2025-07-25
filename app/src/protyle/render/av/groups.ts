@@ -103,6 +103,64 @@ const getLanguageByIndex = (index: number, type: "sort" | "date") => {
     }
 };
 
+export const getGroupsNumberHTML = (group: IAVGroup) => {
+    return `<div class="b3-menu__items">
+    <button class="b3-menu__item" data-type="nobg">
+        <span class="block__icon" style="padding: 8px;margin-left: -4px;" data-type="goGroups">
+            <svg><use xlink:href="#iconLeft"></use></svg>
+        </span>
+        <span class="b3-menu__label ft__center">${window.siyuan.languages.numberFormatNone}</span>
+    </button>
+    <button class="b3-menu__separator"></button>
+    <div class="b3-menu__item" data-type="nobg">
+        <div>
+            <div class="b3-menu__labels">${window.siyuan.languages.groupRange}</div>
+            <input data-type="avGroupRange" class="b3-text-field fn__size96" placeholder="${group?.range?.numStart || 0}"> - <input class="b3-text-field fn__size96" placeholder="${group?.range?.numEnd || 1000}">
+            <div class="fn__hr"></div>
+            <div class="b3-menu__labels">${window.siyuan.languages.groupStep}</div>
+            <input class="b3-text-field fn__block" placeholder="${group?.range?.numStep || 100}">
+            <div class="fn__hr--small"></div>
+        </div>
+    </div>
+</div>`;
+};
+
+export const bindGroupsNumber = (options: {
+    protyle: IProtyle;
+    menuElement: HTMLElement;
+    blockElement: Element;
+    data: IAV;
+}) => {
+    return () => {
+        if (!options.menuElement.querySelector('[data-type="avGroupRange"]')) {
+            return;
+        }
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const inputElements = options.menuElement.querySelectorAll("input");
+        const range = {
+            numStart: inputElements[0].value ? parseFloat(inputElements[0].value) : 0,
+            numEnd: inputElements[1].value ? parseFloat(inputElements[1].value) : 1000,
+            numStep: inputElements[2].value ? parseFloat(inputElements[2].value) : 100
+        };
+        transaction(options.protyle, [{
+            action: "setAttrViewGroup",
+            avID: options.data.id,
+            blockID,
+            data: {
+                range
+            }
+        }], [{
+            action: "setAttrViewGroup",
+            avID: options.data.id,
+            blockID,
+            data: {
+                range: options.data.view.group.range
+            }
+        }]);
+        options.data.view.group.range = range;
+    };
+};
+
 export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     let html = "";
     let column: IAVColumn;
@@ -125,7 +183,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     <span class="b3-menu__accelerator">${getLanguageByIndex(view.group.method, "date")}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item${column.type === "number" ? "" : " fn__none"}" data-type="goGroupsNumber">
+<button class="b3-menu__item${column.type === "number" ? "" : " fn__none"}" data-type="getGroupsNumber">
     <span class="b3-menu__label">${window.siyuan.languages.numberFormatNone}</span>
     <span class="b3-menu__accelerator">${(view.group.range && typeof view.group.range.numStart === "number") ? `${view.group.range.numStart} - ${view.group.range.numEnd}` : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>

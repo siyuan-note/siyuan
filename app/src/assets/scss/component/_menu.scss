@@ -296,6 +296,13 @@
     min-width: 84px;
   }
 
+  &__labels {
+    font-size: 12px;
+    margin-bottom: 4px;
+    line-height: 20px;
+    color: var(--b3-theme-on-surface);
+  }
+
   &__icon {
     align-self: center;
     height: 14px;

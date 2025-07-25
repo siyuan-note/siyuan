@@ -107,13 +107,17 @@ func removeAttributeViewGroup(avID, blockID string) (err error) {
 		return err
 	}
 
-	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
+	removeAttributeViewGroup0(view)
 	err = av.SaveAttributeView(attrView)
 	if err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
 		return err
 	}
 	return nil
+}
+
+func removeAttributeViewGroup0(view *av.View) {
+	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
 }
 
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
@@ -190,6 +194,43 @@ func hideAttributeViewGroup(avID, blockID, groupID string, hidden int) (err erro
 	for _, group := range view.Groups {
 		if group.ID == groupID {
 			group.GroupHidden = hidden
+			break
+		}
+	}
+
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
+func (tx *Transaction) doFoldAttrViewGroup(operation *Operation) (ret *TxErr) {
+	if err := foldAttrViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func foldAttrViewGroup(avID, blockID, groupID string, folded bool) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	if nil == view.Group {
+		return
+	}
+
+	for _, group := range view.Groups {
+		if group.ID == groupID {
+			group.GroupFolded = folded
 			break
 		}
 	}
@@ -1634,17 +1675,18 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
 				// 未来 30 天之后的按月分组
 				now := time.Now()
+				now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
 				if contentTime.Before(now.AddDate(0, 0, -30)) {
 					groupName = contentTime.Format("2006-01")
 				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
 					groupName = groupNameLast30Days
 				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
 					groupName = groupNameLast7Days
-				} else if contentTime.Equal(now.AddDate(0, 0, -1)) {
+				} else if contentTime.Before(now) {
 					groupName = groupNameYesterday
-				} else if contentTime.Equal(now) {
+				} else if contentTime.After(now) && contentTime.Before(now.AddDate(0, 0, 1)) {
 					groupName = groupNameToday
-				} else if contentTime.Equal(now.AddDate(0, 0, 1)) {
+				} else if contentTime.After(now.AddDate(0, 0, 1)) || contentTime.Equal(now.AddDate(0, 0, 1)) {
 					groupName = groupNameTomorrow
 				} else if contentTime.After(now.AddDate(0, 0, 30)) {
 					groupName = contentTime.Format("2006-01")
@@ -1652,8 +1694,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 					groupName = groupNameNext30Days
 				} else if contentTime.After(now.AddDate(0, 0, 1)) {
 					groupName = groupNameNext7Days
-				} else {
-					groupName = notInRange
 				}
 			}
 		}
@@ -2130,6 +2170,7 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+					regenAttrViewViewGroups(srcAv, destVal.KeyID)
 					destKeyValues.Values = append(destKeyValues.Values, destVal)
 				}
 			}
@@ -3911,6 +3952,10 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		}
 	}
 
+	for _, view := range attrView.Views {
+		removeAttributeViewGroup0(view)
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -3959,6 +4004,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
+					regenAttrViewViewGroups(attrView, value.KeyID)
 					err = av.SaveAttributeView(attrView)
 				}
 				return
@@ -4291,6 +4337,8 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 	val.SetUpdatedAt(now)
 
+	regenAttrViewViewGroups(attrView, keyID)
+
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 
@@ -4327,6 +4375,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 						destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, rowID)
 						destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
+						regenAttrViewViewGroups(destAv, key.Relation.BackKeyID)
 						break
 					}
 				}
@@ -4346,6 +4395,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 							if value.BlockID == blockID {
 								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
 								value.SetUpdatedAt(now)
+								regenAttrViewViewGroups(destAv, key.Relation.BackKeyID)
 								break
 							}
 						}
@@ -4359,6 +4409,31 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		}
 	}
 	return
+}
+
+func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
+	for _, view := range attrView.Views {
+		if nil != view.Group && view.Group.Field == keyID {
+			groupKey, _ := attrView.GetKey(view.Group.Field)
+			if nil == groupKey {
+				return
+			}
+
+			genAttrViewViewGroups(view, attrView)
+
+			for _, g := range view.Groups {
+				if view.Group.HideEmpty {
+					if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
+						g.GroupHidden = 1
+					}
+				} else {
+					if 2 != g.GroupHidden {
+						g.GroupHidden = 0
+					}
+				}
+			}
+		}
+	}
 }
 
 func unbindBlockAv(tx *Transaction, avID, blockID string) {
@@ -4755,6 +4830,7 @@ func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []
 				srcAvChanged := false
 				srcValue.Relation.BlockIDs, srcAvChanged = util.ReplaceStr(srcValue.Relation.BlockIDs, previousID, nextID)
 				if srcAvChanged {
+					regenAttrViewViewGroups(srcAv, srcValue.KeyID)
 					changed = true
 				}
 			}

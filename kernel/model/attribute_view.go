@@ -187,14 +187,6 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	}
 
 	view.Group = group
-	for _, g := range view.Groups {
-		if group.HideEmpty {
-			g.GroupHidden = true
-		} else {
-			g.GroupHidden = false
-		}
-	}
-
 	genAttrViewViewGroups(view, attrView)
 	return
 }

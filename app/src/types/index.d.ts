@@ -64,6 +64,7 @@ type TOperation =
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
     | "setAttrViewGroup"
+    | "removeAttrViewGroup"
     | "syncAttrViewTableColWidth"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"

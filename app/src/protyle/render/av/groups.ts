@@ -6,6 +6,7 @@ import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
+import {objEquals} from "../../../util/functions";
 
 export const setGroupMethod = async (options: {
     protyle: IProtyle;
@@ -115,10 +116,10 @@ export const getGroupsNumberHTML = (group: IAVGroup) => {
     <div class="b3-menu__item" data-type="nobg">
         <div>
             <div class="b3-menu__labels">${window.siyuan.languages.groupRange}</div>
-            <input data-type="avGroupRange" class="b3-text-field fn__size96" placeholder="${group?.range?.numStart || 0}"> - <input class="b3-text-field fn__size96" placeholder="${group?.range?.numEnd || 1000}">
+            <input data-type="avGroupRange" class="b3-text-field fn__size96" value="${group?.range?.numStart || 0}"> - <input class="b3-text-field fn__size96" value="${group?.range?.numEnd || 1000}">
             <div class="fn__hr"></div>
             <div class="b3-menu__labels">${window.siyuan.languages.groupStep}</div>
-            <input class="b3-text-field fn__block" placeholder="${group?.range?.numStep || 100}">
+            <input class="b3-text-field fn__block" value="${group?.range?.numStep || 100}">
             <div class="fn__hr--small"></div>
         </div>
     </div>
@@ -137,27 +138,26 @@ export const bindGroupsNumber = (options: {
         }
         const blockID = options.blockElement.getAttribute("data-node-id");
         const inputElements = options.menuElement.querySelectorAll("input");
-        const range = {
-            numStart: inputElements[0].value ? parseFloat(inputElements[0].value) : 0,
-            numEnd: inputElements[1].value ? parseFloat(inputElements[1].value) : 1000,
-            numStep: inputElements[2].value ? parseFloat(inputElements[2].value) : 100
-        };
+        const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+        Object.assign(options.data.view.group.range, {
+            numStart: inputElements[0].value ? parseFloat(inputElements[0].value) : options.data.view.group.range.numStart,
+            numEnd: inputElements[1].value ? parseFloat(inputElements[1].value) : options.data.view.group.range.numEnd,
+            numStep: inputElements[2].value ? parseFloat(inputElements[2].value) : options.data.view.group.range.numStep
+        });
+        if (objEquals(options.data.view.group, oldGroup)) {
+            return;
+        }
         transaction(options.protyle, [{
             action: "setAttrViewGroup",
             avID: options.data.id,
             blockID,
-            data: {
-                range
-            }
+            data: options.data.view.group
         }], [{
             action: "setAttrViewGroup",
             avID: options.data.id,
             blockID,
-            data: {
-                range: options.data.view.group.range
-            }
+            data: oldGroup
         }]);
-        options.data.view.group.range = range;
     };
 };
 
@@ -231,22 +231,19 @@ export const bindGroupsEvent = (options: {
     const blockID = options.blockElement.getAttribute("data-node-id");
     const checkElement = options.menuElement.querySelector("input");
     checkElement.addEventListener("change", () => {
+        const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+        options.data.view.group.hideEmpty = checkElement.checked;
         transaction(options.protyle, [{
             action: "setAttrViewGroup",
             avID: options.data.id,
             blockID,
-            data: {
-                hideEmpty: checkElement.checked,
-            }
+            data: options.data.view.group
         }], [{
             action: "setAttrViewGroup",
             avID: options.data.id,
             blockID,
-            data: {
-                hideEmpty: options.data.view.group?.hideEmpty || null,
-            }
+            data: oldGroup
         }]);
-        options.data.view.group.hideEmpty = checkElement.checked;
     });
 };
 
@@ -268,22 +265,19 @@ export const goGroupsDate = (options: {
             checked: options.data.view.group.method === item,
             label,
             click() {
+                const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+                options.data.view.group.method = item;
                 transaction(options.protyle, [{
                     action: "setAttrViewGroup",
                     avID: options.data.id,
                     blockID,
-                    data: {
-                        method: item,
-                    }
+                    data: options.data.view.group
                 }], [{
                     action: "setAttrViewGroup",
                     avID: options.data.id,
                     blockID,
-                    data: {
-                        method: options.data.view.group?.method || null,
-                    }
+                    data: oldGroup
                 }]);
-                options.data.view.group.method = item;
                 options.target.querySelector(".b3-menu__accelerator").textContent = label;
             }
         });
@@ -315,22 +309,19 @@ export const goGroupsSort = (options: {
             checked: options.data.view.group.order === item,
             label,
             click() {
+                const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+                options.data.view.group.order = item;
                 transaction(options.protyle, [{
                     action: "setAttrViewGroup",
                     avID: options.data.id,
                     blockID,
-                    data: {
-                        order: item,
-                    }
+                    data: options.data.view.group
                 }], [{
                     action: "setAttrViewGroup",
                     avID: options.data.id,
                     blockID,
-                    data: {
-                        order: options.data.view.group?.order || null,
-                    }
+                    data: oldGroup
                 }]);
-                options.data.view.group.order = item;
                 options.target.querySelector(".b3-menu__accelerator").textContent = label;
             }
         });

@@ -1495,6 +1495,25 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "removeGroups") {
+                    window.siyuan.menus.menu.remove();
+                    transaction(options.protyle, [{
+                        action: "removeAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                    }], [{
+                        action: "setAttrViewGroup",
+                        avID:data.id,
+                        blockID,
+                        data: data.view.group
+                    }]);
+                    data.view.group = null;
+                    delete data.view.groups;
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 }
                 // 有错误日志，没找到重现步骤，需先判断一下
                 if (!target || !target.parentElement) {

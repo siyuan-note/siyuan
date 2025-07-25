@@ -1504,7 +1504,7 @@ export const openMenuPanel = (options: {
                     window.siyuan.menus.menu.remove();
                     const useElement = target.firstElementChild;
                     const isHide = useElement.getAttribute("xlink:href") !== "#iconEye";
-                    useElement.setAttribute("xlink:href", "#iconEyeoff");
+                    useElement.setAttribute("xlink:href", isHide ? "#iconEye" : "#iconEyeoff");
                     transaction(options.protyle, [{
                         action: "hideAttrViewGroup",
                         avID: data.id,

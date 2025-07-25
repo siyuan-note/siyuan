@@ -4290,6 +4290,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 	val.SetUpdatedAt(now)
 
+	if err = regenAttrViewViewGroups(attrView, keyID); nil != err {
+		return
+	}
+
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 
@@ -4345,6 +4349,9 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 							if value.BlockID == blockID {
 								value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, rowID)
 								value.SetUpdatedAt(now)
+								if err = regenAttrViewViewGroups(destAv, key.Relation.BackKeyID); nil != err {
+									return
+								}
 								break
 							}
 						}
@@ -4354,6 +4361,32 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 			if destAv != attrView {
 				av.SaveAttributeView(destAv)
+			}
+		}
+	}
+	return
+}
+
+func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) (err error) {
+	for _, view := range attrView.Views {
+		if nil != view.Group && view.Group.Field == keyID {
+			groupKey, _ := attrView.GetKey(view.Group.Field)
+			if nil == groupKey {
+				return
+			}
+
+			genAttrViewViewGroups(view, attrView)
+
+			for _, g := range view.Groups {
+				if view.Group.HideEmpty {
+					if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
+						g.GroupHidden = 1
+					}
+				} else {
+					if 2 != g.GroupHidden {
+						g.GroupHidden = 0
+					}
+				}
 			}
 		}
 	}

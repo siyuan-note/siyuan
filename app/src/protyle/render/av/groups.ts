@@ -309,7 +309,7 @@ export const goGroupsSort = (options: {
     }
     const blockID = options.blockElement.getAttribute("data-node-id");
     const column = getFieldsByData(options.data).find(item => item.id === options.data.view.group.field);
-    (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : [0, 1, 2]).forEach((item) => {
+    (["created", "date", "created", "updated"].includes(column.type) ? [0, 1] : [2, 0, 1]).forEach((item) => {
         const label = getLanguageByIndex(item, "sort");
         menu.addItem({
             iconHTML: "",

@@ -1662,6 +1662,15 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 		}
 	}
+
+	if av.GroupOrderMan != view.Group.Order {
+		sort.SliceStable(view.Groups, func(i, j int) bool {
+			if av.GroupOrderAsc == view.Group.Order {
+				return view.Groups[i].Name < view.Groups[j].Name
+			}
+			return view.Groups[i].Name > view.Groups[j].Name
+		})
+	}
 }
 
 func isGroupByDate(view *av.View) bool {

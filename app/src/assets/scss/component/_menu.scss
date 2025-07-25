@@ -281,6 +281,10 @@
     box-sizing: border-box;
     translate: var(--b3-transition);
 
+    &--show {
+      opacity: 1;
+    }
+
     &:hover {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);

@@ -431,9 +431,8 @@ export const openMenuPanel = (options: {
                 }, options.cellElements);
                 return;
             }
-
             if (targetElement.getAttribute("data-type") === "editCol") {
-                const previousID = (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
+                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
                 const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
                 if (previousID !== undoPreviousID && previousID !== sourceId) {
                     transaction(options.protyle, [{
@@ -468,6 +467,48 @@ export const openMenuPanel = (options: {
                     });
                 }
                 menuElement.innerHTML = getPropertiesHTML(fields);
+                return;
+            }
+            if (targetElement.querySelector('[data-type="hideGroup"]')) {
+                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
+                const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
+                if (previousID !== undoPreviousID && previousID !== sourceId) {
+                    transaction(options.protyle, [{
+                        action: "sortAttrViewGroup",
+                        avID,
+                        blockID,
+                        previousID,
+                        id: sourceId,
+                    }], [{
+                        action: "sortAttrViewGroup",
+                        avID,
+                        blockID,
+                        previousID: undoPreviousID,
+                        id: sourceId,
+                    }]);
+                    data.view.groups.find((group, index) => {
+                        if (group.id === sourceId) {
+                            const groupData = data.view.groups.splice(index, 1)[0];
+                            data.view.groups.find((item, index: number) => {
+                                if (item.id === targetId) {
+                                    if (isTop) {
+                                        data.view.groups.splice(index, 0, groupData);
+                                    } else {
+                                        data.view.groups.splice(index + 1, 0, groupData);
+                                    }
+                                    return true;
+                                }
+                            });
+                            return true;
+                        }
+                    });
+                    if (isTop) {
+                        targetElement.before(sourceElement);
+                    } else {
+                        targetElement.after(sourceElement);
+                    }
+                }
+                targetElement.classList.remove("dragover__top", "dragover__bottom");
                 return;
             }
         });

@@ -167,10 +167,10 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
             groupHTML = '<button class="b3-menu__separator"></button>';
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
             view.groups.forEach(item => {
-                groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}">
+                groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
     ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     <div class="b3-menu__label fn__flex">${item.name || ""}</div>
-    <svg class="b3-menu__action" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
+    <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });
         }

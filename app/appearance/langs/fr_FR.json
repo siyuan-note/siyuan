@@ -1641,6 +1641,7 @@
     "261": "Aujourd'hui",
     "262": "Demain",
     "263": "Les %d prochains jours",
-    "264": "Le champ [%s] est vide"
+    "264": "Le champ [%s] est vide",
+    "265": "Hors de portée"
   }
 }

@@ -1641,6 +1641,7 @@
     "261": "Heute",
     "262": "Morgen",
     "263": "Nächste %d Tage",
-    "264": "Das Feld [%s] ist leer"
+    "264": "Das Feld [%s] ist leer",
+    "265": "Außerhalb des Bereichs"
   }
 }

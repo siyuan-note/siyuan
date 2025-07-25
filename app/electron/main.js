@@ -678,6 +678,10 @@ for (let i = argStart; i < process.argv.length; i++) {
 
 app.whenReady().then(() => {
     const resetTrayMenu = (tray, lang, mainWindow) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+
         const trayMenuTemplate = [{
             label: mainWindow.isVisible() ? lang.hideWindow : lang.showWindow, click: () => {
                 showHideWindow(tray, lang, mainWindow);
@@ -726,6 +730,10 @@ app.whenReady().then(() => {
         }
     };
     const showHideWindow = (tray, lang, mainWindow) => {
+        if (!mainWindow || mainWindow.isDestroyed()) {
+            return;
+        }
+
         if (!mainWindow.isVisible()) {
             if (mainWindow.isMinimized()) {
                 mainWindow.restore();
@@ -1113,23 +1121,24 @@ app.whenReady().then(() => {
         if (exitWS) {
             return;
         }
-        let tray;
-        if ("win32" === process.platform || "linux" === process.platform) {
-            // 系统托盘
-            tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
-            tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
-            const mainWindow = getWindowByContentId(event.sender.id);
-            if (!mainWindow) {
-                return;
-            }
-            resetTrayMenu(tray, data.languages, mainWindow);
-            tray.on("click", () => {
-                showHideWindow(tray, data.languages, mainWindow);
-            });
-        }
+
         workspaces.find(item => {
             if (!item.workspaceDir) {
                 item.workspaceDir = data.workspaceDir;
+                let tray;
+                if ("win32" === process.platform || "linux" === process.platform) {
+                    // 系统托盘
+                    tray = new Tray(path.join(appDir, "stage", "icon-large.png"));
+                    tray.setToolTip(`${path.basename(data.workspaceDir)} - SiYuan v${appVer}`);
+                    const mainWindow = getWindowByContentId(event.sender.id);
+                    if (!mainWindow || mainWindow.isDestroyed()) {
+                        return;
+                    }
+                    resetTrayMenu(tray, data.languages, mainWindow);
+                    tray.on("click", () => {
+                        showHideWindow(tray, data.languages, mainWindow);
+                    });
+                }
                 item.tray = tray;
                 return true;
             }

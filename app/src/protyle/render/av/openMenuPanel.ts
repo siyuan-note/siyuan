@@ -1500,6 +1500,33 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "hideGroup") {
+                    window.siyuan.menus.menu.remove();
+                    const useElement = target.firstElementChild;
+                    const isHide = useElement.getAttribute("xlink:href") !== "#iconEye";
+                    useElement.setAttribute("xlink:href", "#iconEyeoff");
+                    transaction(options.protyle, [{
+                        action: "hideAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                        id: target.dataset.id,
+                        data: isHide,
+                    }], [{
+                        action: "hideAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                        id: target.dataset.id,
+                        data: !isHide
+                    }]);
+                    data.view.groups.find((item) => {
+                       if (item.id === target.dataset.id) {
+                           item.groupHidden = isHide;
+                           return true;
+                       }
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "removeGroups") {
                     window.siyuan.menus.menu.remove();
                     transaction(options.protyle, [{

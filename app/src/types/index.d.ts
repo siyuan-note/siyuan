@@ -66,6 +66,7 @@ type TOperation =
     | "setAttrViewGroup"
     | "removeAttrViewGroup"
     | "syncAttrViewTableColWidth"
+    | "hideAttrViewGroup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |

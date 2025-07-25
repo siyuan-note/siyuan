@@ -1598,6 +1598,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
 	}
 
+	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+		for _, o := range groupKey.Options {
+			if _, ok := groupItemsMap[o.Name]; !ok {
+				groupItemsMap[o.Name] = []av.Item{}
+			}
+		}
+	}
+
 	for name, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {

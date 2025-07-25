@@ -79,26 +79,27 @@ func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
 	return
 }
 
+// KeyType 描述了属性视图属性字段的类型。
 type KeyType string
 
 const (
-	KeyTypeBlock      KeyType = "block"
-	KeyTypeText       KeyType = "text"
-	KeyTypeNumber     KeyType = "number"
-	KeyTypeDate       KeyType = "date"
-	KeyTypeSelect     KeyType = "select"
-	KeyTypeMSelect    KeyType = "mSelect"
-	KeyTypeURL        KeyType = "url"
-	KeyTypeEmail      KeyType = "email"
-	KeyTypePhone      KeyType = "phone"
-	KeyTypeMAsset     KeyType = "mAsset"
-	KeyTypeTemplate   KeyType = "template"
-	KeyTypeCreated    KeyType = "created"
-	KeyTypeUpdated    KeyType = "updated"
-	KeyTypeCheckbox   KeyType = "checkbox"
-	KeyTypeRelation   KeyType = "relation"
-	KeyTypeRollup     KeyType = "rollup"
-	KeyTypeLineNumber KeyType = "lineNumber"
+	KeyTypeBlock      KeyType = "block"      // 主键
+	KeyTypeText       KeyType = "text"       // 文本
+	KeyTypeNumber     KeyType = "number"     // 数字
+	KeyTypeDate       KeyType = "date"       // 日期
+	KeyTypeSelect     KeyType = "select"     // 单选
+	KeyTypeMSelect    KeyType = "mSelect"    // 多选
+	KeyTypeURL        KeyType = "url"        // URL
+	KeyTypeEmail      KeyType = "email"      // Email
+	KeyTypePhone      KeyType = "phone"      // 电话
+	KeyTypeMAsset     KeyType = "mAsset"     // 资源
+	KeyTypeTemplate   KeyType = "template"   // 模板
+	KeyTypeCreated    KeyType = "created"    // 创建时间
+	KeyTypeUpdated    KeyType = "updated"    // 更新时间
+	KeyTypeCheckbox   KeyType = "checkbox"   // 复选框
+	KeyTypeRelation   KeyType = "relation"   // 关联
+	KeyTypeRollup     KeyType = "rollup"     // 汇总
+	KeyTypeLineNumber KeyType = "lineNumber" // 行号
 )
 
 // Key 描述了属性视图属性字段的基础结构。

@@ -132,32 +132,27 @@ export const bindGroupsNumber = (options: {
     blockElement: Element;
     data: IAV;
 }) => {
-    return () => {
+    return async () => {
         if (!options.menuElement.querySelector('[data-type="avGroupRange"]')) {
             return;
         }
         const blockID = options.blockElement.getAttribute("data-node-id");
         const inputElements = options.menuElement.querySelectorAll("input");
-        const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
-        Object.assign(options.data.view.group.range, {
+        const range = {
             numStart: inputElements[0].value ? parseFloat(inputElements[0].value) : options.data.view.group.range.numStart,
             numEnd: inputElements[1].value ? parseFloat(inputElements[1].value) : options.data.view.group.range.numEnd,
             numStep: inputElements[2].value ? parseFloat(inputElements[2].value) : options.data.view.group.range.numStep
-        });
-        if (objEquals(options.data.view.group, oldGroup)) {
+        };
+        if (objEquals(options.data.view.group.range, range)) {
             return;
         }
-        transaction(options.protyle, [{
-            action: "setAttrViewGroup",
-            avID: options.data.id,
+        Object.assign(options.data.view.group.range, range);
+        const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
             blockID,
-            data: options.data.view.group
-        }], [{
-            action: "setAttrViewGroup",
-            avID: options.data.id,
-            blockID,
-            data: oldGroup
-        }]);
+            avID: options.blockElement.getAttribute("data-av-id"),
+            group: options.data.view.group
+        });
+        options.data.view = response.data.view;
     };
 };
 
@@ -228,28 +223,35 @@ export const bindGroupsEvent = (options: {
     blockElement: Element;
     data: IAV;
 }) => {
-    const blockID = options.blockElement.getAttribute("data-node-id");
     const checkElement = options.menuElement.querySelector("input");
-    checkElement.addEventListener("change", () => {
-        const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+    if (!checkElement) {
+        return;
+    }
+    const blockID = options.blockElement.getAttribute("data-node-id");
+    checkElement.addEventListener("change", async () => {
         options.data.view.group.hideEmpty = checkElement.checked;
-        transaction(options.protyle, [{
-            action: "setAttrViewGroup",
-            avID: options.data.id,
+        const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
             blockID,
-            data: options.data.view.group
-        }], [{
-            action: "setAttrViewGroup",
-            avID: options.data.id,
-            blockID,
-            data: oldGroup
-        }]);
+            avID: options.blockElement.getAttribute("data-av-id"),
+            group: options.data.view.group
+        });
+        options.data.view = response.data.view;
+        options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
+        bindGroupsEvent({
+            protyle: options.protyle,
+            menuElement: options.menuElement,
+            blockElement: options.blockElement,
+            data: options.data
+        });
+        const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+        setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
     });
 };
 
 export const goGroupsDate = (options: {
     protyle: IProtyle;
     target: Element;
+    menuElement: HTMLElement;
     data: IAV;
     blockElement: Element;
 }) => {
@@ -264,21 +266,24 @@ export const goGroupsDate = (options: {
             iconHTML: "",
             checked: options.data.view.group.method === item,
             label,
-            click() {
-                const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
+            async click() {
                 options.data.view.group.method = item;
-                transaction(options.protyle, [{
-                    action: "setAttrViewGroup",
-                    avID: options.data.id,
-                    blockID,
-                    data: options.data.view.group
-                }], [{
-                    action: "setAttrViewGroup",
-                    avID: options.data.id,
-                    blockID,
-                    data: oldGroup
-                }]);
                 options.target.querySelector(".b3-menu__accelerator").textContent = label;
+                const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
+                    blockID,
+                    avID: options.blockElement.getAttribute("data-av-id"),
+                    group: options.data.view.group
+                });
+                options.data.view = response.data.view;
+                options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
+                bindGroupsEvent({
+                    protyle: options.protyle,
+                    menuElement: options.menuElement,
+                    blockElement: options.blockElement,
+                    data: options.data
+                });
+                const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
             }
         });
     });
@@ -294,6 +299,7 @@ export const goGroupsSort = (options: {
     protyle: IProtyle;
     target: Element;
     data: IAV;
+    menuElement: HTMLElement;
     blockElement: Element;
 }) => {
     const menu = new Menu("avGroupSort");
@@ -308,21 +314,24 @@ export const goGroupsSort = (options: {
             iconHTML: "",
             checked: options.data.view.group.order === item,
             label,
-            click() {
-                const oldGroup = JSON.parse(JSON.stringify(options.data.view.group));
-                options.data.view.group.order = item;
-                transaction(options.protyle, [{
-                    action: "setAttrViewGroup",
-                    avID: options.data.id,
-                    blockID,
-                    data: options.data.view.group
-                }], [{
-                    action: "setAttrViewGroup",
-                    avID: options.data.id,
-                    blockID,
-                    data: oldGroup
-                }]);
+            async click() {
                 options.target.querySelector(".b3-menu__accelerator").textContent = label;
+                options.data.view.group.order = item;
+                const response = await fetchSyncPost("/api/av/setAttrViewGroup", {
+                    blockID,
+                    avID: options.blockElement.getAttribute("data-av-id"),
+                    group: options.data.view.group
+                });
+                options.data.view = response.data.view;
+                options.menuElement.innerHTML = getGroupsHTML(getFieldsByData(options.data), options.data.view);
+                bindGroupsEvent({
+                    protyle: options.protyle,
+                    menuElement: options.menuElement,
+                    blockElement: options.blockElement,
+                    data: options.data
+                });
+                const tabRect = options.blockElement.querySelector(".av__views").getBoundingClientRect();
+                setPosition(options.menuElement, tabRect.right - options.menuElement.clientWidth, tabRect.bottom, tabRect.height);
             }
         });
     });

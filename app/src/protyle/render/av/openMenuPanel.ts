@@ -1432,6 +1432,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "goGroupsDate") {
                     goGroupsDate({
                         target,
+                        menuElement,
                         protyle: options.protyle,
                         blockElement: options.blockElement,
                         data
@@ -1443,6 +1444,7 @@ export const openMenuPanel = (options: {
                 } else if (type === "goGroupsSort") {
                     goGroupsSort({
                         target,
+                        menuElement,
                         protyle: options.protyle,
                         blockElement: options.blockElement,
                         data
@@ -1463,6 +1465,9 @@ export const openMenuPanel = (options: {
                     event.stopPropagation();
                     break;
                 } else if (type === "goGroups") {
+                    if (menuElement.querySelector('[data-type="avGroupRange"]') && closeCB) {
+                        await closeCB();
+                    }
                     closeCB = undefined;
                     menuElement.innerHTML = getGroupsHTML(fields, data.view);
                     bindGroupsEvent({
@@ -1503,7 +1508,7 @@ export const openMenuPanel = (options: {
                         blockID,
                     }], [{
                         action: "setAttrViewGroup",
-                        avID:data.id,
+                        avID: data.id,
                         blockID,
                         data: data.view.group
                     }]);

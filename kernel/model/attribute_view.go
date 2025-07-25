@@ -44,6 +44,33 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func (tx *Transaction) doRemoveAttrViewGroup(operation *Operation) (ret *TxErr) {
+	if err := removeAttributeViewGroup(operation.AvID, operation.BlockID); nil != err {
+		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
+	}
+	return
+}
+
+func removeAttributeViewGroup(avID, blockID string) (err error) {
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		return err
+	}
+
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if err != nil {
+		return err
+	}
+
+	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
+	err = av.SaveAttributeView(attrView)
+	if err != nil {
+		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
+		return err
+	}
+	return nil
+}
+
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
 	err := syncAttrViewTableColWidth(operation)
 	if err != nil {
@@ -93,53 +120,14 @@ func syncAttrViewTableColWidth(operation *Operation) (err error) {
 	return
 }
 
-func (tx *Transaction) doSetAttrViewHideEmptyGroup(operation *Operation) (ret *TxErr) {
-	if err := setAttrViewHideEmptyGroup(operation.AvID, operation.BlockID, operation.Data.(bool)); nil != err {
-		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
-	}
-	return
-}
-
-func setAttrViewHideEmptyGroup(avID, blockID string, hidden bool) (err error) {
-	attrView, err := av.ParseAttributeView(avID)
-	if err != nil {
-		return err
-	}
-
-	view, err := getAttrViewViewByBlockID(attrView, blockID)
-	if err != nil {
-		return err
-	}
-
-	if nil == view.Group {
-		return
-	}
-
-	view.Group.HideEmpty = hidden
-	for _, group := range view.Groups {
-		if hidden {
-			group.GroupHidden = true
-		} else {
-			group.GroupHidden = false
-		}
-	}
-
-	err = av.SaveAttributeView(attrView)
-	if err != nil {
-		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return err
-	}
-	return nil
-}
-
 func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
-	if err := HideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
+	if err := hideAttributeViewGroup(operation.AvID, operation.BlockID, operation.ID, operation.Data.(bool)); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func HideAttributeViewGroup(avID, blockID, groupID string, hidden bool) (err error) {
+func hideAttributeViewGroup(avID, blockID, groupID string, hidden bool) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return err
@@ -198,16 +186,17 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	if nil == view.Group {
-		view.Group = group
-	} else {
-		if err = copier.Copy(view.Group, group); nil != err {
-			return
+	view.Group = group
+	for _, g := range view.Groups {
+		if group.HideEmpty {
+			g.GroupHidden = true
+		} else {
+			g.GroupHidden = false
 		}
 	}
 
 	genAttrViewViewGroups(view, attrView)
-	return err
+	return
 }
 
 func (tx *Transaction) doSetAttrViewCardAspectRatio(operation *Operation) (ret *TxErr) {

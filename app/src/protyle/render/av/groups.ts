@@ -164,7 +164,7 @@ export const bindGroupsNumber = (options: {
 export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     let html = "";
     let column: IAVColumn;
-    if (view.group && view.group.field) {
+    if (view.group && view.group.field && view.groups) {
         let groupHTML = "";
         column = columns.find(item => item.id === view.group.field);
         if (view.groups.length > 0) {

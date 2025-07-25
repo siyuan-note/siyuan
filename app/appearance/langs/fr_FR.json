@@ -1642,6 +1642,7 @@
     "262": "Demain",
     "263": "Les %d prochains jours",
     "264": "Le champ [%s] est vide",
-    "265": "Hors de portée"
+    "265": "Hors de portée",
+    "266": "Tesseract OCR n'est pas installé ou configuré, veuillez consulter le Guide de l'utilisateur - Section des fichiers de ressources pour la configuration"
   }
 }

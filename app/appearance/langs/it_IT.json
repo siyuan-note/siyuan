@@ -1642,6 +1642,7 @@
     "262": "Domani",
     "263": "Prossimi %d giorni",
     "264": "Il campo [%s] è vuoto",
-    "265": "Fuori intervallo"
+    "265": "Fuori intervallo",
+    "266": "Tesseract OCR non è installato o configurato, fare riferimento alla Guida utente - Sezione file di risorse per la configurazione"
   }
 }

@@ -1373,13 +1373,11 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	}
 
 	if "" == viewID && "" != blockID {
-		if "" != blockID {
-			node, _, getErr := getNodeByBlockID(nil, blockID)
-			if nil != getErr {
-				logging.LogWarnf("get node by block ID [%s] failed: %s", blockID, getErr)
-			} else {
-				viewID = node.IALAttr(av.NodeAttrView)
-			}
+		node, _, getErr := getNodeByBlockID(nil, blockID)
+		if nil != getErr {
+			logging.LogWarnf("get node by block ID [%s] failed: %s", blockID, getErr)
+		} else {
+			viewID = node.IALAttr(av.NodeAttrView)
 		}
 	}
 
@@ -1438,7 +1436,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		}
 	}
 
-	// 如果存在分组的话渲染分组视图视图
+	// 如果存在分组的话渲染分组视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
 		switch groupView.LayoutType {
@@ -1619,6 +1617,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 		if defaultGroupName == name {
 			name = fmt.Sprintf(Conf.language(264), groupKey.Name)
+		} else if notInRange == name {
+			name = fmt.Sprintf(Conf.language(265))
 		}
 		v.Name = name
 		view.Groups = append(view.Groups, v)

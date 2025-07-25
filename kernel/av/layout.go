@@ -63,8 +63,6 @@ type BaseInstance struct {
 	PageSize         int           `json:"pageSize"`         // 每页项目数
 	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
 	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
-	Folded           bool          `json:"folded,omitempty"` // 是否折叠
-	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
 
 	Groups      []Viewable `json:"groups,omitempty"`      // 分组实例列表
 	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`   // 分组计算规则和结果

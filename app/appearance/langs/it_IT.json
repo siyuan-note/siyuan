@@ -1641,6 +1641,7 @@
     "261": "Oggi",
     "262": "Domani",
     "263": "Prossimi %d giorni",
-    "264": "Il campo [%s] è vuoto"
+    "264": "Il campo [%s] è vuoto",
+    "265": "Fuori intervallo"
   }
 }

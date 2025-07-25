@@ -1641,6 +1641,7 @@
     "261": "Dzisiaj",
     "262": "Jutro",
     "263": "Następne %d dni",
-    "264": "Pole [%s] jest puste"
+    "264": "Pole [%s] jest puste",
+    "265": "Poza zakresem"
   }
 }

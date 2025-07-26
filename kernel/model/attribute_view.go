@@ -77,7 +77,7 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 	}
 
 	view.Groups = append(view.Groups[:index], view.Groups[index+1:]...)
-	for i, g := range group.Groups {
+	for i, g := range view.Groups {
 		if g.ID == previousGroupID {
 			previousIndex = i + 1
 			break

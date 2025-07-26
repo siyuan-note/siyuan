@@ -3838,6 +3838,10 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		}
 	}
 
+	for _, view := range attrView.Views {
+		removeAttributeViewGroup0(view)
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }

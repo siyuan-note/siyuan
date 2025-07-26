@@ -842,6 +842,7 @@ interface IAV {
     viewID: string;
     viewType: TAVView;
     views: IAVView[];
+    isMirror?: boolean;
 }
 
 interface IAVView {

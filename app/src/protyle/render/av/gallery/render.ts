@@ -1,14 +1,13 @@
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../../util/hasClosest";
 import {Constants} from "../../../../constants";
 import {fetchPost} from "../../../../util/fetch";
-import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../../util/escape";
+import {escapeAttr} from "../../../../util/escape";
 import {unicode2Emoji} from "../../../../emoji";
 import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
-import {avRender, updateSearch} from "../render";
-import {getViewIcon} from "../view";
+import {avRender, genTabHeaderHTML, updateSearch} from "../render";
 import {processRender} from "../../../util/processCode";
 import {getColIconByType, getColNameByType} from "../col";
 import {getCompressURL} from "../../../../util/image";
@@ -117,65 +116,9 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 </div>`;
         });
         galleryHTML += `<div class="av__gallery-add" data-type="av-add-bottom"><svg class="svg"><use xlink:href="#iconAdd"></use></svg><span class="fn__space"></span>${window.siyuan.languages.newRow}</div>`;
-        let tabHTML = "";
-        let viewData: IAVView;
-        response.data.views.forEach((item: IAVView) => {
-            tabHTML += `<div draggable="true" data-position="north" data-av-type="${item.type}" data-id="${item.id}" data-page="${item.pageSize}" data-desc="${escapeAriaLabel(item.desc || "")}" class="ariaLabel item${item.id === response.data.viewID ? " item--focus" : ""}">
-    ${item.icon ? unicode2Emoji(item.icon, "item__graphic", true) : `<svg class="item__graphic"><use xlink:href="#${getViewIcon(item.type)}"></use></svg>`}
-    <span class="item__text">${escapeHtml(item.name)}</span>
-</div>`;
-            if (item.id === response.data.viewID) {
-                viewData = item;
-            }
-        });
         if (options.renderAll) {
             options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    <div class="av__header">
-        <div class="fn__flex av__views${isSearching || query ? " av__views--show" : ""}">
-            <div class="layout-tab-bar fn__flex">
-                ${tabHTML}
-            </div>
-            <div class="fn__space"></div>
-            <span data-type="av-add" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newView}">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-            </span>
-            <div class="fn__flex-1"></div>
-            <div class="fn__space"></div>
-            <span data-type="av-switcher" aria-label="${window.siyuan.languages.allViews}" data-position="8south" class="ariaLabel block__icon${response.data.views.length > 0 ? "" : " fn__none"}">
-                <svg><use xlink:href="#iconDown"></use></svg>
-                <span class="fn__space"></span>
-                <small>${response.data.views.length}</small>
-            </span>
-            <div class="fn__space"></div>
-            <span data-type="av-filter" aria-label="${window.siyuan.languages.filter}" data-position="8south" class="ariaLabel block__icon${view.filters.length > 0 ? " block__icon--active" : ""}">
-                <svg><use xlink:href="#iconFilter"></use></svg>
-            </span>
-            <div class="fn__space"></div>
-            <span data-type="av-sort" aria-label="${window.siyuan.languages.sort}" data-position="8south" class="ariaLabel block__icon${view.sorts.length > 0 ? " block__icon--active" : ""}">
-                <svg><use xlink:href="#iconSort"></use></svg>
-            </span>
-            <div class="fn__space"></div>
-            <button data-type="av-search-icon" aria-label="${window.siyuan.languages.search}" data-position="8south" class="ariaLabel block__icon">
-                <svg><use xlink:href="#iconSearch"></use></svg>
-            </button>
-            <div style="position: relative" class="fn__flex">
-                <input style="${isSearching || query ? "width:128px" : "width:0;padding-left: 0;padding-right: 0;"}" data-type="av-search" class="b3-text-field b3-text-field--text" placeholder="${window.siyuan.languages.search}">
-            </div>
-            <div class="fn__space"></div>
-            <span data-type="av-more" aria-label="${window.siyuan.languages.config}" data-position="8south" class="ariaLabel block__icon">
-                <svg><use xlink:href="#iconSettings"></use></svg>
-            </span>
-            <div class="fn__space"></div>
-            <span data-type="av-add-more" class="block__icon ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.newRow}">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-            </span>
-            <div class="fn__space"></div>
-            ${response.data.isMirror ? ` <span data-av-id="${response.data.id}" data-popover-url="/api/av/getMirrorDatabaseBlocks" class="popover__block block__icon block__icon--show ariaLabel" data-position="8south" aria-label="${window.siyuan.languages.mirrorTip}">
-    <svg><use xlink:href="#iconSplitLR"></use></svg></span><div class="fn__space"></div>` : ""}
-        </div>
-        <div contenteditable="${options.protyle.disabled || hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed") ? "false" : "true"}" spellcheck="${window.siyuan.config.editor.spellcheck.toString()}" class="av__title${viewData.hideAttrViewName ? " fn__none" : ""}" data-title="${response.data.name || ""}" data-tip="${window.siyuan.languages.title}">${response.data.name || ""}</div>
-        <div class="av__counter fn__none"></div>
-    </div>
+    ${genTabHeaderHTML(response.data,  isSearching || !!query, options.protyle.disabled || !!hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div class="av__gallery${view.cardSize === 0 ? " av__gallery--small" : (view.cardSize === 2 ? " av__gallery--big" : "")}
 ${view.hideAttrViewName ? " av__gallery--top" : ""}">
         ${galleryHTML}

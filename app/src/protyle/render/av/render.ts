@@ -187,7 +187,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
         contentHTML += "<div></div></div>";
     });
     return {
-        contentHTML,
+        contentHTML: contentHTML + `<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
+    <div class="av__colsticky">
+        <button class="b3-button av__button" data-type="av-add-bottom">
+            <svg><use xlink:href="#iconAdd"></use></svg>
+            <span>${window.siyuan.languages.newRow}</span>
+        </button>
+        <span class="fn__space"></span>
+        <button class="b3-button av__button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
+            <svg><use xlink:href="#iconArrowDown"></use></svg>
+            <span>${window.siyuan.languages.loadMore}</span>
+            <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
+        </button>
+    </div>
+</div>`,
         footerHTML: `<div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`
     };
 };
@@ -207,12 +220,12 @@ const renderGroupTable = (options: {
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
             group.columns = (options.data.view as IAVTable).columns;
-            avBodyHTML += `<div>${group.name}</div>${getTableHTMLs(group, options.blockElement).contentHTML}`;
+            avBodyHTML += `<div class="av__group-title">${group.name}</div><div class="av__body">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
         }
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, options.protyle.disabled || !!hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -221,6 +234,11 @@ const renderGroupTable = (options: {
     } else {
         options.blockElement.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
     }
+    afterRenderTable(options.blockElement);
+};
+
+const afterRenderTable = (blockElement: HTMLElement) => {
+    blockElement.setAttribute("data-render", "true");
 };
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true) => {
@@ -317,25 +335,11 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 const tableHTMLs = getTableHTMLs(data, e);
                 const avBodyHTML = `<div class="av__body">
     ${tableHTMLs.contentHTML}
-    <div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
-        <div class="av__colsticky">
-            <button class="b3-button av__button" data-type="av-add-bottom">
-                <svg><use xlink:href="#iconAdd"></use></svg>
-                <span>${window.siyuan.languages.newRow}</span>
-            </button>
-            <span class="fn__space"></span>
-            <button class="b3-button av__button${data.rowCount > data.rows.length ? "" : " fn__none"}" data-type="av-load-more">
-                <svg><use xlink:href="#iconArrowDown"></use></svg>
-                <span>${window.siyuan.languages.loadMore}</span>
-                <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
-            </button>
-        </div>
-    </div>
     ${tableHTMLs.footerHTML}
 </div>`;
                 if (renderAll) {
                     e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(response.data, isSearching || !!query, protyle.disabled || !!hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(response.data, isSearching || !!query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -344,7 +348,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 } else {
                     e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
                 }
-                e.setAttribute("data-render", "true");
+                afterRenderTable(e);
                 // 历史兼容
                 e.style.margin = "";
                 if (left) {

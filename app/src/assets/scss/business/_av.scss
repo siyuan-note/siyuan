@@ -911,6 +911,13 @@
       }
     }
   }
+
+  &__group {
+    &-title {
+      position: sticky;
+      left: 0;
+    }
+  }
 }
 
 img.av__cellassetimg {

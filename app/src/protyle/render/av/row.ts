@@ -264,22 +264,25 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
         return;
     }
     // 只读模式下也需固定 https://github.com/siyuan-note/siyuan/issues/11338
-    const scrollRect = blockElement.querySelector(".av__scroll").getBoundingClientRect();
-    const headerElement = blockElement.querySelector(".av__row--header") as HTMLElement;
-    if (headerElement && (status === "top" || status === "all")) {
-        const distance = Math.floor(elementRect.top - scrollRect.top);
-        if (distance > 0 && distance < scrollRect.height) {
-            headerElement.style.transform = `translateY(${distance}px)`;
-        } else {
-            headerElement.style.transform = "";
-        }
+    const headerElements = blockElement.querySelectorAll(".av__row--header");
+    if (headerElements.length > 0 && (status === "top" || status === "all")) {
+        headerElements.forEach((item: HTMLElement) => {
+            const bodyRect = item.parentElement.getBoundingClientRect();
+            const distance = Math.floor(elementRect.top - bodyRect.top);
+            if (distance > 0 && distance < bodyRect.height - item.clientHeight) {
+                item.style.transform = `translateY(${distance}px)`;
+            } else {
+                item.style.transform = "";
+            }
+        });
     }
 
     const footerElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
     if (footerElement && (status === "bottom" || status === "all")) {
         if (footerElement.querySelector(".av__calc--ashow")) {
-            const distance = Math.ceil(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
-            if (distance < 0 && -distance < scrollRect.height) {
+            const bodyRect = footerElement.parentElement.getBoundingClientRect();
+            const distance = Math.ceil(elementRect.bottom - bodyRect.bottom);
+            if (distance < 0 && -distance < bodyRect.height) {
                 footerElement.style.transform = `translateY(${distance}px)`;
             } else {
                 footerElement.style.transform = "";

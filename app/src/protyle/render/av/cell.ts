@@ -435,7 +435,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         }
     } else {
         const footerElement = blockElement.querySelector(".av__row--footer");
-        if (footerElement.querySelector(".av__calc--ashow")) {
+        if (footerElement?.querySelector(".av__calc--ashow")) {
             const avFooterRect = footerElement.getBoundingClientRect();
             if (avFooterRect.top < cellRect.bottom) {
                 const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);

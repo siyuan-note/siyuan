@@ -3820,6 +3820,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 	}
 
 	colType := av.KeyType(operation.Typ)
+	changeType := false
 	switch colType {
 	case av.KeyTypeBlock, av.KeyTypeText, av.KeyTypeNumber, av.KeyTypeDate, av.KeyTypeSelect, av.KeyTypeMSelect, av.KeyTypeURL, av.KeyTypeEmail,
 		av.KeyTypePhone, av.KeyTypeMAsset, av.KeyTypeTemplate, av.KeyTypeCreated, av.KeyTypeUpdated, av.KeyTypeCheckbox,
@@ -3827,6 +3828,8 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		for _, keyValues := range attrView.KeyValues {
 			if keyValues.Key.ID == operation.ID {
 				keyValues.Key.Name = strings.TrimSpace(operation.Name)
+
+				changeType = keyValues.Key.Type != colType
 				keyValues.Key.Type = colType
 
 				for _, value := range keyValues.Values {
@@ -3838,8 +3841,10 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		}
 	}
 
-	for _, view := range attrView.Views {
-		removeAttributeViewGroup0(view)
+	if changeType {
+		for _, view := range attrView.Views {
+			removeAttributeViewGroup0(view)
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

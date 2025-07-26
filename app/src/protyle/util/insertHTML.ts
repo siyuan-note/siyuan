@@ -259,9 +259,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
                            // 移动端插入嵌入块时，获取到的 range 为旧值
                            useProtyleRange = false,
                            // 在开头粘贴块则插入上方
-                           insertByCursor = false,
-                           // 是否需要再次 spin
-                           spin = true) => {
+                           insertByCursor = false) => {
     if (html === "") {
         return;
     }
@@ -368,7 +366,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     let innerHTML = unSpinHTML || // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
-        (spin && protyle.lute.SpinBlockDOM(html)) || // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
         html;   // 空格会被 Spin 不再，需要使用原文
     // 粘贴纯文本时会进行内部转义，这里需要进行反转义 https://github.com/siyuan-note/siyuan/issues/10620
     innerHTML = innerHTML.replace(/;;;lt;;;/g, "&lt;").replace(/;;;gt;;;/g, "&gt;");

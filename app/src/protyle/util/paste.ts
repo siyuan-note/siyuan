@@ -591,7 +591,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             textPlain = textPlain.replace(/\u200D```/g, "```");
 
             const textPlainDom = protyle.lute.Md2BlockDOM(textPlain);
-            insertHTML(textPlainDom, protyle, false, false, true, false /* 不再次 spin 以提升性能 https://github.com/siyuan-note/siyuan/issues/15306 */);
+            insertHTML(textPlainDom, protyle, false, false, true);
         }
         blockRender(protyle, protyle.wysiwyg.element);
         processRender(protyle.wysiwyg.element);

@@ -268,7 +268,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
+	content := exportMarkdownContent0(id, tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true, false,
 		".md", 3, 1, 1,
 		"#", "#",
 		"", "",
@@ -1457,7 +1457,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 	}
 }
 
-func ExportStdMarkdown(id string, assetsDestSpace2Underscore bool) string {
+func ExportStdMarkdown(id string, assetsDestSpace2Underscore, adjustHeadingLevel bool) string {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
@@ -1495,7 +1495,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore bool) string {
 	}
 	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
 
-	return exportMarkdownContent0(tree, cloudAssetsBase, assetsDestSpace2Underscore,
+	return exportMarkdownContent0(id, tree, cloudAssetsBase, assetsDestSpace2Underscore, adjustHeadingLevel,
 		".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -1989,7 +1989,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 
 	tree := prepareExportTree(bt)
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(tree, "", false,
+	exportedMd = exportMarkdownContent0(id, tree, "", false, false,
 		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -2008,7 +2008,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		return
 	}
 	isEmpty = nil == tree.Root.FirstChild.FirstChild
-	exportedMd = exportMarkdownContent0(tree, "", false,
+	exportedMd = exportMarkdownContent0(id, tree, "", false, false,
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -2021,7 +2021,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 	return
 }
 
-func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore bool,
+func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore, adjustHeadingLv bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
 	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, treeCache *map[string]*parse.Tree) (ret string) {
@@ -2030,6 +2030,11 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
 		addTitle, inlineMemo, 0 < len(defBlockIDs), singleFile, treeCache)
+	if adjustHeadingLv {
+		bt := treenode.GetBlockTree(id)
+		adjustHeadingLevel(bt, tree)
+	}
+
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)

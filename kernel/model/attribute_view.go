@@ -4419,10 +4419,14 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 	for _, view := range attrView.Views {
-		if nil != view.Group && view.Group.Field == keyID {
+		if nil != view.Group {
 			groupKey, _ := attrView.GetKey(view.Group.Field)
 			if nil == groupKey {
-				return
+				continue
+			}
+
+			if av.KeyTypeTemplate != groupKey.Type && view.Group.Field != keyID {
+				continue
 			}
 
 			genAttrViewViewGroups(view, attrView)

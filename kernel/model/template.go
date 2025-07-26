@@ -23,6 +23,7 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -218,6 +219,10 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 		md = append(md, []byte("\n")...)
 		md = append(md, parse.IAL2Tokens(tree.Root.KramdownIAL)...)
 	}
+
+	// 处理template或siyuan-template代码块：转换为普通文本并移除 id
+	templateCodeBlockRegex := regexp.MustCompile(`‍?` + "`" + `{3}(template|siyuan-template)\n([\s\S]*?)\n‍?` + "`" + `{3}\s*\{: id="[^"]*"\}`)
+	md = templateCodeBlockRegex.ReplaceAll(md, []byte("$2"))
 
 	name = util.FilterFileName(name) + ".md"
 	name = util.TruncateLenFileName(name)

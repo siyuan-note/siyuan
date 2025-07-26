@@ -277,8 +277,9 @@ export class Preview {
             this.processZHTable(copyElement);
         } else if (type === "yuque") {
             fetchPost("/api/lute/copyStdMarkdown", {
-                id: protyle.block.rootID,
+                id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
                 assetsDestSpace2Underscore: true,
+                adjustHeadingLevel: true,
             }, (response) => {
                 writeText(response.data);
                 showMessage(`${window.siyuan.languages.pasteToYuque}`);

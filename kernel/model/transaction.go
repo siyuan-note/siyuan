@@ -823,8 +823,6 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
-	//	logging.LogInfof("commit delete [%+v]", operation)
-
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)

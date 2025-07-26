@@ -343,7 +343,9 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 	var keywords []string
 	keywords = append(keywords, keyword)
-	keywords = append(keywords, strings.Split(keyword, " ")...)
+	if "" != keyword {
+		keywords = append(keywords, strings.Split(keyword, " ")...)
+	}
 	pathHitCount := map[string]int{}
 	filterByExt := 0 < len(exts)
 	for _, asset := range cache.GetAssets() {

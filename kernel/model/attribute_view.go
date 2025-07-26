@@ -1677,23 +1677,23 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				todayStart := time.Now()
 				todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 				if contentTime.Before(todayStart.AddDate(0, 0, -30)) {
-					groupName = contentTime.Format("2006-01")
+					groupName = "0" + contentTime.Format("2006-01") // 开头的数字用于排序，下同
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -7)) {
-					groupName = groupNameLast30Days
+					groupName = "1" + groupNameLast30Days
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -1)) {
-					groupName = groupNameLast7Days
+					groupName = "2" + groupNameLast7Days
 				} else if contentTime.Before(todayStart) {
-					groupName = groupNameYesterday
-				} else if contentTime.After(todayStart) && contentTime.Before(todayStart.AddDate(0, 0, 1)) {
-					groupName = groupNameToday
-				} else if (contentTime.After(todayStart.AddDate(0, 0, 1)) && contentTime.Before(todayStart.AddDate(0, 0, 2))) || contentTime.Equal(todayStart.AddDate(0, 0, 1)) {
-					groupName = groupNameTomorrow
+					groupName = "3" + groupNameYesterday
+				} else if (contentTime.After(todayStart) || contentTime.Equal(todayStart)) && contentTime.Before(todayStart.AddDate(0, 0, 1)) {
+					groupName = "4" + groupNameToday
 				} else if contentTime.After(todayStart.AddDate(0, 0, 30)) {
-					groupName = contentTime.Format("2006-01")
+					groupName = "8" + contentTime.Format("2006-01")
 				} else if contentTime.After(todayStart.AddDate(0, 0, 7)) {
-					groupName = groupNameNext30Days
+					groupName = "7" + groupNameNext30Days
 				} else if contentTime.After(todayStart.AddDate(0, 0, 1)) {
-					groupName = groupNameNext7Days
+					groupName = "6" + groupNameNext7Days
+				} else {
+					groupName = "5" + groupNameTomorrow
 				}
 			}
 		}
@@ -1755,6 +1755,12 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 			return view.Groups[i].Name > view.Groups[j].Name
 		})
+	}
+
+	if group.Method == av.GroupMethodDateRelative {
+		for _, v := range view.Groups {
+			v.Name = v.Name[1:] // 去掉前缀排序数字
+		}
 	}
 }
 

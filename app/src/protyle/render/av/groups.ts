@@ -52,7 +52,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     ${group ? "" : selectHTML}
 </button>`;
     columns.forEach(item => {
-        if (["rollup", "mAsset", "number"].includes(item.type)) {
+        if (["rollup", "mAsset", "lineNumber"].includes(item.type)) {
             return;
         }
         html += `<button class="b3-menu__item" data-id="${item.id}" data-type="setGroupMethod">

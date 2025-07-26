@@ -77,7 +77,7 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 	}
 
 	view.Groups = append(view.Groups[:index], view.Groups[index+1:]...)
-	for i, g := range group.Groups {
+	for i, g := range view.Groups {
 		if g.ID == previousGroupID {
 			previousIndex = i + 1
 			break
@@ -1674,26 +1674,26 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				// 过去 30 天之前的按月分组
 				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
 				// 未来 30 天之后的按月分组
-				now := time.Now()
-				now = time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, time.Local)
-				if contentTime.Before(now.AddDate(0, 0, -30)) {
-					groupName = contentTime.Format("2006-01")
-				} else if contentTime.Before(now.AddDate(0, 0, -7)) {
-					groupName = groupNameLast30Days
-				} else if contentTime.Before(now.AddDate(0, 0, -1)) {
-					groupName = groupNameLast7Days
-				} else if contentTime.Before(now) {
-					groupName = groupNameYesterday
-				} else if contentTime.After(now) && contentTime.Before(now.AddDate(0, 0, 1)) {
-					groupName = groupNameToday
-				} else if contentTime.After(now.AddDate(0, 0, 1)) || contentTime.Equal(now.AddDate(0, 0, 1)) {
-					groupName = groupNameTomorrow
-				} else if contentTime.After(now.AddDate(0, 0, 30)) {
-					groupName = contentTime.Format("2006-01")
-				} else if contentTime.After(now.AddDate(0, 0, 7)) {
-					groupName = groupNameNext30Days
-				} else if contentTime.After(now.AddDate(0, 0, 1)) {
-					groupName = groupNameNext7Days
+				todayStart := time.Now()
+				todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
+				if contentTime.Before(todayStart.AddDate(0, 0, -30)) {
+					groupName = "0" + contentTime.Format("2006-01") // 开头的数字用于排序，下同
+				} else if contentTime.Before(todayStart.AddDate(0, 0, -7)) {
+					groupName = "1" + groupNameLast30Days
+				} else if contentTime.Before(todayStart.AddDate(0, 0, -1)) {
+					groupName = "2" + groupNameLast7Days
+				} else if contentTime.Before(todayStart) {
+					groupName = "3" + groupNameYesterday
+				} else if (contentTime.After(todayStart) || contentTime.Equal(todayStart)) && contentTime.Before(todayStart.AddDate(0, 0, 1)) {
+					groupName = "4" + groupNameToday
+				} else if contentTime.After(todayStart.AddDate(0, 0, 30)) {
+					groupName = "8" + contentTime.Format("2006-01")
+				} else if contentTime.After(todayStart.AddDate(0, 0, 7)) {
+					groupName = "7" + groupNameNext30Days
+				} else if contentTime.After(todayStart.AddDate(0, 0, 1)) {
+					groupName = "6" + groupNameNext7Days
+				} else {
+					groupName = "5" + groupNameTomorrow
 				}
 			}
 		}
@@ -1755,6 +1755,12 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 			return view.Groups[i].Name > view.Groups[j].Name
 		})
+	}
+
+	if group.Method == av.GroupMethodDateRelative {
+		for _, v := range view.Groups {
+			v.Name = v.Name[1:] // 去掉前缀排序数字
+		}
 	}
 }
 

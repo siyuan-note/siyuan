@@ -1606,10 +1606,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	case av.GroupMethodValue:
 		if av.GroupOrderMan != group.Order {
 			sort.SliceStable(items, func(i, j int) bool {
-				if av.GroupOrderAsc == group.Order {
-					return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
-				}
-				return items[i].GetValue(group.Field).String(false) > items[j].GetValue(group.Field).String(false)
+				return items[i].GetValue(group.Field).String(false) < items[j].GetValue(group.Field).String(false)
 			})
 		}
 	case av.GroupMethodRangeNum:
@@ -1619,17 +1616,11 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 		rangeStart, rangeEnd = group.Range.NumStart, group.Range.NumStart+group.Range.NumStep
 		sort.SliceStable(items, func(i, j int) bool {
-			if av.GroupOrderAsc == group.Order {
-				return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
-			}
-			return items[i].GetValue(group.Field).Number.Content > items[j].GetValue(group.Field).Number.Content
+			return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
 		})
 	case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
 		sort.SliceStable(items, func(i, j int) bool {
-			if av.GroupOrderAsc == group.Order {
-				return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
-			}
-			return items[i].GetValue(group.Field).Date.Content > items[j].GetValue(group.Field).Date.Content
+			return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
 		})
 	}
 
@@ -1761,10 +1752,11 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	if av.GroupOrderMan != view.Group.Order {
 		sort.SliceStable(view.Groups, func(i, j int) bool {
+			iName, jName := view.Groups[i].Name, view.Groups[j].Name
 			if av.GroupOrderAsc == view.Group.Order {
-				return view.Groups[i].Name < view.Groups[j].Name
+				return util.NaturalCompare(iName, jName)
 			}
-			return view.Groups[i].Name > view.Groups[j].Name
+			return !util.NaturalCompare(iName, jName)
 		})
 	}
 

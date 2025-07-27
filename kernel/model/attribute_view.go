@@ -1539,6 +1539,13 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	// 如果存在分组的话渲染分组视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = view.Gallery.CardFields
+		}
+
 		groupView.Filters = view.Filters
 		groupView.Sorts = view.Sorts
 
@@ -1548,6 +1555,14 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			return
 		}
 		groups = append(groups, groupViewable)
+
+		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = nil
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = nil
+		}
 	}
 	viewable.SetGroups(groups)
 	return

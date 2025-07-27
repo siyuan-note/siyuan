@@ -1573,6 +1573,19 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		return
 	}
 
+	// 临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态
+	type GroupState struct {
+		Folded bool
+		Hidden int
+	}
+	groupStates := map[string]*GroupState{}
+	for _, groupView := range view.Groups {
+		groupStates[groupView.Name] = &GroupState{
+			Folded: groupView.GroupFolded,
+			Hidden: groupView.GroupHidden,
+		}
+	}
+
 	group := view.Group
 	view.Groups = nil
 	viewable := sql.RenderView(attrView, view, "")
@@ -1584,21 +1597,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	groupKey, _ := attrView.GetKey(group.Field)
 	if nil == groupKey {
 		return
-	}
-
-	// 如果是按日期分组，则需要记录每个分组视图的一些状态字段，以便后面重新计算分组后可以恢复这些状态
-	type GroupState struct {
-		Folded bool
-		Hidden int
-	}
-	groupStates := map[string]*GroupState{}
-	if isGroupByDate(view) {
-		for _, groupView := range view.Groups {
-			groupStates[groupView.Name] = &GroupState{
-				Folded: groupView.GroupFolded,
-				Hidden: groupView.GroupHidden,
-			}
-		}
 	}
 
 	var rangeStart, rangeEnd float64
@@ -1738,15 +1736,13 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		view.Groups = append(view.Groups, v)
 	}
 
-	if isGroupByDate(view) {
-		view.GroupUpdated = time.Now().UnixMilli()
+	view.GroupUpdated = time.Now().UnixMilli()
 
-		// 则恢复分组视图状态
-		for _, groupView := range view.Groups {
-			if state, ok := groupStates[groupView.Name]; ok {
-				groupView.GroupFolded = state.Folded
-				groupView.GroupHidden = state.Hidden
-			}
+	// 则恢复分组视图状态
+	for _, groupView := range view.Groups {
+		if state, ok := groupStates[groupView.Name]; ok {
+			groupView.GroupFolded = state.Folded
+			groupView.GroupHidden = state.Hidden
 		}
 	}
 
@@ -1756,7 +1752,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			if av.GroupOrderAsc == view.Group.Order {
 				return util.NaturalCompare(iName, jName)
 			}
-			return !util.NaturalCompare(iName, jName)
+			return util.NaturalCompare(jName, iName)
 		})
 	}
 

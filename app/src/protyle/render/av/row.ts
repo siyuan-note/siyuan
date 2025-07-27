@@ -84,7 +84,7 @@ export const updateHeader = (rowElement: HTMLElement) => {
     }
 
     const counterElement = blockElement.querySelector(".av__counter");
-    const allCount = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").length
+    const allCount = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
     if (allCount === 0) {
         counterElement.classList.add("fn__none");
         return;
@@ -432,7 +432,8 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content
             }],
-            blockID: blockElement.dataset.nodeId
+            blockID: blockElement.dataset.nodeId,
+            groupID: item.parentElement.getAttribute("data-group-id")
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
@@ -458,11 +459,17 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     blockElement.setAttribute("updated", newUpdated);
 };
 
-export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: number, previousID: string) => {
-    const avID = blockElement.getAttribute("data-av-id");
+export const insertRows = (options: {
+    blockElement: HTMLElement,
+    protyle: IProtyle,
+    count: number,
+    previousID: string,
+    groupID?: string
+}) => {
+    const avID = options.blockElement.getAttribute("data-av-id");
     const srcIDs: string[] = [];
     const srcs: IOperationSrcs[] = [];
-    new Array(count).fill(0).forEach(() => {
+    new Array(options.count).fill(0).forEach(() => {
         const newNodeID = Lute.NewNodeID();
         srcIDs.push(newNodeID);
         srcs.push({
@@ -472,15 +479,16 @@ export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: 
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-    transaction(protyle, [{
+    transaction(options.protyle, [{
         action: "insertAttrViewBlock",
         avID,
-        previousID,
+        previousID: options.previousID,
         srcs,
-        blockID: blockElement.dataset.nodeId,
+        blockID: options.blockElement.dataset.nodeId,
+        groupID: options.groupID
     }, {
         action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
+        id: options.blockElement.dataset.nodeId,
         data: newUpdated,
     }], [{
         action: "removeAttrViewBlock",
@@ -488,18 +496,18 @@ export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: 
         avID,
     }, {
         action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
-        data: blockElement.getAttribute("updated")
+        id: options.blockElement.dataset.nodeId,
+        data: options.blockElement.getAttribute("updated")
     }]);
-    if (blockElement.getAttribute("data-av-type") === "gallery") {
+    if (options.blockElement.getAttribute("data-av-type") === "gallery") {
         insertGalleryItemAnimation({
-            blockElement,
-            protyle,
+            blockElement: options.blockElement,
+            protyle: options.protyle,
             srcIDs,
-            previousId: previousID
+            previousId: options.previousID
         });
     } else {
-        insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+        insertAttrViewBlockAnimation(options.protyle, options.blockElement, srcIDs, options.previousID, avID);
     }
-    blockElement.setAttribute("updated", newUpdated);
+    options.blockElement.setAttribute("updated", newUpdated);
 };

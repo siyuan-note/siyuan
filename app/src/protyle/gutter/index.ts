@@ -279,6 +279,7 @@ export class Gutter {
                             content: ""
                         }],
                         blockID: id,
+                        groupID: rowElement.parentElement.getAttribute("data-group-id"),
                     }, {
                         action: "doUpdateUpdated",
                         id,

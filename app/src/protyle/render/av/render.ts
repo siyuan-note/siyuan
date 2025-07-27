@@ -239,7 +239,7 @@ const renderGroupTable = (options: ITableOptions) => {
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div><span class="fn__space"></span>${group.name}<span class="${group.rows.length === 0 ? "fn__none" : "counter"}">${group.rows.length}</span>
 </div>
-<div class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
+<div data-group-id="${group.id}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
         }
     });
     if (options.renderAll) {

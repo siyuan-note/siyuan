@@ -1109,7 +1109,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1169,7 +1170,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1290,6 +1292,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             previousID,
                             srcs,
                             blockID: blockElement.dataset.nodeId,
+                            groupID: targetElement.parentElement.getAttribute("data-group-id")
                         }, {
                             action: "doUpdateUpdated",
                             id: blockElement.dataset.nodeId,

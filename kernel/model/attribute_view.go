@@ -3548,27 +3548,54 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	var itemID string
 	var idx, previousIndex int
-	for i, id := range view.ItemIDs {
-		if id == operation.ID {
-			itemID = id
-			idx = i
-			break
-		}
-	}
-	if "" == itemID {
-		itemID = operation.ID
-		view.ItemIDs = append(view.ItemIDs, itemID)
-		idx = len(view.ItemIDs) - 1
-	}
 
-	view.ItemIDs = append(view.ItemIDs[:idx], view.ItemIDs[idx+1:]...)
-	for i, r := range view.ItemIDs {
-		if r == operation.PreviousID {
-			previousIndex = i + 1
-			break
+	if nil != view.Group && "" != operation.GroupID {
+		if groupView := view.GetGroup(operation.GroupID); nil != groupView {
+			for i, id := range groupView.GroupItemIDs {
+				if id == operation.ID {
+					itemID = id
+					idx = i
+					break
+				}
+			}
+			if "" == itemID {
+				itemID = operation.ID
+				groupView.GroupItemIDs = append(groupView.GroupItemIDs, itemID)
+				idx = len(groupView.GroupItemIDs) - 1
+			}
+
+			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
+			for i, r := range groupView.GroupItemIDs {
+				if r == operation.PreviousID {
+					previousIndex = i + 1
+					break
+				}
+			}
+			groupView.GroupItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 		}
+	} else {
+		for i, id := range view.ItemIDs {
+			if id == operation.ID {
+				itemID = id
+				idx = i
+				break
+			}
+		}
+		if "" == itemID {
+			itemID = operation.ID
+			view.ItemIDs = append(view.ItemIDs, itemID)
+			idx = len(view.ItemIDs) - 1
+		}
+
+		view.ItemIDs = append(view.ItemIDs[:idx], view.ItemIDs[idx+1:]...)
+		for i, r := range view.ItemIDs {
+			if r == operation.PreviousID {
+				previousIndex = i + 1
+				break
+			}
+		}
+		view.ItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 	}
-	view.ItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 
 	err = av.SaveAttributeView(attrView)
 	return

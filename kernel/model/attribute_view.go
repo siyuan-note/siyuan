@@ -4862,6 +4862,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 	}
 
+	regenAttrViewViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }

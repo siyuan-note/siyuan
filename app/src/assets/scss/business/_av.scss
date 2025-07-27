@@ -918,6 +918,11 @@
       clear: both;
       display: flex;
       font-size: 87.5%;
+      align-items: center;
+
+      .counter:hover {
+        background-color: var(--b3-list-icon-hover);
+      }
 
       svg {
         transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);

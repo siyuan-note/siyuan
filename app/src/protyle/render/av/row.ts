@@ -67,27 +67,30 @@ export const updateHeader = (rowElement: HTMLElement) => {
         return;
     }
     const selectCount = rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
-    const diffCount = rowElement.parentElement.childElementCount - 3 - selectCount;
+    const count = rowElement.parentElement.querySelectorAll(".av__row:not(.av__row--header)").length;
+
     const headElement = rowElement.parentElement.firstElementChild;
     const headUseElement = headElement.querySelector("use");
-    const counterElement = blockElement.querySelector(".av__counter");
-    const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
-    if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {
+
+    if (count === selectCount && count !== 0) {
         headElement.classList.add("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconCheck");
-    } else if (diffCount === rowElement.parentElement.childElementCount - 3) {
+    } else if (selectCount === 0) {
         headElement.classList.remove("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconUncheck");
-        counterElement.classList.add("fn__none");
-        avHeadElement.style.position = "";
-        return;
-    } else if (diffCount > 0) {
+    } else if (selectCount > 0) {
         headElement.classList.add("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
     }
+
+    const counterElement = blockElement.querySelector(".av__counter");
+    const allCount = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").length
+    if (allCount === 0) {
+        counterElement.classList.add("fn__none");
+        return;
+    }
     counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} ${window.siyuan.languages.selected}`;
-    avHeadElement.style.position = "sticky";
+    counterElement.innerHTML = `${allCount} ${window.siyuan.languages.selected}`;
 };
 
 export const setPage = (blockElement: Element) => {

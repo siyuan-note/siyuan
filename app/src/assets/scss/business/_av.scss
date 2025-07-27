@@ -56,8 +56,7 @@
   }
 
   &__header {
-    top: -43px;
-    z-index: 2;
+    position: relative;
 
     .layout-tab-bar {
       background-color: transparent;
@@ -916,6 +915,7 @@
     &-title {
       position: sticky;
       left: 0;
+      clear: both;
     }
   }
 }

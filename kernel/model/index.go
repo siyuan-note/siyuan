@@ -120,7 +120,7 @@ func unindex(boxID string) {
 
 func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
-	task.AppendTask(task.DatabaseIndex, index, box.ID)
+	task.AppendTask(task.DatabaseIndex, indexBox, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
 		sql.FlushQueue()
@@ -132,7 +132,7 @@ func removeBoxRefs(boxID string) {
 	sql.DeleteBoxRefsQueue(boxID)
 }
 
-func index(boxID string) {
+func indexBox(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return

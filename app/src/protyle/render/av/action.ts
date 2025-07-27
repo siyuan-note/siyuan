@@ -294,6 +294,34 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
+        } else if (type === "av-group-fold") {
+            if (target.getAttribute("disabled") !== "true") {
+                target.setAttribute("disabled", "true");
+                const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+                transaction(protyle, [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    id: target.dataset.id,
+                    data: isOpen
+                }], [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    id: target.dataset.id,
+                    data: !isOpen
+                }]);
+                if (isOpen) {
+                    target.firstElementChild.classList.remove("av__group-arrow--open");
+                    target.parentElement.nextElementSibling.classList.add("fn__none");
+                } else {
+                    target.firstElementChild.classList.add("av__group-arrow--open");
+                    target.parentElement.nextElementSibling.classList.remove("fn__none");
+                }
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
         }
         target = target.parentElement;
     }

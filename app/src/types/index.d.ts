@@ -68,6 +68,7 @@ type TOperation =
     | "syncAttrViewTableColWidth"
     | "hideAttrViewGroup"
     | "sortAttrViewGroup"
+    | "foldAttrViewGroup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -856,6 +857,7 @@ interface IAVView {
     showIcon: boolean;
     wrapField: boolean;
     groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
+    groupFolded?: boolean,
     filters: IAVFilter[],
     sorts: IAVSort[],
     groups: IAVView[]

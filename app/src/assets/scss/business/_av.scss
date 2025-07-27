@@ -916,6 +916,17 @@
       position: sticky;
       left: 0;
       clear: both;
+      display: flex;
+      font-size: 87.5%;
+
+      svg {
+        transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);
+      }
+    }
+
+
+    &-arrow--open {
+      transform: rotate(90deg);
     }
   }
 }

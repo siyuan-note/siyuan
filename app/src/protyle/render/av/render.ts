@@ -220,7 +220,13 @@ const renderGroupTable = (options: {
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
             group.columns = (options.data.view as IAVTable).columns;
-            avBodyHTML += `<div class="av__group-title">${group.name}</div><div class="av__body">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
+            avBodyHTML += `<div class="av__group-title">
+    <div class="block__icon block__icon--show" data-type="av-group-fold" data-id="${group.id}">
+        <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
+    </div><span class="fn__space"></span>
+    ${group.name}
+</div>
+<div class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
         }
     });
     if (options.renderAll) {
@@ -514,137 +520,163 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             titleElement.dataset.title = operation.data;
         });
     }
+    if (operation.action === "setAttrViewColWidth") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
+            if (!cellElement || cellElement.style.width === operation.data || item.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== operation.keyID) {
+                return;
+            }
+            item.querySelectorAll(".av__row").forEach(rowItem => {
+                (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewCardSize") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            const galleryElement = item.querySelector(".av__gallery") as HTMLElement;
+            if (galleryElement) {
+                galleryElement.classList.remove("av__gallery--small", "av__gallery--big");
+                if (operation.data === 0) {
+                    galleryElement.classList.add("av__gallery--small");
+                } else if (operation.data === 2) {
+                    galleryElement.classList.add("av__gallery--big");
+                }
+            }
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewCardAspectRatio") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
+                coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
+            });
+        });
+        return;
+    }
+    if (operation.action === "hideAttrViewName") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            const titleElement = item.querySelector(".av__title");
+            if (titleElement) {
+                if (!operation.data) {
+                    titleElement.classList.remove("fn__none");
+                } else {
+                    // hide
+                    titleElement.classList.add("fn__none");
+                }
+                if (item.getAttribute("data-av-type") === "gallery") {
+                    const galleryElement = item.querySelector(".av__gallery");
+                    if (!operation.data) {
+                        galleryElement.classList.remove("av__gallery--top");
+                    } else {
+                        // hide
+                        galleryElement.classList.add("av__gallery--top");
+                    }
+                }
+            }
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewWrapField") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            item.querySelectorAll(".av__cell").forEach(fieldItem => {
+                fieldItem.setAttribute("data-wrap", operation.data.toString());
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewShowIcon") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
+                if (operation.data) {
+                    cellItem.classList.remove("fn__none");
+                } else {
+                    cellItem.classList.add("fn__none");
+                }
+            });
+        });
+        return;
+    }
+    if (operation.action === "setAttrViewColWrap") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
+                cellItem.setAttribute("data-wrap", operation.data.toString());
+            });
+        });
+        return;
+    }
+    if (operation.action === "foldAttrViewGroup") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+            const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
+            if (operation.data) {
+                foldElement.firstElementChild.classList.remove("av__group-arrow--open");
+                foldElement.parentElement.nextElementSibling.classList.add("fn__none");
+            } else {
+                foldElement.firstElementChild.classList.add("av__group-arrow--open");
+                foldElement.parentElement.nextElementSibling.classList.remove("fn__none");
+            }
+            foldElement.removeAttribute("disabled");
+        });
+        return;
+    }
     // 只能 setTimeout，以前方案快速输入后最后一次修改会被忽略；必须为每一个 protyle 单独设置，否则有多个 protyle 时，其余无法被执行
     clearTimeout(refreshTimeouts[protyle.id]);
     refreshTimeouts[protyle.id] = window.setTimeout(() => {
-        if (operation.action === "setAttrViewColWidth") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
-                if (!cellElement || cellElement.style.width === operation.data || item.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== operation.keyID) {
+        // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
+        const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
+            item.removeAttribute("data-render");
+            const updateRow = item.querySelector('[data-need-update="true"]');
+            if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
+                item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                    item.classList.remove("av__cell--active");
+                    item.querySelector(".av__drag-fill")?.remove();
+                });
+                addDragFill(item.querySelector(".av__cell--select"));
+            } else if (operation.action === "setAttrViewBlockView") {
+                const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
+                if (viewTabElement) {
+                    item.dataset.pageSize = viewTabElement.dataset.page;
+                }
+            } else if (operation.action === "addAttrViewView") {
+                item.dataset.pageSize = "50";
+            } else if (operation.action === "removeAttrViewView") {
+                item.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+            } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
+                const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
+                if (viewTabElement && !operation.previousID && !viewTabElement.previousElementSibling) {
+                    return;
+                } else if (viewTabElement && operation.previousID && viewTabElement.previousElementSibling?.getAttribute("data-id") === operation.previousID) {
                     return;
                 }
-                item.querySelectorAll(".av__row").forEach(rowItem => {
-                    (rowItem.querySelector(`[data-col-id="${operation.id}"]`) as HTMLElement).style.width = operation.data;
-                });
-            });
-        } else if (operation.action === "setAttrViewCardSize") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                const galleryElement = item.querySelector(".av__gallery") as HTMLElement;
-                if (galleryElement) {
-                    galleryElement.classList.remove("av__gallery--small", "av__gallery--big");
-                    if (operation.data === 0) {
-                        galleryElement.classList.add("av__gallery--small");
-                    } else if (operation.data === 2) {
-                        galleryElement.classList.add("av__gallery--big");
-                    }
-                }
-            });
-        } else if (operation.action === "setAttrViewCardAspectRatio") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
-                    coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
-                });
-            });
-        } else if (operation.action === "hideAttrViewName") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                const titleElement = item.querySelector(".av__title");
-                if (titleElement) {
-                    if (!operation.data) {
-                        titleElement.classList.remove("fn__none");
-                    } else {
-                        // hide
-                        titleElement.classList.add("fn__none");
-                    }
-                    if (item.getAttribute("data-av-type") === "gallery") {
-                        const galleryElement = item.querySelector(".av__gallery");
-                        if (!operation.data) {
-                            galleryElement.classList.remove("av__gallery--top");
-                        } else {
-                            // hide
-                            galleryElement.classList.add("av__gallery--top");
+            }
+            avRender(item, protyle, () => {
+                const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
+                if (attrElement) {
+                    // 更新属性面板
+                    renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
+                } else {
+                    if (operation.action === "insertAttrViewBlock") {
+                        if (updateRow && !item.querySelector(`[data-id="${updateRow.getAttribute("data-id")}"]`)) {
+                            showMessage(window.siyuan.languages.insertRowTip);
+                            document.querySelector(".av__mask")?.remove();
+                        }
+                        if (item.getAttribute("data-av-type") === "gallery") {
+                            operation.srcs.forEach(srcItem => {
+                                const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
+                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
+                                    filesElement.classList.add("av__gallery-fields--edit");
+                                }
+                            });
+                        }
+                    } else if (operation.action === "addAttrViewView") {
+                        if (item.getAttribute("data-node-id") === operation.blockID) {
+                            openMenuPanel({protyle, blockElement: item, type: "config"});
                         }
                     }
                 }
+                item.removeAttribute("data-loading");
             });
-        } else if (operation.action === "setAttrViewWrapField") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll(".av__cell").forEach(fieldItem => {
-                    fieldItem.setAttribute("data-wrap", operation.data.toString());
-                });
-            });
-        } else if (operation.action === "setAttrViewShowIcon") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
-                    if (operation.data) {
-                        cellItem.classList.remove("fn__none");
-                    } else {
-                        cellItem.classList.add("fn__none");
-                    }
-                });
-            });
-        } else if (operation.action === "setAttrViewColWrap") {
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-                item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
-                    cellItem.setAttribute("data-wrap", operation.data.toString());
-                });
-            });
-        } else {
-            // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
-            const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
-                item.removeAttribute("data-render");
-                const updateRow = item.querySelector('[data-need-update="true"]');
-                if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
-                    item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                        item.classList.remove("av__cell--active");
-                        item.querySelector(".av__drag-fill")?.remove();
-                    });
-                    addDragFill(item.querySelector(".av__cell--select"));
-                } else if (operation.action === "setAttrViewBlockView") {
-                    const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
-                    if (viewTabElement) {
-                        item.dataset.pageSize = viewTabElement.dataset.page;
-                    }
-                } else if (operation.action === "addAttrViewView") {
-                    item.dataset.pageSize = "50";
-                } else if (operation.action === "removeAttrViewView") {
-                    item.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
-                } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
-                    const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
-                    if (viewTabElement && !operation.previousID && !viewTabElement.previousElementSibling) {
-                        return;
-                    } else if (viewTabElement && operation.previousID && viewTabElement.previousElementSibling?.getAttribute("data-id") === operation.previousID) {
-                        return;
-                    }
-                }
-                avRender(item, protyle, () => {
-                    const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
-                    if (attrElement) {
-                        // 更新属性面板
-                        renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
-                    } else {
-                        if (operation.action === "insertAttrViewBlock") {
-                            if (updateRow && !item.querySelector(`[data-id="${updateRow.getAttribute("data-id")}"]`)) {
-                                showMessage(window.siyuan.languages.insertRowTip);
-                                document.querySelector(".av__mask")?.remove();
-                            }
-                            if (item.getAttribute("data-av-type") === "gallery") {
-                                operation.srcs.forEach(srcItem => {
-                                    const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
-                                    if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
-                                        filesElement.classList.add("av__gallery-fields--edit");
-                                    }
-                                });
-                            }
-                        } else if (operation.action === "addAttrViewView") {
-                            if (item.getAttribute("data-node-id") === operation.blockID) {
-                                openMenuPanel({protyle, blockElement: item, type: "config"});
-                            }
-                        }
-                    }
-                    item.removeAttribute("data-loading");
-                });
-            });
-        }
+        });
     }, ["insertAttrViewBlock"].includes(operation.action) ? 2 : 100);
 };

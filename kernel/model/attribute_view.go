@@ -63,18 +63,19 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 		return err
 	}
 
-	var group *av.View
+	var groupView *av.View
 	var index, previousIndex int
 	for i, g := range view.Groups {
 		if g.ID == groupID {
-			group = g
+			groupView = g
 			index = i
 			break
 		}
 	}
-	if nil == group {
+	if nil == groupView {
 		return
 	}
+	view.Group.Order = av.GroupOrderMan
 
 	view.Groups = append(view.Groups[:index], view.Groups[index+1:]...)
 	for i, g := range view.Groups {
@@ -83,7 +84,7 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 			break
 		}
 	}
-	view.Groups = util.InsertElem(view.Groups, previousIndex, group)
+	view.Groups = util.InsertElem(view.Groups, previousIndex, groupView)
 
 	err = av.SaveAttributeView(attrView)
 	return
@@ -3080,7 +3081,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 						if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 							// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
-							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt {
+							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && av.GroupValueDefault != groupView.GroupValue {
 								newValue.MSelect[0].Content = opt.Name
 								newValue.MSelect[0].Color = opt.Color
 							}

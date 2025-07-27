@@ -3175,6 +3175,9 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	}
 
 	err = av.SaveAttributeView(attrView)
+	if nil != err {
+		return
+	}
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
 	if err != nil {

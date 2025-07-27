@@ -866,8 +866,8 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Valu
 			return
 		}
 	}
-	// 没有默认值则使用过滤条件的值
 
+	// 没有默认值则使用过滤条件的值
 	switch filter.Value.Type {
 	case KeyTypeBlock:
 		switch filter.Operator {

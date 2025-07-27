@@ -1096,7 +1096,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 			AddAttributeViewBlock(tx, []map[string]interface{}{{
 				"id":         insertedNode.ID,
 				"isDetached": false,
-			}}, avID, "", previousID, false)
+			}}, avID, "", "", previousID, false)
 			ReloadAttrView(avID)
 		}
 
@@ -1275,7 +1275,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", previousID, false)
+		}}, avID, "", "", previousID, false)
 		ReloadAttrView(avID)
 	}
 
@@ -1692,6 +1692,7 @@ type Operation struct {
 	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
 	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
 	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
+	GroupID             string                   `json:"groupID"`           // 属性视图分组视图 ID
 }
 
 type Transaction struct {

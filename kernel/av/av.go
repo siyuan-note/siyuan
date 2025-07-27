@@ -192,14 +192,31 @@ type View struct {
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
-	GroupUpdated int64      `json:"groupUpdated"`        // 分组规则更新时间戳
-	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
-	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
-	GroupName    string     `json:"groupName,omitempty"` // 分组名称
-	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
-	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	Group        *ViewGroup `json:"group,omitempty"`      // 分组规则
+	GroupUpdated int64      `json:"groupUpdated"`         // 分组规则更新时间戳
+	Groups       []*View    `json:"groups,omitempty"`     // 分组视图列表
+	GroupItemIDs []string   `json:"groupItemIds"`         // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则
+	GroupValue   string     `json:"groupValue,omitempty"` // 分组值
+	GroupFolded  bool       `json:"groupFolded"`          // 分组是否折叠
+	GroupHidden  int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+}
+
+const (
+	GroupValueDefault    = "_@default@_"    // 默认分组值（值为空的默认分组）
+	GroupValueNotInRange = "_@notInRange@_" // 不再范围内的分组值（只有数字类型的分组才可能是该值）
+)
+
+// GetGroup 获取指定分组 ID 的分组视图。
+func (view *View) GetGroup(groupID string) *View {
+	if nil == view.Groups {
+		return nil
+	}
+	for _, group := range view.Groups {
+		if group.ID == groupID {
+			return group
+		}
+	}
 }
 
 // GroupCalc 描述了分组计算规则和结果的结构。
@@ -282,9 +299,6 @@ type Viewable interface {
 
 	// GetGroupCalc 获取视图分组计算规则和结果。
 	GetGroupCalc() *GroupCalc
-
-	// SetGroupName 设置分组名称。
-	SetGroupName(name string)
 
 	// SetGroupFolded 设置分组是否折叠。
 	SetGroupFolded(folded bool)

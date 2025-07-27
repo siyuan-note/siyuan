@@ -1539,6 +1539,13 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	// 如果存在分组的话渲染分组视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = view.Gallery.CardFields
+		}
+
 		groupView.Filters = view.Filters
 		groupView.Sorts = view.Sorts
 
@@ -1548,6 +1555,14 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			return
 		}
 		groups = append(groups, groupViewable)
+
+		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = nil
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = nil
+		}
 	}
 	viewable.SetGroups(groups)
 	return
@@ -3146,6 +3161,12 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		for _, blockID := range srcIDs {
 			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
 		}
+
+		for _, groupView := range view.Groups {
+			for _, blockID := range srcIDs {
+				groupView.ItemIDs = gulu.Str.RemoveElem(groupView.ItemIDs, blockID)
+			}
+		}
 	}
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
@@ -3533,27 +3554,54 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	var itemID string
 	var idx, previousIndex int
-	for i, id := range view.ItemIDs {
-		if id == operation.ID {
-			itemID = id
-			idx = i
-			break
-		}
-	}
-	if "" == itemID {
-		itemID = operation.ID
-		view.ItemIDs = append(view.ItemIDs, itemID)
-		idx = len(view.ItemIDs) - 1
-	}
 
-	view.ItemIDs = append(view.ItemIDs[:idx], view.ItemIDs[idx+1:]...)
-	for i, r := range view.ItemIDs {
-		if r == operation.PreviousID {
-			previousIndex = i + 1
-			break
+	if nil != view.Group && "" != operation.GroupID {
+		if groupView := view.GetGroup(operation.GroupID); nil != groupView {
+			for i, id := range groupView.GroupItemIDs {
+				if id == operation.ID {
+					itemID = id
+					idx = i
+					break
+				}
+			}
+			if "" == itemID {
+				itemID = operation.ID
+				groupView.GroupItemIDs = append(groupView.GroupItemIDs, itemID)
+				idx = len(groupView.GroupItemIDs) - 1
+			}
+
+			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
+			for i, r := range groupView.GroupItemIDs {
+				if r == operation.PreviousID {
+					previousIndex = i + 1
+					break
+				}
+			}
+			groupView.GroupItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 		}
+	} else {
+		for i, id := range view.ItemIDs {
+			if id == operation.ID {
+				itemID = id
+				idx = i
+				break
+			}
+		}
+		if "" == itemID {
+			itemID = operation.ID
+			view.ItemIDs = append(view.ItemIDs, itemID)
+			idx = len(view.ItemIDs) - 1
+		}
+
+		view.ItemIDs = append(view.ItemIDs[:idx], view.ItemIDs[idx+1:]...)
+		for i, r := range view.ItemIDs {
+			if r == operation.PreviousID {
+				previousIndex = i + 1
+				break
+			}
+		}
+		view.ItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 	}
-	view.ItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
 
 	err = av.SaveAttributeView(attrView)
 	return

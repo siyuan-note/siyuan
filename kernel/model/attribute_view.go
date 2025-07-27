@@ -3063,7 +3063,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	}
 
 	// 如果存在分组条件，则将分组条件应用到新添加的块上
-	groupKey := getViewGroupKey(view, attrView)
+	groupKey := view.GetGroupKey(attrView)
 	if nil != view && nil != groupKey {
 		if !filterKeyIDs[groupKey.ID] /* 过滤条件应用过的话就不重复处理了 */ && "" != groupID {
 			if groupView := view.GetGroup(groupID); nil != groupView {
@@ -3868,6 +3868,7 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 		}
 	}
 
+	regenAttrViewViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4524,7 +4525,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 	for _, view := range attrView.Views {
-		groupKey := getViewGroupKey(view, attrView)
+		groupKey := view.GetGroupKey(attrView)
 		if nil == groupKey {
 			continue
 		}
@@ -4547,17 +4548,6 @@ func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 			}
 		}
 	}
-}
-
-func getViewGroupKey(view *av.View, attrView *av.AttributeView) *av.Key {
-	if nil == view.Group {
-		return nil
-	}
-	if "" == view.Group.Field {
-		return nil
-	}
-	ret, _ := attrView.GetKey(view.Group.Field)
-	return ret
 }
 
 func unbindBlockAv(tx *Transaction, avID, blockID string) {
@@ -4753,6 +4743,7 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 		break
 	}
 
+	regenAttrViewViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }

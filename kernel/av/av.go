@@ -217,6 +217,7 @@ func (view *View) GetGroup(groupID string) *View {
 			return group
 		}
 	}
+	return nil
 }
 
 // GroupCalc 描述了分组计算规则和结果的结构。

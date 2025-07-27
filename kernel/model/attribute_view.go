@@ -295,6 +295,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	}
 
 	err = av.SaveAttributeView(attrView)
+	ReloadAttrView(avID)
 	return
 }
 

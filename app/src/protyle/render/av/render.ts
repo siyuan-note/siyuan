@@ -615,7 +615,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 foldElement.firstElementChild.classList.add("av__group-arrow--open");
                 foldElement.parentElement.nextElementSibling.classList.remove("fn__none");
             }
-            foldElement.removeAttribute("disabled");
+            foldElement.removeAttribute("data-folding");
         });
         return;
     }

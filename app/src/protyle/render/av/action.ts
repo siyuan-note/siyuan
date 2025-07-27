@@ -295,8 +295,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-group-fold") {
-            if (target.getAttribute("disabled") !== "true") {
-                target.setAttribute("disabled", "true");
+            if (target.getAttribute("data-folding") !== "true") {
+                target.setAttribute("data-folding", "true");
                 const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
                 transaction(protyle, [{
                     action: "foldAttrViewGroup",

@@ -18,6 +18,26 @@ import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 
+interface ITableOptions {
+    protyle: IProtyle,
+    blockElement: HTMLElement,
+    cb: (data: IAV) => void,
+    data: IAV,
+    renderAll: boolean,
+    resetData: {
+        left: number,
+        alignSelf: string,
+        headerTransform: string,
+        footerTransform: string,
+        selectCellId: string,
+        isSearching: boolean,
+        selectRowIds: string[],
+        dragFillId: string,
+        activeIds: string[],
+        query: string,
+    }
+}
+
 export const genTabHeaderHTML = (data: IAV, showSearch: boolean, editable: boolean) => {
     let tabHTML = "";
     let viewData: IAVView;
@@ -205,13 +225,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
     };
 };
 
-const renderGroupTable = (options: {
-    blockElement: HTMLElement,
-    protyle: IProtyle,
-    cb?: (data: IAV) => void,
-    renderAll: boolean
-    data: IAV
-}) => {
+const renderGroupTable = (options: ITableOptions) => {
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
     const query = searchInputElement?.value || "";
@@ -239,11 +253,139 @@ const renderGroupTable = (options: {
     } else {
         options.blockElement.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
     }
-    afterRenderTable(options.blockElement);
+    afterRenderTable(options);
 };
 
-const afterRenderTable = (blockElement: HTMLElement) => {
-    blockElement.setAttribute("data-render", "true");
+const afterRenderTable = (options: ITableOptions) => {
+    options.blockElement.setAttribute("data-render", "true");
+    options.blockElement.querySelector(".av__scroll").scrollLeft = options.resetData.left;
+    options.blockElement.style.alignSelf = options.resetData.alignSelf;
+    const editRect = options.protyle.contentElement.getBoundingClientRect();
+    if (options.resetData.headerTransform) {
+        (options.blockElement.querySelector('.av__row--header[style^="transform"]') as HTMLElement).style.transform = options.resetData.headerTransform;
+    } else {
+        // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
+        setTimeout(() => {
+            stickyRow(options.blockElement, editRect, "top");
+        }, Constants.TIMEOUT_LOAD);
+    }
+    if (options.resetData.footerTransform) {
+        (options.blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = options.resetData.footerTransform;
+    } else {
+        // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
+        setTimeout(() => {
+            stickyRow(options.blockElement, editRect, "bottom");
+        }, Constants.TIMEOUT_LOAD);
+    }
+    if (options.resetData.selectCellId) {
+        const newCellElement = options.blockElement.querySelector(`.av__row[data-id="${options.resetData.selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.selectCellId.split(Constants.ZWSP)[1]}"]`);
+        if (newCellElement) {
+            newCellElement.classList.add("av__cell--select");
+            cellScrollIntoView(options.blockElement, newCellElement);
+        }
+        const avMaskElement = document.querySelector(".av__mask");
+        const avPanelElement = document.querySelector(".av__panel");
+        if (avMaskElement) {
+            (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
+        } else if (!avPanelElement && !options.resetData.isSearching && getSelection().rangeCount > 0) {
+            const range = getSelection().getRangeAt(0);
+            const blockElement = hasClosestBlock(range.startContainer);
+            if (blockElement && options.blockElement === blockElement) {
+                focusBlock(options.blockElement);
+            }
+        } else if (avPanelElement && !newCellElement) {
+            avPanelElement.remove();
+        }
+    }
+    options.resetData.selectRowIds.forEach((selectRowId, index) => {
+        const rowElement = options.blockElement.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
+        if (rowElement) {
+            rowElement.classList.add("av__row--select");
+            rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
+        }
+        if (index === options.resetData.selectRowIds.length - 1 && rowElement) {
+            updateHeader(rowElement);
+        }
+    });
+
+    if (options.resetData.dragFillId) {
+        addDragFill(options.blockElement.querySelector(`.av__row[data-id="${options.resetData.dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.dragFillId.split(Constants.ZWSP)[1]}"]`));
+    }
+    options.resetData.activeIds.forEach(activeId => {
+        options.blockElement.querySelector(`.av__row[data-id="${activeId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${activeId.split(Constants.ZWSP)[1]}"]`)?.classList.add("av__cell--active");
+    });
+    if (getSelection().rangeCount > 0) {
+        // 修改表头后光标重新定位
+        const range = getSelection().getRangeAt(0);
+        if (!hasClosestByClassName(range.startContainer, "av__title")) {
+            const blockElement = hasClosestBlock(range.startContainer);
+            if (blockElement && options.blockElement === blockElement && !options.resetData.isSearching) {
+                focusBlock(options.blockElement);
+            }
+        }
+    }
+    options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
+    if (options.cb) {
+        options.cb(options.data);
+    }
+    if (!options.renderAll) {
+        return;
+    }
+    const viewsElement = options.blockElement.querySelector(".av__views") as HTMLElement;
+    const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
+    searchInputElement.value = options.resetData.query || "";
+    if (options.resetData.isSearching) {
+        searchInputElement.focus();
+    }
+    searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
+        event.stopPropagation();
+    });
+    searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        electronUndo(event);
+    });
+    searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
+        event.stopPropagation();
+        if (event.isComposing) {
+            return;
+        }
+        if (searchInputElement.value || document.activeElement === searchInputElement) {
+            viewsElement.classList.add("av__views--show");
+        } else {
+            viewsElement.classList.remove("av__views--show");
+        }
+        updateSearch(options.blockElement, options.protyle);
+    });
+    searchInputElement.addEventListener("compositionend", () => {
+        updateSearch(options.blockElement, options.protyle);
+    });
+    searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
+        if (event.isComposing) {
+            return;
+        }
+        if (!searchInputElement.value) {
+            viewsElement.classList.remove("av__views--show");
+            searchInputElement.style.width = "0";
+            searchInputElement.style.paddingLeft = "0";
+            searchInputElement.style.paddingRight = "0";
+        }
+    });
+    addClearButton({
+        inputElement: searchInputElement,
+        right: 0,
+        width: "1em",
+        height: searchInputElement.clientHeight,
+        clearCB() {
+            viewsElement.classList.remove("av__views--show");
+            searchInputElement.style.width = "0";
+            searchInputElement.style.paddingLeft = "0";
+            searchInputElement.style.paddingRight = "0";
+            focusBlock(options.blockElement);
+            updateSearch(options.blockElement, options.protyle);
+        }
+    });
 };
 
 export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) => void, renderAll = true) => {
@@ -271,7 +413,40 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 return;
             }
 
-            const alignSelf = e.style.alignSelf;
+            let selectCellId = "";
+            const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
+            if (selectCellElement) {
+                selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
+            }
+            const selectRowIds: string[] = [];
+            e.querySelectorAll(".av__row--select").forEach(rowItem => {
+                const rowId = rowItem.getAttribute("data-id");
+                if (rowId) {
+                    selectRowIds.push(rowId);
+                }
+            });
+            let dragFillId = "";
+            const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
+            if (dragFillElement) {
+                dragFillId = (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + dragFillElement.parentElement.getAttribute("data-col-id");
+            }
+            const activeIds: string[] = [];
+            e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
+                activeIds.push((hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + item.getAttribute("data-col-id"));
+            });
+            const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+            const resetData = {
+                selectCellId,
+                alignSelf: e.style.alignSelf,
+                left: e.querySelector(".av__scroll")?.scrollLeft || 0,
+                headerTransform: (e.querySelector('.av__row--header[style^="transform"]') as HTMLElement)?.style.transform,
+                footerTransform: (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform,
+                isSearching: searchInputElement && document.activeElement === searchInputElement,
+                selectRowIds,
+                dragFillId,
+                activeIds,
+                query: searchInputElement?.value || ""
+            };
             if (e.firstElementChild.innerHTML === "") {
                 e.style.alignSelf = "";
                 let html = "";
@@ -286,42 +461,15 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 });
                 e.firstElementChild.innerHTML = html;
             }
-            const left = e.querySelector(".av__scroll")?.scrollLeft || 0;
-            const headerTransform = (e.querySelector(".av__row--header") as HTMLElement)?.style.transform;
-            const footerTransform = (e.querySelector(".av__row--footer") as HTMLElement)?.style.transform;
-            const selectRowIds: string[] = [];
-            e.querySelectorAll(".av__row--select").forEach(rowItem => {
-                const rowId = rowItem.getAttribute("data-id");
-                if (rowId) {
-                    selectRowIds.push(rowId);
-                }
-            });
-            let selectCellId = "";
-            const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
-            if (selectCellElement) {
-                selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
-            }
-            let dragFillId = "";
-            const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
-            if (dragFillElement) {
-                dragFillId = (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + dragFillElement.parentElement.getAttribute("data-col-id");
-            }
-            const activeIds: string[] = [];
-            e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                activeIds.push((hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + item.getAttribute("data-col-id"));
-            });
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
-            let searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-            const isSearching = searchInputElement && document.activeElement === searchInputElement;
-            const query = searchInputElement?.value || "";
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
                 pageSize: parseInt(e.dataset.pageSize) || undefined,
                 viewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
-                query: query.trim(),
+                query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
             }, (response) => {
                 const data = response.data.view as IAVTable;
@@ -331,7 +479,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                     return;
                 }
                 if (data.groups?.length > 0) {
-                    renderGroupTable({blockElement: e, protyle, cb, renderAll, data: response.data});
+                    renderGroupTable({blockElement: e, protyle, cb, renderAll, data: response.data, resetData});
                     return;
                 }
                 if (!e.dataset.pageSize) {
@@ -344,7 +492,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
 </div>`;
                 if (renderAll) {
                     e.firstElementChild.outerHTML = `<div class="av__container">
-    ${genTabHeaderHTML(response.data, isSearching || !!query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(response.data, resetData.isSearching || !!resetData.query, !protyle.disabled && !hasClosestByAttribute(e, "data-type", "NodeBlockQueryEmbed"))}
     <div class="av__scroll">
         ${avBodyHTML}
     </div>
@@ -353,142 +501,16 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 } else {
                     e.firstElementChild.querySelector(".av__scroll").innerHTML = avBodyHTML;
                 }
-                afterRenderTable(e);
+                afterRenderTable({
+                    renderAll,
+                    data: response.data,
+                    cb,
+                    protyle,
+                    blockElement: e,
+                    resetData
+                });
                 // 历史兼容
                 e.style.margin = "";
-                if (left) {
-                    e.querySelector(".av__scroll").scrollLeft = left;
-                }
-                if (alignSelf) {
-                    e.style.alignSelf = alignSelf;
-                }
-                const editRect = protyle.contentElement.getBoundingClientRect();
-                if (headerTransform) {
-                    (e.querySelector(".av__row--header") as HTMLElement).style.transform = headerTransform;
-                } else {
-                    // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
-                    setTimeout(() => {
-                        stickyRow(e, editRect, "top");
-                    }, Constants.TIMEOUT_LOAD);
-                }
-                if (footerTransform) {
-                    (e.querySelector(".av__row--footer") as HTMLElement).style.transform = footerTransform;
-                } else {
-                    // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
-                    setTimeout(() => {
-                        stickyRow(e, editRect, "bottom");
-                    }, Constants.TIMEOUT_LOAD);
-                }
-                if (selectCellId) {
-                    const newCellElement = e.querySelector(`.av__row[data-id="${selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${selectCellId.split(Constants.ZWSP)[1]}"]`);
-                    if (newCellElement) {
-                        newCellElement.classList.add("av__cell--select");
-                        cellScrollIntoView(e, newCellElement);
-                    }
-                    const avMaskElement = document.querySelector(".av__mask");
-                    const avPanelElement = document.querySelector(".av__panel");
-                    if (avMaskElement) {
-                        (avMaskElement.querySelector("textarea, input") as HTMLTextAreaElement)?.focus();
-                    } else if (!avPanelElement && !isSearching && getSelection().rangeCount > 0) {
-                        const range = getSelection().getRangeAt(0);
-                        const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && e === blockElement) {
-                            focusBlock(e);
-                        }
-                    } else if (avPanelElement && !newCellElement) {
-                        avPanelElement.remove();
-                    }
-                }
-                selectRowIds.forEach((selectRowId, index) => {
-                    const rowElement = e.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
-                    if (rowElement) {
-                        rowElement.classList.add("av__row--select");
-                        rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
-                    }
-
-                    if (index === selectRowIds.length - 1 && rowElement) {
-                        updateHeader(rowElement);
-                    }
-                });
-
-                if (dragFillId) {
-                    addDragFill(e.querySelector(`.av__row[data-id="${dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${dragFillId.split(Constants.ZWSP)[1]}"]`));
-                }
-                activeIds.forEach(activeId => {
-                    e.querySelector(`.av__row[data-id="${activeId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${activeId.split(Constants.ZWSP)[1]}"]`)?.classList.add("av__cell--active");
-                });
-                if (getSelection().rangeCount > 0) {
-                    // 修改表头后光标重新定位
-                    const range = getSelection().getRangeAt(0);
-                    if (!hasClosestByClassName(range.startContainer, "av__title")) {
-                        const blockElement = hasClosestBlock(range.startContainer);
-                        if (blockElement && e === blockElement && !isSearching) {
-                            focusBlock(e);
-                        }
-                    }
-                }
-                e.querySelector(".layout-tab-bar").scrollLeft = (e.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
-                if (cb) {
-                    cb(response.data);
-                }
-                if (!renderAll) {
-                    return;
-                }
-                const viewsElement = e.querySelector(".av__views") as HTMLElement;
-                searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
-                searchInputElement.value = query || "";
-                if (isSearching) {
-                    searchInputElement.focus();
-                }
-                searchInputElement.addEventListener("compositionstart", (event: KeyboardEvent) => {
-                    event.stopPropagation();
-                });
-                searchInputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-                    if (event.isComposing) {
-                        return;
-                    }
-                    electronUndo(event);
-                });
-                searchInputElement.addEventListener("input", (event: KeyboardEvent) => {
-                    event.stopPropagation();
-                    if (event.isComposing) {
-                        return;
-                    }
-                    if (searchInputElement.value || document.activeElement === searchInputElement) {
-                        viewsElement.classList.add("av__views--show");
-                    } else {
-                        viewsElement.classList.remove("av__views--show");
-                    }
-                    updateSearch(e, protyle);
-                });
-                searchInputElement.addEventListener("compositionend", () => {
-                    updateSearch(e, protyle);
-                });
-                searchInputElement.addEventListener("blur", (event: KeyboardEvent) => {
-                    if (event.isComposing) {
-                        return;
-                    }
-                    if (!searchInputElement.value) {
-                        viewsElement.classList.remove("av__views--show");
-                        searchInputElement.style.width = "0";
-                        searchInputElement.style.paddingLeft = "0";
-                        searchInputElement.style.paddingRight = "0";
-                    }
-                });
-                addClearButton({
-                    inputElement: searchInputElement,
-                    right: 0,
-                    width: "1em",
-                    height: searchInputElement.clientHeight,
-                    clearCB() {
-                        viewsElement.classList.remove("av__views--show");
-                        searchInputElement.style.width = "0";
-                        searchInputElement.style.paddingLeft = "0";
-                        searchInputElement.style.paddingRight = "0";
-                        focusBlock(e);
-                        updateSearch(e, protyle);
-                    }
-                });
             });
         });
     }

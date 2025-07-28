@@ -431,7 +431,12 @@ func exportMdContent(c *gin.Context) {
 		fillCSSVar = arg["fillCSSVar"].(bool)
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar)
+	adjustHeadingLevel := false
+	if nil != arg["adjustHeadingLevel"] {
+		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
+	}
+
+	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,
 		"content": content,

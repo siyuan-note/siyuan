@@ -1110,13 +1110,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const groupID = targetElement.parentElement.getAttribute("data-group-id");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
                                 blockID: blockElement.dataset.nodeId,
-                                groupID: targetElement.parentElement.getAttribute("data-group-id")
+                                groupID
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1131,7 +1132,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 data: blockElement.getAttribute("updated")
                             }]);
                             blockElement.setAttribute("updated", newUpdated);
-                            insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
+                            insertAttrViewBlockAnimation({
+                                protyle,
+                                blockElement,
+                                srcIDs: sourceIds,
+                                previousId: previousID,
+                                groupID
+                            });
                         }
                     }
                 } else if (targetElement.classList.contains("av__gallery-item") || targetElement.classList.contains("av__gallery-add")) {
@@ -1292,6 +1299,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
+                        const groupID = targetElement.parentElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
                                 id,
@@ -1304,7 +1312,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             previousID,
                             srcs,
                             blockID: blockElement.dataset.nodeId,
-                            groupID: targetElement.parentElement.getAttribute("data-group-id")
+                            groupID
                         }, {
                             action: "doUpdateUpdated",
                             id: blockElement.dataset.nodeId,
@@ -1318,7 +1326,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             id: blockElement.dataset.nodeId,
                             data: blockElement.getAttribute("updated")
                         }]);
-                        insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                        insertAttrViewBlockAnimation({
+                            protyle,
+                            blockElement,
+                            srcIDs: ids,
+                            previousId: previousID,
+                            groupID
+                        });
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {

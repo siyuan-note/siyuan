@@ -106,21 +106,29 @@ export const setPage = (blockElement: Element) => {
 
 /**
  * 前端插入一假行
- * @param protyle
- * @param blockElement
- * @param srcIDs
- * @param previousId
- * @param avId 存在为新增否则为拖拽插入
+ * @param options.protyle
+ * @param options.blockElement
+ * @param options.srcIDs
+ * @param options.previousId
+ * @param options.avId 存在为新增否则为拖拽插入
  */
-export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
-    if ((blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
+export const insertAttrViewBlockAnimation = (options: {
+    protyle: IProtyle,
+    blockElement: Element,
+    srcIDs: string[],
+    previousId: string,
+    groupID?: string
+}) => {
+    if ((options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
         showMessage(window.siyuan.languages.insertRowTip);
         return;
     }
-    let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+    const avId = options.blockElement.getAttribute("data-av-id");
+    const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
+    let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
-    if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
-        previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
+    if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
+        previousElement = options.blockElement.querySelector("groupQuery + .av__row--util").previousElementSibling;
     }
     let colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
@@ -143,14 +151,14 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
         }
     });
     let html = "";
-    srcIDs.forEach((id) => {
-        const blockCellElement = blockElement.querySelector(`[data-block-id="${id}"]`);
+    options.srcIDs.forEach((id) => {
+        const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
         if (!blockCellElement) {
-            html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
+            html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${options.previousId}">
     ${colHTML}
 </div>`;
         } else {
-            clearSelect(["cell"], blockElement);
+            clearSelect(["cell"], options.blockElement);
             addDragFill(blockCellElement);
             blockCellElement.classList.add("av__cell--select");
         }
@@ -158,19 +166,19 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
     previousElement.insertAdjacentHTML("afterend", html);
     if (avId) {
         const currentRow = previousElement.nextElementSibling;
-        if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-            !blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
+        if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
+            !options.blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
             currentRow.setAttribute("data-need-update", "true");
         }
         const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
         fetchPost("/api/av/getAttributeViewFilterSort", {
             id: avId,
-            blockID: blockElement.getAttribute("data-node-id")
+            blockID: options.blockElement.getAttribute("data-node-id")
         }, (response) => {
             // https://github.com/siyuan-note/siyuan/issues/10517
             let hideTextCell = false;
             response.data.filters.find((item: IAVFilter) => {
-                const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
+                const headerElement = options.blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
                 if (!headerElement) {
                     return;
                 }
@@ -253,13 +261,13 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
             if (hideTextCell) {
                 currentRow.remove();
                 showMessage(window.siyuan.languages.insertRowTip);
-            } else if (srcIDs.length === 1) {
-                popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
+            } else if (options.srcIDs.length === 1) {
+                popTextCell(options.protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             }
-            setPage(blockElement);
+            setPage(options.blockElement);
         });
     }
-    setPage(blockElement);
+    setPage(options.blockElement);
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
@@ -507,7 +515,13 @@ export const insertRows = (options: {
             previousId: options.previousID
         });
     } else {
-        insertAttrViewBlockAnimation(options.protyle, options.blockElement, srcIDs, options.previousID, avID);
+        insertAttrViewBlockAnimation({
+            protyle: options.protyle,
+            blockElement: options.blockElement,
+            srcIDs,
+            previousId: options.previousID,
+            groupID: options.groupID
+        });
     }
     options.blockElement.setAttribute("updated", newUpdated);
 };

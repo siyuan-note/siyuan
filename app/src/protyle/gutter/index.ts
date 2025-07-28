@@ -269,6 +269,7 @@ export class Gutter {
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
                     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                    const groupID = rowElement.parentElement.getAttribute("data-group-id");
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
@@ -279,7 +280,7 @@ export class Gutter {
                             content: ""
                         }],
                         blockID: id,
-                        groupID: rowElement.parentElement.getAttribute("data-group-id"),
+                        groupID,
                     }, {
                         action: "doUpdateUpdated",
                         id,
@@ -293,7 +294,7 @@ export class Gutter {
                         id,
                         data: blockElement.getAttribute("updated")
                     }]);
-                    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    insertAttrViewBlockAnimation({protyle, blockElement, srcIDs, previousId: previousID, groupID});
                     if (event.altKey) {
                         this.element.querySelectorAll("button").forEach(item => {
                             item.dataset.rowId = srcIDs[0];

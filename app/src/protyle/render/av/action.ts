@@ -214,7 +214,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             insertRows({
                 blockElement, protyle,
                 count: 1,
-                previousID: blockElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id") ||
+                previousID: (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
                     target.previousElementSibling?.getAttribute("data-id") || undefined,
                 groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : ""
             });

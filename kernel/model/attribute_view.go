@@ -2936,24 +2936,8 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 				targetView = groupView
 			}
 		}
-		viewable := sql.RenderGroupView(attrView, view, targetView)
-		av.Filter(viewable, attrView)
-		av.Sort(viewable, attrView)
-		items := viewable.(av.Collection).GetItems()
-		if 0 < len(items) {
-			if "" != previousBlockID {
-				for _, row := range items {
-					if row.GetID() == previousBlockID {
-						nearItem = row
-						break
-					}
-				}
-			} else {
-				if 0 < len(items) {
-					nearItem = items[0]
-				}
-			}
-		}
+
+		nearItem = getNearItem(attrView, view, targetView, previousBlockID)
 	}
 
 	filterKeyIDs := map[string]bool{}
@@ -3054,13 +3038,12 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		if !filterKeyIDs[groupKey.ID] /* 过滤条件应用过的话就不重复处理了 */ && "" != groupID {
 			if groupView := view.GetGroup(groupID); nil != groupView {
 				if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-					var newValue, defaultVal *av.Value
+					var newValue *av.Value
 					if nil != nearItem {
-						defaultVal = nearItem.GetValue(groupKey.ID)
-					}
-					if nil != defaultVal {
+						defaultVal := nearItem.GetValue(groupKey.ID)
 						newValue = defaultVal.Clone()
-					} else {
+					}
+					if nil == newValue {
 						newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, blockID, groupKey.Type)
 					}
 
@@ -3093,6 +3076,29 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {
+	viewable := sql.RenderGroupView(attrView, view, groupView)
+	av.Filter(viewable, attrView)
+	av.Sort(viewable, attrView)
+	items := viewable.(av.Collection).GetItems()
+	if 0 < len(items) {
+		if "" != previousItemID {
+			for _, row := range items {
+				if row.GetID() == previousItemID {
+					ret = row
+					return
+				}
+			}
+		} else {
+			if 0 < len(items) {
+				ret = items[0]
+				return
+			}
+		}
+	}
 	return
 }
 
@@ -3565,6 +3571,21 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				targetGroupView = view.GetGroup(operation.TargetGroupID)
 			}
 			if nil != targetGroupView {
+				groupKey := view.GetGroupKey(attrView)
+				nearItem := getNearItem(attrView, view, targetGroupView, operation.PreviousID)
+				var newValue *av.Value
+				if nil != nearItem {
+					defaultVal := nearItem.GetValue(view.Group.Field)
+					newValue = defaultVal.Clone()
+				}
+				if nil == newValue {
+					newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, operation.ID, groupKey.Type)
+
+				}
+				val := attrView.GetValue(groupKey.ID, operation.ID)
+				newValueRaw := newValue.GetValByType(groupKey.Type)
+				val.SetValByType(groupKey.Type, newValueRaw)
+
 				for i, r := range targetGroupView.GroupItemIDs {
 					if r == operation.PreviousID {
 						previousIndex = i + 1

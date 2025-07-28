@@ -220,6 +220,21 @@ func (view *View) GetGroup(groupID string) *View {
 	return nil
 }
 
+// GetGroupKey 获取分组视图的分组字段。
+func (view *View) GetGroupKey(attrView *AttributeView) (ret *Key) {
+	if nil == view.Group || "" == view.Group.Field {
+		return
+	}
+
+	for _, kv := range attrView.KeyValues {
+		if kv.Key.ID == view.Group.Field {
+			ret = kv.Key
+			return
+		}
+	}
+	return
+}
+
 // GroupCalc 描述了分组计算规则和结果的结构。
 type GroupCalc struct {
 	Field     string     `json:"field"` // 字段 ID

@@ -127,10 +127,6 @@
     overflow: auto hidden;
   }
 
-  &__body {
-    float: left;
-  }
-
   &__row {
     display: flex;
     border-bottom: 1px solid var(--b3-theme-surface-lighter);
@@ -256,6 +252,7 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
     width: 100%;
+    margin-top: 8px;
 
     &--top {
       margin-top: 16px;
@@ -919,6 +916,7 @@
       display: flex;
       font-size: 87.5%;
       align-items: center;
+      padding-top: 16px;
 
       .counter:hover {
         background-color: var(--b3-list-icon-hover);

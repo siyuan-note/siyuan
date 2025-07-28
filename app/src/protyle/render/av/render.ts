@@ -239,7 +239,7 @@ const renderGroupTable = (options: ITableOptions) => {
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div><span class="fn__space"></span>${group.name}<span class="${group.rows.length === 0 ? "fn__none" : "counter"}">${group.rows.length}</span>
 </div>
-<div data-group-id="${group.id}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
+<div data-group-id="${group.id}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
         }
     });
     if (options.renderAll) {
@@ -475,7 +475,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 const data = response.data.view as IAVTable;
                 if (response.data.viewType === "gallery") {
                     e.setAttribute("data-av-type", "table");
-                    renderGallery({blockElement: e, protyle, cb, renderAll});
+                    renderGallery({blockElement: e, protyle, cb, renderAll, data: response.data});
                     return;
                 }
                 if (data.groups?.length > 0) {
@@ -486,7 +486,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                     e.dataset.pageSize = data.pageSize.toString();
                 }
                 const tableHTMLs = getTableHTMLs(data, e);
-                const avBodyHTML = `<div class="av__body">
+                const avBodyHTML = `<div class="av__body" style="float: left">
     ${tableHTMLs.contentHTML}
     ${tableHTMLs.footerHTML}
 </div>`;

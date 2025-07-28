@@ -3038,15 +3038,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		if !filterKeyIDs[groupKey.ID] /* 过滤条件应用过的话就不重复处理了 */ && "" != groupID {
 			if groupView := view.GetGroup(groupID); nil != groupView {
 				if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-					var newValue *av.Value
-					if nil != nearItem {
-						defaultVal := nearItem.GetValue(groupKey.ID)
-						newValue = defaultVal.Clone()
-					}
-					if nil == newValue {
-						newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, blockID, groupKey.Type)
-					}
-
+					newValue := getNewValueByNearItem(nearItem, groupKey, blockID)
 					if av.KeyTypeBlock == newValue.Type {
 						// 如果是主键的话前面已经添加过了，这里仅修改内容
 						blockValue.Block.Content = newValue.Block.Content
@@ -3076,6 +3068,17 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	}
 
 	err = av.SaveAttributeView(attrView)
+	return
+}
+
+func getNewValueByNearItem(nearItem av.Item, key *av.Key, blockID string) (ret *av.Value) {
+	if nil != nearItem {
+		defaultVal := nearItem.GetValue(key.ID)
+		ret = defaultVal.Clone()
+	}
+	if nil == ret {
+		ret = av.GetAttributeViewDefaultValue(ast.NewNodeID(), key.ID, blockID, key.Type)
+	}
 	return
 }
 
@@ -3566,33 +3569,31 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			}
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
-			targetGroupView := groupView
-			if operation.GroupID != operation.TargetGroupID { // 跨分组拖拽
-				targetGroupView = view.GetGroup(operation.TargetGroupID)
-			}
-			if nil != targetGroupView {
-				groupKey := view.GetGroupKey(attrView)
-				nearItem := getNearItem(attrView, view, targetGroupView, operation.PreviousID)
-				var newValue *av.Value
-				if nil != nearItem {
-					defaultVal := nearItem.GetValue(view.Group.Field)
-					newValue = defaultVal.Clone()
-				}
-				if nil == newValue {
-					newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, operation.ID, groupKey.Type)
+			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
+				if targetGroupView := view.GetGroup(operation.TargetGroupID); nil != targetGroupView {
+					groupKey := view.GetGroupKey(attrView)
+					nearItem := getNearItem(attrView, view, targetGroupView, operation.PreviousID)
+					newValue := getNewValueByNearItem(nearItem, groupKey, operation.ID)
+					val := attrView.GetValue(groupKey.ID, operation.ID)
+					newValueRaw := newValue.GetValByType(groupKey.Type)
+					val.SetValByType(groupKey.Type, newValueRaw)
 
+					for i, r := range targetGroupView.GroupItemIDs {
+						if r == operation.PreviousID {
+							previousIndex = i + 1
+							break
+						}
+					}
+					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
-				val := attrView.GetValue(groupKey.ID, operation.ID)
-				newValueRaw := newValue.GetValByType(groupKey.Type)
-				val.SetValByType(groupKey.Type, newValueRaw)
-
-				for i, r := range targetGroupView.GroupItemIDs {
+			} else { // 同分组内排序
+				for i, r := range groupView.GroupItemIDs {
 					if r == operation.PreviousID {
 						previousIndex = i + 1
 						break
 					}
 				}
-				targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+				groupView.GroupItemIDs = util.InsertElem(groupView.GroupItemIDs, previousIndex, itemID)
 			}
 		}
 	} else {

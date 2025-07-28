@@ -32,6 +32,19 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View) (ret av.Viewable) {
+	switch groupView.LayoutType {
+	case av.LayoutTypeTable:
+		groupView.Table.Columns = view.Table.Columns
+	case av.LayoutTypeGallery:
+		groupView.Gallery.CardFields = view.Gallery.CardFields
+	}
+
+	groupView.Filters = view.Filters
+	groupView.Sorts = view.Sorts
+	return RenderView(attrView, groupView, "")
+}
+
 func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:

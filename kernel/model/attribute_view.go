@@ -1541,17 +1541,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	// 如果存在分组的话渲染分组视图
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
-		switch groupView.LayoutType {
-		case av.LayoutTypeTable:
-			groupView.Table.Columns = view.Table.Columns
-		case av.LayoutTypeGallery:
-			groupView.Gallery.CardFields = view.Gallery.CardFields
-		}
-
-		groupView.Filters = view.Filters
-		groupView.Sorts = view.Sorts
-
-		groupViewable := sql.RenderView(attrView, groupView, query)
+		groupViewable := sql.RenderGroupView(attrView, view, groupView)
 		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 		if nil != err {
 			return
@@ -2940,7 +2930,13 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	var nearItem av.Item                                   // 临近项
 	if nil != view && ((0 < len(view.Filters) && !ignoreFillFilter) || "" != groupID) {
 		// 存在过滤条件或者指定分组视图时，先获取临近项备用
-		viewable := sql.RenderView(attrView, view, "")
+		targetView := view
+		if "" != groupID {
+			if groupView := view.GetGroup(groupID); nil != groupView {
+				targetView = groupView
+			}
+		}
+		viewable := sql.RenderGroupView(attrView, view, targetView)
 		av.Filter(viewable, attrView)
 		av.Sort(viewable, attrView)
 		items := viewable.(av.Collection).GetItems()

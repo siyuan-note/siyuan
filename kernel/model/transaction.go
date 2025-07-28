@@ -1693,6 +1693,7 @@ type Operation struct {
 	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
 	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
 	GroupID             string                   `json:"groupID"`           // 属性视图分组视图 ID
+	TargetGroupID       string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
 }
 
 type Transaction struct {

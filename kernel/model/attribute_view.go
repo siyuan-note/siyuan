@@ -3558,15 +3558,21 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				groupView.GroupItemIDs = append(groupView.GroupItemIDs, itemID)
 				idx = len(groupView.GroupItemIDs) - 1
 			}
-
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
-			for i, r := range groupView.GroupItemIDs {
-				if r == operation.PreviousID {
-					previousIndex = i + 1
-					break
-				}
+
+			targetGroupView := groupView
+			if operation.GroupID != operation.TargetGroupID { // 跨分组拖拽
+				targetGroupView = view.GetGroup(operation.TargetGroupID)
 			}
-			groupView.GroupItemIDs = util.InsertElem(view.ItemIDs, previousIndex, itemID)
+			if nil != targetGroupView {
+				for i, r := range targetGroupView.GroupItemIDs {
+					if r == operation.PreviousID {
+						previousIndex = i + 1
+						break
+					}
+				}
+				targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+			}
 		}
 	} else {
 		for i, id := range view.ItemIDs {

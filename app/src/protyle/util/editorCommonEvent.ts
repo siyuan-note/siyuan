@@ -1083,14 +1083,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
+                                    const groupID = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
@@ -1098,6 +1102,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         previousID: undoPreviousId,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });
@@ -1144,14 +1150,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
+                                    const groupID = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
@@ -1159,6 +1169,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         previousID: undoPreviousId,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });

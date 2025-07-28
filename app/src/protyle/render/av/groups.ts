@@ -75,7 +75,7 @@ ${html}
 </div>`;
 };
 
-const getLanguageByIndex = (index: number, type: "sort" | "date") => {
+export const getLanguageByIndex = (index: number, type: "sort" | "date") => {
     if (type === "sort") {
         switch (index) {
             case 0:

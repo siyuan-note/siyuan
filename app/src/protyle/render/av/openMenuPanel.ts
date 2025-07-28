@@ -51,7 +51,7 @@ import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
     bindGroupsEvent, bindGroupsNumber,
     getGroupsHTML,
-    getGroupsMethodHTML, getGroupsNumberHTML,
+    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex,
     goGroupsDate,
     goGroupsSort,
     setGroupMethod
@@ -486,6 +486,8 @@ export const openMenuPanel = (options: {
                         previousID: undoPreviousID,
                         id: sourceId,
                     }]);
+                    menuElement.querySelector('[data-type="goGroupsSort"] .b3-menu__accelerator').textContent = getLanguageByIndex(2, "sort");
+                    data.view.group.order = 2;
                     data.view.groups.find((group, index) => {
                         if (group.id === sourceId) {
                             const groupData = data.view.groups.splice(index, 1)[0];

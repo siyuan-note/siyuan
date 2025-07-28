@@ -1514,7 +1514,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	if isGroupByDate(view) {
 		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != updatedDate {
-			genAttrViewViewGroups(view, attrView)
+			regenAttrViewViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
 
@@ -4562,8 +4562,10 @@ func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 			continue
 		}
 
-		if av.KeyTypeTemplate != groupKey.Type && view.Group.Field != keyID {
-			continue
+		if "force" != keyID {
+			if av.KeyTypeTemplate != groupKey.Type && view.Group.Field != keyID {
+				continue
+			}
 		}
 
 		genAttrViewViewGroups(view, attrView)

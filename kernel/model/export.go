@@ -1458,12 +1458,13 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 }
 
 func ExportStdMarkdown(id string, assetsDestSpace2Underscore, adjustHeadingLevel bool) string {
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		logging.LogErrorf("block tree [%s] not found", id)
 		return ""
 	}
 
+	tree := prepareExportTree(bt)
 	cloudAssetsBase := ""
 	if IsSubscriber() {
 		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
@@ -1981,7 +1982,7 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 	}
 }
 
-func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar bool) (hPath, exportedMd string) {
+func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv bool) (hPath, exportedMd string) {
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -1989,7 +1990,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 
 	tree := prepareExportTree(bt)
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(id, tree, "", false, false,
+	exportedMd = exportMarkdownContent0(id, tree, "", false, adjustHeadingLv,
 		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,

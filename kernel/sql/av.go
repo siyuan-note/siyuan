@@ -633,8 +633,14 @@ func filterByQuery(query string, collection av.Collection) {
 
 // manualSort 处理用户手动排序。
 func manualSort(view *av.View, collection av.Collection) {
+	itemIDs := view.ItemIDs
+	// 如果是分组视图，则需要根据分组项的顺序进行排序
+	if 0 < len(view.GroupItemIDs) {
+		itemIDs = view.GroupItemIDs
+	}
+
 	sortItemIDs := map[string]int{}
-	for i, itemID := range view.ItemIDs {
+	for i, itemID := range itemIDs {
 		sortItemIDs[itemID] = i
 	}
 

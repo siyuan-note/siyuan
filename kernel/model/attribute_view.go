@@ -1588,7 +1588,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		items = append(items, item)
 	}
 
-	groupKey, _ := attrView.GetKey(group.Field)
+	groupKey := view.GetGroupKey(attrView)
 	if nil == groupKey {
 		return
 	}
@@ -1611,9 +1611,19 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			return items[i].GetValue(group.Field).Number.Content < items[j].GetValue(group.Field).Number.Content
 		})
 	case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
-		sort.SliceStable(items, func(i, j int) bool {
-			return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
-		})
+		if av.KeyTypeCreated == groupKey.Type {
+			sort.SliceStable(items, func(i, j int) bool {
+				return items[i].GetValue(group.Field).Created.Content < items[j].GetValue(group.Field).Created.Content
+			})
+		} else if av.KeyTypeUpdated == groupKey.Type {
+			sort.SliceStable(items, func(i, j int) bool {
+				return items[i].GetValue(group.Field).Updated.Content < items[j].GetValue(group.Field).Updated.Content
+			})
+		} else if av.KeyTypeDate == groupKey.Type {
+			sort.SliceStable(items, func(i, j int) bool {
+				return items[i].GetValue(group.Field).Date.Content < items[j].GetValue(group.Field).Date.Content
+			})
+		}
 	}
 
 	var groupName string

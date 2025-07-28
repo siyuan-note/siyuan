@@ -3030,6 +3030,24 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		} else {
 			v.ItemIDs = append([]string{addingBlockID}, v.ItemIDs...)
 		}
+
+		for _, g := range v.Groups {
+			if "" != previousBlockID {
+				changed := false
+				for i, id := range g.GroupItemIDs {
+					if id == previousBlockID {
+						g.GroupItemIDs = append(g.GroupItemIDs[:i+1], append([]string{addingBlockID}, g.GroupItemIDs[i+1:]...)...)
+						changed = true
+						break
+					}
+				}
+				if !changed {
+					g.GroupItemIDs = append(g.GroupItemIDs, addingBlockID)
+				}
+			} else {
+				g.GroupItemIDs = append([]string{addingBlockID}, g.GroupItemIDs...)
+			}
+		}
 	}
 
 	// 如果存在分组条件，则将分组条件应用到新添加的块上
@@ -3159,7 +3177,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 		for _, groupView := range view.Groups {
 			for _, blockID := range srcIDs {
-				groupView.ItemIDs = gulu.Str.RemoveElem(groupView.ItemIDs, blockID)
+				groupView.GroupItemIDs = gulu.Str.RemoveElem(groupView.GroupItemIDs, blockID)
 			}
 		}
 	}

@@ -4936,8 +4936,11 @@ func setAttributeViewColumnOptionDesc(operation *Operation) (err error) {
 }
 
 func getAttrViewViewByBlockID(attrView *av.AttributeView, blockID string) (ret *av.View, err error) {
-	node, _, _ := getNodeByBlockID(nil, blockID)
 	var viewID string
+	var node *ast.Node
+	if "" != blockID {
+		node, _, _ = getNodeByBlockID(nil, blockID)
+	}
 	if nil != node {
 		viewID = node.IALAttr(av.NodeAttrView)
 	}

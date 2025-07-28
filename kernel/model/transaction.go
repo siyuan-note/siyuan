@@ -1006,6 +1006,7 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			if changedAv {
+				regenAttrViewViewGroups(attrView, "force")
 				av.SaveAttributeView(attrView)
 				changedAvIDs = append(changedAvIDs, avID)
 			}

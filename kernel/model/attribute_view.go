@@ -3986,7 +3986,11 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 
 	if changeType {
 		for _, view := range attrView.Views {
-			removeAttributeViewGroup0(view)
+			if nil != view.Group {
+				if groupKey := view.GetGroupKey(attrView); nil != groupKey && groupKey.ID == operation.ID {
+					removeAttributeViewGroup0(view)
+				}
+			}
 		}
 	}
 
@@ -4111,7 +4115,11 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 	}
 
 	for _, view := range attrView.Views {
-		removeAttributeViewGroup0(view)
+		if nil != view.Group {
+			if groupKey := view.GetGroupKey(attrView); nil != groupKey && groupKey.ID == keyID {
+				removeAttributeViewGroup0(view)
+			}
+		}
 	}
 
 	err = av.SaveAttributeView(attrView)

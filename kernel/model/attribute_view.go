@@ -1569,12 +1569,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	type GroupState struct {
 		Folded bool
 		Hidden int
+		Sort   int
 	}
 	groupStates := map[string]*GroupState{}
-	for _, groupView := range view.Groups {
+	for i, groupView := range view.Groups {
 		groupStates[groupView.Name] = &GroupState{
 			Folded: groupView.GroupFolded,
 			Hidden: groupView.GroupHidden,
+			Sort:   i,
 		}
 	}
 
@@ -1730,12 +1732,24 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	view.GroupUpdated = time.Now().UnixMilli()
 
-	// 则恢复分组视图状态
+	// 恢复分组视图状态
 	for _, groupView := range view.Groups {
 		if state, ok := groupStates[groupView.Name]; ok {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 		}
+	}
+
+	// 恢复分组视图的顺序
+	if len(groupStates) > 0 {
+		sort.SliceStable(view.Groups, func(i, j int) bool {
+			if stateI, ok := groupStates[view.Groups[i].Name]; ok {
+				if stateJ, ok := groupStates[view.Groups[j].Name]; ok {
+					return stateI.Sort < stateJ.Sort
+				}
+			}
+			return false
+		})
 	}
 
 	if av.GroupOrderMan != view.Group.Order {

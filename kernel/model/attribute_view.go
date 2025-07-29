@@ -1825,8 +1825,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			startIdx := -1
 			thisMonth := todayStart.Format("2006-01")
 			for i, monthGroup := range relativeDateGroups {
-				if monthGroup.GroupValue > thisMonth {
-					startIdx = i
+				if monthGroup.GroupValue < thisMonth {
+					startIdx = i + 1
 				}
 			}
 			if -1 == startIdx {

@@ -1626,6 +1626,9 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
+	todayStart := time.Now()
+	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
+
 	var groupName string
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
@@ -1677,8 +1680,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				// 过去 30 天之前的按月分组
 				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
 				// 未来 30 天之后的按月分组
-				todayStart := time.Now()
-				todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 				if contentTime.Before(todayStart.AddDate(0, 0, -30)) {
 					groupName = "0" + contentTime.Format("2006-01") // 开头的数字用于排序，下同
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -7)) {
@@ -4595,7 +4596,8 @@ func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 		}
 
 		if "force" != keyID {
-			if av.KeyTypeTemplate != groupKey.Type && view.Group.Field != keyID {
+			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
+				view.Group.Field != keyID {
 				continue
 			}
 		}

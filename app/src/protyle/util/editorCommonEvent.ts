@@ -1167,10 +1167,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
-                            const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
+                            const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).parentElement.getAttribute("data-group-id");
+                                    const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
@@ -1582,9 +1582,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
             // gallery item 只能拖拽当前 av 中
-            const galleryElement = hasClosestByClassName(event.target, "av__gallery");
-            if (targetElement.classList.contains("av") || !galleryElement ||
-                !galleryElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
+            const containerElement = hasClosestByClassName(event.target, "av__container");
+            if (targetElement.classList.contains("av") || !containerElement ||
+                !containerElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
                 targetElement = false;
                 editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__left", "dragover__right");

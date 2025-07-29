@@ -1800,26 +1800,27 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			})
 
 			var lastNext30Days []*av.View
-			if nil != last30Days {
-				lastNext30Days = append(lastNext30Days, last30Days)
-			}
-			if nil != last7Days {
-				lastNext30Days = append(lastNext30Days, last7Days)
-			}
-			if nil != yesterday {
-				lastNext30Days = append(lastNext30Days, yesterday)
-			}
-			if nil != today {
-				lastNext30Days = append(lastNext30Days, today)
-			}
-			if nil != tomorrow {
-				lastNext30Days = append(lastNext30Days, tomorrow)
+			if nil != next30Days {
+				lastNext30Days = append(lastNext30Days, next30Days)
 			}
 			if nil != next7Days {
 				lastNext30Days = append(lastNext30Days, next7Days)
 			}
-			if nil != next30Days {
-				lastNext30Days = append(lastNext30Days, next30Days)
+			if nil != tomorrow {
+				lastNext30Days = append(lastNext30Days, tomorrow)
+			}
+			if nil != today {
+				lastNext30Days = append(lastNext30Days, today)
+			}
+			if nil != yesterday {
+				lastNext30Days = append(lastNext30Days, yesterday)
+			}
+
+			if nil != last7Days {
+				lastNext30Days = append(lastNext30Days, last7Days)
+			}
+			if nil != last30Days {
+				lastNext30Days = append(lastNext30Days, last30Days)
 			}
 
 			startIdx := -1
@@ -1830,7 +1831,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				}
 			}
 			if -1 == startIdx {
-				slices.Reverse(lastNext30Days)
 				startIdx = 0
 			}
 			for _, g := range lastNext30Days {

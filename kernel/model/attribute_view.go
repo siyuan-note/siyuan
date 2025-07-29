@@ -1566,6 +1566,9 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			}
 		}
 		viewable.SetGroups(groups)
+
+		// 将总的视图上的项目清空，减少冗余
+		viewable.(av.Collection).SetItems(nil)
 	}
 	return
 }

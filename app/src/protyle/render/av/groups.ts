@@ -5,7 +5,6 @@ import {setPosition} from "../../../util/setPosition";
 import {getFieldsByData} from "./view";
 import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
-import {transaction} from "../../wysiwyg/transaction";
 import {objEquals} from "../../../util/functions";
 
 export const setGroupMethod = async (options: {

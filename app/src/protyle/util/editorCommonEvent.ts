@@ -870,14 +870,24 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     target.classList.add("av__gallery-item--select");
                     const ghostElement = document.createElement("div");
-                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr " + target.parentElement.className;
-                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
+                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
+                    let galleryElement: HTMLElement;
+                    let cloneGalleryElement = document.createElement("div");
+                    selectElements.forEach(item => {
+                        if (!galleryElement || !galleryElement.contains(item)) {
+                            galleryElement = item.parentElement;
+                            cloneGalleryElement = document.createElement("div");
+                            cloneGalleryElement.classList.add("av__gallery");
+                            cloneGalleryElement.setAttribute("style", `width: 100vw;margin-bottom: 16px;grid-template-columns: repeat(auto-fill, ${selectElements[0].clientWidth}px);`);
+                            ghostElement.appendChild(cloneGalleryElement);
+                        }
                         const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
-                        cloneItem.setAttribute("style", `width:${item.clientWidth}px;;height:${item.clientHeight}px;`);
+                        cloneItem.setAttribute("style", `height:${item.clientHeight}px;`);
                         cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
-                        ghostElement.append(cloneItem);
+                        cloneGalleryElement.appendChild(cloneItem);
                     });
-                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0");
+                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {

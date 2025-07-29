@@ -1440,6 +1440,19 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
 
+	if ast.NodeHTMLBlock == updatedNode.Type {
+		content := string(updatedNode.Tokens)
+		// 剔除连续的空行（包括空行内包含空格的情况） https://github.com/siyuan-note/siyuan/issues/15377
+		var newLines []string
+		lines := strings.Split(content, "\n")
+		for _, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				newLines = append(newLines, line)
+			}
+		}
+		updatedNode.Tokens = []byte(strings.Join(newLines, "\n"))
+	}
+
 	// 替换为新节点
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()

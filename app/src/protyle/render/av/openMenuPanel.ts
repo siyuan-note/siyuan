@@ -1548,25 +1548,27 @@ export const openMenuPanel = (options: {
                     const useElement = target.firstElementChild;
                     const isHide = useElement.getAttribute("xlink:href") !== "#iconEye";
                     useElement.setAttribute("xlink:href", isHide ? "#iconEye" : "#iconEyeoff");
+                    let oldGroupHidden;
+                    data.view.groups.find((item) => {
+                        if (item.id === target.dataset.id) {
+                            oldGroupHidden = item.groupHidden;
+                            item.groupHidden = isHide ? 2 : 0;
+                            return true;
+                        }
+                    });
                     transaction(options.protyle, [{
                         action: "hideAttrViewGroup",
                         avID: data.id,
                         blockID,
                         id: target.dataset.id,
-                        data: isHide,
+                        data: isHide ? 0 : 2,
                     }], [{
                         action: "hideAttrViewGroup",
                         avID: data.id,
                         blockID,
                         id: target.dataset.id,
-                        data: !isHide
+                        data: oldGroupHidden
                     }]);
-                    data.view.groups.find((item) => {
-                        if (item.id === target.dataset.id) {
-                            item.groupHidden = isHide ? 2 : 0;
-                            return true;
-                        }
-                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;

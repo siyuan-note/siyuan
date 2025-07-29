@@ -23,7 +23,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
 	"strings"
 	"text/template"
@@ -207,6 +206,28 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 		return ast.WalkContinue
 	})
 
+	var unlinks []*ast.Node
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeCodeBlockFenceInfoMarker == n.Type {
+			if lang := string(n.CodeBlockInfo); "siyuan-template" == lang || "template" == lang {
+				// 将模板代码转换为段落文本 https://github.com/siyuan-note/siyuan/pull/15345
+				unlinks = append(unlinks, n.Parent)
+				p := treenode.NewParagraph(n.Parent.ID)
+				// 代码块内可能会有多个空行，但是这里不需要分块处理，后面渲染一个文本节点即可
+				p.AppendChild(&ast.Node{Type: ast.NodeText, Tokens: n.Next.Tokens})
+				n.Parent.InsertBefore(p)
+			}
+		}
+		return ast.WalkContinue
+	})
+	for _, n := range unlinks {
+		n.Unlink()
+	}
+
 	luteEngine := NewLute()
 	formatRenderer := render.NewFormatRenderer(tree, luteEngine.RenderOptions)
 	md := formatRenderer.Render()
@@ -219,10 +240,6 @@ func DocSaveAsTemplate(id, name string, overwrite bool) (code int, err error) {
 		md = append(md, []byte("\n")...)
 		md = append(md, parse.IAL2Tokens(tree.Root.KramdownIAL)...)
 	}
-
-	// 处理template或siyuan-template代码块：转换为普通文本并移除 id
-	templateCodeBlockRegex := regexp.MustCompile(`‍?` + "`" + `{3}(template|siyuan-template)\n([\s\S]*?)\n‍?` + "`" + `{3}\s*\{: id="[^"]*"\}`)
-	md = templateCodeBlockRegex.ReplaceAll(md, []byte("$2"))
 
 	name = util.FilterFileName(name) + ".md"
 	name = util.TruncateLenFileName(name)

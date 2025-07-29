@@ -11,9 +11,6 @@ import {loadAssets} from "../util/assets";
 import {resetFloatDockSize} from "../layout/dock/util";
 import {confirmDialog} from "../dialog/confirmDialog";
 import {useShell} from "../util/pathName";
-/// #if !MOBILE
-import {getAllEditor} from "../layout/getAll";
-/// #endif
 
 export const appearance = {
     element: undefined as Element,
@@ -266,24 +263,6 @@ export const appearance = {
             });
             return;
         }
-
-        // #if !MOBILE
-        // 外观模式或主题改变之后，重新加载所有将 CSS 变量替换为实际值的导出预览
-        if (data.mode !== window.siyuan.config.appearance.mode ||
-            (data.mode === window.siyuan.config.appearance.mode && (
-                    (data.mode === 0 && window.siyuan.config.appearance.themeLight !== data.themeLight) ||
-                    (data.mode === 1 && window.siyuan.config.appearance.themeDark !== data.themeDark))
-            )
-        ) {
-            getAllEditor().forEach(editor => {
-                if (editor.protyle.preview && !editor.protyle.preview.element.classList.contains("fn__none") &&
-                    editor.protyle.preview.previewElement.dataset.fillCssVar === "true"
-                ) {
-                    editor.protyle.preview.render(editor.protyle);
-                }
-            });
-        }
-        /// #endif
 
         window.siyuan.config.appearance = data;
         if (appearance.element) {

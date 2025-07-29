@@ -1096,7 +1096,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).parentElement.getAttribute("data-group-id");
+                                    const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,

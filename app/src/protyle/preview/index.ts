@@ -188,6 +188,11 @@ export class Preview {
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
+                if (response.data.fillCSSVar) {
+                    protyle.preview.previewElement.dataset.fillCssVar = "true";
+                } else {
+                    protyle.preview.previewElement.dataset.fillCssVar = "";
+                }
                 processRender(protyle.preview.previewElement);
                 highlightRender(protyle.preview.previewElement);
                 avRender(protyle.preview.previewElement, protyle);
@@ -218,6 +223,7 @@ export class Preview {
     private async copyToX(copyElement: HTMLElement, protyle: IProtyle, type?: string) {
         // fix math render
         if (type === "mp-wechat") {
+            copyElement.dataset.copyTo = "mp-wechat";
             this.link2online(copyElement);
             copyElement.querySelectorAll(".katex-html .base").forEach((item: HTMLElement) => {
                 item.style.display = "initial";
@@ -234,18 +240,41 @@ export class Preview {
                     }
                 });
             });
-            // 处理任务列表（微信公众号不能显示input[type="checkbox"]）
-            copyElement.querySelectorAll("li.protyle-task").forEach((taskItem: HTMLElement) => {
-                const checkbox = taskItem.querySelector('input[type="checkbox"]') as HTMLInputElement;
-                if (checkbox) {
-                    checkbox.style.opacity = "0";
-                    if (checkbox.checked) {
-                        taskItem.style.setProperty("list-style-type", "'✅'", "important");
-                    } else {
-                        taskItem.style.setProperty("list-style-type", "'▢'", "important");
+            if (copyElement.dataset.fillCssVar === "true") {
+                // 需要内联样式
+                // 微信公众号不能显示 input[type="checkbox"]
+                copyElement.querySelectorAll("li.protyle-task").forEach((taskItem: HTMLElement) => {
+                    const checkbox = taskItem.querySelector('input[type="checkbox"]') as HTMLInputElement;
+                    if (checkbox) {
+                        checkbox.style.display = "none";
+                        if (checkbox.checked) {
+                            taskItem.style.setProperty("list-style-type", "'☑︎'");
+                        } else {
+                            taskItem.style.setProperty("list-style-type", "'▢'");
+                        }
                     }
+                });
+                // 代码块没有外间距
+                copyElement.querySelectorAll("pre").forEach((item: HTMLElement) => {
+                    item.style.margin = "16px 0";
+                });
+            } else {
+                if (window.siyuan.config.appearance.mode === 0) {
+                    // 明亮模式防止背景色被粘贴到公众号中
+                    copyElement.style.backgroundColor = "#fff";
+                } else {
+                    // 暗黑模式插入一层 section 设置背景色
+                    const sectionElement = document.createElement("section");
+                    sectionElement.innerHTML = copyElement.innerHTML;
+                    copyElement.innerHTML = "";
+                    copyElement.removeAttribute("style");
+                    copyElement.appendChild(sectionElement);
+                    // b3-typography 类名移动，否则选择器不匹配
+                    sectionElement.classList.add("b3-typography");
+                    copyElement.classList.remove("b3-typography");
+                    sectionElement.dataset.copyTo = copyElement.dataset.copyTo;
                 }
-            });
+            }
             if (typeof window.MathJax === "undefined") {
                 window.MathJax = {
                     svg: {
@@ -287,15 +316,10 @@ export class Preview {
             });
             return;
         }
-        // 防止背景色被粘贴到公众号中
-        copyElement.style.backgroundColor = "#fff";
-        // 代码背景
-        copyElement.querySelectorAll("code").forEach((item) => {
-            item.style.backgroundImage = "none";
-        });
+
         this.element.append(copyElement);
-        // 最后一个块是公式块时无法复制下来
-        copyElement.insertAdjacentHTML("beforeend", "<p>&zwj;</p>");
+        // 最后一个块是公式块时无法复制下来；section 元素后面还需要一个其他元素才能被复制
+        copyElement.insertAdjacentHTML("beforeend", "<p style='background-color: transparent;'>&zwj;</p>");
         let cloneRange;
         if (getSelection().rangeCount > 0) {
             cloneRange = getSelection().getRangeAt(0).cloneRange();

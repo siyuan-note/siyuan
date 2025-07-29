@@ -180,15 +180,11 @@ func (tx *Transaction) doHideAttrViewGroup(operation *Operation) (ret *TxErr) {
 func hideAttributeViewGroup(avID, blockID, groupID string, hidden int) (err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
-		return err
+		return
 	}
 
 	view, err := getAttrViewViewByBlockID(attrView, blockID)
 	if err != nil {
-		return err
-	}
-
-	if nil == view.Group {
 		return
 	}
 

@@ -970,7 +970,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else {
+			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) {
 				// 将标签转换为纯文本
 
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换

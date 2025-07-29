@@ -1740,7 +1740,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 
-		v.Name = ""
+		v.Name = "" // 分组视图的名称在渲染时才填充
 		v.GroupValue = name
 		view.Groups = append(view.Groups, v)
 	}
@@ -1755,26 +1755,90 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	// 恢复分组视图的顺序
-	if len(groupStates) > 0 {
-		sort.SliceStable(view.Groups, func(i, j int) bool {
-			if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
-				if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
-					return stateI.Sort < stateJ.Sort
+	if av.GroupOrderMan == view.Group.Order {
+		// 恢复分组视图的自定义顺序
+		if len(groupStates) > 0 {
+			sort.SliceStable(view.Groups, func(i, j int) bool {
+				if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
+					if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
+						return stateI.Sort < stateJ.Sort
+					}
+				}
+				return false
+			})
+		}
+	} else {
+		if av.GroupMethodDateRelative == view.Group.Method {
+			var monthGroups []*av.View
+			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days *av.View
+			for _, groupView := range view.Groups {
+				_, err := time.Parse("2006-01", groupView.GroupValue)
+				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
+					monthGroups = append(monthGroups, groupView)
+				} else { // 否则是相对日期分组形式
+					switch groupView.GroupValue {
+					case groupValueLast30Days:
+						last30Days = groupView
+					case groupValueLast7Days:
+						last7Days = groupView
+					case groupValueYesterday:
+						yesterday = groupView
+					case groupValueToday:
+						today = groupView
+					case groupValueTomorrow:
+						tomorrow = groupView
+					case groupValueNext7Days:
+						next7Days = groupView
+					case groupValueNext30Days:
+						next30Days = groupView
+					}
 				}
 			}
-			return false
-		})
-	}
 
-	if av.GroupOrderMan != view.Group.Order {
-		sort.SliceStable(view.Groups, func(i, j int) bool {
-			iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
-			if av.GroupOrderAsc == view.Group.Order {
-				return util.NaturalCompare(iVal, jVal)
+			sort.SliceStable(monthGroups, func(i, j int) bool {
+				return monthGroups[i].GroupValue < monthGroups[j].GroupValue
+			})
+
+			var idx int
+			thisMonth := todayStart.Format("2006-01")
+			for i, monthGroup := range monthGroups {
+				if monthGroup.GroupValue > thisMonth {
+					idx = i
+					break
+				}
 			}
-			return util.NaturalCompare(jVal, iVal)
-		})
+
+			if nil != next30Days {
+				util.InsertElem(monthGroups, idx, next30Days)
+			}
+			if nil != next7Days {
+				util.InsertElem(monthGroups, idx, next7Days)
+			}
+			if nil != tomorrow {
+				util.InsertElem(monthGroups, idx, tomorrow)
+			}
+			if nil != today {
+				util.InsertElem(monthGroups, idx, today)
+			}
+			if nil != yesterday {
+				util.InsertElem(monthGroups, idx, yesterday)
+			}
+			if nil != last7Days {
+				util.InsertElem(monthGroups, idx, last7Days)
+			}
+			if nil != last30Days {
+				util.InsertElem(monthGroups, idx, last30Days)
+			}
+			view.Groups = monthGroups
+		} else {
+			sort.SliceStable(view.Groups, func(i, j int) bool {
+				iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
+				if av.GroupOrderAsc == view.Group.Order {
+					return util.NaturalCompare(iVal, jVal)
+				}
+				return util.NaturalCompare(jVal, iVal)
+			})
+		}
 	}
 }
 

@@ -279,6 +279,7 @@ export class Preview {
             fetchPost("/api/lute/copyStdMarkdown", {
                 id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
                 assetsDestSpace2Underscore: true,
+                fillCSSVar: true,
                 adjustHeadingLevel: true,
             }, (response) => {
                 writeText(response.data);

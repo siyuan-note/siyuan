@@ -1457,7 +1457,7 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 	}
 }
 
-func ExportStdMarkdown(id string, assetsDestSpace2Underscore, adjustHeadingLevel bool) string {
+func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel bool) string {
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		logging.LogErrorf("block tree [%s] not found", id)
@@ -1500,7 +1500,7 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore, adjustHeadingLevel
 		".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, false, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, &map[string]*parse.Tree{})
 }
 
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {

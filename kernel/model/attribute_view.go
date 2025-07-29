@@ -1521,6 +1521,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		}
 	}
 
+	// 如果存在分组的话渲染分组视图
 	if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 		for _, groupView := range view.Groups {
 			switch groupView.GroupValue {
@@ -1546,27 +1547,26 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 				groupView.Name = groupView.GroupValue
 			}
 		}
-	}
 
-	// 如果存在分组的话渲染分组视图
-	var groups []av.Viewable
-	for _, groupView := range view.Groups {
-		groupViewable := sql.RenderGroupView(attrView, view, groupView)
-		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
-		if nil != err {
-			return
-		}
-		groups = append(groups, groupViewable)
+		var groups []av.Viewable
+		for _, groupView := range view.Groups {
+			groupViewable := sql.RenderGroupView(attrView, view, groupView)
+			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+			if nil != err {
+				return
+			}
+			groups = append(groups, groupViewable)
 
-		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
-		switch groupView.LayoutType {
-		case av.LayoutTypeTable:
-			groupView.Table.Columns = nil
-		case av.LayoutTypeGallery:
-			groupView.Gallery.CardFields = nil
+			// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
+			switch groupView.LayoutType {
+			case av.LayoutTypeTable:
+				groupView.Table.Columns = nil
+			case av.LayoutTypeGallery:
+				groupView.Gallery.CardFields = nil
+			}
 		}
+		viewable.SetGroups(groups)
 	}
-	viewable.SetGroups(groups)
 	return
 }
 

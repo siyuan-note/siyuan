@@ -1809,25 +1809,25 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 
 			if nil != next30Days {
-				util.InsertElem(monthGroups, idx, next30Days)
+				monthGroups = util.InsertElem(monthGroups, idx, next30Days)
 			}
 			if nil != next7Days {
-				util.InsertElem(monthGroups, idx, next7Days)
+				monthGroups = util.InsertElem(monthGroups, idx, next7Days)
 			}
 			if nil != tomorrow {
-				util.InsertElem(monthGroups, idx, tomorrow)
+				monthGroups = util.InsertElem(monthGroups, idx, tomorrow)
 			}
 			if nil != today {
-				util.InsertElem(monthGroups, idx, today)
+				monthGroups = util.InsertElem(monthGroups, idx, today)
 			}
 			if nil != yesterday {
-				util.InsertElem(monthGroups, idx, yesterday)
+				monthGroups = util.InsertElem(monthGroups, idx, yesterday)
 			}
 			if nil != last7Days {
-				util.InsertElem(monthGroups, idx, last7Days)
+				monthGroups = util.InsertElem(monthGroups, idx, last7Days)
 			}
 			if nil != last30Days {
-				util.InsertElem(monthGroups, idx, last30Days)
+				monthGroups = util.InsertElem(monthGroups, idx, last30Days)
 			}
 			view.Groups = monthGroups
 		} else {

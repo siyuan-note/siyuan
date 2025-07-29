@@ -273,27 +273,8 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	oldHideEmpty := false
-	if nil != view.Group {
-		oldHideEmpty = view.Group.HideEmpty
-	}
-
 	view.Group = group
-	genAttrViewViewGroups(view, attrView)
-
-	if view.Group.HideEmpty != oldHideEmpty {
-		for _, g := range view.Groups {
-			if view.Group.HideEmpty {
-				if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
-					g.GroupHidden = 1
-				}
-			} else {
-				if 2 != g.GroupHidden {
-					g.GroupHidden = 0
-				}
-			}
-		}
-	}
+	regenAttrViewViewGroups(attrView, "force")
 
 	err = av.SaveAttributeView(attrView)
 	ReloadAttrView(avID)
@@ -3169,8 +3150,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 						if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 							// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
 							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
-								newValue.MSelect[0].Content = opt.Name
-								newValue.MSelect[0].Color = opt.Color
+								newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 							}
 						}
 

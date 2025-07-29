@@ -3268,13 +3268,9 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		for _, blockID := range srcIDs {
 			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
 		}
-
-		for _, groupView := range view.Groups {
-			for _, blockID := range srcIDs {
-				groupView.GroupItemIDs = gulu.Str.RemoveElem(groupView.GroupItemIDs, blockID)
-			}
-		}
 	}
+
+	regenAttrViewViewGroups(attrView, "force")
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {

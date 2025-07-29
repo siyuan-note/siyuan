@@ -1541,6 +1541,8 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 				groupView.Name = fmt.Sprintf(Conf.language(263), 7)
 			case groupValueNext30Days:
 				groupView.Name = fmt.Sprintf(Conf.language(263), 30)
+			default:
+				groupView.Name = groupView.GroupValue
 			}
 		}
 	}

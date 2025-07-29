@@ -31,7 +31,7 @@ export const highlightRender = (element: Element, cdn = Constants.PROTYLE_CDN, z
     setCodeTheme(cdn);
 
     addScript(`${cdn}/js/highlight.js/highlight.min.js?v=11.11.1`, "protyleHljsScript").then(() => {
-        addScript(`${cdn}/js/highlight.js/third-languages.js?v=1.0.1`, "protyleHljsThirdScript").then(() => {
+        addScript(`${cdn}/js/highlight.js/third-languages.js?v=2.0.0`, "protyleHljsThirdScript").then(() => {
             codeElements.forEach((block: HTMLElement) => {
                 const iconElements = block.parentElement.querySelectorAll(".protyle-icon");
                 if (iconElements.length === 2) {

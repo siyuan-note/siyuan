@@ -512,7 +512,8 @@ export const insertRows = (options: {
             blockElement: options.blockElement,
             protyle: options.protyle,
             srcIDs,
-            previousId: options.previousID
+            previousId: options.previousID,
+            groupID: options.groupID
         });
     } else {
         insertAttrViewBlockAnimation({

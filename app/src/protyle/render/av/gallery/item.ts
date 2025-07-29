@@ -13,17 +13,19 @@ export const insertGalleryItemAnimation = (options: {
     protyle: IProtyle;
     srcIDs: string[];
     previousId: string;
+    groupID?: string
 }) => {
     if ((options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
         showMessage(window.siyuan.languages.insertRowTip);
         return;
     }
     const avId = options.blockElement.getAttribute("data-av-id");
-    const sideItemElement = options.previousId ? options.blockElement.querySelector(`.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(".av__gallery-item");
+    const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
+    const sideItemElement = options.previousId ? options.blockElement.querySelector(`.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
     let html = "";
     let needUpdate = "";
     if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-        !options.blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
+        !options.blockElement.querySelector(groupQuery+'[data-type="av-load-more"]').classList.contains("fn__none")) {
         needUpdate = ' data-need-update="true"';
     }
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";

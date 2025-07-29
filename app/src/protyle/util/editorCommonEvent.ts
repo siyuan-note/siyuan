@@ -1209,7 +1209,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 protyle,
                                 blockElement,
                                 srcIDs: sourceIds,
-                                previousId: previousID
+                                previousId: previousID,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             });
                         }
                     }

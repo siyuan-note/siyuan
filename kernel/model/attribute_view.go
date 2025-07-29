@@ -1519,8 +1519,9 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			regenAttrViewViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
+	}
 
-		groupKey := view.GetGroupKey(attrView)
+	if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 		for _, groupView := range view.Groups {
 			switch groupView.GroupValue {
 			case groupValueDefault:

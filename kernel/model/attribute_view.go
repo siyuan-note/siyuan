@@ -273,27 +273,8 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	oldHideEmpty := false
-	if nil != view.Group {
-		oldHideEmpty = view.Group.HideEmpty
-	}
-
 	view.Group = group
-	genAttrViewViewGroups(view, attrView)
-
-	if view.Group.HideEmpty != oldHideEmpty {
-		for _, g := range view.Groups {
-			if view.Group.HideEmpty {
-				if 2 != g.GroupHidden && 1 > len(g.GroupItemIDs) {
-					g.GroupHidden = 1
-				}
-			} else {
-				if 2 != g.GroupHidden {
-					g.GroupHidden = 0
-				}
-			}
-		}
-	}
+	regenAttrViewViewGroups(attrView, "force")
 
 	err = av.SaveAttributeView(attrView)
 	ReloadAttrView(avID)
@@ -1519,8 +1500,10 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			regenAttrViewViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
+	}
 
-		groupKey := view.GetGroupKey(attrView)
+	// 如果存在分组的话渲染分组视图
+	if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 		for _, groupView := range view.Groups {
 			switch groupView.GroupValue {
 			case groupValueDefault:
@@ -1545,27 +1528,29 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 				groupView.Name = groupView.GroupValue
 			}
 		}
-	}
 
-	// 如果存在分组的话渲染分组视图
-	var groups []av.Viewable
-	for _, groupView := range view.Groups {
-		groupViewable := sql.RenderGroupView(attrView, view, groupView)
-		err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
-		if nil != err {
-			return
-		}
-		groups = append(groups, groupViewable)
+		var groups []av.Viewable
+		for _, groupView := range view.Groups {
+			groupViewable := sql.RenderGroupView(attrView, view, groupView)
+			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+			if nil != err {
+				return
+			}
+			groups = append(groups, groupViewable)
 
-		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
-		switch groupView.LayoutType {
-		case av.LayoutTypeTable:
-			groupView.Table.Columns = nil
-		case av.LayoutTypeGallery:
-			groupView.Gallery.CardFields = nil
+			// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
+			switch groupView.LayoutType {
+			case av.LayoutTypeTable:
+				groupView.Table.Columns = nil
+			case av.LayoutTypeGallery:
+				groupView.Gallery.CardFields = nil
+			}
 		}
+		viewable.SetGroups(groups)
+
+		// 将总的视图上的项目清空，减少冗余
+		viewable.(av.Collection).SetItems(nil)
 	}
-	viewable.SetGroups(groups)
 	return
 }
 
@@ -1740,7 +1725,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 
-		v.Name = ""
+		v.Name = "" // 分组视图的名称在渲染时才填充
 		v.GroupValue = name
 		view.Groups = append(view.Groups, v)
 	}
@@ -1755,26 +1740,97 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	// 恢复分组视图的顺序
-	if len(groupStates) > 0 {
-		sort.SliceStable(view.Groups, func(i, j int) bool {
-			if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
-				if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
-					return stateI.Sort < stateJ.Sort
+	if av.GroupOrderMan == view.Group.Order {
+		// 恢复分组视图的自定义顺序
+		if len(groupStates) > 0 {
+			sort.SliceStable(view.Groups, func(i, j int) bool {
+				if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
+					if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
+						return stateI.Sort < stateJ.Sort
+					}
+				}
+				return false
+			})
+		}
+	} else {
+		if av.GroupMethodDateRelative == view.Group.Method {
+			var relativeDateGroups []*av.View
+			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days *av.View
+			for _, groupView := range view.Groups {
+				_, err := time.Parse("2006-01", groupView.GroupValue)
+				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
+					relativeDateGroups = append(relativeDateGroups, groupView)
+				} else { // 否则是相对日期分组形式
+					switch groupView.GroupValue {
+					case groupValueLast30Days:
+						last30Days = groupView
+					case groupValueLast7Days:
+						last7Days = groupView
+					case groupValueYesterday:
+						yesterday = groupView
+					case groupValueToday:
+						today = groupView
+					case groupValueTomorrow:
+						tomorrow = groupView
+					case groupValueNext7Days:
+						next7Days = groupView
+					case groupValueNext30Days:
+						next30Days = groupView
+					}
 				}
 			}
-			return false
-		})
-	}
 
-	if av.GroupOrderMan != view.Group.Order {
-		sort.SliceStable(view.Groups, func(i, j int) bool {
-			iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
-			if av.GroupOrderAsc == view.Group.Order {
-				return util.NaturalCompare(iVal, jVal)
+			sort.SliceStable(relativeDateGroups, func(i, j int) bool {
+				return relativeDateGroups[i].GroupValue < relativeDateGroups[j].GroupValue
+			})
+
+			var lastNext30Days []*av.View
+			if nil != next30Days {
+				lastNext30Days = append(lastNext30Days, next30Days)
 			}
-			return util.NaturalCompare(jVal, iVal)
-		})
+			if nil != next7Days {
+				lastNext30Days = append(lastNext30Days, next7Days)
+			}
+			if nil != tomorrow {
+				lastNext30Days = append(lastNext30Days, tomorrow)
+			}
+			if nil != today {
+				lastNext30Days = append(lastNext30Days, today)
+			}
+			if nil != yesterday {
+				lastNext30Days = append(lastNext30Days, yesterday)
+			}
+
+			if nil != last7Days {
+				lastNext30Days = append(lastNext30Days, last7Days)
+			}
+			if nil != last30Days {
+				lastNext30Days = append(lastNext30Days, last30Days)
+			}
+
+			startIdx := -1
+			thisMonth := todayStart.Format("2006-01")
+			for i, monthGroup := range relativeDateGroups {
+				if monthGroup.GroupValue < thisMonth {
+					startIdx = i + 1
+				}
+			}
+			if -1 == startIdx {
+				startIdx = 0
+			}
+			for _, g := range lastNext30Days {
+				relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
+			}
+			view.Groups = relativeDateGroups
+		} else {
+			sort.SliceStable(view.Groups, func(i, j int) bool {
+				iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
+				if av.GroupOrderAsc == view.Group.Order {
+					return util.NaturalCompare(iVal, jVal)
+				}
+				return util.NaturalCompare(jVal, iVal)
+			})
+		}
 	}
 }
 
@@ -3094,8 +3150,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 						if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 							// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
 							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
-								newValue.MSelect[0].Content = opt.Name
-								newValue.MSelect[0].Color = opt.Color
+								newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 							}
 						}
 
@@ -3197,13 +3252,9 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		for _, blockID := range srcIDs {
 			view.ItemIDs = gulu.Str.RemoveElem(view.ItemIDs, blockID)
 		}
-
-		for _, groupView := range view.Groups {
-			for _, blockID := range srcIDs {
-				groupView.GroupItemIDs = gulu.Str.RemoveElem(groupView.GroupItemIDs, blockID)
-			}
-		}
 	}
+
+	regenAttrViewViewGroups(attrView, "force")
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {

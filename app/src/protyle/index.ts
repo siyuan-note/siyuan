@@ -48,6 +48,7 @@ import {getAllModels} from "../layout/getAll";
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
 import {genEmptyElement} from "../block/util";
+import {zoomOut} from "../menus/protyle";
 
 export class Protyle {
 
@@ -179,16 +180,24 @@ export class Protyle {
                                     // 反链面板移除元素后，文档为空
                                     if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID &&
                                         !(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
-                                        const newID = Lute.NewNodeID();
-                                        const emptyElement = genEmptyElement(false, false, newID);
-                                        this.protyle.wysiwyg.element.append(emptyElement);
-                                        transaction(this.protyle, [{
-                                            action: "insert",
-                                            data: emptyElement.outerHTML,
-                                            id: newID,
-                                            parentID: this.protyle.block.parentID
-                                        }]);
-                                        this.protyle.undo.clear();
+                                        if (item.action === "delete" && this.protyle.block.showAll) {
+                                            zoomOut({
+                                                protyle: this.protyle,
+                                                id: this.protyle.block.rootID,
+                                                focusId: this.protyle.block.id
+                                            });
+                                        } else {
+                                            const newID = Lute.NewNodeID();
+                                            const emptyElement = genEmptyElement(false, false, newID);
+                                            this.protyle.wysiwyg.element.append(emptyElement);
+                                            transaction(this.protyle, [{
+                                                action: "insert",
+                                                data: emptyElement.outerHTML,
+                                                id: newID,
+                                                parentID: this.protyle.block.parentID
+                                            }]);
+                                            this.protyle.undo.clear();
+                                        }
                                     }
                                 }
                             });

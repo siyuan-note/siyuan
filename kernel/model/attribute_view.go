@@ -1769,12 +1769,12 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	} else {
 		if av.GroupMethodDateRelative == view.Group.Method {
-			var monthGroups []*av.View
+			var relativeDateGroups []*av.View
 			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days *av.View
 			for _, groupView := range view.Groups {
 				_, err := time.Parse("2006-01", groupView.GroupValue)
 				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
-					monthGroups = append(monthGroups, groupView)
+					relativeDateGroups = append(relativeDateGroups, groupView)
 				} else { // 否则是相对日期分组形式
 					switch groupView.GroupValue {
 					case groupValueLast30Days:
@@ -1795,13 +1795,13 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				}
 			}
 
-			sort.SliceStable(monthGroups, func(i, j int) bool {
-				return monthGroups[i].GroupValue < monthGroups[j].GroupValue
+			sort.SliceStable(relativeDateGroups, func(i, j int) bool {
+				return relativeDateGroups[i].GroupValue < relativeDateGroups[j].GroupValue
 			})
 
 			var idx int
 			thisMonth := todayStart.Format("2006-01")
-			for i, monthGroup := range monthGroups {
+			for i, monthGroup := range relativeDateGroups {
 				if monthGroup.GroupValue > thisMonth {
 					idx = i
 					break
@@ -1809,27 +1809,27 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 
 			if nil != next30Days {
-				monthGroups = util.InsertElem(monthGroups, idx, next30Days)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, next30Days)
 			}
 			if nil != next7Days {
-				monthGroups = util.InsertElem(monthGroups, idx, next7Days)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, next7Days)
 			}
 			if nil != tomorrow {
-				monthGroups = util.InsertElem(monthGroups, idx, tomorrow)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, tomorrow)
 			}
 			if nil != today {
-				monthGroups = util.InsertElem(monthGroups, idx, today)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, today)
 			}
 			if nil != yesterday {
-				monthGroups = util.InsertElem(monthGroups, idx, yesterday)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, yesterday)
 			}
 			if nil != last7Days {
-				monthGroups = util.InsertElem(monthGroups, idx, last7Days)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, last7Days)
 			}
 			if nil != last30Days {
-				monthGroups = util.InsertElem(monthGroups, idx, last30Days)
+				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, last30Days)
 			}
-			view.Groups = monthGroups
+			view.Groups = relativeDateGroups
 		} else {
 			sort.SliceStable(view.Groups, func(i, j int) bool {
 				iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue

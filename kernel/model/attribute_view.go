@@ -202,9 +202,9 @@ func hideAttributeViewGroup(avID, blockID, groupID string, hidden int) (err erro
 	err = av.SaveAttributeView(attrView)
 	if err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
-		return err
+		return
 	}
-	return nil
+	return
 }
 
 func (tx *Transaction) doFoldAttrViewGroup(operation *Operation) (ret *TxErr) {

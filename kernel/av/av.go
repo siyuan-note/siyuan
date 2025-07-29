@@ -202,11 +202,6 @@ type View struct {
 	GroupHidden  int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
-const (
-	GroupValueDefault    = "_@default@_"    // 默认分组值（值为空的默认分组）
-	GroupValueNotInRange = "_@notInRange@_" // 不再范围内的分组值（只有数字类型的分组才可能是该值）
-)
-
 // GetGroup 获取指定分组 ID 的分组视图。
 func (view *View) GetGroup(groupID string) *View {
 	if nil == view.Groups {

@@ -1457,9 +1457,11 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 }
 
 const (
-	groupNameLast30Days, groupNameLast7Days               = "_@last30Days@_", "_@last7Days@_"
-	groupNameYesterday, groupNameToday, groupNameTomorrow = "_@yesterday@_", "_@today@_", "_@tomorrow@_"
-	groupNameNext7Days, groupNameNext30Days               = "_@next7Days@_", "_@next30Days@_"
+	groupValueDefault                                        = "_@default@_"    // 默认分组值（值为空的默认分组）
+	groupValueNotInRange                                     = "_@notInRange@_" // 不再范围内的分组值（只有数字类型的分组才可能是该值）
+	groupValueLast30Days, groupValueLast7Days                = "_@last30Days@_", "_@last7Days@_"
+	groupValueYesterday, groupValueToday, groupValueTomorrow = "_@yesterday@_", "_@today@_", "_@tomorrow@_"
+	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
 func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
@@ -1518,21 +1520,26 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			av.SaveAttributeView(attrView)
 		}
 
+		groupKey := view.GetGroupKey(attrView)
 		for _, groupView := range view.Groups {
-			switch groupView.Name {
-			case groupNameLast30Days:
+			switch groupView.GroupValue {
+			case groupValueDefault:
+				groupView.Name = fmt.Sprintf(Conf.language(264), groupKey.Name)
+			case groupValueNotInRange:
+				groupView.Name = Conf.language(265)
+			case groupValueLast30Days:
 				groupView.Name = fmt.Sprintf(Conf.language(259), 30)
-			case groupNameLast7Days:
+			case groupValueLast7Days:
 				groupView.Name = fmt.Sprintf(Conf.language(259), 7)
-			case groupNameYesterday:
+			case groupValueYesterday:
 				groupView.Name = Conf.language(260)
-			case groupNameToday:
+			case groupValueToday:
 				groupView.Name = Conf.language(261)
-			case groupNameTomorrow:
+			case groupValueTomorrow:
 				groupView.Name = Conf.language(262)
-			case groupNameNext7Days:
+			case groupValueNext7Days:
 				groupView.Name = fmt.Sprintf(Conf.language(263), 7)
-			case groupNameNext30Days:
+			case groupValueNext30Days:
 				groupView.Name = fmt.Sprintf(Conf.language(263), 30)
 			}
 		}
@@ -1573,7 +1580,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	}
 	groupStates := map[string]*GroupState{}
 	for i, groupView := range view.Groups {
-		groupStates[groupView.Name] = &GroupState{
+		groupStates[groupView.GroupValue] = &GroupState{
 			Folded: groupView.GroupFolded,
 			Hidden: groupView.GroupHidden,
 			Sort:   i,
@@ -1629,22 +1636,22 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	todayStart := time.Now()
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 
-	var groupName string
+	var groupVal string
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)
 		if value.IsEmpty() {
-			groupName = av.GroupValueDefault
-			groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+			groupVal = groupValueDefault
+			groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
 			continue
 		}
 
 		switch group.Method {
 		case av.GroupMethodValue:
-			groupName = value.String(false)
+			groupVal = value.String(false)
 		case av.GroupMethodRangeNum:
 			if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
-				groupName = av.GroupValueNotInRange
+				groupVal = groupValueNotInRange
 				break
 			}
 
@@ -1654,7 +1661,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 
 			if rangeStart <= value.Number.Content && rangeEnd > value.Number.Content {
-				groupName = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
+				groupVal = fmt.Sprintf("%s - %s", strconv.FormatFloat(rangeStart, 'f', -1, 64), strconv.FormatFloat(rangeEnd, 'f', -1, 64))
 			}
 		case av.GroupMethodDateDay, av.GroupMethodDateWeek, av.GroupMethodDateMonth, av.GroupMethodDateYear, av.GroupMethodDateRelative:
 			var contentTime time.Time
@@ -1668,40 +1675,40 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 			switch group.Method {
 			case av.GroupMethodDateDay:
-				groupName = contentTime.Format("2006-01-02")
+				groupVal = contentTime.Format("2006-01-02")
 			case av.GroupMethodDateWeek:
 				year, week := contentTime.ISOWeek()
-				groupName = fmt.Sprintf("%d-W%02d", year, week)
+				groupVal = fmt.Sprintf("%d-W%02d", year, week)
 			case av.GroupMethodDateMonth:
-				groupName = contentTime.Format("2006-01")
+				groupVal = contentTime.Format("2006-01")
 			case av.GroupMethodDateYear:
-				groupName = contentTime.Format("2006")
+				groupVal = contentTime.Format("2006")
 			case av.GroupMethodDateRelative:
 				// 过去 30 天之前的按月分组
 				// 过去 30 天、过去 7 天、昨天、今天、明天、未来 7 天、未来 30 天
 				// 未来 30 天之后的按月分组
 				if contentTime.Before(todayStart.AddDate(0, 0, -30)) {
-					groupName = "0" + contentTime.Format("2006-01") // 开头的数字用于排序，下同
+					groupVal = contentTime.Format("2006-01") // 开头的数字用于排序，下同
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -7)) {
-					groupName = "1" + groupNameLast30Days
+					groupVal = groupValueLast30Days
 				} else if contentTime.Before(todayStart.AddDate(0, 0, -1)) {
-					groupName = "2" + groupNameLast7Days
+					groupVal = groupValueLast7Days
 				} else if contentTime.Before(todayStart) {
-					groupName = "3" + groupNameYesterday
+					groupVal = groupValueYesterday
 				} else if (contentTime.After(todayStart) || contentTime.Equal(todayStart)) && contentTime.Before(todayStart.AddDate(0, 0, 1)) {
-					groupName = "4" + groupNameToday
+					groupVal = groupValueToday
 				} else if contentTime.After(todayStart.AddDate(0, 0, 30)) {
-					groupName = "8" + contentTime.Format("2006-01")
+					groupVal = contentTime.Format("2006-01")
 				} else if contentTime.After(todayStart.AddDate(0, 0, 7)) {
-					groupName = "7" + groupNameNext30Days
+					groupVal = groupValueNext30Days
 				} else if contentTime.Equal(todayStart.AddDate(0, 0, 2)) || contentTime.After(todayStart.AddDate(0, 0, 2)) {
-					groupName = "6" + groupNameNext7Days
+					groupVal = groupValueNext7Days
 				} else {
-					groupName = "5" + groupNameTomorrow
+					groupVal = groupValueTomorrow
 				}
 			}
 		}
-		groupItemsMap[groupName] = append(groupItemsMap[groupName], item)
+		groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
 	}
 
 	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
@@ -1731,13 +1738,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 
+		v.Name = ""
 		v.GroupValue = name
-		if av.GroupValueDefault == name {
-			name = fmt.Sprintf(Conf.language(264), groupKey.Name)
-		} else if av.GroupValueNotInRange == name {
-			name = fmt.Sprintf(Conf.language(265))
-		}
-		v.Name = name
 		view.Groups = append(view.Groups, v)
 	}
 
@@ -1745,7 +1747,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	// 恢复分组视图状态
 	for _, groupView := range view.Groups {
-		if state, ok := groupStates[groupView.Name]; ok {
+		if state, ok := groupStates[groupView.GroupValue]; ok {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 		}
@@ -1754,8 +1756,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	// 恢复分组视图的顺序
 	if len(groupStates) > 0 {
 		sort.SliceStable(view.Groups, func(i, j int) bool {
-			if stateI, ok := groupStates[view.Groups[i].Name]; ok {
-				if stateJ, ok := groupStates[view.Groups[j].Name]; ok {
+			if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
+				if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
 					return stateI.Sort < stateJ.Sort
 				}
 			}
@@ -1765,18 +1767,12 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	if av.GroupOrderMan != view.Group.Order {
 		sort.SliceStable(view.Groups, func(i, j int) bool {
-			iName, jName := view.Groups[i].Name, view.Groups[j].Name
+			iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
 			if av.GroupOrderAsc == view.Group.Order {
-				return util.NaturalCompare(iName, jName)
+				return util.NaturalCompare(iVal, jVal)
 			}
-			return util.NaturalCompare(jName, iName)
+			return util.NaturalCompare(jVal, iVal)
 		})
-	}
-
-	if group.Method == av.GroupMethodDateRelative {
-		for _, v := range view.Groups {
-			v.Name = v.Name[1:] // 去掉前缀排序数字
-		}
 	}
 }
 
@@ -3095,7 +3091,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 						if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 							// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
-							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && av.GroupValueDefault != groupView.GroupValue {
+							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
 								newValue.MSelect[0].Content = opt.Name
 								newValue.MSelect[0].Color = opt.Color
 							}

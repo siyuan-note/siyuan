@@ -1799,35 +1799,42 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				return relativeDateGroups[i].GroupValue < relativeDateGroups[j].GroupValue
 			})
 
-			var idx int
+			var lastNext30Days []*av.View
+			if nil != last30Days {
+				lastNext30Days = append(lastNext30Days, last30Days)
+			}
+			if nil != last7Days {
+				lastNext30Days = append(lastNext30Days, last7Days)
+			}
+			if nil != yesterday {
+				lastNext30Days = append(lastNext30Days, yesterday)
+			}
+			if nil != today {
+				lastNext30Days = append(lastNext30Days, today)
+			}
+			if nil != tomorrow {
+				lastNext30Days = append(lastNext30Days, tomorrow)
+			}
+			if nil != next7Days {
+				lastNext30Days = append(lastNext30Days, next7Days)
+			}
+			if nil != next30Days {
+				lastNext30Days = append(lastNext30Days, next30Days)
+			}
+
+			startIdx := -1
 			thisMonth := todayStart.Format("2006-01")
 			for i, monthGroup := range relativeDateGroups {
 				if monthGroup.GroupValue > thisMonth {
-					idx = i
-					break
+					startIdx = i
 				}
 			}
-
-			if nil != next30Days {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, next30Days)
+			if -1 == startIdx {
+				slices.Reverse(lastNext30Days)
+				startIdx = 0
 			}
-			if nil != next7Days {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, next7Days)
-			}
-			if nil != tomorrow {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, tomorrow)
-			}
-			if nil != today {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, today)
-			}
-			if nil != yesterday {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, yesterday)
-			}
-			if nil != last7Days {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, last7Days)
-			}
-			if nil != last30Days {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, idx, last30Days)
+			for _, g := range lastNext30Days {
+				relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
 			}
 			view.Groups = relativeDateGroups
 		} else {

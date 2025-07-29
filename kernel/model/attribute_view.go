@@ -1694,7 +1694,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 					groupName = "8" + contentTime.Format("2006-01")
 				} else if contentTime.After(todayStart.AddDate(0, 0, 7)) {
 					groupName = "7" + groupNameNext30Days
-				} else if contentTime.After(todayStart.AddDate(0, 0, 1)) {
+				} else if contentTime.Equal(todayStart.AddDate(0, 0, 2)) || contentTime.After(todayStart.AddDate(0, 0, 2)) {
 					groupName = "6" + groupNameNext7Days
 				} else {
 					groupName = "5" + groupNameTomorrow

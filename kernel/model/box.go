@@ -679,6 +679,7 @@ func FullReindex() {
 func fullReindex() {
 	pushSQLInsertBlocksFTSMsg = true
 	defer func() {
+		sql.FlushQueue()
 		pushSQLInsertBlocksFTSMsg = false
 	}()
 

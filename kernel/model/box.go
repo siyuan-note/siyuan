@@ -676,12 +676,10 @@ func FullReindex() {
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 
-var fullReindexing bool
-
 func fullReindex() {
-	fullReindexing = true
+	pushSQLInsertBlocksFTSMsg = true
 	defer func() {
-		fullReindexing = false
+		pushSQLInsertBlocksFTSMsg = false
 	}()
 
 	util.PushEndlessProgress(Conf.language(35))

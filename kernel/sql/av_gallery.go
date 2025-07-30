@@ -26,6 +26,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 		CardAspectRatio:     view.Gallery.CardAspectRatio,
 		CardSize:            view.Gallery.CardSize,
 		FitImage:            view.Gallery.FitImage,
+		DisplayFieldName:    view.Gallery.DisplayFieldName,
 		Fields:              []*av.GalleryField{},
 		Cards:               []*av.GalleryCard{},
 	}

@@ -368,6 +368,12 @@ func subscribeSQLEvents() {
 	//	util.ContextPushMsg(context, msg)
 	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+		if !fullReindexing {
+			// 如果不是全量重建索引，则不显示进度信息
+			// Improve status bar index creation information prompt https://github.com/siyuan-note/siyuan/issues/15390
+			return
+		}
+
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)

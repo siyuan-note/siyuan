@@ -676,7 +676,14 @@ func FullReindex() {
 	task.AppendTask(task.ReloadUI, util.ReloadUI)
 }
 
+var fullReindexing bool
+
 func fullReindex() {
+	fullReindexing = true
+	defer func() {
+		fullReindexing = false
+	}()
+
 	util.PushEndlessProgress(Conf.language(35))
 	defer util.PushClearProgress()
 

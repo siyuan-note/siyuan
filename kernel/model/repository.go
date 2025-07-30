@@ -54,7 +54,6 @@ import (
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
-	"github.com/siyuan-note/siyuan/kernel/sql"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -772,13 +771,7 @@ func checkoutRepo(id string) {
 		return
 	}
 
-	task.AppendTask(task.DatabaseIndexFull, fullReindex)
-	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
-	go func() {
-		sql.FlushQueue()
-		ResetVirtualBlockRefCache()
-	}()
-	task.AppendTask(task.ReloadUI, util.ReloadUIResetScroll)
+	FullReindex()
 
 	if syncEnabled {
 		task.AppendAsyncTaskWithDelay(task.PushMsg, 7*time.Second, util.PushMsg, Conf.Language(134), 0)

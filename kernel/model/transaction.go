@@ -1222,6 +1222,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
+
+		if treenode.IsUnderFoldedHeading(insertedNode) {
+			// 保持在标题下的折叠状态
+			insertedNode.SetIALAttr("fold", "1")
+			insertedNode.SetIALAttr("heading-fold", "1")
+		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1458,6 +1464,12 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 	// 替换为新节点
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
+
+	if treenode.IsUnderFoldedHeading(updatedNode) {
+		// 保持在标题下的折叠状态
+		updatedNode.SetIALAttr("fold", "1")
+		updatedNode.SetIALAttr("heading-fold", "1")
+	}
 
 	createdUpdated(updatedNode)
 

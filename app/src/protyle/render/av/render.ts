@@ -206,8 +206,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
         });
         contentHTML += "<div></div></div>";
     });
-    return {
-        contentHTML: contentHTML + `<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
+    return `${contentHTML}<div class="av__row--util${data.rowCount > data.rows.length ? " av__readonly--show" : ""}">
     <div class="av__colsticky">
         <button class="b3-button av__button" data-type="av-add-bottom">
             <svg><use xlink:href="#iconAdd"></use></svg>
@@ -220,9 +219,8 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
             <svg data-type="set-page-size" data-size="${data.pageSize}"><use xlink:href="#iconMore"></use></svg>
         </button>
     </div>
-</div>`,
-        footerHTML: `<div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`
-    };
+</div>
+<div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`;
 };
 
 const renderGroupTable = (options: ITableOptions) => {
@@ -239,7 +237,7 @@ const renderGroupTable = (options: ITableOptions) => {
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div><span class="fn__space"></span>${group.name}<span class="${group.rows.length === 0 ? "fn__none" : "counter"}">${group.rows.length}</span>
 </div>
-<div data-group-id="${group.id}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement).contentHTML}</div>`;
+<div data-group-id="${group.id}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -485,10 +483,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 if (!e.dataset.pageSize) {
                     e.dataset.pageSize = data.pageSize.toString();
                 }
-                const tableHTMLs = getTableHTMLs(data, e);
                 const avBodyHTML = `<div class="av__body" style="float: left">
-    ${tableHTMLs.contentHTML}
-    ${tableHTMLs.footerHTML}
+    ${getTableHTMLs(data, e)}
 </div>`;
                 if (renderAll) {
                     e.firstElementChild.outerHTML = `<div class="av__container">

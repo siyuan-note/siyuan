@@ -288,19 +288,21 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
         });
     }
 
-    const footerElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
-    if (footerElement && (status === "bottom" || status === "all")) {
-        if (footerElement.querySelector(".av__calc--ashow")) {
-            const bodyRect = footerElement.parentElement.getBoundingClientRect();
-            const distance = Math.ceil(elementRect.bottom - bodyRect.bottom);
-            if (distance < 0 && -distance < bodyRect.height) {
-                footerElement.style.transform = `translateY(${distance}px)`;
+    const footerElements = blockElement.querySelectorAll(".av__row--footer");
+    if (footerElements.length > 0 && (status === "bottom" || status === "all")) {
+        footerElements.forEach((item: HTMLElement) => {
+            if (item.querySelector(".av__calc--ashow")) {
+                const bodyRect = item.parentElement.getBoundingClientRect();
+                const distance = Math.ceil(elementRect.bottom - bodyRect.bottom);
+                if (distance < 0 && -distance < bodyRect.height - item.clientHeight) {
+                    item.style.transform = `translateY(${distance}px)`;
+                } else {
+                    item.style.transform = "";
+                }
             } else {
-                footerElement.style.transform = "";
+                item.style.transform = "";
             }
-        } else {
-            footerElement.style.transform = "";
-        }
+        });
     }
 };
 

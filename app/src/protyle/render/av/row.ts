@@ -128,7 +128,7 @@ export const insertAttrViewBlockAnimation = (options: {
     let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
     if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
-        previousElement = options.blockElement.querySelector("groupQuery + .av__row--util").previousElementSibling;
+        previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util").previousElementSibling;
     }
     let colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;

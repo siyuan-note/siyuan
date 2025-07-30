@@ -25,14 +25,18 @@ export const insertGalleryItemAnimation = (options: {
     let html = "";
     let needUpdate = "";
     if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-        !options.blockElement.querySelector(groupQuery+'[data-type="av-load-more"]').classList.contains("fn__none")) {
+        !options.blockElement.querySelector(groupQuery + '[data-type="av-load-more"]').classList.contains("fn__none")) {
         needUpdate = ' data-need-update="true"';
     }
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
+    let cellsHTML = "";
+    sideItemElement.querySelectorAll(".av__cell").forEach((item:HTMLElement) => {
+        cellsHTML += `<div class="av__cell" aria-label="${item.getAttribute("aria-label")}" data-field-id="${item.dataset.fieldId}"><span class="av__pulse"></span>${item.querySelector(".av__gallery-tip").outerHTML}</div>`;
+    });
     options.srcIDs.forEach((id) => {
         html += `<div class="av__gallery-item"${needUpdate} data-type="ghost" data-id="${id}">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
-    <div class="av__gallery-fields"><span class="av__pulse"></span></div>
+    <div class="av__gallery-fields">${cellsHTML}</div>
 </div>`;
     });
     if (options.previousId && sideItemElement) {
@@ -119,13 +123,17 @@ export const insertGalleryItemAnimation = (options: {
                         break;
                 }
             }
-            if (sideItemElement.classList.contains("av__row") && isRenderValue) {
+            if (sideItemElement.classList.contains("av__gallery-item") && isRenderValue) {
                 const sideItemCellElement = sideItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`) as HTMLElement;
                 const cellElement = currentItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`);
                 const cellValue = genCellValueByElement(getTypeByCellElement(sideItemCellElement), sideItemCellElement);
                 const iconElement = cellElement.querySelector(".b3-menu__avemoji");
+                if (cellValue.type === "checkbox") {
+                    cellValue.checkbox.content = cellElement.getAttribute("aria-label");
+                }
                 cellElement.innerHTML = renderCell(cellValue, undefined,
-                    iconElement ? !iconElement.classList.contains("fn__none") : false, "gallery");
+                        iconElement ? !iconElement.classList.contains("fn__none") : false, "gallery") +
+                    cellElement.querySelector(".av__gallery-tip").outerHTML;
                 renderCellAttr(cellElement, cellValue);
             }
         });

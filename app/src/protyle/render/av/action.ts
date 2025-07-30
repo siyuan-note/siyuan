@@ -825,6 +825,12 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
         if (viewType === "gallery") {
+            if (value.type === "checkbox") {
+                value.checkbox = {
+                    checked: value.checkbox?.checked || false,
+                    content: cellElement.getAttribute("aria-label"),
+                };
+            }
             cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
                 cellElement.querySelector(".av__gallery-tip").outerHTML;
             cellElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());

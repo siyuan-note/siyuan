@@ -995,7 +995,8 @@ interface IAVCellValue {
         content: string
     },
     checkbox?: {
-        checked: boolean
+        checked: boolean,
+        content?: string, // gallery 中显示 https://github.com/siyuan-note/siyuan/issues/15389
     }
     relation?: IAVCellRelationValue
     rollup?: {

@@ -62,6 +62,9 @@ const getGalleryHTML = (data: IAVGallery, selectItemIds: string[], editIds: stri
             if (data.fields[fieldsIndex].desc) {
                 ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
             }
+            if (cell.valueType === "checkbox") {
+                cell.value["checkbox"].content = data.fields[fieldsIndex].name||getColNameByType(data.fields[fieldsIndex].type)
+            }
             galleryHTML += `<div class="av__cell${checkClass} ariaLabel" data-wrap="${data.fields[fieldsIndex].wrap}" 
 data-empty="${isEmpty}" 
 aria-label="${ariaLabel}" 

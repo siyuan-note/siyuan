@@ -353,6 +353,7 @@ hljs.registerLanguage('template', function (hljs) {
 
     return {
         name: 'template',
+        aliases: ['siyuan-template'],
         case_insensitive: true,
         contains: [
             ACTION_BLOCK,
@@ -361,5 +362,4 @@ hljs.registerLanguage('template', function (hljs) {
             ...markdownRules.contains,
         ]
     };
-
 });

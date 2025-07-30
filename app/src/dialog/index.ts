@@ -78,7 +78,7 @@ left:${left || "auto"};top:${top || "auto"}">
         } else {
             setTimeout(() => {
                 this.element.classList.add("b3-dialog--open");
-            });
+            }, Constants.TIMEOUT_OPENDIALOG);
         }
         /// #if !MOBILE
         moveResize(this.element.querySelector(".b3-dialog__container"), options.resizeCallback);

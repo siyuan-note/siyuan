@@ -1306,10 +1306,6 @@ func MoveDocs(fromPaths []string, toBoxID, toPath string, callback interface{}) 
 	}
 
 	FlushTxQueue()
-	pushSQLInsertBlocksFTSMsg = true
-	defer func() {
-		pushSQLInsertBlocksFTSMsg = false
-	}()
 	luteEngine := util.NewLute()
 	count := 0
 	for fromPath, fromBox := range pathsBoxes {

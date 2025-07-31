@@ -1180,6 +1180,7 @@
   "newFileTip": "Si prega di aprire prima un taccuino",
   "copyBlockRef": "Copia riferimento blocco",
   "copyBlockEmbed": "Copia incorporamento blocco",
+  "copyStdMarkdown": "Copia Markdown standard",
   "linkLevel": "Profondità",
   "mark": "Segna",
   "splitLR": "Dividi a destra",

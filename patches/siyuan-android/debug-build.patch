@@ -1,0 +1,94 @@
+diff --git a/app/build.gradle b/app/build.gradle
+index 6922a27..a7da1fc 100644
+--- a/app/build.gradle
++++ b/app/build.gradle
+@@ -4,8 +4,8 @@ plugins {
+ 
+ // 多渠道打包配置已引用的方式传递
+ apply from: rootProject.file('flavors.gradle')
+-apply from: rootProject.file('signings.gradle')
+-apply from: rootProject.file('buildRelease.gradle')
++//apply from: rootProject.file('signings.gradle')
++//apply from: rootProject.file('buildRelease.gradle')
+ 
+ // By appending the version name, build type, and a timestamp to the APK filename,
+ // it becomes very easy for testers and developers to identify exactly which version of the application they are testing.
+@@ -41,17 +41,26 @@ android {
+         versionName siyuanVersionName
+     }
+ 
++    signingConfigs{
++        release {
++            storeFile = file("../keystore/siyuan.jks")
++            storePassword System.getenv("KEYSTORE_PASSWORD")
++            keyAlias "siyuan"
++            keyPassword System.getenv("KEYSTORE_PASSWORD")
++        }
++    }
++
+     buildTypes {
+         release {
+             // 正式版打包时指定签名证书
+-            signingConfig signingConfigs.siyuanConfig
++            signingConfig signingConfigs.release
+ 
+             minifyEnabled true
+             shrinkResources true
+ 
+             // 此处优先级太高，渠道处配置 resValue 不会生效，故放到了 productFlavors 多渠道打包处处理
+-            // resValue "string", "app_name", "SiYuan"
+-            resValue "string", "app_package_name", "org.b3log.siyuan"
++            resValue "string", "app_name", "SiYuan"
++            resValue "string", "app_package_name", "org.b3log.siyuan-unlock"
+ 
+             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+         }
+diff --git a/app/src/main/AndroidManifest.xml b/app/src/main/AndroidManifest.xml
+index 66b9b9e..946a60b 100644
+--- a/app/src/main/AndroidManifest.xml
++++ b/app/src/main/AndroidManifest.xml
+@@ -175,7 +175,7 @@
+         <!-- 多渠道打包配置 -->
+         <meta-data
+             android:name="CHANNEL"
+-            android:value="${CHANNEL}" />
++            android:value="googleplay" />
+ 
+     </application>
+ 
+diff --git a/flavors.gradle b/flavors.gradle
+index eeaed73..9338e4a 100644
+--- a/flavors.gradle
++++ b/flavors.gradle
+@@ -19,31 +19,11 @@ android {
+ 
+   // 多渠道打包配置
+   productFlavors {
+-
+-    // 小米/Vivo/OPPO/荣耀
+-    cn profileLqr() >> {
+-      buildConfigField "String", "CHANNEL", '"cn"'
+-      resValue "string", "app_name", "思源笔记"
+-    }
+-
+     // Google Play
+     googleplay profileLqr() >> {
+       buildConfigField "String", "CHANNEL", '"googleplay"'
+       resValue "string", "app_name", "SiYuan"
+     }
+-
+-    // 华为
+-    huawei profileLqr() >> {
+-      buildConfigField "String", "CHANNEL", '"huawei"'
+-      resValue "string", "app_name", "思源笔记"
+-    }
+-
+-    // 官方
+-    official profileLqr() >> {
+-      buildConfigField "String", "CHANNEL", '"official"'
+-      resValue "string", "app_name", "SiYuan"
+-    }
+-
+     // 遍历 productFlavors 多渠道，设置渠道号
+     productFlavors.all {
+       flavor -> flavor.manifestPlaceholders.put("CHANNEL", name)

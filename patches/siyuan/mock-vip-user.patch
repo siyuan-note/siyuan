@@ -1,0 +1,62 @@
+diff --git forkSrcPrefix/kernel/api/setting.go forkDstPrefix/kernel/api/setting.go
+index 9010350078560bb298de72bc73d54e51db60f21b..dfe9ab286f50431bdb30c633b8e63886b5046419 100644
+--- forkSrcPrefix/kernel/api/setting.go
++++ forkDstPrefix/kernel/api/setting.go
+@@ -586,7 +586,7 @@ func getPublish(c *gin.Context) {
+ 	}
+ }
+ 
+-func getCloudUser(c *gin.Context) {
++func getCloudUserOrigin(c *gin.Context) {
+ 	ret := gulu.Ret.NewResult()
+ 	defer c.JSON(http.StatusOK, ret)
+ 
+@@ -608,6 +608,48 @@ func getCloudUser(c *gin.Context) {
+ 	ret.Data = model.Conf.GetUser()
+ }
+ 
++func getCloudUser(c *gin.Context) {
++	ret := gulu.Ret.NewResult()
++	defer c.JSON(http.StatusOK, ret)
++
++	if !model.IsAdminRoleContext(c) {
++		return
++	}
++
++	user := &conf.User{
++			UserId: "0",
++			UserName: "_",
++			UserAvatarURL: "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
++			UserHomeBImgURL: "",
++			UserTitles: []*conf.UserTitle{},
++			UserIntro: "",
++			UserNickname: "",
++			UserCreateTime: "29991231 00:00:00",
++			UserSiYuanProExpireTime: -1,
++			UserToken: "token",
++			UserTokenExpireTime: "32503593600",
++			UserSiYuanRepoSize: 0,
++			UserSiYuanPointExchangeRepoSize: 0,
++			UserSiYuanAssetSize: 0,
++			UserTrafficUpload: 0,
++			UserTrafficDownload: 0,
++			UserTrafficAPIGet: 0,
++			UserTrafficAPIPut: 0,
++			UserTrafficTime: 0,
++			UserSiYuanSubscriptionPlan: 0,
++			UserSiYuanSubscriptionStatus: 0,
++			UserSiYuanSubscriptionType: 1,
++			UserSiYuanOneTimePayStatus: 1,
++	}
++
++	model.Conf.User = user
++	data, _ := gulu.JSON.MarshalJSON(user)
++	model.Conf.UserData = util.AESEncrypt(string(data))
++	model.Conf.Save()
++
++	ret.Data = user
++}
++
+ func logoutCloudUser(c *gin.Context) {
+ 	ret := gulu.Ret.NewResult()
+ 	defer c.JSON(http.StatusOK, ret)

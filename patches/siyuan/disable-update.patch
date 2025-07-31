@@ -1,0 +1,74 @@
+diff --git forkSrcPrefix/kernel/api/system.go forkDstPrefix/kernel/api/system.go
+index 51af4472aab1930b520dd923bb643ca4bf81aaa2..0b0d90f4276fae27fa0468155e1edb8eff15cfed 100644
+--- forkSrcPrefix/kernel/api/system.go
++++ forkDstPrefix/kernel/api/system.go
+@@ -184,16 +184,17 @@ func addCustomEmoji(name string, items *[]map[string]interface{}) {
+ }
+ 
+ func checkUpdate(c *gin.Context) {
+-	ret := gulu.Ret.NewResult()
+-	defer c.JSON(http.StatusOK, ret)
++	// ret := gulu.Ret.NewResult()
++	// defer c.JSON(http.StatusOK, ret)
+ 
+-	arg, ok := util.JsonArg(c, ret)
+-	if !ok {
+-		return
+-	}
++	// arg, ok := util.JsonArg(c, ret)
++	// if !ok {
++	// 	return
++	// }
+ 
+-	showMsg := arg["showMsg"].(bool)
+-	model.CheckUpdate(showMsg)
++	// showMsg := arg["showMsg"].(bool)
++	// model.CheckUpdate(showMsg)
++	return
+ }
+ 
+ func exportLog(c *gin.Context) {
+diff --git forkSrcPrefix/kernel/model/updater.go forkDstPrefix/kernel/model/updater.go
+index f902b49d6b32d35318eb0b237037f2b4f79b8d33..cdbbc35027afb7c1173056105065268d238f68e2 100644
+--- forkSrcPrefix/kernel/model/updater.go
++++ forkDstPrefix/kernel/model/updater.go
+@@ -306,6 +306,11 @@ func skipNewVerInstallPkg() bool {
+ 	}
+ 	if !Conf.System.DownloadInstallPkg {
+ 		return true
++	} else {
++		// Conf.System.DownloadInstallPkg(自动下载更新安装包) 强制赋值为false
++		Conf.System.DownloadInstallPkg = false
++		Conf.Save()
++		return true
+ 	}
+ 	if gulu.OS.IsWindows() {
+ 		plat := strings.ToLower(Conf.System.OSPlatform)
+diff --git forkSrcPrefix/kernel/conf/system.go forkDstPrefix/kernel/conf/system.go
+index 6d51b4ce1020d2996a6a41898b34686bf94e40a1..e43d3184a7393bf02f1ba135d8bb79dce4f85077 100644
+--- forkSrcPrefix/kernel/conf/system.go
++++ forkDstPrefix/kernel/conf/system.go
+@@ -52,7 +52,7 @@ func NewSystem() *System {
+ 		Name:               util.GetDeviceName(),
+ 		KernelVersion:      util.Ver,
+ 		NetworkProxy:       &NetworkProxy{},
+-		DownloadInstallPkg: true,
++		DownloadInstallPkg: false,
+ 	}
+ }
+ 
+diff --git forkSrcPrefix/kernel/model/mount.go forkDstPrefix/kernel/model/mount.go
+index cc55d4543130128cf0a78ef43c6cd982fa45c151..ae12417e2dedd0854182c654ed29768920eec673 100644
+--- forkSrcPrefix/kernel/model/mount.go
++++ forkDstPrefix/kernel/model/mount.go
+@@ -222,8 +222,8 @@ func Mount(boxID string) (alreadyMount bool, err error) {
+ 		task.AppendAsyncTaskWithDelay(task.PushMsg, 3*time.Second, util.PushErrMsg, Conf.Language(52), 7000)
+ 		go func() {
+ 			// 每次打开帮助文档时自动检查版本更新并提醒 https://github.com/siyuan-note/siyuan/issues/5057
+-			time.Sleep(time.Second * 10)
+-			CheckUpdate(true)
++			// time.Sleep(time.Second * 10)
++			// CheckUpdate(true)
+ 		}()
+ 	}
+ 

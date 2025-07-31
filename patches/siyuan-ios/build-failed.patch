@@ -1,0 +1,59 @@
+diff --git forkSrcPrefix/siyuan-ios/IAPManager.swift forkDstPrefix/siyuan-ios/IAPManager.swift
+index 418cbd80a279b15ccc71c4be2a6772fbf58ddc39..94834373b078beae87b2f3ff0b269247c27da14b 100644
+--- forkSrcPrefix/siyuan-ios/IAPManager.swift
++++ forkDstPrefix/siyuan-ios/IAPManager.swift
+@@ -35,30 +35,30 @@ class IAPManager:ObservableObject {
+     func purchaseProduct(_ product: Product, uuid:UUID) {
+         // 在这里输出要购买的商品id
+         print("Purchasing product: \(product.id)")
+-        Task {  @MainActor in
+-            do {
+-                let result = try await product.purchase(options: [.appAccountToken(uuid)])
+-                switch result {
+-                case .success(let verification):    // 购买成功的情况，返回verification包含交易的验证信息
+-                    let transaction = try checkVerified(verification)    // 验证交易
+-                    savePurchasedState(for: product.id)    // 更新UserDefaults中的购买状态
+-                    await transaction.finish()    // 告诉系统交易完成
+-                    let response = Iosk.MobileVerifyAppStoreTransaction(uuid.uuidString, String(transaction.id));
+-                    DispatchQueue.main.asyncAfter(deadline: .now()) {
+-                        ViewController.syWebView.evaluateJavaScript("processIOSPurchaseResponse(" + String(response) + ")")
+-                    }
+-                case .userCancelled:    // 用户取消交易
+-                    print("用户取消交易：\(result)")
+-                case .pending:    // 购买交易被挂起
+-                    print("购买交易被挂起：\(result)")
+-                default:    // 其他情况
+-                    throw StoreError.failedVerification    // 购买失败
+-                }
+-            } catch {
+-                print("购买失败：\(error)")
+-                await resetProduct()    // 购买失败后重置 product 以便允许再次尝试购买
+-            }
+-        }
++        // Task {  @MainActor in
++        //     do {
++        //         let result = try await product.purchase(options: [.appAccountToken(uuid)])
++        //         switch result {
++        //         case .success(let verification):    // 购买成功的情况，返回verification包含交易的验证信息
++        //             let transaction = try checkVerified(verification)    // 验证交易
++        //             savePurchasedState(for: product.id)    // 更新UserDefaults中的购买状态
++        //             await transaction.finish()    // 告诉系统交易完成
++        //             let response = Iosk.MobileVerifyAppStoreTransaction(uuid.uuidString, String(transaction.id));
++        //             DispatchQueue.main.asyncAfter(deadline: .now()) {
++        //                 ViewController.syWebView.evaluateJavaScript("processIOSPurchaseResponse(" + String(response) + ")")
++        //             }
++        //         case .userCancelled:    // 用户取消交易
++        //             print("用户取消交易：\(result)")
++        //         case .pending:    // 购买交易被挂起
++        //             print("购买交易被挂起：\(result)")
++        //         default:    // 其他情况
++        //             throw StoreError.failedVerification    // 购买失败
++        //         }
++        //     } catch {
++        //         print("购买失败：\(error)")
++        //         await resetProduct()    // 购买失败后重置 product 以便允许再次尝试购买
++        //     }
++        // }
+     }
+     // 验证购买结果
+     func checkVerified<T>(_ result: VerificationResult<T>) throws -> T {

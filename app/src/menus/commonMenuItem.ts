@@ -451,12 +451,19 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
     
     if (stdMarkdownId) {
         menuItems.push({
-            id: "copyStdMarkdown",
+            id: "copyMarkdown",
             iconHTML: "",
-            label: window.siyuan.languages.copyStdMarkdown,
+            label: window.siyuan.languages.copyMarkdown,
             accelerator: undefined,
             click: async () => {
-                const response = await fetchSyncPost("/api/export/exportMdContent", { id: stdMarkdownId });
+                const response = await fetchSyncPost("/api/export/exportMdContent", {
+                    id: stdMarkdownId,
+                    refMode: 3,
+                    embedMode: 1,
+                    yfm: false,
+                    fillCSSVar: false,
+                    adjustHeadingLevel: false
+                });
                 const text = response.data.content;
                 writeText(text);
                 if (focusElement) {

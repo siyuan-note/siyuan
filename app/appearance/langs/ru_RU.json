@@ -1180,7 +1180,7 @@
   "newFileTip": "Пожалуйста, сначала откройте блокнот",
   "copyBlockRef": "Скопировать ссылку на блок",
   "copyBlockEmbed": "Скопировать встроенный блок",
-  "copyStdMarkdown": "Скопировать стандартный Markdown",
+  "copyMarkdown": "Скопировать как Markdown",
   "linkLevel": "Глубина",
   "mark": "Значить",
   "splitLR": "Разделить направо",

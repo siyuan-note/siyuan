@@ -1,0 +1,134 @@
+name: release-android
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "release version/tag"
+        required: true
+      packageManager:
+        description: "pnpm@x.x.x"
+        required: true
+
+jobs:
+  build:
+    runs-on: ${{ matrix.config.os }}
+    strategy:
+      matrix:
+        config:
+          - os: ubuntu-22.04
+            kernel_path: "../../../siyuan-android/app/libs/kernel.aar"
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: siyuan-note
+
+      - name: clone origin and apply patches
+        run: |
+          mkdir -p ${{ github.workspace }}/go
+          cd ${{ github.workspace }}/siyuan-note/
+
+          git clone --branch ${{ github.event.inputs.version }} --depth=1 https://github.com/siyuan-note/siyuan.git
+          cd siyuan
+
+          git apply ${{ github.workspace }}/siyuan-note/patches/siyuan/disable-update.patch
+          git apply ${{ github.workspace }}/siyuan-note/patches/siyuan/default-config.patch
+          git apply ${{ github.workspace }}/siyuan-note/patches/siyuan/mock-vip-user.patch
+
+          git status
+
+          cd ..
+
+          git clone --branch ${{ github.event.inputs.version }} --depth=1 https://github.com/siyuan-note/siyuan-android.git
+          cd siyuan-android
+
+          git apply --ignore-whitespace --verbose ${{ github.workspace }}/siyuan-note/patches/siyuan-android/debug-build.patch
+
+          mkdir -p app/src/main/assets/
+          mkdir -p app/libs/
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: ${{ github.workspace }}/siyuan-note/siyuan/kernel/go.mod
+          cache-dependency-path: "**/*.sum"
+      - run: go version
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Node pnpm
+        run: npm install -g ${{ github.event.inputs.packageManager }}
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan/app
+
+      - name: Install Node Dependencies
+        run: pnpm install --no-frozen-lockfile
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan/app
+
+      - name: Building UI
+        run: pnpm run build
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan/app
+
+      - name: gomobile
+        working-directory: ${{ github.workspace }}/go
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@latest
+          gomobile init
+
+      - name: Set up java
+        uses: actions/setup-java@v4
+        with:
+          distribution: "temurin"
+          java-version: "17"
+          cache: "gradle"
+
+      - name: Building Android Kernel
+        run: |
+          gomobile bind --tags fts5 -androidapi 21 -target='android/arm64'  -ldflags '-s -w' -v -o "${{ matrix.config.kernel_path }}" ./
+          ls -la "${{ matrix.config.kernel_path }}"
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan/kernel/mobile
+        env:
+          GO111MODULE: on
+          CGO_ENABLED: 1
+
+      - name: android assets
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan/app/
+        run: |
+          zip -r ${{ github.workspace }}/siyuan-note/siyuan-android/app/src/main/assets/app.zip ./appearance ./guide ./stage ./changelogs
+
+      - name: Decode Keystore
+        id: decode_keystore
+        uses: timheuer/base64-to-file@v1.2
+        with:
+          fileName: "siyuan.jks"
+          fileDir: ${{ github.workspace }}/siyuan-note/siyuan-android/keystore
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      - name: Building Android
+        working-directory: ${{ github.workspace }}/siyuan-note/siyuan-android
+        run: |
+          chmod 777 ./gradlew
+          ./gradlew :app:assembleRelease
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+
+      - uses: joutvhu/get-release@v1
+        id: get_current_release
+        with:
+          tag_name: ${{ github.event.inputs.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: List generated APK files
+        run: ls -la ${{ github.workspace }}/siyuan-note/siyuan-android/app/build/outputs/apk/googleplay/release/
+      - name: Upload Android
+        uses: shogo82148/actions-upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.get_current_release.outputs.upload_url }}
+          asset_name: siyuan-unlock-${{ github.event.inputs.version }}-android-arm64.apk
+          asset_path: ${{ github.workspace }}/siyuan-note/siyuan-android/app/build/outputs/apk/googleplay/release/siyuan-*.apk
+          asset_content_type: application/octet-stream

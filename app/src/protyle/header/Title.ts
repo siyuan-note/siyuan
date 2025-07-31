@@ -140,8 +140,8 @@ export class Title {
                     event.stopPropagation();
                 }
             } else if (event.key === "Enter") {
-                const editElment = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);
-                if (editElment && editElment.textContent === "" && !protyle.wysiwyg.element.firstElementChild.classList.contains("av")) {
+                const editElement = getContenteditableElement(protyle.wysiwyg.element.firstElementChild);
+                if (editElement && editElement.textContent === "" && editElement.getAttribute("placeholder")) {
                     // 配合提示文本使用，避免提示文本挤压到第二个块中
                     focusBlock(protyle.wysiwyg.element.firstElementChild, protyle.wysiwyg.element);
                 } else {

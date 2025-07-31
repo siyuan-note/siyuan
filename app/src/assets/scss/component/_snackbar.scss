@@ -24,6 +24,11 @@
     flex-direction: column;
     transform: translate3d(calc(20vw + 48px), 0, 0);
     transition: transform .15s cubic-bezier(.4, 0, 1, 1) 0ms;
+    pointer-events: none;
+
+    * {
+      pointer-events: auto;
+    }
 
     &--show {
       transform: translate3d(0, 0, 0) !important;

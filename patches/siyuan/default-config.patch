@@ -1,0 +1,44 @@
+diff --git forkSrcPrefix/kernel/conf/sync.go forkDstPrefix/kernel/conf/sync.go
+index 488cb9e5701adc964635376373202516656b1f9a..4e2a457fe7ff2dec817c2e0ae9de610d1412cbd3 100644
+--- forkSrcPrefix/kernel/conf/sync.go
++++ forkDstPrefix/kernel/conf/sync.go
+@@ -36,8 +36,8 @@ func NewSync() *Sync {
+ 		Enabled:             false,
+ 		Perception:          false,
+ 		Mode:                1,
+-		GenerateConflictDoc: false,
+-		Provider:            ProviderSiYuan,
++		GenerateConflictDoc: true,
++		Provider:            ProviderS3,
+ 		Interval:            30,
+ 	}
+ }
+diff --git forkSrcPrefix/kernel/conf/account.go forkDstPrefix/kernel/conf/account.go
+index 5e3b51fb8f9d2944a2cacef66cdc3bc9bd365c5a..d4f4e00dea010730b557f7c122b624fb015b1021 100644
+--- forkSrcPrefix/kernel/conf/account.go
++++ forkDstPrefix/kernel/conf/account.go
+@@ -23,7 +23,7 @@ type Account struct {
+ 
+ func NewAccount() *Account {
+ 	return &Account{
+-		DisplayTitle: true,
+-		DisplayVIP:   true,
++		DisplayTitle: false,
++		DisplayVIP:   false,
+ 	}
+ }
+diff --git forkSrcPrefix/kernel/conf/appearance.go forkDstPrefix/kernel/conf/appearance.go
+index ebd1002acf907e4afb3524fe5adcf672a850646b..1df2f4761587468cadf8f6d43573836790473f22 100644
+--- forkSrcPrefix/kernel/conf/appearance.go
++++ forkDstPrefix/kernel/conf/appearance.go
+@@ -44,8 +44,8 @@ func NewAppearance() *Appearance {
+ 		Icon:                "material",
+ 		CodeBlockThemeLight: "github",
+ 		CodeBlockThemeDark:  "base16/dracula",
+-		Lang:                "en_US",
+-		CloseButtonBehavior: 0,
++		Lang:                "zh_CN",
++		CloseButtonBehavior: 1,
+ 		HideStatusBar:       false,
+ 	}
+ }

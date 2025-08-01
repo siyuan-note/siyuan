@@ -146,6 +146,7 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
+        this.element.style.setProperty("--b3-menu-position-top", this.element.style.top);
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

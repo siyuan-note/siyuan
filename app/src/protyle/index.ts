@@ -160,9 +160,7 @@ export class Protyle {
                             break;
                         case "transactions":
                             data.data[0].doOperations.find((item: IOperation) => {
-                                if (!this.protyle.preview.element.classList.contains("fn__none") &&
-                                    item.action !== "updateAttrs"   // 预览模式下点击只读
-                                ) {
+                                if (!this.protyle.preview.element.classList.contains("fn__none")) {
                                     this.protyle.preview.render(this.protyle);
                                 } else if (options.backlinkData && ["delete", "move"].includes(item.action)) {
                                     // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁

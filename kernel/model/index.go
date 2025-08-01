@@ -359,7 +359,10 @@ func init() {
 	subscribeSQLEvents()
 }
 
-var pushSQLInsertBlocksFTSMsg bool
+var (
+	pushSQLInsertBlocksFTSMsg bool
+	pushSQLDeleteBlocksMsg    bool
+)
 
 func subscribeSQLEvents() {
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
@@ -371,8 +374,6 @@ func subscribeSQLEvents() {
 	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
 		if !pushSQLInsertBlocksFTSMsg {
-			// 如果不是全量重建索引，则不显示进度信息
-			// Improve status bar index creation information prompt https://github.com/siyuan-note/siyuan/issues/15390
 			return
 		}
 
@@ -383,7 +384,7 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if !pushSQLDeleteBlocksMsg {
 			return
 		}
 

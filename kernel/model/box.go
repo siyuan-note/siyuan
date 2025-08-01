@@ -677,10 +677,10 @@ func FullReindex() {
 }
 
 func fullReindex() {
-	pushSQLInsertBlocksFTSMsg = true
+	pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = true, true
 	defer func() {
 		sql.FlushQueue()
-		pushSQLInsertBlocksFTSMsg = false
+		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
 	}()
 
 	util.PushEndlessProgress(Conf.language(35))

@@ -7,7 +7,7 @@ on:
         description: "release version/tag"
         required: true
       packageManager:
-        description: "pnpm@x.x.x"
+        description: "pnpm@10.13.1"
         required: true
 
 jobs:
@@ -40,7 +40,7 @@ jobs:
 
           cd ..
 
-          git clone --branch ${{ github.event.inputs.version }} --depth=1 https://github.com/siyuan-note/siyuan-android.git
+          git clone --branch main --depth=1 https://github.com/siyuan-note/siyuan-android.git
           cd siyuan-android
 
           git apply --ignore-whitespace --verbose ${{ github.workspace }}/siyuan-note/patches/siyuan-android/debug-build.patch

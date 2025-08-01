@@ -1395,7 +1395,7 @@ func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
 	return
 }
 
@@ -1438,11 +1438,11 @@ func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, att
 		}
 	}
 
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1)
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
 	return
 }
 
-func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
 	if avJSONPath := av.GetAttributeViewDataPath(avID); !filelock.IsExist(avJSONPath) {
@@ -1459,7 +1459,7 @@ func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int
 		return
 	}
 
-	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize)
+	viewable, err = renderAttributeView(attrView, blockID, viewID, query, page, pageSize, groupPaging)
 	return
 }
 
@@ -1471,7 +1471,7 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query string, page, pageSize int) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, err error) {
 	if 1 > len(attrView.Views) {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -1557,8 +1557,18 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 
 		var groups []av.Viewable
 		for _, groupView := range view.Groups {
-			groupViewable := sql.RenderGroupView(attrView, view, groupView)
-			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
+			groupViewable := sql.RenderGroupView(attrView, view, groupView, query)
+
+			groupPage, groupPageSize := page, pageSize
+			if nil != groupPaging {
+				if paging := groupPaging[groupView.ID]; nil != paging {
+					pagingMap := paging.(map[string]interface{})
+					groupPage = int(pagingMap["page"].(float64))
+					groupPageSize = int(pagingMap["pageSize"].(float64))
+				}
+			}
+
+			err = renderViewableInstance(groupViewable, view, attrView, groupPage, groupPageSize)
 			if nil != err {
 				return
 			}
@@ -1856,7 +1866,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			if av.GroupOrderDesc == view.Group.Order {
 				slices.Reverse(relativeDateGroups)
 			}
-			
+
 			view.Groups = relativeDateGroups
 		} else {
 			sort.SliceStable(view.Groups, func(i, j int) bool {
@@ -3216,7 +3226,7 @@ func getNewValueByNearItem(nearItem av.Item, key *av.Key, blockID string) (ret *
 }
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {
-	viewable := sql.RenderGroupView(attrView, view, groupView)
+	viewable := sql.RenderGroupView(attrView, view, groupView, "")
 	av.Filter(viewable, attrView)
 	av.Sort(viewable, attrView)
 	items := viewable.(av.Collection).GetItems()

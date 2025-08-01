@@ -93,7 +93,7 @@ func setAttrViewGroup(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -116,7 +116,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(blockID, avID, "", "", 1, -1)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1, nil)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -664,13 +664,19 @@ func renderAttributeView(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	ret = renderAttrView(blockID, id, viewID, query, page, pageSize)
+	groupPaging := map[string]interface{}{}
+	groupPagingArg := arg["groupPaging"]
+	if nil != groupPagingArg {
+		groupPaging = groupPagingArg.(map[string]interface{})
+	}
+
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize, groupPaging)
 	c.JSON(http.StatusOK, ret)
 }
 
-func renderAttrView(blockID, avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize)
+	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize, groupPaging)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

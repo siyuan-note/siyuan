@@ -32,7 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View) (ret av.Viewable) {
+func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query string) (ret av.Viewable) {
 	switch groupView.LayoutType {
 	case av.LayoutTypeTable:
 		groupView.Table.Columns = view.Table.Columns
@@ -42,7 +42,7 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View) (ret 
 
 	groupView.Filters = view.Filters
 	groupView.Sorts = view.Sorts
-	return RenderView(attrView, groupView, "")
+	return RenderView(attrView, groupView, query)
 }
 
 func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {

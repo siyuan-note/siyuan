@@ -1291,10 +1291,10 @@ export class Toolbar {
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            if (listElement.firstElementChild.nextElementSibling) {
-                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
+            if (listElement.childElementCount > 2) {
+                listElement.firstElementChild.nextElementSibling.nextElementSibling.classList.add("b3-list-item--focus");
             } else {
-                listElement.firstElementChild.classList.add("b3-list-item--focus");
+                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
             }
             event.stopPropagation();
         });

@@ -1781,7 +1781,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	} else {
 		if av.GroupMethodDateRelative == view.Group.Method {
 			var relativeDateGroups []*av.View
-			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days *av.View
+			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
 			for _, groupView := range view.Groups {
 				_, err := time.Parse("2006-01", groupView.GroupValue)
 				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
@@ -1802,6 +1802,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 						next7Days = groupView
 					case groupValueNext30Days:
 						next30Days = groupView
+					case groupValueDefault:
+						defaultGroup = groupView
 					}
 				}
 			}
@@ -1847,6 +1849,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			for _, g := range lastNext30Days {
 				relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
 			}
+			if nil != defaultGroup {
+				relativeDateGroups = append([]*av.View{defaultGroup}, relativeDateGroups...)
+			}
+
+			if av.GroupOrderDesc == view.Group.Order {
+				slices.Reverse(relativeDateGroups)
+			}
+			
 			view.Groups = relativeDateGroups
 		} else {
 			sort.SliceStable(view.Groups, func(i, j int) bool {

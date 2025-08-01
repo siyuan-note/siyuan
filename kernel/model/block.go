@@ -280,6 +280,42 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	return
 }
 
+func GetBlockIDs(id string) (parentID, previousID, nextID string, err error) {
+	tree, err := LoadTreeByBlockID(id)
+	if err != nil {
+		return
+	}
+
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	if nil != node.Parent {
+		parentID = node.Parent.ID
+	}
+	if nil != node.Previous {
+		previous := node.Previous
+		if ast.NodeKramdownBlockIAL == previous.Type {
+			previous = previous.Previous
+		}
+		if nil != previous {
+			previousID = previous.ID
+		}
+	}
+	if nil != node.Next {
+		next := node.Next
+		if ast.NodeKramdownBlockIAL == next.Type {
+			next = next.Next
+		}
+		if nil != next {
+			nextID = next.ID
+		}
+	}
+	return
+}
+
 func GetUnfoldedParentID(id string) (parentID string) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {

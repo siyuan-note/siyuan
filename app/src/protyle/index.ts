@@ -179,11 +179,15 @@ export class Protyle {
                                     if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID &&
                                         !(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
                                         if (item.action === "delete" && this.protyle.block.showAll) {
-                                            zoomOut({
-                                                protyle: this.protyle,
-                                                id: this.protyle.block.rootID,
-                                                focusId: this.protyle.block.id
-                                            });
+                                            if (this.protyle.options.handleEmptyContent) {
+                                                this.protyle.options.handleEmptyContent();
+                                            } else {
+                                                zoomOut({
+                                                    protyle: this.protyle,
+                                                    id: this.protyle.block.rootID,
+                                                    focusId: this.protyle.block.id
+                                                });
+                                            }
                                         } else {
                                             const newID = Lute.NewNodeID();
                                             const emptyElement = genEmptyElement(false, false, newID);

@@ -757,7 +757,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         const cursorElements = [];
         if (operation.previousID) {
             const previousElement = protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${operation.previousID}"]`);
-            if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
+            if (previousElement.length === 0 && isUndo && protyle.wysiwyg.element.childElementCount === 0) {
+                // https://github.com/siyuan-note/siyuan/issues/15396 操作后撤销
+                protyle.wysiwyg.element.innerHTML = operation.data;
+            } else if (previousElement.length === 0 && protyle.options.backlinkData && isUndo && getSelection().rangeCount > 0) {
                 // 反链面板删除超级块中的最后一个段落块后撤销
                 const blockElement = hasClosestBlock(getSelection().getRangeAt(0).startContainer);
                 if (blockElement) {
@@ -1199,7 +1202,11 @@ export const turnsOneInto = async (options: {
         }
     }
     const oldHTML = options.nodeElement.outerHTML;
-    const previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
+    let previousId = options.nodeElement.previousElementSibling?.getAttribute("data-node-id");
+    if (!options.nodeElement.previousElementSibling && options.protyle.block.showAll) {
+        const response = await fetchSyncPost("/api/block/getBlockRelevantIDs", {id: options.id});
+        previousId = response.data.previousID;
+    }
     const parentId = options.nodeElement.parentElement.getAttribute("data-node-id") || options.protyle.block.parentID;
     // @ts-ignore
     const newHTML = options.protyle.lute[options.type](options.nodeElement.outerHTML, options.level);

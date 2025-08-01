@@ -555,14 +555,10 @@ export class Gutter {
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
         let isContinue = false;
-        let hasEmbedBlock = false;
         selectsElement.find((item, index) => {
             if (item.classList.contains("li")) {
                 isList = true;
                 return true;
-            }
-            if (item.classList.contains("sb") || item.classList.contains("p")) {
-                hasEmbedBlock = true;
             }
             if (item.nextElementSibling && selectsElement[index + 1] &&
                 item.nextElementSibling === selectsElement[index + 1]) {
@@ -612,19 +608,16 @@ export class Gutter {
                     type: "Blocks2Blockquote"
                 }));
             }
-            // 多选引用转换为块的时候 id 不一致
-            if (!hasEmbedBlock) {
-                turnIntoSubmenu.push(this.turnsInto({
-                    menuId: "paragraph",
-                    icon: "iconParagraph",
-                    label: window.siyuan.languages.paragraph,
-                    accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2Ps",
-                    isContinue
-                }));
-            }
+            turnIntoSubmenu.push(this.turnsInto({
+                menuId: "paragraph",
+                icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle,
+                selectsElement,
+                type: "Blocks2Ps",
+                isContinue
+            }));
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "heading1",
                 icon: "iconH1",

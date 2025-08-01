@@ -970,7 +970,7 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 			if strings.HasPrefix(replacement, "#") && strings.HasSuffix(replacement, "#") {
 				replacement = strings.TrimPrefix(replacement, "#")
 				replacement = strings.TrimSuffix(replacement, "#")
-			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) {
+			} else if n.TextMarkTextContent == keyword || n.TextMarkTextContent == escapedKey {
 				// 将标签转换为纯文本
 
 				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时直接转换
@@ -1006,6 +1006,18 @@ func replaceNodeTextMarkTextContent(n *ast.Node, method int, keyword, escapedKey
 				// 存在其他类型时仅移除标签类型
 				n.TextMarkType = strings.ReplaceAll(n.TextMarkType, "tag", "")
 				n.TextMarkType = strings.TrimSpace(n.TextMarkType)
+			} else if strings.Contains(n.TextMarkTextContent, keyword) || strings.Contains(n.TextMarkTextContent, escapedKey) { // 标签包含了部分关键字的情况
+				if "tag" == n.TextMarkType { // 没有其他类型，仅是标签时保持标签类型不变，仅替换标签部分内容
+					content := n.TextMarkTextContent
+					if strings.Contains(content, escapedKey) {
+						content = strings.ReplaceAll(content, escapedKey, replacement)
+					} else if strings.Contains(content, keyword) {
+						content = strings.ReplaceAll(content, keyword, replacement)
+					}
+					content = strings.ReplaceAll(content, editor.Zwsp, "")
+					n.TextMarkTextContent = content
+					return
+				}
 			}
 		}
 

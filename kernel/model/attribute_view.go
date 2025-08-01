@@ -1557,7 +1557,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 
 		var groups []av.Viewable
 		for _, groupView := range view.Groups {
-			groupViewable := sql.RenderGroupView(attrView, view, groupView)
+			groupViewable := sql.RenderGroupView(attrView, view, groupView, query)
 			err = renderViewableInstance(groupViewable, view, attrView, page, pageSize)
 			if nil != err {
 				return
@@ -1856,7 +1856,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			if av.GroupOrderDesc == view.Group.Order {
 				slices.Reverse(relativeDateGroups)
 			}
-			
+
 			view.Groups = relativeDateGroups
 		} else {
 			sort.SliceStable(view.Groups, func(i, j int) bool {
@@ -3216,7 +3216,7 @@ func getNewValueByNearItem(nearItem av.Item, key *av.Key, blockID string) (ret *
 }
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {
-	viewable := sql.RenderGroupView(attrView, view, groupView)
+	viewable := sql.RenderGroupView(attrView, view, groupView, "")
 	av.Filter(viewable, attrView)
 	av.Sort(viewable, attrView)
 	items := viewable.(av.Collection).GetItems()

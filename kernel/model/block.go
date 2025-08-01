@@ -280,7 +280,7 @@ func GetBlockSiblingID(id string) (parent, previous, next string) {
 	return
 }
 
-func GetBlockIDs(id string) (parentID, previousID, nextID string, err error) {
+func GetBlockRelevantIDs(id string) (parentID, previousID, nextID string, err error) {
 	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return

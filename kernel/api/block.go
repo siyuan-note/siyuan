@@ -86,7 +86,7 @@ func getBlockSiblingID(c *gin.Context) {
 	}
 }
 
-func getBlockIDs(c *gin.Context) {
+func getBlockRelevantIDs(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
 
@@ -96,7 +96,7 @@ func getBlockIDs(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	parentID, previousID, nextID, err := model.GetBlockIDs(id)
+	parentID, previousID, nextID, err := model.GetBlockRelevantIDs(id)
 	if nil != err {
 		ret.Code = -1
 		ret.Msg = err.Error()

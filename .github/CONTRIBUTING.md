@@ -7,17 +7,17 @@
 
 ## NPM dependencies
 
-Install pnpm: `npm install -g pnpm@10.13.1`
+Install pnpm: `npm install -g pnpm@10.14.0`
 
 <details>
 <summary>For China mainland</summary>
 
 Set the Electron mirror environment variable and install Electron:
 
-* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@37.2.3 -D`
+* macOS/Linux: `ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/ pnpm install electron@37.2.5 -D`
 * Windows:
   * `SET ELECTRON_MIRROR=https://npmmirror.com/mirrors/electron/`
-  * `pnpm install electron@37.2.3 -D`
+  * `pnpm install electron@37.2.5 -D`
 
 NPM mirror:
 
@@ -27,7 +27,7 @@ NPM mirror:
 
 Enter the app folder and execute:
 
-* `pnpm install electron@37.2.3 -D`
+* `pnpm install electron@37.2.5 -D`
 * `pnpm run dev`
 * `pnpm run start`
 

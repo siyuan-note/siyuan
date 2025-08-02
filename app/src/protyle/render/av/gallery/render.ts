@@ -24,6 +24,7 @@ interface ITableOptions {
         selectItemIds: string[],
         isSearching: boolean,
         editIds: string[],
+        pageSizes: { [key: string]: string },
         query: string,
         oldOffset: number,
     }
@@ -137,6 +138,13 @@ const afterRenderGallery = (options: ITableOptions) => {
     if (options.resetData.alignSelf) {
         options.blockElement.style.alignSelf = options.resetData.alignSelf;
     }
+    Object.keys(options.resetData.pageSizes).forEach((groupId) => {
+        if (groupId === "unGroup") {
+            (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+            return;
+        }
+        (options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+    });
     if (getSelection().rangeCount > 0) {
         // 修改表头后光标重新定位
         const range = getSelection().getRangeAt(0);
@@ -233,6 +241,10 @@ export const renderGallery = async (options: {
             selectItemIds.push(rowId);
         }
     });
+    const pageSizes: { [key: string]: string } = {};
+    options.blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+    });
     const resetData = {
         isSearching: searchInputElement && document.activeElement === searchInputElement,
         query: searchInputElement?.value || "",
@@ -240,6 +252,7 @@ export const renderGallery = async (options: {
         oldOffset: options.protyle.contentElement.scrollTop,
         editIds,
         selectItemIds,
+        pageSizes,
     };
     if (options.blockElement.firstElementChild.innerHTML === "") {
         options.blockElement.style.alignSelf = "";

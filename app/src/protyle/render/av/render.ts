@@ -36,6 +36,7 @@ interface ITableOptions {
         dragFillId: string,
         activeIds: string[],
         query: string,
+        pageSizes: { [key: string]: string },
     }
 }
 
@@ -270,7 +271,10 @@ const afterRenderTable = (options: ITableOptions) => {
     options.blockElement.style.alignSelf = options.resetData.alignSelf;
     const editRect = options.protyle.contentElement.getBoundingClientRect();
     if (options.resetData.headerTransform) {
-        (options.blockElement.querySelector('.av__row--header[style^="transform"]') as HTMLElement).style.transform = options.resetData.headerTransform;
+        const headerTransformElement = options.blockElement.querySelector('.av__row--header[style^="transform"]') as HTMLElement;
+        if (headerTransformElement) {
+            headerTransformElement.style.transform = options.resetData.headerTransform;
+        }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
@@ -278,7 +282,10 @@ const afterRenderTable = (options: ITableOptions) => {
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.footerTransform) {
-        (options.blockElement.querySelector(".av__row--footer") as HTMLElement).style.transform = options.resetData.footerTransform;
+        const footerTransformElement = options.blockElement.querySelector('.av__row--footer[style^="transform"]') as HTMLElement;
+        if (footerTransformElement) {
+            footerTransformElement.style.transform = options.resetData.footerTransform;
+        }
     } else {
         // 需等待渲染完，否则 getBoundingClientRect 错误 https://github.com/siyuan-note/siyuan/issues/13787
         setTimeout(() => {
@@ -315,7 +322,13 @@ const afterRenderTable = (options: ITableOptions) => {
             updateHeader(rowElement);
         }
     });
-
+    Object.keys(options.resetData.pageSizes).forEach((groupId) => {
+        if (groupId === "unGroup") {
+            (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+            return;
+        }
+        (options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+    });
     if (options.resetData.dragFillId) {
         addDragFill(options.blockElement.querySelector(`.av__row[data-id="${options.resetData.dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.dragFillId.split(Constants.ZWSP)[1]}"]`));
     }
@@ -443,6 +456,10 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 activeIds.push((hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + item.getAttribute("data-col-id"));
             });
             const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
+            const pageSizes: { [key: string]: string } = {};
+            e.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+                pageSizes[item.dataset.groupId || "unGroup"] = item.dataset.pageSize;
+            });
             const resetData = {
                 selectCellId,
                 alignSelf: e.style.alignSelf,
@@ -453,7 +470,8 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 selectRowIds,
                 dragFillId,
                 activeIds,
-                query: searchInputElement?.value || ""
+                query: searchInputElement?.value || "",
+                pageSizes
             };
             if (e.firstElementChild.innerHTML === "") {
                 e.style.alignSelf = "";

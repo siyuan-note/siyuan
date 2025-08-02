@@ -12,13 +12,13 @@ export const getPageSize = (blockElement: Element) => {
         [key: string]: {
             pageSize: string
         }
-    }[] = [];
+    } = {};
     let unGroupPageSize: string;
     blockElement.querySelectorAll(".av__body").forEach((item:HTMLElement) => {
         const id = item.dataset.groupId;
         const pageSize = item.dataset.pageSize;
         if (id) {
-            groupPageSize.push({[id]: {pageSize}});
+            groupPageSize[id] = {pageSize};
         } else if (!unGroupPageSize) {
             unGroupPageSize = pageSize;
         }

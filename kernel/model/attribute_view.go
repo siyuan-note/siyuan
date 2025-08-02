@@ -1638,8 +1638,12 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			if nil != groupPaging {
 				if paging := groupPaging[groupView.ID]; nil != paging {
 					pagingMap := paging.(map[string]interface{})
-					groupPage = int(pagingMap["page"].(float64))
-					groupPageSize = int(pagingMap["pageSize"].(float64))
+					if nil != pagingMap["page"] {
+						groupPage = int(pagingMap["page"].(float64))
+					}
+					if nil != pagingMap["pageSize"] {
+						groupPageSize = int(pagingMap["pageSize"].(float64))
+					}
 				}
 			}
 

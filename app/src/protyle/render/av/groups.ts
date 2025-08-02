@@ -10,13 +10,13 @@ import {objEquals} from "../../../util/functions";
 export const getPageSize = (blockElement: Element) => {
     const groupPageSize: {
         [key: string]: {
-            pageSize: string
+            pageSize: number
         }
     } = {};
-    let unGroupPageSize: string;
+    let unGroupPageSize: number;
     blockElement.querySelectorAll(".av__body").forEach((item:HTMLElement) => {
         const id = item.dataset.groupId;
-        const pageSize = item.dataset.pageSize;
+        const pageSize = parseInt(item.dataset.pageSize);
         if (id) {
             groupPageSize[id] = {pageSize};
         } else if (!unGroupPageSize) {

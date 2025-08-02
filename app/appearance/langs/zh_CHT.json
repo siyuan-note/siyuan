@@ -1180,6 +1180,7 @@
   "newFileTip": "請先打開一個筆記本",
   "copyBlockRef": "複製為塊引用",
   "copyBlockEmbed": "複製為嵌入塊",
+  "copyMarkdown": "複製為 Markdown",
   "linkLevel": "層級",
   "mark": "標記",
   "splitLR": "向右並排顯示",

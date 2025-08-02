@@ -1180,6 +1180,7 @@
   "newFileTip": "Bitte öffnen Sie zuerst ein Notizbuch",
   "copyBlockRef": "Blockreferenz kopieren",
   "copyBlockEmbed": "Blockeinbettung kopieren",
+  "copyMarkdown": "Als Markdown kopieren",
   "linkLevel": "Tiefe",
   "mark": "Markieren",
   "splitLR": "Rechts aufteilen",

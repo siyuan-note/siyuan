@@ -1180,6 +1180,7 @@
   "newFileTip": "Por favor, abra um bloco de notas primeiro",
   "copyBlockRef": "Copiar referência de bloco",
   "copyBlockEmbed": "Copiar bloco incorporado",
+  "copyMarkdown": "Copiar como Markdown",
   "linkLevel": "Profundidade",
   "mark": "Marca",
   "splitLR": "Dividir à Direita",

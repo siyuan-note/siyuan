@@ -1180,6 +1180,7 @@
   "newFileTip": "Please open a notebook first",
   "copyBlockRef": "Copy block ref",
   "copyBlockEmbed": "Copy block embed",
+  "copyMarkdown": "Copy as Markdown",
   "linkLevel": "Depth",
   "mark": "Mark",
   "splitLR": "Split Right",

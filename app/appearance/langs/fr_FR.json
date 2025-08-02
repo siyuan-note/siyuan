@@ -1180,6 +1180,7 @@
   "newFileTip": "Veuillez d'abord ouvrir un carnet de notes",
   "copyBlockRef": "Copier bloc réf",
   "copyBlockEmbed": "Copier le bloc en tant que bloc incorporé",
+  "copyMarkdown": "Copier comme Markdown",
   "linkLevel": "Niveaux",
   "mark": "Mark",
   "splitLR": "Split Droit",

@@ -1180,6 +1180,7 @@
   "newFileTip": "最初にノートブックを開いてください",
   "copyBlockRef": "ブロック参照としてコピー",
   "copyBlockEmbed": "埋め込みブロックとしてコピー",
+  "copyMarkdown": "Markdown としてコピー",
   "linkLevel": "深さ",
   "mark": "ハイライト",
   "splitLR": "右に分割",

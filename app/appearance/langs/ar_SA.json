@@ -1180,6 +1180,7 @@
   "newFileTip": "الرجاء فتح دفتر الملاحظات أولاً",
   "copyBlockRef": "نسخ كمرجع كتلة",
   "copyBlockEmbed": "نسخ ككتلة تضمين",
+  "copyMarkdown": "نسخ كـ Markdown",
   "linkLevel": "العمق",
   "mark": "تمييز",
   "splitLR": "تقسيم لليمين",

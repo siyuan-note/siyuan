@@ -723,13 +723,8 @@ func GetBlockDOM(id string) (ret string) {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		return
-	}
-	node := treenode.GetNodeInTree(tree, id)
-	luteEngine := NewLute()
-	ret = luteEngine.RenderNodeBlockDOM(node)
+	doms := GetBlockDOMs([]string{id})
+	ret = doms[id]
 	return
 }
 

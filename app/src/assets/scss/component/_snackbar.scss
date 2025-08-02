@@ -1,10 +1,13 @@
 .b3-snackbar {
-  margin-bottom: 16px;
   position: relative;
   transition: transform 256ms cubic-bezier(.45, .05, .55, .95) 0ms;
   text-align: right;
   justify-self: end;
   font-size: var(--b3-font-size);
+
+  &:not(:first-child) {
+    margin-top: 16px;
+  }
 
   &--hide {
     transform: translate3d(calc(20vw + 48px), 0, 0);
@@ -16,10 +19,16 @@
     top: 22px;
     // 不能设置死，否则右键菜单会被遮盖 z-index: 999999;
     max-height: calc(100vh - 32px);
+    margin: 0 18px;
     display: flex;
     flex-direction: column;
     transform: translate3d(calc(20vw + 48px), 0, 0);
     transition: transform .15s cubic-bezier(.4, 0, 1, 1) 0ms;
+    pointer-events: none;
+
+    * {
+      pointer-events: auto;
+    }
 
     &--show {
       transform: translate3d(0, 0, 0) !important;
@@ -27,15 +36,11 @@
 
     & > .b3-button {
       align-self: flex-end;
-      margin-right: 18px;
+      margin-top: 16px;
     }
 
-    & > .fn__flex-1 {
-      padding: 0 18px 0 18px;
-
-      &::-webkit-scrollbar {
-        display: none;
-      }
+    & > .fn__flex-1::-webkit-scrollbar {
+      display: none;
     }
   }
 

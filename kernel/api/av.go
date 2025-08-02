@@ -48,8 +48,12 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
 	}
+	var addingBlockID string
+	if nil != arg["addingBlockID"] {
+		addingBlockID = arg["addingBlockID"].(string)
+	}
 
-	ret.Data = model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID)
+	ret.Data = model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID, addingBlockID)
 }
 
 func batchReplaceAttributeViewBlocks(c *gin.Context) {
@@ -329,17 +333,13 @@ func addAttributeViewBlocks(c *gin.Context) {
 	if nil != arg["previousID"] {
 		previousID = arg["previousID"].(string)
 	}
-	ignoreFillFilter := true
-	if nil != arg["ignoreFillFilter"] {
-		ignoreFillFilter = arg["ignoreFillFilter"].(bool)
-	}
 
 	var srcs []map[string]interface{}
 	for _, v := range arg["srcs"].([]interface{}) {
 		src := v.(map[string]interface{})
 		srcs = append(srcs, src)
 	}
-	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, groupID, previousID, ignoreFillFilter)
+	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, groupID, previousID)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

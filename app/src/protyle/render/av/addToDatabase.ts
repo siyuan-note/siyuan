@@ -21,7 +21,6 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
             transaction(undefined, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {
@@ -40,7 +39,6 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs: [{
                     id: protyle.block.rootID,
                     isDetached: false
@@ -91,7 +89,6 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {

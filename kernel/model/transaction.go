@@ -1099,7 +1099,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 			AddAttributeViewBlock(tx, []map[string]interface{}{{
 				"id":         insertedNode.ID,
 				"isDetached": false,
-			}}, avID, "", "", previousID, false)
+			}}, avID, "", "", previousID)
 			ReloadAttrView(avID)
 		}
 
@@ -1284,7 +1284,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", "", previousID, false)
+		}}, avID, "", "", previousID)
 		ReloadAttrView(avID)
 	}
 
@@ -1712,22 +1712,21 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID                string                   `json:"avID"`              // 属性视图 ID
-	SrcIDs              []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
-	Srcs                []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
-	IsDetached          bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
-	IgnoreFillFilterVal bool                     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
-	Name                string                   `json:"name"`              // 属性视图列名
-	Typ                 string                   `json:"type"`              // 属性视图列类型
-	Format              string                   `json:"format"`            // 属性视图列格式化
-	KeyID               string                   `json:"keyID"`             // 属性视图字段 ID
-	RowID               string                   `json:"rowID"`             // 属性视图行 ID
-	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
-	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
-	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
-	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
-	GroupID             string                   `json:"groupID"`           // 属性视图分组视图 ID
-	TargetGroupID       string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
+	AvID              string                   `json:"avID"`              // 属性视图 ID
+	SrcIDs            []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs              []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
+	IsDetached        bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
+	Name              string                   `json:"name"`              // 属性视图列名
+	Typ               string                   `json:"type"`              // 属性视图列类型
+	Format            string                   `json:"format"`            // 属性视图列格式化
+	KeyID             string                   `json:"keyID"`             // 属性视图字段 ID
+	RowID             string                   `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay          bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
+	RemoveDest        bool                     `json:"removeDest"`        // 属性视图删除关联目标
+	Layout            av.LayoutType            `json:"layout"`            // 属性视图布局类型
+	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
+	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
 }
 
 type Transaction struct {

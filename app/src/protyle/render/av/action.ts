@@ -4,7 +4,8 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
 import {
-    addDragFill, cellValueIsEmpty,
+    addDragFill,
+    cellValueIsEmpty,
     genCellValueByElement,
     getCellText,
     getTypeByCellElement,
@@ -603,7 +604,6 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
-                        ignoreFillFilter: true,
                         srcs,
                         blockID: listItemElement.dataset.blockId,
                         groupID: rowElement.parentElement.getAttribute("data-group-id")

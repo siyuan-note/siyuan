@@ -223,6 +223,19 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 <div class="av__row--footer${hasCalc ? " av__readonly--show" : ""}">${calcHTML}</div>`;
 };
 
+export const getGroupTitleHTML = (group: IAVView, counter: number) => {
+    return `<div class="av__group-title block__icons">
+    <div class="block__icon block__icon--show" data-type="av-group-fold" data-id="${group.id}">
+        <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
+    </div>
+    <span class="fn__space"></span>
+    ${group.name}
+    <span class="${counter === 0 ? "fn__none" : "counter"}">${counter}</span>
+    <span class="fn__space"></span>
+    <span class="block__icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+</div>`;
+};
+
 const renderGroupTable = (options: ITableOptions) => {
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
     const isSearching = searchInputElement && document.activeElement === searchInputElement;
@@ -232,11 +245,7 @@ const renderGroupTable = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
             group.columns = (options.data.view as IAVTable).columns;
-            avBodyHTML += `<div class="av__group-title">
-    <div class="block__icon block__icon--show" data-type="av-group-fold" data-id="${group.id}">
-        <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
-    </div><span class="fn__space"></span>${group.name}<span class="${group.rows.length === 0 ? "fn__none" : "counter"}">${group.rows.length}</span>
-</div>
+            avBodyHTML += `${getGroupTitleHTML(group, group.rows.length)}
 <div data-group-id="${group.id}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
         }
     });

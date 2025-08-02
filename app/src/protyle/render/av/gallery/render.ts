@@ -7,7 +7,7 @@ import {cellValueIsEmpty, renderCell} from "../cell";
 import {focusBlock} from "../../../util/selection";
 import {electronUndo} from "../../../undo";
 import {addClearButton} from "../../../../util/addClearButton";
-import {avRender, genTabHeaderHTML, updateSearch} from "../render";
+import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../render";
 import {processRender} from "../../../util/processCode";
 import {getColIconByType, getColNameByType} from "../col";
 import {getCompressURL} from "../../../../util/image";
@@ -106,11 +106,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             group.fields = (options.data.view as IAVGallery).fields;
-            avBodyHTML += `<div class="av__group-title">
-    <div class="block__icon block__icon--show" data-type="av-group-fold" data-id="${group.id}">
-        <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
-    </div><span class="fn__space"></span>${group.name}<span class="${group.cards.length === 0 ? "fn__none" : "counter"}">${group.cards.length}</span>
-</div>
+            avBodyHTML += `${getGroupTitleHTML(group, group.fields.length)}
 <div data-group-id="${group.id}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds)}</div>`;
         }
     });

@@ -913,10 +913,8 @@
       position: sticky;
       left: 0;
       clear: both;
-      display: flex;
       font-size: 87.5%;
-      align-items: center;
-      padding-top: 16px;
+      padding: 16px 0 0 0;
 
       .counter:hover {
         background-color: var(--b3-list-icon-hover);

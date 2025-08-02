@@ -157,7 +157,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-more") {
-            insertRows({blockElement, protyle, count: 1, previousID: ""});
+            insertRows({
+                blockElement,
+                protyle,
+                count: 1,
+                previousID: "",
+                groupID: blockElement.querySelector(".av__body")?.getAttribute("data-group-id") || ""
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -217,6 +223,18 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                 previousID: (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
                     target.previousElementSibling?.getAttribute("data-id") || undefined,
                 groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : ""
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-add-top") {
+            const titleElement = hasClosestByClassName(target, "av__group-title");
+            insertRows({
+                blockElement,
+                protyle,
+                count: 1,
+                previousID: "",
+                groupID: titleElement ? titleElement.nextElementSibling.getAttribute("data-group-id") : ""
             });
             event.preventDefault();
             event.stopPropagation();

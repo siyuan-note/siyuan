@@ -1116,17 +1116,6 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 			continue
 		}
 
-		exist := false
-		for _, result := range ret {
-			if result.AvID == avID {
-				exist = true
-				break
-			}
-		}
-		if exist {
-			continue
-		}
-
 		var hPath string
 		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
 		if nil != baseBlock {

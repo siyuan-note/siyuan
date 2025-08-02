@@ -44,6 +44,81 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID string) (ret map[string]*av.Value) {
+	ret = map[string]*av.Value{}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	view := attrView.GetView(viewID)
+	if nil == view {
+		logging.LogErrorf("view [%s] not found in attribute view [%s]", viewID, avID)
+		return
+	}
+
+	groupView := view
+	if "" != groupID {
+		groupView = view.GetGroup(groupID)
+	}
+	if nil == groupView {
+		logging.LogErrorf("group [%s] not found in view [%s] of attribute view [%s]", groupID, viewID, avID)
+		return
+	}
+	return getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID)
+}
+
+func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID string) (ret map[string]*av.Value) {
+	ret = map[string]*av.Value{}
+
+	nearItem := getNearItem(attrView, view, groupView, previousBlockID)
+	filterKeyIDs := map[string]bool{}
+	for _, f := range view.Filters {
+		filterKeyIDs[f.Column] = true
+	}
+
+	for _, filter := range view.Filters {
+		keyValues, _ := attrView.GetKeyValues(filter.Column)
+		if nil == keyValues {
+			continue
+		}
+
+		var defaultVal *av.Value
+		if nil != nearItem {
+			defaultVal = nearItem.GetValue(filter.Column)
+		}
+
+		newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
+		if nil != newValue {
+			ret[keyValues.Key.ID] = newValue
+		}
+	}
+
+	groupKey := view.GetGroupKey(attrView)
+	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
+		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
+			newValue := getNewValueByNearItem(nearItem, groupKey, ast.NewNodeID())
+
+			newValue.ID = ast.NewNodeID()
+			newValue.CreatedAt = util.CurrentTimeMillis()
+			newValue.UpdatedAt = newValue.CreatedAt + 1000
+			newValue.KeyID = keyValues.Key.ID
+
+			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
+				if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
+					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+				}
+			}
+
+			ret[groupKey.ID] = newValue
+		}
+	}
+	return
+}
+
 func (tx *Transaction) doSortAttrViewGroup(operation *Operation) (ret *TxErr) {
 	if err := sortAttributeViewGroup(operation.AvID, operation.BlockID, operation.PreviousID, operation.ID); nil != err {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -3075,49 +3150,31 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
 	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
-		sameKeyFilterSort := false // 是否在同一个字段上同时存在过滤和排序
-		if 0 < len(view.Sorts) {
-			sortKeys := map[string]bool{}
-			for _, s := range view.Sorts {
-				sortKeys[s.Column] = true
-			}
+		for _, filter := range view.Filters {
+			for _, keyValues := range attrView.KeyValues {
+				if keyValues.Key.ID == filter.Column {
+					var defaultVal *av.Value
+					if nil != nearItem {
+						defaultVal = nearItem.GetValue(filter.Column)
+					}
 
-			for k := range filterKeyIDs {
-				if sortKeys[k] {
-					sameKeyFilterSort = true
-					break
-				}
-			}
-		}
+					newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
+					if nil == newValue {
+						continue
+					}
 
-		if !sameKeyFilterSort {
-			// 如果在同一个字段上仅存在过滤条件，则将过滤条件应用到新添加的块上
-			for _, filter := range view.Filters {
-				for _, keyValues := range attrView.KeyValues {
-					if keyValues.Key.ID == filter.Column {
-						var defaultVal *av.Value
-						if nil != nearItem {
-							defaultVal = nearItem.GetValue(filter.Column)
-						}
-
-						newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
-						if nil == newValue {
-							continue
-						}
-
-						if av.KeyTypeBlock == newValue.Type {
-							// 如果是主键的话前面已经添加过了，这里仅修改内容
-							blockValue.Block.Content = newValue.Block.Content
-							break
-						}
-
-						newValue.ID = ast.NewNodeID()
-						newValue.KeyID = keyValues.Key.ID
-						newValue.BlockID = addingBlockID
-						newValue.IsDetached = isDetached
-						keyValues.Values = append(keyValues.Values, newValue)
+					if av.KeyTypeBlock == newValue.Type {
+						// 如果是主键的话前面已经添加过了，这里仅修改内容
+						blockValue.Block.Content = newValue.Block.Content
 						break
 					}
+
+					newValue.ID = ast.NewNodeID()
+					newValue.KeyID = keyValues.Key.ID
+					newValue.BlockID = addingBlockID
+					newValue.IsDetached = isDetached
+					keyValues.Values = append(keyValues.Values, newValue)
+					break
 				}
 			}
 		}

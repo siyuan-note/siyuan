@@ -11,6 +11,7 @@ import {avRender, genTabHeaderHTML, getGroupTitleHTML, updateSearch} from "../re
 import {processRender} from "../../../util/processCode";
 import {getColIconByType, getColNameByType} from "../col";
 import {getCompressURL} from "../../../../util/image";
+import {getPageSize} from "../groups";
 
 interface ITableOptions {
     protyle: IProtyle,
@@ -63,7 +64,7 @@ const getGalleryHTML = (data: IAVGallery, selectItemIds: string[], editIds: stri
                 ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
             }
             if (cell.valueType === "checkbox") {
-                cell.value["checkbox"].content = data.fields[fieldsIndex].name||getColNameByType(data.fields[fieldsIndex].type)
+                cell.value["checkbox"].content = data.fields[fieldsIndex].name || getColNameByType(data.fields[fieldsIndex].type);
             }
             galleryHTML += `<div class="av__cell${checkClass} ariaLabel" data-wrap="${data.fields[fieldsIndex].wrap}" 
 data-empty="${isEmpty}" 
@@ -107,7 +108,7 @@ const renderGroupGallery = (options: ITableOptions) => {
         if (group.groupHidden === 0) {
             group.fields = (options.data.view as IAVGallery).fields;
             avBodyHTML += `${getGroupTitleHTML(group, group.fields.length)}
-<div data-group-id="${group.id}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -253,11 +254,13 @@ export const renderGallery = async (options: {
 
     let data: IAV = options.data;
     if (!data) {
+        const avPageSize = getPageSize(options.blockElement);
         const response = await fetchSyncPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
             id: options.blockElement.getAttribute("data-av-id"),
             created,
             snapshot,
-            pageSize: parseInt(options.blockElement.dataset.pageSize) || undefined,
+            pageSize: avPageSize.unGroupPageSize,
+            groupPaging: avPageSize.groupPageSize,
             viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
             query: resetData.query.trim()
         });
@@ -280,22 +283,21 @@ export const renderGallery = async (options: {
         });
         return;
     }
-    if (!options.blockElement.dataset.pageSize) {
-        options.blockElement.dataset.pageSize = view.pageSize.toString();
-    }
     const bodyHTML = getGalleryHTML(view, selectItemIds, editIds);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, options.protyle.disabled || !!hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div>
-        <div class="av__body">
+        <div class="av__body" data-page-size="${view.pageSize}">
             ${bodyHTML}
         </div>
     </div>
     <div class="av__cursor" contenteditable="true">${Constants.ZWSP}</div>
 </div>`;
     } else {
-        options.blockElement.querySelector(".av__body").innerHTML = bodyHTML;
+        const bodyElement = options.blockElement.querySelector(".av__body") as HTMLElement;
+        bodyElement.innerHTML = bodyHTML;
+        bodyElement.dataset.pageSize = view.pageSize.toString();
     }
     afterRenderGallery({
         resetData,

@@ -54,7 +54,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             rowFooterElement.style.transform = "";
         }
         blockElement.removeAttribute("data-render");
-        blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+        const bodyElement = hasClosestByClassName(event.target, "av__body") as HTMLElement;
+        bodyElement.dataset.pageSize = (parseInt(bodyElement.dataset.pageSize) + parseInt(bodyElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
         avRender(blockElement, protyle);
         event.preventDefault();
         event.stopPropagation();

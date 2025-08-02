@@ -51,7 +51,7 @@ import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
 import {
     bindGroupsEvent, bindGroupsNumber,
     getGroupsHTML,
-    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex,
+    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex, getPageSize,
     goGroupsDate,
     goGroupsSort,
     setGroupMethod
@@ -76,10 +76,12 @@ export const openMenuPanel = (options: {
         return;
     }
     const avID = options.blockElement.getAttribute("data-av-id");
+    const avPageSize = getPageSize(options.blockElement);
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
-        pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
+        pageSize: avPageSize.unGroupPageSize,
+        groupPaging: avPageSize.groupPageSize,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
         avPanelElement = document.querySelector(".av__panel");

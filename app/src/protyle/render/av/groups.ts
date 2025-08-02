@@ -7,6 +7,25 @@ import {fetchSyncPost} from "../../../util/fetch";
 import {Menu} from "../../../plugin/Menu";
 import {objEquals} from "../../../util/functions";
 
+export const getPageSize = (blockElement: Element) => {
+    const groupPageSize: {
+        [key: string]: {
+            pageSize: string
+        }
+    }[] = [];
+    let unGroupPageSize: string;
+    blockElement.querySelectorAll(".av__body").forEach((item:HTMLElement) => {
+        const id = item.dataset.groupId;
+        const pageSize = item.dataset.pageSize;
+        if (id) {
+            groupPageSize.push({[id]: {pageSize}});
+        } else if (!unGroupPageSize) {
+            unGroupPageSize = pageSize;
+        }
+    });
+    return {groupPageSize, unGroupPageSize};
+};
+
 export const setGroupMethod = async (options: {
     protyle: IProtyle;
     fieldId: string;

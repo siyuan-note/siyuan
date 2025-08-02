@@ -94,14 +94,16 @@ export const updateHeader = (rowElement: HTMLElement) => {
 };
 
 export const setPage = (blockElement: Element) => {
-    const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
-    if (pageSize) {
-        const avType = blockElement.getAttribute("data-av-type") as TAVView;
-        const currentCount = blockElement.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
-        if (pageSize < currentCount) {
-            blockElement.setAttribute("data-page-size", currentCount.toString());
+    const avType = blockElement.getAttribute("data-av-type") as TAVView;
+    blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        const pageSize = item.dataset.pageSize;
+        if (pageSize) {
+            const currentCount = item.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
+            if (parseInt(pageSize) < currentCount) {
+                item.dataset.pageSize = currentCount.toString();
+            }
         }
-    }
+    });
 };
 
 /**
@@ -316,7 +318,9 @@ const updatePageSize = (options: {
     if (options.currentPageSize === options.newPageSize) {
         return;
     }
-    options.nodeElement.setAttribute("data-page-size", options.newPageSize);
+    options.nodeElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        item.dataset.pageSize = options.newPageSize;
+    });
     const blockID = options.nodeElement.getAttribute("data-node-id");
     transaction(options.protyle, [{
         action: "setAttrViewPageSize",

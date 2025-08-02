@@ -17,6 +17,7 @@ import {isMobile} from "../../../util/functions";
 import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
+import {getPageSize} from "./groups";
 
 interface ITableOptions {
     protyle: IProtyle,
@@ -470,11 +471,13 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
             }
             const created = protyle.options.history?.created;
             const snapshot = protyle.options.history?.snapshot;
+            const avPageSize = getPageSize(e);
             fetchPost(created ? "/api/av/renderHistoryAttributeView" : (snapshot ? "/api/av/renderSnapshotAttributeView" : "/api/av/renderAttributeView"), {
                 id: e.getAttribute("data-av-id"),
                 created,
                 snapshot,
-                pageSize: parseInt(e.dataset.pageSize) || undefined,
+                pageSize: avPageSize.unGroupPageSize,
+                groupPaging: avPageSize.groupPageSize,
                 viewID: e.getAttribute(Constants.CUSTOM_SY_AV_VIEW) || "",
                 query: resetData.query.trim(),
                 blockID: e.getAttribute("data-node-id"),
@@ -489,10 +492,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                     renderGroupTable({blockElement: e, protyle, cb, renderAll, data: response.data, resetData});
                     return;
                 }
-                if (!e.dataset.pageSize) {
-                    e.dataset.pageSize = data.pageSize.toString();
-                }
-                const avBodyHTML = `<div class="av__body" style="float: left">
+                const avBodyHTML = `<div class="av__body" data-page-size="${data.pageSize}" style="float: left">
     ${getTableHTMLs(data, e)}
 </div>`;
                 if (renderAll) {
@@ -662,12 +662,18 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
             } else if (operation.action === "setAttrViewBlockView") {
                 const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
                 if (viewTabElement) {
-                    item.dataset.pageSize = viewTabElement.dataset.page;
+                    item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                        bodyItem.dataset.pageSize = viewTabElement.dataset.page;
+                    });
                 }
             } else if (operation.action === "addAttrViewView") {
-                item.dataset.pageSize = "50";
+                item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                    bodyItem.dataset.pageSize = "50";
+                });
             } else if (operation.action === "removeAttrViewView") {
-                item.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+                item.querySelectorAll(".av__body").forEach((bodyItem: HTMLElement) => {
+                    bodyItem.dataset.pageSize = item.querySelector(`.av__views > .layout-tab-bar .item[data-id="${item.getAttribute(Constants.CUSTOM_SY_AV_VIEW)}"]`)?.getAttribute("data-page");
+                });
             } else if (operation.action === "sortAttrViewView" && operation.data === "unRefresh") {
                 const viewTabElement = item.querySelector(`.av__views > .layout-tab-bar > .item[data-id="${operation.id}"]`) as HTMLElement;
                 if (viewTabElement && !operation.previousID && !viewTabElement.previousElementSibling) {

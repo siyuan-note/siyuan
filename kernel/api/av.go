@@ -53,7 +53,10 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 		addingBlockID = arg["addingBlockID"].(string)
 	}
 
-	ret.Data = model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID, addingBlockID)
+	values := model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID, addingBlockID)
+	ret.Data = map[string]interface{}{
+		"values": values,
+	}
 }
 
 func batchReplaceAttributeViewBlocks(c *gin.Context) {

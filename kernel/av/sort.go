@@ -74,14 +74,14 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 			}
 
 			if val.IsEdited() {
-				// 如果该卡片某字段的值已经编辑过，则该卡片可参与排序
+				// 如果该项目某字段的值已经编辑过，则该项目可参与排序
 				editedValItems[item.GetID()] = true
 				break
 			}
 		}
 	}
 
-	// 将未编辑的卡片和已编辑的卡片分开排序
+	// 将未编辑的项目和已编辑的项目分开排序
 	var uneditedItems, editedItems []Item
 	for _, item := range items {
 		if _, ok := editedValItems[item.GetID()]; ok {
@@ -147,7 +147,7 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 		return false
 	})
 
-	// 将包含未编辑的卡片放在最后
+	// 将包含未编辑的项目放在最后
 	collection.SetItems(append(editedItems, uneditedItems...))
 	if 1 > len(collection.GetItems()) {
 		collection.SetItems([]Item{})

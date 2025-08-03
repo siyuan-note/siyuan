@@ -3146,7 +3146,6 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		}
 
 		newValue.BlockID = addingBlockID
-		newValue.IsDetached = isDetached
 		keyValues.Values = append(keyValues.Values, newValue)
 	}
 
@@ -4570,7 +4569,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 				// 将绑定的块从属性视图中移除
 				unbindBlockAv(tx, avID, rowID)
 			} else {
-				// 现在绑定了块
+				// 现在也绑定了块
 
 				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
@@ -4583,8 +4582,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 					updateStaticText := true
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
-						val.Block.Content = blockText
-						val.Block.Content = util.UnescapeHTML(val.Block.Content)
+						val.Block.Content = util.UnescapeHTML(blockText)
 					} else {
 						if blockText == content {
 							updateStaticText = false

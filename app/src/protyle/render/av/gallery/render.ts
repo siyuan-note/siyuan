@@ -143,7 +143,10 @@ const afterRenderGallery = (options: ITableOptions) => {
             (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
             return;
         }
-        (options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement
+        if (bodyElement) {
+            bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
+        }
     });
     if (getSelection().rangeCount > 0) {
         // 修改表头后光标重新定位

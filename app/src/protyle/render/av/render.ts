@@ -327,7 +327,10 @@ const afterRenderTable = (options: ITableOptions) => {
             (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
             return;
         }
-        (options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
+        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement;
+        if (bodyElement) {
+            bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
+        }
     });
     if (options.resetData.dragFillId) {
         addDragFill(options.blockElement.querySelector(`.av__row[data-id="${options.resetData.dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.dragFillId.split(Constants.ZWSP)[1]}"]`));

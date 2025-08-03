@@ -1226,14 +1226,14 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 				}
 
 				if 5 == orderBy { // 按内容顺序（仅在按文档分组时）
-					sort := 0
+					sortVal := 0
 					ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 						if !entering || !n.IsBlock() {
 							return ast.WalkContinue
 						}
 
-						contentSorts[n.ID] = sort
-						sort++
+						contentSorts[n.ID] = sortVal
+						sortVal++
 						return ast.WalkContinue
 					})
 				}

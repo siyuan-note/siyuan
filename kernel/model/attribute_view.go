@@ -44,7 +44,7 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID string) (ret map[string]*av.Value) {
+func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -67,10 +67,10 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID 
 		logging.LogErrorf("group [%s] not found in view [%s] of attribute view [%s]", groupID, viewID, avID)
 		return
 	}
-	return getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID)
+	return getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
 }
 
-func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID string) (ret map[string]*av.Value) {
+func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
 	nearItem := getNearItem(attrView, view, groupView, previousBlockID)
@@ -90,7 +90,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			defaultVal = nearItem.GetValue(filter.Column)
 		}
 
-		newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
+		newValue := filter.GetAffectValue(keyValues.Key, defaultVal, addingBlockID)
 		if nil != newValue {
 			ret[keyValues.Key.ID] = newValue
 		}
@@ -99,13 +99,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	groupKey := view.GetGroupKey(attrView)
 	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
 		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-			newValue := getNewValueByNearItem(nearItem, groupKey, ast.NewNodeID())
-
-			newValue.ID = ast.NewNodeID()
-			newValue.CreatedAt = util.CurrentTimeMillis()
-			newValue.UpdatedAt = newValue.CreatedAt + 1000
-			newValue.KeyID = keyValues.Key.ID
-
+			newValue := getNewValueByNearItem(nearItem, groupKey, addingBlockID)
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
 				if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
@@ -1119,17 +1113,6 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 			}
 		}
 		if nil == existAv {
-			continue
-		}
-
-		exist := false
-		for _, result := range ret {
-			if result.AvID == avID {
-				exist = true
-				break
-			}
-		}
-		if exist {
 			continue
 		}
 
@@ -3034,14 +3017,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.GroupID, operation.PreviousID, operation.IgnoreFillFilterVal)
+	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.GroupID, operation.PreviousID)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, groupID, previousBlockID string, ignoreFillFilter bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, groupID, previousBlockID string) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -3070,14 +3053,14 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, blockID, groupID, previousBlockID, srcID, srcContent, isDetached, ignoreFillFilter, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, blockID, groupID, previousBlockID, srcID, srcContent, isDetached, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, addingBlockID, addingBlockContent string, isDetached, ignoreFillFilter bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, addingBlockID, addingBlockContent string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBlockID)
@@ -3131,57 +3114,40 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		Block:      &av.ValueBlock{ID: addingBlockID, Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
 	blockValues.Values = append(blockValues.Values, blockValue)
 
-	view, _ := getAttrViewViewByBlockID(attrView, blockID) // blockID 可能不传，所以这里的 view 可能为空，后面使用需要判空
-	var nearItem av.Item                                   // 临近项
-	if nil != view && ((0 < len(view.Filters) && !ignoreFillFilter) || "" != groupID) {
-		// 存在过滤条件或者指定分组视图时，先获取临近项备用
-		targetView := view
-		if "" != groupID {
-			if groupView := view.GetGroup(groupID); nil != groupView {
-				targetView = groupView
+	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	if nil != err {
+		logging.LogErrorf("get view by block ID [%s] failed: %s", blockID, err)
+		return
+	}
+
+	groupView := view
+	if "" != groupID {
+		groupView = view.GetGroup(groupID)
+	}
+
+	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	for keyID, newValue := range defaultValues {
+		keyValues, getErr := attrView.GetKeyValues(keyID)
+		if nil != getErr {
+			continue
+		}
+
+		if av.KeyTypeBlock == newValue.Type {
+			// 如果是主键的话前面已经添加过了，这里仅修改内容
+			blockValue.Block.Content = newValue.Block.Content
+			continue
+		}
+
+		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
+			// 单选或多选类型的值可能需要从分组条件中获取默认值
+			if opt := keyValues.Key.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
+				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 			}
 		}
 
-		nearItem = getNearItem(attrView, view, targetView, previousBlockID)
-	}
-
-	filterKeyIDs := map[string]bool{}
-	if nil != view {
-		for _, f := range view.Filters {
-			filterKeyIDs[f.Column] = true
-		}
-	}
-
-	// 如果存在过滤条件，则将过滤条件应用到新添加的块上
-	if nil != view && 0 < len(view.Filters) && !ignoreFillFilter {
-		for _, filter := range view.Filters {
-			for _, keyValues := range attrView.KeyValues {
-				if keyValues.Key.ID == filter.Column {
-					var defaultVal *av.Value
-					if nil != nearItem {
-						defaultVal = nearItem.GetValue(filter.Column)
-					}
-
-					newValue := filter.GetAffectValue(keyValues.Key, defaultVal)
-					if nil == newValue {
-						continue
-					}
-
-					if av.KeyTypeBlock == newValue.Type {
-						// 如果是主键的话前面已经添加过了，这里仅修改内容
-						blockValue.Block.Content = newValue.Block.Content
-						break
-					}
-
-					newValue.ID = ast.NewNodeID()
-					newValue.KeyID = keyValues.Key.ID
-					newValue.BlockID = addingBlockID
-					newValue.IsDetached = isDetached
-					keyValues.Values = append(keyValues.Values, newValue)
-					break
-				}
-			}
-		}
+		newValue.BlockID = addingBlockID
+		newValue.IsDetached = isDetached
+		keyValues.Values = append(keyValues.Values, newValue)
 	}
 
 	// 处理日期字段默认填充当前创建时间
@@ -3237,37 +3203,8 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		}
 	}
 
-	// 如果存在分组条件，则将分组条件应用到新添加的块上
 	groupKey := view.GetGroupKey(attrView)
-	if nil != view && nil != groupKey {
-		if !filterKeyIDs[groupKey.ID] /* 过滤条件应用过的话就不重复处理了 */ && "" != groupID {
-			if groupView := view.GetGroup(groupID); nil != groupView {
-				if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-					newValue := getNewValueByNearItem(nearItem, groupKey, blockID)
-					if av.KeyTypeBlock == newValue.Type {
-						// 如果是主键的话前面已经添加过了，这里仅修改内容
-						blockValue.Block.Content = newValue.Block.Content
-					} else {
-						newValue.ID = ast.NewNodeID()
-						newValue.CreatedAt = util.CurrentTimeMillis()
-						newValue.UpdatedAt = newValue.CreatedAt + 1000
-						newValue.KeyID = keyValues.Key.ID
-						newValue.BlockID = addingBlockID
-						newValue.IsDetached = isDetached
-
-						if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
-							// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
-							if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
-								newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
-							}
-						}
-
-						keyValues.Values = append(keyValues.Values, newValue)
-					}
-				}
-			}
-		}
-
+	if nil != groupKey {
 		regenAttrViewViewGroups(attrView, groupKey.ID)
 	}
 
@@ -3275,15 +3212,18 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	return
 }
 
-func getNewValueByNearItem(nearItem av.Item, key *av.Key, blockID string) (ret *av.Value) {
+func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) (ret *av.Value) {
 	if nil != nearItem {
 		defaultVal := nearItem.GetValue(key.ID)
 		ret = defaultVal.Clone()
+		ret.ID = ast.NewNodeID()
+		ret.KeyID = key.ID
+		ret.BlockID = addingBlockID
+		ret.CreatedAt = util.CurrentTimeMillis()
+		ret.UpdatedAt = ret.CreatedAt + 1000
+		return
 	}
-	if nil == ret {
-		ret = av.GetAttributeViewDefaultValue(ast.NewNodeID(), key.ID, blockID, key.Type)
-	}
-	return
+	return av.GetAttributeViewDefaultValue(ast.NewNodeID(), key.ID, addingBlockID, key.Type)
 }
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {

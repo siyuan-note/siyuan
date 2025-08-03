@@ -1276,7 +1276,7 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 		case 3: // 按更新时间升序
 			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated < roots[j].Updated })
 		case 4: // 按更新时间降序
-			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated < roots[j].Updated })
+			sort.Slice(roots, func(i, j int) bool { return roots[i].Updated > roots[j].Updated })
 		case 5: // 按内容顺序（仅在按文档分组时）
 			// 都是文档，按更新时间降序
 			sort.Slice(roots, func(i, j int) bool { return roots[i].IAL["updated"] > roots[j].IAL["updated"] })

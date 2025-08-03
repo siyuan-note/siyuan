@@ -121,10 +121,7 @@ export const insertAttrViewBlockAnimation = (options: {
     previousId: string,
     groupID?: string
 }) => {
-    if ((options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
-        showMessage(window.siyuan.languages.insertRowTip);
-        return;
-    }
+    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const avId = options.blockElement.getAttribute("data-av-id");
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
@@ -173,9 +170,11 @@ ${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span c
             currentRow.setAttribute("data-need-update", "true");
         }
         const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
-        fetchPost("/api/av/getAttributeViewFilterSort", {
-            id: avId,
-            blockID: options.blockElement.getAttribute("data-node-id")
+        fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
+            avID: avId,
+            viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            groupID: options.groupID,
+            previousID: options.previousId,
         }, (response) => {
             // https://github.com/siyuan-note/siyuan/issues/10517
             let hideTextCell = false;

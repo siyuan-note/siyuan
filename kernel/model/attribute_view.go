@@ -85,12 +85,12 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			continue
 		}
 
-		var defaultVal *av.Value
+		var newValue *av.Value
 		if nil != nearItem {
-			defaultVal = nearItem.GetValue(filter.Column)
+			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
+		} else {
+			newValue = filter.GetAffectValue(keyValues.Key, addingBlockID)
 		}
-
-		newValue := filter.GetAffectValue(keyValues.Key, defaultVal, addingBlockID)
 		if nil != newValue {
 			ret[keyValues.Key.ID] = newValue
 		}
@@ -4609,8 +4609,6 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 	val.SetUpdatedAt(now)
 
-	regenAttrViewViewGroups(attrView, keyID)
-
 	if nil != key && av.KeyTypeRelation == key.Type && nil != key.Relation && key.Relation.IsTwoWay {
 		// 双向关联需要同时更新目标字段的值
 
@@ -4680,6 +4678,8 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			}
 		}
 	}
+
+	regenAttrViewViewGroups(attrView, keyID)
 	return
 }
 

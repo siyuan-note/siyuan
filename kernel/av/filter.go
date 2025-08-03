@@ -829,7 +829,7 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 	return
 }
 
-func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value, addingBlockID string) (ret *Value) {
+func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value) {
 	if nil != filter.Value {
 		if KeyTypeRelation == filter.Value.Type || KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
 			// 所有生成的数据都不设置默认值
@@ -859,16 +859,6 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value, addingBloc
 	ret.BlockID = addingBlockID
 	ret.CreatedAt = util.CurrentTimeMillis()
 	ret.UpdatedAt = ret.CreatedAt + 1000
-
-	if nil != defaultVal {
-		// 如果有默认值则优先使用默认值
-		clonedDefaultVal := defaultVal.Clone()
-		defaultRawVal := clonedDefaultVal.GetValByType(filter.Value.Type)
-		if nil != defaultRawVal {
-			ret.SetValByType(filter.Value.Type, defaultRawVal)
-			return
-		}
-	}
 
 	// 没有默认值则使用过滤条件的值
 	switch filter.Value.Type {

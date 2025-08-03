@@ -3146,7 +3146,6 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		}
 
 		newValue.BlockID = addingBlockID
-		newValue.IsDetached = isDetached
 		keyValues.Values = append(keyValues.Values, newValue)
 	}
 

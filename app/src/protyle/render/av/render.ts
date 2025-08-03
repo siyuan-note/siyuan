@@ -670,7 +670,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
-            const updateRow = item.querySelector('[data-need-update="true"]');
             if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
                 item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     item.classList.remove("av__cell--active");
@@ -707,10 +706,6 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
                     if (operation.action === "insertAttrViewBlock") {
-                        if (updateRow && !item.querySelector(`[data-id="${updateRow.getAttribute("data-id")}"]`)) {
-                            showMessage(window.siyuan.languages.insertRowTip);
-                            document.querySelector(".av__mask")?.remove();
-                        }
                         if (item.getAttribute("data-av-type") === "gallery") {
                             operation.srcs.forEach(srcItem => {
                                 const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");

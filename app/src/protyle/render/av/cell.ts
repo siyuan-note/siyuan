@@ -380,7 +380,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         }
     }
     if (colType === "block") {
-        if (typeof value === "object" && value.id) {
+        if (typeof value === "object" && value && value.id) {
             cellValue.isDetached = false;
         } else {
             cellValue.isDetached = true;

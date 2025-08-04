@@ -124,9 +124,6 @@ export const insertAttrViewBlockAnimation = (options: {
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     const hasMore = !options.blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none");
-    if (hasMore && hasSort) {
-        showMessage(window.siyuan.languages.insertRowTip);
-    }
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
@@ -178,22 +175,26 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {
-        let popCellElement: HTMLElement;
-        options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {
-            const updateIds = Object.keys(response.data.values);
-            rowItem.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
-                if (!popCellElement && cellItem.getAttribute("data-detached") === "true") {
-                    popCellElement = cellItem;
-                }
-                if (updateIds.includes(cellItem.dataset.colId)) {
-                    const cellValue = response.data.values[cellItem.dataset.colId];
-                    cellItem.innerHTML = renderCell(cellValue);
-                    renderCellAttr(cellItem, cellValue);
-                }
+        if (!response.data.values) {
+            showMessage(window.siyuan.languages.insertRowTip);
+        } else {
+            let popCellElement: HTMLElement;
+            options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {
+                const updateIds = Object.keys(response.data.values);
+                rowItem.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
+                    if (!popCellElement && cellItem.getAttribute("data-detached") === "true") {
+                        popCellElement = cellItem;
+                    }
+                    if (updateIds.includes(cellItem.dataset.colId)) {
+                        const cellValue = response.data.values[cellItem.dataset.colId];
+                        cellItem.innerHTML = renderCell(cellValue);
+                        renderCellAttr(cellItem, cellValue);
+                    }
+                });
             });
-        });
-        if (options.srcIDs.length === 1 && !(hasMore && hasSort)) {
-            popTextCell(options.protyle, [popCellElement], "block");
+            if (options.srcIDs.length === 1 && !(hasMore && hasSort)) {
+                popTextCell(options.protyle, [popCellElement], "block");
+            }
         }
         setPage(options.blockElement);
     });

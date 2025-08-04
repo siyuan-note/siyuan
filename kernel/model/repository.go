@@ -45,6 +45,7 @@ import (
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
 	"github.com/emirpasic/gods/sets/hashset"
+	"github.com/siyuan-note/dataparser"
 	"github.com/siyuan-note/dejavu"
 	"github.com/siyuan-note/dejavu/cloud"
 	"github.com/siyuan-note/dejavu/entity"
@@ -53,7 +54,6 @@ import (
 	"github.com/siyuan-note/httpclient"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/conf"
-	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/task"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -425,7 +425,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 		}
 
 		var tree *parse.Tree
-		tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+		tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 		if err != nil {
 			logging.LogErrorf("parse file [%s] failed: %s", fileID, err)
 			return
@@ -438,7 +438,7 @@ func parseTitleInSnapshot(fileID string, repo *dejavu.Repo, luteEngine *lute.Lut
 
 func parseTreeInSnapshot(data []byte, luteEngine *lute.Lute) (isLargeDoc bool, tree *parse.Tree, err error) {
 	isLargeDoc = 1024*1024*1 <= len(data)
-	tree, err = filesys.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
+	tree, err = dataparser.ParseJSONWithoutFix(data, luteEngine.ParseOptions)
 	if err != nil {
 		return
 	}

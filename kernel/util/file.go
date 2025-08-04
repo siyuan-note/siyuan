@@ -78,7 +78,13 @@ func GetUniqueFilename(filePath string) string {
 func GetMimeTypeByExt(filePath string) (ret string) {
 	ret = mime.TypeByExtension(filepath.Ext(filePath))
 	if "" == ret {
-		m, err := mimetype.DetectFile(filePath)
+		f, err := filelock.OpenFile(filePath, os.O_RDONLY, 0644)
+		if err != nil {
+			logging.LogErrorf("open file [%s] failed: %s", filePath, err)
+			return
+		}
+		defer filelock.CloseFile(f)
+		m, err := mimetype.DetectReader(f)
 		if err != nil {
 			logging.LogErrorf("detect mime type of [%s] failed: %s", filePath, err)
 			return
@@ -140,6 +146,22 @@ func RemoveID(name string) string {
 		}
 	}
 	return name + ext
+}
+
+var commonSuffixes = []string{
+	".jpg", ".jpeg", ".png", ".gif", ".bmp", ".svg", ".webp", ".tiff",
+	".txt", ".pdf", ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".md", ".rtf",
+	".zip", ".rar", ".7z", ".tar", ".gz", ".bz2",
+	".mp3", ".wav", ".aac", ".flac", ".ogg", ".m4a",
+	".mp4", ".avi", ".mkv", ".mov", ".wmv", ".flv",
+	".exe", ".bat", ".sh", ".app",
+	".js", ".ts", ".html", ".css", ".go", ".py", ".java", ".c", ".cpp", ".json", ".xml", ".yaml", ".toml",
+	".sql", ".db", ".sqlite", ".csv",
+	".iso", ".dmg", ".apk", ".bin",
+}
+
+func IsCommonExt(ext string) bool {
+	return strings.HasPrefix(ext, ".") && gulu.Str.Contains(strings.ToLower(ext), commonSuffixes)
 }
 
 func Ext(name string) (ret string) {
@@ -298,6 +320,12 @@ func IsSubPath(absPath, toCheckPath string) bool {
 		return true
 	}
 	return false
+}
+
+func IsCompressibleAssetImage(p string) bool {
+	lowerName := strings.ToLower(p)
+	return strings.HasPrefix(lowerName, "assets/") &&
+		(strings.HasSuffix(lowerName, ".png") || strings.HasSuffix(lowerName, ".jpg") || strings.HasSuffix(lowerName, ".jpeg"))
 }
 
 func SizeOfDirectory(path string) (size int64, err error) {

@@ -16,8 +16,6 @@
 
 package av
 
-import "sort"
-
 // BaseLayout 描述了布局的基础结构。
 type BaseLayout struct {
 	Spec int    `json:"spec"` // 布局格式版本
@@ -38,10 +36,11 @@ type BaseLayout struct {
 
 // BaseField 描述了字段的基础结构。
 type BaseField struct {
-	ID     string `json:"id"`             // 字段 ID
-	Wrap   bool   `json:"wrap"`           // 是否换行
-	Hidden bool   `json:"hidden"`         // 是否隐藏
-	Desc   string `json:"desc,omitempty"` // 字段描述
+	ID     string     `json:"id"`             // 字段 ID
+	Wrap   bool       `json:"wrap"`           // 是否换行
+	Hidden bool       `json:"hidden"`         // 是否隐藏
+	Desc   string     `json:"desc,omitempty"` // 字段描述
+	Calc   *FieldCalc `json:"calc,omitempty"` // 计算规则
 }
 
 // BaseValue 描述了字段值的基础结构。
@@ -67,7 +66,39 @@ type BaseInstance struct {
 	Folded           bool          `json:"folded,omitempty"` // 是否折叠
 	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
 
-	Groups []Viewable `json:"groups,omitempty"` // 分组实例列表
+	Groups      []Viewable `json:"groups,omitempty"`      // 分组实例列表
+	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`   // 分组计算规则和结果
+	GroupName   string     `json:"groupName,omitempty"`   // 分组名称
+	GroupFolded bool       `json:"groupFolded,omitempty"` // 分组是否折叠
+	GroupHidden bool       `json:"groupHidden,omitempty"` // 分组是否隐藏
+}
+
+func NewViewBaseInstance(view *View) *BaseInstance {
+	showIcon, wrapField := true, false
+	switch view.LayoutType {
+	case LayoutTypeTable:
+		showIcon = view.Table.ShowIcon
+		wrapField = view.Table.WrapField
+	case LayoutTypeGallery:
+		showIcon = view.Gallery.ShowIcon
+		wrapField = view.Gallery.WrapField
+	}
+	return &BaseInstance{
+		ID:               view.ID,
+		Icon:             view.Icon,
+		Name:             view.Name,
+		Desc:             view.Desc,
+		HideAttrViewName: view.HideAttrViewName,
+		Filters:          view.Filters,
+		Sorts:            view.Sorts,
+		Group:            view.Group,
+		GroupCalc:        view.GroupCalc,
+		GroupName:        view.GroupName,
+		GroupFolded:      view.GroupFolded,
+		GroupHidden:      view.GroupHidden,
+		ShowIcon:         showIcon,
+		WrapField:        wrapField,
+	}
 }
 
 func (baseInstance *BaseInstance) GetSorts() []*ViewSort {
@@ -82,19 +113,40 @@ func (baseInstance *BaseInstance) SetGroups(viewables []Viewable) {
 	baseInstance.Groups = viewables
 }
 
+func (baseInstance *BaseInstance) SetGroupCalc(group *GroupCalc) {
+	baseInstance.GroupCalc = group
+}
+
+func (baseInstance *BaseInstance) GetGroupCalc() *GroupCalc {
+	return baseInstance.GroupCalc
+}
+
+func (baseInstance *BaseInstance) SetGroupName(name string) {
+	baseInstance.GroupName = name
+}
+
+func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
+	baseInstance.GroupFolded = folded
+}
+
+func (baseInstance *BaseInstance) SetGroupHidden(hidden bool) {
+	baseInstance.GroupHidden = hidden
+}
+
 func (baseInstance *BaseInstance) GetID() string {
 	return baseInstance.ID
 }
 
 // BaseInstanceField 描述了实例字段的基础结构。
 type BaseInstanceField struct {
-	ID     string  `json:"id"`     // ID
-	Name   string  `json:"name"`   // 名称
-	Type   KeyType `json:"type"`   // 类型
-	Icon   string  `json:"icon"`   // 图标
-	Wrap   bool    `json:"wrap"`   // 是否换行
-	Hidden bool    `json:"hidden"` // 是否隐藏
-	Desc   string  `json:"desc"`   // 描述
+	ID     string     `json:"id"`     // ID
+	Name   string     `json:"name"`   // 名称
+	Type   KeyType    `json:"type"`   // 类型
+	Icon   string     `json:"icon"`   // 图标
+	Wrap   bool       `json:"wrap"`   // 是否换行
+	Hidden bool       `json:"hidden"` // 是否隐藏
+	Desc   string     `json:"desc"`   // 描述
+	Calc   *FieldCalc `json:"calc"`   // 计算规则和结果
 
 	// 以下是某些字段类型的特有属性
 
@@ -110,8 +162,24 @@ func (baseInstanceField *BaseInstanceField) GetID() string {
 	return baseInstanceField.ID
 }
 
+func (baseInstanceField *BaseInstanceField) GetCalc() *FieldCalc {
+	return baseInstanceField.Calc
+}
+
+func (baseInstanceField *BaseInstanceField) SetCalc(calc *FieldCalc) {
+	baseInstanceField.Calc = calc
+}
+
+func (baseInstanceField *BaseInstanceField) GetType() KeyType {
+	return baseInstanceField.Type
+}
+
+func (baseInstanceField *BaseInstanceField) GetNumberFormat() NumberFormat {
+	return baseInstanceField.NumberFormat
+}
+
 // Collection 描述了一个集合的接口。
-// 集合可以是表格、画廊等，包含多个项目。
+// 集合可以是表格、卡片等，包含多个项目。
 type Collection interface {
 
 	// GetItems 返回集合中的所有项目。
@@ -122,6 +190,9 @@ type Collection interface {
 
 	// GetFields 返回集合的所有字段。
 	GetFields() []Field
+
+	// GetField 返回指定 ID 的字段。
+	GetField(id string) (ret Field, fieldIndex int)
 
 	// GetSorts 返回集合的排序规则。
 	GetSorts() []*ViewSort
@@ -135,10 +206,22 @@ type Field interface {
 
 	// GetID 返回字段的 ID。
 	GetID() string
+
+	// GetType 返回字段的类型。
+	GetType() KeyType
+
+	// GetCalc 返回字段的计算规则和结果。
+	GetCalc() *FieldCalc
+
+	// SetCalc 设置字段的计算规则和结果。
+	SetCalc(*FieldCalc)
+
+	// GetNumberFormat 返回数字字段的格式化设置。
+	GetNumberFormat() NumberFormat
 }
 
 // Item 描述了一个项目的接口。
-// 项目可以是表格行、画廊卡片等。
+// 项目可以是表格行、卡片等。
 type Item interface {
 
 	// GetBlockValue 返回主键的值。
@@ -152,170 +235,4 @@ type Item interface {
 
 	// GetID 返回项目的 ID。
 	GetID() string
-}
-
-func sort0(collection Collection, attrView *AttributeView) {
-	sorts := collection.GetSorts()
-	if 1 > len(sorts) {
-		return
-	}
-
-	type FieldIndexSort struct {
-		Index int
-		Order SortOrder
-	}
-
-	var fieldIndexSorts []*FieldIndexSort
-	for _, s := range sorts {
-		for i, c := range collection.GetFields() {
-			if c.GetID() == s.Column {
-				fieldIndexSorts = append(fieldIndexSorts, &FieldIndexSort{Index: i, Order: s.Order})
-				break
-			}
-		}
-	}
-
-	items := collection.GetItems()
-	editedValItems := map[string]bool{}
-	for i, item := range items {
-		for _, fieldIndexSort := range fieldIndexSorts {
-			val := items[i].GetValues()[fieldIndexSort.Index]
-			if KeyTypeCheckbox == val.Type {
-				if block := item.GetBlockValue(); nil != block && block.IsEdited() {
-					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
-					editedValItems[item.GetID()] = true
-					break
-				}
-			}
-
-			if val.IsEdited() {
-				// 如果该卡片某字段的值已经编辑过，则该卡片可参与排序
-				editedValItems[item.GetID()] = true
-				break
-			}
-		}
-	}
-
-	// 将未编辑的卡片和已编辑的卡片分开排序
-	var uneditedItems, editedItems []Item
-	for _, item := range items {
-		if _, ok := editedValItems[item.GetID()]; ok {
-			editedItems = append(editedItems, item)
-		} else {
-			uneditedItems = append(uneditedItems, item)
-		}
-	}
-
-	sort.Slice(uneditedItems, func(i, j int) bool {
-		val1 := uneditedItems[i].GetBlockValue()
-		if nil == val1 {
-			return true
-		}
-		val2 := uneditedItems[j].GetBlockValue()
-		if nil == val2 {
-			return false
-		}
-		return val1.CreatedAt < val2.CreatedAt
-	})
-
-	sort.Slice(editedItems, func(i, j int) bool {
-		sorted := true
-		for _, fieldIndexSort := range fieldIndexSorts {
-			val1 := editedItems[i].GetValues()[fieldIndexSort.Index]
-			val2 := editedItems[j].GetValues()[fieldIndexSort.Index]
-			if nil == val1 || val1.IsEmpty() {
-				if nil != val2 && !val2.IsEmpty() {
-					return false
-				}
-				sorted = false
-				continue
-			} else {
-				if nil == val2 || val2.IsEmpty() {
-					return true
-				}
-			}
-
-			result := val1.Compare(val2, attrView)
-			if 0 == result {
-				sorted = false
-				continue
-			}
-			sorted = true
-
-			if fieldIndexSort.Order == SortOrderAsc {
-				return 0 > result
-			}
-			return 0 < result
-		}
-
-		if !sorted {
-			key1 := editedItems[i].GetBlockValue()
-			if nil == key1 {
-				return false
-			}
-			key2 := editedItems[j].GetBlockValue()
-			if nil == key2 {
-				return false
-			}
-			return key1.CreatedAt < key2.CreatedAt
-		}
-		return false
-	})
-
-	// 将包含未编辑的卡片放在最后
-	collection.SetItems(append(editedItems, uneditedItems...))
-	if 1 > len(collection.GetItems()) {
-		collection.SetItems([]Item{})
-	}
-}
-
-func filter0(collection Collection, attrView *AttributeView) {
-	filters := collection.GetFilters()
-	if 1 > len(filters) {
-		return
-	}
-
-	var colIndexes []int
-	for _, f := range filters {
-		for i, c := range collection.GetFields() {
-			if c.GetID() == f.Column {
-				colIndexes = append(colIndexes, i)
-				break
-			}
-		}
-	}
-
-	var items []Item
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
-	for _, item := range collection.GetItems() {
-		pass := true
-		values := item.GetValues()
-		for j, index := range colIndexes {
-			operator := filters[j].Operator
-
-			if nil == values[index] {
-				if FilterOperatorIsNotEmpty == operator {
-					pass = false
-				} else if FilterOperatorIsEmpty == operator {
-					pass = true
-					break
-				}
-
-				if KeyTypeText != values[index].Type {
-					pass = false
-				}
-				break
-			}
-
-			if !values[index].Filter(filters[j], attrView, item.GetID(), &attrViewCache) {
-				pass = false
-				break
-			}
-		}
-		if pass {
-			items = append(items, item)
-		}
-	}
-	collection.SetItems(items)
 }

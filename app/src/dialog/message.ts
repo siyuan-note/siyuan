@@ -32,25 +32,27 @@ export const initMessage = () => {
             target = target.parentElement;
         }
     });
-    const tempMessageElement = document.getElementById("tempMessage");
-    if (tempMessageElement) {
-        showMessage(tempMessageElement.innerHTML);
-        tempMessageElement.remove();
-    }
+
+    document.querySelectorAll("#tempMessage > div").forEach((item) => {
+        showMessage(item.innerHTML, parseInt(item.getAttribute("data-timeout")), item.getAttribute("data-type"), item.getAttribute("data-message-id"));
+        item.remove();
+    });
 };
 
 // type: info/error; timeout: 0 手动关闭；-1 永不关闭
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
     if (!messagesElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div style="top: 10px;
-    position: fixed;
-    z-index: 100;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    right: 10px;
-    border: 1px solid #e0e0e0;" id='tempMessage'>${message}</div>`);
+        let tempMessages = document.getElementById("tempMessage");
+        if (!tempMessages) {
+            document.body.insertAdjacentHTML("beforeend", `<div style="top: 22px;position: fixed;z-index: 100;right: 12px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
+id="tempMessage"></div>`);
+            tempMessages = document.getElementById("tempMessage");
+        }
+        tempMessages.insertAdjacentHTML("beforeend", `<div style="background: white;padding: 8px 16px;border-radius: 6px;margin-bottom: 16px;"  
+data-timeout="${timeout}" 
+data-type="${type}" 
+data-message-id="${messageId || ""}">${message}</div>`);
         return;
     }
     const id = messageId || genUUID();

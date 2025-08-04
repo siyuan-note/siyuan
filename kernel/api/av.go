@@ -27,6 +27,36 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
+func batchReplaceAttributeViewBlocks(c *gin.Context) {
+	// Add kernel API `/api/av/batchReplaceAttributeViewBlocks` https://github.com/siyuan-note/siyuan/issues/15313
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	isDetached := arg["isDetached"].(bool)
+	oldNewArg := arg["oldNew"].([]interface{})
+	var oldNew []map[string]string
+	for _, v := range oldNewArg {
+		for o, n := range v.(map[string]interface{}) {
+			oldNew = append(oldNew, map[string]string{o: n.(string)})
+		}
+	}
+
+	err := model.BatchReplaceAttributeViewBlocks(avID, isDetached, oldNew)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
+	}
+
+	model.ReloadAttrView(avID)
+}
+
 func setAttrViewGroup(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -80,7 +110,7 @@ func changeAttrViewLayout(c *gin.Context) {
 		return
 	}
 
-	ret = renderAttrView(avID, "", "", 1, -1)
+	ret = renderAttrView(blockID, avID, "", "", 1, -1)
 	c.JSON(http.StatusOK, ret)
 }
 
@@ -596,6 +626,11 @@ func renderAttributeView(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
+	blockIDArg := arg["blockID"]
+	var blockID string
+	if nil != blockIDArg {
+		blockID = blockIDArg.(string)
+	}
 	viewIDArg := arg["viewID"]
 	var viewID string
 	if nil != viewIDArg {
@@ -619,13 +654,13 @@ func renderAttributeView(c *gin.Context) {
 		query = queryArg.(string)
 	}
 
-	ret = renderAttrView(id, viewID, query, page, pageSize)
+	ret = renderAttrView(blockID, id, viewID, query, page, pageSize)
 	c.JSON(http.StatusOK, ret)
 }
 
-func renderAttrView(avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
+func renderAttrView(blockID, avID, viewID, query string, page, pageSize int) (ret *gulu.Result) {
 	ret = gulu.Ret.NewResult()
-	view, attrView, err := model.RenderAttributeView(avID, viewID, query, page, pageSize)
+	view, attrView, err := model.RenderAttributeView(blockID, avID, viewID, query, page, pageSize)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()
@@ -726,6 +761,28 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 
 	ret.Data = map[string]interface{}{
 		"value": updatedVal,
+	}
+
+	model.ReloadAttrView(avID)
+}
+
+func batchSetAttributeViewBlockAttrs(c *gin.Context) {
+	// Add kernel API `/api/av/batchSetAttributeViewBlockAttrs` https://github.com/siyuan-note/siyuan/issues/15310
+	ret := gulu.Ret.NewResult()
+	defer c.JSON(http.StatusOK, ret)
+
+	arg, ok := util.JsonArg(c, ret)
+	if !ok {
+		return
+	}
+
+	avID := arg["avID"].(string)
+	values := arg["values"].([]interface{})
+	err := model.BatchUpdateAttributeViewCells(nil, avID, values)
+	if err != nil {
+		ret.Code = -1
+		ret.Msg = err.Error()
+		return
 	}
 
 	model.ReloadAttrView(avID)

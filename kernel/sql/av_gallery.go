@@ -3,12 +3,15 @@ package sql
 import (
 	"bytes"
 	"fmt"
+	"net/url"
 	"strings"
 
 	"github.com/88250/lute"
 	"github.com/88250/lute/ast"
+	"github.com/88250/lute/html"
 	"github.com/88250/lute/parse"
 	"github.com/88250/lute/render"
+	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
@@ -17,18 +20,7 @@ import (
 
 func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query string) (ret *av.Gallery) {
 	ret = &av.Gallery{
-		BaseInstance: &av.BaseInstance{
-			ID:               view.ID,
-			Icon:             view.Icon,
-			Name:             view.Name,
-			Desc:             view.Desc,
-			HideAttrViewName: view.HideAttrViewName,
-			Filters:          view.Filters,
-			Sorts:            view.Sorts,
-			Group:            view.Group,
-			ShowIcon:         view.Gallery.ShowIcon,
-			WrapField:        view.Gallery.WrapField,
-		},
+		BaseInstance:        av.NewViewBaseInstance(view),
 		CoverFrom:           view.Gallery.CoverFrom,
 		CoverFromAssetKeyID: view.Gallery.CoverFromAssetKeyID,
 		CardAspectRatio:     view.Gallery.CardAspectRatio,
@@ -56,6 +48,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 				Wrap:         field.Wrap,
 				Hidden:       field.Hidden,
 				Desc:         key.Desc,
+				Calc:         field.Calc,
 				Options:      key.Options,
 				NumberFormat: key.NumberFormat,
 				Template:     key.Template,
@@ -195,19 +188,7 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 		})
 
 		if "" == galleryCard.CoverURL {
-			isDoc := ast.NodeDocument == node.Type
-			if isDoc {
-				node = node.FirstChild
-			}
-
-			buf := bytes.Buffer{}
-			for c := node; nil != c; c = c.Next {
-				buf.WriteString(renderBlockDOMByNode(c, luteEngine))
-				if !isDoc || 1024*4 < buf.Len() {
-					break
-				}
-			}
-			galleryCard.CoverContent = buf.String()
+			galleryCard.CoverContent = renderCoverContentBlock(node, luteEngine)
 			return
 		}
 	case av.CoverFromAssetField:
@@ -220,9 +201,55 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 			break
 		}
 
-		galleryCard.CoverURL = assetValue.MAsset[0].Content
+		p := assetValue.MAsset[0].Content
+		if util.IsAssetsImage(p) {
+			galleryCard.CoverURL = p
+		}
 		return
+	case av.CoverFromContentBlock:
+		blockValue := getBlockValue(cardValues)
+		if blockValue.IsDetached {
+			break
+		}
+
+		tree := trees[blockValue.BlockID]
+		if nil == tree {
+			break
+		}
+		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		if nil == node {
+			break
+		}
+		galleryCard.CoverContent = renderCoverContentBlock(node, luteEngine)
 	}
+}
+
+func renderCoverContentBlock(node *ast.Node, luteEngine *lute.Lute) string {
+	isDoc := ast.NodeDocument == node.Type
+	if isDoc {
+		node = node.FirstChild
+	}
+	heading := node
+	isHeading := ast.NodeHeading == node.Type
+	headingLevel := node.HeadingLevel
+	if isHeading {
+		node = node.Next
+	}
+
+	buf := bytes.Buffer{}
+	for c := node; nil != c; c = c.Next {
+		if isHeading && ast.NodeHeading == c.Type && c.HeadingLevel <= headingLevel {
+			if 1 > buf.Len() {
+				buf.WriteString(renderBlockDOMByNode(heading, luteEngine))
+			}
+			break
+		}
+		buf.WriteString(renderBlockDOMByNode(c, luteEngine))
+		if (!isDoc && !isHeading) || 1024*4 < buf.Len() {
+			break
+		}
+	}
+	return buf.String()
 }
 
 func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
@@ -242,6 +269,26 @@ func renderBlockDOMByNode(node *ast.Node, luteEngine *lute.Lute) string {
 				resetIDs[newID] = n.ID
 				n.ID, ial["id"] = newID, newID
 				n.KramdownIAL = parse.Map2IAL(ial)
+
+				if ast.NodeIFrame == n.Type || ast.NodeAudio == n.Type || ast.NodeVideo == n.Type {
+					// 禁止自动播放 Disable automatic video playback in database card view https://github.com/siyuan-note/siyuan/issues/15212
+					dest := treenode.GetNodeSrcTokens(n)
+					oldDest := dest
+					if (strings.HasPrefix(dest, "http://") || strings.HasPrefix(dest, "https://")) && !strings.Contains(dest, "autoplay") {
+						dest = html.UnescapeHTMLStr(dest)
+						destURL, err := url.Parse(dest)
+						if nil == err {
+							q := destURL.Query()
+							q.Set("autoplay", "0")
+							destURL.RawQuery = q.Encode()
+							dest = destURL.String()
+							dest = html.EscapeHTMLStr(dest)
+							n.Tokens = bytes.ReplaceAll(n.Tokens, []byte(oldDest), []byte(dest))
+						} else {
+							logging.LogWarnf("parse url [%s] failed: %v", dest, err)
+						}
+					}
+				}
 			}
 		}
 		rendererFunc := blockRenderer.RendererFuncs[n.Type]

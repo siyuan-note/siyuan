@@ -32,7 +32,8 @@ import {assetMenu} from "../../../menus/protyle";
 import {
     addView,
     bindSwitcherEvent,
-    bindViewEvent, getFieldsByData,
+    bindViewEvent,
+    getFieldsByData,
     getSwitcherHTML,
     getViewHTML,
     openViewMenu
@@ -47,6 +48,7 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
+import {bindGroupsEvent, getGroupsHTML, getGroupsMethodHTML, setGroupMethod} from "./groups";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -575,6 +577,31 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "goGroups") {
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view.group);
+                    bindGroupsEvent();
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    window.siyuan.menus.menu.remove();
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsMethod") {
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "setGroupMethod") {
+                    setGroupMethod({
+                        protyle: options.protyle,
+                        fieldId: target.getAttribute("data-id"),
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement,
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "removeSorts") {
                     transaction(options.protyle, [{
                         action: "setAttrViewSorts",
@@ -935,7 +962,7 @@ export const openMenuPanel = (options: {
                             type: target.dataset.oldType as TAVCol,
                         }]);
 
-                        // 需要取消 lineNumber 列的排序和过滤
+                        // 需要取消行号列的筛选和排序
                         if (target.dataset.newType === "lineNumber") {
                             const sortExist = data.view.sorts.find((sort) => sort.column === colId);
                             if (sortExist) {

@@ -1234,7 +1234,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
         const loadingElement = element.querySelector(".fn__loading--top");
         loadingElement.classList.remove("fn__none");
         const searchInputElement = element.querySelector("#searchInput") as HTMLInputElement;
-        const inputValue = searchInputElement.value;
+        config.query = searchInputElement.value;
         element.querySelector("#searchList").scrollTo(0, 0);
         const previousElement = element.querySelector('[data-type="previous"]');
         const nextElement = element.querySelector('[data-type="next"]');
@@ -1246,7 +1246,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
             });
         });
         const searchResultElement = element.querySelector("#searchResult");
-        if (inputValue === "" && (!config.idPath || config.idPath.length === 0)) {
+        if (config.query === "" && (!config.idPath || config.idPath.length === 0)) {
             fetchPost("/api/block/getRecentUpdatedBlocks", {}, (response) => {
                 if (window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] && window.siyuan.reqIds["/api/search/fullTextSearchBlock"] &&
                     window.siyuan.reqIds["/api/block/getRecentUpdatedBlocks"] < window.siyuan.reqIds["/api/search/fullTextSearchBlock"]) {
@@ -1265,7 +1265,7 @@ export const inputEvent = (element: Element, config: Config.IUILayoutTabSearchCo
                 previousElement.setAttribute("disabled", "disabled");
             }
             fetchPost("/api/search/fullTextSearchBlock", {
-                query: inputValue,
+                query: config.query,
                 method: config.method,
                 types: config.types,
                 paths: config.idPath || [],

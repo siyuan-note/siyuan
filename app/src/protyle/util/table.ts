@@ -188,7 +188,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
             newCellElement.textContent = " ";
         }
     }
-    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col>");
+    tableElement.querySelectorAll("col")[index].insertAdjacentHTML(type, "<col style='min-width: 60px;'>");
     focusByWbr(nodeElement, range);
     updateTransaction(protyle, nodeElement.getAttribute("data-node-id"), nodeElement.outerHTML, html);
 };

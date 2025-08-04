@@ -221,7 +221,7 @@ func upgradeSpec1(av *AttributeView) {
 		}
 	}
 
-	// 补全过滤器 Value
+	// 补全过滤规则 Value
 	for _, view := range av.Views {
 		if nil != view.Table {
 			for _, f := range view.Table.Filters {

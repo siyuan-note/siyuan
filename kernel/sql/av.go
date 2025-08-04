@@ -32,7 +32,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderView(view *av.View, attrView *av.AttributeView, query string) (ret av.Viewable) {
+func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av.Viewable) {
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		ret = RenderAttributeViewTable(attrView, view, query)

@@ -9,18 +9,6 @@ import {fetchPost} from "./fetch";
 import {appearance} from "../config/appearance";
 import {isInAndroid, isInHarmony, isInIOS, isIPad, isIPhone, isMac, isWin11} from "../protyle/util/compatibility";
 
-const loadThirdIcon = (iconURL: string, data: Config.IAppearance) => {
-    addScript(iconURL, "iconDefaultScript").then(() => {
-        if (!["ant", "material"].includes(data.icon)) {
-            const iconScriptElement = document.getElementById("iconScript");
-            if (iconScriptElement) {
-                iconScriptElement.remove();
-            }
-            addScript(`/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`, "iconScript");
-        }
-    });
-};
-
 export const loadAssets = (data: Config.IAppearance) => {
     const htmlElement = document.getElementsByTagName("html")[0];
     htmlElement.setAttribute("lang", window.siyuan.config.appearance.lang);
@@ -40,7 +28,17 @@ export const loadAssets = (data: Config.IAppearance) => {
     const defaultThemeAddress = `/appearance/themes/${data.mode === 1 ? "midnight" : "daylight"}/theme.css?v=${Constants.SIYUAN_VERSION}`;
     if (defaultStyleElement) {
         if (!defaultStyleElement.getAttribute("href").startsWith(defaultThemeAddress)) {
-            defaultStyleElement.setAttribute("href", defaultThemeAddress);
+            const newStyleElement = document.createElement("link");
+            // 等待新样式表加载完成再移除旧样式表
+            new Promise((resolve) => {
+                newStyleElement.rel = "stylesheet";
+                newStyleElement.href = defaultThemeAddress;
+                newStyleElement.onload = resolve;
+                defaultStyleElement.parentNode.insertBefore(newStyleElement, defaultStyleElement);
+            }).then(() => {
+                defaultStyleElement.remove();
+                newStyleElement.id = "themeDefaultStyle";
+            });
         }
     } else {
         addStyle(defaultThemeAddress, "themeDefaultStyle");
@@ -98,25 +96,56 @@ export const loadAssets = (data: Config.IAppearance) => {
         addScript(themeScriptAddress, "themeScript");
     }
 
+    // load icons
+    const isBuiltInIcon = ["ant", "material"].includes(data.icon);
+    const iconScriptElement = document.getElementById("iconScript");
     const iconDefaultScriptElement = document.getElementById("iconDefaultScript");
     // 不能使用 data.iconVer，因为其他主题也需要加载默认图标，此时 data.iconVer 为其他图标的版本号
-    const iconURL = `/appearance/icons/${["ant", "material"].includes(data.icon) ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
-    if (iconDefaultScriptElement) {
-        if (!iconDefaultScriptElement.getAttribute("src").startsWith(iconURL)) {
-            iconDefaultScriptElement.remove();
-            let svgElement = document.body.firstElementChild;
-            while (svgElement.tagName === "svg") {
-                const currentSvgElement = svgElement;
-                svgElement = svgElement.nextElementSibling;
-                if (!currentSvgElement.getAttribute("data-name")) {
-                    currentSvgElement.remove();
+    const iconDefaultURL = `/appearance/icons/${isBuiltInIcon ? data.icon : "material"}/icon.js?v=${Constants.SIYUAN_VERSION}`;
+    const iconThirdURL = `/appearance/icons/${data.icon}/icon.js?v=${data.iconVer}`;
+
+    if ((isBuiltInIcon && iconDefaultScriptElement && iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) ||
+        (!isBuiltInIcon && iconScriptElement && iconScriptElement.getAttribute("src").startsWith(iconThirdURL))) {
+        // 第三方图标切换到 material
+        if (isBuiltInIcon) {
+            iconScriptElement?.remove();
+            Array.from(document.body.children).forEach((item) => {
+                if (item.tagName === "svg" &&
+                    !item.getAttribute("data-name") &&
+                    !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                    item.remove();
                 }
-            }
-            loadThirdIcon(iconURL, data);
+            });
         }
-    } else {
-        loadThirdIcon(iconURL, data);
+        return;
     }
+    if (iconDefaultScriptElement && !iconDefaultScriptElement.getAttribute("src").startsWith(iconDefaultURL)) {
+        iconDefaultScriptElement.remove();
+        if (data.icon === "ant") {
+            document.querySelectorAll("#iconsMaterial").forEach(item => {
+                item.remove();
+            });
+        } else {
+            document.querySelectorAll("#iconsAnt").forEach(item => {
+                item.remove();
+            });
+        }
+    }
+    addScript(iconDefaultURL, "iconDefaultScript").then(() => {
+        iconScriptElement?.remove();
+        if (!isBuiltInIcon) {
+            addScript(iconThirdURL, "iconScript").then(() => {
+                Array.from(document.body.children).forEach((item, index) => {
+                    if (item.tagName === "svg" &&
+                        index !== 0 &&
+                        !item.getAttribute("data-name") &&
+                        !["iconsMaterial", "iconsAnt"].includes(item.id)) {
+                        item.remove();
+                    }
+                });
+            });
+        }
+    });
 };
 
 export const initAssets = () => {

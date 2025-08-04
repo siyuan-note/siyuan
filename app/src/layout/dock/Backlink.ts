@@ -458,6 +458,9 @@ export class Backlink extends Model {
                 liElement.after(editorElement);
                 const editor = new Protyle(this.app, editorElement, {
                     blockId: docId,
+                    click: {
+                        preventInsetEmptyBlock: true
+                    },
                     backlinkData: isMention ? response.data.backmentions : response.data.backlinks,
                     render: {
                         background: false,

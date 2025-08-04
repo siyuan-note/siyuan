@@ -17,10 +17,14 @@
 package model
 
 import (
+	"time"
+
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
 	"github.com/siyuan-note/siyuan/kernel/treenode"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 func checkAttrView(attrView *av.AttributeView, view *av.View) {
@@ -45,15 +49,45 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	}
 	view.Sorts = tmpSorts
 
-	// 视图类型不匹配时需要订正
+	// 订正视图类型
 	for i, v := range attrView.Views {
 		if av.LayoutTypeGallery == v.LayoutType && nil == v.Gallery {
-			// 切换为画廊视图时可能没有初始化画廊实例 https://github.com/siyuan-note/siyuan/issues/15122
+			// 切换为卡片视图时可能没有初始化卡片实例 https://github.com/siyuan-note/siyuan/issues/15122
 			if nil != v.Table {
 				v.LayoutType = av.LayoutTypeTable
 				changed = true
 			} else {
 				attrView.Views = append(attrView.Views[:i], attrView.Views[i+1:]...)
+				changed = true
+			}
+		}
+	}
+
+	now := util.CurrentTimeMillis()
+
+	// 订正字段类型
+	for _, kv := range attrView.KeyValues {
+		for _, v := range kv.Values {
+			if v.Type != kv.Key.Type {
+				v.Type = kv.Key.Type
+				if av.KeyTypeBlock == v.Type && nil == v.Block {
+					v.Block = &av.ValueBlock{ID: v.BlockID}
+					if nil != v.Text {
+						v.Block.Content = v.Text.Content
+					}
+					if "" == v.Block.ID {
+						v.Block.ID = ast.NewNodeID()
+						v.BlockID = v.Block.ID
+					}
+					createdStr := v.Block.ID[:len("20060102150405")]
+					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+					if nil == parseErr {
+						v.Block.Created = created.UnixMilli()
+					} else {
+						v.Block.Created = now
+					}
+					v.Block.Updated = v.Block.Created
+				}
 				changed = true
 			}
 		}

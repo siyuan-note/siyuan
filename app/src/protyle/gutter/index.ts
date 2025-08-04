@@ -94,6 +94,11 @@ export class Gutter {
                         return true;
                     }
                 });
+                if (avElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    return;
+                }
                 const rowElement = avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 rowElement.classList.add("av__row--select");
                 rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");

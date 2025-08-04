@@ -1053,7 +1053,7 @@ export class Toolbar {
                 }
                 inlineMemoElements.forEach((item) => {
                     if (item.nodeType !== 3) {
-                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                        item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(textElement.value));
                     }
                 });
             } else {
@@ -1131,7 +1131,7 @@ export class Toolbar {
                         }
                     } else if (item.nodeType !== 3) {
                         // 行级备注自动移除换行  https://ld246.com/article/1664205917326
-                        item.setAttribute("data-inline-memo-content", Lute.EscapeHTMLStr(textElement.value));
+                        item.setAttribute("data-inline-memo-content", window.DOMPurify.sanitize(textElement.value));
                     }
                 });
             } else if (types.includes("inline-math")) {

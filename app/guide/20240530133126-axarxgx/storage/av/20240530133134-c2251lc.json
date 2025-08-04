@@ -1,5 +1,5 @@
 {
-	"spec": 1,
+	"spec": 3,
 	"id": "20240530133134-c2251lc",
 	"name": "書名",
 	"keyValues": [
@@ -254,12 +254,13 @@
 			"name": "テーブル",
 			"hideAttrViewName": false,
 			"desc": "",
+			"pageSize": 50,
 			"type": "table",
 			"table": {
 				"spec": 0,
 				"id": "20240530101000-mhhmma3",
-				"filters": [],
-				"sorts": [],
+				"showIcon": true,
+				"wrapField": false,
 				"pageSize": 50,
 				"columns": [
 					{
@@ -296,43 +297,51 @@
 					"20240530101000-9utmfv2",
 					"20240530101000-6k25xnw"
 				]
-			}
+			},
+			"itemIds": [
+				"20240530101000-3n32s4x",
+				"20240530101000-9utmfv2",
+				"20240530101000-6k25xnw"
+			]
 		},
 		{
 			"id": "20250615173942-0xk5p5h",
 			"icon": "",
-			"name": "ギャラリー",
+			"name": "カード",
 			"hideAttrViewName": false,
 			"desc": "",
+			"pageSize": 50,
 			"type": "gallery",
 			"gallery": {
 				"spec": 0,
 				"id": "20250615173947-oj97e6l",
-				"filters": [],
-				"sorts": [],
+				"showIcon": true,
+				"wrapField": false,
 				"pageSize": 50,
 				"coverFrom": 2,
 				"coverFromAssetKeyID": "20250615173851-vmlovdh",
 				"cardAspectRatio": 3,
 				"cardSize": 0,
 				"fitImage": false,
-				"showIcon": true,
-				"wrapField": false,
 				"fields": [
 					{
 						"id": "20240530101000-dwysfvj",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20240530101000-fxi3h2s",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20240530101000-6666dv2",
+						"wrap": false,
 						"hidden": false
 					},
 					{
 						"id": "20250615173851-vmlovdh",
+						"wrap": false,
 						"hidden": true
 					}
 				],
@@ -341,7 +350,12 @@
 					"20240530101000-9utmfv2",
 					"20240530101000-6k25xnw"
 				]
-			}
+			},
+			"itemIds": [
+				"20240530101000-3n32s4x",
+				"20240530101000-9utmfv2",
+				"20240530101000-6k25xnw"
+			]
 		}
 	]
 }

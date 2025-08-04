@@ -787,8 +787,44 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
     });
     menu.addSeparator({id: "separator_1"});
 
-    // 行号 类型不参与 排序和筛选
+    // 行号类型不参与筛选和排序
     if (type !== "lineNumber") {
+        if (type !== "mAsset") {
+            menu.addItem({
+                id: "filter",
+                icon: "iconFilter",
+                label: window.siyuan.languages.filter,
+                click() {
+                    fetchPost("/api/av/renderAttributeView", {
+                        id: avID,
+                    }, (response) => {
+                        const avData = response.data as IAV;
+                        let filter: IAVFilter;
+                        avData.view.filters.find((item) => {
+                            if (item.column === colId && item.value.type === type) {
+                                filter = item;
+                                return true;
+                            }
+                        });
+                        if (!filter) {
+                            filter = {
+                                column: colId,
+                                operator: getDefaultOperatorByType(type),
+                                value: genCellValue(type, ""),
+                            };
+                            avData.view.filters.push(filter);
+                        }
+                        setFilter({
+                            filter,
+                            protyle,
+                            data: avData,
+                            blockElement: blockElement,
+                            target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
+                        });
+                    });
+                }
+            });
+        }
         menu.addItem({
             id: "asc",
             icon: "iconUp",
@@ -839,42 +875,6 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 });
             }
         });
-        if (type !== "mAsset") {
-            menu.addItem({
-                id: "filter",
-                icon: "iconFilter",
-                label: window.siyuan.languages.filter,
-                click() {
-                    fetchPost("/api/av/renderAttributeView", {
-                        id: avID,
-                    }, (response) => {
-                        const avData = response.data as IAV;
-                        let filter: IAVFilter;
-                        avData.view.filters.find((item) => {
-                            if (item.column === colId && item.value.type === type) {
-                                filter = item;
-                                return true;
-                            }
-                        });
-                        if (!filter) {
-                            filter = {
-                                column: colId,
-                                operator: getDefaultOperatorByType(type),
-                                value: genCellValue(type, ""),
-                            };
-                            avData.view.filters.push(filter);
-                        }
-                        setFilter({
-                            filter,
-                            protyle,
-                            data: avData,
-                            blockElement: blockElement,
-                            target: blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`),
-                        });
-                    });
-                }
-            });
-        }
         menu.addSeparator({id: "separator_2"});
     }
     menu.addItem({
@@ -953,6 +953,18 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                 blockID
             }]);
             updateAttrViewCellAnimation(blockElement.querySelector(`.av__row--header .av__cell[data-col-id="${colId}"]`), undefined, {pin: !isPin});
+        }
+    });
+    menu.addItem({
+        icon: "iconRefresh",
+        label: window.siyuan.languages.syncColWidth,
+        click() {
+            transaction(protyle, [{
+                action: "syncAttrViewTableColWidth",
+                keyID: colId,
+                avID,
+                id: blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+            }]);
         }
     });
     if (type !== "block") {

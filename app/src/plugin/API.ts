@@ -27,6 +27,8 @@ import {getAllEditor} from "../layout/getAll";
 import {openSetting} from "../config";
 import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
+import {exportLayout} from "../layout/util";
+import {saveScroll} from "../protyle/scroll/saveScroll";
 
 let openTab;
 let openWindow;
@@ -195,6 +197,21 @@ const openAttributePanel = (options: {
     }
 };
 
+const saveLayout = (cb: () => void) => {
+    /// #if MOBILE
+    if (window.siyuan.mobile.editor) {
+        const result = saveScroll(window.siyuan.mobile.editor.protyle);
+        if (cb && result instanceof Promise) {
+            result.then(() => {
+                cb();
+            });
+        }
+    }
+    /// #else
+    exportLayout({cb, errorExit: false});
+    /// #endif
+};
+
 export const API = {
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
@@ -223,5 +240,6 @@ export const API = {
     platformUtils,
     openSetting,
     openAttributePanel,
+    saveLayout,
     globalCommand,
 };

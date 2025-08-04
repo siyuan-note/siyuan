@@ -63,6 +63,8 @@ type TOperation =
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
+    | "setAttrViewGroup"
+    | "syncAttrViewTableColWidth"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -138,8 +140,11 @@ interface CSSStyleDeclarationElectron extends CSSStyleDeclaration {
 }
 
 interface Window {
+    DOMPurify: {
+        sanitize(dirty: string): string;
+    };
     echarts: {
-        init(element: HTMLElement, theme?: string, options?: {
+        init(element: Element, theme?: string, options?: {
             width: number
         }): {
             setOption(option: any): void;
@@ -256,6 +261,13 @@ interface Window {
     openFileByURL(URL: string): boolean;
 
     destroyTheme(): Promise<void>;
+}
+
+interface IClipboardData {
+    textHTML?: string,
+    textPlain?: string,
+    siyuanHTML?: string,
+    files?: File[],
 }
 
 interface IRefDefs {
@@ -839,18 +851,20 @@ interface IAVView {
     pageSize: number;
     showIcon: boolean;
     wrapField: boolean;
+    filters: IAVFilter[],
+    sorts: IAVSort[],
+    groups: IAVView[]
+    group: IAVGroup
 }
 
 interface IAVTable extends IAVView {
     columns: IAVColumn[],
-    filters: IAVFilter[],
-    sorts: IAVSort[],
     rows: IAVRow[],
     rowCount: number,
 }
 
 interface IAVGallery extends IAVView {
-    coverFrom: number;    // 0：无，1：内容图，2：资源字段
+    coverFrom: number;    // 0：无，1：内容图，2：资源字段，3：内容块
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
@@ -858,8 +872,6 @@ interface IAVGallery extends IAVView {
     cards: IAVGalleryItem[],
     desc: string
     fields: IAVColumn[]
-    filters: IAVFilter[],
-    sorts: IAVSort[],
     cardCount: number,
 }
 
@@ -875,6 +887,17 @@ interface relativeDate {
     count: number;   // 数量
     unit: number;    // 单位：0: 天、1: 周、2: 月、3: 年
     direction: number;   // 方向：-1: 前、0: 现在、1: 后
+}
+
+interface IAVGroup {
+    field: string,
+    method?: number //  0: 按值分组、1: 按数字范围分组、2: 按相对日期分组、3: 按天日期分组、4: 按周日期分组、5: 按月日期分组、6: 按年日期分组
+    range?: {
+        numStart: number // 数字范围起始值
+        numEnd: number   // 数字范围结束值
+        numStep: number  // 数字范围步长
+    }
+    order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
 }
 
 interface IAVSort {

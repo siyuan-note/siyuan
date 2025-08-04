@@ -6,7 +6,7 @@ import {
     focusByWbr,
     getEditorRange,
     getSelectionOffset,
-    getSelectionPosition
+    getSelectionPosition, setLastNodeRange
 } from "../util/selection";
 import {genHintItemHTML, hintEmbed, hintRef, hintSlash} from "./extend";
 import {getSavePath, newFile} from "../../util/newFile";
@@ -563,6 +563,13 @@ ${genHintItemHTML(item)}
                         type: "id",
                         color: `${response.data}${Constants.ZWSP}${refIsS ? "s" : "d"}${Constants.ZWSP}${(refIsS ? fileNames[0] : realFileName).substring(0, window.siyuan.config.editor.blockRefDynamicAnchorTextMaxLen)}`
                     });
+                    if (protyle.toolbar.range.endContainer.nodeType === 1 &&
+                        protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
+                        const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
+                        if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
+                            setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
+                        }
+                    }
                     protyle.toolbar.range.collapse(false);
                 });
             });
@@ -597,6 +604,13 @@ ${genHintItemHTML(item)}
                 type: "id",
                 color: `${tempElement.getAttribute("data-id")}${Constants.ZWSP}${tempElement.getAttribute("data-subtype")}${Constants.ZWSP}${tempElement.textContent}`
             });
+            if (protyle.toolbar.range.endContainer.nodeType === 1 &&
+                protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) {
+                const refElement = hasPreviousSibling(protyle.toolbar.range.endContainer.childNodes[protyle.toolbar.range.endOffset]) as HTMLElement;
+                if (refElement && refElement.nodeType === 1 && refElement.getAttribute("data-type") === "block-ref") {
+                    setLastNodeRange(refElement as HTMLElement, protyle.toolbar.range, false);
+                }
+            }
             protyle.toolbar.range.collapse(false);
             return;
         } else if (this.splitChar === ":") {

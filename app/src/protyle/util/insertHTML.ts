@@ -59,7 +59,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const firstColIndex = cellElements[0].getAttribute("data-col-id");
             values.find(rowItem => {
                 if (!currentRowElement) {
-                    currentRowElement = cellElements[0].parentElement;
+                    currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                 } else {
                     currentRowElement = currentRowElement.nextElementSibling;
                 }
@@ -71,7 +71,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                     if (!cellElement) {
                         cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                     } else {
-                        cellElement = cellElement.nextElementSibling as HTMLElement;
+                        if (cellElement.nextElementSibling) {
+                            cellElement = cellElement.nextElementSibling as HTMLElement;
+                        } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
+                            cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
+                        }
                     }
                     if (!cellElement.classList.contains("av__cell")) {
                         return true;
@@ -156,7 +160,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                 const firstColIndex = cellElements[0].getAttribute("data-col-id");
                 textJSON.forEach((rowValue) => {
                     if (!currentRowElement) {
-                        currentRowElement = cellElements[0].parentElement;
+                        currentRowElement = hasClosestByClassName(cellElements[0].parentElement, "av__row") as HTMLElement;
                     } else {
                         currentRowElement = currentRowElement.nextElementSibling;
                     }
@@ -168,7 +172,11 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
                         if (!cellElement) {
                             cellElement = currentRowElement.querySelector(`.av__cell[data-col-id="${firstColIndex}"]`) as HTMLElement;
                         } else {
-                            cellElement = cellElement.nextElementSibling as HTMLElement;
+                            if (cellElement.nextElementSibling) {
+                                cellElement = cellElement.nextElementSibling as HTMLElement;
+                            } else if (cellElement.parentElement.classList.contains("av__colsticky")) {
+                                cellElement = cellElement.parentElement.nextElementSibling as HTMLElement;
+                            }
                         }
                         if (!cellElement.classList.contains("av__cell")) {
                             return true;
@@ -374,7 +382,16 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         isBlock = false;
         block2text = true;
     }
-
+    if (!isBlock && tempElement && tempElement.content.childElementCount === 1) {
+        // 通过右键粘贴包含属性的块需保留整个块 https://github.com/siyuan-note/siyuan/issues/15268
+        for (let i = 0; i < tempElement.content.firstElementChild.attributes.length; i++) {
+            const attribute = tempElement.content.firstElementChild.attributes[i];
+            if (["memo", "name", "alias", "bookmark"].includes(attribute.name) || attribute.name.startsWith("custom-")) {
+                isBlock = true;
+                break;
+            }
+        }
+    }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
         if (tempElement.content.firstChild.nodeType === 3 || block2text ||

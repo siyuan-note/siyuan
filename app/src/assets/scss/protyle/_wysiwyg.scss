@@ -1,3 +1,5 @@
+@use "../util/mixin";
+
 .protyle-wysiwyg {
   padding: 16px 16px 16px 24px;
   cursor: text;
@@ -582,7 +584,7 @@
 
     & > div:not(.protyle-attr--memo):not(.protyle-attr--refcount) {
       cursor: pointer;
-      @include text-clamp(1);
+      @include mixin.text-clamp(1);
       max-width: 25vw;
     }
   }
@@ -614,7 +616,7 @@
   }
 
   [data-node-id][fold="1"]:not(.li):not([data-type="NodeHeading"]) {
-    @include text-clamp(1);
+    @include mixin.text-clamp(1);
     opacity: .38;
     font-size: 16px;
     height: 26px;
@@ -795,7 +797,7 @@
       }
     }
 
-    .av__cell[data-block-id] > .block__icon[data-type="copy"] {
+    .av__row .av__cell[data-block-id] > .block__icon[data-type="copy"] {
       display: flex;
     }
   }

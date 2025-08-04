@@ -22,6 +22,12 @@
   --input-hover-border-color: black;
   --link-outline: none;
 
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+  transform-origin: 0 0;
+
   @media screen and (forced-colors: active) {
     --input-focus-border-color: CanvasText;
     --input-unfocused-border-color: ActiveText;
@@ -70,12 +76,6 @@
       outline: calc(3px * var(--scale-factor)) solid Highlight !important;
     }
   }
-
-  position: absolute;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  transform-origin: 0 0;
 
   &[data-main-rotation="90"] .norotate {
     transform: rotate(270deg) translateX(-100%);

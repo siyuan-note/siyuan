@@ -1,3 +1,6 @@
+@use "../util/function";
+@use "../component/form";
+
 .search {
   &__layout {
     display: flex;

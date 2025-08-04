@@ -20,7 +20,7 @@ import (
 	"github.com/88250/lute/ast"
 )
 
-// LayoutGallery 描述了画廊布局的结构。
+// LayoutGallery 描述了卡片布局的结构。
 type LayoutGallery struct {
 	*BaseLayout
 
@@ -30,7 +30,7 @@ type LayoutGallery struct {
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
 
-	CardFields []*ViewGalleryCardField `json:"fields"` // 画廊卡片字段
+	CardFields []*ViewGalleryCardField `json:"fields"` // 卡片字段
 
 	// TODO CardIDs 字段已经废弃，计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15194
 	//Deprecated
@@ -70,21 +70,22 @@ const (
 	CardSizeLarge                  // 大卡片
 )
 
-// CoverFrom 描述了画廊中的卡片封面来源的枚举类型。
+// CoverFrom 描述了卡片封面来源的枚举类型。
 type CoverFrom int
 
 const (
 	CoverFromNone         CoverFrom = iota // 无封面
 	CoverFromContentImage                  // 内容图
 	CoverFromAssetField                    // 资源字段
+	CoverFromContentBlock                  // 内容块
 )
 
-// ViewGalleryCardField 描述了画廊卡片字段的结构。
+// ViewGalleryCardField 描述了卡片字段的结构。
 type ViewGalleryCardField struct {
 	*BaseField
 }
 
-// Gallery 描述了画廊实例的结构。
+// Gallery 描述了卡片视图实例的结构。
 type Gallery struct {
 	*BaseInstance
 
@@ -93,12 +94,12 @@ type Gallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
-	Fields              []*GalleryField `json:"fields"`                        // 画廊字段
-	Cards               []*GalleryCard  `json:"cards"`                         // 画廊卡片
-	CardCount           int             `json:"cardCount"`                     // 画廊总卡片数
+	Fields              []*GalleryField `json:"fields"`                        // 卡片字段
+	Cards               []*GalleryCard  `json:"cards"`                         // 卡片
+	CardCount           int             `json:"cardCount"`                     // 总卡片数
 }
 
-// GalleryCard 描述了画廊实例卡片的结构。
+// GalleryCard 描述了卡片实例的结构。
 type GalleryCard struct {
 	ID     string               `json:"id"`     // 卡片 ID
 	Values []*GalleryFieldValue `json:"values"` // 卡片字段值
@@ -107,12 +108,12 @@ type GalleryCard struct {
 	CoverContent string `json:"coverContent"` // 卡片封面文本内容
 }
 
-// GalleryField 描述了画廊实例卡片字段的结构。
+// GalleryField 描述了卡片实例字段的结构。
 type GalleryField struct {
 	*BaseInstanceField
 }
 
-// GalleryFieldValue 描述了画廊实例字段值的结构。
+// GalleryFieldValue 描述了卡片字段实例值的结构。
 type GalleryFieldValue struct {
 	*BaseValue
 }
@@ -172,14 +173,15 @@ func (gallery *Gallery) GetFields() (ret []Field) {
 	return ret
 }
 
+func (gallery *Gallery) GetField(id string) (ret Field, fieldIndex int) {
+	for i, field := range gallery.Fields {
+		if field.ID == id {
+			return field, i
+		}
+	}
+	return nil, -1
+}
+
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
-}
-
-func (gallery *Gallery) Sort(attrView *AttributeView) {
-	sort0(gallery, attrView)
-}
-
-func (gallery *Gallery) Filter(attrView *AttributeView) {
-	filter0(gallery, attrView)
 }

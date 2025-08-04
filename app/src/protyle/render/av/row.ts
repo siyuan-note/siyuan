@@ -122,11 +122,10 @@ export const insertAttrViewBlockAnimation = (options: {
     groupID?: string
 }) => {
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
-    const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
-    const hasMore = !options.blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none");
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
     let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
+    const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     if (hasSort) {
         previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util").previousElementSibling;
     }
@@ -136,14 +135,13 @@ export const insertAttrViewBlockAnimation = (options: {
     if (pinIndex > -1) {
         cellsHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
-    const avId = options.blockElement.getAttribute("data-av-id");
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
         let lineNumber = 1;
         const colType = getTypeByCellElement(item);
         if (colType === "lineNumber") {
             const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value");
             if (lineNumberValue) {
-                lineNumber = parseInt(lineNumberValue) + 1;
+                lineNumber = parseInt(lineNumberValue);
             }
         }
         cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
@@ -156,6 +154,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
         }
     });
     let html = "";
+    clearSelect(["cell", "row"], options.blockElement);
     options.srcIDs.forEach((id) => {
         const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
         if (!blockCellElement) {
@@ -163,14 +162,13 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
     ${cellsHTML}
 </div>`;
         } else {
-            clearSelect(["cell"], options.blockElement);
             addDragFill(blockCellElement);
             blockCellElement.classList.add("av__cell--select");
         }
     });
     previousElement.insertAdjacentHTML("afterend", html);
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
-        avID: avId,
+        avID: options.blockElement.getAttribute("data-av-id"),
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
         groupID: options.groupID,
         previousID: options.previousId,
@@ -179,8 +177,8 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
             showMessage(window.siyuan.languages.insertRowTip);
         } else {
             let popCellElement: HTMLElement;
+            const updateIds = Object.keys(response.data.values);
             options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {
-                const updateIds = Object.keys(response.data.values);
                 rowItem.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
                     if (!popCellElement && cellItem.getAttribute("data-detached") === "true") {
                         popCellElement = cellItem;
@@ -192,7 +190,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
                     }
                 });
             });
-            if (options.srcIDs.length === 1 && !(hasMore && hasSort)) {
+            if (options.srcIDs.length === 1 ) {
                 popTextCell(options.protyle, [popCellElement], "block");
             }
         }

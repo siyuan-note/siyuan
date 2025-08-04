@@ -1,12 +1,15 @@
 import {showMessage} from "../../../../dialog/message";
 import {
-    genCellValueByElement,
-    getTypeByCellElement,
+    genCellValue,
+    getTypeByCellElement, popTextCell,
     renderCell,
     renderCellAttr
 } from "../cell";
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
+import {Constants} from "../../../../constants";
+import {clearSelect} from "../../../util/clearSelect";
+import {hasClosestByClassName} from "../../../util/hasClosest";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;
@@ -15,131 +18,80 @@ export const insertGalleryItemAnimation = (options: {
     previousId: string;
     groupID?: string
 }) => {
-    if ((options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
-        showMessage(window.siyuan.languages.insertRowTip);
-        return;
-    }
-    const avId = options.blockElement.getAttribute("data-av-id");
+    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
-    const sideItemElement = options.previousId ? options.blockElement.querySelector(`.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
-    let html = "";
-    let needUpdate = "";
-    if (options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-        !options.blockElement.querySelector(groupQuery + '[data-type="av-load-more"]').classList.contains("fn__none")) {
-        needUpdate = ' data-need-update="true"';
+    let sideItemElement = options.previousId ? options.blockElement.querySelector(`.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
+    const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
+    if (hasSort) {
+        sideItemElement = options.blockElement.querySelector(groupQuery + ".av__gallery-add").previousElementSibling;
     }
-    const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
     let cellsHTML = "";
-    sideItemElement.querySelectorAll(".av__cell").forEach((item:HTMLElement) => {
-        cellsHTML += `<div class="av__cell" aria-label="${item.getAttribute("aria-label")}" data-field-id="${item.dataset.fieldId}"><span class="av__pulse"></span>${item.querySelector(".av__gallery-tip").outerHTML}</div>`;
+    sideItemElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
+        let lineNumber = 1;
+        const fieldType = getTypeByCellElement(item);
+        if (fieldType === "lineNumber") {
+            const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value");
+            if (lineNumberValue) {
+                lineNumber = parseInt(lineNumberValue);
+            }
+        }
+        cellsHTML += `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" data-field-id="${item.dataset.fieldId}" 
+data-wrap="${item.dataset.wrap}" 
+data-dtype="${item.dataset.dtype}" 
+data-empty="${item.dataset.empty}"
+${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, "gallery")}</div>`;
     });
+    clearSelect(["galleryItem"], options.blockElement);
+    let html = "";
+    const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
     options.srcIDs.forEach((id) => {
-        html += `<div class="av__gallery-item"${needUpdate} data-type="ghost" data-id="${id}">
+        const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
+        if (!blockCellElement) {
+            html += `<div class="av__gallery-item" data-type="ghost">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
     <div class="av__gallery-fields">${cellsHTML}</div>
 </div>`;
+        } else {
+            const galleryItemElement = hasClosestByClassName(blockCellElement, "av__gallery-item");
+            if (galleryItemElement) {
+                galleryItemElement.classList.add("av__gallery-item--select");
+            }
+        }
     });
-    if (options.previousId && sideItemElement) {
+    if (sideItemElement) {
         sideItemElement.insertAdjacentHTML("afterend", html);
     } else {
-        options.blockElement.querySelector(".av__gallery").insertAdjacentHTML("afterbegin", html);
+        options.blockElement.querySelector(groupQuery + ".av__gallery").insertAdjacentHTML("afterbegin", html);
     }
-    const currentItemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${options.srcIDs[0]}"]`);
-    fetchPost("/api/av/getAttributeViewFilterSort", {
-        id: avId,
-        blockID: options.blockElement.getAttribute("data-node-id")
+    fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
+        avID: options.blockElement.getAttribute("data-av-id"),
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        groupID: options.groupID,
+        previousID: options.previousId,
     }, (response) => {
-        // https://github.com/siyuan-note/siyuan/issues/10517
-        let hideTextCell = false;
-        response.data.filters.find((item: IAVFilter) => {
-            const itemCellElement = options.blockElement.querySelector(`.av__cell[data-field-id="${item.column}"]`);
-            if (!itemCellElement) {
-                return;
-            }
-            const filterType = itemCellElement.getAttribute("data-dtype");
-            if (item.value && filterType !== item.value.type) {
-                return;
-            }
-            if (["relation", "rollup", "template"].includes(filterType)) {
-                hideTextCell = true;
-                return true;
-            }
-
-            // 根据后台计算出显示与否的结果进行标识，以便于在 refreshAV 中更新 UI
-            if (["created", "updated"].includes(filterType)) {
-                currentItemElement.setAttribute("data-need-update", "true");
-            } else {
-                response.data.sorts.find((sortItem: IAVSort) => {
-                    if (sortItem.column === item.column) {
-                        currentItemElement.setAttribute("data-need-update", "true");
-                        return true;
+        if (!response.data.values) {
+            showMessage(window.siyuan.languages.insertRowTip);
+        } else {
+            let popCellElement: HTMLElement;
+            const updateIds = Object.keys(response.data.values);
+            options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {
+                rowItem.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
+                    if (!popCellElement && cellItem.getAttribute("data-detached") === "true") {
+                        popCellElement = cellItem;
+                    }
+                    if (updateIds.includes(cellItem.dataset.fieldId)) {
+                        const cellValue = response.data.values[cellItem.dataset.fieldId];
+                        if (cellValue.type === "checkbox") {
+                            cellValue.checkbox.content = cellItem.getAttribute("aria-label");
+                        }
+                        cellItem.innerHTML = renderCell(cellValue, undefined, false, "gallery");
+                        renderCellAttr(cellItem, cellValue);
                     }
                 });
+            });
+            if (options.srcIDs.length === 1) {
+                popTextCell(options.protyle, [popCellElement], "block");
             }
-            // 当空或非空外，需要根据值进行判断
-            let isRenderValue = true;
-            if (item.operator !== "Is empty" && item.operator !== "Is not empty") {
-                switch (item.value.type) {
-                    case "select":
-                    case "mSelect":
-                        if (!item.value.mSelect || item.value.mSelect.length === 0) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "block":
-                        if (!item.value.block || !item.value.block.content) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "number":
-                        if (!item.value.number || !item.value.number.isNotEmpty) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "date":
-                    case "created":
-                    case "updated":
-                        if (!item.value[item.value.type] || !item.value[item.value.type].isNotEmpty) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "mAsset":
-                        if (!item.value.mAsset || item.value.mAsset.length === 0) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "checkbox":
-                        if (!item.value.checkbox) {
-                            isRenderValue = false;
-                        }
-                        break;
-                    case "text":
-                    case "url":
-                    case "phone":
-                    case "email":
-                        if (!item.value[item.value.type] || !item.value[item.value.type].content) {
-                            isRenderValue = false;
-                        }
-                        break;
-                }
-            }
-            if (sideItemElement.classList.contains("av__gallery-item") && isRenderValue) {
-                const sideItemCellElement = sideItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`) as HTMLElement;
-                const cellElement = currentItemElement.querySelector(`.av__cell[data-field-id="${item.column}"]`);
-                const cellValue = genCellValueByElement(getTypeByCellElement(sideItemCellElement), sideItemCellElement);
-                const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-                if (cellValue.type === "checkbox") {
-                    cellValue.checkbox.content = cellElement.getAttribute("aria-label");
-                }
-                cellElement.innerHTML = renderCell(cellValue, undefined,
-                        iconElement ? !iconElement.classList.contains("fn__none") : false, "gallery") +
-                    cellElement.querySelector(".av__gallery-tip").outerHTML;
-                renderCellAttr(cellElement, cellValue);
-            }
-        });
-        if (hideTextCell) {
-            currentItemElement.remove();
-            showMessage(window.siyuan.languages.insertRowTip);
         }
         setPage(options.blockElement);
     });

@@ -79,6 +79,26 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		filterKeyIDs[f.Column] = true
 	}
 
+	// 对库中存在模板字段的情况进行处理
+	existTemplateField := false
+	for _, keyValues := range attrView.KeyValues {
+		if av.KeyTypeTemplate == keyValues.Key.Type {
+			existTemplateField = true
+			break
+		}
+	}
+	if existTemplateField {
+		if nil != nearItem {
+			// 存在模板字段且存在临近项时从临近项获取新值
+			for _, keyValues := range attrView.KeyValues {
+				newValue := getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
+				ret[keyValues.Key.ID] = newValue
+			}
+		} else { // 存在模板字段但不存在临近项时不生成任何新值
+			return
+		}
+	}
+
 	for _, filter := range view.Filters {
 		keyValues, _ := attrView.GetKeyValues(filter.Column)
 		if nil == keyValues {
@@ -87,8 +107,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 		var newValue *av.Value
 		if nil != nearItem {
+			// 存在临近项时优先通过临近项获取新值
 			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
 		} else {
+			// 不存在临近项时通过过滤条件计算新值
 			newValue = filter.GetAffectValue(keyValues.Key, addingBlockID)
 		}
 		if nil != newValue {

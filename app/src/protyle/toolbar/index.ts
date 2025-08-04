@@ -1291,7 +1291,7 @@ export class Toolbar {
             }
             html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            if (listElement.childElementCount > 2) {
+            if (listElement.childElementCount > 2 && !matchInput && inputElement.value.trim()) {
                 listElement.firstElementChild.nextElementSibling.nextElementSibling.classList.add("b3-list-item--focus");
             } else {
                 listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");

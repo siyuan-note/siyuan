@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "La pulizia del repository dei dati eliminerà completamente tutti gli snapshot non referenziati e gli oggetti dati correlati, sei sicuro di voler pulire?",
   "purge": "Pulisci",
   "plsChoose": "Si prega di scegliere prima",
-  "clearMessage": "Segna come letto",
   "freeSub": "Prova gratuita",
   "sortByUpdateTimeDesc": "Discendente per ora di aggiornamento",
   "sortByUpdateTimeAsc": "Ascendente per ora di aggiornamento",

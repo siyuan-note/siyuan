@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "データリポジトリを消去すると、参照されていないすべてのスナップショットと関連するデータオブジェクトが完全に削除されます。消去してもよろしいですか？",
   "purge": "消去",
   "plsChoose": "最初にノートを選択してください",
-  "clearMessage": "既読",
   "freeSub": "無料体験版",
   "sortByUpdateTimeDesc": "更新時間 (降順)",
   "sortByUpdateTimeAsc": "更新時間 (昇順)",

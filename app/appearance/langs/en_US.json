@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "Purging the data repo will completely delete all unreferenced snapshots and related data objects, are you sure to purge?",
   "purge": "Purge",
   "plsChoose": "Please choose first",
-  "clearMessage": "Read",
   "freeSub": "Free Trial Subscription",
   "sortByUpdateTimeDesc": "Descending by update time",
   "sortByUpdateTimeAsc": "Ascending by update time",

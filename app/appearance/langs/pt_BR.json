@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "Limpar o repositório de dados excluirá completamente todos os instantâneos não referenciados e objetos de dados relacionados, tem certeza que deseja limpar?",
   "purge": "Limpar",
   "plsChoose": "Por favor, escolha primeiro",
-  "clearMessage": "Ler",
   "freeSub": "Assinatura de Teste Gratuita",
   "sortByUpdateTimeDesc": "Decrescente por hora de atualização",
   "sortByUpdateTimeAsc": "Crescente por hora de atualização",

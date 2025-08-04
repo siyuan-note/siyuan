@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "清理数据仓库会彻底删除所有未引用的快照和相关数据对象，确定进行清理吗？",
   "purge": "清理",
   "plsChoose": "请先进行选择",
-  "clearMessage": "已读",
   "freeSub": "免费试用订阅",
   "sortByUpdateTimeDesc": "更新时间降序",
   "sortByUpdateTimeAsc": "更新时间升序",

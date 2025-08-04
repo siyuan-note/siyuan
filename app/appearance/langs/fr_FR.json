@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "La purge du référentiel de données supprimera complètement tous les instantanés non référencés et les objets de données associés, êtes-vous sûr de purger ?",
   "purge": "Purger",
   "plsChoose": "Veuillez d'abord choisir",
-  "clearMessage": "Lire",
   "freeSub": "Abonnement d'essai gratuit",
   "sortByUpdateTimeDesc": "Descendant par heure de mise à jour",
   "sortByUpdateTimeAsc": "Croissant par heure de mise à jour",

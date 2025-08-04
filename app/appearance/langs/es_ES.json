@@ -636,7 +636,6 @@
   "purge": "Purgar",
   "dataRepoPurgeTip": "Purga todas las instantáneas sin referencia y los objetos de datos relacionados",
   "plsChoose": "Por favor, elija primero",
-  "clearMessage": "Leer",
   "freeSub": "Suscripción de prueba gratuita",
   "sortByUpdateTimeDesc": "Descendente por tiempo de actualización",
   "sortByUpdateTimeAsc": "Ascendente por tiempo de actualización",

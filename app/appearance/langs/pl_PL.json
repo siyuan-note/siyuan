@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "Oczyszczenie repozytorium danych całkowicie usunie wszystkie nieodwołane zrzuty i powiązane obiekty danych, czy na pewno chcesz przeprowadzić oczyszczenie?",
   "purge": "Oczyść",
   "plsChoose": "Proszę najpierw wybrać",
-  "clearMessage": "Przeczytaj",
   "freeSub": "Bezpłatna subskrypcja próbna",
   "sortByUpdateTimeDesc": "Malejąco wg czasu aktualizacji",
   "sortByUpdateTimeAsc": "Rosnąco wg czasu aktualizacji",

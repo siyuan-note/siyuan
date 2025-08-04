@@ -636,7 +636,6 @@
   "dataRepoPurgeConfirm": "Das Bereinigen des Daten-Repo löscht alle nicht referenzierten Schnappschüsse und zugehörigen Datenobjekte vollständig. Sind Sie sicher, dass Sie bereinigen möchten?",
   "purge": "Bereinigen",
   "plsChoose": "Bitte zuerst auswählen",
-  "clearMessage": "Lesen",
   "freeSub": "Kostenlose Testversion",
   "sortByUpdateTimeDesc": "Absteigend nach Aktualisierungszeit",
   "sortByUpdateTimeAsc": "Aufsteigend nach Aktualisierungszeit",

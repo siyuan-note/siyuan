@@ -1,8 +1,6 @@
 module github.com/siyuan-note/siyuan/kernel
 
-go 1.24
-
-toolchain go1.24.1
+go 1.24.4
 
 require (
 	code.sajari.com/docconv v1.3.8
@@ -37,7 +35,6 @@ require (
 	github.com/gin-contrib/sse v1.1.0
 	github.com/gin-gonic/gin v1.10.1
 	github.com/go-ole/go-ole v1.3.0
-	github.com/goccy/go-json v0.10.5
 	github.com/gofrs/flock v0.12.1
 	github.com/golang-jwt/jwt/v5 v5.2.2
 	github.com/gorilla/css v1.0.1
@@ -59,6 +56,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/sashabaranov/go-openai v1.40.3
 	github.com/shirou/gopsutil/v4 v4.25.7
+	github.com/siyuan-note/dataparser v0.0.0-20250804100744-b41253b236f3
 	github.com/siyuan-note/dejavu v0.0.0-20250802020836-44a543706899
 	github.com/siyuan-note/encryption v0.0.0-20250326023622-24a67e6956ec
 	github.com/siyuan-note/eventbus v0.0.0-20240627125516-396fdb0f0f97
@@ -128,6 +126,7 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.26.0 // indirect
 	github.com/go-resty/resty/v2 v2.16.5 // indirect
+	github.com/goccy/go-json v0.10.5 // indirect
 	github.com/golang/freetype v0.0.0-20170609003504-e2365dfdc4a0 // indirect
 	github.com/google/pprof v0.0.0-20250607225305-033d6d78b36a // indirect
 	github.com/google/uuid v1.6.0 // indirect

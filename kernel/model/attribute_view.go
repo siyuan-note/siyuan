@@ -79,22 +79,22 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		filterKeyIDs[f.Column] = true
 	}
 
-	// 对库中存在模板字段的情况进行处理
-	existTemplateField := false
+	// 对库中存在模板字段和汇总字段的情况进行处理（尽量从临近项获取新值，获取不到的话直接返回）
+	existSpecialField := false
 	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeTemplate == keyValues.Key.Type {
-			existTemplateField = true
+		if av.KeyTypeTemplate == keyValues.Key.Type || av.KeyTypeRollup == keyValues.Key.Type {
+			existSpecialField = true
 			break
 		}
 	}
-	if existTemplateField {
+	if existSpecialField {
 		if nil != nearItem {
-			// 存在模板字段且存在临近项时从临近项获取新值
+			// 存在临近项时从临近项获取新值
 			for _, keyValues := range attrView.KeyValues {
 				newValue := getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
 				ret[keyValues.Key.ID] = newValue
 			}
-		} else { // 存在模板字段但不存在临近项时不生成任何新值
+		} else { // 不存在临近项时不生成任何新值
 			return
 		}
 	}

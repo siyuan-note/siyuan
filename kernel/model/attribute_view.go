@@ -3157,6 +3157,11 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 			continue
 		}
 
+		if av.KeyTypeRollup == newValue.Type {
+			// 汇总字段的值是渲染时计算的，不需要添加到数据存储中
+			continue
+		}
+
 		if av.KeyTypeBlock == newValue.Type {
 			// 如果是主键的话前面已经添加过了，这里仅修改内容
 			blockValue.Block.Content = newValue.Block.Content

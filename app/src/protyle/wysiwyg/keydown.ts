@@ -681,7 +681,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                     scrollCenter(protyle, previousElement);
                                     event.stopPropagation();
                                     event.preventDefault();
-                                } else if (foldElement && foldElement.getAttribute("data-type") !== "NodeListItem") {
+                                } else if (foldElement) {
                                     // 遇到折叠块
                                     foldElement.scrollTop = 0;
                                     focusBlock(foldElement, undefined, true);

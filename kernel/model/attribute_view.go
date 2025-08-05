@@ -360,8 +360,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
+	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
 	regenAttrViewViewGroups(attrView, "force")
+	setAttrViewGroupStates(view, groupStates)
 
 	err = av.SaveAttributeView(attrView)
 	ReloadAttrView(avID)
@@ -1679,23 +1681,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		return
 	}
 
-	// 临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态
-	type GroupState struct {
-		ID     string
-		Folded bool
-		Hidden int
-		Sort   int
-	}
-	groupStates := map[string]*GroupState{}
-	for i, groupView := range view.Groups {
-		groupStates[groupView.GroupValue] = &GroupState{
-			ID:     groupView.ID,
-			Folded: groupView.GroupFolded,
-			Hidden: groupView.GroupHidden,
-			Sort:   i,
-		}
-	}
-
+	groupStates := getAttrViewGroupStates(view)
 	group := view.Group
 	view.Groups = nil
 	viewable := sql.RenderView(attrView, view, "")
@@ -1854,14 +1840,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	view.GroupUpdated = time.Now().UnixMilli()
 
-	// 恢复分组视图状态
-	for _, groupView := range view.Groups {
-		if state, ok := groupStates[groupView.GroupValue]; ok {
-			groupView.ID = state.ID
-			groupView.GroupFolded = state.Folded
-			groupView.GroupHidden = state.Hidden
-		}
-	}
+	setAttrViewGroupStates(view, groupStates)
 
 	if av.GroupOrderMan == view.Group.Order {
 		// 恢复分组视图的自定义顺序
@@ -1963,6 +1942,41 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				}
 				return util.NaturalCompare(jVal, iVal)
 			})
+		}
+	}
+}
+
+// GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
+type GroupState struct {
+	ID     string
+	Folded bool
+	Hidden int
+	Sort   int
+}
+
+func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
+	groupStates = map[string]*GroupState{}
+	if nil == view.Group {
+		return
+	}
+
+	for i, groupView := range view.Groups {
+		groupStates[groupView.GroupValue] = &GroupState{
+			ID:     groupView.ID,
+			Folded: groupView.GroupFolded,
+			Hidden: groupView.GroupHidden,
+			Sort:   i,
+		}
+	}
+	return
+}
+
+func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
+	for _, groupView := range view.Groups {
+		if state, ok := groupStates[groupView.GroupValue]; ok {
+			groupView.ID = state.ID
+			groupView.GroupFolded = state.Folded
+			groupView.GroupHidden = state.Hidden
 		}
 	}
 }

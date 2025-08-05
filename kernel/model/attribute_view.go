@@ -217,7 +217,7 @@ func removeAttributeViewGroup(avID, blockID string) (err error) {
 }
 
 func removeAttributeViewGroup0(view *av.View) {
-	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
+	view.Group, view.Groups, view.GroupCreated = nil, nil, 0
 }
 
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
@@ -1613,8 +1613,8 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 
 	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
 	if isGroupByDate(view) {
-		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
-		if time.Now().Format("2006-01-02") != updatedDate {
+		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
+		if time.Now().Format("2006-01-02") != createdDate {
 			regenAttrViewViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
@@ -1871,7 +1871,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		view.Groups = append(view.Groups, v)
 	}
 
-	view.GroupUpdated = time.Now().UnixMilli()
+	view.GroupCreated = time.Now().UnixMilli()
 
 	setAttrViewGroupStates(view, groupStates)
 

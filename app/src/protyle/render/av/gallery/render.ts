@@ -114,7 +114,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     });
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(options.data, isSearching || !!query, options.protyle.disabled || !!hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(options.data, isSearching || !!query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div>
         ${avBodyHTML}
     </div>
@@ -143,7 +143,7 @@ const afterRenderGallery = (options: ITableOptions) => {
             (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
             return;
         }
-        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement
+        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement;
         if (bodyElement) {
             bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
         }
@@ -161,9 +161,6 @@ const afterRenderGallery = (options: ITableOptions) => {
     options.blockElement.querySelector(".layout-tab-bar").scrollLeft = (options.blockElement.querySelector(".layout-tab-bar .item--focus") as HTMLElement).offsetLeft - 30;
     if (options.cb) {
         options.cb(options.data);
-    }
-    if (options.data.view.hideAttrViewName) {
-        options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
     }
     if (!options.renderAll) {
         return;
@@ -302,7 +299,7 @@ export const renderGallery = async (options: {
     const bodyHTML = getGalleryHTML(view, selectItemIds, editIds);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
-    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, options.protyle.disabled || !!hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
+    ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div>
         <div class="av__body" data-page-size="${view.pageSize}">
             ${bodyHTML}
@@ -323,4 +320,7 @@ export const renderGallery = async (options: {
         protyle: options.protyle,
         blockElement: options.blockElement,
     });
+    if (options.data.view.hideAttrViewName) {
+        options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
+    }
 };

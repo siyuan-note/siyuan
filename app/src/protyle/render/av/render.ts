@@ -225,12 +225,20 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 };
 
 export const getGroupTitleHTML = (group: IAVView, counter: number) => {
+    let nameHTML = '';
+    if (["mSelect", "select"].includes(group.groupValue.type)) {
+        group.groupValue.mSelect.forEach((item) => {
+            nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;
+        });
+    } else {
+        nameHTML = group.name;
+    }
     return `<div class="av__group-title">
     <div class="av__group-icon" data-type="av-group-fold" data-id="${group.id}">
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div>
     <span class="fn__space"></span>
-    ${group.name}
+    ${nameHTML}
     <span class="${counter === 0 ? "fn__none" : "av__group-counter"}">${counter}</span>
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
@@ -609,7 +617,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     // hide
                     titleElement.classList.add("fn__none");
                 }
-                if (item.getAttribute("data-av-type") === "gallery") {
+                if (item.getAttribute("data-av-type") === "gallery" && !item.querySelector(".av__group-title")) {
                     const galleryElement = item.querySelector(".av__gallery");
                     if (!operation.data) {
                         galleryElement.classList.remove("av__gallery--top");

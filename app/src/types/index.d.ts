@@ -863,6 +863,7 @@ interface IAVView {
     sorts: IAVSort[],
     groups: IAVView[]
     group: IAVGroup
+    groupValue: IAVCellValue
 }
 
 interface IAVTable extends IAVView {

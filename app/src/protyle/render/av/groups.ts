@@ -14,7 +14,7 @@ export const getPageSize = (blockElement: Element) => {
         }
     } = {};
     let unGroupPageSize: number;
-    blockElement.querySelectorAll(".av__body").forEach((item:HTMLElement) => {
+    blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
         const id = item.dataset.groupId;
         const pageSize = parseInt(item.dataset.pageSize);
         if (id) {
@@ -67,7 +67,7 @@ export const getGroupsMethodHTML = (columns: IAVColumn[], group: IAVGroup) => {
     const selectHTML = '<svg class="b3-menu__checked"><use xlink:href="#iconSelect"></use></svg>';
     let html = `<button class="b3-menu__item" data-type="setGroupMethod">
     <div class="b3-menu__label">${window.siyuan.languages.calcOperatorNone}</div>
-    ${group ? "" : selectHTML}
+    ${(!group || !group.field) ? selectHTML : ""}
 </button>`;
     columns.forEach(item => {
         if (["rollup", "mAsset", "lineNumber"].includes(item.type)) {
@@ -178,10 +178,10 @@ export const bindGroupsNumber = (options: {
 export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
     let html = "";
     let column: IAVColumn;
-    if (view.group && view.group.field && view.groups) {
+    if (view.group && view.group.field) {
         let groupHTML = "";
         column = columns.find(item => item.id === view.group.field);
-        if (view.groups.length > 0) {
+        if (view.groups?.length > 0) {
             groupHTML = '<button class="b3-menu__separator"></button>';
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
             view.groups.forEach(item => {

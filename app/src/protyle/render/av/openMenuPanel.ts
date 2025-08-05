@@ -1514,13 +1514,17 @@ export const openMenuPanel = (options: {
                         await closeCB();
                     }
                     closeCB = undefined;
-                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
-                    bindGroupsEvent({
-                        protyle: options.protyle,
-                        menuElement: menuElement,
-                        blockElement: options.blockElement,
-                        data
-                    });
+                    if ((data.view.group && data.view.group.field) || target.classList.contains("block__icon")) {
+                        menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                        bindGroupsEvent({
+                            protyle: options.protyle,
+                            menuElement: menuElement,
+                            blockElement: options.blockElement,
+                            data
+                        });
+                    } else {
+                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    }
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();

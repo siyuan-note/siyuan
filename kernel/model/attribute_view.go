@@ -1618,9 +1618,17 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		}
 	}
 
+	fixDev := false
 	// 如果存在分组的话渲染分组视图
 	if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 		for _, groupView := range view.Groups {
+			if "" == groupView.GetGroupValue() && !fixDev {
+				// TODO 分组上线后删除，预计 2025 年 9 月后可以删除
+				regenAttrViewViewGroups(attrView, "force")
+				av.SaveAttributeView(attrView)
+				fixDev = true
+			}
+
 			switch groupView.GetGroupValue() {
 			case groupValueDefault:
 				groupView.Name = fmt.Sprintf(Conf.language(264), groupKey.Name)
@@ -1853,11 +1861,11 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		v.Name = "" // 分组视图的名称在渲染时才填充
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
 		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
-			v.GroupVal.Text = nil
-			v.GroupVal.Type = av.KeyTypeSelect
-
-			opt := groupKey.GetOption(groupVal)
-			v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+			if opt := groupKey.GetOption(groupVal); nil != opt {
+				v.GroupVal.Text = nil
+				v.GroupVal.Type = av.KeyTypeSelect
+				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+			}
 		}
 		view.Groups = append(view.Groups, v)
 	}

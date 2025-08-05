@@ -226,15 +226,14 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 };
 
 export const getGroupTitleHTML = (group: IAVView, counter: number) => {
-    return `<div class="av__group-title block__icons">
-    <div class="block__icon block__icon--show" data-type="av-group-fold" data-id="${group.id}">
+    return `<div class="av__group-title">
+    <div class="av__group-icon" data-type="av-group-fold" data-id="${group.id}">
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div>
     <span class="fn__space"></span>
     ${group.name}
-    <span class="${counter === 0 ? "fn__none" : "counter"}">${counter}</span>
-    <span class="fn__space"></span>
-    <span class="block__icon ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
+    <span class="${counter === 0 ? "fn__none" : "av__group-counter"}">${counter}</span>
+    <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };
 

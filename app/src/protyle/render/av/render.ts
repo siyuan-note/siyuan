@@ -707,16 +707,17 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
                     if (operation.action === "insertAttrViewBlock") {
+                        const groupQuery = operation.groupID ? `[data-group-id="${operation.groupID}"]` : "";
                         if (item.getAttribute("data-av-type") === "gallery") {
                             operation.srcs.forEach(srcItem => {
-                                const filesElement = item.querySelector(`.av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
+                                const filesElement = item.querySelector(`.av__body${groupQuery} .av__gallery-item[data-id="${srcItem.id}"]`)?.querySelector(".av__gallery-fields");
                                 if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
                                     filesElement.classList.add("av__gallery-fields--edit");
                                 }
                             });
                         }
                         if (operation.srcs.length === 1) {
-                            const popCellElement = item.querySelector(`.av__body${operation.groupID ? `[data-group-id="${operation.groupID}"]` : ""} .av__cell[data-block-id="${operation.srcs[0].id}"]`) as HTMLElement;
+                            const popCellElement = item.querySelector(`.av__body${groupQuery} .av__cell[data-block-id="${operation.srcs[0].id}"]`) as HTMLElement;
                             if (popCellElement) {
                                 popTextCell(protyle, [popCellElement], "block");
                             }

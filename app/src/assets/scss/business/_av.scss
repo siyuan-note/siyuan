@@ -940,7 +940,7 @@
       }
 
       svg {
-        padding: 4px;
+        padding: 5px;
         float: left;
         width: calc(1em - 6px);
         height: calc(1em - 6px);
@@ -951,6 +951,7 @@
         display: none;
 
         svg {
+          padding: 4px;
           width: calc(1em - 4px);
           height: calc(1em - 4px);
         }

@@ -192,21 +192,21 @@ type View struct {
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group        *ViewGroup `json:"group,omitempty"`      // 分组规则
-	GroupUpdated int64      `json:"groupUpdated"`         // 分组规则更新时间戳
-	Groups       []*View    `json:"groups,omitempty"`     // 分组视图列表
-	GroupItemIDs []string   `json:"groupItemIds"`         // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则
-	GroupValue   *Value     `json:"groupValue,omitempty"` // 分组值
-	GroupFolded  bool       `json:"groupFolded"`          // 分组是否折叠
-	GroupHidden  int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
+	GroupUpdated int64      `json:"groupUpdated"`        // 分组规则更新时间戳
+	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
+	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
+	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
+	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
+	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
 func (view *View) GetGroupValue() string {
-	if nil == view.GroupValue {
+	if nil == view.GroupVal {
 		return ""
 	}
-	return view.GroupValue.String(false)
+	return view.GroupVal.String(false)
 }
 
 // GetGroup 获取指定分组 ID 的分组视图。

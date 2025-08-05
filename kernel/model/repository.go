@@ -1526,8 +1526,13 @@ func processSyncMergeResult(exit, byHand bool, mergeResult *dejavu.MergeResult, 
 				tree.Box = boxID
 				tree.Path = strings.TrimPrefix(file.Path, "/"+boxID)
 
+				previousPath := tree.Path
 				resetTree(tree, "Conflicted", true)
 				createTreeTx(tree)
+				box := Conf.Box(boxID)
+				if nil != box {
+					box.addSort(previousPath, tree.ID)
+				}
 			}
 
 			needReloadFiletree = true

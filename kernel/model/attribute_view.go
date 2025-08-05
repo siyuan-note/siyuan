@@ -1863,7 +1863,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		v.Name = "" // 分组视图的名称在渲染时才填充
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
 		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
-			if opt := groupKey.GetOption(groupVal); nil != opt {
+			if opt := groupKey.GetOption(groupValue); nil != opt {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeSelect
 				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}

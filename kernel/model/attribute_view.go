@@ -124,10 +124,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			newValue := getNewValueByNearItem(nearItem, groupKey, addingBlockID)
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
-				if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
+				if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
 					exists := false
 					for _, s := range newValue.MSelect {
-						if s.Content == groupView.GroupValue {
+						if s.Content == groupView.GetGroupValue() {
 							exists = true
 						}
 					}
@@ -1621,7 +1621,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 	// 如果存在分组的话渲染分组视图
 	if groupKey := view.GetGroupKey(attrView); nil != groupKey {
 		for _, groupView := range view.Groups {
-			switch groupView.GroupValue {
+			switch groupView.GetGroupValue() {
 			case groupValueDefault:
 				groupView.Name = fmt.Sprintf(Conf.language(264), groupKey.Name)
 			case groupValueNotInRange:
@@ -1641,7 +1641,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			case groupValueNext30Days:
 				groupView.Name = fmt.Sprintf(Conf.language(263), 30)
 			default:
-				groupView.Name = groupView.GroupValue
+				groupView.Name = groupView.GetGroupValue()
 			}
 		}
 
@@ -1831,7 +1831,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	for name, groupItems := range groupItemsMap {
+	for groupValue, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {
 		case av.LayoutTypeTable:
@@ -1851,7 +1851,14 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 
 		v.Name = "" // 分组视图的名称在渲染时才填充
-		v.GroupValue = name
+		v.GroupValue = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
+		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+			v.GroupValue.Text = nil
+			v.GroupValue.Type = av.KeyTypeSelect
+
+			opt := groupKey.GetOption(groupVal)
+			v.GroupValue.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+		}
 		view.Groups = append(view.Groups, v)
 	}
 
@@ -1863,8 +1870,8 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		// 恢复分组视图的自定义顺序
 		if len(groupStates) > 0 {
 			sort.SliceStable(view.Groups, func(i, j int) bool {
-				if stateI, ok := groupStates[view.Groups[i].GroupValue]; ok {
-					if stateJ, ok := groupStates[view.Groups[j].GroupValue]; ok {
+				if stateI, ok := groupStates[view.Groups[i].GetGroupValue()]; ok {
+					if stateJ, ok := groupStates[view.Groups[j].GetGroupValue()]; ok {
 						return stateI.Sort < stateJ.Sort
 					}
 				}
@@ -1876,11 +1883,11 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			var relativeDateGroups []*av.View
 			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
 			for _, groupView := range view.Groups {
-				_, err := time.Parse("2006-01", groupView.GroupValue)
+				_, err := time.Parse("2006-01", groupView.GetGroupValue())
 				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
 					relativeDateGroups = append(relativeDateGroups, groupView)
 				} else { // 否则是相对日期分组形式
-					switch groupView.GroupValue {
+					switch groupView.GetGroupValue() {
 					case groupValueLast30Days:
 						last30Days = groupView
 					case groupValueLast7Days:
@@ -1902,7 +1909,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			}
 
 			sort.SliceStable(relativeDateGroups, func(i, j int) bool {
-				return relativeDateGroups[i].GroupValue < relativeDateGroups[j].GroupValue
+				return relativeDateGroups[i].GetGroupValue() < relativeDateGroups[j].GetGroupValue()
 			})
 
 			var lastNext30Days []*av.View
@@ -1932,7 +1939,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			startIdx := -1
 			thisMonth := todayStart.Format("2006-01")
 			for i, monthGroup := range relativeDateGroups {
-				if monthGroup.GroupValue < thisMonth {
+				if monthGroup.GetGroupValue() < thisMonth {
 					startIdx = i + 1
 				}
 			}
@@ -1953,7 +1960,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 			view.Groups = relativeDateGroups
 		} else {
 			sort.SliceStable(view.Groups, func(i, j int) bool {
-				iVal, jVal := view.Groups[i].GroupValue, view.Groups[j].GroupValue
+				iVal, jVal := view.Groups[i].GetGroupValue(), view.Groups[j].GetGroupValue()
 				if av.GroupOrderAsc == view.Group.Order {
 					return util.NaturalCompare(iVal, jVal)
 				}
@@ -1978,7 +1985,7 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 	}
 
 	for i, groupView := range view.Groups {
-		groupStates[groupView.GroupValue] = &GroupState{
+		groupStates[groupView.GetGroupValue()] = &GroupState{
 			ID:     groupView.ID,
 			Folded: groupView.GroupFolded,
 			Hidden: groupView.GroupHidden,
@@ -1990,7 +1997,7 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 
 func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 	for _, groupView := range view.Groups {
-		if state, ok := groupStates[groupView.GroupValue]; ok {
+		if state, ok := groupStates[groupView.GetGroupValue()]; ok {
 			groupView.ID = state.ID
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
@@ -3201,7 +3208,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
 			// 单选或多选类型的值可能需要从分组条件中获取默认值
-			if opt := keyValues.Key.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
+			if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
 				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 			}
 		}

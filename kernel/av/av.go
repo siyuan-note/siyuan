@@ -197,9 +197,16 @@ type View struct {
 	Groups       []*View    `json:"groups,omitempty"`     // 分组视图列表
 	GroupItemIDs []string   `json:"groupItemIds"`         // 分组项目 ID 列表，用于维护分组中的所有项目
 	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则
-	GroupValue   string     `json:"groupValue,omitempty"` // 分组值
+	GroupValue   *Value     `json:"groupValue,omitempty"` // 分组值
 	GroupFolded  bool       `json:"groupFolded"`          // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+}
+
+func (view *View) GetGroupValue() string {
+	if nil == view.GroupValue {
+		return ""
+	}
+	return view.GroupValue.String(false)
 }
 
 // GetGroup 获取指定分组 ID 的分组视图。

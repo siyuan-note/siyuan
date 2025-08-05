@@ -54,6 +54,9 @@ func getAttributeViewAddingBlockDefaultValues(c *gin.Context) {
 	}
 
 	values := model.GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousID, addingBlockID)
+	if 1 > len(values) {
+		values = nil
+	}
 	ret.Data = map[string]interface{}{
 		"values": values,
 	}

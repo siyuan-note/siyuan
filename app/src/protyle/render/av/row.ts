@@ -6,7 +6,6 @@ import {
     addDragFill, genCellValue,
     genCellValueByElement,
     getTypeByCellElement,
-    popTextCell,
     renderCell,
     renderCellAttr
 } from "./cell";

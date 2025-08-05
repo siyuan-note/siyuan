@@ -1,7 +1,7 @@
 import {showMessage} from "../../../../dialog/message";
 import {
     genCellValue,
-    getTypeByCellElement, popTextCell,
+    getTypeByCellElement,
     renderCell,
     renderCellAttr
 } from "../cell";

@@ -225,7 +225,7 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
 };
 
 export const getGroupTitleHTML = (group: IAVView, counter: number) => {
-    let nameHTML = '';
+    let nameHTML = "";
     if (["mSelect", "select"].includes(group.groupValue.type)) {
         group.groupValue.mSelect.forEach((item) => {
             nameHTML += `<span class="b3-chip" style="background-color:var(--b3-font-background${item.color});color:var(--b3-font-color${item.color})">${escapeHtml(item.content)}</span>`;

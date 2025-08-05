@@ -1750,16 +1750,15 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	todayStart := time.Now()
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 
-	var groupVal string
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)
 		if value.IsEmpty() {
-			groupVal = groupValueDefault
-			groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
+			groupItemsMap[groupValueDefault] = append(groupItemsMap[groupValueDefault], item)
 			continue
 		}
 
+		var groupVal string
 		switch group.Method {
 		case av.GroupMethodValue:
 			if av.KeyTypeMSelect == groupKey.Type {

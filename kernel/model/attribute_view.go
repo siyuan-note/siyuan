@@ -125,7 +125,15 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
 				if opt := groupKey.GetOption(groupView.GroupValue); nil != opt && groupValueDefault != groupView.GroupValue {
-					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					exists := false
+					for _, s := range newValue.MSelect {
+						if s.Content == groupView.GroupValue {
+							exists = true
+						}
+					}
+					if !exists {
+						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					}
 				}
 			}
 
@@ -1682,6 +1690,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	}
 
 	groupStates := getAttrViewGroupStates(view)
+
 	group := view.Group
 	view.Groups = nil
 	viewable := sql.RenderView(attrView, view, "")
@@ -1743,6 +1752,13 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 
 		switch group.Method {
 		case av.GroupMethodValue:
+			if av.KeyTypeMSelect == groupKey.Type {
+				for _, s := range value.MSelect {
+					groupItemsMap[s.Content] = append(groupItemsMap[s.Content], item)
+				}
+				continue
+			}
+
 			groupVal = value.String(false)
 		case av.GroupMethodRangeNum:
 			if group.Range.NumStart > value.Number.Content || group.Range.NumEnd < value.Number.Content {
@@ -1803,6 +1819,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 				}
 			}
 		}
+
 		groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
 	}
 

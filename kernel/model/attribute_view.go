@@ -217,7 +217,7 @@ func removeAttributeViewGroup(avID, blockID string) (err error) {
 }
 
 func removeAttributeViewGroup0(view *av.View) {
-	view.Group, view.Groups, view.GroupUpdated = nil, nil, 0
+	view.Group, view.Groups, view.GroupCreated = nil, nil, 0
 }
 
 func (tx *Transaction) doSyncAttrViewTableColWidth(operation *Operation) (ret *TxErr) {
@@ -508,6 +508,8 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 			}
 		}
 	}
+
+	regenAttrViewViewGroups(attrView, "force")
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -1611,8 +1613,8 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 
 	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
 	if isGroupByDate(view) {
-		updatedDate := time.UnixMilli(view.GroupUpdated).Format("2006-01-02")
-		if time.Now().Format("2006-01-02") != updatedDate {
+		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
+		if time.Now().Format("2006-01-02") != createdDate {
 			regenAttrViewViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
@@ -1748,16 +1750,15 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	todayStart := time.Now()
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
 
-	var groupVal string
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)
 		if value.IsEmpty() {
-			groupVal = groupValueDefault
-			groupItemsMap[groupVal] = append(groupItemsMap[groupVal], item)
+			groupItemsMap[groupValueDefault] = append(groupItemsMap[groupValueDefault], item)
 			continue
 		}
 
+		var groupVal string
 		switch group.Method {
 		case av.GroupMethodValue:
 			if av.KeyTypeMSelect == groupKey.Type {
@@ -1861,7 +1862,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		v.Name = "" // 分组视图的名称在渲染时才填充
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
 		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
-			if opt := groupKey.GetOption(groupVal); nil != opt {
+			if opt := groupKey.GetOption(groupValue); nil != opt {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeSelect
 				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
@@ -1870,7 +1871,7 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 		view.Groups = append(view.Groups, v)
 	}
 
-	view.GroupUpdated = time.Now().UnixMilli()
+	view.GroupCreated = time.Now().UnixMilli()
 
 	setAttrViewGroupStates(view, groupStates)
 

@@ -123,7 +123,7 @@ export const insertAttrViewBlockAnimation = (options: {
 }) => {
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
-    let previousElement = options.blockElement.querySelector(`.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
+    let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     if (hasSort) {
@@ -190,9 +190,6 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
                     }
                 });
             });
-            if (options.srcIDs.length === 1 ) {
-                popTextCell(options.protyle, [popCellElement], "block");
-            }
         }
         setPage(options.blockElement);
     });

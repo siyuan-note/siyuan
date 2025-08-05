@@ -1,14 +1,13 @@
 import {fetchPost} from "../../../util/fetch";
 import {getColIconByType} from "./col";
 import {Constants} from "../../../constants";
-import {addDragFill, cellScrollIntoView, renderCell} from "./cell";
+import {addDragFill, cellScrollIntoView, popTextCell, renderCell} from "./cell";
 import {unicode2Emoji} from "../../../emoji";
 import {focusBlock} from "../../util/selection";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
 import {stickyRow, updateHeader} from "./row";
 import {getCalcValue} from "./calc";
 import {renderAVAttribute} from "./blockAttr";
-import {showMessage} from "../../../dialog/message";
 import {addClearButton} from "../../../util/addClearButton";
 import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import {electronUndo} from "../../undo";
@@ -715,6 +714,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                     filesElement.classList.add("av__gallery-fields--edit");
                                 }
                             });
+                        }
+                        if (operation.srcs.length === 1) {
+                            const popCellElement = item.querySelector(`.av__body${operation.groupID ? `[data-group-id="${operation.groupID}"]` : ""} .av__cell[data-block-id="${operation.srcs[0].id}"]`) as HTMLElement;
+                            if (popCellElement) {
+                                popTextCell(protyle, [popCellElement], "block");
+                            }
                         }
                     } else if (operation.action === "addAttrViewView") {
                         if (item.getAttribute("data-node-id") === operation.blockID) {

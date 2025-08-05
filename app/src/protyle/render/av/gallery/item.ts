@@ -20,7 +20,7 @@ export const insertGalleryItemAnimation = (options: {
 }) => {
     (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
     const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
-    let sideItemElement = options.previousId ? options.blockElement.querySelector(`.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
+    let sideItemElement = options.previousId ? options.blockElement.querySelector(groupQuery + `.av__gallery-item[data-id="${options.previousId}"]`) : options.blockElement.querySelector(groupQuery + ".av__gallery-item");
     const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
     if (hasSort) {
         sideItemElement = options.blockElement.querySelector(groupQuery + ".av__gallery-add").previousElementSibling;
@@ -89,9 +89,6 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                     }
                 });
             });
-            if (options.srcIDs.length === 1) {
-                popTextCell(options.protyle, [popCellElement], "block");
-            }
         }
         setPage(options.blockElement);
     });

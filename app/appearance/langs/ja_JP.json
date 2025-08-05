@@ -8,7 +8,7 @@
   "groupMethodDateYear": "年",
   "syncColWidth": "列幅を同期",
   "groupMethod": "グループ方法",
-  "hideEmptyGroup": "空のグループを隠す",
+  "hideEmptyGroup": "空のグループを非表示",
   "groups": "グループ",
   "removeGroup": "グループを削除",
   "contentBlock": "コンテンツブロック",

@@ -188,6 +188,9 @@ type Collection interface {
 	// GetField 返回指定 ID 的字段。
 	GetField(id string) (ret Field, fieldIndex int)
 
+	// GetValue 返回指定项目 ID 和键 ID 的字段值。
+	GetValue(itemID, keyID string) (ret *Value)
+
 	// GetSorts 返回集合的排序规则。
 	GetSorts() []*ViewSort
 

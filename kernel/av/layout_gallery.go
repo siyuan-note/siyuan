@@ -184,6 +184,15 @@ func (gallery *Gallery) GetField(id string) (ret Field, fieldIndex int) {
 	return nil, -1
 }
 
+func (gallery *Gallery) GetValue(itemID, keyID string) (ret *Value) {
+	for _, card := range gallery.Cards {
+		if card.ID == itemID {
+			return card.GetValue(keyID)
+		}
+	}
+	return nil
+}
+
 func (gallery *Gallery) GetType() LayoutType {
 	return LayoutTypeGallery
 }

@@ -1559,7 +1559,7 @@ export const openMenuPanel = (options: {
                     data.view.groups.forEach((item) => {
                         if (item.id === target.dataset.id) {
                             oldGroupHidden = item.groupHidden;
-                            item.groupHidden = isHide ? 2 : 0;
+                            item.groupHidden = isHide ? 0 : 2;
                         }
                         if (item.groupHidden === 0) {
                             showCount++;

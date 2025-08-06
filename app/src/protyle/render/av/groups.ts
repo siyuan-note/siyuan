@@ -198,9 +198,9 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label"></span>
     <span class="block__icon" data-type="hideGroups">
-        ${window.siyuan.languages[showCount <= view.groups.length ? "hideAll" : "showAll"]}
+        ${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
         <span class="fn__space"></span>
-        <svg><use xlink:href="#iconEye${showCount <= view.groups.length ? "off" : ""}"></use></svg>
+        <svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>
     </span>
 </button>` + groupHTML;
         }

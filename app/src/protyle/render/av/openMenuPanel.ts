@@ -1565,9 +1565,9 @@ export const openMenuPanel = (options: {
                             showCount++;
                         }
                     });
-                    menuElement.querySelector('[data-type="hideGroups"]').innerHTML = `${window.siyuan.languages[showCount <= data.view.groups.length ? "hideAll" : "showAll"]}
+                    menuElement.querySelector('[data-type="hideGroups"]').innerHTML = `${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
 <span class="fn__space"></span>
-<svg><use xlink:href="#iconEye${showCount <= data.view.groups.length ? "off" : ""}"></use></svg>`;
+<svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>`;
                     transaction(options.protyle, [{
                         action: "hideAttrViewGroup",
                         avID: data.id,

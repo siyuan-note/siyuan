@@ -55,6 +55,7 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 		return
 	}
 
+	*depth++
 	switch view.LayoutType {
 	case av.LayoutTypeTable:
 		ret = RenderAttributeViewTable(attrView, view, query, depth)

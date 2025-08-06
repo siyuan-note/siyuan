@@ -44,7 +44,7 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
+func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value, ignore bool) {
 	ret = map[string]*av.Value{}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -59,6 +59,12 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		return
 	}
 
+	if 1 > len(view.Filters) && nil == view.Group {
+		// 没有过滤条件也没有分组条件时忽略
+		ignore = true
+		return
+	}
+
 	groupView := view
 	if "" != groupID {
 		groupView = view.GetGroup(groupID)
@@ -67,7 +73,9 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 		logging.LogErrorf("group [%s] not found in view [%s] of attribute view [%s]", groupID, viewID, avID)
 		return
 	}
-	return getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+
+	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	return
 }
 
 func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {

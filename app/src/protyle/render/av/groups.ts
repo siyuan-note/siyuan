@@ -183,9 +183,9 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         column = columns.find(item => item.id === view.group.field);
         if (view.groups?.length > 0) {
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
-            let showCount = 0
+            let showCount = 0;
             view.groups.forEach(item => {
-                if (!item.groupHidden) {
+                if (item.groupHidden === 0) {
                     showCount++;
                 }
                 groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
@@ -198,9 +198,9 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
 <button class="b3-menu__item" data-type="nobg">
     <span class="b3-menu__label"></span>
     <span class="block__icon" data-type="hideGroups">
-        ${window.siyuan.languages[showCount === view.groups.length? "hideAll" : "showAll"]}
+        ${window.siyuan.languages[showCount <= view.groups.length ? "hideAll" : "showAll"]}
         <span class="fn__space"></span>
-        <svg><use xlink:href="#iconEye${showCount === view.groups.length? "off" : ""}"></use></svg>
+        <svg><use xlink:href="#iconEye${showCount <= view.groups.length ? "off" : ""}"></use></svg>
     </span>
 </button>` + groupHTML;
         }

@@ -1587,7 +1587,7 @@ export const openMenuPanel = (options: {
         <svg><use xlink:href="#iconEye${isShow ? "" : "off"}"></use></svg>`;
                     data.view.groups.forEach((item) => {
                         item.groupHidden = isShow ? 2 : 0;
-                        target.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"] .b3-menu__action use`)?.setAttribute("xlink:href", `iconEye${isShow ? "" : "off"}`);
+                        target.parentElement.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"] .b3-menu__action use`)?.setAttribute("xlink:href", `#iconEye${isShow ? "off" : ""}`);
                     });
                     transaction(options.protyle, [{
                         action: "hideAttrViewAllGroups",

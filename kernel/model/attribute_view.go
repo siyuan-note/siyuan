@@ -3529,7 +3529,7 @@ func duplicateAttributeViewKey(operation *Operation) (err error) {
 		return
 	}
 
-	if av.KeyTypeBlock == key.Type || av.KeyTypeRelation == key.Type || av.KeyTypeRollup == key.Type {
+	if av.KeyTypeBlock == key.Type || av.KeyTypeRelation == key.Type {
 		return
 	}
 

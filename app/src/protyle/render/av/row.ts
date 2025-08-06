@@ -173,7 +173,9 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
         previousID: options.previousId,
     }, (response) => {
         if (!response.data.values) {
-            showMessage(window.siyuan.languages.insertRowTip);
+            if (!response.data.ignore) {
+                showMessage(window.siyuan.languages.insertRowTip);
+            }
         } else {
             let popCellElement: HTMLElement;
             const updateIds = Object.keys(response.data.values);

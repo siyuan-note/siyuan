@@ -326,8 +326,6 @@ func hideAttributeViewAllGroups(avID, blockID string, hidden bool) (err error) {
 		} else {
 			group.GroupHidden = 0
 		}
-
-		break
 	}
 
 	err = av.SaveAttributeView(attrView)

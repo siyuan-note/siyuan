@@ -1578,6 +1578,31 @@ export const openMenuPanel = (options: {
                     event.preventDefault();
                     event.stopPropagation();
                     break;
+                } else if (type === "hideGroups") {
+                    window.siyuan.menus.menu.remove();
+                    const useElement = target.querySelector("use");
+                    const isShow = useElement.getAttribute("xlink:href") === "#iconEyeoff";
+                    target.innerHTML = `${window.siyuan.languages[isShow ? "showAll" : "hideAll"]}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye${isShow ? "" : "off"}"></use></svg>`;
+                    data.view.groups.forEach((item) => {
+                        item.groupHidden = isShow ? 2 : 0;
+                        target.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"] .b3-menu__action use`)?.setAttribute("xlink:href", `iconEye${isShow ? "" : "off"}`);
+                    });
+                    transaction(options.protyle, [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: isShow,
+                    }], [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: !isShow
+                    }]);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
                 } else if (type === "removeGroups") {
                     window.siyuan.menus.menu.remove();
                     transaction(options.protyle, [{

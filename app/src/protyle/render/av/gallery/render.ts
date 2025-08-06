@@ -320,7 +320,7 @@ export const renderGallery = async (options: {
         protyle: options.protyle,
         blockElement: options.blockElement,
     });
-    if (options.data.view.hideAttrViewName) {
+    if (view.hideAttrViewName) {
         options.blockElement.querySelector(".av__gallery").classList.add("av__gallery--top");
     }
 };

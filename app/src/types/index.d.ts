@@ -65,6 +65,7 @@ type TOperation =
     | "setAttrViewBlockView"
     | "setAttrViewGroup"
     | "removeAttrViewGroup"
+    | "hideAttrViewAllGroups"
     | "syncAttrViewTableColWidth"
     | "hideAttrViewGroup"
     | "sortAttrViewGroup"

@@ -182,15 +182,27 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         let groupHTML = "";
         column = columns.find(item => item.id === view.group.field);
         if (view.groups?.length > 0) {
-            groupHTML = '<button class="b3-menu__separator"></button>';
             const disabledDrag = ["created", "date", "created", "updated"].includes(column.type);
+            let showCount = 0
             view.groups.forEach(item => {
+                if (!item.groupHidden) {
+                    showCount++;
+                }
                 groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
     ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     <div class="b3-menu__label fn__flex">${item.name || ""}</div>
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });
+            groupHTML = `<button class="b3-menu__separator"></button>
+<button class="b3-menu__item" data-type="nobg">
+    <span class="b3-menu__label"></span>
+    <span class="block__icon" data-type="hideGroups">
+        ${window.siyuan.languages[showCount === view.groups.length? "hideAll" : "showAll"]}
+        <span class="fn__space"></span>
+        <svg><use xlink:href="#iconEye${showCount === view.groups.length? "off" : ""}"></use></svg>
+    </span>
+</button>` + groupHTML;
         }
         html = `<button class="b3-menu__item${["date", "updated", "created"].includes(column.type) ? "" : " fn__none"}" data-type="goGroupsDate">
     <span class="b3-menu__label">${window.siyuan.languages.date}</span>

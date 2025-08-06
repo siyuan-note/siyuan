@@ -136,7 +136,7 @@
   "lastReviewTime": "Ultima revisione",
   "cardStatus": "Stato della carta",
   "noSupportTip": "Questa funzione non supporta l'uso di mazzi di carte",
-  "insertRowTip": "L'elemento aggiunto è stato filtrato, è possibile annullare filtro/ricerca/ordinamento per visualizzarlo",
+  "insertRowTip": "Il nuovo elemento è stato filtrato, annulla il filtro o modifica le impostazioni di raggruppamento per visualizzarlo",
   "insertPhoto": "Scatta una foto e inseriscila",
   "relativeToToday": "Relativo a oggi",
   "current": "Questo",

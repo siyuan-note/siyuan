@@ -136,7 +136,7 @@
   "lastReviewTime": "最後複習時間",
   "cardStatus": "卡片狀態",
   "noSupportTip": "此功能不支援卡包使用",
-  "insertRowTip": "新增條目已被過濾，可取消過濾/搜尋/排序進行查看",
+  "insertRowTip": "新增條目已被過濾，可取消過濾或分組設置後進行查看",
   "insertPhoto": "拍照並插入",
   "relativeToToday": "相對於今天",
   "current": "當前",

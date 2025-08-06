@@ -136,7 +136,7 @@
   "lastReviewTime": "Ostatni czas przeglądu",
   "cardStatus": "Status karty",
   "noSupportTip": "Ta funkcja nie wspiera użycia zestawów kart",
-  "insertRowTip": "Nowo dodane wiersze zostały przefiltrowane i mogą być wyświetlane po anulowaniu filtrowania/szukań/sortowań",
+  "insertRowTip": "Nowy element został przefiltrowany, anuluj filtrowanie lub ustawienia grupowania, aby wyświetlić",
   "insertPhoto": "Zrób zdjęcie i wstaw je",
   "relativeToToday": "W odniesieniu do dzisiaj",
   "current": "Ten",

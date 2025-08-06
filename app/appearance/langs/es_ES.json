@@ -136,7 +136,7 @@
   "lastReviewTime": "Última hora de revisión",
   "cardStatus": "Estado de la tarjeta",
   "noSupportTip": "Esta función no admite el uso de paquetes de tarjetas",
-  "insertRowTip": "Las filas recién agregadas se han filtrado y se pueden ver cancelando el filtrado/búsqueda/clasificación",
+  "insertRowTip": "El nuevo elemento ha sido filtrado, cancele el filtro o ajuste la configuración de agrupación para verlo",
   "insertPhoto": "Toma una foto e insértala",
   "relativeToToday": "Relativa a hoy",
   "current": "Esto",

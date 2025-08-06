@@ -136,7 +136,7 @@
   "lastReviewTime": "Last review time",
   "cardStatus": "Card status",
   "noSupportTip": "This function does not support the use of card decks",
-  "insertRowTip": "The newly added entries have been filtered and can be viewed by canceling filtering/searching/sorting",
+  "insertRowTip": "The new item has been filtered, cancel the filter or adjust the grouping settings to view it",
   "insertPhoto": "Take a photo and insert it",
   "relativeToToday": "Relative to today",
   "current": "This",

@@ -136,7 +136,7 @@
   "lastReviewTime": "Letzte Überprüfungszeit",
   "cardStatus": "Kartenstatus",
   "noSupportTip": "Diese Funktion unterstützt die Verwendung von Kartenstapeln nicht.",
-  "insertRowTip": "Die neu hinzugefügten Reihen wurden gefiltert und können eingesehen werden, indem das Filtern/Suchen/Sortieren aufgehoben wird.",
+  "insertRowTip": "Das neue Element wurde gefiltert, heben Sie die Filterung auf oder passen Sie die Gruppierungseinstellungen an, um es anzuzeigen",
   "insertPhoto": "Foto aufnehmen und einfügen",
   "relativeToToday": "Bezogen auf heute",
   "current": "Aktuell",

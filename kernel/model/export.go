@@ -2010,7 +2010,11 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
 		return
 	}
-	isEmpty = nil == tree.Root.FirstChild.FirstChild
+
+	if ast.NodeParagraph == tree.Root.FirstChild.Type {
+		isEmpty = nil == tree.Root.FirstChild.FirstChild
+	}
+
 	exportedMd = exportMarkdownContent0(id, tree, "", false, false,
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,

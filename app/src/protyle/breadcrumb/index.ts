@@ -363,7 +363,7 @@ ${padHTML}
                     click() {
                         if (!needSubscribe()) {
                             confirmDialog("📦 " + window.siyuan.languages.uploadAssets2CDN, window.siyuan.languages.uploadAssets2CDNConfirmTip, () => {
-                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.parentID});
+                                fetchPost("/api/asset/uploadCloud", {id: protyle.block.id});
                             });
                         }
                     }

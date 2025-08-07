@@ -17,7 +17,9 @@
 package model
 
 import (
+	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -91,6 +93,13 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 				changed = true
 			}
 		}
+	}
+
+	// 截断超长的数据库标题 Limit the database title to 256 characters https://github.com/siyuan-note/siyuan/issues/15459
+	if 256 < utf8.RuneCountInString(attrView.Name) {
+		attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
+		attrView.Name = gulu.Str.SubStr(attrView.Name, 256)
+		changed = true
 	}
 
 	if changed {

@@ -910,7 +910,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 需使用 textContent，文本元素没有 innerText
                             currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
-                        removeBlock(protyle, nodeElement, range, "Backspace");
+                        if (!nodeElement.classList.contains("code-block")) {
+                            removeBlock(protyle, nodeElement, range, "Backspace");
+                        }
                         event.stopPropagation();
                         event.preventDefault();
                         return;

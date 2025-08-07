@@ -380,7 +380,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
         }
     }
     if (colType === "block") {
-        if (typeof value === "object" && value.id) {
+        if (typeof value === "object" && value && value.id) {
             cellValue.isDetached = false;
         } else {
             cellValue.isDetached = true;
@@ -435,7 +435,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         }
     } else {
         const footerElement = blockElement.querySelector(".av__row--footer");
-        if (footerElement.querySelector(".av__calc--ashow")) {
+        if (footerElement?.querySelector(".av__calc--ashow")) {
             const avFooterRect = footerElement.getBoundingClientRect();
             if (avFooterRect.top < cellRect.bottom) {
                 const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
@@ -743,9 +743,9 @@ export const updateCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, va
         const cellId = item.dataset.id;   // 刚创建时无 id，更新需和 oldValue 保持一致
         const colId = getColId(item, viewType);
 
-        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling.isSameNode(cellElements[elementIndex + 1])) ? "\t" : "\n\n");
+        text += getCellText(item) + ((cellElements[elementIndex + 1] && item.nextElementSibling && item.nextElementSibling === cellElements[elementIndex + 1]) ? "\t" : "\n\n");
         const oldValue = genCellValueByElement(type, item);
-        if (elementIndex === 0 || !cellElements[elementIndex - 1].isSameNode(item.previousElementSibling)) {
+        if (elementIndex === 0 || cellElements[elementIndex - 1] !== item.previousElementSibling) {
             json.push([]);
         }
         json[json.length - 1].push(oldValue);
@@ -977,13 +977,13 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
         });
     } else if (cellValue.type === "checkbox") {
         text += `<div class="fn__flex"><svg class="av__checkbox"><use xlink:href="#icon${cellValue?.checkbox?.checked ? "Check" : "Uncheck"}"></use></svg>`;
-        if (type === "gallery") {
-            text += `<span class="fn__space"></span>${window.siyuan.languages.checkbox}`;
+        if (type === "gallery" && cellValue?.checkbox?.content) {
+            text += `<span class="fn__space"></span>${cellValue?.checkbox?.content}`;
         }
         text += "</div>";
     } else if (cellValue.type === "rollup") {
         cellValue?.rollup?.contents?.forEach((item) => {
-            const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type) : renderRollup(item);
+            const rollupText = ["template", "select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? renderCell(item, rowIndex, showIcon, type) : renderRollup(item);
             if (rollupText) {
                 text += rollupText + ", ";
             }

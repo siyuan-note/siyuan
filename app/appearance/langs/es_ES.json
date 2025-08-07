@@ -1,7 +1,14 @@
 {
+  "groupStep": "Intervalo de agrupación",
+  "groupRange": "Rango de agrupación",
+  "groupMethodDateRelative": "Fecha relativa",
+  "groupMethodDateDay": "Día",
+  "groupMethodDateWeek": "Semana",
+  "groupMethodDateMonth": "Mes",
+  "groupMethodDateYear": "Año",
   "syncColWidth": "Sincronizar ancho de columna",
   "groupMethod": "Método de agrupación",
-  "hideEmptyGroup": "Ocultar grupo vacío",
+  "hideEmptyGroup": "Ocultar grupos vacíos",
   "groups": "Grupos",
   "removeGroup": "Eliminar grupo",
   "contentBlock": "Bloque de contenido",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Última hora de revisión",
   "cardStatus": "Estado de la tarjeta",
   "noSupportTip": "Esta función no admite el uso de paquetes de tarjetas",
-  "insertRowTip": "Las filas recién agregadas se han filtrado y se pueden ver cancelando el filtrado/búsqueda/clasificación",
+  "insertRowTip": "El nuevo elemento ha sido filtrado, cancele el filtro o ajuste la configuración de agrupación para verlo",
   "insertPhoto": "Toma una foto e insértala",
   "relativeToToday": "Relativa a hoy",
   "current": "Esto",
@@ -629,7 +636,6 @@
   "purge": "Purgar",
   "dataRepoPurgeTip": "Purga todas las instantáneas sin referencia y los objetos de datos relacionados",
   "plsChoose": "Por favor, elija primero",
-  "clearMessage": "Leer",
   "freeSub": "Suscripción de prueba gratuita",
   "sortByUpdateTimeDesc": "Descendente por tiempo de actualización",
   "sortByUpdateTimeAsc": "Ascendente por tiempo de actualización",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Por favor, abra primero un cuaderno de notas",
   "copyBlockRef": "Copiar bloque referencia",
   "copyBlockEmbed": "Copiar bloque incrustado",
+  "copyMarkdown": "Copiar como Markdown",
   "linkLevel": "Profundidad",
   "mark": "Marca",
   "splitLR": "Dividir a la derecha",
@@ -1634,6 +1641,8 @@
     "261": "Hoy",
     "262": "Mañana",
     "263": "Próximos %d días",
-    "264": "El campo [%s] está vacío"
+    "264": "El campo [%s] está vacío",
+    "265": "Fuera de rango",
+    "266": "Tesseract OCR no está instalado o configurado, consulte la Guía del Usuario - Sección de archivos de recursos para la configuración"
   }
 }

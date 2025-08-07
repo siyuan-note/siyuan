@@ -4,10 +4,12 @@ import {transaction, updateTransaction} from "../wysiwyg/transaction";
 import {getContenteditableElement} from "../wysiwyg/getBlock";
 import {
     fixTableRange,
-    focusBlock, focusByRange,
+    focusBlock,
+    focusByRange,
     focusByWbr,
     getEditorRange,
-    getSelectionOffset, setLastNodeRange,
+    getSelectionOffset,
+    setLastNodeRange,
 } from "./selection";
 import {Constants} from "../../constants";
 import {highlightRender} from "../render/highlightRender";
@@ -364,7 +366,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
     }
 
     let innerHTML = unSpinHTML || // 在 table 中插入需要使用转换好的行内元素 https://github.com/siyuan-note/siyuan/issues/9358
-        protyle.lute.SpinBlockDOM(html) || // 需要再 spin 一次 https://github.com/siyuan-note/siyuan/issues/7118
         html;   // 空格会被 Spin 不再，需要使用原文
     // 粘贴纯文本时会进行内部转义，这里需要进行反转义 https://github.com/siyuan-note/siyuan/issues/10620
     innerHTML = innerHTML.replace(/;;;lt;;;/g, "&lt;").replace(/;;;gt;;;/g, "&gt;");
@@ -382,16 +383,6 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         isBlock = false;
         block2text = true;
     }
-    if (!isBlock && tempElement && tempElement.content.childElementCount === 1) {
-        // 通过右键粘贴包含属性的块需保留整个块 https://github.com/siyuan-note/siyuan/issues/15268
-        for (let i = 0; i < tempElement.content.firstElementChild.attributes.length; i++) {
-            const attribute = tempElement.content.firstElementChild.attributes[i];
-            if (["memo", "name", "alias", "bookmark"].includes(attribute.name) || attribute.name.startsWith("custom-")) {
-                isBlock = true;
-                break;
-            }
-        }
-    }
     // 使用 lute 方法会添加 p 元素，只有一个 p 元素或者只有一个字符串或者为 <u>b</u> 时的时候只拷贝内部
     if (!isBlock) {
         if (tempElement.content.firstChild.nodeType === 3 || block2text ||
@@ -403,7 +394,7 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             }
             // 粘贴带样式的行内元素到另一个行内元素中需进行切割
             const spanElement = range.startContainer.nodeType === 3 ? range.startContainer.parentElement : range.startContainer as HTMLElement;
-            if (spanElement.tagName === "SPAN" && spanElement.isSameNode(range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
+            if (spanElement.tagName === "SPAN" && spanElement === (range.endContainer.nodeType === 3 ? range.endContainer.parentElement : range.endContainer) &&
                 // 粘贴纯文本不需切割 https://ld246.com/article/1665556907936
                 // emoji 图片需要切割 https://github.com/siyuan-note/siyuan/issues/9370
                 tempElement.content.querySelector("span, img")

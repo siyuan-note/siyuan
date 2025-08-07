@@ -120,7 +120,7 @@ func unindex(boxID string) {
 
 func (box *Box) Index() {
 	task.AppendTask(task.DatabaseIndexRef, removeBoxRefs, box.ID)
-	task.AppendTask(task.DatabaseIndex, index, box.ID)
+	task.AppendTask(task.DatabaseIndex, indexBox, box.ID)
 	task.AppendTask(task.DatabaseIndexRef, IndexRefs)
 	go func() {
 		sql.FlushQueue()
@@ -132,7 +132,7 @@ func removeBoxRefs(boxID string) {
 	sql.DeleteBoxRefsQueue(boxID)
 }
 
-func index(boxID string) {
+func indexBox(boxID string) {
 	box := Conf.Box(boxID)
 	if nil == box {
 		return
@@ -359,6 +359,11 @@ func init() {
 	subscribeSQLEvents()
 }
 
+var (
+	pushSQLInsertBlocksFTSMsg bool
+	pushSQLDeleteBlocksMsg    bool
+)
+
 func subscribeSQLEvents() {
 	// 使用下面的 EvtSQLInsertBlocksFTS 就可以了
 	//eventbus.Subscribe(eventbus.EvtSQLInsertBlocks, func(context map[string]interface{}, current, total, blockCount int, hash string) {
@@ -368,6 +373,10 @@ func subscribeSQLEvents() {
 	//	util.ContextPushMsg(context, msg)
 	//})
 	eventbus.Subscribe(eventbus.EvtSQLInsertBlocksFTS, func(context map[string]interface{}, blockCount int, hash string) {
+		if !pushSQLInsertBlocksFTSMsg {
+			return
+		}
+
 		current := context["current"].(int)
 		total := context["total"]
 		msg := fmt.Sprintf(Conf.Language(90), current, total, blockCount, hash)
@@ -375,7 +384,7 @@ func subscribeSQLEvents() {
 		util.ContextPushMsg(context, msg)
 	})
 	eventbus.Subscribe(eventbus.EvtSQLDeleteBlocks, func(context map[string]interface{}, rootID string) {
-		if util.ContainerAndroid == util.Container || util.ContainerIOS == util.Container || util.ContainerHarmony == util.Container {
+		if !pushSQLDeleteBlocksMsg {
 			return
 		}
 

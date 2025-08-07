@@ -1,7 +1,14 @@
 {
+  "groupStep": "Intervalo de agrupamento",
+  "groupRange": "Intervalo de grupo",
+  "groupMethodDateRelative": "Data relativa",
+  "groupMethodDateDay": "Dia",
+  "groupMethodDateWeek": "Semana",
+  "groupMethodDateMonth": "Mês",
+  "groupMethodDateYear": "Ano",
   "syncColWidth": "Sincronizar largura da coluna",
   "groupMethod": "Método de agrupamento",
-  "hideEmptyGroup": "Ocultar grupo vazio",
+  "hideEmptyGroup": "Ocultar grupos vazios",
   "groups": "Grupos",
   "removeGroup": "Remover grupo",
   "contentBlock": "Bloco de conteúdo",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Última hora de revisão",
   "cardStatus": "Status do cartão",
   "noSupportTip": "Esta função não suporta o uso de baralhos de cartas",
-  "insertRowTip": "As entradas recém-adicionadas foram filtradas e podem ser visualizadas cancelando o filtro/pesquisa/ordenação",
+  "insertRowTip": "O novo item foi filtrado, cancele o filtro ou ajuste a configuração de agrupamento para visualizar",
   "insertPhoto": "Tirar uma foto e inserir",
   "relativeToToday": "Relativo a hoje",
   "current": "Este",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "Limpar o repositório de dados excluirá completamente todos os instantâneos não referenciados e objetos de dados relacionados, tem certeza que deseja limpar?",
   "purge": "Limpar",
   "plsChoose": "Por favor, escolha primeiro",
-  "clearMessage": "Ler",
   "freeSub": "Assinatura de Teste Gratuita",
   "sortByUpdateTimeDesc": "Decrescente por hora de atualização",
   "sortByUpdateTimeAsc": "Crescente por hora de atualização",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Por favor, abra um bloco de notas primeiro",
   "copyBlockRef": "Copiar referência de bloco",
   "copyBlockEmbed": "Copiar bloco incorporado",
+  "copyMarkdown": "Copiar como Markdown",
   "linkLevel": "Profundidade",
   "mark": "Marca",
   "splitLR": "Dividir à Direita",
@@ -1634,6 +1641,8 @@
     "261": "Hoje",
     "262": "Amanhã",
     "263": "Próximos %d dias",
-    "264": "O campo [%s] está vazio"
+    "264": "O campo [%s] está vazio",
+    "265": "Fora do intervalo",
+    "266": "Tesseract OCR não está instalado ou configurado, consulte o Guia do Usuário - Seção de Arquivos de Recursos para configuração"
   }
 }

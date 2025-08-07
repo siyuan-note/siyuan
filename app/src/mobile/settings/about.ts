@@ -182,7 +182,7 @@ export const initAbout = () => {
             const importKeyElement = modelMainElement.querySelector("#importKey");
             modelMainElement.firstElementChild.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
-                while (target && !target.isSameNode(modelMainElement)) {
+                while (target && (target !== modelMainElement)) {
                     if (target.id === "authCode") {
                         setAccessAuthCode();
                         event.preventDefault();

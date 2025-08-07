@@ -269,6 +269,7 @@ export class Gutter {
                     const srcIDs = [Lute.NewNodeID()];
                     const previousID = event.altKey ? (rowElement.previousElementSibling.getAttribute("data-id") || "") : buttonElement.dataset.rowId;
                     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                    const groupID = rowElement.parentElement.getAttribute("data-group-id");
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
@@ -279,6 +280,7 @@ export class Gutter {
                             content: ""
                         }],
                         blockID: id,
+                        groupID,
                     }, {
                         action: "doUpdateUpdated",
                         id,
@@ -292,7 +294,7 @@ export class Gutter {
                         id,
                         data: blockElement.getAttribute("updated")
                     }]);
-                    insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+                    insertAttrViewBlockAnimation({protyle, blockElement, srcIDs, previousId: previousID, groupID});
                     if (event.altKey) {
                         this.element.querySelectorAll("button").forEach(item => {
                             item.dataset.rowId = srcIDs[0];
@@ -553,17 +555,13 @@ export class Gutter {
     public renderMultipleMenu(protyle: IProtyle, selectsElement: Element[]) {
         let isList = false;
         let isContinue = false;
-        let hasEmbedBlock = false;
         selectsElement.find((item, index) => {
             if (item.classList.contains("li")) {
                 isList = true;
                 return true;
             }
-            if (item.classList.contains("sb") || item.classList.contains("p")) {
-                hasEmbedBlock = true;
-            }
             if (item.nextElementSibling && selectsElement[index + 1] &&
-                item.nextElementSibling.isSameNode(selectsElement[index + 1])) {
+                item.nextElementSibling === selectsElement[index + 1]) {
                 isContinue = true;
             } else if (index !== selectsElement.length - 1) {
                 isContinue = false;
@@ -610,19 +608,16 @@ export class Gutter {
                     type: "Blocks2Blockquote"
                 }));
             }
-            // 多选引用转换为块的时候 id 不一致
-            if (!hasEmbedBlock) {
-                turnIntoSubmenu.push(this.turnsInto({
-                    menuId: "paragraph",
-                    icon: "iconParagraph",
-                    label: window.siyuan.languages.paragraph,
-                    accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
-                    protyle,
-                    selectsElement,
-                    type: "Blocks2Ps",
-                    isContinue
-                }));
-            }
+            turnIntoSubmenu.push(this.turnsInto({
+                menuId: "paragraph",
+                icon: "iconParagraph",
+                label: window.siyuan.languages.paragraph,
+                accelerator: window.siyuan.config.keymap.editor.heading.paragraph.custom,
+                protyle,
+                selectsElement,
+                type: "Blocks2Ps",
+                isContinue
+            }));
             turnIntoSubmenu.push(this.turnsInto({
                 menuId: "heading1",
                 icon: "iconH1",
@@ -2329,7 +2324,7 @@ export class Gutter {
                         listItem = undefined;
                     }
                     // 标题必须显示
-                    if (!topElement.isSameNode(nodeElement) && type !== "NodeHeading") {
+                    if (topElement !== nodeElement && type !== "NodeHeading") {
                         nodeElement = topElement;
                         parentElement = hasClosestBlock(nodeElement.parentElement);
                         type = nodeElement.getAttribute("data-type");

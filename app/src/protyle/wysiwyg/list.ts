@@ -228,7 +228,7 @@ export const breakList = (protyle: IProtyle, blockElement: Element, range: Range
     let newListHTML = "";
     let hasFind = 0;
     Array.from(listItemElement.parentElement.children).forEach(item => {
-        if (!hasFind && item.isSameNode(listItemElement)) {
+        if (!hasFind && item === listItemElement) {
             hasFind = 1;
         } else if (hasFind && !item.classList.contains("protyle-attr")) {
             undoOperations.push({

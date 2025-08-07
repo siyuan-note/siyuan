@@ -115,7 +115,7 @@ export const viewCards = (app: App, deckID: string, title: string, deckType: "Tr
                 return;
             }
             let target = event.target as HTMLElement;
-            while (target && !dialog.element.isSameNode(target)) {
+            while (target && (dialog.element !== target)) {
                 const type = target.getAttribute("data-type");
                 if (type === "close") {
                     dialog.destroy();

@@ -278,7 +278,7 @@ export class Backlink extends Model {
             this.setFocus();
             let target = event.target as HTMLElement;
             while (target && !target.isEqualNode(this.element)) {
-                if (target.classList.contains("block__icon") && target.parentElement.parentElement.isSameNode(this.element)) {
+                if (target.classList.contains("block__icon") && target.parentElement.parentElement === this.element) {
                     const type = target.getAttribute("data-type");
                     switch (type) {
                         case "refresh":
@@ -433,7 +433,7 @@ export class Backlink extends Model {
         if (svgElement.classList.contains("b3-list-item__arrow--open")) {
             svgElement.classList.remove("b3-list-item__arrow--open");
             this.editors.find((item, index) => {
-                if (item.protyle.block.rootID === docId && liElement.nextElementSibling && item.protyle.element.isSameNode(liElement.nextElementSibling)) {
+                if (item.protyle.block.rootID === docId && liElement.nextElementSibling && item.protyle.element === liElement.nextElementSibling) {
                     item.destroy();
                     this.editors.splice(index, 1);
                     liElement.nextElementSibling.remove();

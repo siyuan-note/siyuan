@@ -1,7 +1,14 @@
 {
+  "groupStep": "Intervallo di raggruppamento",
+  "groupRange": "Intervallo di gruppo",
+  "groupMethodDateRelative": "Data relativa",
+  "groupMethodDateDay": "Giorno",
+  "groupMethodDateWeek": "Settimana",
+  "groupMethodDateMonth": "Mese",
+  "groupMethodDateYear": "Anno",
   "syncColWidth": "Sincronizza larghezza colonna",
   "groupMethod": "Metodo di raggruppamento",
-  "hideEmptyGroup": "Nascondi gruppo vuoto",
+  "hideEmptyGroup": "Nascondi gruppi vuoti",
   "groups": "Gruppi",
   "removeGroup": "Rimuovi gruppo",
   "contentBlock": "Blocco di contenuto",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Ultima revisione",
   "cardStatus": "Stato della carta",
   "noSupportTip": "Questa funzione non supporta l'uso di mazzi di carte",
-  "insertRowTip": "L'elemento aggiunto è stato filtrato, è possibile annullare filtro/ricerca/ordinamento per visualizzarlo",
+  "insertRowTip": "Il nuovo elemento è stato filtrato, annulla il filtro o modifica le impostazioni di raggruppamento per visualizzarlo",
   "insertPhoto": "Scatta una foto e inseriscila",
   "relativeToToday": "Relativo a oggi",
   "current": "Questo",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "La pulizia del repository dei dati eliminerà completamente tutti gli snapshot non referenziati e gli oggetti dati correlati, sei sicuro di voler pulire?",
   "purge": "Pulisci",
   "plsChoose": "Si prega di scegliere prima",
-  "clearMessage": "Segna come letto",
   "freeSub": "Prova gratuita",
   "sortByUpdateTimeDesc": "Discendente per ora di aggiornamento",
   "sortByUpdateTimeAsc": "Ascendente per ora di aggiornamento",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Si prega di aprire prima un taccuino",
   "copyBlockRef": "Copia riferimento blocco",
   "copyBlockEmbed": "Copia incorporamento blocco",
+  "copyMarkdown": "Copia come Markdown",
   "linkLevel": "Profondità",
   "mark": "Segna",
   "splitLR": "Dividi a destra",
@@ -1634,6 +1641,8 @@
     "261": "Oggi",
     "262": "Domani",
     "263": "Prossimi %d giorni",
-    "264": "Il campo [%s] è vuoto"
+    "264": "Il campo [%s] è vuoto",
+    "265": "Fuori intervallo",
+    "266": "Tesseract OCR non è installato o configurato, fare riferimento alla Guida utente - Sezione file di risorse per la configurazione"
   }
 }

@@ -64,7 +64,12 @@ type TOperation =
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"
     | "setAttrViewGroup"
+    | "removeAttrViewGroup"
+    | "hideAttrViewAllGroups"
     | "syncAttrViewTableColWidth"
+    | "hideAttrViewGroup"
+    | "sortAttrViewGroup"
+    | "foldAttrViewGroup"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -539,7 +544,6 @@ interface IOperation {
     retData?: any
     nextID?: string // insert 专享
     isDetached?: boolean // insertAttrViewBlock 专享
-    ignoreFillFilter?: boolean // insertAttrViewBlock 专享
     srcIDs?: string[] // removeAttrViewBlock 专享
     srcs?: IOperationSrcs[] // insertAttrViewBlock 专享
     name?: string // addAttrViewCol 专享
@@ -548,6 +552,8 @@ interface IOperation {
     blockIDs?: string[] // add/removeFlashcards 专享
     removeDest?: boolean // removeAttrViewCol 专享
     layout?: string // addAttrViewView 专享
+    groupID?: string // insertAttrViewBlock, sortAttrViewRow 专享
+    targetGroupID?: string // sortAttrViewRow 专享
 }
 
 interface IOperationSrcs {
@@ -839,6 +845,7 @@ interface IAV {
     viewID: string;
     viewType: TAVView;
     views: IAVView[];
+    isMirror?: boolean;
 }
 
 interface IAVView {
@@ -851,10 +858,13 @@ interface IAVView {
     pageSize: number;
     showIcon: boolean;
     wrapField: boolean;
+    groupHidden?: number,  // 0：显示，1：空白隐藏，2：手动隐藏
+    groupFolded?: boolean,
     filters: IAVFilter[],
     sorts: IAVSort[],
     groups: IAVView[]
     group: IAVGroup
+    groupValue: IAVCellValue
 }
 
 interface IAVTable extends IAVView {
@@ -893,10 +903,11 @@ interface IAVGroup {
     field: string,
     method?: number //  0: 按值分组、1: 按数字范围分组、2: 按相对日期分组、3: 按天日期分组、4: 按周日期分组、5: 按月日期分组、6: 按年日期分组
     range?: {
-        numStart: number // 数字范围起始值
-        numEnd: number   // 数字范围结束值
-        numStep: number  // 数字范围步长
+        numStart: number // 数字范围起始值 0
+        numEnd: number   // 数字范围结束值 1000
+        numStep: number  // 数字范围步长 100
     }
+    hideEmpty?: boolean
     order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
 }
 
@@ -985,7 +996,8 @@ interface IAVCellValue {
         content: string
     },
     checkbox?: {
-        checked: boolean
+        checked: boolean,
+        content?: string, // gallery 中显示 https://github.com/siyuan-note/siyuan/issues/15389
     }
     relation?: IAVCellRelationValue
     rollup?: {

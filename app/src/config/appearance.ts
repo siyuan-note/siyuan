@@ -263,6 +263,7 @@ export const appearance = {
             });
             return;
         }
+
         window.siyuan.config.appearance = data;
         if (appearance.element) {
             const modeElement = appearance.element.querySelector("#mode") as HTMLSelectElement;

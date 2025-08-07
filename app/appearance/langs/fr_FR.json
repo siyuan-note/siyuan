@@ -1,7 +1,14 @@
 {
+  "groupStep": "Intervalle de regroupement",
+  "groupRange": "Plage de regroupement",
+  "groupMethodDateRelative": "Date relative",
+  "groupMethodDateDay": "Jour",
+  "groupMethodDateWeek": "Semaine",
+  "groupMethodDateMonth": "Mois",
+  "groupMethodDateYear": "Année",
   "syncColWidth": "Synchroniser la largeur de la colonne",
   "groupMethod": "Méthode de regroupement",
-  "hideEmptyGroup": "Masquer le groupe vide",
+  "hideEmptyGroup": "Masquer les groupes vides",
   "groups": "Groupes",
   "removeGroup": "Supprimer le groupe",
   "contentBlock": "Bloc de contenu",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Heure de la dernière révision",
   "cardStatus": "Statut de la carte",
   "noSupportTip": "Cette fonction ne prend pas en charge l'utilisation de packages de cartes",
-  "insertRowTip": "Les lignes nouvellement ajoutées ont été filtrées et peuvent être visualisées en annulant le filtrage/recherche/tri",
+  "insertRowTip": "Le nouvel élément a été filtré, annulez le filtre ou ajustez les paramètres de regroupement pour le voir",
   "insertPhoto": "Prendre une photo et l'insérer",
   "relativeToToday": "Par rapport à aujourd'hui",
   "current": "Ceci",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "La purge du référentiel de données supprimera complètement tous les instantanés non référencés et les objets de données associés, êtes-vous sûr de purger ?",
   "purge": "Purger",
   "plsChoose": "Veuillez d'abord choisir",
-  "clearMessage": "Lire",
   "freeSub": "Abonnement d'essai gratuit",
   "sortByUpdateTimeDesc": "Descendant par heure de mise à jour",
   "sortByUpdateTimeAsc": "Croissant par heure de mise à jour",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Veuillez d'abord ouvrir un carnet de notes",
   "copyBlockRef": "Copier bloc réf",
   "copyBlockEmbed": "Copier le bloc en tant que bloc incorporé",
+  "copyMarkdown": "Copier comme Markdown",
   "linkLevel": "Niveaux",
   "mark": "Mark",
   "splitLR": "Split Droit",
@@ -1634,6 +1641,8 @@
     "261": "Aujourd'hui",
     "262": "Demain",
     "263": "Les %d prochains jours",
-    "264": "Le champ [%s] est vide"
+    "264": "Le champ [%s] est vide",
+    "265": "Hors de portée",
+    "266": "Tesseract OCR n'est pas installé ou configuré, veuillez consulter le Guide de l'utilisateur - Section des fichiers de ressources pour la configuration"
   }
 }

@@ -178,7 +178,7 @@ export class Outline extends Model {
                             break;
                     }
                     break;
-                } else if (this.blockId && (target.isSameNode(this.headerElement.nextElementSibling) || target.classList.contains("block__icons"))) {
+                } else if (this.blockId && (target === this.headerElement.nextElementSibling || target.classList.contains("block__icons"))) {
                     openFileById({
                         app: options.app,
                         id: this.blockId,
@@ -269,7 +269,7 @@ export class Outline extends Model {
                 this.element.querySelectorAll(".dragover__top, .dragover__bottom, .dragover, .dragover__current").forEach(item => {
                     item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__current");
                 });
-                if (selectItem.isSameNode(item)) {
+                if (selectItem === item) {
                     selectItem.classList.add("dragover__current");
                     return;
                 }

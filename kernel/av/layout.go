@@ -63,14 +63,12 @@ type BaseInstance struct {
 	PageSize         int           `json:"pageSize"`         // 每页项目数
 	ShowIcon         bool          `json:"showIcon"`         // 是否显示字段图标
 	WrapField        bool          `json:"wrapField"`        // 是否换行字段内容
-	Folded           bool          `json:"folded,omitempty"` // 是否折叠
-	Hidden           bool          `json:"hidden,omitempty"` // 是否隐藏
 
-	Groups      []Viewable `json:"groups,omitempty"`      // 分组实例列表
-	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`   // 分组计算规则和结果
-	GroupName   string     `json:"groupName,omitempty"`   // 分组名称
-	GroupFolded bool       `json:"groupFolded,omitempty"` // 分组是否折叠
-	GroupHidden bool       `json:"groupHidden,omitempty"` // 分组是否隐藏
+	GroupValue  *Value     `json:"groupValue,omitempty"` // 分组值
+	Groups      []Viewable `json:"groups,omitempty"`     // 分组实例列表
+	GroupCalc   *GroupCalc `json:"groupCalc,omitempty"`  // 分组计算规则和结果
+	GroupFolded bool       `json:"groupFolded"`          // 分组是否折叠
+	GroupHidden int        `json:"groupHidden"`          // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
 }
 
 func NewViewBaseInstance(view *View) *BaseInstance {
@@ -92,8 +90,8 @@ func NewViewBaseInstance(view *View) *BaseInstance {
 		Filters:          view.Filters,
 		Sorts:            view.Sorts,
 		Group:            view.Group,
+		GroupValue:       view.GroupVal,
 		GroupCalc:        view.GroupCalc,
-		GroupName:        view.GroupName,
 		GroupFolded:      view.GroupFolded,
 		GroupHidden:      view.GroupHidden,
 		ShowIcon:         showIcon,
@@ -121,15 +119,11 @@ func (baseInstance *BaseInstance) GetGroupCalc() *GroupCalc {
 	return baseInstance.GroupCalc
 }
 
-func (baseInstance *BaseInstance) SetGroupName(name string) {
-	baseInstance.GroupName = name
-}
-
 func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 	baseInstance.GroupFolded = folded
 }
 
-func (baseInstance *BaseInstance) SetGroupHidden(hidden bool) {
+func (baseInstance *BaseInstance) SetGroupHidden(hidden int) {
 	baseInstance.GroupHidden = hidden
 }
 
@@ -193,6 +187,9 @@ type Collection interface {
 
 	// GetField 返回指定 ID 的字段。
 	GetField(id string) (ret Field, fieldIndex int)
+
+	// GetValue 返回指定项目 ID 和键 ID 的字段值。
+	GetValue(itemID, keyID string) (ret *Value)
 
 	// GetSorts 返回集合的排序规则。
 	GetSorts() []*ViewSort

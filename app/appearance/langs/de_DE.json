@@ -1,7 +1,14 @@
 {
+  "groupStep": "Gruppierungsintervall",
+  "groupRange": "Gruppierungsbereich",
+  "groupMethodDateRelative": "Relatives Datum",
+  "groupMethodDateDay": "Tag",
+  "groupMethodDateWeek": "Woche",
+  "groupMethodDateMonth": "Monat",
+  "groupMethodDateYear": "Jahr",
   "syncColWidth": "Spaltenbreite synchronisieren",
   "groupMethod": "Gruppierungsmethode",
-  "hideEmptyGroup": "Leere Gruppe ausblenden",
+  "hideEmptyGroup": "Leere Gruppen ausblenden",
   "groups": "Gruppen",
   "removeGroup": "Gruppe entfernen",
   "contentBlock": "Inhaltsblock",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Letzte Überprüfungszeit",
   "cardStatus": "Kartenstatus",
   "noSupportTip": "Diese Funktion unterstützt die Verwendung von Kartenstapeln nicht.",
-  "insertRowTip": "Die neu hinzugefügten Reihen wurden gefiltert und können eingesehen werden, indem das Filtern/Suchen/Sortieren aufgehoben wird.",
+  "insertRowTip": "Das neue Element wurde gefiltert, heben Sie die Filterung auf oder passen Sie die Gruppierungseinstellungen an, um es anzuzeigen",
   "insertPhoto": "Foto aufnehmen und einfügen",
   "relativeToToday": "Bezogen auf heute",
   "current": "Aktuell",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "Das Bereinigen des Daten-Repo löscht alle nicht referenzierten Schnappschüsse und zugehörigen Datenobjekte vollständig. Sind Sie sicher, dass Sie bereinigen möchten?",
   "purge": "Bereinigen",
   "plsChoose": "Bitte zuerst auswählen",
-  "clearMessage": "Lesen",
   "freeSub": "Kostenlose Testversion",
   "sortByUpdateTimeDesc": "Absteigend nach Aktualisierungszeit",
   "sortByUpdateTimeAsc": "Aufsteigend nach Aktualisierungszeit",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Bitte öffnen Sie zuerst ein Notizbuch",
   "copyBlockRef": "Blockreferenz kopieren",
   "copyBlockEmbed": "Blockeinbettung kopieren",
+  "copyMarkdown": "Als Markdown kopieren",
   "linkLevel": "Tiefe",
   "mark": "Markieren",
   "splitLR": "Rechts aufteilen",
@@ -1634,6 +1641,8 @@
     "261": "Heute",
     "262": "Morgen",
     "263": "Nächste %d Tage",
-    "264": "Das Feld [%s] ist leer"
+    "264": "Das Feld [%s] ist leer",
+    "265": "Außerhalb des Bereichs",
+    "266": "Tesseract OCR ist nicht installiert oder konfiguriert, bitte lesen Sie das Benutzerhandbuch - Abschnitt Ressourcen-Dateien zur Konfiguration"
   }
 }

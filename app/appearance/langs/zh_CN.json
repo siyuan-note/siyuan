@@ -1,7 +1,14 @@
 {
+  "groupStep": "分组间隔",
+  "groupRange": "分组范围",
+  "groupMethodDateRelative": "相对日期",
+  "groupMethodDateDay": "天",
+  "groupMethodDateWeek": "周",
+  "groupMethodDateMonth": "月",
+  "groupMethodDateYear": "年",
   "syncColWidth": "同步列宽",
   "groupMethod": "分组方式",
-  "hideEmptyGroup": "隐藏空白分组",
+  "hideEmptyGroup": "隐藏无条目分组",
   "groups": "分组",
   "removeGroup": "移除分组",
   "contentBlock": "内容块",
@@ -129,7 +136,7 @@
   "lastReviewTime": "最后复习时间",
   "cardStatus": "卡片状态",
   "noSupportTip": "该功能不支持卡包使用",
-  "insertRowTip": "新增条目已被过滤，可取消过滤/搜索/排序进行查看",
+  "insertRowTip": "新增条目已被过滤，可取消过滤或分组设置后进行查看",
   "insertPhoto": "拍照并插入",
   "relativeToToday": "相对于今天",
   "current": "当前",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "清理数据仓库会彻底删除所有未引用的快照和相关数据对象，确定进行清理吗？",
   "purge": "清理",
   "plsChoose": "请先进行选择",
-  "clearMessage": "已读",
   "freeSub": "免费试用订阅",
   "sortByUpdateTimeDesc": "更新时间降序",
   "sortByUpdateTimeAsc": "更新时间升序",
@@ -1173,6 +1179,7 @@
   "newFileTip": "请先打开一个笔记本",
   "copyBlockRef": "复制为块引用",
   "copyBlockEmbed": "复制为嵌入块",
+  "copyMarkdown": "复制为 Markdown",
   "linkLevel": "层级",
   "mark": "标记",
   "splitLR": "向右分屏",
@@ -1634,6 +1641,8 @@
     "261": "今天",
     "262": "明天",
     "263": "未来 %d 天",
-    "264": "字段 [%s] 值为空"
+    "264": "字段 [%s] 为空",
+    "265": "不在范围内",
+    "266": "Tesseract OCR 未安装或未配置，请参考 用户指南-资源文件 章节进行配置"
   }
 }

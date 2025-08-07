@@ -677,6 +677,12 @@ func FullReindex() {
 }
 
 func fullReindex() {
+	pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = true, true
+	defer func() {
+		sql.FlushQueue()
+		pushSQLInsertBlocksFTSMsg, pushSQLDeleteBlocksMsg = false, false
+	}()
+
 	util.PushEndlessProgress(Conf.language(35))
 	defer util.PushClearProgress()
 
@@ -690,7 +696,7 @@ func fullReindex() {
 	sql.IndexIgnoreCached = false
 	openedBoxes := Conf.GetOpenedBoxes()
 	for _, openedBox := range openedBoxes {
-		index(openedBox.ID)
+		indexBox(openedBox.ID)
 	}
 	LoadFlashcards()
 	debug.FreeOSMemory()

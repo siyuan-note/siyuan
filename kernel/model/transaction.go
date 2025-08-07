@@ -167,149 +167,160 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		}
 	}()
 
-	for _, op := range tx.DoOperations {
-		switch op.Action {
-		case "create":
-			ret = tx.doCreate(op)
-		case "update":
-			ret = tx.doUpdate(op)
-		case "insert":
-			ret = tx.doInsert(op)
-		case "delete":
-			ret = tx.doDelete(op)
-		case "move":
-			ret = tx.doMove(op)
-		case "moveOutlineHeading":
-			ret = tx.doMoveOutlineHeading(op)
-		case "append":
-			ret = tx.doAppend(op)
-		case "appendInsert":
-			ret = tx.doAppendInsert(op)
-		case "prependInsert":
-			ret = tx.doPrependInsert(op)
-		case "foldHeading":
-			ret = tx.doFoldHeading(op)
-		case "unfoldHeading":
-			ret = tx.doUnfoldHeading(op)
-		case "setAttrs":
-			ret = tx.doSetAttrs(op)
-		case "doUpdateUpdated":
-			ret = tx.doUpdateUpdated(op)
-		case "addFlashcards":
-			ret = tx.doAddFlashcards(op)
-		case "removeFlashcards":
-			ret = tx.doRemoveFlashcards(op)
-		case "setAttrViewName":
-			ret = tx.doSetAttrViewName(op)
-		case "setAttrViewFilters":
-			ret = tx.doSetAttrViewFilters(op)
-		case "setAttrViewSorts":
-			ret = tx.doSetAttrViewSorts(op)
-		case "setAttrViewPageSize":
-			ret = tx.doSetAttrViewPageSize(op)
-		case "setAttrViewColWidth":
-			ret = tx.doSetAttrViewColumnWidth(op)
-		case "setAttrViewColWrap":
-			ret = tx.doSetAttrViewColumnWrap(op)
-		case "setAttrViewColHidden":
-			ret = tx.doSetAttrViewColumnHidden(op)
-		case "setAttrViewColPin":
-			ret = tx.doSetAttrViewColumnPin(op)
-		case "setAttrViewColIcon":
-			ret = tx.doSetAttrViewColumnIcon(op)
-		case "setAttrViewColDesc":
-			ret = tx.doSetAttrViewColumnDesc(op)
-		case "insertAttrViewBlock":
-			ret = tx.doInsertAttrViewBlock(op)
-		case "removeAttrViewBlock":
-			ret = tx.doRemoveAttrViewBlock(op)
-		case "addAttrViewCol":
-			ret = tx.doAddAttrViewColumn(op)
-		case "updateAttrViewCol":
-			ret = tx.doUpdateAttrViewColumn(op)
-		case "removeAttrViewCol":
-			ret = tx.doRemoveAttrViewColumn(op)
-		case "sortAttrViewRow":
-			ret = tx.doSortAttrViewRow(op)
-		case "sortAttrViewCol":
-			ret = tx.doSortAttrViewColumn(op)
-		case "sortAttrViewKey":
-			ret = tx.doSortAttrViewKey(op)
-		case "updateAttrViewCell":
-			ret = tx.doUpdateAttrViewCell(op)
-		case "updateAttrViewColOptions":
-			ret = tx.doUpdateAttrViewColOptions(op)
-		case "removeAttrViewColOption":
-			ret = tx.doRemoveAttrViewColOption(op)
-		case "updateAttrViewColOption":
-			ret = tx.doUpdateAttrViewColOption(op)
-		case "setAttrViewColOptionDesc":
-			ret = tx.doSetAttrViewColOptionDesc(op)
-		case "setAttrViewColCalc":
-			ret = tx.doSetAttrViewColCalc(op)
-		case "updateAttrViewColNumberFormat":
-			ret = tx.doUpdateAttrViewColNumberFormat(op)
-		case "replaceAttrViewBlock":
-			ret = tx.doReplaceAttrViewBlock(op)
-		case "updateAttrViewColTemplate":
-			ret = tx.doUpdateAttrViewColTemplate(op)
-		case "addAttrViewView":
-			ret = tx.doAddAttrViewView(op)
-		case "removeAttrViewView":
-			ret = tx.doRemoveAttrViewView(op)
-		case "setAttrViewViewName":
-			ret = tx.doSetAttrViewViewName(op)
-		case "setAttrViewViewIcon":
-			ret = tx.doSetAttrViewViewIcon(op)
-		case "setAttrViewViewDesc":
-			ret = tx.doSetAttrViewViewDesc(op)
-		case "duplicateAttrViewView":
-			ret = tx.doDuplicateAttrViewView(op)
-		case "sortAttrViewView":
-			ret = tx.doSortAttrViewView(op)
-		case "updateAttrViewColRelation":
-			ret = tx.doUpdateAttrViewColRelation(op)
-		case "updateAttrViewColRollup":
-			ret = tx.doUpdateAttrViewColRollup(op)
-		case "hideAttrViewName":
-			ret = tx.doHideAttrViewName(op)
-		case "setAttrViewColDate":
-			ret = tx.doSetAttrViewColDate(op)
-		case "unbindAttrViewBlock":
-			ret = tx.doUnbindAttrViewBlock(op)
-		case "duplicateAttrViewKey":
-			ret = tx.doDuplicateAttrViewKey(op)
-		case "setAttrViewCoverFrom":
-			ret = tx.doSetAttrViewCoverFrom(op)
-		case "setAttrViewCoverFromAssetKeyID":
-			ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
-		case "setAttrViewCardSize":
-			ret = tx.doSetAttrViewCardSize(op)
-		case "setAttrViewFitImage":
-			ret = tx.doSetAttrViewFitImage(op)
-		case "setAttrViewShowIcon":
-			ret = tx.doSetAttrViewShowIcon(op)
-		case "setAttrViewWrapField":
-			ret = tx.doSetAttrViewWrapField(op)
-		case "changeAttrViewLayout":
-			ret = tx.doChangeAttrViewLayout(op)
-		case "setAttrViewBlockView":
-			ret = tx.doSetAttrViewBlockView(op)
-		case "setAttrViewCardAspectRatio":
-			ret = tx.doSetAttrViewCardAspectRatio(op)
-		case "setAttrViewGroup":
-			ret = tx.doSetAttrViewGroup(op)
-		case "hideAttrViewGroup":
-			ret = tx.doHideAttrViewGroup(op)
-		case "setGroupHideEmpty":
-			ret = tx.doSetGroupHideEmpty(op)
-		case "syncAttrViewTableColWidth":
-			ret = tx.doSyncAttrViewTableColWidth(op)
-		}
+	isLargeInsert := tx.processLargeInsert()
+	if !isLargeInsert {
+		for _, op := range tx.DoOperations {
+			switch op.Action {
+			case "create":
+				ret = tx.doCreate(op)
+			case "update":
+				ret = tx.doUpdate(op)
+			case "insert":
+				ret = tx.doInsert(op)
+			case "delete":
+				ret = tx.doDelete(op)
+			case "move":
+				ret = tx.doMove(op)
+			case "moveOutlineHeading":
+				ret = tx.doMoveOutlineHeading(op)
+			case "append":
+				ret = tx.doAppend(op)
+			case "appendInsert":
+				ret = tx.doAppendInsert(op)
+			case "prependInsert":
+				ret = tx.doPrependInsert(op)
+			case "foldHeading":
+				ret = tx.doFoldHeading(op)
+			case "unfoldHeading":
+				ret = tx.doUnfoldHeading(op)
+			case "setAttrs":
+				ret = tx.doSetAttrs(op)
+			case "doUpdateUpdated":
+				ret = tx.doUpdateUpdated(op)
+			case "addFlashcards":
+				ret = tx.doAddFlashcards(op)
+			case "removeFlashcards":
+				ret = tx.doRemoveFlashcards(op)
+			case "setAttrViewName":
+				ret = tx.doSetAttrViewName(op)
+			case "setAttrViewFilters":
+				ret = tx.doSetAttrViewFilters(op)
+			case "setAttrViewSorts":
+				ret = tx.doSetAttrViewSorts(op)
+			case "setAttrViewPageSize":
+				ret = tx.doSetAttrViewPageSize(op)
+			case "setAttrViewColWidth":
+				ret = tx.doSetAttrViewColumnWidth(op)
+			case "setAttrViewColWrap":
+				ret = tx.doSetAttrViewColumnWrap(op)
+			case "setAttrViewColHidden":
+				ret = tx.doSetAttrViewColumnHidden(op)
+			case "setAttrViewColPin":
+				ret = tx.doSetAttrViewColumnPin(op)
+			case "setAttrViewColIcon":
+				ret = tx.doSetAttrViewColumnIcon(op)
+			case "setAttrViewColDesc":
+				ret = tx.doSetAttrViewColumnDesc(op)
+			case "insertAttrViewBlock":
+				ret = tx.doInsertAttrViewBlock(op)
+			case "removeAttrViewBlock":
+				ret = tx.doRemoveAttrViewBlock(op)
+			case "addAttrViewCol":
+				ret = tx.doAddAttrViewColumn(op)
+			case "updateAttrViewCol":
+				ret = tx.doUpdateAttrViewColumn(op)
+			case "removeAttrViewCol":
+				ret = tx.doRemoveAttrViewColumn(op)
+			case "sortAttrViewRow":
+				ret = tx.doSortAttrViewRow(op)
+			case "sortAttrViewCol":
+				ret = tx.doSortAttrViewColumn(op)
+			case "sortAttrViewKey":
+				ret = tx.doSortAttrViewKey(op)
+			case "updateAttrViewCell":
+				ret = tx.doUpdateAttrViewCell(op)
+			case "updateAttrViewColOptions":
+				ret = tx.doUpdateAttrViewColOptions(op)
+			case "removeAttrViewColOption":
+				ret = tx.doRemoveAttrViewColOption(op)
+			case "updateAttrViewColOption":
+				ret = tx.doUpdateAttrViewColOption(op)
+			case "setAttrViewColOptionDesc":
+				ret = tx.doSetAttrViewColOptionDesc(op)
+			case "setAttrViewColCalc":
+				ret = tx.doSetAttrViewColCalc(op)
+			case "updateAttrViewColNumberFormat":
+				ret = tx.doUpdateAttrViewColNumberFormat(op)
+			case "replaceAttrViewBlock":
+				ret = tx.doReplaceAttrViewBlock(op)
+			case "updateAttrViewColTemplate":
+				ret = tx.doUpdateAttrViewColTemplate(op)
+			case "addAttrViewView":
+				ret = tx.doAddAttrViewView(op)
+			case "removeAttrViewView":
+				ret = tx.doRemoveAttrViewView(op)
+			case "setAttrViewViewName":
+				ret = tx.doSetAttrViewViewName(op)
+			case "setAttrViewViewIcon":
+				ret = tx.doSetAttrViewViewIcon(op)
+			case "setAttrViewViewDesc":
+				ret = tx.doSetAttrViewViewDesc(op)
+			case "duplicateAttrViewView":
+				ret = tx.doDuplicateAttrViewView(op)
+			case "sortAttrViewView":
+				ret = tx.doSortAttrViewView(op)
+			case "updateAttrViewColRelation":
+				ret = tx.doUpdateAttrViewColRelation(op)
+			case "updateAttrViewColRollup":
+				ret = tx.doUpdateAttrViewColRollup(op)
+			case "hideAttrViewName":
+				ret = tx.doHideAttrViewName(op)
+			case "setAttrViewColDate":
+				ret = tx.doSetAttrViewColDate(op)
+			case "unbindAttrViewBlock":
+				ret = tx.doUnbindAttrViewBlock(op)
+			case "duplicateAttrViewKey":
+				ret = tx.doDuplicateAttrViewKey(op)
+			case "setAttrViewCoverFrom":
+				ret = tx.doSetAttrViewCoverFrom(op)
+			case "setAttrViewCoverFromAssetKeyID":
+				ret = tx.doSetAttrViewCoverFromAssetKeyID(op)
+			case "setAttrViewCardSize":
+				ret = tx.doSetAttrViewCardSize(op)
+			case "setAttrViewFitImage":
+				ret = tx.doSetAttrViewFitImage(op)
+			case "setDisplayFieldName":
+				ret = tx.doSetAttrViewDisplayFieldName(op)
+			case "setAttrViewShowIcon":
+				ret = tx.doSetAttrViewShowIcon(op)
+			case "setAttrViewWrapField":
+				ret = tx.doSetAttrViewWrapField(op)
+			case "changeAttrViewLayout":
+				ret = tx.doChangeAttrViewLayout(op)
+			case "setAttrViewBlockView":
+				ret = tx.doSetAttrViewBlockView(op)
+			case "setAttrViewCardAspectRatio":
+				ret = tx.doSetAttrViewCardAspectRatio(op)
+			case "setAttrViewGroup":
+				ret = tx.doSetAttrViewGroup(op)
+			case "hideAttrViewGroup":
+				ret = tx.doHideAttrViewGroup(op)
+			case "hideAttrViewAllGroups":
+				ret = tx.doHideAttrViewAllGroups(op)
+			case "foldAttrViewGroup":
+				ret = tx.doFoldAttrViewGroup(op)
+			case "syncAttrViewTableColWidth":
+				ret = tx.doSyncAttrViewTableColWidth(op)
+			case "removeAttrViewGroup":
+				ret = tx.doRemoveAttrViewGroup(op)
+			case "sortAttrViewGroup":
+				ret = tx.doSortAttrViewGroup(op)
+			}
 
-		if nil != ret {
-			tx.rollback()
-			return
+			if nil != ret {
+				tx.rollback()
+				return
+			}
 		}
 	}
 
@@ -318,6 +329,42 @@ func performTx(tx *Transaction) (ret *TxErr) {
 		return &TxErr{msg: cr.Error()}
 	}
 	return
+}
+
+func (tx *Transaction) processLargeInsert() bool {
+	opSize := len(tx.DoOperations)
+	isLargeInsert := 128 < opSize
+	if isLargeInsert {
+		var previousID string
+		for i, op := range tx.DoOperations {
+			if i == opSize-1 {
+				if "delete" != op.Action {
+					// 最后一个是 delete
+					isLargeInsert = false
+				}
+				break
+			}
+			if "insert" != op.Action {
+				isLargeInsert = false
+				break
+			}
+
+			if "" == op.PreviousID {
+				isLargeInsert = false
+				break
+			}
+			if "" == previousID {
+				previousID = op.PreviousID
+			} else if previousID != op.PreviousID {
+				isLargeInsert = false
+				break
+			}
+		}
+		if isLargeInsert {
+			tx.doLargeInsert(previousID)
+		}
+	}
+	return isLargeInsert
 }
 
 func (tx *Transaction) doMove(operation *Operation) (ret *TxErr) {
@@ -780,8 +827,6 @@ func (tx *Transaction) doAppend(operation *Operation) (ret *TxErr) {
 }
 
 func (tx *Transaction) doDelete(operation *Operation) (ret *TxErr) {
-	//	logging.LogInfof("commit delete [%+v]", operation)
-
 	var err error
 	id := operation.ID
 	tree, err := tx.loadTree(id)
@@ -965,6 +1010,7 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			if changedAv {
+				regenAttrViewViewGroups(attrView, "force")
 				av.SaveAttributeView(attrView)
 				changedAvIDs = append(changedAvIDs, avID)
 			}
@@ -974,6 +1020,127 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 	return
+}
+
+func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
+	tree, err := tx.loadTree(previousID)
+	if nil != err {
+		logging.LogErrorf("load tree [%s] failed: %s", previousID, err)
+		return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
+	}
+
+	for _, operation := range tx.DoOperations {
+		if "insert" != operation.Action {
+			break
+		}
+
+		data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
+		subTree := tx.luteEngine.BlockDOM2Tree(data)
+		tx.processGlobalAssets(subTree)
+
+		insertedNode := subTree.Root.FirstChild
+		if nil == insertedNode {
+			return &TxErr{code: TxErrCodeBlockNotFound, msg: "invalid data tree", id: tree.ID}
+		}
+		var remains []*ast.Node
+		for remain := insertedNode.Next; nil != remain; remain = remain.Next {
+			if ast.NodeKramdownBlockIAL != remain.Type {
+				if "" == remain.ID {
+					remain.ID = ast.NewNodeID()
+					remain.SetIALAttr("id", remain.ID)
+				}
+				remains = append(remains, remain)
+			}
+		}
+		if "" == insertedNode.ID {
+			insertedNode.ID = ast.NewNodeID()
+			insertedNode.SetIALAttr("id", insertedNode.ID)
+		}
+
+		node := treenode.GetNodeInTree(tree, previousID)
+		if nil == node {
+			logging.LogErrorf("get node [%s] in tree [%s] failed", previousID, tree.Root.ID)
+			return &TxErr{code: TxErrCodeBlockNotFound, id: previousID}
+		}
+
+		if ast.NodeHeading == node.Type && "1" == node.IALAttr("fold") {
+			children := treenode.HeadingChildren(node)
+			if l := len(children); 0 < l {
+				node = children[l-1]
+			}
+		}
+		if ast.NodeList == insertedNode.Type && nil != node.Parent && ast.NodeList == node.Parent.Type {
+			insertedNode = insertedNode.FirstChild
+		}
+		for i := len(remains) - 1; 0 <= i; i-- {
+			remain := remains[i]
+			node.InsertAfter(remain)
+		}
+		node.InsertAfter(insertedNode)
+
+		createdUpdated(insertedNode)
+		tx.nodes[insertedNode.ID] = insertedNode
+		tx.trees[tree.ID] = tree
+
+		// 收集引用的定义块 ID
+		refDefIDs := getRefDefIDs(insertedNode)
+		// 推送定义节点引用计数
+		for _, defID := range refDefIDs {
+			task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
+		}
+
+		upsertAvBlockRel(insertedNode)
+
+		// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
+		avs := insertedNode.IALAttr(av.NodeAttrNameAvs)
+		for _, avID := range strings.Split(avs, ",") {
+			if !ast.IsNodeIDPattern(avID) {
+				continue
+			}
+
+			AddAttributeViewBlock(tx, []map[string]interface{}{{
+				"id":         insertedNode.ID,
+				"isDetached": false,
+			}}, avID, "", "", previousID)
+			ReloadAttrView(avID)
+		}
+
+		if ast.NodeAttributeView == insertedNode.Type {
+			// 插入数据库块时需要重新绑定其中已经存在的块
+			// 比如剪切操作时，会先进行 delete 数据库解绑块，这里需要重新绑定 https://github.com/siyuan-note/siyuan/issues/13031
+			attrView, parseErr := av.ParseAttributeView(insertedNode.AttributeViewID)
+			if nil == parseErr {
+				trees, toBindNodes := tx.getAttrViewBoundNodes(attrView)
+				for _, toBindNode := range toBindNodes {
+					t := trees[toBindNode.ID]
+					bindBlockAv0(tx, insertedNode.AttributeViewID, toBindNode, t)
+				}
+
+				// 设置视图 https://github.com/siyuan-note/siyuan/issues/15279
+				v := attrView.GetView(attrView.ViewID)
+				if nil != v {
+					insertedNode.AttributeViewType = string(v.LayoutType)
+					attrs := parse.IAL2Map(insertedNode.KramdownIAL)
+					if "" == attrs[av.NodeAttrView] {
+						attrs[av.NodeAttrView] = v.ID
+						err = setNodeAttrs(insertedNode, tree, attrs)
+						if err != nil {
+							logging.LogWarnf("set node [%s] attrs failed: %s", operation.BlockID, err)
+							return
+						}
+					}
+				}
+			}
+		}
+
+		operation.ID = insertedNode.ID
+		operation.ParentID = insertedNode.Parent.ID
+	}
+
+	if err = tx.writeTree(tree); nil != err {
+		return &TxErr{code: TxErrCodeWriteTree, msg: err.Error(), id: tree.ID}
+	}
+	return tx.doDelete(tx.DoOperations[len(tx.DoOperations)-1])
 }
 
 func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
@@ -1001,42 +1168,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 
 	data := strings.ReplaceAll(operation.Data.(string), editor.FrontEndCaret, "")
 	subTree := tx.luteEngine.BlockDOM2Tree(data)
-
-	if !tx.isGlobalAssetsInit {
-		tx.assetsDir = getAssetsDir(filepath.Join(util.DataDir, bt.BoxID), filepath.Dir(filepath.Join(util.DataDir, bt.BoxID, bt.Path)))
-		tx.isGlobalAssets = strings.HasPrefix(tx.assetsDir, filepath.Join(util.DataDir, "assets"))
-		tx.isGlobalAssetsInit = true
-	}
-	if !tx.isGlobalAssets {
-		// 本地资源文件需要移动到用户手动建立的 assets 下 https://github.com/siyuan-note/siyuan/issues/2410
-		ast.Walk(subTree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
-			if !entering {
-				return ast.WalkContinue
-			}
-
-			if ast.NodeLinkDest == n.Type && bytes.HasPrefix(n.Tokens, []byte("assets/")) {
-				assetP := gulu.Str.FromBytes(n.Tokens)
-				assetPath, e := GetAssetAbsPath(assetP)
-				if nil != e {
-					logging.LogErrorf("get path of asset [%s] failed: %s", assetP, err)
-					return ast.WalkContinue
-				}
-
-				if !strings.HasPrefix(assetPath, filepath.Join(util.DataDir, "assets")) {
-					// 非全局 assets 则跳过
-					return ast.WalkContinue
-				}
-
-				// 只有全局 assets 才移动到相对 assets
-				targetP := filepath.Join(tx.assetsDir, filepath.Base(assetPath))
-				if e = filelock.Rename(assetPath, targetP); err != nil {
-					logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, err)
-					return ast.WalkContinue
-				}
-			}
-			return ast.WalkContinue
-		})
-	}
+	tx.processGlobalAssets(subTree)
 
 	insertedNode := subTree.Root.FirstChild
 	if nil == insertedNode {
@@ -1092,6 +1224,12 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 			node.InsertAfter(remain)
 		}
 		node.InsertAfter(insertedNode)
+
+		if treenode.IsUnderFoldedHeading(insertedNode) {
+			// 保持在标题下的折叠状态
+			insertedNode.SetIALAttr("fold", "1")
+			insertedNode.SetIALAttr("heading-fold", "1")
+		}
 	} else {
 		node = treenode.GetNodeInTree(tree, operation.ParentID)
 		if nil == node {
@@ -1148,7 +1286,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", previousID, false)
+		}}, avID, "", "", previousID)
 		ReloadAttrView(avID)
 	}
 
@@ -1183,6 +1321,47 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 	operation.ID = insertedNode.ID
 	operation.ParentID = insertedNode.Parent.ID
 	return
+}
+
+func (tx *Transaction) processGlobalAssets(tree *parse.Tree) {
+	if !tx.isGlobalAssetsInit {
+		tx.assetsDir = getAssetsDir(filepath.Join(util.DataDir, tree.Box), filepath.Dir(filepath.Join(util.DataDir, tree.Box, tree.Path)))
+		tx.isGlobalAssets = strings.HasPrefix(tx.assetsDir, filepath.Join(util.DataDir, "assets"))
+		tx.isGlobalAssetsInit = true
+	}
+
+	if tx.isGlobalAssets {
+		return
+	}
+
+	// 本地资源文件需要移动到用户手动建立的 assets 下 https://github.com/siyuan-note/siyuan/issues/2410
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeLinkDest == n.Type && bytes.HasPrefix(n.Tokens, []byte("assets/")) {
+			assetP := gulu.Str.FromBytes(n.Tokens)
+			assetPath, e := GetAssetAbsPath(assetP)
+			if nil != e {
+				logging.LogErrorf("get path of asset [%s] failed: %s", assetP, e)
+				return ast.WalkContinue
+			}
+
+			if !strings.HasPrefix(assetPath, filepath.Join(util.DataDir, "assets")) {
+				// 非全局 assets 则跳过
+				return ast.WalkContinue
+			}
+
+			// 只有全局 assets 才移动到相对 assets
+			targetP := filepath.Join(tx.assetsDir, filepath.Base(assetPath))
+			if e = filelock.Rename(assetPath, targetP); e != nil {
+				logging.LogErrorf("copy path of asset from [%s] to [%s] failed: %s", assetPath, targetP, e)
+				return ast.WalkContinue
+			}
+		}
+		return ast.WalkContinue
+	})
 }
 
 func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
@@ -1271,9 +1450,28 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 
 	cache.PutBlockIAL(updatedNode.ID, parse.IAL2Map(updatedNode.KramdownIAL))
 
+	if ast.NodeHTMLBlock == updatedNode.Type {
+		content := string(updatedNode.Tokens)
+		// 剔除连续的空行（包括空行内包含空格的情况） https://github.com/siyuan-note/siyuan/issues/15377
+		var newLines []string
+		lines := strings.Split(content, "\n")
+		for _, line := range lines {
+			if strings.TrimSpace(line) != "" {
+				newLines = append(newLines, line)
+			}
+		}
+		updatedNode.Tokens = []byte(strings.Join(newLines, "\n"))
+	}
+
 	// 替换为新节点
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
+
+	if treenode.IsUnderFoldedHeading(updatedNode) {
+		// 保持在标题下的折叠状态
+		updatedNode.SetIALAttr("fold", "1")
+		updatedNode.SetIALAttr("heading-fold", "1")
+	}
 
 	createdUpdated(updatedNode)
 
@@ -1371,6 +1569,12 @@ func upsertAvBlockRel(node *ast.Node) {
 		affectedAvIDs = append(affectedAvIDs, relatedAvIDs...)
 		affectedAvIDs = gulu.Str.RemoveDuplicatedElem(affectedAvIDs)
 		for _, avID := range affectedAvIDs {
+			attrView, _ := av.ParseAttributeView(avID)
+			if nil != attrView {
+				regenAttrViewViewGroups(attrView, "force")
+				av.SaveAttributeView(attrView)
+			}
+
 			ReloadAttrView(avID)
 		}
 	}()
@@ -1510,20 +1714,21 @@ type Operation struct {
 
 	DeckID string `json:"deckID"` // 用于添加/删除闪卡
 
-	AvID                string                   `json:"avID"`              // 属性视图 ID
-	SrcIDs              []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
-	Srcs                []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
-	IsDetached          bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
-	IgnoreFillFilterVal bool                     `json:"ignoreFillFilter"`  // 用于标识是否忽略填充筛选值
-	Name                string                   `json:"name"`              // 属性视图列名
-	Typ                 string                   `json:"type"`              // 属性视图列类型
-	Format              string                   `json:"format"`            // 属性视图列格式化
-	KeyID               string                   `json:"keyID"`             // 属性视图字段 ID
-	RowID               string                   `json:"rowID"`             // 属性视图行 ID
-	IsTwoWay            bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
-	BackRelationKeyID   string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
-	RemoveDest          bool                     `json:"removeDest"`        // 属性视图删除关联目标
-	Layout              av.LayoutType            `json:"layout"`            // 属性视图布局类型
+	AvID              string                   `json:"avID"`              // 属性视图 ID
+	SrcIDs            []string                 `json:"srcIDs"`            // 用于从属性视图中删除行
+	Srcs              []map[string]interface{} `json:"srcs"`              // 用于添加属性视图行（包括绑定块）{id, content, isDetached}
+	IsDetached        bool                     `json:"isDetached"`        // 用于标识是否未绑定块，仅存在于属性视图中
+	Name              string                   `json:"name"`              // 属性视图列名
+	Typ               string                   `json:"type"`              // 属性视图列类型
+	Format            string                   `json:"format"`            // 属性视图列格式化
+	KeyID             string                   `json:"keyID"`             // 属性视图字段 ID
+	RowID             string                   `json:"rowID"`             // 属性视图行 ID
+	IsTwoWay          bool                     `json:"isTwoWay"`          // 属性视图关联列是否是双向关系
+	BackRelationKeyID string                   `json:"backRelationKeyID"` // 属性视图关联列回链关联列的 ID
+	RemoveDest        bool                     `json:"removeDest"`        // 属性视图删除关联目标
+	Layout            av.LayoutType            `json:"layout"`            // 属性视图布局类型
+	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
+	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
 }
 
 type Transaction struct {

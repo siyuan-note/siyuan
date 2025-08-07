@@ -632,13 +632,13 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 	case FilterOperatorIsNotEqual:
 		return valueTime.Before(otherValueStart) || valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreater:
-		return valueTime.After(otherValueEnd) || valueTime.Equal(otherValueEnd)
+		return valueTime.After(otherValueStart)
 	case FilterOperatorIsGreaterOrEqual:
 		return valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)
 	case FilterOperatorIsLess:
 		return valueTime.Before(otherValueStart)
 	case FilterOperatorIsLessOrEqual:
-		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
+		return valueTime.Before(otherValueStart) || valueTime.Equal(otherValueStart)
 	case FilterOperatorIsBetween:
 		if RelativeDateDirectionBefore == direction {
 			if RelativeDateDirectionBefore == direction2 {
@@ -829,7 +829,7 @@ func calcRelativeTimeRegion(count int, unit RelativeDateUnit, direction Relative
 	return
 }
 
-func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Value) {
+func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *Value) {
 	if nil != filter.Value {
 		if KeyTypeRelation == filter.Value.Type || KeyTypeTemplate == filter.Value.Type || KeyTypeRollup == filter.Value.Type || KeyTypeUpdated == filter.Value.Type || KeyTypeCreated == filter.Value.Type {
 			// 所有生成的数据都不设置默认值
@@ -854,39 +854,32 @@ func (filter *ViewFilter) GetAffectValue(key *Key, defaultVal *Value) (ret *Valu
 	}
 
 	ret = filter.Value.Clone()
+	ret.ID = ast.NewNodeID()
+	ret.KeyID = key.ID
+	ret.BlockID = addingBlockID
 	ret.CreatedAt = util.CurrentTimeMillis()
 	ret.UpdatedAt = ret.CreatedAt + 1000
 
-	if nil != defaultVal {
-		// 如果有默认值则优先使用默认值
-		clonedDefaultVal := defaultVal.Clone()
-		defaultRawVal := clonedDefaultVal.GetValByType(filter.Value.Type)
-		if nil != defaultRawVal {
-			ret.SetValByType(filter.Value.Type, defaultRawVal)
-			return
-		}
-	}
 	// 没有默认值则使用过滤条件的值
-
 	switch filter.Value.Type {
 	case KeyTypeBlock:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEqual:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: ""}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorContains:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorDoesNotContain:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: ""}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorStartsWith:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorEndsWith:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: filter.Value.Block.Content}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsEmpty:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: ""}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEmpty:
-			ret.Block = &ValueBlock{ID: filter.Value.Block.ID, Content: ""}
+			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		}
 	case KeyTypeText:
 		switch filter.Operator {

@@ -255,7 +255,7 @@ export const AIActions = (elements: Element[], protyle: IProtyle) => {
             });
             element.addEventListener("click", (event) => {
                 let target = event.target as HTMLElement;
-                while (target && !target.isSameNode(element)) {
+                while (target && (target !== element)) {
                     if (target.classList.contains("b3-list-item__action")) {
                         const subItem = window.siyuan.storage[Constants.LOCAL_AI][target.parentElement.dataset.index];
                         editDialog(subItem.name, subItem.memo);

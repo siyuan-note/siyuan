@@ -268,7 +268,7 @@ func Export2Liandi(id string) (err error) {
 
 	title := path.Base(tree.HPath)
 	tags := tree.Root.IALAttr("tags")
-	content := exportMarkdownContent0(tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true,
+	content := exportMarkdownContent0(id, tree, util.GetCloudForumAssetsServer()+time.Now().Format("2006/01")+"/siyuan/"+Conf.GetUser().UserId+"/", true, false,
 		".md", 3, 1, 1,
 		"#", "#",
 		"", "",
@@ -571,9 +571,14 @@ func ExportResources(resourcePaths []string, mainName string) (exportFilePath st
 	return
 }
 
-func Preview(id string) (retStdHTML string) {
+func Preview(id string, fillCSSVar bool) (retStdHTML string) {
 	blockRefMode := Conf.Export.BlockRefMode
-	tree, _ := LoadTreeByBlockID(id)
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		return
+	}
+
+	tree := prepareExportTree(bt)
 	tree = exportTree(tree, false, false, true,
 		blockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		"#", "#", // 这里固定使用 # 包裹标签，否则无法正确解析标签 https://github.com/siyuan-note/siyuan/issues/13857
@@ -583,6 +588,8 @@ func Preview(id string) (retStdHTML string) {
 	enableLuteInlineSyntax(luteEngine)
 	luteEngine.SetFootnotes(true)
 	addBlockIALNodes(tree, false)
+
+	adjustHeadingLevel(bt, tree)
 
 	// 移除超级块的属性列表 https://github.com/siyuan-note/siyuan/issues/13451
 	var unlinks []*ast.Node
@@ -599,7 +606,9 @@ func Preview(id string) (retStdHTML string) {
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458
-	fillThemeStyleVar(tree)
+	if fillCSSVar {
+		fillThemeStyleVar(tree)
+	}
 	luteEngine.RenderOptions.ProtyleMarkNetImg = false
 	retStdHTML = luteEngine.ProtylePreview(tree, luteEngine.RenderOptions)
 
@@ -860,6 +869,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
 		Conf.Export.AddTitle, Conf.Export.InlineMemo, true, true, &map[string]*parse.Tree{})
+	adjustHeadingLevel(bt, tree)
 	name = path.Base(tree.HPath)
 	name = util.FilterFileName(name) // 导出 PDF、HTML 和 Word 时未移除不支持的文件名符号 https://github.com/siyuan-note/siyuan/issues/5614
 
@@ -1449,13 +1459,14 @@ func processPDFLinkEmbedAssets(pdfCtx *model.Context, assetDests []string, remov
 	}
 }
 
-func ExportStdMarkdown(id string, assetsDestSpace2Underscore bool) string {
-	tree, err := LoadTreeByBlockID(id)
-	if err != nil {
-		logging.LogErrorf("load tree by block id [%s] failed: %s", id, err)
+func ExportStdMarkdown(id string, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel bool) string {
+	bt := treenode.GetBlockTree(id)
+	if nil == bt {
+		logging.LogErrorf("block tree [%s] not found", id)
 		return ""
 	}
 
+	tree := prepareExportTree(bt)
 	cloudAssetsBase := ""
 	if IsSubscriber() {
 		cloudAssetsBase = util.GetCloudAssetsServer() + Conf.GetUser().UserId + "/"
@@ -1487,11 +1498,11 @@ func ExportStdMarkdown(id string, assetsDestSpace2Underscore bool) string {
 	}
 	defBlockIDs = gulu.Str.RemoveDuplicatedElem(defBlockIDs)
 
-	return exportMarkdownContent0(tree, cloudAssetsBase, assetsDestSpace2Underscore,
+	return exportMarkdownContent0(id, tree, cloudAssetsBase, assetsDestSpace2Underscore, adjustHeadingLevel,
 		".md", Conf.Export.BlockRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
-		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, false, &map[string]*parse.Tree{})
+		Conf.Export.AddTitle, Conf.Export.InlineMemo, defBlockIDs, true, fillCSSVar, &map[string]*parse.Tree{})
 }
 
 func ExportPandocConvertZip(ids []string, pandocTo, ext string) (name, zipPath string) {
@@ -1973,7 +1984,7 @@ func walkRelationAvs(avID string, exportAvIDs *hashset.Set) {
 	}
 }
 
-func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar bool) (hPath, exportedMd string) {
+func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar, adjustHeadingLv bool) (hPath, exportedMd string) {
 	bt := treenode.GetBlockTree(id)
 	if nil == bt {
 		return
@@ -1981,7 +1992,7 @@ func ExportMarkdownContent(id string, refMode, embedMode int, addYfm, fillCSSVar
 
 	tree := prepareExportTree(bt)
 	hPath = tree.HPath
-	exportedMd = exportMarkdownContent0(tree, "", false,
+	exportedMd = exportMarkdownContent0(id, tree, "", false, adjustHeadingLv,
 		".md", refMode, embedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -2000,7 +2011,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		return
 	}
 	isEmpty = nil == tree.Root.FirstChild.FirstChild
-	exportedMd = exportMarkdownContent0(tree, "", false,
+	exportedMd = exportMarkdownContent0(id, tree, "", false, false,
 		ext, exportRefMode, Conf.Export.BlockEmbedMode, Conf.Export.FileAnnotationRefMode,
 		Conf.Export.TagOpenMarker, Conf.Export.TagCloseMarker,
 		Conf.Export.BlockRefTextLeft, Conf.Export.BlockRefTextRight,
@@ -2013,7 +2024,7 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 	return
 }
 
-func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore bool,
+func exportMarkdownContent0(id string, tree *parse.Tree, cloudAssetsBase string, assetsDestSpace2Underscore, adjustHeadingLv bool,
 	ext string, blockRefMode, blockEmbedMode, fileAnnotationRefMode int,
 	tagOpenMarker, tagCloseMarker string, blockRefTextLeft, blockRefTextRight string,
 	addTitle, inlineMemo bool, defBlockIDs []string, singleFile, fillCSSVar bool, treeCache *map[string]*parse.Tree) (ret string) {
@@ -2022,6 +2033,11 @@ func exportMarkdownContent0(tree *parse.Tree, cloudAssetsBase string, assetsDest
 		tagOpenMarker, tagCloseMarker,
 		blockRefTextLeft, blockRefTextRight,
 		addTitle, inlineMemo, 0 < len(defBlockIDs), singleFile, treeCache)
+	if adjustHeadingLv {
+		bt := treenode.GetBlockTree(id)
+		adjustHeadingLevel(bt, tree)
+	}
+
 	luteEngine := NewLute()
 	luteEngine.SetFootnotes(true)
 	luteEngine.SetKramdownIAL(false)
@@ -3406,6 +3422,54 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 			view.Table.Columns = append(view.Table.Columns, &av.ViewTableColumn{BaseField: &av.BaseField{ID: field.ID}})
 		}
 	}
-	ret = sql.RenderAttributeViewTable(attrView, view, query)
+
+	depth := 1
+	ret = sql.RenderAttributeViewTable(attrView, view, query, &depth)
 	return
+}
+
+// adjustHeadingLevel 聚焦导出（即非文档块）的情况下，将第一个标题层级提升为一级（如果开启了添加文档标题的话提升为二级）。
+// Export preview mode supports focus use https://github.com/siyuan-note/siyuan/issues/15340
+func adjustHeadingLevel(bt *treenode.BlockTree, tree *parse.Tree) {
+	if "d" == bt.Type {
+		return
+	}
+
+	level := 1
+	var firstHeading *ast.Node
+	if !Conf.Export.AddTitle {
+		for n := tree.Root.FirstChild; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+				firstHeading = n
+				break
+			}
+		}
+	} else {
+		for n := tree.Root.FirstChild.Next; nil != n; n = n.Next {
+			if ast.NodeHeading == n.Type && !n.ParentIs(ast.NodeBlockquote) {
+				firstHeading = n
+				break
+			}
+		}
+		level = 2
+	}
+	if nil != firstHeading {
+		hLevel := firstHeading.HeadingLevel
+		diff := level - hLevel
+		var children, childrenHeadings []*ast.Node
+		children = append(children, firstHeading)
+		children = append(children, treenode.HeadingChildren(firstHeading)...)
+		for _, c := range children {
+			ccH := c.ChildrenByType(ast.NodeHeading)
+			childrenHeadings = append(childrenHeadings, ccH...)
+		}
+		for _, h := range childrenHeadings {
+			h.HeadingLevel += diff
+			if 6 < h.HeadingLevel {
+				h.HeadingLevel = 6
+			} else if 1 > h.HeadingLevel {
+				h.HeadingLevel = 1
+			}
+		}
+	}
 }

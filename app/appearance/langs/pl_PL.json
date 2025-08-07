@@ -1,7 +1,14 @@
 {
+  "groupStep": "Odstęp grupowania",
+  "groupRange": "Zakres grupowania",
+  "groupMethodDateRelative": "Data względna",
+  "groupMethodDateDay": "Dzień",
+  "groupMethodDateWeek": "Tydzień",
+  "groupMethodDateMonth": "Miesiąc",
+  "groupMethodDateYear": "Rok",
   "syncColWidth": "Synchronizuj szerokość kolumny",
   "groupMethod": "Metoda grupowania",
-  "hideEmptyGroup": "Ukryj pustą grupę",
+  "hideEmptyGroup": "Ukryj puste grupy",
   "groups": "Grupy",
   "removeGroup": "Usuń grupę",
   "contentBlock": "Blok treści",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Ostatni czas przeglądu",
   "cardStatus": "Status karty",
   "noSupportTip": "Ta funkcja nie wspiera użycia zestawów kart",
-  "insertRowTip": "Nowo dodane wiersze zostały przefiltrowane i mogą być wyświetlane po anulowaniu filtrowania/szukań/sortowań",
+  "insertRowTip": "Nowy element został przefiltrowany, anuluj filtrowanie lub ustawienia grupowania, aby wyświetlić",
   "insertPhoto": "Zrób zdjęcie i wstaw je",
   "relativeToToday": "W odniesieniu do dzisiaj",
   "current": "Ten",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "Oczyszczenie repozytorium danych całkowicie usunie wszystkie nieodwołane zrzuty i powiązane obiekty danych, czy na pewno chcesz przeprowadzić oczyszczenie?",
   "purge": "Oczyść",
   "plsChoose": "Proszę najpierw wybrać",
-  "clearMessage": "Przeczytaj",
   "freeSub": "Bezpłatna subskrypcja próbna",
   "sortByUpdateTimeDesc": "Malejąco wg czasu aktualizacji",
   "sortByUpdateTimeAsc": "Rosnąco wg czasu aktualizacji",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Proszę najpierw otworzyć notes",
   "copyBlockRef": "Skopiuj odniesienie do bloku",
   "copyBlockEmbed": "Skopiuj blok osadzony",
+  "copyMarkdown": "Skopiuj jako Markdown",
   "linkLevel": "Głębokość",
   "mark": "Zaznacz",
   "splitLR": "Podziel w prawo",
@@ -1634,6 +1641,8 @@
     "261": "Dzisiaj",
     "262": "Jutro",
     "263": "Następne %d dni",
-    "264": "Pole [%s] jest puste"
+    "264": "Pole [%s] jest puste",
+    "265": "Poza zakresem",
+    "266": "Tesseract OCR nie jest zainstalowany lub skonfigurowany, zapoznaj się z Podręcznikiem użytkownika - Sekcja plików zasobów, aby skonfigurować"
   }
 }

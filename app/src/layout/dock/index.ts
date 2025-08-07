@@ -186,13 +186,13 @@ export class Dock {
                 const targetItem = hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item") ||
                     hasClosestByClassName(moveEvent.target as HTMLElement, "dock__items") as HTMLElement ||
                     hasClosestByClassName(moveEvent.target as HTMLElement, "dock__item--space") as HTMLElement;
-                if (targetItem && selectItem && targetItem.isSameNode(selectItem)) {
+                if (targetItem && selectItem && targetItem === selectItem) {
                     if (selectItem.classList.contains("dock__item--space")) {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.id === "dockBottom") {
                             if (moveEvent.clientX < selectRect.right && moveEvent.clientX > selectRect.right - 40) {
                                 const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                if (lastFirstElement && lastFirstElement === item) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -202,7 +202,7 @@ export class Dock {
                         } else {
                             if (moveEvent.clientY < selectRect.bottom && moveEvent.clientY > selectRect.bottom - 40) {
                                 const lastFirstElement = selectItem.nextElementSibling.firstElementChild;
-                                if (lastFirstElement && lastFirstElement.isSameNode(item)) {
+                                if (lastFirstElement && lastFirstElement === item) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -211,7 +211,7 @@ export class Dock {
                             }
                         }
                     } else if (selectItem.classList.contains("dock__item--pin")) {
-                        if (item.nextElementSibling?.isSameNode(selectItem)) {
+                        if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                             moveItem.classList.add("fn__none");
                         } else {
                             moveItem.classList.remove("fn__none");
@@ -221,14 +221,14 @@ export class Dock {
                         const selectRect = selectItem.getBoundingClientRect();
                         if (selectItem.parentElement.parentElement.id === "dockBottom") {
                             if (selectRect.left + selectRect.width / 2 > moveEvent.clientX) {
-                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
-                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                if (item.previousElementSibling && item.previousElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -237,14 +237,14 @@ export class Dock {
                             }
                         } else {
                             if (selectRect.top + selectRect.height / 2 > moveEvent.clientY) {
-                                if (item.nextElementSibling?.isSameNode(selectItem)) {
+                                if (item.nextElementSibling && item.nextElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
                                     selectItem.before(moveItem);
                                 }
                             } else {
-                                if (item.previousElementSibling?.isSameNode(selectItem)) {
+                                if (item.previousElementSibling && item.previousElementSibling === selectItem) {
                                     moveItem.classList.add("fn__none");
                                 } else {
                                     moveItem.classList.remove("fn__none");
@@ -266,8 +266,8 @@ export class Dock {
                     }
                     return;
                 }
-                if (!targetItem || targetItem.style.position === "fixed" || targetItem.isSameNode(item) || targetItem.id === "dockMoveItem") {
-                    if (targetItem && targetItem.isSameNode(item)) {
+                if (!targetItem || targetItem.style.position === "fixed" || (targetItem === item) || targetItem.id === "dockMoveItem") {
+                    if (targetItem && targetItem === item) {
                         moveItem.classList.add("fn__none");
                     }
                     return;
@@ -295,7 +295,7 @@ export class Dock {
                     } else if (moveItem.parentElement.parentElement.id === "dockRight") {
                         dock = window.siyuan.layout.rightDock;
                     }
-                    dock.add(moveItem.parentElement.isSameNode(dock.element.firstElementChild) ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
+                    dock.add(moveItem.parentElement === dock.element.firstElementChild ? 0 : 1, item, moveItem.previousElementSibling?.getAttribute("data-type"));
                 }
                 moveItem.remove();
             };

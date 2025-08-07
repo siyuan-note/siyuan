@@ -1,7 +1,14 @@
 {
+  "groupStep": "Group interval",
+  "groupRange": "Group range",
+  "groupMethodDateRelative": "Relative date",
+  "groupMethodDateDay": "Day",
+  "groupMethodDateWeek": "Week",
+  "groupMethodDateMonth": "Month",
+  "groupMethodDateYear": "Year",
   "syncColWidth": "Sync column width",
   "groupMethod": "Grouping method",
-  "hideEmptyGroup": "Hide empty group",
+  "hideEmptyGroup": "Hide empty groups",
   "groups": "Groups",
   "removeGroup": "Remove group",
   "contentBlock": "Content block",
@@ -129,7 +136,7 @@
   "lastReviewTime": "Last review time",
   "cardStatus": "Card status",
   "noSupportTip": "This function does not support the use of card decks",
-  "insertRowTip": "The newly added entries have been filtered and can be viewed by canceling filtering/searching/sorting",
+  "insertRowTip": "The new item has been filtered, cancel the filter or adjust the grouping settings to view it",
   "insertPhoto": "Take a photo and insert it",
   "relativeToToday": "Relative to today",
   "current": "This",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "Purging the data repo will completely delete all unreferenced snapshots and related data objects, are you sure to purge?",
   "purge": "Purge",
   "plsChoose": "Please choose first",
-  "clearMessage": "Read",
   "freeSub": "Free Trial Subscription",
   "sortByUpdateTimeDesc": "Descending by update time",
   "sortByUpdateTimeAsc": "Ascending by update time",
@@ -1173,6 +1179,7 @@
   "newFileTip": "Please open a notebook first",
   "copyBlockRef": "Copy block ref",
   "copyBlockEmbed": "Copy block embed",
+  "copyMarkdown": "Copy as Markdown",
   "linkLevel": "Depth",
   "mark": "Mark",
   "splitLR": "Split Right",
@@ -1634,6 +1641,8 @@
     "261": "Today",
     "262": "Tomorrow",
     "263": "Next %d days",
-    "264": "Field [%s] is empty"
+    "264": "Field [%s] is empty",
+    "265": "Out of range",
+    "266": "Tesseract OCR is not installed or configured, please refer to the User Guide - Assets section for configuration"
   }
 }

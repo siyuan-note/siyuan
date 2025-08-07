@@ -128,7 +128,7 @@ export class Tab {
                     // 按 esc 取消的时候应该还原在 dragover 时交换的 tab
                     this.parent.children.forEach((item, index) => {
                         const currentElement = this.headElement.parentElement.children[index];
-                        if (!item.headElement.isSameNode(currentElement)) {
+                        if (item.headElement !== currentElement) {
                             if (index === 0) {
                                 this.headElement.parentElement.firstElementChild.before(item.headElement);
                             } else {

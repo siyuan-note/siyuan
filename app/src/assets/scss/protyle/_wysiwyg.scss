@@ -183,7 +183,29 @@
         line-height: calc(1.625em + 8px);
 
         & ~ [data-type="NodeHeading"] {
-          line-height: 1em;
+          &.h1 {
+            line-height: calc(1.625em / 1.75);
+          }
+
+          &.h2 {
+            line-height: calc(1.625em / 1.55);
+          }
+
+          &.h3 {
+            line-height: calc(1.625em / 1.38);
+          }
+
+          &.h4 {
+            line-height: calc(1.625em / 1.25);
+          }
+
+          &.h5 {
+            line-height: calc(1.625em / 1.13);
+          }
+
+          &.h6 {
+            line-height: 1.625em;
+          }
 
           & > [spellcheck] {
             min-height: 1em;

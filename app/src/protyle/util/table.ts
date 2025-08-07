@@ -67,7 +67,7 @@ export const setTableAlign = (protyle: IProtyle, cellElements: HTMLElement[], no
 
     for (let i = 0; i < rowCnt; i++) {
         for (let j = 0; j < columnCnt; j++) {
-            if (tableElement.rows[i].cells[j].isSameNode(cellElements[currentColumns.length])) {
+            if (tableElement.rows[i].cells[j] === cellElements[currentColumns.length]) {
                 currentColumns.push(j);
             }
         }
@@ -178,7 +178,7 @@ export const insertColumn = (protyle: IProtyle, nodeElement: Element, cellElemen
         const colCellElement = tableElement.rows[i].cells[index];
         const newCellElement = document.createElement(colCellElement.tagName);
         colCellElement.insertAdjacentElement(type, newCellElement);
-        if (colCellElement.isSameNode(cellElement)) {
+        if (colCellElement === cellElement) {
             newCellElement.innerHTML = "<wbr> ";
             // 滚动条横向定位
             if (newCellElement.offsetLeft + newCellElement.clientWidth > nodeElement.firstElementChild.scrollLeft + nodeElement.firstElementChild.clientWidth) {
@@ -319,7 +319,7 @@ export const moveColumnToLeft = (protyle: IProtyle, range: Range, cellElement: H
     const html = nodeElement.outerHTML;
     let cellIndex = 0;
     Array.from(cellElement.parentElement.children).find((item, index) => {
-        if (cellElement.isSameNode(item)) {
+        if (cellElement === item) {
             cellIndex = index;
             return true;
         }
@@ -346,7 +346,7 @@ export const moveColumnToRight = (protyle: IProtyle, range: Range, cellElement: 
     const html = nodeElement.outerHTML;
     let cellIndex = 0;
     Array.from(cellElement.parentElement.children).find((item, index) => {
-        if (cellElement.isSameNode(item)) {
+        if (cellElement === item) {
             cellIndex = index;
             return true;
         }
@@ -422,7 +422,7 @@ export const fixTable = (protyle: IProtyle, event: KeyboardEvent, range: Range) 
         // 表格后无内容时，按右键需新建空块
         if (event.key === "ArrowRight" && range.toString() === "" &&
             !nodeElement.nextElementSibling &&
-            cellElement.isSameNode(nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild) &&
+            cellElement === nodeElement.querySelector("table").lastElementChild.lastElementChild.lastElementChild &&
             getSelectionOffset(cellElement, protyle.wysiwyg.element, range).start === cellElement.textContent.length) {
             event.preventDefault();
             insertEmptyBlock(protyle, "afterend", nodeElement.getAttribute("data-node-id"));

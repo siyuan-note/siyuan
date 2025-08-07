@@ -3,20 +3,12 @@ import {Constants} from "../constants";
 
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
-    messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<button class="b3-button ft__smaller fn__none">${window.siyuan.languages.clearMessage}</button>`;
+    messageElement.innerHTML = '<div class="fn__flex-1"></div>';
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(messageElement)) {
             if (target.classList.contains("b3-snackbar__close")) {
                 hideMessage(target.parentElement.getAttribute("data-id"));
-                event.preventDefault();
-                break;
-            } else if (target.isSameNode(messageElement.lastElementChild)) {
-                target.parentElement.classList.remove("b3-snackbars--show");
-                setTimeout(() => {
-                    target.parentElement.firstElementChild.innerHTML = "";
-                }, Constants.TIMEOUT_INPUT);
                 event.preventDefault();
                 break;
             } else if (target.tagName === "A" || target.tagName === "BUTTON") {
@@ -45,7 +37,7 @@ export const showMessage = (message: string, timeout = 6000, type = "info", mess
     if (!messagesElement) {
         let tempMessages = document.getElementById("tempMessage");
         if (!tempMessages) {
-            document.body.insertAdjacentHTML("beforeend", `<div style="top: 22px;position: fixed;z-index: 100;right: 12px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
+            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: 22px;position: fixed;z-index: 100;right: 30px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
 id="tempMessage"></div>`);
             tempMessages = document.getElementById("tempMessage");
         }

@@ -1,7 +1,14 @@
 {
+  "groupStep": "グループ間隔",
+  "groupRange": "グループ範囲",
+  "groupMethodDateRelative": "相対日付",
+  "groupMethodDateDay": "日",
+  "groupMethodDateWeek": "週",
+  "groupMethodDateMonth": "月",
+  "groupMethodDateYear": "年",
   "syncColWidth": "列幅を同期",
   "groupMethod": "グループ方法",
-  "hideEmptyGroup": "空のグループを隠す",
+  "hideEmptyGroup": "空のグループを非表示",
   "groups": "グループ",
   "removeGroup": "グループを削除",
   "contentBlock": "コンテンツブロック",
@@ -129,7 +136,7 @@
   "lastReviewTime": "最後の復習時間",
   "cardStatus": "カードの状態",
   "noSupportTip": "この機能はカードデッキの使用をサポートしていません",
-  "insertRowTip": "新しく追加された行はフィルタリングされており、フィルタリング/検索/並べ替えを解除すると表示されます",
+  "insertRowTip": "新しい項目はフィルタリングされています。フィルタリングまたはグループ設定を解除して確認してください",
   "insertPhoto": "画像を挿入",
   "relativeToToday": "今日からの相対的な期間",
   "current": "現在",
@@ -629,7 +636,6 @@
   "dataRepoPurgeConfirm": "データリポジトリを消去すると、参照されていないすべてのスナップショットと関連するデータオブジェクトが完全に削除されます。消去してもよろしいですか？",
   "purge": "消去",
   "plsChoose": "最初にノートを選択してください",
-  "clearMessage": "既読",
   "freeSub": "無料体験版",
   "sortByUpdateTimeDesc": "更新時間 (降順)",
   "sortByUpdateTimeAsc": "更新時間 (昇順)",
@@ -1173,6 +1179,7 @@
   "newFileTip": "最初にノートブックを開いてください",
   "copyBlockRef": "ブロック参照としてコピー",
   "copyBlockEmbed": "埋め込みブロックとしてコピー",
+  "copyMarkdown": "Markdown としてコピー",
   "linkLevel": "深さ",
   "mark": "ハイライト",
   "splitLR": "右に分割",
@@ -1634,6 +1641,8 @@
     "261": "今日",
     "262": "明日",
     "263": "次の %d 日間",
-    "264": "フィールド [%s] の値が空です"
+    "264": "フィールド [%s] が空です",
+    "265": "範囲外",
+    "266": "Tesseract OCR がインストールされていないか、設定されていません。ユーザーガイド - リソースファイルセクションを参照して設定してください"
   }
 }

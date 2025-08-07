@@ -149,7 +149,12 @@ func ExistsAssetText(asset string) (ret bool) {
 	return
 }
 
-func OcrAsset(asset string) (ret []map[string]interface{}) {
+func OcrAsset(asset string) (ret []map[string]interface{}, err error) {
+	if !TesseractEnabled {
+		err = fmt.Errorf(Langs[Lang][266])
+		return
+	}
+
 	assetsPath := GetDataAssetsAbsPath()
 	assetAbsPath := strings.TrimPrefix(asset, "assets")
 	assetAbsPath = filepath.Join(assetsPath, assetAbsPath)

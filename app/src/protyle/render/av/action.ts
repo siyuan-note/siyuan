@@ -4,7 +4,8 @@ import {transaction} from "../../wysiwyg/transaction";
 import {openEditorTab} from "../../../menus/util";
 import {openFileAttr} from "../../../menus/commonMenuItem";
 import {
-    addDragFill, cellValueIsEmpty,
+    addDragFill,
+    cellValueIsEmpty,
     genCellValueByElement,
     getCellText,
     getTypeByCellElement,
@@ -54,7 +55,8 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             rowFooterElement.style.transform = "";
         }
         blockElement.removeAttribute("data-render");
-        blockElement.dataset.pageSize = (parseInt(blockElement.dataset.pageSize) + parseInt(blockElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+        const bodyElement = hasClosestByClassName(event.target, "av__body") as HTMLElement;
+        bodyElement.dataset.pageSize = (parseInt(bodyElement.dataset.pageSize) + parseInt(bodyElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
         avRender(blockElement, protyle);
         event.preventDefault();
         event.stopPropagation();
@@ -157,7 +159,13 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-more") {
-            insertRows(blockElement, protyle, 1, undefined);
+            insertRows({
+                blockElement,
+                protyle,
+                count: 1,
+                previousID: "",
+                groupID: blockElement.querySelector(".av__body")?.getAttribute("data-group-id") || ""
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -210,10 +218,26 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.stopPropagation();
             return true;
         } else if (type === "av-add-bottom") {
-            insertRows(blockElement, protyle, 1,
-                blockElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id") ||
-                target.previousElementSibling?.getAttribute("data-id") || undefined
-            );
+            const bodyElement = hasClosestByClassName(target, "av__body");
+            insertRows({
+                blockElement, protyle,
+                count: 1,
+                previousID: (bodyElement && bodyElement.querySelector(".av__row--util")?.previousElementSibling?.getAttribute("data-id")) ||
+                    target.previousElementSibling?.getAttribute("data-id") || undefined,
+                groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : ""
+            });
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-add-top") {
+            const titleElement = hasClosestByClassName(target, "av__group-title");
+            insertRows({
+                blockElement,
+                protyle,
+                count: 1,
+                previousID: "",
+                groupID: titleElement ? titleElement.nextElementSibling.getAttribute("data-group-id") : ""
+            });
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -291,6 +315,34 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     y: rect.bottom
                 }
             });
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-group-fold") {
+            if (target.getAttribute("data-folding") !== "true") {
+                target.setAttribute("data-folding", "true");
+                const isOpen = target.firstElementChild.classList.contains("av__group-arrow--open");
+                transaction(protyle, [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    id: target.dataset.id,
+                    data: isOpen
+                }], [{
+                    action: "foldAttrViewGroup",
+                    avID: blockElement.dataset.avId,
+                    blockID: blockElement.dataset.nodeId,
+                    id: target.dataset.id,
+                    data: !isOpen
+                }]);
+                if (isOpen) {
+                    target.firstElementChild.classList.remove("av__group-arrow--open");
+                    target.parentElement.nextElementSibling.classList.add("fn__none");
+                } else {
+                    target.firstElementChild.classList.add("av__group-arrow--open");
+                    target.parentElement.nextElementSibling.classList.remove("fn__none");
+                }
+            }
             event.preventDefault();
             event.stopPropagation();
             return true;
@@ -552,9 +604,9 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
                         avID,
-                        ignoreFillFilter: true,
                         srcs,
-                        blockID: listItemElement.dataset.blockId
+                        blockID: listItemElement.dataset.blockId,
+                        groupID: rowElement.parentElement.getAttribute("data-group-id")
                     }, {
                         action: "doUpdateUpdated",
                         id: listItemElement.dataset.blockId,
@@ -580,15 +632,27 @@ ${window.siyuan.languages[avType === "table" ? "insertRowBefore" : "insertItemBe
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     element.addEventListener("click", () => {
-                        if (document.activeElement.isSameNode(inputElement)) {
+                        if (document.activeElement === inputElement) {
                             return;
                         }
-                        insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
+                        insertRows({
+                            blockElement,
+                            protyle,
+                            count: parseInt(inputElement.value),
+                            previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                        });
                         menu.close();
                     });
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
-                            insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].previousElementSibling.getAttribute("data-id"));
+                            insertRows({
+                                blockElement,
+                                protyle,
+                                count: parseInt(inputElement.value),
+                                previousID: rowElements[0].previousElementSibling.getAttribute("data-id"),
+                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            });
                             menu.close();
                         }
                     });
@@ -603,15 +667,27 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 bind(element) {
                     const inputElement = element.querySelector("input");
                     element.addEventListener("click", () => {
-                        if (document.activeElement.isSameNode(inputElement)) {
+                        if (document.activeElement === inputElement) {
                             return;
                         }
-                        insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
+                        insertRows({
+                            blockElement,
+                            protyle,
+                            count: parseInt(inputElement.value),
+                            previousID: rowElements[0].getAttribute("data-id"),
+                            groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                        });
                         menu.close();
                     });
                     inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
                         if (!event.isComposing && event.key === "Enter") {
-                            insertRows(blockElement, protyle, parseInt(inputElement.value), rowElements[0].getAttribute("data-id"));
+                            insertRows({
+                                blockElement,
+                                protyle,
+                                count: parseInt(inputElement.value),
+                                previousID: rowElements[0].getAttribute("data-id"),
+                                groupID: rowElements[0].parentElement.getAttribute("data-group-id")
+                            });
                             menu.close();
                         }
                     });
@@ -735,7 +811,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
 
     // 当前页面不能进行推送，否则光标会乱跳
     Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
-        if (blockElement.isSameNode(item)) {
+        if (blockElement === item) {
             return;
         }
         const titleElement = item.querySelector(".av__title") as HTMLElement;
@@ -768,6 +844,12 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
         const viewType = blockElement.getAttribute("data-av-type") as TAVView;
         const iconElement = cellElement.querySelector(".b3-menu__avemoji");
         if (viewType === "gallery") {
+            if (value.type === "checkbox") {
+                value.checkbox = {
+                    checked: value.checkbox?.checked || false,
+                    content: cellElement.getAttribute("aria-label"),
+                };
+            }
             cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
                 cellElement.querySelector(".av__gallery-tip").outerHTML;
             cellElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());

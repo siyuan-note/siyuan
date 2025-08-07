@@ -420,9 +420,9 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
             const blockID = target.querySelector(".popover__block").getAttribute("data-id");
             const content = target.querySelector("b").textContent;
             const rowId = Lute.NewNodeID();
+            const bodyElement = hasClosestByClassName(cellElements[0], "av__body");
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
-                ignoreFillFilter: true,
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
                     id: rowId,
@@ -430,6 +430,7 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
                     content
                 }],
                 blockID,
+                groupID: bodyElement ? bodyElement.getAttribute("data-group-id") : "",
             }, {
                 action: "doUpdateUpdated",
                 id: blockID,

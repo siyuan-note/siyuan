@@ -35,7 +35,7 @@
 
   &__pulse {
     width: 70%;
-    height: 23px;
+    height: 22px;
     display: block;
     position: relative;
     overflow: hidden;
@@ -56,8 +56,7 @@
   }
 
   &__header {
-    top: -43px;
-    z-index: 2;
+    position: relative;
 
     .layout-tab-bar {
       background-color: transparent;
@@ -126,10 +125,6 @@
 
   &__scroll {
     overflow: auto hidden;
-  }
-
-  &__body {
-    float: left;
   }
 
   &__row {
@@ -257,6 +252,7 @@
     grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
     gap: 16px;
     width: 100%;
+    margin-top: 8px;
 
     &--top {
       margin-top: 16px;
@@ -909,6 +905,71 @@
           background-color: var(--b3-theme-background);
         }
       }
+    }
+  }
+
+  &__group {
+    &-title {
+      position: sticky;
+      left: 0;
+      clear: both;
+      padding: 16px 0 8px 0;
+      display: flex;
+      align-items: center;
+
+      &:hover .av__group-icon--hover {
+        display: block;
+      }
+
+      .b3-chip {
+        padding: 2px 6px;
+        line-height: calc(1.625em - 4px);
+        font-size: inherit;
+      }
+
+      & + .av__body .av__gallery {
+        margin-top: 0;
+      }
+    }
+
+    &-counter {
+      font-size: 87.5%;
+      color: var(--b3-theme-on-surface-light);
+      margin: 0 8px;
+    }
+
+    &-icon {
+      cursor: pointer;
+      color: var(--b3-theme-on-surface-light);
+      translate: var(--b3-transition);
+      border-radius: var(--b3-border-radius);
+
+      &:hover {
+        color: var(--b3-theme-on-background);
+        background-color: var(--b3-list-icon-hover);
+      }
+
+      svg {
+        padding: 5px;
+        float: left;
+        width: calc(1em - 6px);
+        height: calc(1em - 6px);
+        transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);
+      }
+
+      &--hover {
+        display: none;
+
+        svg {
+          padding: 4px;
+          width: calc(1em - 4px);
+          height: calc(1em - 4px);
+        }
+      }
+    }
+
+    &-arrow--open {
+      transform: rotate(90deg);
     }
   }
 }

@@ -48,7 +48,18 @@ func copyStdMarkdown(c *gin.Context) {
 	if nil != arg["assetsDestSpace2Underscore"] {
 		assetsDestSpace2Underscore = arg["assetsDestSpace2Underscore"].(bool)
 	}
-	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore)
+
+	fillCSSVar := false
+	if nil != arg["fillCSSVar"] {
+		fillCSSVar = arg["fillCSSVar"].(bool)
+	}
+
+	adjustHeadingLevel := false
+	if nil != arg["adjustHeadingLevel"] {
+		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
+	}
+
+	ret.Data = model.ExportStdMarkdown(id, assetsDestSpace2Underscore, fillCSSVar, adjustHeadingLevel)
 }
 
 func html2BlockDOM(c *gin.Context) {

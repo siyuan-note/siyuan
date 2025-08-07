@@ -563,7 +563,7 @@ export const movePathTo = (cb: (toPath: string[], toNotebook: string[]) => void,
                     return;
                 }
                 if (title === window.siyuan.languages.specifyPath && isOnlyMeta(event)) {
-                    if (currentItemElements.length === 1 && currentItemElements[0].isSameNode(target)) {
+                    if (currentItemElements.length === 1 && currentItemElements[0] === target) {
                         // 至少需选中一个
                     } else {
                         target.classList.toggle("b3-list-item--focus");

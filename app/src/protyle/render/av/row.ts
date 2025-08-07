@@ -3,10 +3,9 @@ import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {
-    addDragFill,
+    addDragFill, genCellValue,
     genCellValueByElement,
     getTypeByCellElement,
-    popTextCell,
     renderCell,
     renderCellAttr
 } from "./cell";
@@ -67,196 +66,134 @@ export const updateHeader = (rowElement: HTMLElement) => {
         return;
     }
     const selectCount = rowElement.parentElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
-    const diffCount = rowElement.parentElement.childElementCount - 3 - selectCount;
+    const count = rowElement.parentElement.querySelectorAll(".av__row:not(.av__row--header)").length;
+
     const headElement = rowElement.parentElement.firstElementChild;
     const headUseElement = headElement.querySelector("use");
-    const counterElement = blockElement.querySelector(".av__counter");
-    const avHeadElement = blockElement.querySelector(".av__header") as HTMLElement;
-    if (diffCount === 0 && rowElement.parentElement.childElementCount - 3 !== 0) {
+
+    if (count === selectCount && count !== 0) {
         headElement.classList.add("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconCheck");
-    } else if (diffCount === rowElement.parentElement.childElementCount - 3) {
+    } else if (selectCount === 0) {
         headElement.classList.remove("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconUncheck");
-        counterElement.classList.add("fn__none");
-        avHeadElement.style.position = "";
-        return;
-    } else if (diffCount > 0) {
+    } else if (selectCount > 0) {
         headElement.classList.add("av__row--select");
         headUseElement.setAttribute("xlink:href", "#iconIndeterminateCheck");
     }
+
+    const counterElement = blockElement.querySelector(".av__counter");
+    const allCount = blockElement.querySelectorAll(".av__row--select:not(.av__row--header)").length;
+    if (allCount === 0) {
+        counterElement.classList.add("fn__none");
+        return;
+    }
     counterElement.classList.remove("fn__none");
-    counterElement.innerHTML = `${selectCount} ${window.siyuan.languages.selected}`;
-    avHeadElement.style.position = "sticky";
+    counterElement.innerHTML = `${allCount} ${window.siyuan.languages.selected}`;
 };
 
 export const setPage = (blockElement: Element) => {
-    const pageSize = parseInt(blockElement.getAttribute("data-page-size"));
-    if (pageSize) {
-        const avType = blockElement.getAttribute("data-av-type") as TAVView;
-        const currentCount = blockElement.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
-        if (pageSize < currentCount) {
-            blockElement.setAttribute("data-page-size", currentCount.toString());
+    const avType = blockElement.getAttribute("data-av-type") as TAVView;
+    blockElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        const pageSize = item.dataset.pageSize;
+        if (pageSize) {
+            const currentCount = item.querySelectorAll(avType === "table" ? ".av__row:not(.av__row--header)" : ".av__gallery-item").length;
+            if (parseInt(pageSize) < currentCount) {
+                item.dataset.pageSize = currentCount.toString();
+            }
         }
-    }
+    });
 };
 
 /**
  * 前端插入一假行
- * @param protyle
- * @param blockElement
- * @param srcIDs
- * @param previousId
- * @param avId 存在为新增否则为拖拽插入
+ * @param options.protyle
+ * @param options.blockElement
+ * @param options.srcIDs
+ * @param options.previousId
+ * @param options.avId 存在为新增否则为拖拽插入
  */
-export const insertAttrViewBlockAnimation = (protyle: IProtyle, blockElement: Element, srcIDs: string[], previousId: string, avId?: string,) => {
-    if ((blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value !== "") {
-        showMessage(window.siyuan.languages.insertRowTip);
-        return;
-    }
-    let previousElement = blockElement.querySelector(`.av__row[data-id="${previousId}"]`) || blockElement.querySelector(".av__row--header");
+export const insertAttrViewBlockAnimation = (options: {
+    protyle: IProtyle,
+    blockElement: Element,
+    srcIDs: string[],
+    previousId: string,
+    groupID?: string
+}) => {
+    (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement).value = "";
+    const groupQuery = options.groupID ? `.av__body[data-group-id="${options.groupID}"] ` : "";
+    let previousElement = options.blockElement.querySelector(groupQuery + `.av__row[data-id="${options.previousId}"]`) || options.blockElement.querySelector(groupQuery + ".av__row--header");
     // 有排序需要加入最后一行
-    if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active")) {
-        previousElement = blockElement.querySelector(".av__row--util").previousElementSibling;
+    const hasSort = options.blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active");
+    if (hasSort) {
+        previousElement = options.blockElement.querySelector(groupQuery + ".av__row--util").previousElementSibling;
     }
-    let colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
+
+    let cellsHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;
     if (pinIndex > -1) {
-        colHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
+        cellsHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div>';
     }
     previousElement.querySelectorAll(".av__cell").forEach((item: HTMLElement, index) => {
-        let lineNumber = "";
-        if (getTypeByCellElement(item) === "lineNumber") {
+        let lineNumber = 1;
+        const colType = getTypeByCellElement(item);
+        if (colType === "lineNumber") {
             const lineNumberValue = item.querySelector(".av__celltext")?.getAttribute("data-value");
             if (lineNumberValue) {
-                lineNumber = (parseInt(lineNumberValue) + 1).toString();
+                lineNumber = parseInt(lineNumberValue);
             }
         }
-        colHTML += `<div class="av__cell" data-col-id="${item.dataset.colId}" 
+        cellsHTML += `<div class="av__cell${colType === "checkbox" ? " av__cell-uncheck" : ""}" data-col-id="${item.dataset.colId}" 
+data-wrap="${item.dataset.wrap}" 
+data-dtype="${item.dataset.dtype}" 
 style="width: ${item.style.width};${item.dataset.dtype === "number" ? "text-align: right;" : ""}" 
-${getTypeByCellElement(item) === "block" ? ' data-detached="true"' : ""}><span class="${avId ? "av__celltext" : "av__pulse"}">${lineNumber}</span></div>`;
+${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(colType, null), lineNumber)}</div>`;
         if (pinIndex === index) {
-            colHTML += "</div>";
+            cellsHTML += "</div>";
         }
     });
     let html = "";
-    srcIDs.forEach((id) => {
-        const blockCellElement = blockElement.querySelector(`[data-block-id="${id}"]`);
+    clearSelect(["cell", "row"], options.blockElement);
+    options.srcIDs.forEach((id) => {
+        const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
         if (!blockCellElement) {
-            html += `<div class="av__row" data-type="ghost" data-id="${id}" data-avid="${avId}" data-previous-id="${previousId}">
-    ${colHTML}
+            html += `<div class="av__row" data-type="ghost">
+    ${cellsHTML}
 </div>`;
         } else {
-            clearSelect(["cell"], blockElement);
             addDragFill(blockCellElement);
             blockCellElement.classList.add("av__cell--select");
         }
     });
     previousElement.insertAdjacentHTML("afterend", html);
-    if (avId) {
-        const currentRow = previousElement.nextElementSibling;
-        if (blockElement.querySelector('.av__views [data-type="av-sort"]').classList.contains("block__icon--active") &&
-            !blockElement.querySelector('[data-type="av-load-more"]').classList.contains("fn__none")) {
-            currentRow.setAttribute("data-need-update", "true");
-        }
-        const sideRow = previousElement.classList.contains("av__row--header") ? currentRow.nextElementSibling : previousElement;
-        fetchPost("/api/av/getAttributeViewFilterSort", {
-            id: avId,
-            blockID: blockElement.getAttribute("data-node-id")
-        }, (response) => {
-            // https://github.com/siyuan-note/siyuan/issues/10517
-            let hideTextCell = false;
-            response.data.filters.find((item: IAVFilter) => {
-                const headerElement = blockElement.querySelector(`.av__cell--header[data-col-id="${item.column}"]`);
-                if (!headerElement) {
-                    return;
-                }
-                const filterType = headerElement.getAttribute("data-dtype");
-                if (item.value && filterType !== item.value.type) {
-                    return;
-                }
-                if (["relation", "rollup", "template"].includes(filterType)) {
-                    hideTextCell = true;
-                    return true;
-                }
-
-                // 根据后台计算出显示与否的结果进行标识，以便于在 refreshAV 中更新 UI
-                if (["created", "updated"].includes(filterType)) {
-                    currentRow.setAttribute("data-need-update", "true");
-                } else {
-                    response.data.sorts.find((sortItem: IAVSort) => {
-                        if (sortItem.column === item.column) {
-                            currentRow.setAttribute("data-need-update", "true");
-                            return true;
-                        }
-                    });
-                }
-                // 当空或非空外，需要根据值进行判断
-                let isRenderValue = true;
-                if (item.operator !== "Is empty" && item.operator !== "Is not empty") {
-                    switch (item.value.type) {
-                        case "select":
-                        case "mSelect":
-                            if (!item.value.mSelect || item.value.mSelect.length === 0) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "block":
-                            if (!item.value.block || !item.value.block.content) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "number":
-                            if (!item.value.number || !item.value.number.isNotEmpty) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "date":
-                        case "created":
-                        case "updated":
-                            if (!item.value[item.value.type] || !item.value[item.value.type].isNotEmpty) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "mAsset":
-                            if (!item.value.mAsset || item.value.mAsset.length === 0) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "checkbox":
-                            if (!item.value.checkbox) {
-                                isRenderValue = false;
-                            }
-                            break;
-                        case "text":
-                        case "url":
-                        case "phone":
-                        case "email":
-                            if (!item.value[item.value.type] || !item.value[item.value.type].content) {
-                                isRenderValue = false;
-                            }
-                            break;
-                    }
-                }
-                if (sideRow.classList.contains("av__row") && isRenderValue) {
-                    const sideRowCellElement = sideRow.querySelector(`.av__cell[data-col-id="${item.column}"]`) as HTMLElement;
-                    const cellElement = currentRow.querySelector(`.av__cell[data-col-id="${item.column}"]`);
-                    const cellValue = genCellValueByElement(getTypeByCellElement(sideRowCellElement), sideRowCellElement);
-                    const iconElement = cellElement.querySelector(".b3-menu__avemoji");
-                    cellElement.innerHTML = renderCell(cellValue, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
-                    renderCellAttr(cellElement, cellValue);
-                }
-            });
-            if (hideTextCell) {
-                currentRow.remove();
+    fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
+        avID: options.blockElement.getAttribute("data-av-id"),
+        viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+        groupID: options.groupID,
+        previousID: options.previousId,
+    }, (response) => {
+        if (!response.data.values) {
+            if (!response.data.ignore) {
                 showMessage(window.siyuan.languages.insertRowTip);
-            } else if (srcIDs.length === 1) {
-                popTextCell(protyle, [currentRow.querySelector('.av__cell[data-detached="true"]')], "block");
             }
-            setPage(blockElement);
-        });
-    }
-    setPage(blockElement);
+        } else {
+            let popCellElement: HTMLElement;
+            const updateIds = Object.keys(response.data.values);
+            options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {
+                rowItem.querySelectorAll(".av__cell").forEach((cellItem: HTMLElement) => {
+                    if (!popCellElement && cellItem.getAttribute("data-detached") === "true") {
+                        popCellElement = cellItem;
+                    }
+                    if (updateIds.includes(cellItem.dataset.colId)) {
+                        const cellValue = response.data.values[cellItem.dataset.colId];
+                        cellItem.innerHTML = renderCell(cellValue);
+                        renderCellAttr(cellItem, cellValue);
+                    }
+                });
+            });
+        }
+        setPage(options.blockElement);
+    });
 };
 
 export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, status: "top" | "bottom" | "all") => {
@@ -264,29 +201,34 @@ export const stickyRow = (blockElement: HTMLElement, elementRect: DOMRect, statu
         return;
     }
     // 只读模式下也需固定 https://github.com/siyuan-note/siyuan/issues/11338
-    const scrollRect = blockElement.querySelector(".av__scroll").getBoundingClientRect();
-    const headerElement = blockElement.querySelector(".av__row--header") as HTMLElement;
-    if (headerElement && (status === "top" || status === "all")) {
-        const distance = Math.floor(elementRect.top - scrollRect.top);
-        if (distance > 0 && distance < scrollRect.height) {
-            headerElement.style.transform = `translateY(${distance}px)`;
-        } else {
-            headerElement.style.transform = "";
-        }
+    const headerElements = blockElement.querySelectorAll(".av__row--header");
+    if (headerElements.length > 0 && (status === "top" || status === "all")) {
+        headerElements.forEach((item: HTMLElement) => {
+            const bodyRect = item.parentElement.getBoundingClientRect();
+            const distance = Math.floor(elementRect.top - bodyRect.top);
+            if (distance > 0 && distance < bodyRect.height - item.clientHeight) {
+                item.style.transform = `translateY(${distance}px)`;
+            } else {
+                item.style.transform = "";
+            }
+        });
     }
 
-    const footerElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
-    if (footerElement && (status === "bottom" || status === "all")) {
-        if (footerElement.querySelector(".av__calc--ashow")) {
-            const distance = Math.ceil(elementRect.bottom - footerElement.parentElement.getBoundingClientRect().bottom);
-            if (distance < 0 && -distance < scrollRect.height) {
-                footerElement.style.transform = `translateY(${distance}px)`;
+    const footerElements = blockElement.querySelectorAll(".av__row--footer");
+    if (footerElements.length > 0 && (status === "bottom" || status === "all")) {
+        footerElements.forEach((item: HTMLElement) => {
+            if (item.querySelector(".av__calc--ashow")) {
+                const bodyRect = item.parentElement.getBoundingClientRect();
+                const distance = Math.ceil(elementRect.bottom - bodyRect.bottom);
+                if (distance < 0 && -distance < bodyRect.height - item.clientHeight) {
+                    item.style.transform = `translateY(${distance}px)`;
+                } else {
+                    item.style.transform = "";
+                }
             } else {
-                footerElement.style.transform = "";
+                item.style.transform = "";
             }
-        } else {
-            footerElement.style.transform = "";
-        }
+        });
     }
 };
 
@@ -300,7 +242,9 @@ const updatePageSize = (options: {
     if (options.currentPageSize === options.newPageSize) {
         return;
     }
-    options.nodeElement.setAttribute("data-page-size", options.newPageSize);
+    options.nodeElement.querySelectorAll(".av__body").forEach((item: HTMLElement) => {
+        item.dataset.pageSize = options.newPageSize;
+    });
     const blockID = options.nodeElement.getAttribute("data-node-id");
     transaction(options.protyle, [{
         action: "setAttrViewPageSize",
@@ -426,7 +370,8 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content
             }],
-            blockID: blockElement.dataset.nodeId
+            blockID: blockElement.dataset.nodeId,
+            groupID: item.parentElement.getAttribute("data-group-id")
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
@@ -452,11 +397,17 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     blockElement.setAttribute("updated", newUpdated);
 };
 
-export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: number, previousID: string) => {
-    const avID = blockElement.getAttribute("data-av-id");
+export const insertRows = (options: {
+    blockElement: HTMLElement,
+    protyle: IProtyle,
+    count: number,
+    previousID: string,
+    groupID?: string
+}) => {
+    const avID = options.blockElement.getAttribute("data-av-id");
     const srcIDs: string[] = [];
     const srcs: IOperationSrcs[] = [];
-    new Array(count).fill(0).forEach(() => {
+    new Array(options.count).fill(0).forEach(() => {
         const newNodeID = Lute.NewNodeID();
         srcIDs.push(newNodeID);
         srcs.push({
@@ -466,15 +417,16 @@ export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: 
         });
     });
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-    transaction(protyle, [{
+    transaction(options.protyle, [{
         action: "insertAttrViewBlock",
         avID,
-        previousID,
+        previousID: options.previousID,
         srcs,
-        blockID: blockElement.dataset.nodeId,
+        blockID: options.blockElement.dataset.nodeId,
+        groupID: options.groupID
     }, {
         action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
+        id: options.blockElement.dataset.nodeId,
         data: newUpdated,
     }], [{
         action: "removeAttrViewBlock",
@@ -482,18 +434,25 @@ export const insertRows = (blockElement: HTMLElement, protyle: IProtyle, count: 
         avID,
     }, {
         action: "doUpdateUpdated",
-        id: blockElement.dataset.nodeId,
-        data: blockElement.getAttribute("updated")
+        id: options.blockElement.dataset.nodeId,
+        data: options.blockElement.getAttribute("updated")
     }]);
-    if (blockElement.getAttribute("data-av-type") === "gallery") {
+    if (options.blockElement.getAttribute("data-av-type") === "gallery") {
         insertGalleryItemAnimation({
-            blockElement,
-            protyle,
+            blockElement: options.blockElement,
+            protyle: options.protyle,
             srcIDs,
-            previousId: previousID
+            previousId: options.previousID,
+            groupID: options.groupID
         });
     } else {
-        insertAttrViewBlockAnimation(protyle, blockElement, srcIDs, previousID, avID);
+        insertAttrViewBlockAnimation({
+            protyle: options.protyle,
+            blockElement: options.blockElement,
+            srcIDs,
+            previousId: options.previousID,
+            groupID: options.groupID
+        });
     }
-    blockElement.setAttribute("updated", newUpdated);
+    options.blockElement.setAttribute("updated", newUpdated);
 };

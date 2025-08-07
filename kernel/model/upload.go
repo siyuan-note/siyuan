@@ -33,7 +33,7 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
+func InsertLocalAssets(id string, assetAbsPaths []string, isUpload bool) (succMap map[string]interface{}, err error) {
 	succMap = map[string]interface{}{}
 
 	bt := treenode.GetBlockTree(id)
@@ -50,28 +50,35 @@ func InsertLocalAssets(id string, assetPaths []string, isUpload bool) (succMap m
 		}
 	}
 
-	for _, p := range assetPaths {
-		baseName := filepath.Base(p)
+	for _, assetAbsPath := range assetAbsPaths {
+		baseName := filepath.Base(assetAbsPath)
 		fName := baseName
 		fName = util.FilterUploadFileName(fName)
 		ext := filepath.Ext(fName)
 		fName = strings.TrimSuffix(fName, ext)
 		ext = strings.ToLower(ext)
 		fName += ext
-		if gulu.File.IsDir(p) || !isUpload {
-			if !strings.HasPrefix(p, "\\\\") {
-				p = "file://" + p
+		if gulu.File.IsDir(assetAbsPath) || !isUpload {
+			if !strings.HasPrefix(assetAbsPath, "\\\\") {
+				assetAbsPath = "file://" + assetAbsPath
 			}
-			succMap[baseName] = p
+			succMap[baseName] = assetAbsPath
 			continue
 		}
 
-		fi, statErr := os.Stat(p)
+		if util.IsSubPath(assetsDirPath, assetAbsPath) {
+			// 已经位于 assets 目录下的资源文件不处理
+			// Dragging a file from the assets folder into the editor causes the kernel to exit https://github.com/siyuan-note/siyuan/issues/15355
+			succMap[baseName] = "assets/" + fName
+			continue
+		}
+
+		fi, statErr := os.Stat(assetAbsPath)
 		if nil != statErr {
 			err = statErr
 			return
 		}
-		f, openErr := os.Open(p)
+		f, openErr := os.Open(assetAbsPath)
 		if nil != openErr {
 			err = openErr
 			return

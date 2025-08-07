@@ -10,6 +10,7 @@ import {blockRender} from "../protyle/render/blockRender";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {openFileById} from "../editor/util";
 import {openMobileFileById} from "../mobile/editor";
+import {mathRender} from "../protyle/render/mathRender";
 
 export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: Range) => {
     const doOperations: IOperation[] = [];
@@ -73,6 +74,7 @@ export const cancelSB = async (protyle: IProtyle, nodeElement: Element, range?: 
         });
         previousId = item.getAttribute("data-node-id");
     });
+    mathRender(protyle.wysiwyg.element);
     // 超级块内嵌入块无面包屑，需重新渲染 https://github.com/siyuan-note/siyuan/issues/7574
     doOperations.forEach(item => {
         const element = protyle.wysiwyg.element.querySelector(`[data-node-id="${item.id}"]`);

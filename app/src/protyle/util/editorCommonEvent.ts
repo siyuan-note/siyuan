@@ -64,7 +64,7 @@ const moveToNew = (protyle: IProtyle, sourceElements: Element[], targetElement: 
         const itemId = item.getAttribute("data-node-id");
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
                 // 单个缩放或反链面板中的列表项拖拽到包含该列表的编辑器中会导致残留的 list
                 Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${item.getAttribute("data-node-id")}"]`)).find((targetItem: HTMLElement) => {
@@ -158,7 +158,7 @@ const moveTo = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
         if (index === sourceElements.length - 1) {
             topSourceElement = getTopAloneElement(item);
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
             } else if (topSourceElement.contains(item) && topSourceElement.contains(targetElement)) {
                 // * * 1 列表项拖拽到父级列表项下 https://ld246.com/article/1665448570858
@@ -312,7 +312,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         sourceElements.reverse().forEach((item, index) => {
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
-                if (topSourceElement.isSameNode(item)) {
+                if (topSourceElement === item) {
                     topSourceElement = undefined;
                 }
             }
@@ -374,7 +374,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             const parentID = item.parentElement.getAttribute("data-node-id") || protyle.block.rootID;
             if (index === sourceElements.length - 1) {
                 topSourceElement = getTopAloneElement(item);
-                if (topSourceElement.isSameNode(item)) {
+                if (topSourceElement === item) {
                     topSourceElement = undefined;
                 }
             }
@@ -481,7 +481,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
     // https://github.com/siyuan-note/insider/issues/536
     if (!isCopy && oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        !oldSourceParentElement.isSameNode(sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -540,7 +540,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
             if (otherProtyleElement) {
                 const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
-                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                    if (allEditor[i].protyle.element === otherProtyleElement) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
@@ -558,7 +558,7 @@ const dragSb = async (protyle: IProtyle, sourceElements: Element[], targetElemen
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement) {
             getAllEditor().find(item => {
-                if (item.protyle.element.isSameNode(protyleElement)) {
+                if (item.protyle.element === protyleElement) {
                     if (item.protyle.block.id === item.protyle.block.rootID) {
                         const newId = Lute.NewNodeID();
                         doOperations.splice(0, 0, {
@@ -676,7 +676,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         isSameDoc &&    // 同一文档分屏后，oldSourceParentElement 已经被移走，不可再 update https://github.com/siyuan-note/siyuan/issues/8863
         oldSourceParentElement && oldSourceParentElement.classList.contains("list") &&
         oldSourceParentElement.getAttribute("data-subtype") === "o" &&
-        !oldSourceParentElement.isSameNode(sourceElements[0].parentElement) && oldSourceParentElement.childElementCount > 1) {
+        oldSourceParentElement !== sourceElements[0].parentElement && oldSourceParentElement.childElementCount > 1) {
         Array.from(oldSourceParentElement.children).forEach((item) => {
             if (item.classList.contains("protyle-attr")) {
                 return;
@@ -743,7 +743,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
             if (otherProtyleElement) {
                 const allEditor = getAllEditor();
                 for (let i = 0; i < allEditor.length; i++) {
-                    if (allEditor[i].protyle.element.isSameNode(otherProtyleElement)) {
+                    if (allEditor[i].protyle.element === otherProtyleElement) {
                         const otherSbData = await cancelSB(allEditor[i].protyle, oldSourceParentElement);
                         doOperations.push(otherSbData.doOperations[0], otherSbData.doOperations[1]);
                         undoOperations.splice(0, 0, otherSbData.undoOperations[0], otherSbData.undoOperations[1]);
@@ -760,7 +760,7 @@ const dragSame = async (protyle: IProtyle, sourceElements: Element[], targetElem
         const protyleElement = hasClosestByClassName(oldSourceParentElement, "protyle", true);
         if (protyleElement) {
             getAllEditor().find(item => {
-                if (item.protyle.element.isSameNode(protyleElement)) {
+                if (item.protyle.element === protyleElement) {
                     if (item.protyle.block.id === item.protyle.block.rootID) {
                         const newId = Lute.NewNodeID();
                         doOperations.splice(0, 0, {
@@ -870,14 +870,24 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     }
                     target.classList.add("av__gallery-item--select");
                     const ghostElement = document.createElement("div");
-                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr " + target.parentElement.className;
-                    blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                    ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
+                    const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
+                    let galleryElement: HTMLElement;
+                    let cloneGalleryElement = document.createElement("div");
+                    selectElements.forEach(item => {
+                        if (!galleryElement || !galleryElement.contains(item)) {
+                            galleryElement = item.parentElement;
+                            cloneGalleryElement = document.createElement("div");
+                            cloneGalleryElement.classList.add("av__gallery");
+                            cloneGalleryElement.setAttribute("style", `width: 100vw;margin-bottom: 16px;grid-template-columns: repeat(auto-fill, ${selectElements[0].clientWidth}px);`);
+                            ghostElement.appendChild(cloneGalleryElement);
+                        }
                         const cloneItem = processClonePHElement(item.cloneNode(true) as Element);
-                        cloneItem.setAttribute("style", `width:${item.clientWidth}px;;height:${item.clientHeight}px;`);
+                        cloneItem.setAttribute("style", `height:${item.clientHeight}px;`);
                         cloneItem.querySelector(".av__gallery-fields").setAttribute("style", "background-color: var(--b3-theme-background)");
-                        ghostElement.append(cloneItem);
+                        cloneGalleryElement.appendChild(cloneItem);
                     });
-                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0");
+                    ghostElement.setAttribute("style", "top:100vh;position:fixed;opacity:.1;padding:0;z-index: 8");
                     document.body.append(ghostElement);
                     event.dataTransfer.setDragImage(ghostElement, -10, -10);
                     setTimeout(() => {
@@ -1083,14 +1093,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
+                                    const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
@@ -1098,18 +1112,22 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         previousID: undoPreviousId,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const groupID = targetElement.parentElement.getAttribute("data-group-id");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1124,7 +1142,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 data: blockElement.getAttribute("updated")
                             }]);
                             blockElement.setAttribute("updated", newUpdated);
-                            insertAttrViewBlockAnimation(protyle, blockElement, sourceIds, previousID);
+                            insertAttrViewBlockAnimation({
+                                protyle,
+                                blockElement,
+                                srcIDs: sourceIds,
+                                previousId: previousID,
+                                groupID
+                            });
                         }
                     }
                 } else if (targetElement.classList.contains("av__gallery-item") || targetElement.classList.contains("av__gallery-add")) {
@@ -1143,14 +1167,18 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
                             const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
+                            const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
                                 if (previousID !== item && undoPreviousId !== previousID) {
+                                    const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID,
+                                        targetGroupID,
                                     });
                                     undoOperations.push({
                                         action: "sortAttrViewRow",
@@ -1158,6 +1186,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         previousID: undoPreviousId,
                                         id: item,
                                         blockID: blockElement.dataset.nodeId,
+                                        groupID: targetGroupID,
+                                        targetGroupID: groupID,
                                     });
                                 }
                             });
@@ -1169,7 +1199,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 avID,
                                 previousID,
                                 srcs,
-                                blockID: blockElement.dataset.nodeId
+                                blockID: blockElement.dataset.nodeId,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1188,7 +1219,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 protyle,
                                 blockElement,
                                 srcIDs: sourceIds,
-                                previousId: previousID
+                                previousId: previousID,
+                                groupID: targetElement.parentElement.getAttribute("data-group-id")
                             });
                         }
                     }
@@ -1278,6 +1310,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
+                        const groupID = targetElement.parentElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
                                 id,
@@ -1290,6 +1323,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             previousID,
                             srcs,
                             blockID: blockElement.dataset.nodeId,
+                            groupID
                         }, {
                             action: "doUpdateUpdated",
                             id: blockElement.dataset.nodeId,
@@ -1303,7 +1337,13 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             id: blockElement.dataset.nodeId,
                             data: blockElement.getAttribute("updated")
                         }]);
-                        insertAttrViewBlockAnimation(protyle, blockElement, ids, previousID);
+                        insertAttrViewBlockAnimation({
+                            protyle,
+                            blockElement,
+                            srcIDs: ids,
+                            previousId: previousID,
+                            groupID
+                        });
                         blockElement.setAttribute("updated", newUpdated);
                     }
                 } else {
@@ -1423,7 +1463,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement && targetElement.getAttribute("data-dtype") === "mAsset" &&
                 !targetElement.classList.contains("av__cell--header")) {
                 event.preventDefault(); // 不使用导致无法触发 drop
-                if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+                if (dragoverElement && targetElement === dragoverElement) {
                     return;
                 }
                 const blockElement = hasClosestBlock(targetElement);
@@ -1528,8 +1568,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             if (targetElement) {
                 const targetRowElement = hasClosestByClassName(targetElement, "av__row--header");
                 const dragRowElement = hasClosestByClassName(window.siyuan.dragElement, "av__row--header");
-                if (targetElement.isSameNode(window.siyuan.dragElement) || !targetRowElement || !dragRowElement ||
-                    (targetRowElement && dragRowElement && !targetRowElement.isSameNode(dragRowElement))
+                if (targetElement === window.siyuan.dragElement || !targetRowElement || !dragRowElement ||
+                    (targetRowElement && dragRowElement && targetRowElement !== dragRowElement)
                 ) {
                     targetElement = false;
                 }
@@ -1542,9 +1582,9 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
             // gallery item 只能拖拽当前 av 中
-            const galleryElement = hasClosestByClassName(event.target, "av__gallery");
-            if (targetElement.classList.contains("av") || !galleryElement ||
-                !galleryElement.contains(window.siyuan.dragElement) || targetElement.isSameNode(window.siyuan.dragElement)) {
+            const containerElement = hasClosestByClassName(event.target, "av__container");
+            if (targetElement.classList.contains("av") || !containerElement ||
+                !containerElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
                 targetElement = false;
                 editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__left", "dragover__right");
@@ -1559,7 +1599,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             !targetElement.classList.contains("av__row--util") &&
             !targetElement.classList.contains("av__gallery-item") &&
             !targetElement.classList.contains("av__gallery-add");
-        if (targetElement && dragoverElement && targetElement.isSameNode(dragoverElement)) {
+        if (targetElement && dragoverElement && targetElement === dragoverElement) {
             // 性能优化，目标为同一个元素不再进行校验
             const nodeRect = targetElement.getBoundingClientRect();
             editorElement.querySelectorAll(".dragover__left, .dragover__right, .dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
@@ -1597,11 +1637,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
 
             if (targetElement.classList.contains("av__cell")) {
                 if (event.clientX < nodeRect.left + nodeRect.width / 2 && event.clientX > nodeRect.left &&
-                    !targetElement.classList.contains("av__row") && !targetElement.previousElementSibling.isSameNode(window.siyuan.dragElement)) {
+                    !targetElement.classList.contains("av__row") && targetElement.previousElementSibling !== window.siyuan.dragElement) {
                     targetElement.classList.add("dragover__left");
                 } else if (event.clientX > nodeRect.right - nodeRect.width / 2 && event.clientX <= nodeRect.right + 1 &&
-                    !targetElement.classList.contains("av__row") && !targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling)) {
-                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") && targetElement.isSameNode(window.siyuan.dragElement.previousElementSibling.lastElementChild)) {
+                    !targetElement.classList.contains("av__row") && targetElement !== window.siyuan.dragElement.previousElementSibling) {
+                    if (window.siyuan.dragElement.previousElementSibling.classList.contains("av__colsticky") &&
+                        targetElement === window.siyuan.dragElement.previousElementSibling.lastElementChild) {
                         // 拖拽到固定列的最后一个元素
                     } else {
                         targetElement.classList.add("dragover__right");

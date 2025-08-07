@@ -386,8 +386,8 @@ func uploadCloud(c *gin.Context) {
 		return
 	}
 
-	rootID := arg["id"].(string)
-	count, err := model.UploadAssets2Cloud(rootID)
+	id := arg["id"].(string)
+	count, err := model.UploadAssets2Cloud(id)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

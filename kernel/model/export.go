@@ -218,8 +218,8 @@ func Export2Liandi(id string) (err error) {
 		return errors.New(Conf.Language(204))
 	}
 
-	assets := assetsLinkDestsInTree(tree)
-	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
+	assets := getAssetsLinkDests(tree.Root)
+	embedAssets := getQueryEmbedNodesAssetsLinkDests(tree.Root)
 	assets = append(assets, embedAssets...)
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	_, err = uploadAssets2Cloud(assets, bizTypeExport2Liandi)
@@ -716,7 +716,7 @@ func ExportMarkdownHTML(id, savePath string, docx, merge bool) (name, dom string
 		return
 	}
 
-	assets := assetsLinkDestsInTree(tree)
+	assets := getAssetsLinkDests(tree.Root)
 	for _, asset := range assets {
 		if strings.HasPrefix(asset, "assets/") {
 			if strings.Contains(asset, "?") {
@@ -879,7 +879,7 @@ func ExportHTML(id, savePath string, pdf, image, keepFold, merge bool) (name, do
 			return
 		}
 
-		assets := assetsLinkDestsInTree(tree)
+		assets := getAssetsLinkDests(tree.Root)
 		for _, asset := range assets {
 			if strings.Contains(asset, "?") {
 				asset = asset[:strings.LastIndex(asset, "?")]
@@ -1037,7 +1037,7 @@ func ProcessPDF(id, p string, merge, removeAssets, watermark bool) (err error) {
 	}
 
 	var headings []*ast.Node
-	assetDests := assetsLinkDestsInTree(tree)
+	assetDests := getAssetsLinkDests(tree.Root)
 	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering {
 			return ast.WalkContinue
@@ -1741,7 +1741,7 @@ func exportSYZip(boxID, rootDirPath, baseFolderName string, docPaths []string) (
 	copiedAssets := hashset.New()
 	for _, tree := range trees {
 		var assets []string
-		assets = append(assets, assetsLinkDestsInTree(tree)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root)...)
 		titleImgPath := treenode.GetDocTitleImgPath(tree.Root) // Export .sy.zip doc title image is not exported https://github.com/siyuan-note/siyuan/issues/8748
 		if "" != titleImgPath {
 			if util.IsAssetLinkDest([]byte(titleImgPath)) {
@@ -3183,7 +3183,7 @@ func exportPandocConvertZip(baseFolderName string, docPaths, defBlockIDs []strin
 		// 解析导出后的标准 Markdown，汇总 assets
 		tree = parse.Parse("", gulu.Str.ToBytes(md), luteEngine.ParseOptions)
 		var assets []string
-		assets = append(assets, assetsLinkDestsInTree(tree)...)
+		assets = append(assets, getAssetsLinkDests(tree.Root)...)
 		for _, asset := range assets {
 			asset = string(html.DecodeDestination([]byte(asset)))
 			if strings.Contains(asset, "?") {

@@ -307,12 +307,18 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
         (isNodeCodeBlock || protyle.toolbar.getCurrentType(range).includes("code"))) {
         range.deleteContents();
         // 代码块需保持至少一个 \n https://github.com/siyuan-note/siyuan/pull/13271#issuecomment-2502672155
+        let codeBlockIsEmpty = false;
         if (isNodeCodeBlock && editableElement.textContent === "") {
-            html += "\n";
+            codeBlockIsEmpty = true;
         }
         range.insertNode(document.createTextNode(html.replace(/\r\n|\r|\u2028|\u2029/g, "\n")));
         range.collapse(false);
         range.insertNode(document.createElement("wbr"));
+        if (codeBlockIsEmpty) {
+            // 代码块为空添加的 \n 需放在最后 https://github.com/siyuan-note/siyuan/issues/15399
+            range.collapse(false);
+            range.insertNode(document.createTextNode("\n"));
+        }
         if (isNodeCodeBlock) {
             blockElement.querySelector('[data-render="true"]')?.removeAttribute("data-render");
             highlightRender(blockElement);

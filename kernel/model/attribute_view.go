@@ -2922,6 +2922,10 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 	}
 
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
+	attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
+	if 256 < len(attrView.Name) {
+		attrView.Name = gulu.Str.SubStr(attrView.Name, 256)
+	}
 	err = av.SaveAttributeView(attrView)
 
 	_, nodes := tx.getAttrViewBoundNodes(attrView)

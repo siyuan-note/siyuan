@@ -110,8 +110,9 @@ left:${left || "auto"};top:${top || "auto"}">
 
     public bindInput(inputElement: HTMLInputElement | HTMLTextAreaElement, enterEvent?: () => void, bindEnter = true) {
         inputElement.focus();
+        let timeStamp: number;
         inputElement.addEventListener("keydown", (event: KeyboardEvent) => {
-            if (event.isComposing) {
+            if (event.isComposing || event.repeat) {
                 event.preventDefault();
                 return;
             }
@@ -122,6 +123,10 @@ left:${left || "auto"};top:${top || "auto"}">
                 return;
             }
             if (!event.shiftKey && isNotCtrl(event) && event.key === "Enter" && enterEvent && bindEnter) {
+                if (timeStamp && event.timeStamp - timeStamp < 124) {
+                    return;
+                }
+                timeStamp = event.timeStamp;
                 enterEvent();
                 event.preventDefault();
                 event.stopPropagation();

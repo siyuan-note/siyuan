@@ -587,15 +587,14 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     }
     if (operation.action === "setAttrViewCardSize") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
-            const galleryElement = item.querySelector(".av__gallery") as HTMLElement;
-            if (galleryElement) {
-                galleryElement.classList.remove("av__gallery--small", "av__gallery--big");
+            item.querySelectorAll(".av__gallery").forEach(galleryItem => {
+                galleryItem.classList.remove("av__gallery--small", "av__gallery--big");
                 if (operation.data === 0) {
-                    galleryElement.classList.add("av__gallery--small");
+                    galleryItem.classList.add("av__gallery--small");
                 } else if (operation.data === 2) {
-                    galleryElement.classList.add("av__gallery--big");
+                    galleryItem.classList.add("av__gallery--big");
                 }
-            }
+            });
         });
         return;
     }

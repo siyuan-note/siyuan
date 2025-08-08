@@ -2928,8 +2928,8 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
-	if 256 < len(attrView.Name) {
-		attrView.Name = gulu.Str.SubStr(attrView.Name, 256)
+	if 512 < len(attrView.Name) {
+		attrView.Name = gulu.Str.SubStr(attrView.Name, 512)
 	}
 	err = av.SaveAttributeView(attrView)
 

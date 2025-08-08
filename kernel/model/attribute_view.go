@@ -4993,10 +4993,12 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 	for _, keyValues := range attrView.KeyValues {
 		if keyValues.Key.ID == operation.ID {
 			keyValues.Key.Options = options
-			err = av.SaveAttributeView(attrView)
-			return
+			break
 		}
 	}
+
+	regenAttrViewViewGroups(attrView, operation.ID)
+	err = av.SaveAttributeView(attrView)
 	return
 }
 

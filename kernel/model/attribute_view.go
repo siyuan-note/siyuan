@@ -81,6 +81,11 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
+	if 1 > len(view.Filters) && nil == view.Group {
+		// 没有过滤条件也没有分组条件时忽略
+		return
+	}
+
 	nearItem := getNearItem(attrView, view, groupView, previousBlockID)
 	filterKeyIDs := map[string]bool{}
 	for _, f := range view.Filters {

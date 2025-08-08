@@ -805,6 +805,10 @@
       opacity: 0;
     }
 
+    .av__group-title:hover .av__group-icon--hover {
+      display: none;
+    }
+
     .av__row--footer .av__calc:hover,
     .av__cell--header:hover {
       background-color: transparent;

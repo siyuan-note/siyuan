@@ -48,101 +48,11 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
         return false;
     }
 
-    const loadMoreElement = hasClosestByAttribute(event.target, "data-type", "av-load-more");
-    if (loadMoreElement && !hasClosestByAttribute(event.target, "data-type", "set-page-size")) {
-        const rowFooterElement = blockElement.querySelector(".av__row--footer") as HTMLElement;
-        if (rowFooterElement) {
-            rowFooterElement.style.transform = "";
-        }
-        blockElement.removeAttribute("data-render");
-        const bodyElement = hasClosestByClassName(event.target, "av__body") as HTMLElement;
-        bodyElement.dataset.pageSize = (parseInt(bodyElement.dataset.pageSize) + parseInt(bodyElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
-        avRender(blockElement, protyle);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-    const firstColElement = hasClosestByClassName(event.target, "av__firstcol");
-    if (firstColElement) {
-        window.siyuan.menus.menu.remove();
-        selectRow(firstColElement, "toggle");
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-    const imgElement = hasClosestByClassName(event.target, "av__cellassetimg");
-    if (imgElement) {
-        previewAttrViewImages(
-            removeCompressURL((imgElement as HTMLImageElement).getAttribute("src")),
-            blockElement.getAttribute("data-av-id"),
-            blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
-            (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
-        );
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-    if (event.shiftKey) {
-        const rowElement = hasClosestByClassName(event.target, "av__row");
-        if (rowElement && !rowElement.classList.contains("av__row--header")) {
-            selectRow(rowElement.querySelector(".av__firstcol"), "toggle");
-            event.preventDefault();
-            event.stopPropagation();
-            return true;
-        }
-    }
-    const copyElement = hasClosestByAttribute(event.target, "data-type", "copy");
-    if (copyElement) {
-        writeText(getCellText(hasClosestByClassName(copyElement, "av__cell")));
-        showMessage(window.siyuan.languages.copied);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-    const searchIconElement = hasClosestByAttribute(event.target, "data-type", "av-search-icon");
-    if (searchIconElement) {
-        const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
-        searchElement.style.width = "128px";
-        searchElement.style.paddingLeft = "";
-        searchElement.style.paddingRight = "";
-        const viewsElement = hasClosestByClassName(searchElement, "av__views");
-        if (viewsElement) {
-            viewsElement.classList.add("av__views--show");
-        }
-        setTimeout(() => {
-            searchElement.focus();
-        }, Constants.TIMEOUT_TRANSITION);
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-    const viewItemElement = hasClosestByClassName(event.target, "item");
-    if (viewItemElement && viewItemElement.parentElement.classList.contains("layout-tab-bar")) {
-        if (viewItemElement.classList.contains("item--focus")) {
-            openViewMenu({protyle, blockElement, element: viewItemElement});
-        } else {
-            transaction(protyle, [{
-                action: "setAttrViewBlockView",
-                blockID: blockElement.getAttribute("data-node-id"),
-                id: viewItemElement.dataset.id,
-                avID: blockElement.getAttribute("data-av-id"),
-            }]);
-        }
-        event.preventDefault();
-        event.stopPropagation();
-        return true;
-    }
-
-
-    if (protyle.disabled) {
-        return false;
-    }
     const viewType = blockElement.getAttribute("data-av-type") as TAVView;
     let target = event.target;
     while (target && !target.isEqualNode(blockElement)) {
         const type = target.getAttribute("data-type");
-        if (type === "av-header-add") {
+        if (type === "av-header-add" && !protyle.disabled) {
             const addMenu = addCol(protyle, blockElement);
             const addRect = target.getBoundingClientRect();
             addMenu.open({
@@ -153,12 +63,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-header-more") {
+        } else if (type === "av-header-more" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "properties"});
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-add-more") {
+        } else if (type === "av-add-more" && !protyle.disabled) {
             insertRows({
                 blockElement,
                 protyle,
@@ -169,32 +79,32 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-more") {
+        } else if (type === "av-more" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "config"});
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-switcher") {
+        } else if (type === "av-switcher" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "switcher"});
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-sort") {
+        } else if (type === "av-sort" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "sorts"});
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-filter") {
+        } else if (type === "av-filter" && !protyle.disabled) {
             openMenuPanel({protyle, blockElement, type: "filters"});
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-add") {
+        } else if (type === "av-add" && !protyle.disabled) {
             addView(protyle, blockElement);
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "block-more") {
+        } else if (type === "block-more" && !protyle.disabled) {
             window.siyuan.menus.menu.remove();
             protyle.toolbar.range = document.createRange();
             protyle.toolbar.range.selectNodeContents(target);
@@ -207,7 +117,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "set-page-size") {
+        } else if (type === "set-page-size" && !protyle.disabled) {
             setPageSize({
                 target,
                 protyle,
@@ -217,7 +127,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-add-bottom") {
+        } else if (type === "av-add-bottom" && !protyle.disabled) {
             const bodyElement = hasClosestByClassName(target, "av__body");
             insertRows({
                 blockElement, protyle,
@@ -229,7 +139,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-add-top") {
+        } else if (type === "av-add-top" && !protyle.disabled) {
             const titleElement = hasClosestByClassName(target, "av__group-title");
             insertRows({
                 blockElement,
@@ -241,12 +151,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__cell--header")) {
+        } else if (target.classList.contains("av__cell--header") && !protyle.disabled) {
             showColMenu(protyle, blockElement, target);
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__cell")) {
+        } else if (target.classList.contains("av__cell") && !protyle.disabled) {
             if (!hasClosestByClassName(target, "av__row--header")) {
                 if (target.querySelector(".av__pulse")) {
                     return;
@@ -282,12 +192,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("av__calc")) {
+        } else if (target.classList.contains("av__calc") && !protyle.disabled) {
             openCalcMenu(protyle, target, undefined, event.clientX - 64);
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (target.classList.contains("b3-menu__avemoji")) {
+        } else if (target.classList.contains("b3-menu__avemoji") && !protyle.disabled) {
             const rect = target.getBoundingClientRect();
             openEmojiPanel(target.parentElement.getAttribute("data-block-id"), "doc", {
                 x: rect.left,
@@ -300,12 +210,12 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-gallery-edit") {
+        } else if (type === "av-gallery-edit" && !protyle.disabled) {
             editGalleryItem(target);
             event.preventDefault();
             event.stopPropagation();
             return true;
-        } else if (type === "av-gallery-more") {
+        } else if (type === "av-gallery-more" && !protyle.disabled) {
             const rect = target.getBoundingClientRect();
             openGalleryItemMenu({
                 target,
@@ -343,6 +253,73 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
                     target.parentElement.nextElementSibling.classList.remove("fn__none");
                 }
             }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-load-more") {
+            blockElement.querySelectorAll(".av__row--footer").forEach((item: HTMLElement) => {
+                item.style.transform = "";
+            });
+            blockElement.removeAttribute("data-render");
+            const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
+            bodyElement.dataset.pageSize = (parseInt(bodyElement.dataset.pageSize) + parseInt(bodyElement.querySelector('[data-type="set-page-size"]').getAttribute("data-size"))).toString();
+            avRender(blockElement, protyle);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("av__firstcol")) {
+            window.siyuan.menus.menu.remove();
+            selectRow(target, "toggle");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("item") && target.parentElement.classList.contains("layout-tab-bar")) {
+            if (target.classList.contains("item--focus")) {
+                openViewMenu({protyle, blockElement, element: target});
+            } else {
+                transaction(protyle, [{
+                    action: "setAttrViewBlockView",
+                    blockID: blockElement.getAttribute("data-node-id"),
+                    id: target.dataset.id,
+                    avID: blockElement.getAttribute("data-av-id"),
+                }]);
+            }
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("av__cellassetimg")) {
+            previewAttrViewImages(
+                removeCompressURL((target as HTMLImageElement).getAttribute("src")),
+                blockElement.getAttribute("data-av-id"),
+                blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
+                (blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || ""
+            );
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("av__row") && event.shiftKey && !target.classList.contains("av__row--header")) {
+            selectRow(target.querySelector(".av__firstcol"), "toggle");
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "copy") {
+            writeText(getCellText(hasClosestByClassName(target, "av__cell")));
+            showMessage(window.siyuan.languages.copied);
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (type === "av-search-icon") {
+            const searchElement = blockElement.querySelector('input[data-type="av-search"]') as HTMLInputElement;
+            searchElement.style.width = "128px";
+            searchElement.style.paddingLeft = "";
+            searchElement.style.paddingRight = "";
+            const viewsElement = hasClosestByClassName(searchElement, "av__views");
+            if (viewsElement) {
+                viewsElement.classList.add("av__views--show");
+            }
+            setTimeout(() => {
+                searchElement.focus();
+            }, Constants.TIMEOUT_TRANSITION);
             event.preventDefault();
             event.stopPropagation();
             return true;

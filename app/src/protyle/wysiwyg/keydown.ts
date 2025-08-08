@@ -855,13 +855,15 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const cloneRange = range.cloneRange();
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
-                            const nextRange = focusBlock(nextElement);
-                            if (nextRange) {
-                                const nextBlockElement = hasClosestBlock(nextRange.startContainer);
-                                if (nextBlockElement) {
-                                    // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
-                                    cloneRange.insertNode(document.createElement("wbr"));
-                                    removeBlock(protyle, nextBlockElement, nextRange, "Delete");
+                            if (!nodeElement.classList.contains("code-block")) {
+                                const nextRange = focusBlock(nextElement);
+                                if (nextRange) {
+                                    const nextBlockElement = hasClosestBlock(nextRange.startContainer);
+                                    if (nextBlockElement) {
+                                        // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
+                                        cloneRange.insertNode(document.createElement("wbr"));
+                                        removeBlock(protyle, nextBlockElement, nextRange, "Delete");
+                                    }
                                 }
                             }
                             event.stopPropagation();

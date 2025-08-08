@@ -788,6 +788,10 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     if (newData === nameElement.dataset.title.trim()) {
         return;
     }
+    if (newData.length > Constants.SIZE_TITLE) {
+        showMessage(window.siyuan.languages["_kernel"]["106"]);
+        return false;
+    }
     const newUpdated = dayjs().format("YYYYMMDDHHmmss");
     transaction(protyle, [{
         action: "setAttrViewName",

@@ -791,7 +791,7 @@ export const updateAVName = (protyle: IProtyle, blockElement: Element) => {
     nameElement.dataset.title = newData;
 
     // 当前页面不能进行推送，否则光标会乱跳
-    Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
+    Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avId}"]`)).forEach((item: HTMLElement) => {
         if (blockElement === item) {
             return;
         }

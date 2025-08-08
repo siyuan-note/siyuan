@@ -870,7 +870,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
             refreshAV(protyle, operation);
         } else if (operation.action === "setAttrViewName") {
             // setAttrViewName 同文档不会推送，需手动刷新
-            Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+            Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
                 const titleElement = item.querySelector(".av__title") as HTMLElement;
                 if (!titleElement) {
                     return;

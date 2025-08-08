@@ -211,7 +211,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
 
             if (element.innerHTML) {
                 // 防止 blockElement 找不到
-                element.querySelector(`div[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
+                element.querySelector(`.av[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
             }
         });
         if (element.innerHTML === "") {

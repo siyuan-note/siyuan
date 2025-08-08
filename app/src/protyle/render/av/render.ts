@@ -564,7 +564,7 @@ const refreshTimeouts: {
 
 export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "setAttrViewName") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.id}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title") as HTMLElement;
             if (!titleElement) {
                 return;
@@ -574,7 +574,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
     }
     if (operation.action === "setAttrViewColWidth") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             const cellElement = item.querySelector(`.av__cell[data-col-id="${operation.id}"]`) as HTMLElement;
             if (!cellElement || cellElement.style.width === operation.data || item.getAttribute(Constants.CUSTOM_SY_AV_VIEW) !== operation.keyID) {
                 return;
@@ -586,7 +586,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewCardSize") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll(".av__gallery").forEach(galleryItem => {
                 galleryItem.classList.remove("av__gallery--small", "av__gallery--big");
                 if (operation.data === 0) {
@@ -599,7 +599,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewCardAspectRatio") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll(".av__gallery-cover").forEach(coverItem => {
                 coverItem.className = "av__gallery-cover av__gallery-cover--" + operation.data;
             });
@@ -607,7 +607,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "hideAttrViewName") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             const titleElement = item.querySelector(".av__title");
             if (titleElement) {
                 if (!operation.data) {
@@ -630,7 +630,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewWrapField") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll(".av__cell").forEach(fieldItem => {
                 fieldItem.setAttribute("data-wrap", operation.data.toString());
             });
@@ -638,7 +638,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewShowIcon") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
                 if (operation.data) {
                     cellItem.classList.remove("fn__none");
@@ -650,7 +650,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "setAttrViewColWrap") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll(`.av__cell[data-col-id="${operation.id}"],.av__cell[data-field-id="${operation.id}"]`).forEach(cellItem => {
                 cellItem.setAttribute("data-wrap", operation.data.toString());
             });
@@ -658,7 +658,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         return;
     }
     if (operation.action === "foldAttrViewGroup") {
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
             if (operation.data) {
                 foldElement.firstElementChild.classList.remove("av__group-arrow--open");
@@ -676,7 +676,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     refreshTimeouts[protyle.id] = window.setTimeout(() => {
         // 修改表格名 avID 传入到 id 上了 https://github.com/siyuan-note/siyuan/issues/12724
         const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
-        Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
             if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
                 item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
@@ -708,7 +708,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             avRender(item, protyle, () => {
-                const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] div[data-av-id="${avID}"]`) as HTMLElement;
+                const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .av[data-av-id="${avID}"]`) as HTMLElement;
                 if (attrElement) {
                     // 更新属性面板
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);

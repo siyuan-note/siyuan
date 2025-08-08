@@ -252,7 +252,6 @@ const renderGroupTable = (options: ITableOptions) => {
     let avBodyHTML = "";
     options.data.view.groups.forEach((group: IAVTable) => {
         if (group.groupHidden === 0) {
-            group.columns = (options.data.view as IAVTable).columns;
             avBodyHTML += `${getGroupTitleHTML(group, group.rows.length)}
 <div data-group-id="${group.id}" data-page-size="${group.pageSize}" style="float: left" class="av__body${group.groupFolded ? " fn__none" : ""}">${getTableHTMLs(group, options.blockElement)}</div>`;
         }

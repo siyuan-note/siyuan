@@ -25,6 +25,7 @@ import (
 	"time"
 
 	"github.com/88250/lute/ast"
+	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/av"
 	"github.com/siyuan-note/siyuan/kernel/filesys"
@@ -33,11 +34,22 @@ import (
 )
 
 func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query string) (ret av.Viewable) {
+	var err error
 	switch groupView.LayoutType {
 	case av.LayoutTypeTable:
-		groupView.Table.Columns = view.Table.Columns
+		// 这里需要使用深拷贝，因为字段上可能会带有计算（FieldCalc），每个分组视图的计算结果都需要分别存储在不同的字段实例上
+		err = copier.CopyWithOption(&groupView.Table.Columns, &view.Table.Columns, copier.Option{DeepCopy: true})
 	case av.LayoutTypeGallery:
-		groupView.Gallery.CardFields = view.Gallery.CardFields
+		err = copier.CopyWithOption(&groupView.Gallery.CardFields, &view.Gallery.CardFields, copier.Option{DeepCopy: true})
+	}
+	if nil != err {
+		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)
+		switch groupView.LayoutType {
+		case av.LayoutTypeTable:
+			groupView.Table.Columns = view.Table.Columns
+		case av.LayoutTypeGallery:
+			groupView.Gallery.CardFields = view.Gallery.CardFields
+		}
 	}
 
 	groupView.Filters = view.Filters

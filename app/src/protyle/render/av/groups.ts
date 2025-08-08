@@ -190,7 +190,11 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 }
                 groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
     ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
-    <div class="b3-menu__label fn__flex">${item.name || ""}</div>
+    ${item.groupValue?.mSelect?.length > 0 ? `<div class="fn__flex-1">
+        <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
+            <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
+        </span>
+    </div>` : `<div class="b3-menu__label fn__flex-1">${item.name || ""}</div>`}
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });

@@ -39,8 +39,19 @@ func RenderGroupView(attrView *av.AttributeView, view, groupView *av.View, query
 	case av.LayoutTypeTable:
 		// 这里需要使用深拷贝，因为字段上可能会带有计算（FieldCalc），每个分组视图的计算结果都需要分别存储在不同的字段实例上
 		err = copier.CopyWithOption(&groupView.Table.Columns, &view.Table.Columns, copier.Option{DeepCopy: true})
+		groupView.Table.ShowIcon = view.Table.ShowIcon
+		groupView.Table.WrapField = view.Table.WrapField
 	case av.LayoutTypeGallery:
 		err = copier.CopyWithOption(&groupView.Gallery.CardFields, &view.Gallery.CardFields, copier.Option{DeepCopy: true})
+		groupView.Gallery.ShowIcon = view.Gallery.ShowIcon
+		groupView.Gallery.WrapField = view.Gallery.WrapField
+
+		groupView.Gallery.CoverFrom = view.Gallery.CoverFrom
+		groupView.Gallery.CoverFromAssetKeyID = view.Gallery.CoverFromAssetKeyID
+		groupView.Gallery.CardAspectRatio = view.Gallery.CardAspectRatio
+		groupView.Gallery.CardSize = view.Gallery.CardSize
+		groupView.Gallery.FitImage = view.Gallery.FitImage
+		groupView.Gallery.DisplayFieldName = view.Gallery.DisplayFieldName
 	}
 	if nil != err {
 		logging.LogErrorf("copy view fields [%s] to group [%s] failed: %s", view.ID, groupView.ID, err)

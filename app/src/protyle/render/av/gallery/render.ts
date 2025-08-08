@@ -108,7 +108,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             group.fields = (options.data.view as IAVGallery).fields;
-            avBodyHTML += `${getGroupTitleHTML(group, group.fields.length)}
+            avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
 <div data-group-id="${group.id}" data-page-size="${group.pageSize}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds)}</div>`;
         }
     });

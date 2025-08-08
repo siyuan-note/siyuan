@@ -21,7 +21,7 @@ export const insertGalleryItemAnimation = (options: {
         sideItemElement = options.blockElement.querySelector(groupQuery + ".av__gallery-add").previousElementSibling;
     }
     let cellsHTML = "";
-    sideItemElement.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
+    sideItemElement?.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
         let lineNumber = 1;
         const fieldType = getTypeByCellElement(item);
         if (fieldType === "lineNumber") {

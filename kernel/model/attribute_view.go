@@ -415,10 +415,32 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
+	oldHideEmpty := false
+	if nil != view.Group {
+		oldHideEmpty = view.Group.HideEmpty
+	}
+
 	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
 	regenAttrViewViewGroups(attrView, "force")
 	setAttrViewGroupStates(view, groupStates)
+
+	if view.Group.HideEmpty != oldHideEmpty {
+		if !oldHideEmpty && view.Group.HideEmpty { // 启用隐藏空分组
+			for _, g := range view.Groups {
+				if g.GroupHidden == 0 && 1 > len(g.GroupItemIDs) {
+					g.GroupHidden = 1
+				}
+			}
+		}
+		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
+			for _, g := range view.Groups {
+				if g.GroupHidden == 1 && 1 > len(g.GroupItemIDs) {
+					g.GroupHidden = 0
+				}
+			}
+		}
+	}
 
 	err = av.SaveAttributeView(attrView)
 	ReloadAttrView(avID)

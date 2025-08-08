@@ -923,8 +923,8 @@
 
       .b3-chip {
         padding: 2px 6px;
-        line-height: calc(1.625em - 4px);
-        font-size: inherit;
+        line-height: calc(1.625em - 6px);
+        font-size: 87.5%;
       }
 
       & + .av__body .av__gallery {

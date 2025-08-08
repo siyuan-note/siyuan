@@ -1,10 +1,5 @@
 import {showMessage} from "../../../../dialog/message";
-import {
-    genCellValue,
-    getTypeByCellElement,
-    renderCell,
-    renderCellAttr
-} from "../cell";
+import {genCellValue, getTypeByCellElement, renderCell, renderCellAttr} from "../cell";
 import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {Constants} from "../../../../constants";
@@ -70,7 +65,9 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
         previousID: options.previousId,
     }, (response) => {
         if (!response.data.values) {
-            showMessage(window.siyuan.languages.insertRowTip);
+            if (!response.data.ignore) {
+                showMessage(window.siyuan.languages.insertRowTip);
+            }
         } else {
             let popCellElement: HTMLElement;
             const updateIds = Object.keys(response.data.values);

@@ -1702,6 +1702,10 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 			}
 		}
 
+		todayStart := time.Now()
+		todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
+		sortGroupViews(todayStart, view)
+
 		var groups []av.Viewable
 		for _, groupView := range view.Groups {
 			groupViewable := sql.RenderGroupView(attrView, view, groupView, query)
@@ -1739,6 +1743,101 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 		viewable.(av.Collection).SetItems(nil)
 	}
 	return
+}
+
+func sortGroupViews(todayStart time.Time, view *av.View) {
+	if av.GroupOrderMan == view.Group.Order {
+		return
+	}
+
+	if av.GroupMethodDateRelative == view.Group.Method {
+		var relativeDateGroups []*av.View
+		var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
+		for _, groupView := range view.Groups {
+			_, err := time.Parse("2006-01", groupView.GetGroupValue())
+			if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
+				relativeDateGroups = append(relativeDateGroups, groupView)
+			} else { // 否则是相对日期分组形式
+				switch groupView.GetGroupValue() {
+				case groupValueLast30Days:
+					last30Days = groupView
+				case groupValueLast7Days:
+					last7Days = groupView
+				case groupValueYesterday:
+					yesterday = groupView
+				case groupValueToday:
+					today = groupView
+				case groupValueTomorrow:
+					tomorrow = groupView
+				case groupValueNext7Days:
+					next7Days = groupView
+				case groupValueNext30Days:
+					next30Days = groupView
+				case groupValueDefault:
+					defaultGroup = groupView
+				}
+			}
+		}
+
+		sort.SliceStable(relativeDateGroups, func(i, j int) bool {
+			return relativeDateGroups[i].GetGroupValue() < relativeDateGroups[j].GetGroupValue()
+		})
+
+		var lastNext30Days []*av.View
+		if nil != next30Days {
+			lastNext30Days = append(lastNext30Days, next30Days)
+		}
+		if nil != next7Days {
+			lastNext30Days = append(lastNext30Days, next7Days)
+		}
+		if nil != tomorrow {
+			lastNext30Days = append(lastNext30Days, tomorrow)
+		}
+		if nil != today {
+			lastNext30Days = append(lastNext30Days, today)
+		}
+		if nil != yesterday {
+			lastNext30Days = append(lastNext30Days, yesterday)
+		}
+
+		if nil != last7Days {
+			lastNext30Days = append(lastNext30Days, last7Days)
+		}
+		if nil != last30Days {
+			lastNext30Days = append(lastNext30Days, last30Days)
+		}
+
+		startIdx := -1
+		thisMonth := todayStart.Format("2006-01")
+		for i, monthGroup := range relativeDateGroups {
+			if monthGroup.GetGroupValue() < thisMonth {
+				startIdx = i + 1
+			}
+		}
+		if -1 == startIdx {
+			startIdx = 0
+		}
+		for _, g := range lastNext30Days {
+			relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
+		}
+		if nil != defaultGroup {
+			relativeDateGroups = append([]*av.View{defaultGroup}, relativeDateGroups...)
+		}
+
+		if av.GroupOrderDesc == view.Group.Order {
+			slices.Reverse(relativeDateGroups)
+		}
+
+		view.Groups = relativeDateGroups
+	} else {
+		sort.SliceStable(view.Groups, func(i, j int) bool {
+			iVal, jVal := view.Groups[i].GetGroupValue(), view.Groups[j].GetGroupValue()
+			if av.GroupOrderAsc == view.Group.Order {
+				return util.NaturalCompare(iVal, jVal)
+			}
+			return util.NaturalCompare(jVal, iVal)
+		})
+	}
 }
 
 func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
@@ -1921,109 +2020,6 @@ func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
 	view.GroupCreated = time.Now().UnixMilli()
 
 	setAttrViewGroupStates(view, groupStates)
-
-	if av.GroupOrderMan == view.Group.Order {
-		// 恢复分组视图的自定义顺序
-		if len(groupStates) > 0 {
-			sort.SliceStable(view.Groups, func(i, j int) bool {
-				if stateI, ok := groupStates[view.Groups[i].GetGroupValue()]; ok {
-					if stateJ, ok := groupStates[view.Groups[j].GetGroupValue()]; ok {
-						return stateI.Sort < stateJ.Sort
-					}
-				}
-				return false
-			})
-		}
-	} else {
-		if av.GroupMethodDateRelative == view.Group.Method {
-			var relativeDateGroups []*av.View
-			var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
-			for _, groupView := range view.Groups {
-				_, err := time.Parse("2006-01", groupView.GetGroupValue())
-				if nil == err { // 如果能解析出来说明是 30 天之前或 30 天之后的分组形式
-					relativeDateGroups = append(relativeDateGroups, groupView)
-				} else { // 否则是相对日期分组形式
-					switch groupView.GetGroupValue() {
-					case groupValueLast30Days:
-						last30Days = groupView
-					case groupValueLast7Days:
-						last7Days = groupView
-					case groupValueYesterday:
-						yesterday = groupView
-					case groupValueToday:
-						today = groupView
-					case groupValueTomorrow:
-						tomorrow = groupView
-					case groupValueNext7Days:
-						next7Days = groupView
-					case groupValueNext30Days:
-						next30Days = groupView
-					case groupValueDefault:
-						defaultGroup = groupView
-					}
-				}
-			}
-
-			sort.SliceStable(relativeDateGroups, func(i, j int) bool {
-				return relativeDateGroups[i].GetGroupValue() < relativeDateGroups[j].GetGroupValue()
-			})
-
-			var lastNext30Days []*av.View
-			if nil != next30Days {
-				lastNext30Days = append(lastNext30Days, next30Days)
-			}
-			if nil != next7Days {
-				lastNext30Days = append(lastNext30Days, next7Days)
-			}
-			if nil != tomorrow {
-				lastNext30Days = append(lastNext30Days, tomorrow)
-			}
-			if nil != today {
-				lastNext30Days = append(lastNext30Days, today)
-			}
-			if nil != yesterday {
-				lastNext30Days = append(lastNext30Days, yesterday)
-			}
-
-			if nil != last7Days {
-				lastNext30Days = append(lastNext30Days, last7Days)
-			}
-			if nil != last30Days {
-				lastNext30Days = append(lastNext30Days, last30Days)
-			}
-
-			startIdx := -1
-			thisMonth := todayStart.Format("2006-01")
-			for i, monthGroup := range relativeDateGroups {
-				if monthGroup.GetGroupValue() < thisMonth {
-					startIdx = i + 1
-				}
-			}
-			if -1 == startIdx {
-				startIdx = 0
-			}
-			for _, g := range lastNext30Days {
-				relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
-			}
-			if nil != defaultGroup {
-				relativeDateGroups = append([]*av.View{defaultGroup}, relativeDateGroups...)
-			}
-
-			if av.GroupOrderDesc == view.Group.Order {
-				slices.Reverse(relativeDateGroups)
-			}
-
-			view.Groups = relativeDateGroups
-		} else {
-			sort.SliceStable(view.Groups, func(i, j int) bool {
-				iVal, jVal := view.Groups[i].GetGroupValue(), view.Groups[j].GetGroupValue()
-				if av.GroupOrderAsc == view.Group.Order {
-					return util.NaturalCompare(iVal, jVal)
-				}
-				return util.NaturalCompare(jVal, iVal)
-			})
-		}
-	}
 }
 
 // GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
@@ -2031,7 +2027,6 @@ type GroupState struct {
 	ID     string
 	Folded bool
 	Hidden int
-	Sort   int
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -2040,12 +2035,11 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 		return
 	}
 
-	for i, groupView := range view.Groups {
+	for _, groupView := range view.Groups {
 		groupStates[groupView.GetGroupValue()] = &GroupState{
 			ID:     groupView.ID,
 			Folded: groupView.GroupFolded,
 			Hidden: groupView.GroupHidden,
-			Sort:   i,
 		}
 	}
 	return

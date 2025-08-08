@@ -952,9 +952,10 @@
       svg {
         padding: 5px;
         float: left;
-        width: calc(1em - 6px);
-        height: calc(1em - 6px);
+        width: calc(1.625em - 12px);
+        height: calc(1.625em - 12px);
         transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);
+        font-size: 87.5%;
       }
 
       &--hover {
@@ -962,8 +963,8 @@
 
         svg {
           padding: 4px;
-          width: calc(1em - 4px);
-          height: calc(1em - 4px);
+          width: calc(1.625em - 10px);
+          height: calc(1.625em - 10px);
         }
       }
     }

@@ -239,7 +239,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     </div>
     <span class="fn__space"></span>
     ${nameHTML}
-    <span class="${counter === 0 ? "fn__none" : "av__group-counter"}">${counter}</span>
+    ${counter === 0 ? '<span class="fn__space"></span>' : `<span class="av__group-counter">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;
 };

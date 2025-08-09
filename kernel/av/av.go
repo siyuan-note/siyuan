@@ -200,8 +200,10 @@ type View struct {
 	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupSort    int        `json:"groupSort"`           // 分组排序值
 }
 
+// GetGroupValue 获取分组视图的分组值。
 func (view *View) GetGroupValue() string {
 	if nil == view.GroupVal {
 		return ""
@@ -209,8 +211,8 @@ func (view *View) GetGroupValue() string {
 	return view.GroupVal.String(false)
 }
 
-// GetGroup 获取指定分组 ID 的分组视图。
-func (view *View) GetGroup(groupID string) *View {
+// GetGroupByID 获取指定分组 ID 的分组视图。
+func (view *View) GetGroupByID(groupID string) *View {
 	if nil == view.Groups {
 		return nil
 	}
@@ -220,6 +222,32 @@ func (view *View) GetGroup(groupID string) *View {
 		}
 	}
 	return nil
+}
+
+// GetGroupByGroupValue 获取指定分组值的分组视图。
+func (view *View) GetGroupByGroupValue(groupVal string) *View {
+	if nil == view.Groups {
+		return nil
+	}
+	for _, group := range view.Groups {
+		if group.GetGroupValue() == groupVal {
+			return group
+		}
+	}
+	return nil
+}
+
+// RemoveGroupByID 从分组视图列表中移除指定 ID 的分组视图。
+func (view *View) RemoveGroupByID(groupID string) {
+	if nil == view.Groups {
+		return
+	}
+	for i, group := range view.Groups {
+		if group.ID == groupID {
+			view.Groups = append(view.Groups[:i], view.Groups[i+1:]...)
+			return
+		}
+	}
 }
 
 // GetGroupKey 获取分组视图的分组字段。

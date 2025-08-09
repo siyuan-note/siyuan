@@ -344,6 +344,13 @@ export class Title {
         if (this.element.getAttribute("data-render") === "true") {
             return false;
         }
+        if (protyle.options.render.hideTitleOnZoom) {
+            if (protyle.block.showAll) {
+                this.element.classList.add("fn__none");
+            } else {
+                this.element.classList.remove("fn__none");
+            }
+        }
         this.element.setAttribute("data-node-id", protyle.block.rootID);
         if (response.data.ial[Constants.CUSTOM_RIFF_DECKS]) {
             this.element.setAttribute(Constants.CUSTOM_RIFF_DECKS, response.data.ial[Constants.CUSTOM_RIFF_DECKS]);

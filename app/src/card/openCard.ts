@@ -150,8 +150,8 @@ export const genCardHTML = (options: {
 const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard: ICard) => {
     fetchPost("/api/block/getDocInfo", {
         id,
-    }, (response) => {
-        protyle.wysiwyg.renderCustom(response.data.ial);
+    }, (docResponse) => {
+        protyle.wysiwyg.renderCustom(docResponse.data.ial);
         fetchPost("/api/filetree/getDoc", {
             id,
             mode: 0,
@@ -163,6 +163,8 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                 protyle,
                 action: response.data.rootID === response.data.id ? [Constants.CB_GET_HTML] : [Constants.CB_GET_ALL, Constants.CB_GET_HTML],
                 afterCB: () => {
+                    protyle.title.element.removeAttribute("data-render");
+                    protyle.title.render(protyle, docResponse);
                     let hasHide = false;
                     if (!window.siyuan.config.flashcard.superBlock &&
                         !window.siyuan.config.flashcard.heading &&
@@ -199,7 +201,7 @@ const getEditor = (id: string, protyle: IProtyle, element: Element, currentCard:
                             if (btnIndex < 2) {
                                 return;
                             }
-                            element.previousElementSibling.textContent = currentCard.nextDues[btnIndex-1];
+                            element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
                         });
                         actionElements[1].classList.remove("fn__none");
                     } else {
@@ -250,6 +252,8 @@ export const bindCardEvent = async (options: {
             background: false,
             gutter: true,
             breadcrumbDocName: true,
+            title: true,
+            hideTitleOnZoom: true,
         },
         typewriterMode: false
     });
@@ -418,7 +422,7 @@ export const bindCardEvent = async (options: {
                                     if (btnIndex < 2) {
                                         return;
                                     }
-                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex-1];
+                                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
                                 });
                                 options.cardsData.unreviewedOldCardCount--;
                                 options.cardsData.unreviewedNewCardCount++;
@@ -650,7 +654,7 @@ export const bindCardEvent = async (options: {
                     if (btnIndex < 2) {
                         return;
                     }
-                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex-1];
+                    element.previousElementSibling.textContent = currentCard.nextDues[btnIndex - 1];
                 });
                 actionElements[1].classList.remove("fn__none");
                 emitEvent(options.app, currentCard, type);

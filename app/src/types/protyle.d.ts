@@ -459,6 +459,7 @@ interface IProtyleOptions {
         scroll?: boolean
         breadcrumb?: boolean
         breadcrumbDocName?: boolean
+        hideTitleOnZoom?: boolean
     }
     /** 内部调试时使用 */
     _lutePath?: string;

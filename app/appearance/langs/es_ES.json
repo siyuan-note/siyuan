@@ -553,7 +553,7 @@
   "embedBlockBreadcrumbTip": "Después de habilitar los bloques incrustados, se mostrarán migas de pan, incrustar bloques en superbloques ignora esta opción y nunca muestra migas de pan",
   "appearanceMode": "Modo de apariencia",
   "editReadonly": "Modo de solo lectura",
-  "editReadonlyTip": "Después de habilitarlo, el editor cargará el documento en modo de solo lectura",
+  "editReadonlyTip": "Después de habilitarlo, el documento será de solo lectura por defecto",
   "generateConflictDoc": "Generar documentación de conflicto al sincronizar conflictos",
   "generateConflictDocTip": "Después de habilitarlo, se generará un documento de conflicto cuando ocurra un conflicto de sincronización, para que pueda abrirse y verse directamente. Ya sea que esté habilitado o no, el [Historial de datos] registrará el documento de conflicto",
   "deleteOpConfirm": "⚠️ Confirmación de operación de eliminación",

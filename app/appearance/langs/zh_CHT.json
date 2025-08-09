@@ -553,7 +553,7 @@
   "embedBlockBreadcrumbTip": "啟用後嵌入塊將顯示導覽路徑，在超級塊中的嵌入塊忽略該選項，始終不顯示導覽路徑",
   "appearanceMode": "外觀模式",
   "editReadonly": "只讀模式",
-  "editReadonlyTip": "啟用後編輯器將以只讀模式載入文檔",
+  "editReadonlyTip": "啟用後文檔將預設鎖定編輯",
   "generateConflictDoc": "同步衝突時生成衝突文檔",
   "generateConflictDocTip": "啟用後當同步發生衝突時會生成衝突文檔，以便直接打開查看。無論是否啟用，[資料歷史] 都會記錄衝突文檔",
   "deleteOpConfirm": "⚠️ Delete operation confirmation",

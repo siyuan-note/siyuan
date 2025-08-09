@@ -471,6 +471,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			if nil != defaultGroup {
 				view.Groups = append(view.Groups, defaultGroup)
 			}
+
+			for i, g := range view.Groups {
+				g.GroupSort = i
+			}
 		}
 	}
 
@@ -3300,39 +3304,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		groupView = view.GetGroupByID(groupID)
 	}
 
-	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
-	for keyID, newValue := range defaultValues {
-		keyValues, getErr := attrView.GetKeyValues(keyID)
-		if nil != getErr {
-			continue
-		}
-
-		if av.KeyTypeRollup == newValue.Type {
-			// 汇总字段的值是渲染时计算的，不需要添加到数据存储中
-			continue
-		}
-
-		if av.KeyTypeBlock == newValue.Type {
-			// 如果是主键的话前面已经添加过了，这里仅修改内容
-			blockValue.Block.Content = newValue.Block.Content
-			continue
-		}
-
-		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
-			// 单选或多选类型的值可能需要从分组条件中获取默认值
-			if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
-				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
-			}
-		}
-
-		if av.KeyTypeRelation == newValue.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
-			// 双向关联需要同时更新目标字段的值
-			updateTwoWayRelationDestAttrView(attrView, keyValues.Key, newValue, 1, []string{})
-		}
-
-		newValue.BlockID = addingBlockID
-		keyValues.Values = append(keyValues.Values, newValue)
-	}
+	fillDefaultValue(attrView, view, groupView, previousBlockID, addingBlockID)
 
 	// 处理日期字段默认填充当前创建时间
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
@@ -3394,6 +3366,44 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 	err = av.SaveAttributeView(attrView)
 	return
+}
+
+func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) {
+	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	for keyID, newValue := range defaultValues {
+		newValue.BlockID = addingBlockID
+		keyValues, getErr := attrView.GetKeyValues(keyID)
+		if nil != getErr {
+			continue
+		}
+
+		if av.KeyTypeRollup == newValue.Type {
+			// 汇总字段的值是渲染时计算的，不需要添加到数据存储中
+			continue
+		}
+
+		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
+			// 单选或多选类型的值可能需要从分组条件中获取默认值
+			if groupValueDefault != groupView.GetGroupValue() {
+				if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
+					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+				}
+			}
+		}
+
+		if av.KeyTypeRelation == newValue.Type && nil != keyValues.Key.Relation && keyValues.Key.Relation.IsTwoWay {
+			// 双向关联需要同时更新目标字段的值
+			updateTwoWayRelationDestAttrView(attrView, keyValues.Key, newValue, 1, []string{})
+		}
+
+		existingVal := keyValues.GetValue(addingBlockID)
+		if nil == existingVal {
+			keyValues.Values = append(keyValues.Values, newValue)
+		} else {
+			newValueRaw := newValue.GetValByType(keyValues.Key.Type)
+			existingVal.SetValByType(keyValues.Key.Type, newValueRaw)
+		}
+	}
 }
 
 func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) (ret *av.Value) {
@@ -3895,12 +3905,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView {
-					groupKey := view.GetGroupKey(attrView)
-					nearItem := getNearItem(attrView, view, targetGroupView, operation.PreviousID)
-					newValue := getNewValueByNearItem(nearItem, groupKey, operation.ID)
-					val := attrView.GetValue(groupKey.ID, operation.ID)
-					newValueRaw := newValue.GetValByType(groupKey.Type)
-					val.SetValByType(groupKey.Type, newValueRaw)
+					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
 
 					for i, r := range targetGroupView.GroupItemIDs {
 						if r == operation.PreviousID {
@@ -3910,6 +3915,8 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
+
+				regenAttrViewViewGroups(attrView, "force")
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {
 					if r == operation.PreviousID {

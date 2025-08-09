@@ -2944,31 +2944,9 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		} else {
 			v.ItemIDs = append([]string{addingBlockID}, v.ItemIDs...)
 		}
-
-		for _, g := range v.Groups {
-			if "" != previousBlockID {
-				changed := false
-				for i, id := range g.GroupItemIDs {
-					if id == previousBlockID {
-						g.GroupItemIDs = append(g.GroupItemIDs[:i+1], append([]string{addingBlockID}, g.GroupItemIDs[i+1:]...)...)
-						changed = true
-						break
-					}
-				}
-				if !changed {
-					g.GroupItemIDs = append(g.GroupItemIDs, addingBlockID)
-				}
-			} else {
-				g.GroupItemIDs = append([]string{addingBlockID}, g.GroupItemIDs...)
-			}
-		}
 	}
 
-	groupKey := view.GetGroupKey(attrView)
-	if nil != groupKey {
-		regenAttrViewViewGroups(attrView, groupKey.ID)
-	}
-
+	regenAttrViewViewGroups(attrView, "force")
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4074,7 +4052,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
-					regenAttrViewViewGroups(attrView, value.KeyID)
+					regenAttrViewViewGroups(attrView, "force")
 					err = av.SaveAttributeView(attrView)
 				}
 				return

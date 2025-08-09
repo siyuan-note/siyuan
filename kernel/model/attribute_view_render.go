@@ -102,8 +102,9 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		return
 	}
 
-	fixDev := false
 	// 如果存在分组的话渲染分组视图
+
+	fixDev := false
 	for _, groupView := range view.Groups {
 		if "" == groupView.GetGroupValue() && !fixDev {
 			// TODO 分组上线后删除，预计 2025 年 9 月后可以删除
@@ -184,7 +185,7 @@ func sortGroupViews(todayStart time.Time, view *av.View) {
 		return
 	}
 
-	if av.GroupMethodDateRelative == view.Group.Method {
+	if av.GroupMethodDateRelative == view.Group.Method { // 相对日期分组排序
 		var relativeDateGroups []*av.View
 		var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
 		for _, groupView := range view.Groups {
@@ -254,16 +255,22 @@ func sortGroupViews(todayStart time.Time, view *av.View) {
 		for _, g := range lastNext30Days {
 			relativeDateGroups = util.InsertElem(relativeDateGroups, startIdx, g)
 		}
-		if nil != defaultGroup {
-			relativeDateGroups = append([]*av.View{defaultGroup}, relativeDateGroups...)
-		}
 
 		if av.GroupOrderDesc == view.Group.Order {
 			slices.Reverse(relativeDateGroups)
 		}
 
+		if nil != defaultGroup {
+			relativeDateGroups = append(relativeDateGroups, defaultGroup)
+		}
+
 		view.Groups = relativeDateGroups
-	} else {
+	} else { // 升序/降序
+		defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
+		if nil != defaultGroup {
+			view.RemoveGroupByID(defaultGroup.ID)
+		}
+
 		sort.SliceStable(view.Groups, func(i, j int) bool {
 			iVal, jVal := view.Groups[i].GetGroupValue(), view.Groups[j].GetGroupValue()
 			if av.GroupOrderAsc == view.Group.Order {
@@ -271,6 +278,10 @@ func sortGroupViews(todayStart time.Time, view *av.View) {
 			}
 			return util.NaturalCompare(jVal, iVal)
 		})
+
+		if nil != defaultGroup {
+			view.Groups = append(view.Groups, defaultGroup)
+		}
 	}
 }
 

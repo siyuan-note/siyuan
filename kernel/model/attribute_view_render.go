@@ -362,10 +362,8 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, blockID stri
 	}
 
 	if "" == viewID && "" != blockID {
-		node, _, getErr := getNodeByBlockID(nil, blockID)
-		if nil != getErr {
-			logging.LogWarnf("get node by block ID [%s] failed: %s", blockID, getErr)
-		} else {
+		node, _, _ := getNodeByBlockID(nil, blockID)
+		if nil != node {
 			viewID = node.IALAttr(av.NodeAttrView)
 		}
 	}

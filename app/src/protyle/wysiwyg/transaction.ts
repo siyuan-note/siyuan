@@ -1299,10 +1299,10 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
     }
     window.clearTimeout(transactionsTimeout);
     // 加速折叠 https://github.com/siyuan-note/siyuan/issues/11828
-    if (doOperations.length === 1 && (
+    if ((doOperations.length === 1 && (
         doOperations[0].action === "unfoldHeading" || doOperations[0].action === "setAttrViewBlockView" ||
         (doOperations[0].action === "setAttrs" && doOperations[0].data.startsWith('{"fold":'))
-    )) {
+    )) || (doOperations.length === 2 && doOperations[0].action === "insertAttrViewBlock")) {
         // 防止 needDebounce 为 true
         protyle.transactionTime = time + Constants.TIMEOUT_INPUT * 2;
         fetchPost("/api/transactions", {
@@ -1328,6 +1328,8 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             blockRender(protyle, item);
                         }
                     });
+                } else if (operation.action === "insertAttrViewBlock") {
+                    refreshAV(protyle, operation);
                 }
             });
         });

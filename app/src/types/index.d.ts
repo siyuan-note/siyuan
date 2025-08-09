@@ -908,7 +908,7 @@ interface IAVGroup {
         numStep: number  // 数字范围步长 100
     }
     hideEmpty?: boolean
-    order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2
+    order?: number  // 升序: 0(默认), 降序: 1, 手动排序: 2, 按选项排序: 3
 }
 
 interface IAVSort {

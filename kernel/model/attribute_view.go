@@ -67,7 +67,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 
 	groupView := view
 	if "" != groupID {
-		groupView = view.GetGroup(groupID)
+		groupView = view.GetGroupByID(groupID)
 	}
 	if nil == groupView {
 		logging.LogErrorf("group [%s] not found in view [%s] of attribute view [%s]", groupID, viewID, avID)
@@ -415,9 +415,11 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	oldHideEmpty := false
+	var oldHideEmpty, firstInit bool
 	if nil != view.Group {
 		oldHideEmpty = view.Group.HideEmpty
+	} else {
+		firstInit = true
 	}
 
 	groupStates := getAttrViewGroupStates(view)
@@ -438,6 +440,32 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 				if g.GroupHidden == 1 && 1 > len(g.GroupItemIDs) {
 					g.GroupHidden = 0
 				}
+			}
+		}
+	}
+
+	if firstInit {
+		if groupKey := view.GetGroupKey(attrView); nil != groupKey && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
+			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为手动排序，并按选项顺序排序分组视图 https://github.com/siyuan-note/siyuan/issues/15491
+			view.Group.Order = av.GroupOrderMan
+			optionSort := map[string]int{}
+			for i, op := range groupKey.Options {
+				optionSort[op.Name] = i
+			}
+
+			defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
+			if nil != defaultGroup {
+				view.RemoveGroupByID(defaultGroup.ID)
+			}
+
+			sort.Slice(view.Groups, func(i, j int) bool {
+				vSort := optionSort[view.Groups[i].GetGroupValue()]
+				oSort := optionSort[view.Groups[j].GetGroupValue()]
+				return vSort < oSort
+			})
+
+			if nil != defaultGroup {
+				view.Groups = append(view.Groups, defaultGroup)
 			}
 		}
 	}
@@ -3261,7 +3289,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 	groupView := view
 	if "" != groupID {
-		groupView = view.GetGroup(groupID)
+		groupView = view.GetGroupByID(groupID)
 	}
 
 	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
@@ -3842,7 +3870,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 	var idx, previousIndex int
 
 	if nil != view.Group && "" != operation.GroupID {
-		if groupView := view.GetGroup(operation.GroupID); nil != groupView {
+		if groupView := view.GetGroupByID(operation.GroupID); nil != groupView {
 			for i, id := range groupView.GroupItemIDs {
 				if id == operation.ID {
 					itemID = id
@@ -3858,7 +3886,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
 			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
-				if targetGroupView := view.GetGroup(operation.TargetGroupID); nil != targetGroupView {
+				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView {
 					groupKey := view.GetGroupKey(attrView)
 					nearItem := getNearItem(attrView, view, targetGroupView, operation.PreviousID)
 					newValue := getNewValueByNearItem(nearItem, groupKey, operation.ID)

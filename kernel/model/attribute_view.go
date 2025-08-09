@@ -174,6 +174,8 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 		return err
 	}
 
+	sortGroupViews(time.Now(), view)
+
 	var groupView *av.View
 	var index, previousIndex int
 	for i, g := range view.Groups {

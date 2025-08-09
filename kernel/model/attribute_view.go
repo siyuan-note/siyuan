@@ -198,6 +198,10 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 	}
 	view.Groups = util.InsertElem(view.Groups, previousIndex, groupView)
 
+	for i, g := range view.Groups {
+		g.GroupSort = i
+	}
+
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -1797,6 +1801,7 @@ func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query stri
 
 func sortGroupViews(todayStart time.Time, view *av.View) {
 	if av.GroupOrderMan == view.Group.Order {
+		sort.Slice(view.Groups, func(i, j int) bool { return view.Groups[i].GroupSort < view.Groups[j].GroupSort })
 		return
 	}
 
@@ -2077,6 +2082,7 @@ type GroupState struct {
 	ID     string
 	Folded bool
 	Hidden int
+	Sort   int
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -2090,6 +2096,7 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 			ID:     groupView.ID,
 			Folded: groupView.GroupFolded,
 			Hidden: groupView.GroupHidden,
+			Sort:   groupView.GroupSort,
 		}
 	}
 	return
@@ -2101,6 +2108,7 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.ID = state.ID
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
+			groupView.GroupSort = state.Sort
 		}
 	}
 }

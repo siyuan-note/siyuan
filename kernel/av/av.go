@@ -200,6 +200,7 @@ type View struct {
 	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupSort    int        `json:"groupSort"`           // 分组排序值
 }
 
 // GetGroupValue 获取分组视图的分组值。

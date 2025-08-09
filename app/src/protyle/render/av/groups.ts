@@ -194,7 +194,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
             <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
         </span>
-    </div>` : `<div class="b3-menu__label fn__flex-1">${item.name || ""}</div>`}
+    </div>` : `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`}
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });

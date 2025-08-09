@@ -196,7 +196,7 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">
-    <svg class="b3-menu__icon"></svg>
+    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.fields}</span>
     <span class="b3-menu__accelerator">${fields.filter((item: IAVColumn) => !item.hidden).length}/${fields.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>

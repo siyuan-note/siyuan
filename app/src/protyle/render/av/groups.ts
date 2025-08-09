@@ -188,7 +188,7 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 if (item.groupHidden === 0) {
                     showCount++;
                 }
-                groupHTML += `<button class="b3-menu__item" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
+                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
     ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
     ${item.groupValue?.mSelect?.length > 0 ? `<div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">

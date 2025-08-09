@@ -1565,6 +1565,7 @@ export const openMenuPanel = (options: {
                             showCount++;
                         }
                     });
+                    target.parentElement.classList[isHide ? "remove" : "add"]("b3-menu__item--hidden");
                     menuElement.querySelector('[data-type="hideGroups"]').innerHTML = `${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
 <span class="fn__space"></span>
 <svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>`;
@@ -1592,7 +1593,9 @@ export const openMenuPanel = (options: {
 <svg><use xlink:href="#iconEye${isShow ? "" : "off"}"></use></svg>`;
                     data.view.groups.forEach((item) => {
                         item.groupHidden = isShow ? 2 : 0;
-                        target.parentElement.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"] .b3-menu__action use`)?.setAttribute("xlink:href", `#iconEye${isShow ? "off" : ""}`);
+                        const itemElement = target.parentElement.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"]`);
+                        itemElement.classList[isShow ? "add" : "remove"]("b3-menu__item--hidden");
+                        itemElement.querySelector(".b3-menu__action use")?.setAttribute("xlink:href", `#iconEye${isShow ? "off" : ""}`);
                     });
                     transaction(options.protyle, [{
                         action: "hideAttrViewAllGroups",

@@ -267,6 +267,10 @@
       opacity: .38;
       cursor: not-allowed;
     }
+
+    &--hidden {
+      opacity: .38;
+    }
   }
 
   &__action {

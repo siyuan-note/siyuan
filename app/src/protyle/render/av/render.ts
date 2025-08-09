@@ -659,14 +659,16 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
     if (operation.action === "foldAttrViewGroup") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             const foldElement = item.querySelector(`[data-type="av-group-fold"][data-id="${operation.id}"]`);
-            if (operation.data) {
-                foldElement.firstElementChild.classList.remove("av__group-arrow--open");
-                foldElement.parentElement.nextElementSibling.classList.add("fn__none");
-            } else {
-                foldElement.firstElementChild.classList.add("av__group-arrow--open");
-                foldElement.parentElement.nextElementSibling.classList.remove("fn__none");
+            if (foldElement) {
+                if (operation.data) {
+                    foldElement.firstElementChild.classList.remove("av__group-arrow--open");
+                    foldElement.parentElement.nextElementSibling.classList.add("fn__none");
+                } else {
+                    foldElement.firstElementChild.classList.add("av__group-arrow--open");
+                    foldElement.parentElement.nextElementSibling.classList.remove("fn__none");
+                }
+                foldElement.removeAttribute("data-folding");
             }
-            foldElement.removeAttribute("data-folding");
         });
         return;
     }

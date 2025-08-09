@@ -102,6 +102,8 @@ export const getLanguageByIndex = (index: number, type: "sort" | "date") => {
                 return window.siyuan.languages.desc;
             case 2:
                 return window.siyuan.languages.customSort;
+            case 3:
+                return window.siyuan.languages.sortBySelectOption;
             default:
                 return "";
         }

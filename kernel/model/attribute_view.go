@@ -174,7 +174,7 @@ func sortAttributeViewGroup(avID, blockID, previousGroupID, groupID string) (err
 		return err
 	}
 
-	sortGroupViews(view)
+	sortGroupViews(attrView, view)
 
 	var groupView *av.View
 	var index, previousIndex int
@@ -453,26 +453,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为手动排序，并按选项顺序排序分组视图 https://github.com/siyuan-note/siyuan/issues/15491
 			view.Group.Order = av.GroupOrderMan
-			optionSort := map[string]int{}
-			for i, op := range groupKey.Options {
-				optionSort[op.Name] = i
-			}
-
-			defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
-			if nil != defaultGroup {
-				view.RemoveGroupByID(defaultGroup.ID)
-			}
-
-			sort.Slice(view.Groups, func(i, j int) bool {
-				vSort := optionSort[view.Groups[i].GetGroupValue()]
-				oSort := optionSort[view.Groups[j].GetGroupValue()]
-				return vSort < oSort
-			})
-
-			if nil != defaultGroup {
-				view.Groups = append(view.Groups, defaultGroup)
-			}
-
+			sortGroupsBySelectOption(view, groupKey)
 			for i, g := range view.Groups {
 				g.GroupSort = i
 			}

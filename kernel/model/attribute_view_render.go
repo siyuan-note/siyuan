@@ -137,7 +137,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	sortGroupViews(view)
+	sortGroupViews(attrView, view)
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
@@ -193,13 +193,13 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 	}
 }
 
-func sortGroupViews(view *av.View) {
+func sortGroupViews(attrView *av.AttributeView, view *av.View) {
 	if av.GroupOrderMan == view.Group.Order {
 		sort.Slice(view.Groups, func(i, j int) bool { return view.Groups[i].GroupSort < view.Groups[j].GroupSort })
 		return
 	}
 
-	if av.GroupMethodDateRelative == view.Group.Method { // 相对日期分组排序
+	if av.GroupMethodDateRelative == view.Group.Method {
 		var relativeDateGroups []*av.View
 		var last30Days, last7Days, yesterday, today, tomorrow, next7Days, next30Days, defaultGroup *av.View
 		for _, groupView := range view.Groups {
@@ -280,7 +280,10 @@ func sortGroupViews(view *av.View) {
 		}
 
 		view.Groups = relativeDateGroups
-	} else { // 升序/降序
+		return
+	}
+
+	if av.GroupOrderAsc == view.Group.Order || av.GroupOrderDesc == view.Group.Order {
 		defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
 		if nil != defaultGroup {
 			view.RemoveGroupByID(defaultGroup.ID)
@@ -297,6 +300,43 @@ func sortGroupViews(view *av.View) {
 		if nil != defaultGroup {
 			view.Groups = append(view.Groups, defaultGroup)
 		}
+		return
+	}
+
+	if av.GroupOrderSelectOption == view.Group.Order {
+		groupKey := view.GetGroupKey(attrView)
+		if nil == groupKey {
+			return
+		}
+
+		if av.KeyTypeSelect != groupKey.Type && av.KeyTypeMSelect != groupKey.Type {
+			return
+		}
+
+		sortGroupsBySelectOption(view, groupKey)
+		return
+	}
+}
+
+func sortGroupsBySelectOption(view *av.View, groupKey *av.Key) {
+	optionSort := map[string]int{}
+	for i, op := range groupKey.Options {
+		optionSort[op.Name] = i
+	}
+
+	defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
+	if nil != defaultGroup {
+		view.RemoveGroupByID(defaultGroup.ID)
+	}
+
+	sort.Slice(view.Groups, func(i, j int) bool {
+		vSort := optionSort[view.Groups[i].GetGroupValue()]
+		oSort := optionSort[view.Groups[j].GetGroupValue()]
+		return vSort < oSort
+	})
+
+	if nil != defaultGroup {
+		view.Groups = append(view.Groups, defaultGroup)
 	}
 }
 

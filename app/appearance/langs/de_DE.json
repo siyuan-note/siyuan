@@ -1,4 +1,5 @@
 {
+  "sortBySelectOption": "Nach Option sortieren",
   "groupStep": "Gruppierungsintervall",
   "groupRange": "Gruppierungsbereich",
   "groupMethodDateRelative": "Relatives Datum",

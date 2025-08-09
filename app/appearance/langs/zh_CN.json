@@ -1,4 +1,5 @@
 {
+  "sortBySelectOption": "按选项排序",
   "groupStep": "分组间隔",
   "groupRange": "分组范围",
   "groupMethodDateRelative": "相对日期",

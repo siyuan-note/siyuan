@@ -1,4 +1,5 @@
 {
+  "sortBySelectOption": "Сортировать по опции",
   "groupStep": "Интервал группировки",
   "groupRange": "Диапазон группировки",
   "groupMethodDateRelative": "Относительная дата",

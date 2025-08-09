@@ -92,7 +92,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	if isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
 		if time.Now().Format("2006-01-02") != createdDate {
-			regenAttrViewViewGroups(attrView, "force")
+			regenAttrViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 		}
 	}
@@ -108,7 +108,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	for _, groupView := range view.Groups {
 		if "" == groupView.GetGroupValue() && !fixDev {
 			// TODO 分组上线后删除，预计 2025 年 9 月后可以删除
-			regenAttrViewViewGroups(attrView, "force")
+			regenAttrViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)
 			fixDev = true
 		}
@@ -362,10 +362,8 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, blockID stri
 	}
 
 	if "" == viewID && "" != blockID {
-		node, _, getErr := getNodeByBlockID(nil, blockID)
-		if nil != getErr {
-			logging.LogWarnf("get node by block ID [%s] failed: %s", blockID, getErr)
-		} else {
+		node, _, _ := getNodeByBlockID(nil, blockID)
+		if nil != node {
 			viewID = node.IALAttr(av.NodeAttrView)
 		}
 	}

@@ -553,7 +553,7 @@
   "embedBlockBreadcrumbTip": "Nach der Aktivierung zeigen eingebettete Blöcke Breadcrumbs an, eingebettete Blöcke in Superblöcken ignorieren diese Option und zeigen niemals Breadcrumbs.",
   "appearanceMode": "Darstellungsmodus",
   "editReadonly": "Schreibgeschützter Modus",
-  "editReadonlyTip": "Nach der Aktivierung wird das Dokument im schreibgeschützten Modus geladen.",
+  "editReadonlyTip": "Nach der Aktivierung ist das Dokument standardmäßig schreibgeschützt.",
   "generateConflictDoc": "Konfliktdokument generieren, wenn Synchronisationskonflikte auftreten.",
   "generateConflictDocTip": "Nach der Aktivierung wird ein Konfliktdokument generiert, wenn ein Synchronisationskonflikt auftritt, sodass es direkt geöffnet und angezeigt werden kann. Egal ob aktiviert oder nicht, die [Datenhistorie] wird das Konfliktdokument aufzeichnen.",
   "deleteOpConfirm": "⚠️ Bestätigung der Löschoperation",

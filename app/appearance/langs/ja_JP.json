@@ -553,7 +553,7 @@
   "embedBlockBreadcrumbTip": "埋め込みブロックにパンくずリストを表示します<br>この設定にかかわらずスーパーブロック内の埋め込みブロックは常にパンくずリストが表示されません",
   "appearanceMode": "表示モード",
   "editReadonly": "読み取り専用モード",
-  "editReadonlyTip": "エディタが読み取り専用モードでドキュメントを読み込みます",
+  "editReadonlyTip": "有効にすると、ドキュメントはデフォルトで読み取り専用になります",
   "generateConflictDoc": "同期の競合時に競合ドキュメントを生成する",
   "generateConflictDocTip": "同期の競合が発生した場合は競合ドキュメントが生成され、直接開いて表示できます。この設定に関わらず [データ履歴] には競合ドキュメントが記録されます",
   "deleteOpConfirm": "⚠️ 削除操作の確認",

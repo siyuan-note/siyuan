@@ -137,9 +137,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	todayStart := time.Now()
-	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
-	sortGroupViews(todayStart, view)
+	sortGroupViews(view)
 
 	var groups []av.Viewable
 	for _, groupView := range view.Groups {
@@ -195,7 +193,7 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 	}
 }
 
-func sortGroupViews(todayStart time.Time, view *av.View) {
+func sortGroupViews(view *av.View) {
 	if av.GroupOrderMan == view.Group.Order {
 		sort.Slice(view.Groups, func(i, j int) bool { return view.Groups[i].GroupSort < view.Groups[j].GroupSort })
 		return
@@ -259,6 +257,7 @@ func sortGroupViews(todayStart time.Time, view *av.View) {
 		}
 
 		startIdx := -1
+		todayStart := util.GetTodayStart()
 		thisMonth := todayStart.Format("2006-01")
 		for i, monthGroup := range relativeDateGroups {
 			if monthGroup.GetGroupValue() < thisMonth {

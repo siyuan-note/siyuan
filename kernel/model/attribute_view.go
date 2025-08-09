@@ -429,7 +429,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 
 	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
-	regenAttrViewViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView, "force")
 	setAttrViewGroupStates(view, groupStates)
 
 	if view.Group.HideEmpty != oldHideEmpty {
@@ -615,7 +615,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView, "force")
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -1554,7 +1554,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 	return
 }
 
-func genAttrViewViewGroups(view *av.View, attrView *av.AttributeView) {
+func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 	if nil == view.Group {
 		return
 	}
@@ -2134,18 +2134,19 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 					}
 					destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, srcVal.BlockID)
 					destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
-					regenAttrViewViewGroups(srcAv, destVal.KeyID)
 					destKeyValues.Values = append(destKeyValues.Values, destVal)
 				}
 			}
 		}
 	}
 
+	regenAttrViewGroups(srcAv, "force")
 	err = av.SaveAttributeView(srcAv)
 	if err != nil {
 		return
 	}
 	if !isSameAv {
+		regenAttrViewGroups(destAv, "force")
 		err = av.SaveAttributeView(destAv)
 		ReloadAttrView(destAv.ID)
 	}
@@ -2946,7 +2947,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView, "force")
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -3079,7 +3080,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView, "force")
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
@@ -3499,7 +3500,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
 
-				regenAttrViewViewGroups(attrView, "force")
+				regenAttrViewGroups(attrView, "force")
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {
 					if r == operation.PreviousID {
@@ -3796,7 +3797,7 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4052,7 +4053,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
 					value.UpdatedAt = now
-					regenAttrViewViewGroups(attrView, "force")
+					regenAttrViewGroups(attrView, "force")
 					err = av.SaveAttributeView(attrView)
 				}
 				return
@@ -4117,6 +4118,8 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 			v.ItemIDs = append(v.ItemIDs, newBlockID)
 		}
 	}
+
+	regenAttrViewGroups(attrView, "force")
 
 	changedAvIDs = gulu.Str.RemoveDuplicatedElem(changedAvIDs)
 	for _, id := range changedAvIDs {
@@ -4389,7 +4392,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		updateTwoWayRelationDestAttrView(attrView, key, val, relationChangeMode, oldRelationBlockIDs)
 	}
 
-	regenAttrViewViewGroups(attrView, keyID)
+	regenAttrViewGroups(attrView, keyID)
 	return
 }
 
@@ -4430,7 +4433,6 @@ func updateTwoWayRelationDestAttrView(attrView *av.AttributeView, relKey *av.Key
 
 				destVal.Relation.BlockIDs = append(destVal.Relation.BlockIDs, val.BlockID)
 				destVal.Relation.BlockIDs = gulu.Str.RemoveDuplicatedElem(destVal.Relation.BlockIDs)
-				regenAttrViewViewGroups(destAv, relKey.Relation.BackKeyID)
 				break
 			}
 		}
@@ -4450,7 +4452,6 @@ func updateTwoWayRelationDestAttrView(attrView *av.AttributeView, relKey *av.Key
 					if value.BlockID == blockID {
 						value.Relation.BlockIDs = gulu.Str.RemoveElem(value.Relation.BlockIDs, val.BlockID)
 						value.SetUpdatedAt(now)
-						regenAttrViewViewGroups(destAv, relKey.Relation.BackKeyID)
 						break
 					}
 				}
@@ -4459,11 +4460,14 @@ func updateTwoWayRelationDestAttrView(attrView *av.AttributeView, relKey *av.Key
 	}
 
 	if destAv != attrView {
+		regenAttrViewGroups(destAv, "force")
 		av.SaveAttributeView(destAv)
 	}
 }
 
-func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
+// regenAttrViewGroups 重新生成分组视图。
+// keyID: 如果是 "force" 则强制重新生成所有分组视图，否则只生成 keyID 指定的分组字段的分组视图
+func regenAttrViewGroups(attrView *av.AttributeView, keyID string) {
 	for _, view := range attrView.Views {
 		groupKey := view.GetGroupKey(attrView)
 		if nil == groupKey {
@@ -4477,7 +4481,7 @@ func regenAttrViewViewGroups(attrView *av.AttributeView, keyID string) {
 			}
 		}
 
-		genAttrViewViewGroups(view, attrView)
+		genAttrViewGroups(view, attrView)
 
 		for _, g := range view.Groups {
 			if view.Group.HideEmpty {
@@ -4639,7 +4643,7 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4692,7 +4696,7 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 		break
 	}
 
-	regenAttrViewViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4811,7 +4815,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4898,13 +4902,13 @@ func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []
 				srcAvChanged := false
 				srcValue.Relation.BlockIDs, srcAvChanged = util.ReplaceStr(srcValue.Relation.BlockIDs, previousID, nextID)
 				if srcAvChanged {
-					regenAttrViewViewGroups(srcAv, srcValue.KeyID)
 					changed = true
 				}
 			}
 		}
 
 		if changed {
+			regenAttrViewGroups(srcAv, "force")
 			av.SaveAttributeView(srcAv)
 			changedSrcAvID = append(changedSrcAvID, srcAvID)
 		}

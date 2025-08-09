@@ -35,92 +35,6 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	repo, err := newRepository()
-	if err != nil {
-		return
-	}
-
-	index, err := repo.GetIndex(indexID)
-	if err != nil {
-		return
-	}
-
-	files, err := repo.GetFiles(index)
-	if err != nil {
-		return
-	}
-	var avFile *entity.File
-	for _, f := range files {
-		if "/storage/av/"+avID+".json" == f.Path {
-			avFile = f
-			break
-		}
-	}
-
-	if nil == avFile {
-		attrView = av.NewAttributeView(avID)
-	} else {
-		data, readErr := repo.OpenFile(avFile)
-		if nil != readErr {
-			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-			return
-		}
-
-		attrView = &av.AttributeView{}
-		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-			return
-		}
-	}
-
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
-	return
-}
-
-func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
-	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
-	if nil != parseErr {
-		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
-		return
-	}
-
-	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
-	globPath := filepath.Join(util.HistoryDir, dirPrefix+"*")
-	matches, err := filepath.Glob(globPath)
-	if err != nil {
-		logging.LogErrorf("glob [%s] failed: %s", globPath, err)
-		return
-	}
-	if 1 > len(matches) {
-		return
-	}
-
-	historyDir := matches[0]
-	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
-	if !gulu.File.IsExist(avJSONPath) {
-		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
-	}
-	if !gulu.File.IsExist(avJSONPath) {
-		attrView = av.NewAttributeView(avID)
-	} else {
-		data, readErr := os.ReadFile(avJSONPath)
-		if nil != readErr {
-			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
-			return
-		}
-
-		attrView = &av.AttributeView{}
-		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
-			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
-			return
-		}
-	}
-
-	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
-	return
-}
-
 func RenderAttributeView(blockID, avID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, attrView *av.AttributeView, err error) {
 	waitForSyncingStorages()
 
@@ -446,5 +360,91 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, blockID stri
 	if nil == ret {
 		ret = attrView.Views[0]
 	}
+	return
+}
+
+func RenderRepoSnapshotAttributeView(indexID, avID string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	repo, err := newRepository()
+	if err != nil {
+		return
+	}
+
+	index, err := repo.GetIndex(indexID)
+	if err != nil {
+		return
+	}
+
+	files, err := repo.GetFiles(index)
+	if err != nil {
+		return
+	}
+	var avFile *entity.File
+	for _, f := range files {
+		if "/storage/av/"+avID+".json" == f.Path {
+			avFile = f
+			break
+		}
+	}
+
+	if nil == avFile {
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := repo.OpenFile(avFile)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
+	return
+}
+
+func RenderHistoryAttributeView(avID, created string) (viewable av.Viewable, attrView *av.AttributeView, err error) {
+	createdUnix, parseErr := strconv.ParseInt(created, 10, 64)
+	if nil != parseErr {
+		logging.LogErrorf("parse created [%s] failed: %s", created, parseErr)
+		return
+	}
+
+	dirPrefix := time.Unix(createdUnix, 0).Format("2006-01-02-150405")
+	globPath := filepath.Join(util.HistoryDir, dirPrefix+"*")
+	matches, err := filepath.Glob(globPath)
+	if err != nil {
+		logging.LogErrorf("glob [%s] failed: %s", globPath, err)
+		return
+	}
+	if 1 > len(matches) {
+		return
+	}
+
+	historyDir := matches[0]
+	avJSONPath := filepath.Join(historyDir, "storage", "av", avID+".json")
+	if !gulu.File.IsExist(avJSONPath) {
+		avJSONPath = filepath.Join(util.DataDir, "storage", "av", avID+".json")
+	}
+	if !gulu.File.IsExist(avJSONPath) {
+		attrView = av.NewAttributeView(avID)
+	} else {
+		data, readErr := os.ReadFile(avJSONPath)
+		if nil != readErr {
+			logging.LogErrorf("read attribute view [%s] failed: %s", avID, readErr)
+			return
+		}
+
+		attrView = &av.AttributeView{}
+		if err = gulu.JSON.UnmarshalJSON(data, attrView); err != nil {
+			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
+			return
+		}
+	}
+
+	viewable, err = renderAttributeView(attrView, "", "", "", 1, -1, nil)
 	return
 }

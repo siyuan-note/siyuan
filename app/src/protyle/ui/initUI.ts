@@ -224,7 +224,8 @@ export const initUI = (protyle: IProtyle) => {
             }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!isInEmbedBlock(item) && protyle.gutter.isMatchNode(item)) {
-                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                    const bodyQueryClass = buttonElement.dataset.groupId ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
+                    const rowItem = item.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                     Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
                         if (item !== hlItem) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");

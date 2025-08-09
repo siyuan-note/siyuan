@@ -167,6 +167,10 @@ func (gallery *Gallery) SetItems(items []Item) {
 	}
 }
 
+func (gallery *Gallery) CountItems() int {
+	return len(gallery.Cards)
+}
+
 func (gallery *Gallery) GetFields() (ret []Field) {
 	ret = []Field{}
 	for _, field := range gallery.Fields {

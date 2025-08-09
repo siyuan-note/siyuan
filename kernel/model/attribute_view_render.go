@@ -162,6 +162,8 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		if nil != err {
 			return
 		}
+
+		hideEmptyGroupViews(view, groupViewable)
 		groups = append(groups, groupViewable)
 
 		// 将分组视图的分组字段清空，减少冗余（字段信息可以在总的视图 view 对象上获取到）
@@ -177,6 +179,20 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 	// 将总的视图上的项目清空，减少冗余
 	viewable.(av.Collection).SetItems(nil)
 	return
+}
+
+func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
+	if nil == view.Group {
+		return
+	}
+
+	if !view.Group.HideEmpty {
+		return
+	}
+
+	if 2 != viewable.GetGroupHidden() && 1 > viewable.(av.Collection).CountItems() {
+		viewable.SetGroupHidden(1)
+	}
 }
 
 func sortGroupViews(todayStart time.Time, view *av.View) {

@@ -349,6 +349,10 @@ type Viewable interface {
 	// SetGroupFolded 设置分组是否折叠。
 	SetGroupFolded(folded bool)
 
+	// GetGroupHidden 获取分组是否隐藏。
+	// hidden 0：显示，1：空白隐藏，2：手动隐藏
+	GetGroupHidden() int
+
 	// SetGroupHidden 设置分组是否隐藏。
 	// hidden 0：显示，1：空白隐藏，2：手动隐藏
 	SetGroupHidden(hidden int)

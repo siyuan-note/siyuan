@@ -141,6 +141,10 @@ func (table *Table) SetItems(items []Item) {
 	}
 }
 
+func (table *Table) CountItems() int {
+	return len(table.Rows)
+}
+
 func (table *Table) GetFields() (ret []Field) {
 	ret = []Field{}
 	for _, column := range table.Columns {

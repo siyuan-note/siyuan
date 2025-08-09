@@ -123,6 +123,10 @@ func (baseInstance *BaseInstance) SetGroupFolded(folded bool) {
 	baseInstance.GroupFolded = folded
 }
 
+func (baseInstance *BaseInstance) GetGroupHidden() int {
+	return baseInstance.GroupHidden
+}
+
 func (baseInstance *BaseInstance) SetGroupHidden(hidden int) {
 	baseInstance.GroupHidden = hidden
 }
@@ -181,6 +185,9 @@ type Collection interface {
 
 	// SetItems 设置集合中的项目。
 	SetItems(items []Item)
+
+	// CountItems 返回集合中的项目数量。
+	CountItems() int
 
 	// GetFields 返回集合的所有字段。
 	GetFields() []Field

@@ -1095,8 +1095,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
+                                const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
+                                if (previousID !== item && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
@@ -1170,8 +1172,10 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                if (previousID !== item && undoPreviousId !== previousID) {
-                                    const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
+                                const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
+                                if (previousID !== item && undoPreviousId !== previousID || (
+                                    (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
+                                )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,

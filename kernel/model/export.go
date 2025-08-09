@@ -2012,8 +2012,16 @@ func exportMarkdownContent(id, ext string, exportRefMode int, defBlockIDs []stri
 		return
 	}
 
-	if ast.NodeParagraph == tree.Root.FirstChild.Type {
-		isEmpty = nil == tree.Root.FirstChild.FirstChild
+	for c := tree.Root.FirstChild; nil != c; c = c.Next {
+		if ast.NodeParagraph == c.Type {
+			isEmpty = nil == c.FirstChild
+			if !isEmpty {
+				break
+			}
+		} else {
+			isEmpty = false
+			break
+		}
 	}
 
 	exportedMd = exportMarkdownContent0(id, tree, "", false, false, false,

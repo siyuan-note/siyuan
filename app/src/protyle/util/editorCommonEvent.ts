@@ -1120,7 +1120,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
-                            const groupID = targetElement.parentElement.getAttribute("data-group-id");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                            const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
@@ -1194,13 +1195,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             transaction(protyle, doOperations, undoOperations);
                         } else {
                             const newUpdated = dayjs().format("YYYYMMDDHHmmss");
+                            const bodyElement = hasClosestByClassName(targetElement, "av__body");
                             transaction(protyle, [{
                                 action: "insertAttrViewBlock",
                                 avID,
                                 previousID,
                                 srcs,
                                 blockID: blockElement.dataset.nodeId,
-                                groupID: targetElement.parentElement.getAttribute("data-group-id")
+                                groupID: bodyElement && bodyElement.getAttribute("data-group-id")
                             }, {
                                 action: "doUpdateUpdated",
                                 id: blockElement.dataset.nodeId,
@@ -1310,7 +1312,8 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const avID = blockElement.getAttribute("data-av-id");
                         const newUpdated = dayjs().format("YYYYMMDDHHmmss");
                         const srcs: IOperationSrcs[] = [];
-                        const groupID = targetElement.parentElement.getAttribute("data-group-id");
+                        const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                        const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
                                 id,

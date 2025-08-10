@@ -91,8 +91,13 @@ func renderView(attrView *av.AttributeView, view *av.View, query string, depth *
 func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplContent string) (ret string, err error) {
 	if "" == ial["id"] {
 		block := getBlockValue(keyValues)
-		if nil != block && nil != block.Block {
-			ial["id"] = block.Block.ID
+		if nil != block {
+			if nil != block.Block {
+				ial["id"] = block.Block.ID
+			}
+			if "" == ial["id"] {
+				ial["id"] = block.BlockID
+			}
 		}
 	}
 	if "" == ial["updated"] {

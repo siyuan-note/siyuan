@@ -3002,22 +3002,24 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 	trees := map[string]*parse.Tree{}
 	for _, keyValues := range attrView.KeyValues {
 		tmp := keyValues.Values[:0]
-		for i, values := range keyValues.Values {
-			if !gulu.Str.Contains(values.BlockID, srcIDs) {
+		for i, val := range keyValues.Values {
+			if !gulu.Str.Contains(val.BlockID, srcIDs) {
 				tmp = append(tmp, keyValues.Values[i])
 			} else {
 				// Remove av block also remove node attr https://github.com/siyuan-note/siyuan/issues/9091#issuecomment-1709824006
-				if bt := treenode.GetBlockTree(values.BlockID); nil != bt {
-					tree := trees[bt.RootID]
-					if nil == tree {
-						tree, _ = LoadTreeByBlockID(values.BlockID)
-					}
+				if !val.IsDetached && nil != val.Block {
+					if bt := treenode.GetBlockTree(val.Block.ID); nil != bt {
+						tree := trees[bt.RootID]
+						if nil == tree {
+							tree, _ = LoadTreeByBlockID(val.Block.ID)
+						}
 
-					if nil != tree {
-						trees[bt.RootID] = tree
-						if node := treenode.GetNodeInTree(tree, values.BlockID); nil != node {
-							if err = removeNodeAvID(node, avID, tx, tree); err != nil {
-								return
+						if nil != tree {
+							trees[bt.RootID] = tree
+							if node := treenode.GetNodeInTree(tree, val.BlockID); nil != node {
+								if err = removeNodeAvID(node, avID, tx, tree); err != nil {
+									return
+								}
 							}
 						}
 					}

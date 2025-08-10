@@ -3960,41 +3960,28 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 	}
 
 	var changedAvIDs []string
-	for _, keyValues := range attrView.KeyValues {
-		for _, value := range keyValues.Values {
-			if av.KeyTypeRelation == value.Type {
-				if nil != value.Relation {
-					for i, relBlockID := range value.Relation.BlockIDs {
-						if relBlockID == oldBlockID {
-							value.Relation.BlockIDs[i] = newBlockID
-							changedAvIDs = append(changedAvIDs, attrView.ID)
-						}
-					}
+	for _, blockVal := range attrView.GetBlockKeyValues().Values {
+		if blockVal.BlockID != oldBlockID {
+			continue
+		}
+
+		if av.KeyTypeBlock == blockVal.Type {
+			blockVal.IsDetached = isDetached
+			if !isDetached {
+				if "" != blockVal.Block.ID && blockVal.Block.ID != newBlockID {
+					unbindBlockAv(tx, avID, blockVal.Block.ID)
 				}
-			}
+				bindBlockAv(tx, avID, newBlockID)
 
-			if value.BlockID != oldBlockID {
-				continue
-			}
+				blockVal.Block.ID = newBlockID
+				icon, content := getNodeAvBlockText(node)
+				content = util.UnescapeHTML(content)
+				blockVal.Block.Icon, blockVal.Block.Content = icon, content
 
-			if av.KeyTypeBlock == value.Type {
-				value.IsDetached = isDetached
-				if !isDetached {
-					if "" != value.Block.ID && value.Block.ID != newBlockID {
-						unbindBlockAv(tx, avID, value.Block.ID)
-					}
-					bindBlockAv(tx, avID, newBlockID)
-
-					value.Block.ID = newBlockID
-					icon, content := getNodeAvBlockText(node)
-					content = util.UnescapeHTML(content)
-					value.Block.Icon, value.Block.Content = icon, content
-
-					avIDs := replaceRelationAvValues(avID, oldBlockID, newBlockID)
-					changedAvIDs = append(changedAvIDs, avIDs...)
-				} else {
-					value.Block.ID = ""
-				}
+				avIDs := replaceRelationAvValues(avID, oldBlockID, newBlockID)
+				changedAvIDs = append(changedAvIDs, avIDs...)
+			} else {
+				blockVal.Block.ID = ""
 			}
 		}
 	}

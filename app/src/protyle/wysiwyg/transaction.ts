@@ -1297,7 +1297,6 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
             protyle.undo.add(doOperations, undoOperations, protyle);
         }
     }
-    window.clearTimeout(transactionsTimeout);
     // 加速折叠 https://github.com/siyuan-note/siyuan/issues/11828
     if ((doOperations.length === 1 && (
         doOperations[0].action === "unfoldHeading" || doOperations[0].action === "setAttrViewBlockView" ||
@@ -1335,6 +1334,7 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
         });
         return;
     }
+    window.clearTimeout(transactionsTimeout);
     if (needDebounce) {
         // 不能覆盖 undoOperations https://github.com/siyuan-note/siyuan/issues/3727
         window.siyuan.transactions[window.siyuan.transactions.length - 1].protyle = protyle;

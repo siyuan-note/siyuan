@@ -3939,29 +3939,8 @@ func replaceAttributeViewBlock(avID, oldBlockID, newBlockID string, isDetached b
 func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlockID string, isDetached bool, tx *Transaction) (err error) {
 	avID := attrView.ID
 	var node *ast.Node
-	var tree *parse.Tree
 	if !isDetached {
-		node, tree, _ = getNodeByBlockID(tx, newBlockID)
-	}
-
-	now := util.CurrentTimeMillis()
-	// 检查是否已经存在绑定块，如果存在的话则重新绑定
-	for _, keyValues := range attrView.KeyValues {
-		for _, value := range keyValues.Values {
-			if av.KeyTypeBlock == value.Type && nil != value.Block && value.Block.ID == newBlockID {
-				if !isDetached {
-					bindBlockAv0(tx, avID, node, tree)
-					value.IsDetached = false
-					icon, content := getNodeAvBlockText(node)
-					content = util.UnescapeHTML(content)
-					value.Block.Icon, value.Block.Content = icon, content
-					value.UpdatedAt = now
-					regenAttrViewGroups(attrView, "force")
-					err = av.SaveAttributeView(attrView)
-				}
-				return
-			}
-		}
+		node, _, _ = getNodeByBlockID(tx, newBlockID)
 	}
 
 	var changedAvIDs []string

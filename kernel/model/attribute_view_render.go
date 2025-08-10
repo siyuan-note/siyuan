@@ -64,9 +64,9 @@ const (
 	groupValueNext7Days, groupValueNext30Days                = "_@next7Days@_", "_@next30Days@_"
 )
 
-func renderAttributeView(attrView *av.AttributeView, blockID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, err error) {
+func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query string, page, pageSize int, groupPaging map[string]interface{}) (viewable av.Viewable, err error) {
 	// 获取待渲染的视图
-	view, err := getRenderAttributeViewView(attrView, blockID, viewID)
+	view, err := getRenderAttributeViewView(attrView, viewID, nodeID)
 	if nil != err {
 		return
 	}
@@ -390,7 +390,7 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 	return
 }
 
-func getRenderAttributeViewView(attrView *av.AttributeView, viewID, blockID string) (ret *av.View, err error) {
+func getRenderAttributeViewView(attrView *av.AttributeView, viewID, nodeID string) (ret *av.View, err error) {
 	if 1 > len(attrView.Views) {
 		view, _, _ := av.NewTableViewWithBlockKey(ast.NewNodeID())
 		attrView.Views = append(attrView.Views, view)
@@ -401,8 +401,8 @@ func getRenderAttributeViewView(attrView *av.AttributeView, viewID, blockID stri
 		}
 	}
 
-	if "" == viewID && "" != blockID {
-		node, _, _ := getNodeByBlockID(nil, blockID)
+	if "" == viewID && "" != nodeID {
+		node, _, _ := getNodeByBlockID(nil, nodeID)
 		if nil != node {
 			viewID = node.IALAttr(av.NodeAttrView)
 		}

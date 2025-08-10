@@ -3480,8 +3480,6 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
-
-				regenAttrViewGroups(attrView, "force")
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {
 					if r == operation.PreviousID {

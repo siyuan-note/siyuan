@@ -582,6 +582,19 @@ func (av *AttributeView) ExistBoundBlock(nodeID string) bool {
 	return false
 }
 
+func (av *AttributeView) GetBlockValueByBoundID(nodeID string) *Value {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if v.Block.ID == nodeID {
+					return v
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (av *AttributeView) GetValue(keyID, itemID string) (ret *Value) {
 	for _, kv := range av.KeyValues {
 		if kv.Key.ID == keyID {

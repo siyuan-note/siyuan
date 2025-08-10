@@ -1378,7 +1378,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 						for _, bID := range relVal.Relation.BlockIDs {
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
 							if nil == destVal {
-								if destAv.ExistBlock(bID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
+								if destAv.ExistItem(bID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
 									destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.Rollup.KeyID, bID, destKey.Type)
 								}
 								if nil == destVal {
@@ -2542,20 +2542,20 @@ func (tx *Transaction) getAttrViewBoundNodes(attrView *av.AttributeView) (trees 
 		}
 
 		var tree *parse.Tree
-		tree = trees[blockKeyValue.BlockID]
+		tree = trees[blockKeyValue.Block.ID]
 		if nil == tree {
 			if nil == tx {
-				tree, _ = LoadTreeByBlockID(blockKeyValue.BlockID)
+				tree, _ = LoadTreeByBlockID(blockKeyValue.Block.ID)
 			} else {
-				tree, _ = tx.loadTree(blockKeyValue.BlockID)
+				tree, _ = tx.loadTree(blockKeyValue.Block.ID)
 			}
 		}
 		if nil == tree {
 			continue
 		}
-		trees[blockKeyValue.BlockID] = tree
+		trees[blockKeyValue.Block.ID] = tree
 
-		node := treenode.GetNodeInTree(tree, blockKeyValue.BlockID)
+		node := treenode.GetNodeInTree(tree, blockKeyValue.Block.ID)
 		if nil == node {
 			continue
 		}

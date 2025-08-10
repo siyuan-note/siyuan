@@ -185,7 +185,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		for _, blockID := range relVal.Relation.BlockIDs {
 			destVal := destAv.GetValue(key.Rollup.KeyID, blockID)
 			if nil == destVal {
-				if destAv.ExistBlock(blockID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
+				if destAv.ExistItem(blockID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
 					destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), key.Rollup.KeyID, blockID, destKey.Type)
 				}
 				if nil == destVal {

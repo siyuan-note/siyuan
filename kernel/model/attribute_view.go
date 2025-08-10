@@ -1384,7 +1384,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 						for _, bID := range relVal.Relation.BlockIDs {
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
 							if nil == destVal {
-								if destAv.ExistBlock(bID) { // 数据库中存在行但是字段值不存在是数据未初始化，这里补一个默认值
+								if destAv.ExistBlock(bID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
 									destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.Rollup.KeyID, bID, destKey.Type)
 								}
 								if nil == destVal {
@@ -4135,15 +4135,10 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 }
 
 func (tx *Transaction) doUpdateAttrViewCell(operation *Operation) (ret *TxErr) {
-	err := updateAttributeViewCell(operation, tx)
+	_, err := UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.Data)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
-	return
-}
-
-func updateAttributeViewCell(operation *Operation, tx *Transaction) (err error) {
-	_, err = UpdateAttributeViewCell(tx, operation.AvID, operation.KeyID, operation.RowID, operation.Data)
 	return
 }
 
@@ -4317,17 +4312,15 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 	if isUpdatingBlockKey {
 		if oldIsDetached {
-			// 之前是游离行
+			// 之前是非绑定块
 
 			if !val.IsDetached { // 现在绑定了块
-				// 将游离行绑定到新建的块上
 				bindBlockAv(tx, avID, val.Block.ID)
 			}
 		} else {
 			// 之前绑定了块
 
-			if val.IsDetached { // 现在是游离行
-				// 将绑定的块从属性视图中移除
+			if val.IsDetached { // 现在是非绑定块
 				unbindBlockAv(tx, avID, blockID)
 			} else {
 				// 现在也绑定了块
@@ -4343,6 +4336,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 					updateStaticText := true
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
+						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)
 					} else {
 						if blockText == content {

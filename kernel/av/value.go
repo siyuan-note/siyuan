@@ -33,9 +33,9 @@ import (
 
 type Value struct {
 	ID         string  `json:"id,omitempty"`
-	KeyID      string  `json:"keyID,omitempty"`
-	BlockID    string  `json:"blockID,omitempty"`
-	Type       KeyType `json:"type,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`      // 字段 ID
+	BlockID    string  `json:"blockID,omitempty"`    // 项目 ID
+	Type       KeyType `json:"type,omitempty"`       // 字段类型
 	IsDetached bool    `json:"isDetached,omitempty"` // 是否为非绑定块，注意这个字段只能在主键（KeyTypeBlock）上使用，其他类型的值不要使用
 
 	CreatedAt int64 `json:"createdAt,omitempty"`

@@ -99,9 +99,9 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 	// 批量获取块属性以提升性能
 	var ialIDs []string
 	for _, row := range ret.Rows {
-		block := row.GetBlockValue()
-		if nil != block && !block.IsDetached {
-			ialIDs = append(ialIDs, row.ID)
+		blockVal := row.GetBlockValue()
+		if nil != blockVal && !blockVal.IsDetached {
+			ialIDs = append(ialIDs, blockVal.Block.ID)
 		}
 	}
 	ials := BatchGetBlockAttrs(ialIDs)

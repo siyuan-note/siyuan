@@ -65,11 +65,11 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 
 	// 批量加载绑定块对应的树
 	var ialIDs []string
-	for cardID, keyValues := range cardsValues {
+	for _, keyValues := range cardsValues {
 		for _, kValues := range keyValues {
-			block := kValues.GetBlockValue()
-			if nil != block && !block.IsDetached {
-				ialIDs = append(ialIDs, cardID)
+			blockVal := kValues.GetBlockValue()
+			if nil != blockVal && !blockVal.IsDetached {
+				ialIDs = append(ialIDs, blockVal.Block.ID)
 			}
 		}
 	}

@@ -4212,7 +4212,8 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			// 之前绑定了块
 
 			if val.IsDetached { // 现在是非绑定块
-				unbindBlockAv(tx, avID, blockID)
+				unbindBlockAv(tx, avID, val.Block.ID)
+				val.Block.ID = ""
 			} else {
 				// 现在也绑定了块
 

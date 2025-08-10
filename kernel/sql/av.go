@@ -284,7 +284,7 @@ func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
 			continue
 		}
 
-		toCheckBlockIDs = append(toCheckBlockIDs, blockID)
+		toCheckBlockIDs = append(toCheckBlockIDs, blockValue.Block.ID)
 	}
 	checkRet := treenode.ExistBlockTrees(toCheckBlockIDs)
 	for blockID, exist := range checkRet {

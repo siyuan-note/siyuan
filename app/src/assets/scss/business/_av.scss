@@ -605,7 +605,7 @@
       white-space: nowrap;
     }
 
-    &[data-block-id] > .block__icon[data-type="copy"] {
+    &[data-dtype="block"] > .block__icon[data-type="copy"] {
       display: none;
     }
 

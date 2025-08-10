@@ -154,16 +154,10 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
     });
     let html = "";
     clearSelect(["cell", "row"], options.blockElement);
-    options.srcIDs.forEach((id) => {
-        const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
-        if (!blockCellElement) {
-            html += `<div class="av__row" data-type="ghost">
+    options.srcIDs.forEach(() => {
+        html += `<div class="av__row" data-type="ghost">
     ${cellsHTML}
 </div>`;
-        } else {
-            addDragFill(blockCellElement);
-            blockCellElement.classList.add("av__cell--select");
-        }
     });
     previousElement.insertAdjacentHTML("afterend", html);
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
@@ -357,10 +351,10 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
     const undoOperations: IOperation[] = [];
     const blockIds: string[] = [];
     rowElements.forEach(item => {
-        blockIds.push(item.querySelector(".av__cell[data-block-id]").getAttribute("data-block-id"));
+        blockIds.push(item.getAttribute("data-id"));
     });
     rowElements.forEach(item => {
-        const blockValue = genCellValueByElement("block", item.querySelector(".av__cell[data-block-id]"));
+        const blockValue = genCellValueByElement("block", item.querySelector('.av__cell[data-dtype="block"]'));
         undoOperations.push({
             action: "insertAttrViewBlock",
             avID,

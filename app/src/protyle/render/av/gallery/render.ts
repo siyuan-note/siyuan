@@ -72,8 +72,7 @@ data-empty="${isEmpty}"
 aria-label="${ariaLabel}" 
 data-position="5west"
 data-id="${cell.id}" 
-data-field-id="${data.fields[fieldsIndex].id}"
-${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} 
+data-field-id="${data.fields[fieldsIndex].id}" 
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}

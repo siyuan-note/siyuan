@@ -909,13 +909,10 @@ export const renderCellAttr = (cellElement: Element, value: IAVCellValue) => {
             cellElement.classList.add("av__cell-uncheck");
         }
     } else if (value.type === "block") {
-        if (value.block.id) {
-            // 不能设置为空，否则编辑后会临时无 id
-            cellElement.setAttribute("data-block-id", value.block.id);
-        }
         if (value.isDetached) {
             cellElement.setAttribute("data-detached", "true");
         } else {
+            cellElement.querySelector(".av__celltext").setAttribute("data-id", value.block.id);
             cellElement.removeAttribute("data-detached");
         }
     }
@@ -1032,7 +1029,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     } else if (cellValue.type === "block") {
         if (cellValue?.isDetached) {
-            text = `<span class="av__celltext" data-id="${cellValue.block?.id}">${Lute.EscapeHTMLStr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
+            text = `<span class="av__celltext">${Lute.EscapeHTMLStr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
         } else {
             text = `<span data-type="block-ref" data-id="${cellValue.block?.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(cellValue.block?.content || window.siyuan.languages.untitled)}</span>`;
         }

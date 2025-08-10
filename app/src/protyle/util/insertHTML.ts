@@ -19,6 +19,7 @@ import {updateCellsValue} from "../render/av/cell";
 import {input} from "../wysiwyg/input";
 import {fetchPost} from "../../util/fetch";
 import {isIncludeCell} from "./table";
+import {getFieldIdByCellElement} from "../render/av/row";
 
 const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: HTMLElement) => {
     const tempElement = document.createElement("template");
@@ -111,7 +112,7 @@ const processAV = (range: Range, html: string, protyle: IProtyle, blockElement: 
             const selectCellElement = blockElement.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
                 const sourceId = contenteditableElement.firstElementChild.getAttribute("data-id");
-                const previousID = selectCellElement.dataset.blockId;
+                const previousID = getFieldIdByCellElement(selectCellElement, blockElement.getAttribute("data-av-type") as TAVView);
                 transaction(protyle, [{
                     action: "replaceAttrViewBlock",
                     avID,

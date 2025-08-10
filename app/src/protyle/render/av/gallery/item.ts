@@ -4,7 +4,6 @@ import {fetchPost} from "../../../../util/fetch";
 import {setPage} from "../row";
 import {Constants} from "../../../../constants";
 import {clearSelect} from "../../../util/clearSelect";
-import {hasClosestByClassName} from "../../../util/hasClosest";
 
 export const insertGalleryItemAnimation = (options: {
     blockElement: HTMLElement;
@@ -39,19 +38,11 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     clearSelect(["galleryItem"], options.blockElement);
     let html = "";
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
-    options.srcIDs.forEach((id) => {
-        const blockCellElement = options.blockElement.querySelector(`[data-block-id="${id}"]`);
-        if (!blockCellElement) {
+    options.srcIDs.forEach(() => {
             html += `<div class="av__gallery-item" data-type="ghost">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
     <div class="av__gallery-fields">${cellsHTML}</div>
 </div>`;
-        } else {
-            const galleryItemElement = hasClosestByClassName(blockCellElement, "av__gallery-item");
-            if (galleryItemElement) {
-                galleryItemElement.classList.add("av__gallery-item--select");
-            }
-        }
     });
     if (sideItemElement) {
         sideItemElement.insertAdjacentHTML("afterend", html);

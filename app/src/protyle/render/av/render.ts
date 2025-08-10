@@ -192,8 +192,8 @@ style="width: ${column.width || "200px"}">${getCalcValue(column) || `<svg><use x
             if (cell.valueType === "checkbox") {
                 checkClass = cell.value?.checkbox?.checked ? " av__cell-check" : " av__cell-uncheck";
             }
-            contentHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${data.columns[index].id}"
-${cell.valueType === "block" ? 'data-block-id="' + (cell.value.block.id || "") + '"' : ""} data-wrap="${data.columns[index].wrap}" 
+            contentHTML += `<div class="av__cell${checkClass}" data-id="${cell.id}" data-col-id="${data.columns[index].id}" 
+data-wrap="${data.columns[index].wrap}" 
 data-dtype="${data.columns[index].type}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="width: ${data.columns[index].width || "200px"};
@@ -725,7 +725,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             });
                         }
                         if (operation.srcs.length === 1) {
-                            const popCellElement = item.querySelector(`.av__body${groupQuery} .av__cell[data-block-id="${operation.srcs[0].id}"]`) as HTMLElement;
+                            const popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].id}"] .av__cell[data-dtype="block"]`) as HTMLElement;
                             if (popCellElement) {
                                 popTextCell(protyle, [popCellElement], "block");
                             }

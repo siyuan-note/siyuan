@@ -1,6 +1,6 @@
 import {confirmDialog} from "../dialog/confirmDialog";
 import {Plugin} from "./index";
-import {showMessage} from "../dialog/message";
+import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
 import {fetchGet, fetchPost, fetchSyncPost} from "../util/fetch";
 import {getBackend, getFrontend} from "../util/functions";
@@ -217,6 +217,7 @@ export const API = {
     confirm: confirmDialog,
     Constants,
     showMessage,
+    hideMessage,
     fetchPost,
     fetchSyncPost,
     fetchGet,

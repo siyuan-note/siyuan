@@ -865,21 +865,21 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 	case KeyTypeBlock:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEqual:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorContains:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorDoesNotContain:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorStartsWith:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorEndsWith:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: filter.Value.Block.Content, Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsEmpty:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEmpty:
-			ret.Block = &ValueBlock{ID: addingBlockID, Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		}
 	case KeyTypeText:
 		switch filter.Operator {

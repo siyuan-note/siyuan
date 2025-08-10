@@ -420,9 +420,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	var oldHideEmpty, firstInit bool
+	var oldHideEmpty, firstInit, changeGroupField bool
 	if nil != view.Group {
 		oldHideEmpty = view.Group.HideEmpty
+		changeGroupField = group.Field != view.Group.Field
 	} else {
 		firstInit = true
 	}
@@ -449,7 +450,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		}
 	}
 
-	if firstInit {
+	if firstInit || changeGroupField {
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为手动排序，并按选项顺序排序分组视图 https://github.com/siyuan-note/siyuan/issues/15491
 			view.Group.Order = av.GroupOrderMan
@@ -847,9 +848,9 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			v.BlockID = blockID
 			v.Type = keyValues.Key.Type
 			if av.KeyTypeBlock == v.Type {
-				v.Block.ID = blockID
 				v.Block.Created = now
 				v.Block.Updated = now
+				v.Block.ID = "" // 非绑定块 ID 置空
 			}
 			v.IsDetached = true
 			v.CreatedAt = now
@@ -1829,7 +1830,7 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 			value.BlockID = operation.NextID
 			value.IsDetached = true
 			if nil != value.Block {
-				value.Block.ID = operation.NextID
+				value.Block.ID = ""
 			}
 
 			avIDs := replaceRelationAvValues(operation.AvID, operation.ID, operation.NextID)
@@ -2877,7 +2878,11 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		IsDetached: isDetached,
 		CreatedAt:  now,
 		UpdatedAt:  now,
-		Block:      &av.ValueBlock{ID: addingBlockID, Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
+		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
+	if !isDetached {
+		blockValue.Block.ID = addingBlockID
+	}
+
 	blockValues.Values = append(blockValues.Values, blockValue)
 
 	view, err := getAttrViewViewByBlockID(attrView, blockID)
@@ -4065,12 +4070,14 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 
 			value.BlockID = newBlockID
 			if av.KeyTypeBlock == value.Type && nil != value.Block {
-				value.Block.ID = newBlockID
 				value.IsDetached = isDetached
 				if !isDetached {
+					value.Block.ID = newBlockID
 					icon, content := getNodeAvBlockText(node)
 					content = util.UnescapeHTML(content)
 					value.Block.Icon, value.Block.Content = icon, content
+				} else {
+					value.Block.ID = ""
 				}
 			}
 
@@ -4196,7 +4203,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	for _, kv := range attrView.KeyValues {
 		if av.KeyTypeBlock == kv.Key.Type {
 			for _, v := range kv.Values {
-				if blockID == v.Block.ID {
+				if blockID == v.BlockID {
 					blockVal = v
 					break
 				}
@@ -4314,14 +4321,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 			if !val.IsDetached { // 现在绑定了块
 				// 将游离行绑定到新建的块上
-
-				if val.Block.ID != blockID {
-					// 从其他库拷贝主键值后会出现该情况
-					blockID = val.Block.ID
-					val.BlockID = blockID
-				}
-
-				bindBlockAv(tx, avID, blockID)
+				bindBlockAv(tx, avID, val.Block.ID)
 			}
 		} else {
 			// 之前绑定了块

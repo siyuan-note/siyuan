@@ -120,15 +120,11 @@ func upgradeSpec1(av *AttributeView) {
 			for _, v := range kv.Values {
 				if 0 == v.Block.Created {
 					logging.LogWarnf("block [%s] created time is empty", v.BlockID)
-					if "" == v.Block.ID {
-						v.Block.ID = v.BlockID
-						if "" == v.Block.ID {
-							v.Block.ID = ast.NewNodeID()
-							v.BlockID = v.Block.ID
-						}
+					if "" == v.BlockID {
+						v.BlockID = ast.NewNodeID()
 					}
 
-					createdStr := v.Block.ID[:len("20060102150405")]
+					createdStr := v.BlockID[:len("20060102150405")]
 					created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
 					if nil == parseErr {
 						v.Block.Created = created.UnixMilli()

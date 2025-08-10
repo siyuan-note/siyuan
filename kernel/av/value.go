@@ -374,7 +374,7 @@ func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
 }
 
 type ValueBlock struct {
-	ID      string `json:"id"`
+	ID      string `json:"id"` // 绑定的块 ID，非绑定块时为空
 	Icon    string `json:"icon"`
 	Content string `json:"content"`
 	Created int64  `json:"created"`

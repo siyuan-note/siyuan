@@ -3394,7 +3394,7 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 					continue
 				}
 
-				defBlock := treenode.GetBlockTree(val.BlockID)
+				defBlock := treenode.GetBlockTree(val.Block.ID)
 				if nil == defBlock {
 					continue
 				}

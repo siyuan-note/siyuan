@@ -4270,9 +4270,9 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 					if "" == content {
 						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)
+						updateBlockValueStaticText(tx, node, tree, avID, "")
 					} else {
 						val.Block.Content = content
-						// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
 						updateBlockValueStaticText(tx, node, tree, avID, content)
 					}
 				}
@@ -4463,6 +4463,8 @@ func bindBlockAv0(tx *Transaction, avID string, node *ast.Node, tree *parse.Tree
 }
 
 func updateBlockValueStaticText(tx *Transaction, node *ast.Node, tree *parse.Tree, avID, text string) {
+	// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
+
 	if nil == node {
 		return
 	}

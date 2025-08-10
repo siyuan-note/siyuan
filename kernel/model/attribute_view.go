@@ -4140,8 +4140,10 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 
 	now := time.Now().UnixMilli()
 	oldIsDetached := true
+	var oldBoundBlockID string
 	if nil != blockVal {
 		oldIsDetached = blockVal.IsDetached
+		oldBoundBlockID = blockVal.Block.ID
 	}
 	for _, keyValues := range attrView.KeyValues {
 		if keyID != keyValues.Key.ID {
@@ -4164,7 +4166,6 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 
 	isUpdatingBlockKey := av.KeyTypeBlock == val.Type
-	oldBoundBlockID := val.BlockID
 	var oldRelationBlockIDs []string
 	if av.KeyTypeRelation == val.Type {
 		if nil != val.Relation {
@@ -4257,14 +4258,14 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			} else {
 				// 现在也绑定了块
 
-				if oldBoundBlockID != val.BlockID { // 之前绑定的块和现在绑定的块不一样
+				if oldBoundBlockID != val.Block.ID { // 之前绑定的块和现在绑定的块不一样
 					// 换绑块
 					unbindBlockAv(tx, avID, oldBoundBlockID)
-					bindBlockAv(tx, avID, val.BlockID)
+					bindBlockAv(tx, avID, val.Block.ID)
 					val.Block.Content = util.UnescapeHTML(val.Block.Content)
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
-					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
+					node, tree, _ := getNodeByBlockID(tx, val.Block.ID)
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
 						// 使用动态锚文本

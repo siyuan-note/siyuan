@@ -1289,9 +1289,7 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 			attrViewCache[avID] = attrView
 		}
 
-		// TODO 待测试
-
-		if !attrView.ExistBlock(blockID) {
+		if !attrView.ExistBoundBlock(blockID) {
 			// 比如剪切后粘贴，块 ID 会变，但是属性还在块上，这里做一次数据订正
 			// Auto verify the database name when clicking the block superscript icon https://github.com/siyuan-note/siyuan/issues/10861
 			unbindBlockAv(nil, avID, blockID)

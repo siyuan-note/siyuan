@@ -565,17 +565,19 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 }
 
 func (av *AttributeView) ExistBlock(blockID string) bool {
-	for _, kv := range av.KeyValues {
-		if KeyTypeBlock != kv.Key.Type {
-			continue
+	for _, blockVal := range av.GetBlockKeyValues().Values {
+		if blockVal.BlockID == blockID {
+			return true
 		}
+	}
+	return false
+}
 
-		for _, v := range kv.Values {
-			if v.BlockID == blockID {
-				return true
-			}
+func (av *AttributeView) ExistBoundBlock(nodeID string) bool {
+	for _, blockVal := range av.GetBlockKeyValues().Values {
+		if blockVal.Block.ID == nodeID {
+			return true
 		}
-		return false
 	}
 	return false
 }

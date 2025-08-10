@@ -3390,6 +3390,10 @@ func exportRefTrees(tree *parse.Tree, defBlockIDs *[]string, retTrees, treeCache
 			}
 
 			for _, val := range blockKeyValues.Values {
+				if val.IsDetached {
+					continue
+				}
+
 				defBlock := treenode.GetBlockTree(val.BlockID)
 				if nil == defBlock {
 					continue

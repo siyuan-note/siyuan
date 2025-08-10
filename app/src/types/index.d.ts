@@ -59,7 +59,6 @@ type TOperation =
     | "setAttrViewShowIcon"
     | "setAttrViewWrapField"
     | "setAttrViewColDate"
-    | "unbindAttrViewBlock"
     | "setAttrViewViewDesc"
     | "setAttrViewColDesc"
     | "setAttrViewBlockView"

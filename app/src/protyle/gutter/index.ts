@@ -100,6 +100,12 @@ export class Gutter {
                     return;
                 }
                 const rowElement = avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                if (!rowElement.classList.contains("av__row--select")) {
+                    avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
+                        item.classList.remove("av__row--select");
+                        item.querySelector("use").setAttribute("xlink:href", "#iconUncheck");
+                    });
+                }
                 rowElement.classList.add("av__row--select");
                 rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
                 updateHeader(rowElement as HTMLElement);

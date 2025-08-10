@@ -1115,6 +1115,7 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 type AvSearchResult struct {
 	AvID     string            `json:"avID"`
 	AvName   string            `json:"avName"`
+	ViewName string            `json:"viewName"`
 	BlockID  string            `json:"blockID"`
 	HPath    string            `json:"hPath"`
 	Children []*AvSearchResult `json:"children,omitempty"`
@@ -1134,7 +1135,7 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 	keyword = strings.TrimSpace(keyword)
 	keywords := strings.Fields(keyword)
 
-	var avs []*AvSearchTempResult
+	var avSearchTmpResults []*AvSearchTempResult
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	entries, err := os.ReadDir(avDir)
 	if err != nil {
@@ -1176,32 +1177,32 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()
 				}
-				avs = append(avs, a)
+				avSearchTmpResults = append(avSearchTmpResults, a)
 			}
 		} else {
 			a := &AvSearchTempResult{AvID: id, AvName: name}
 			if nil != info && !info.ModTime().IsZero() {
 				a.AvUpdated = info.ModTime().UnixMilli()
 			}
-			avs = append(avs, a)
+			avSearchTmpResults = append(avSearchTmpResults, a)
 		}
 	}
 
 	if "" == keyword {
-		sort.Slice(avs, func(i, j int) bool { return avs[i].AvUpdated > avs[j].AvUpdated })
+		sort.Slice(avSearchTmpResults, func(i, j int) bool { return avSearchTmpResults[i].AvUpdated > avSearchTmpResults[j].AvUpdated })
 	} else {
-		sort.SliceStable(avs, func(i, j int) bool {
-			if avs[i].Score == avs[j].Score {
-				return avs[i].AvUpdated > avs[j].AvUpdated
+		sort.SliceStable(avSearchTmpResults, func(i, j int) bool {
+			if avSearchTmpResults[i].Score == avSearchTmpResults[j].Score {
+				return avSearchTmpResults[i].AvUpdated > avSearchTmpResults[j].AvUpdated
 			}
-			return avs[i].Score > avs[j].Score
+			return avSearchTmpResults[i].Score > avSearchTmpResults[j].Score
 		})
 	}
-	if 12 <= len(avs) {
-		avs = avs[:12]
+	if 12 <= len(avSearchTmpResults) {
+		avSearchTmpResults = avSearchTmpResults[:12]
 	}
 	var avIDs []string
-	for _, a := range avs {
+	for _, a := range avSearchTmpResults {
 		avIDs = append(avIDs, a.AvID)
 	}
 
@@ -1214,22 +1215,22 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 
 	trees := filesys.LoadTrees(blockIDs)
 	for _, avBlock := range avBlocks {
-		parentResult := buildSearchAttributeViewResult(avs, avBlock.BlockIDs[0], trees, excludeAvIDs)
+		parentResult := buildSearchAttributeViewResult(avSearchTmpResults, avBlock.BlockIDs[0], trees, excludeAvIDs)
+		if nil == parentResult {
+			continue
+		}
 		ret = append(ret, parentResult)
-		if 1 < len(avBlock.BlockIDs) {
-			parentResult.BlockID = "" // 置空表示该结果为父级
-			for _, blockID := range avBlock.BlockIDs {
-				result := buildSearchAttributeViewResult(avs, blockID, trees, excludeAvIDs)
-				if nil != result {
-					parentResult.Children = append(parentResult.Children, result)
-				}
+		for _, blockID := range avBlock.BlockIDs {
+			result := buildSearchAttributeViewResult(avSearchTmpResults, blockID, trees, excludeAvIDs)
+			if nil != result {
+				parentResult.Children = append(parentResult.Children, result)
 			}
 		}
 	}
 	return
 }
 
-func buildSearchAttributeViewResult(avSearchResults []*AvSearchTempResult, blockID string, trees map[string]*parse.Tree, excludeAvIDs []string) (ret *AvSearchResult) {
+func buildSearchAttributeViewResult(avSearchTempResults []*AvSearchTempResult, blockID string, trees map[string]*parse.Tree, excludeAvIDs []string) (ret *AvSearchResult) {
 	tree := trees[blockID]
 	if nil == tree {
 		return
@@ -1246,13 +1247,26 @@ func buildSearchAttributeViewResult(avSearchResults []*AvSearchTempResult, block
 
 	avID := node.AttributeViewID
 	var existAv *AvSearchTempResult
-	for _, av := range avSearchResults {
-		if av.AvID == avID {
-			existAv = av
+	for _, tmpResult := range avSearchTempResults {
+		if tmpResult.AvID == avID {
+			existAv = tmpResult
 			break
 		}
 	}
 	if nil == existAv {
+		return
+	}
+
+	attrView, _ := av.ParseAttributeView(avID)
+	if nil == attrView {
+		return
+	}
+	viewID := node.IALAttr(av.NodeAttrView)
+	if "" == viewID {
+		viewID = attrView.ViewID
+	}
+	view, _ := attrView.GetCurrentView(viewID)
+	if nil == view {
 		return
 	}
 
@@ -1268,10 +1282,11 @@ func buildSearchAttributeViewResult(avSearchResults []*AvSearchTempResult, block
 
 	if !gulu.Str.Contains(avID, excludeAvIDs) {
 		ret = &AvSearchResult{
-			AvID:    avID,
-			AvName:  existAv.AvName,
-			BlockID: blockID,
-			HPath:   hPath,
+			AvID:     avID,
+			AvName:   existAv.AvName,
+			ViewName: view.Name,
+			BlockID:  blockID,
+			HPath:    hPath,
 		}
 	}
 	return

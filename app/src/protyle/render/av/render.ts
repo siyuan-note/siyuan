@@ -726,7 +726,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         }
                         if (operation.srcs.length === 1) {
                             const popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
-                            if (popCellElement) {
+                            if (popCellElement && popCellElement.getAttribute("data-detached") === "true") {
                                 popTextCell(protyle, [popCellElement], "block");
                             }
                         }

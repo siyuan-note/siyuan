@@ -3964,10 +3964,10 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 			if av.KeyTypeBlock == value.Type {
 				value.IsDetached = isDetached
 				if !isDetached {
-					if value.Block.ID != newBlockID {
+					if "" != value.Block.ID && value.Block.ID != newBlockID {
 						unbindBlockAv(tx, avID, value.Block.ID)
-						bindBlockAv(tx, avID, newBlockID)
 					}
+					bindBlockAv(tx, avID, newBlockID)
 
 					value.Block.ID = newBlockID
 					icon, content := getNodeAvBlockText(node)
@@ -3980,21 +3980,6 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 					value.Block.ID = ""
 				}
 			}
-		}
-	}
-
-	replacedRowID := false
-	for _, v := range attrView.Views {
-		for i, itemID := range v.ItemIDs {
-			if itemID == oldBlockID {
-				v.ItemIDs[i] = newBlockID
-				replacedRowID = true
-				break
-			}
-		}
-
-		if !replacedRowID {
-			v.ItemIDs = append(v.ItemIDs, newBlockID)
 		}
 	}
 

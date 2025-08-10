@@ -77,7 +77,7 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	return
 }
 
-func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
+func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
 	if 1 > len(view.Filters) && nil == view.Group {
@@ -85,7 +85,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		return
 	}
 
-	nearItem := getNearItem(attrView, view, groupView, previousBlockID)
+	nearItem := getNearItem(attrView, view, groupView, previousItemID)
 	filterKeyIDs := map[string]bool{}
 	for _, f := range view.Filters {
 		filterKeyIDs[f.Column] = true
@@ -103,7 +103,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		if nil != nearItem {
 			// 存在临近项时从临近项获取新值
 			for _, keyValues := range attrView.KeyValues {
-				newValue := getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
+				newValue := getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
 				ret[keyValues.Key.ID] = newValue
 			}
 		} else { // 不存在临近项时不生成任何新值
@@ -120,10 +120,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		var newValue *av.Value
 		if nil != nearItem {
 			// 存在临近项时优先通过临近项获取新值
-			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingBlockID)
+			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
 		} else {
 			// 不存在临近项时通过过滤条件计算新值
-			newValue = filter.GetAffectValue(keyValues.Key, addingBlockID)
+			newValue = filter.GetAffectValue(keyValues.Key, addingItemID)
 		}
 		if nil != newValue {
 			ret[keyValues.Key.ID] = newValue
@@ -133,7 +133,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	groupKey := view.GetGroupKey(attrView)
 	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
 		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-			newValue := getNewValueByNearItem(nearItem, groupKey, addingBlockID)
+			newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
 				if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
@@ -2710,7 +2710,7 @@ func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) 
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, blockID, groupID, previousBlockID string) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, groupID, previousItemID string) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -2718,6 +2718,11 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		srcID := src["id"].(string)
 		if !ast.IsNodeIDPattern(srcID) {
 			continue
+		}
+
+		srcItemID := ast.NewNodeID()
+		if nil != src["itemID"] {
+			srcItemID = src["itemID"].(string)
 		}
 
 		isDetached := src["isDetached"].(bool)
@@ -2739,26 +2744,31 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, blockID, groupID, previousBlockID, srcID, srcContent, isDetached, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, groupID, previousItemID, srcItemID, srcID, srcContent, isDetached, tree, tx); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, addingBlockID, addingBlockContent string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached bool, tree *parse.Tree, tx *Transaction) (err error) {
 	var node *ast.Node
 	if !isDetached {
-		node = treenode.GetNodeInTree(tree, addingBlockID)
+		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
 		if nil == node {
 			err = ErrBlockNotFound
 			return
 		}
 	} else {
-		if "" == addingBlockID {
-			addingBlockID = ast.NewNodeID()
-			logging.LogWarnf("detached block id is empty, generate a new one [%s]", addingBlockID)
+		if "" == addingItemID {
+			addingItemID = ast.NewNodeID()
+			logging.LogWarnf("detached block id is empty, generate a new one [%s]", addingItemID)
 		}
+	}
+
+	if addingItemID == addingBoundBlockID {
+		addingItemID = ast.NewNodeID()
+		logging.LogWarnf("the adding item ID is the same as the bound block ID [%s], generate a new one item id [%s]", addingBoundBlockID, addingItemID)
 	}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -2775,7 +2785,7 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	// 检查是否重复添加相同的块
 	blockValues := attrView.GetBlockKeyValues()
 	for _, blockValue := range blockValues.Values {
-		if blockValue.Block.ID == addingBlockID {
+		if blockValue.Block.ID == addingBoundBlockID {
 			if !isDetached {
 				// 重复绑定一下，比如剪切数据库块、取消绑定块后再次添加的场景需要
 				bindBlockAv0(tx, avID, node, tree)
@@ -2792,21 +2802,21 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 	blockValue := &av.Value{
 		ID:         ast.NewNodeID(),
 		KeyID:      blockValues.Key.ID,
-		BlockID:    addingBlockID,
+		BlockID:    addingItemID,
 		Type:       av.KeyTypeBlock,
 		IsDetached: isDetached,
 		CreatedAt:  now,
 		UpdatedAt:  now,
 		Block:      &av.ValueBlock{Icon: blockIcon, Content: addingBlockContent, Created: now, Updated: now}}
 	if !isDetached {
-		blockValue.Block.ID = addingBlockID
+		blockValue.Block.ID = addingBoundBlockID
 	}
 
 	blockValues.Values = append(blockValues.Values, blockValue)
 
-	view, err := getAttrViewViewByBlockID(attrView, blockID)
+	view, err := getAttrViewViewByBlockID(attrView, dbBlockID)
 	if nil != err {
-		logging.LogErrorf("get view by block ID [%s] failed: %s", blockID, err)
+		logging.LogErrorf("get view by block ID [%s] failed: %s", dbBlockID, err)
 		return
 	}
 
@@ -2815,14 +2825,14 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 		groupView = view.GetGroupByID(groupID)
 	}
 
-	fillDefaultValue(attrView, view, groupView, previousBlockID, addingBlockID)
+	fillDefaultValue(attrView, view, groupView, previousItemID, addingItemID)
 
 	// 处理日期字段默认填充当前创建时间
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
 			dateVal := &av.Value{
-				ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingBlockID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
+				ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
 				Date: &av.ValueDate{Content: now, IsNotEmpty: true},
 			}
 			keyValues.Values = append(keyValues.Values, dateVal)
@@ -2835,20 +2845,20 @@ func addAttributeViewBlock(now int64, avID, blockID, groupID, previousBlockID, a
 
 	// 在所有视图上添加项目
 	for _, v := range attrView.Views {
-		if "" != previousBlockID {
+		if "" != previousItemID {
 			changed := false
 			for i, id := range v.ItemIDs {
-				if id == previousBlockID {
-					v.ItemIDs = append(v.ItemIDs[:i+1], append([]string{addingBlockID}, v.ItemIDs[i+1:]...)...)
+				if id == previousItemID {
+					v.ItemIDs = append(v.ItemIDs[:i+1], append([]string{addingItemID}, v.ItemIDs[i+1:]...)...)
 					changed = true
 					break
 				}
 			}
 			if !changed {
-				v.ItemIDs = append(v.ItemIDs, addingBlockID)
+				v.ItemIDs = append(v.ItemIDs, addingItemID)
 			}
 		} else {
-			v.ItemIDs = append([]string{addingBlockID}, v.ItemIDs...)
+			v.ItemIDs = append([]string{addingItemID}, v.ItemIDs...)
 		}
 	}
 

@@ -4227,20 +4227,12 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.BlockID)
-					updateStaticText := true
 					_, blockText := getNodeAvBlockText(node)
 					if "" == content {
 						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)
 					} else {
-						if blockText == content {
-							updateStaticText = false
-						} else {
-							val.Block.Content = content
-						}
-					}
-
-					if updateStaticText {
+						val.Block.Content = content
 						// 设置静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
 						updateBlockValueStaticText(tx, node, tree, avID, content)
 					}

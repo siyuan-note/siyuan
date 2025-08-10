@@ -1112,27 +1112,29 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 	return
 }
 
-type SearchAttributeViewResult struct {
-	AvID    string `json:"avID"`
-	AvName  string `json:"avName"`
-	BlockID string `json:"blockID"`
-	HPath   string `json:"hPath"`
+type AvSearchResult struct {
+	AvID     string            `json:"avID"`
+	AvName   string            `json:"avName"`
+	BlockID  string            `json:"blockID"`
+	HPath    string            `json:"hPath"`
+	Children []*AvSearchResult `json:"children,omitempty"`
 }
 
-func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAttributeViewResult) {
+type AvSearchTempResult struct {
+	AvID      string
+	AvName    string
+	AvUpdated int64
+	Score     float64
+}
+
+func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearchResult) {
 	waitForSyncingStorages()
 
-	ret = []*SearchAttributeViewResult{}
+	ret = []*AvSearchResult{}
 	keyword = strings.TrimSpace(keyword)
 	keywords := strings.Fields(keyword)
 
-	type result struct {
-		AvID      string
-		AvName    string
-		AvUpdated int64
-		Score     float64
-	}
-	var avs []*result
+	var avs []*AvSearchTempResult
 	avDir := filepath.Join(util.DataDir, "storage", "av")
 	entries, err := os.ReadDir(avDir)
 	if err != nil {
@@ -1170,14 +1172,14 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 			}
 
 			if hit {
-				a := &result{AvID: id, AvName: name, Score: score}
+				a := &AvSearchTempResult{AvID: id, AvName: name, Score: score}
 				if nil != info && !info.ModTime().IsZero() {
 					a.AvUpdated = info.ModTime().UnixMilli()
 				}
 				avs = append(avs, a)
 			}
 		} else {
-			a := &result{AvID: id, AvName: name}
+			a := &AvSearchTempResult{AvID: id, AvName: name}
 			if nil != info && !info.ModTime().IsZero() {
 				a.AvUpdated = info.ModTime().UnixMilli()
 			}
@@ -1211,50 +1213,65 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*SearchAt
 	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
 
 	trees := filesys.LoadTrees(blockIDs)
-	for _, blockID := range blockIDs {
-		tree := trees[blockID]
-		if nil == tree {
-			continue
-		}
-
-		node := treenode.GetNodeInTree(tree, blockID)
-		if nil == node {
-			continue
-		}
-
-		if "" == node.AttributeViewID {
-			continue
-		}
-
-		avID := node.AttributeViewID
-		var existAv *result
-		for _, av := range avs {
-			if av.AvID == avID {
-				existAv = av
-				break
+	for _, avBlock := range avBlocks {
+		parentResult := buildSearchAttributeViewResult(avs, avBlock.BlockIDs[0], trees, excludeAvIDs)
+		ret = append(ret, parentResult)
+		if 1 < len(avBlock.BlockIDs) {
+			parentResult.BlockID = "" // 置空表示该结果为父级
+			for _, blockID := range avBlock.BlockIDs {
+				result := buildSearchAttributeViewResult(avs, blockID, trees, excludeAvIDs)
+				if nil != result {
+					parentResult.Children = append(parentResult.Children, result)
+				}
 			}
 		}
-		if nil == existAv {
-			continue
-		}
+	}
+	return
+}
 
-		var hPath string
-		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
-		if nil != baseBlock {
-			hPath = baseBlock.HPath
-		}
-		box := Conf.Box(node.Box)
-		if nil != box {
-			hPath = box.Name + hPath
-		}
+func buildSearchAttributeViewResult(avSearchResults []*AvSearchTempResult, blockID string, trees map[string]*parse.Tree, excludeAvIDs []string) (ret *AvSearchResult) {
+	tree := trees[blockID]
+	if nil == tree {
+		return
+	}
 
-		if !gulu.Str.Contains(avID, excludeAvIDs) {
-			ret = append(ret, &SearchAttributeViewResult{
-				AvID:    avID,
-				AvName:  existAv.AvName,
-				BlockID: blockID,
-				HPath:   hPath,
-			})
+	node := treenode.GetNodeInTree(tree, blockID)
+	if nil == node {
+		return
+	}
+
+	if "" == node.AttributeViewID {
+		return
+	}
+
+	avID := node.AttributeViewID
+	var existAv *AvSearchTempResult
+	for _, av := range avSearchResults {
+		if av.AvID == avID {
+			existAv = av
+			break
+		}
+	}
+	if nil == existAv {
+		return
+	}
+
+	var hPath string
+	baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
+	if nil != baseBlock {
+		hPath = baseBlock.HPath
+	}
+	box := Conf.Box(node.Box)
+	if nil != box {
+		hPath = box.Name + hPath
+	}
+
+	if !gulu.Str.Contains(avID, excludeAvIDs) {
+		ret = &AvSearchResult{
+			AvID:    avID,
+			AvName:  existAv.AvName,
+			BlockID: blockID,
+			HPath:   hPath,
 		}
 	}
 	return

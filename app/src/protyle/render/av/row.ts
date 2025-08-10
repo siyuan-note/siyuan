@@ -360,6 +360,7 @@ export const deleteRow = (blockElement: HTMLElement, protyle: IProtyle) => {
             avID,
             previousID: item.previousElementSibling?.getAttribute("data-id") || "",
             srcs: [{
+                itemID: Lute.NewNodeID(),
                 id: item.getAttribute("data-id"),
                 isDetached: blockValue.isDetached,
                 content: blockValue.block.content
@@ -405,6 +406,7 @@ export const insertRows = (options: {
         const newNodeID = Lute.NewNodeID();
         srcIDs.push(newNodeID);
         srcs.push({
+            itemID: Lute.NewNodeID(),
             id: newNodeID,
             isDetached: true,
             content: "",

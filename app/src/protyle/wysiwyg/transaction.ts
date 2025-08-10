@@ -854,7 +854,7 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         }
         return;
     }
-    if (["addAttrViewCol", "insertAttrViewBlock", "updateAttrViewCol", "updateAttrViewColOptions",
+    if (["addAttrViewCol", "updateAttrViewCol", "updateAttrViewColOptions",
         "updateAttrViewColOption", "updateAttrViewCell", "sortAttrViewRow", "sortAttrViewCol", "setAttrViewColHidden",
         "setAttrViewColWrap", "setAttrViewColWidth", "removeAttrViewColOption", "setAttrViewName", "setAttrViewFilters",
         "setAttrViewSorts", "setAttrViewColCalc", "removeAttrViewCol", "updateAttrViewColNumberFormat", "removeAttrViewBlock",

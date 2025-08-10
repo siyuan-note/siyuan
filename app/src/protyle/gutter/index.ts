@@ -281,6 +281,7 @@ export class Gutter {
                         avID,
                         previousID,
                         srcs: [{
+                            itemID: Lute.NewNodeID(),
                             id: srcIDs[0],
                             isDetached: true,
                             content: ""

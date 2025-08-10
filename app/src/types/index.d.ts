@@ -556,6 +556,7 @@ interface IOperation {
 }
 
 interface IOperationSrcs {
+    itemID: string,
     id: string,
     content?: string,
     isDetached: boolean

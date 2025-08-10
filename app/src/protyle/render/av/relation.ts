@@ -425,6 +425,7 @@ draggable="true">${genSelectItemHTML("selected", targetId, !target.querySelector
                 action: "insertAttrViewBlock",
                 avID: menuElement.firstElementChild.getAttribute("data-av-id"),
                 srcs: [{
+                    itemID: Lute.NewNodeID(),
                     id: rowId,
                     isDetached: true,
                     content

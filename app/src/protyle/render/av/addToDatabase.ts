@@ -10,6 +10,7 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
         const id = item.getAttribute("data-node-id");
         if (id) {
             srcs.push({
+                itemID: Lute.NewNodeID(),
                 id,
                 isDetached: false
             });
@@ -40,6 +41,7 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
                 action: "insertAttrViewBlock",
                 avID,
                 srcs: [{
+                    itemID: Lute.NewNodeID(),
                     id: protyle.block.rootID,
                     isDetached: false
                 }],
@@ -81,6 +83,7 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             ids.forEach(item => {
                 srcIDs.push(item);
                 srcs.push({
+                    itemID: Lute.NewNodeID(),
                     id: item,
                     isDetached: false
                 });

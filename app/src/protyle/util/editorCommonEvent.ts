@@ -1023,6 +1023,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     const id = item.getAttribute("data-node-id");
                     sourceIds.push(id);
                     srcs.push({
+                        itemID: Lute.NewNodeID(),
                         id,
                         isDetached: false,
                     });
@@ -1320,6 +1321,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const groupID = bodyElement && bodyElement.getAttribute("data-group-id");
                         ids.forEach(id => {
                             srcs.push({
+                                itemID: Lute.NewNodeID(),
                                 id,
                                 isDetached: false,
                             });

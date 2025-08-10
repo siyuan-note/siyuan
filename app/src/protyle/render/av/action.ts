@@ -571,6 +571,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         const rowId = item.getAttribute("data-id");
                         const blockValue = genCellValueByElement("block", item.querySelector('.av__cell[data-dtype="block"]'));
                         srcs.push({
+                            itemID: Lute.NewNodeID(),
                             content: blockValue.block.content,
                             id: rowId,
                             isDetached: blockValue.isDetached,

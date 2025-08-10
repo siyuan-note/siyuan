@@ -420,9 +420,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		return err
 	}
 
-	var oldHideEmpty, firstInit bool
+	var oldHideEmpty, firstInit, changeGroupField bool
 	if nil != view.Group {
 		oldHideEmpty = view.Group.HideEmpty
+		changeGroupField = group.Field != view.Group.Field
 	} else {
 		firstInit = true
 	}
@@ -449,7 +450,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		}
 	}
 
-	if firstInit {
+	if firstInit || changeGroupField {
 		if groupKey := view.GetGroupKey(attrView); nil != groupKey && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
 			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为手动排序，并按选项顺序排序分组视图 https://github.com/siyuan-note/siyuan/issues/15491
 			view.Group.Order = av.GroupOrderMan

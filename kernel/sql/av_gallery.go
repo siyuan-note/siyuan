@@ -136,11 +136,11 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 			break
 		}
 
-		tree := trees[blockValue.BlockID]
+		tree := trees[blockValue.Block.ID]
 		if nil == tree {
 			break
 		}
-		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		node := treenode.GetNodeInTree(tree, blockValue.Block.ID)
 		if nil == node {
 			break
 		}
@@ -199,11 +199,11 @@ func fillAttributeViewGalleryCardCover(attrView *av.AttributeView, view *av.View
 			break
 		}
 
-		tree := trees[blockValue.BlockID]
+		tree := trees[blockValue.Block.ID]
 		if nil == tree {
 			break
 		}
-		node := treenode.GetNodeInTree(tree, blockValue.BlockID)
+		node := treenode.GetNodeInTree(tree, blockValue.Block.ID)
 		if nil == node {
 			break
 		}

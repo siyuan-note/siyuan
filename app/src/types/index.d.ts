@@ -964,6 +964,7 @@ interface IAVCell {
 interface IAVCellValue {
     keyID?: string,
     id?: string,
+    blockID?: string // 为 row id
     type: TAVCol,
     isDetached?: boolean,
     text?: {

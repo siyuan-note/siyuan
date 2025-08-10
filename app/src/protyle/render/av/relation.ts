@@ -255,8 +255,8 @@ class="b3-menu__item ariaLabel${item.textContent.indexOf(keyword) > -1 ? "" : " 
 draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled))}</button>`;
         });
         cells.forEach((item) => {
-            if (!hasIds.includes(item.block.id)) {
-                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
+            if (!hasIds.includes(item.blockID)) {
+                html += genSelectItemHTML("unselect", item.blockID, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
             }
         });
         menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}
@@ -288,8 +288,8 @@ export const bindRelationEvent = (options: {
 draggable="true">${genSelectItemHTML("selected", item.dataset.id, !item.classList.contains("av__celltext--ref"), Lute.EscapeHTMLStr(item.textContent || window.siyuan.languages.untitled))}</button>`;
         });
         cells.forEach((item) => {
-            if (!hasIds.includes(item.block.id)) {
-                html += genSelectItemHTML("unselect", item.block.id, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
+            if (!hasIds.includes(item.blockID)) {
+                html += genSelectItemHTML("unselect", item.blockID, item.isDetached, Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled));
             }
         });
         options.menuElement.querySelector(".b3-menu__items").innerHTML = `${selectHTML}

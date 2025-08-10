@@ -23,7 +23,7 @@ import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getSearch} from "../../../util/functions";
+import {getSearch, isMobile} from "../../../util/functions";
 /// #if !MOBILE
 import {openAsset} from "../../../editor/util";
 /// #endif
@@ -145,9 +145,9 @@ export const openMenuPanel = (options: {
             }
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex}">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu">${html}</div>
+    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;

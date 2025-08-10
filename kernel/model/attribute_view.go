@@ -850,7 +850,7 @@ func AppendAttributeViewDetachedBlocksWithValues(avID string, blocksValues [][]*
 			if av.KeyTypeBlock == v.Type {
 				v.Block.Created = now
 				v.Block.Updated = now
-				v.Block.ID = "" // 非绑定块 ID 置空
+				v.Block.ID = ""
 			}
 			v.IsDetached = true
 			v.CreatedAt = now
@@ -1284,16 +1284,12 @@ func GetBlockAttributeViewKeys(blockID string) (ret []*BlockAttributeViewKeys) {
 		if nil == attrView {
 			attrView, _ = av.ParseAttributeView(avID)
 			if nil == attrView {
-				unbindBlockAv(nil, avID, blockID)
 				return
 			}
 			attrViewCache[avID] = attrView
 		}
 
-		if 1 > len(attrView.Views) {
-			unbindBlockAv(nil, avID, blockID)
-			return
-		}
+		// TODO 待测试
 
 		if !attrView.ExistBlock(blockID) {
 			// 比如剪切后粘贴，块 ID 会变，但是属性还在块上，这里做一次数据订正
@@ -1825,9 +1821,8 @@ func unbindAttributeViewBlock(operation *Operation, tx *Transaction) (err error)
 			}
 
 			if av.KeyTypeBlock == value.Type {
-				unbindBlockAv(tx, operation.AvID, value.BlockID)
+				unbindBlockAv(tx, operation.AvID, value.Block.ID)
 			}
-			value.BlockID = operation.NextID
 			value.IsDetached = true
 			if nil != value.Block {
 				value.Block.ID = ""
@@ -4029,7 +4024,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 	// 检查是否已经存在绑定块，如果存在的话则重新绑定
 	for _, keyValues := range attrView.KeyValues {
 		for _, value := range keyValues.Values {
-			if av.KeyTypeBlock == value.Type && nil != value.Block && value.BlockID == newBlockID {
+			if av.KeyTypeBlock == value.Type && nil != value.Block && value.Block.ID == newBlockID {
 				if !isDetached {
 					bindBlockAv0(tx, avID, node, tree)
 					value.IsDetached = false
@@ -4063,12 +4058,11 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 				continue
 			}
 
-			if av.KeyTypeBlock == value.Type && value.BlockID != newBlockID {
+			if av.KeyTypeBlock == value.Type && value.Block.ID != newBlockID {
 				// 换绑
-				unbindBlockAv(tx, avID, value.BlockID)
+				unbindBlockAv(tx, avID, value.Block.ID)
 			}
 
-			value.BlockID = newBlockID
 			if av.KeyTypeBlock == value.Type && nil != value.Block {
 				value.IsDetached = isDetached
 				if !isDetached {
@@ -4462,8 +4456,8 @@ func regenAttrViewGroups(attrView *av.AttributeView, keyID string) {
 	}
 }
 
-func unbindBlockAv(tx *Transaction, avID, blockID string) {
-	node, tree, err := getNodeByBlockID(tx, blockID)
+func unbindBlockAv(tx *Transaction, avID, nodeID string) {
+	node, tree, err := getNodeByBlockID(tx, nodeID)
 	if err != nil {
 		return
 	}
@@ -4492,7 +4486,7 @@ func unbindBlockAv(tx *Transaction, avID, blockID string) {
 		err = setNodeAttrs(node, tree, attrs)
 	}
 	if err != nil {
-		logging.LogWarnf("set node [%s] attrs failed: %s", blockID, err)
+		logging.LogWarnf("set node [%s] attrs failed: %s", nodeID, err)
 		return
 	}
 	return

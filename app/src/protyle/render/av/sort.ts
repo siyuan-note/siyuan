@@ -117,6 +117,7 @@ export const getSortsHTML = (columns: IAVColumn[], sorts: IAVSort[]) => {
         <option value="ASC" ${item.order === "ASC" ? "selected" : ""}>${window.siyuan.languages.asc}</option>
         <option value="DESC" ${item.order === "DESC" ? "selected" : ""}>${window.siyuan.languages.desc}</option>
     </select>
+    <span class="fn__flex-1"></span>
     <svg class="b3-menu__action" data-type="removeSort"><use xlink:href="#iconTrashcan"></use></svg>
 </button>`;
     });

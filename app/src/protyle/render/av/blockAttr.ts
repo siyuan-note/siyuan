@@ -189,7 +189,7 @@ export const renderAVAttribute = (element: HTMLElement, id: string, protyle: IPr
         <span class="fn__ellipsis">${table.avName || window.siyuan.languages.database}</span>
     </div>
     <div class="fn__flex-1"></div>
-    <span data-type="remove" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
+    <span data-type="remove" data-row-id="${table.keyValues && table.keyValues[0].values[0].blockID}" class="block__icon block__icon--warning block__icon--show b3-tooltips__w b3-tooltips" aria-label="${window.siyuan.languages.removeAV}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
 </div>`;
             table.keyValues?.forEach(item => {
                 innerHTML += `<div class="block__icons av__row" data-id="${id}" data-col-id="${item.key.id}">
@@ -359,11 +359,11 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                     if (blockElement) {
                         transaction(protyle, [{
                             action: "removeAttrViewBlock",
-                            srcIDs: [id],
+                            srcIDs: [removeElement.dataset.rowId],
                             avID: blockElement.dataset.avId,
                         }, {
                             action: "doUpdateUpdated",
-                            id,
+                            id: removeElement.dataset.rowId,
                             data: dayjs().format("YYYYMMDDHHmmss"),
                         }]);
                         blockElement.remove();

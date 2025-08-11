@@ -108,7 +108,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         const contents: IAVCellValue[] = [];
         Array.from(cellElement.querySelectorAll(".av__cell--relation")).forEach((relationItem: HTMLElement) => {
             const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            blockIDs.push(item.dataset.id);
+            blockIDs.push(item.dataset.rowId);
             contents.push({
                 isDetached: !item.classList.contains("av__celltext--ref"),
                 block: {
@@ -204,7 +204,7 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
     } else if (colType === "relation") {
         if (value.type === "block") {
             newValue.relation = {
-                blockIDs: [value.block.id],
+                blockIDs: [value.blockID],
                 contents: [value]
             };
         } else {
@@ -989,13 +989,14 @@ export const renderCell = (cellValue: IAVCellValue, rowIndex = 0, showIcon = tru
             text = text.substring(0, text.length - 2);
         }
     } else if (cellValue.type === "relation") {
-        cellValue?.relation?.contents?.forEach((item) => {
+        cellValue?.relation?.contents?.forEach((item, index) => {
             if (item && item.block) {
+                const rowID = cellValue.relation.blockIDs[index];
                 if (item?.isDetached) {
-                    text += `<span class="av__cell--relation"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}">➖</span><span class="av__celltext" data-id="${item.block?.id}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    text += `<span class="av__cell--relation"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}">➖</span><span class="av__celltext" data-row-id="${rowID}">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                 } else {
                     // data-block-id 用于更新 emoji
-                    text += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                    text += `<span class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji${showIcon ? "" : " fn__none"}" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-row-id="${rowID}" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                 }
             }
         });

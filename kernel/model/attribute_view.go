@@ -1742,11 +1742,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
 			}
 		}
+		v.GroupSort = -1
 		view.Groups = append(view.Groups, v)
 	}
 
 	view.GroupCreated = time.Now().UnixMilli()
-
 	setAttrViewGroupStates(view, groupStates)
 }
 
@@ -1783,6 +1783,26 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
 		}
+	}
+
+	defaultGroup := view.GetGroupByGroupValue(groupValueDefault)
+	if nil != defaultGroup {
+		if -1 == defaultGroup.GroupSort {
+			view.RemoveGroupByID(defaultGroup.ID)
+		} else {
+			defaultGroup = nil
+		}
+	}
+
+	for i, groupView := range view.Groups {
+		if i != groupView.GroupSort && -1 == groupView.GroupSort {
+			groupView.GroupSort = i
+		}
+	}
+
+	if nil != defaultGroup {
+		view.Groups = append(view.Groups, defaultGroup)
+		defaultGroup.GroupSort = len(view.Groups) - 1
 	}
 }
 

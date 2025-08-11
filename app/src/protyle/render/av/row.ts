@@ -3,7 +3,7 @@ import {focusBlock} from "../../util/selection";
 import {Menu} from "../../../plugin/Menu";
 import {transaction} from "../../wysiwyg/transaction";
 import {
-    addDragFill, genCellValue,
+    genCellValue,
     genCellValueByElement,
     getTypeByCellElement,
     renderCell,

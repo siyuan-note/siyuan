@@ -1280,6 +1280,11 @@ func buildSearchAttributeViewResult(avSearchTempResults []*AvSearchTempResult, b
 		hPath = box.Name + hPath
 	}
 
+	name := existAv.AvName
+	if "" == name {
+		name = Conf.language(267)
+	}
+
 	if !gulu.Str.Contains(avID, excludeAvIDs) {
 		ret = &AvSearchResult{
 			AvID:     avID,

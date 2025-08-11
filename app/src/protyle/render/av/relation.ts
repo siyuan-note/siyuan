@@ -28,7 +28,7 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
     <div class="b3-list-item--two fn__flex-1">
         <div class="b3-list-item__first">
-            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages.title)}</span>
+            <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>
         </div>
         <div class="b3-list-item__meta b3-list-item__showall">${escapeGreat(item.hPath)}</div>
     </div>

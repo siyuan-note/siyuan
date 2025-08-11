@@ -1644,6 +1644,7 @@
     "263": "Próximos %d dias",
     "264": "O campo [%s] está vazio",
     "265": "Fora do intervalo",
-    "266": "Tesseract OCR não está instalado ou configurado, consulte o Guia do Usuário - Seção de Arquivos de Recursos para configuração"
+    "266": "Tesseract OCR não está instalado ou configurado, consulte o Guia do Usuário - Seção de Arquivos de Recursos para configuração",
+    "267": "Banco de dados sem nome"
   }
 }

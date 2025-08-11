@@ -1644,6 +1644,7 @@
     "263": "Nächste %d Tage",
     "264": "Das Feld [%s] ist leer",
     "265": "Außerhalb des Bereichs",
-    "266": "Tesseract OCR ist nicht installiert oder konfiguriert, bitte lesen Sie das Benutzerhandbuch - Abschnitt Ressourcen-Dateien zur Konfiguration"
+    "266": "Tesseract OCR ist nicht installiert oder konfiguriert, bitte lesen Sie das Benutzerhandbuch - Abschnitt Ressourcen-Dateien zur Konfiguration",
+    "267": "Unbenannte Datenbank"
   }
 }

@@ -1493,12 +1493,14 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			switch kv.Key.Type {
 			case av.KeyTypeTemplate:
 				if 0 < len(kv.Values) {
-					ial := map[string]string{}
+					var ial map[string]string
 					block := av.GetKeyBlockValue(keyValues)
 					if nil != block && !block.IsDetached {
 						ial = sql.GetBlockAttrs(block.BlockID)
 					}
-
+					if nil == ial {
+						ial = map[string]string{}
+					}
 					if nil == kv.Values[0].Template {
 						kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, nodeID, kv.Key.Type)
 					}

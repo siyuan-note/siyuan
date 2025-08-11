@@ -488,10 +488,13 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, collection av.C
 			switch value.Type {
 			case av.KeyTypeTemplate: // 渲染模板字段
 				keyValues := items[itemID]
-				ial := map[string]string{}
+				var ial map[string]string
 				blockVal := item.GetBlockValue()
 				if nil != blockVal {
 					ial = ials[blockVal.Block.ID]
+				}
+				if nil == ial {
+					ial = map[string]string{}
 				}
 				content, renderErr := RenderTemplateField(ial, keyValues, value.Template.Content)
 				value.Template.Content = content

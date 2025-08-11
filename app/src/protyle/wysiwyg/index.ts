@@ -728,7 +728,7 @@ export class WYSIWYG {
                     return;
                 }
                 const originData: { [key: string]: IAVCellValue[] } = {};
-                let lastOriginCellElement;
+                let lastOriginCellElement: HTMLElement;
                 const originCellIds: string[] = [];
                 nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     const rowElement = hasClosestByClassName(item, "av__row");
@@ -783,7 +783,7 @@ export class WYSIWYG {
                     documentSelf.onselectstart = null;
                     documentSelf.onselect = null;
                     if (lastCellElement) {
-                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds);
+                        dragFillCellsValue(protyle, nodeElement, originData, originCellIds, lastOriginCellElement);
                         const allActiveCellsElement = nodeElement.querySelectorAll(".av__cell--active");
                         addDragFill(allActiveCellsElement[allActiveCellsElement.length - 1]);
                     }

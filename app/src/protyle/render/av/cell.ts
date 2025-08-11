@@ -108,7 +108,7 @@ export const genCellValueByElement = (colType: TAVCol, cellElement: HTMLElement)
         const contents: IAVCellValue[] = [];
         Array.from(cellElement.querySelectorAll(".av__cell--relation")).forEach((relationItem: HTMLElement) => {
             const item = relationItem.querySelector(".av__celltext") as HTMLElement;
-            blockIDs.push(item.dataset.rowId);
+            blockIDs.push(relationItem.dataset.rowId);
             contents.push({
                 isDetached: !item.classList.contains("av__celltext--ref"),
                 block: {
@@ -1102,7 +1102,7 @@ export const getPositionByCellElement = (cellElement: HTMLElement) => {
 
 export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, originData: {
     [key: string]: IAVCellValue[]
-}, originCellIds: string[]) => {
+}, originCellIds: string[], activeElement: Element) => {
     nodeElement.querySelector(".av__drag-fill")?.remove();
     const newData: { [key: string]: Array<IAVCellValue & { colId?: string, element?: HTMLElement }> } = {};
     nodeElement.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
@@ -1128,6 +1128,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
     const undoOperations: IOperation[] = [];
     const avID = nodeElement.dataset.avId;
     const originKeys = Object.keys(originData);
+    const showIcon = activeElement.querySelector(".b3-menu__avemoji") ? true : false;
     Object.keys(newData).forEach((rowID, index) => {
         newData[rowID].forEach((item, cellIndex) => {
             if (["rollup", "template", "created", "updated"].includes(item.type) ||
@@ -1150,8 +1151,7 @@ export const dragFillCellsValue = (protyle: IProtyle, nodeElement: HTMLElement, 
                 rowID,
                 data
             });
-            const iconElement = item.element.querySelector(".b3-menu__avemoji");
-            item.element.innerHTML = renderCell(data, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
+            item.element.innerHTML = renderCell(data, 0, showIcon);
             renderCellAttr(item.element, data);
             delete item.colId;
             delete item.element;

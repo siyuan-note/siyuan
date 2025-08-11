@@ -4611,6 +4611,33 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 		break
 	}
 
+	// 如果存在选项对应的过滤条件，则删除过滤条件中设置的选项值 https://github.com/siyuan-note/siyuan/issues/15536
+	for _, view := range attrView.Views {
+		for _, filter := range view.Filters {
+			if filter.Column != operation.ID {
+				continue
+			}
+
+			if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+				for i, opt := range filter.Value.MSelect {
+					if optName == opt.Content {
+						filter.Value.MSelect = append(filter.Value.MSelect[:i], filter.Value.MSelect[i+1:]...)
+						break
+					}
+				}
+				if 1 > len(filter.Value.MSelect) {
+					// 如果删除后选项值为空，则删除过滤条件
+					for i, f := range view.Filters {
+						if f.Column == operation.ID && f.Value == filter.Value {
+							view.Filters = append(view.Filters[:i], view.Filters[i+1:]...)
+							break
+						}
+					}
+				}
+			}
+		}
+	}
+
 	regenAttrViewGroups(attrView, operation.ID)
 	err = av.SaveAttributeView(attrView)
 	return
@@ -4710,7 +4737,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		break
 	}
 
-	// 如果存在选项对应的过滤器，需要更新过滤器中设置的选项值
+	// 如果存在选项对应的过滤条件，需要更新过滤条件中设置的选项值
 	// Database select field filters follow option editing changes https://github.com/siyuan-note/siyuan/issues/10881
 	for _, view := range attrView.Views {
 		for _, filter := range view.Filters {

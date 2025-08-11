@@ -1176,6 +1176,10 @@ export const addDragFill = (cellElement: Element) => {
     }
     cellElement.classList.add("av__cell--active");
     if (!cellElement.querySelector(".av__drag-fill")) {
+        const cellType = cellElement.getAttribute("data-dtype") as TAVCol;
+        if (["template", "rollup", "lineNumber", "created", "updated"].includes(cellType)) {
+            return;
+        }
         cellElement.insertAdjacentHTML("beforeend", `<div aria-label="${window.siyuan.languages.dragFill}" class="av__drag-fill ariaLabel"></div>`);
     }
 };

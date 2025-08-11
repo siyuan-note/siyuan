@@ -417,7 +417,7 @@ export const openMenuPanel = (options: {
                 const contents: IAVCellValue[] = [];
                 targetElement.parentElement.querySelectorAll(".fn__grab").forEach(item => {
                     const dateElement = item.nextElementSibling as HTMLElement;
-                    blockIDs.push(dateElement.dataset.id);
+                    blockIDs.push(dateElement.parentElement.dataset.rowId);
                     contents.push({
                         isDetached: !dateElement.style.color,
                         type: "block",

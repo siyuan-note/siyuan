@@ -743,7 +743,7 @@ ${html}
     <svg class="b3-menu__icon"><use xlink:href="#iconAdd"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.addFilter}</span>
 </button>
-<button class="b3-menu__item${html ? "" : " fn__none"}" data-type="removeFilters">
+<button class="b3-menu__item b3-menu__item--warning${html ? "" : " fn__none"}" data-type="removeFilters">
     <svg class="b3-menu__icon"><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.removeFilters}</span>
 </button>

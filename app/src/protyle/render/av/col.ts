@@ -200,7 +200,7 @@ export const getEditHTML = (options: {
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconCopy"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.duplicate}</span>
 </button>
-<button class="b3-menu__item" data-type="removeCol">
+<button class="b3-menu__item  b3-menu__item--warning" data-type="removeCol">
     <svg class="b3-menu__icon" style=""><use xlink:href="#iconTrashcan"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.delete}</span>
 </button>`;

@@ -4229,6 +4229,19 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		}
 	} else if av.KeyTypeSelect == val.Type || av.KeyTypeMSelect == val.Type {
 		if nil != key && 0 < len(val.MSelect) {
+			var tmp []*av.ValueSelect
+			// 移除空选项 https://github.com/siyuan-note/siyuan/issues/15533
+			for _, v := range val.MSelect {
+				if "" != v.Content {
+					tmp = append(tmp, v)
+				}
+			}
+			val.MSelect = tmp
+
+			if 1 > len(val.MSelect) {
+				return
+			}
+
 			// The selection options are inconsistent after pasting data into the database https://github.com/siyuan-note/siyuan/issues/11409
 			for _, valOpt := range val.MSelect {
 				if opt := key.GetOption(valOpt.Content); nil == opt {
@@ -4548,6 +4561,18 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 
 	options := []*av.SelectOption{}
 	if err = gulu.JSON.UnmarshalJSON(jsonData, &options); err != nil {
+		return
+	}
+
+	// 移除空选项 https://github.com/siyuan-note/siyuan/issues/15533
+	var tmp []*av.SelectOption
+	for _, opt := range options {
+		if "" != opt.Name {
+			tmp = append(tmp, opt)
+		}
+	}
+	options = tmp
+	if 1 > len(options) {
 		return
 	}
 

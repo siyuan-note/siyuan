@@ -29,7 +29,7 @@ import (
 func StartCron() {
 	go every(100*time.Millisecond, task.ExecTaskJob)
 	go every(100*time.Millisecond, task.ExecAsyncTaskJob)
-	go every(5*time.Second, task.StatusJob)
+	go every(7*time.Second, task.StatusJob)
 	go every(5*time.Second, model.SyncDataJob)
 	go every(2*time.Hour, model.StatJob)
 	go every(6*time.Hour, util.RefreshRhyResultJob, "RefreshRhyResultJob")

@@ -11,7 +11,7 @@ module.exports = (env, argv) => {
     return {
         mode: argv.mode || "development",
         watch: argv.mode !== "production",
-        devtool: argv.mode !== "production" ? "eval" : false,
+        devtool: argv.mode !== "production" ? "cheap-source-map" : false,
         output: {
             // 不能使用 auto，否则 ios 导出图片获取不到 css。 https://github.com/siyuan-note/siyuan/issues/8532
             publicPath: "/stage/build/mobile/",
@@ -24,7 +24,10 @@ module.exports = (env, argv) => {
         optimization: {
             minimize: true,
             minimizer: [
-                new EsbuildPlugin({target: "es6"}),
+                new EsbuildPlugin({
+                    target: "es6",
+                    sourcemap: argv.mode !== "production",
+                }),
             ],
         },
         resolve: {
@@ -52,6 +55,7 @@ module.exports = (env, argv) => {
                             loader: "esbuild-loader",
                             options: {
                                 target: "es6",
+                                sourcemap: argv.mode !== "production",
                             }
                         },
                         {
@@ -73,9 +77,15 @@ module.exports = (env, argv) => {
                         MiniCssExtractPlugin.loader,
                         {
                             loader: "css-loader", // translates CSS into CommonJS
+                            options: {
+                                sourceMap: argv.mode !== "production",
+                            },
                         },
                         {
                             loader: "sass-loader", // compiles Sass to CSS
+                            options: {
+                                sourceMap: argv.mode !== "production",
+                            },
                         },
                     ],
                 },

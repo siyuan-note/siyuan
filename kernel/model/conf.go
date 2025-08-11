@@ -870,7 +870,7 @@ func InitBoxes() {
 		box.UpdateHistoryGenerated() // 初始化历史生成时间为当前时间
 
 		if !initialized {
-			index(box.ID)
+			indexBox(box.ID)
 		}
 	}
 

@@ -148,7 +148,7 @@ func DocAssets(rootID string) (ret []string, err error) {
 		return
 	}
 
-	ret = assetsLinkDestsInTree(tree)
+	ret = getAssetsLinkDests(tree.Root)
 	return
 }
 
@@ -285,7 +285,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				name, _ = url.PathUnescape(name)
 				name = util.FilterUploadFileName(name)
 				ext := util.Ext(name)
-				if "" == ext {
+				if !util.IsCommonExt(ext) {
 					if mtype := mimetype.Detect(data); nil != mtype {
 						ext = mtype.Extension()
 						name += ext
@@ -343,7 +343,9 @@ func SearchAssetsByName(keyword string, exts []string) (ret []*cache.Asset) {
 	ret = []*cache.Asset{}
 	var keywords []string
 	keywords = append(keywords, keyword)
-	keywords = append(keywords, strings.Split(keyword, " ")...)
+	if "" != keyword {
+		keywords = append(keywords, strings.Split(keyword, " ")...)
+	}
 	pathHitCount := map[string]int{}
 	filterByExt := 0 < len(exts)
 	for _, asset := range cache.GetAssets() {
@@ -467,19 +469,32 @@ func GetAssetAbsPath(relativePath string) (ret string, err error) {
 	return "", errors.New(fmt.Sprintf(Conf.Language(12), relativePath))
 }
 
-func UploadAssets2Cloud(rootID string) (count int, err error) {
+func UploadAssets2Cloud(id string) (count int, err error) {
 	if !IsSubscriber() {
 		return
 	}
 
-	tree, err := LoadTreeByBlockID(rootID)
+	tree, err := LoadTreeByBlockID(id)
 	if err != nil {
 		return
 	}
 
-	assets := assetsLinkDestsInTree(tree)
-	embedAssets := assetsLinkDestsInQueryEmbedNodes(tree)
-	assets = append(assets, embedAssets...)
+	node := treenode.GetNodeInTree(tree, id)
+	if nil == node {
+		err = ErrBlockNotFound
+		return
+	}
+
+	nodes := []*ast.Node{node}
+	if ast.NodeHeading == node.Type {
+		nodes = append(nodes, treenode.HeadingChildren(node)...)
+	}
+
+	var assets []string
+	for _, n := range nodes {
+		assets = append(assets, getAssetsLinkDests(n)...)
+		assets = append(assets, getQueryEmbedNodesAssetsLinkDests(n)...)
+	}
 	assets = gulu.Str.RemoveDuplicatedElem(assets)
 	count, err = uploadAssets2Cloud(assets, bizTypeUploadAssets)
 	if err != nil {
@@ -862,7 +877,7 @@ func UnusedAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range assetsLinkDestsInTree(tree) {
+				for _, d := range getAssetsLinkDests(tree.Root) {
 					dests[d] = true
 				}
 
@@ -1025,7 +1040,7 @@ func MissingAssets() (ret []string) {
 				trees = append(trees, tree)
 			}
 			for _, tree := range trees {
-				for _, d := range assetsLinkDestsInTree(tree) {
+				for _, d := range getAssetsLinkDests(tree.Root) {
 					dests[d] = true
 				}
 
@@ -1106,11 +1121,11 @@ func emojisInTree(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
+func getQueryEmbedNodesAssetsLinkDests(node *ast.Node) (ret []string) {
 	// The images in the embed blocks are not uploaded to the community hosting https://github.com/siyuan-note/siyuan/issues/10042
 
 	ret = []string{}
-	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if !entering || ast.NodeBlockQueryEmbedScript != n.Type {
 			return ast.WalkContinue
 		}
@@ -1129,7 +1144,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 				continue
 			}
 
-			ret = append(ret, assetsLinkDestsInNode(embedNode)...)
+			ret = append(ret, getAssetsLinkDests(embedNode)...)
 		}
 		return ast.WalkContinue
 	})
@@ -1137,12 +1152,7 @@ func assetsLinkDestsInQueryEmbedNodes(tree *parse.Tree) (ret []string) {
 	return
 }
 
-func assetsLinkDestsInTree(tree *parse.Tree) (ret []string) {
-	ret = assetsLinkDestsInNode(tree.Root)
-	return
-}
-
-func assetsLinkDestsInNode(node *ast.Node) (ret []string) {
+func getAssetsLinkDests(node *ast.Node) (ret []string) {
 	ret = []string{}
 	ast.Walk(node, func(n *ast.Node, entering bool) ast.WalkStatus {
 		if n.IsBlock() {

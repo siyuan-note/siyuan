@@ -10,6 +10,7 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
         const id = item.getAttribute("data-node-id");
         if (id) {
             srcs.push({
+                itemID: Lute.NewNodeID(),
                 id,
                 isDetached: false
             });
@@ -21,7 +22,6 @@ export const addFilesToDatabase = (fileLiElements: Element[]) => {
             transaction(undefined, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {
@@ -40,8 +40,8 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs: [{
+                    itemID: Lute.NewNodeID(),
                     id: protyle.block.rootID,
                     isDetached: false
                 }],
@@ -83,6 +83,7 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             ids.forEach(item => {
                 srcIDs.push(item);
                 srcs.push({
+                    itemID: Lute.NewNodeID(),
                     id: item,
                     isDetached: false
                 });
@@ -91,7 +92,6 @@ export const addEditorToDatabase = (protyle: IProtyle, range: Range, type?: stri
             transaction(protyle, [{
                 action: "insertAttrViewBlock",
                 avID,
-                ignoreFillFilter: true,
                 srcs,
                 blockID: listItemElement.dataset.blockId
             }, {

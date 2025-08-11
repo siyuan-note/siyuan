@@ -26,6 +26,12 @@ import (
 	"github.com/88250/go-humanize"
 )
 
+func GetTodayStart() (ret time.Time) {
+	ret = time.Now()
+	ret = time.Date(ret.Year(), ret.Month(), ret.Day(), 0, 0, 0, 0, time.Local)
+	return
+}
+
 // Weekday returns the day of the week specified by date.
 // Sunday=0, Monday=1, ..., Saturday=6.
 func Weekday(date time.Time) int {

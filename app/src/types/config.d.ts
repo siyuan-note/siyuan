@@ -2059,6 +2059,10 @@ declare namespace Config {
      */
     export interface IUILayoutTabSearchConfig {
         /**
+         * 搜索传入的查询内容
+         */
+        query?: string;
+        /**
          * Grouping strategy
          * - `0`: No grouping
          * - `1`: Group by document

@@ -29,6 +29,7 @@ import (
 	"time"
 
 	"github.com/88250/gulu"
+	"github.com/gabriel-vasile/mimetype"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
 )
@@ -317,10 +318,23 @@ var (
 	SiYuanAssetsVideo = []string{".mov", ".weba", ".mkv", ".mp4", ".webm"}
 )
 
-func IsAssetsImage(p string) bool {
-	ext := strings.ToLower(filepath.Ext(p))
+func IsAssetsImage(assetPath string) bool {
+	ext := strings.ToLower(filepath.Ext(assetPath))
 	if "" == ext {
-		return false
+		absPath := filepath.Join(DataDir, assetPath)
+		f, err := filelock.OpenFile(absPath, os.O_RDONLY, 0644)
+		if err != nil {
+			logging.LogErrorf("open file [%s] failed: %s", absPath, err)
+			return false
+		}
+		defer filelock.CloseFile(f)
+		m, err := mimetype.DetectReader(f)
+		if nil != err {
+			logging.LogWarnf("detect file [%s] mimetype failed: %v", absPath, err)
+			return false
+		}
+
+		ext = m.Extension()
 	}
 	return gulu.Str.Contains(ext, SiYuanAssetsImage)
 }

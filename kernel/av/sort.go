@@ -67,21 +67,21 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 			val := items[i].GetValues()[fieldIndexSort.Index]
 			if KeyTypeCheckbox == val.Type {
 				if block := item.GetBlockValue(); nil != block && block.IsEdited() {
-					// 如果主键编辑过，则勾选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
+					// 如果主键编辑过，则复选框也算作编辑过，参与排序 https://github.com/siyuan-note/siyuan/issues/11016
 					editedValItems[item.GetID()] = true
 					break
 				}
 			}
 
 			if val.IsEdited() {
-				// 如果该卡片某字段的值已经编辑过，则该卡片可参与排序
+				// 如果该项目某字段的值已经编辑过，则该项目可参与排序
 				editedValItems[item.GetID()] = true
 				break
 			}
 		}
 	}
 
-	// 将未编辑的卡片和已编辑的卡片分开排序
+	// 将未编辑的项目和已编辑的项目分开排序
 	var uneditedItems, editedItems []Item
 	for _, item := range items {
 		if _, ok := editedValItems[item.GetID()]; ok {
@@ -147,7 +147,7 @@ func Sort(viewable Viewable, attrView *AttributeView) {
 		return false
 	})
 
-	// 将包含未编辑的卡片放在最后
+	// 将包含未编辑的项目放在最后
 	collection.SetItems(append(editedItems, uneditedItems...))
 	if 1 > len(collection.GetItems()) {
 		collection.SetItems([]Item{})
@@ -397,7 +397,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeRelation:
 		if nil != value.Relation && nil != other.Relation {
-			if 1 < len(value.Relation.Contents) && 1 < len(other.Relation.Contents) && KeyTypeNumber == value.Relation.Contents[0].Type && KeyTypeNumber == other.Relation.Contents[0].Type {
+			if 0 < len(value.Relation.Contents) && 0 < len(other.Relation.Contents) && KeyTypeNumber == value.Relation.Contents[0].Type && KeyTypeNumber == other.Relation.Contents[0].Type {
 				v1, ok1 := util.Convert2Float(value.Relation.Contents[0].String(false))
 				v2, ok2 := util.Convert2Float(other.Relation.Contents[0].String(false))
 				if ok1 && ok2 {
@@ -435,7 +435,7 @@ func (value *Value) Compare(other *Value, attrView *AttributeView) int {
 		}
 	case KeyTypeRollup:
 		if nil != value.Rollup && nil != other.Rollup {
-			if 1 < len(value.Rollup.Contents) && 1 < len(other.Rollup.Contents) && KeyTypeNumber == value.Rollup.Contents[0].Type && KeyTypeNumber == other.Rollup.Contents[0].Type {
+			if 0 < len(value.Rollup.Contents) && 0 < len(other.Rollup.Contents) && KeyTypeNumber == value.Rollup.Contents[0].Type && KeyTypeNumber == other.Rollup.Contents[0].Type {
 				v1, ok1 := util.Convert2Float(value.Rollup.Contents[0].String(false))
 				v2, ok2 := util.Convert2Float(other.Rollup.Contents[0].String(false))
 				if ok1 && ok2 {

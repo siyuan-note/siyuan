@@ -267,6 +267,10 @@
       opacity: .38;
       cursor: not-allowed;
     }
+
+    &--hidden {
+      opacity: .38;
+    }
   }
 
   &__action {
@@ -281,6 +285,10 @@
     box-sizing: border-box;
     translate: var(--b3-transition);
 
+    &--show {
+      opacity: 1;
+    }
+
     &:hover {
       color: var(--b3-theme-on-background);
       background-color: var(--b3-list-icon-hover);
@@ -294,6 +302,13 @@
   &__label {
     flex: 1;
     min-width: 84px;
+  }
+
+  &__labels {
+    font-size: 12px;
+    margin-bottom: 4px;
+    line-height: 20px;
+    color: var(--b3-theme-on-surface);
   }
 
   &__icon {

@@ -135,7 +135,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
                 if (typeof event.detail !== "number") {
                     target = event.detail;
                 }
-                while (target && !target.isSameNode(modelMainElement)) {
+                while (target && target !== modelMainElement) {
                     if (target.getAttribute("data-action") === "iOSPay") {
                         iOSPurchase(target.getAttribute("data-type"));
                         event.preventDefault();

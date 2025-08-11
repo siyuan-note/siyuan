@@ -284,6 +284,22 @@ html {
     overflow: hidden;
     transition: var(--b3-transition);
   }
+
+  &.sy__file--disablehover {
+    .b3-list--background .b3-list-item {
+      &:hover {
+        background-color: transparent !important;
+      }
+
+      &--hide-action .b3-list-item__action {
+        display: none;
+      }
+
+      > * {
+        pointer-events: none;
+      }
+    }
+  }
 }
 
 .counter {

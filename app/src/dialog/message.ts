@@ -3,20 +3,12 @@ import {Constants} from "../constants";
 
 export const initMessage = () => {
     const messageElement = document.getElementById("message");
-    messageElement.innerHTML = `<div class="fn__flex-1"></div>
-<button class="b3-button ft__smaller fn__none">${window.siyuan.languages.clearMessage}</button>`;
+    messageElement.innerHTML = '<div class="fn__flex-1"></div>';
     messageElement.addEventListener("click", (event) => {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(messageElement)) {
             if (target.classList.contains("b3-snackbar__close")) {
                 hideMessage(target.parentElement.getAttribute("data-id"));
-                event.preventDefault();
-                break;
-            } else if (target.isSameNode(messageElement.lastElementChild)) {
-                target.parentElement.classList.remove("b3-snackbars--show");
-                setTimeout(() => {
-                    target.parentElement.firstElementChild.innerHTML = "";
-                }, Constants.TIMEOUT_INPUT);
                 event.preventDefault();
                 break;
             } else if (target.tagName === "A" || target.tagName === "BUTTON") {
@@ -32,25 +24,27 @@ export const initMessage = () => {
             target = target.parentElement;
         }
     });
-    const tempMessageElement = document.getElementById("tempMessage");
-    if (tempMessageElement) {
-        showMessage(tempMessageElement.innerHTML);
-        tempMessageElement.remove();
-    }
+
+    document.querySelectorAll("#tempMessage > div").forEach((item) => {
+        showMessage(item.innerHTML, parseInt(item.getAttribute("data-timeout")), item.getAttribute("data-type"), item.getAttribute("data-message-id"));
+        item.remove();
+    });
 };
 
 // type: info/error; timeout: 0 手动关闭；-1 永不关闭
 export const showMessage = (message: string, timeout = 6000, type = "info", messageId?: string) => {
     const messagesElement = document.getElementById("message").firstElementChild;
     if (!messagesElement) {
-        document.body.insertAdjacentHTML("beforeend", `<div style="top: 10px;
-    position: fixed;
-    z-index: 100;
-    background: white;
-    padding: 10px;
-    border-radius: 5px;
-    right: 10px;
-    border: 1px solid #e0e0e0;" id='tempMessage'>${message}</div>`);
+        let tempMessages = document.getElementById("tempMessage");
+        if (!tempMessages) {
+            document.body.insertAdjacentHTML("beforeend", `<div style="font-size: 14px;top: 22px;position: fixed;z-index: 100;right: 30px;line-height: 20px;word-break: break-word;display: flex;flex-direction: column;align-items: flex-end;" 
+id="tempMessage"></div>`);
+            tempMessages = document.getElementById("tempMessage");
+        }
+        tempMessages.insertAdjacentHTML("beforeend", `<div style="background: white;padding: 8px 16px;border-radius: 6px;margin-bottom: 16px;"  
+data-timeout="${timeout}" 
+data-type="${type}" 
+data-message-id="${messageId || ""}">${message}</div>`);
         return;
     }
     const id = messageId || genUUID();

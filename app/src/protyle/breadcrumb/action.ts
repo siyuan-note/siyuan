@@ -26,7 +26,7 @@ export const net2LocalAssets = (protyle: IProtyle, type: "Assets" | "Img") => {
         /// #else
         getAllEditor().forEach(item => {
             if (item.protyle.block.rootID === protyle.block.rootID) {
-                reloadProtyle(item.protyle, item.protyle.element.isSameNode(protyle.element));
+                reloadProtyle(item.protyle, item.protyle.element === protyle.element);
             }
         });
         /// #endif
@@ -95,7 +95,7 @@ export const fullscreen = (element: Element, btnElement?: Element) => {
         window.siyuan.editorIsFullscreen = !isFullscreen;
     }
     getAllModels().editor.forEach(item => {
-        if (!element.isSameNode(item.element)) {
+        if (element !== item.element) {
             if (window.siyuan.editorIsFullscreen) {
                 if (item.element.classList.contains("fullscreen")) {
                     item.element.classList.remove("fullscreen");

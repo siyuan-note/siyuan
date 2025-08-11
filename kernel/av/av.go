@@ -79,26 +79,27 @@ func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
 	return
 }
 
+// KeyType 描述了属性视图属性字段的类型。
 type KeyType string
 
 const (
-	KeyTypeBlock      KeyType = "block"
-	KeyTypeText       KeyType = "text"
-	KeyTypeNumber     KeyType = "number"
-	KeyTypeDate       KeyType = "date"
-	KeyTypeSelect     KeyType = "select"
-	KeyTypeMSelect    KeyType = "mSelect"
-	KeyTypeURL        KeyType = "url"
-	KeyTypeEmail      KeyType = "email"
-	KeyTypePhone      KeyType = "phone"
-	KeyTypeMAsset     KeyType = "mAsset"
-	KeyTypeTemplate   KeyType = "template"
-	KeyTypeCreated    KeyType = "created"
-	KeyTypeUpdated    KeyType = "updated"
-	KeyTypeCheckbox   KeyType = "checkbox"
-	KeyTypeRelation   KeyType = "relation"
-	KeyTypeRollup     KeyType = "rollup"
-	KeyTypeLineNumber KeyType = "lineNumber"
+	KeyTypeBlock      KeyType = "block"      // 主键
+	KeyTypeText       KeyType = "text"       // 文本
+	KeyTypeNumber     KeyType = "number"     // 数字
+	KeyTypeDate       KeyType = "date"       // 日期
+	KeyTypeSelect     KeyType = "select"     // 单选
+	KeyTypeMSelect    KeyType = "mSelect"    // 多选
+	KeyTypeURL        KeyType = "url"        // URL
+	KeyTypeEmail      KeyType = "email"      // Email
+	KeyTypePhone      KeyType = "phone"      // 电话
+	KeyTypeMAsset     KeyType = "mAsset"     // 资源
+	KeyTypeTemplate   KeyType = "template"   // 模板
+	KeyTypeCreated    KeyType = "created"    // 创建时间
+	KeyTypeUpdated    KeyType = "updated"    // 更新时间
+	KeyTypeCheckbox   KeyType = "checkbox"   // 复选框
+	KeyTypeRelation   KeyType = "relation"   // 关联
+	KeyTypeRollup     KeyType = "rollup"     // 汇总
+	KeyTypeLineNumber KeyType = "lineNumber" // 行号
 )
 
 // Key 描述了属性视图属性字段的基础结构。
@@ -191,15 +192,77 @@ type View struct {
 	Gallery          *LayoutGallery `json:"gallery,omitempty"` // 卡片布局
 	ItemIDs          []string       `json:"itemIds,omitempty"` // 项目 ID 列表，用于维护所有项目
 
-	Group          *ViewGroup `json:"group,omitempty"`          // 分组规则
-	GroupUpdated   int64      `json:"groupUpdated"`             // 分组规则更新时间戳
-	Groups         []*View    `json:"groups,omitempty"`         // 分组视图列表
-	GroupItemIDs   []string   `json:"groupItemIds,omitempty"`   // 分组项目 ID 列表，用于维护分组中的所有项目
-	GroupCalc      *GroupCalc `json:"groupCalc,omitempty"`      // 分组计算规则
-	GroupName      string     `json:"groupName,omitempty"`      // 分组名称
-	GroupFolded    bool       `json:"groupFolded,omitempty"`    // 分组是否折叠
-	GroupHidden    bool       `json:"groupHidden,omitempty"`    // 分组是否隐藏
-	GroupHideEmpty bool       `json:"groupHideEmpty,omitempty"` // 分组是否隐藏空分组
+	Group        *ViewGroup `json:"group,omitempty"`     // 分组规则
+	GroupCreated int64      `json:"groupCreated"`        // 分组生成时间戳
+	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
+	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
+	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
+	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
+	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
+	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏
+	GroupSort    int        `json:"groupSort"`           // 分组排序值，用于手动排序
+}
+
+// GetGroupValue 获取分组视图的分组值。
+func (view *View) GetGroupValue() string {
+	if nil == view.GroupVal {
+		return ""
+	}
+	return view.GroupVal.String(false)
+}
+
+// GetGroupByID 获取指定分组 ID 的分组视图。
+func (view *View) GetGroupByID(groupID string) *View {
+	if nil == view.Groups {
+		return nil
+	}
+	for _, group := range view.Groups {
+		if group.ID == groupID {
+			return group
+		}
+	}
+	return nil
+}
+
+// GetGroupByGroupValue 获取指定分组值的分组视图。
+func (view *View) GetGroupByGroupValue(groupVal string) *View {
+	if nil == view.Groups {
+		return nil
+	}
+	for _, group := range view.Groups {
+		if group.GetGroupValue() == groupVal {
+			return group
+		}
+	}
+	return nil
+}
+
+// RemoveGroupByID 从分组视图列表中移除指定 ID 的分组视图。
+func (view *View) RemoveGroupByID(groupID string) {
+	if nil == view.Groups {
+		return
+	}
+	for i, group := range view.Groups {
+		if group.ID == groupID {
+			view.Groups = append(view.Groups[:i], view.Groups[i+1:]...)
+			return
+		}
+	}
+}
+
+// GetGroupKey 获取分组视图的分组字段。
+func (view *View) GetGroupKey(attrView *AttributeView) (ret *Key) {
+	if nil == view.Group || "" == view.Group.Field {
+		return
+	}
+
+	for _, kv := range attrView.KeyValues {
+		if kv.Key.ID == view.Group.Field {
+			ret = kv.Key
+			return
+		}
+	}
+	return
 }
 
 // GroupCalc 描述了分组计算规则和结果的结构。
@@ -283,14 +346,16 @@ type Viewable interface {
 	// GetGroupCalc 获取视图分组计算规则和结果。
 	GetGroupCalc() *GroupCalc
 
-	// SetGroupName 设置分组名称。
-	SetGroupName(name string)
-
 	// SetGroupFolded 设置分组是否折叠。
 	SetGroupFolded(folded bool)
 
+	// GetGroupHidden 获取分组是否隐藏。
+	// hidden 0：显示，1：空白隐藏，2：手动隐藏
+	GetGroupHidden() int
+
 	// SetGroupHidden 设置分组是否隐藏。
-	SetGroupHidden(hidden bool)
+	// hidden 0：显示，1：空白隐藏，2：手动隐藏
+	SetGroupHidden(hidden int)
 }
 
 func NewAttributeView(id string) (ret *AttributeView) {
@@ -499,27 +564,42 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	return
 }
 
-func (av *AttributeView) ExistBlock(blockID string) bool {
-	for _, kv := range av.KeyValues {
-		if KeyTypeBlock != kv.Key.Type {
-			continue
+func (av *AttributeView) ExistItem(itemID string) bool {
+	for _, blockVal := range av.GetBlockKeyValues().Values {
+		if blockVal.BlockID == itemID {
+			return true
 		}
-
-		for _, v := range kv.Values {
-			if v.BlockID == blockID {
-				return true
-			}
-		}
-		return false
 	}
 	return false
 }
 
-func (av *AttributeView) GetValue(keyID, blockID string) (ret *Value) {
+func (av *AttributeView) ExistBoundBlock(nodeID string) bool {
+	for _, blockVal := range av.GetBlockKeyValues().Values {
+		if blockVal.Block.ID == nodeID {
+			return true
+		}
+	}
+	return false
+}
+
+func (av *AttributeView) GetBlockValueByBoundID(nodeID string) *Value {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type {
+			for _, v := range kv.Values {
+				if v.Block.ID == nodeID {
+					return v
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (av *AttributeView) GetValue(keyID, itemID string) (ret *Value) {
 	for _, kv := range av.KeyValues {
 		if kv.Key.ID == keyID {
 			for _, v := range kv.Values {
-				if v.BlockID == blockID {
+				if v.BlockID == itemID {
 					ret = v
 					return
 				}

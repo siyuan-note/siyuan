@@ -428,6 +428,7 @@ export class Files extends Model {
             hideTooltip();
             const liElement = hasClosestByTag(event.target, "LI");
             if (liElement) {
+                this.parent.panelElement.classList.add("sy__file--disablehover");
                 let selectElements: Element[] = Array.from(this.element.querySelectorAll(".b3-list-item--focus"));
                 if (!liElement.classList.contains("b3-list-item--focus")) {
                     selectElements.forEach((item) => {
@@ -464,6 +465,7 @@ export class Files extends Model {
             }
         });
         this.element.addEventListener("dragend", () => {
+            this.parent.panelElement.classList.remove("sy__file--disablehover");
             this.element.querySelectorAll(".b3-list-item--focus").forEach((item: HTMLElement, index) => {
                 item.style.opacity = "";
                 // https://github.com/siyuan-note/siyuan/issues/11587
@@ -1315,4 +1317,3 @@ aria-label="${ariaLabel}">${getDisplayName(item.name, true, true)}</span>
         return window.siyuan.menus.menu;
     }
 }
-

@@ -274,7 +274,7 @@ func CheckAuth(c *gin.Context) {
 		return
 	}
 
-	// 放过 /appearance/
+	// 放过 /appearance/ 等（不要扩大到 /stage/ 否则鉴权会有问题）
 	if strings.HasPrefix(c.Request.RequestURI, "/appearance/") ||
 		strings.HasPrefix(c.Request.RequestURI, "/stage/build/export/") ||
 		strings.HasPrefix(c.Request.RequestURI, "/stage/protyle/") {

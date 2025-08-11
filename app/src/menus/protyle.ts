@@ -620,7 +620,7 @@ export const refMenu = (protyle: IProtyle, element: HTMLElement) => {
             }
         });
         window.siyuan.menus.menu.append(new MenuItem({
-            id: "iconRefresh",
+            id: "turnInto",
             label: window.siyuan.languages.turnInto,
             icon: "iconRefresh",
             submenu
@@ -2142,7 +2142,7 @@ export const tableMenu = (protyle: IProtyle, nodeElement: Element, cellElement: 
                     if (prueTrElement) {
                         const tbodyElement = nodeElement.querySelector("tbody");
                         const theadElement = nodeElement.querySelector("thead");
-                        while (!prueTrElement.isSameNode(theadElement.lastElementChild)) {
+                        while (prueTrElement !== theadElement.lastElementChild) {
                             tbodyElement.insertAdjacentElement("afterbegin", theadElement.lastElementChild);
                         }
                     }

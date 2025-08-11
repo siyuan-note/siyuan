@@ -141,9 +141,11 @@ export const initUI = (protyle: IProtyle) => {
             const range = document.createRange();
             if (event.y > lastRect.bottom) {
                 const lastEditElement = getContenteditableElement(getLastBlock(protyle.wysiwyg.element.lastElementChild));
-                if (!lastEditElement ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem" && !protyle.options.backlinkData) ||
-                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== "")) {
+                if (!protyle.options.click.preventInsetEmptyBlock && (
+                    !lastEditElement ||
+                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") !== "NodeParagraph" && protyle.wysiwyg.element.getAttribute("data-doc-type") !== "NodeListItem") ||
+                    (protyle.wysiwyg.element.lastElementChild.getAttribute("data-type") === "NodeParagraph" && getContenteditableElement(lastEditElement).innerHTML !== ""))
+                ) {
                     const emptyElement = genEmptyElement(false, false);
                     protyle.wysiwyg.element.insertAdjacentElement("beforeend", emptyElement);
                     transaction(protyle, [{
@@ -222,12 +224,13 @@ export const initUI = (protyle: IProtyle) => {
             }
             Array.from(protyle.wysiwyg.element.querySelectorAll(`[data-node-id="${buttonElement.getAttribute("data-node-id")}"]`)).find(item => {
                 if (!isInEmbedBlock(item) && protyle.gutter.isMatchNode(item)) {
-                    const rowItem = item.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                    const bodyQueryClass = (buttonElement.dataset.groupId && buttonElement.dataset.groupId !== "undefined") ? `.av__body[data-group-id="${buttonElement.dataset.groupId}"] ` : "";
+                    const rowItem = item.querySelector(bodyQueryClass + `.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                     Array.from(protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl, .av__row--hl")).forEach(hlItem => {
-                        if (!item.isSameNode(hlItem)) {
+                        if (item !== hlItem) {
                             hlItem.classList.remove("protyle-wysiwyg--hl");
                         }
-                        if (rowItem && !rowItem.isSameNode(hlItem)) {
+                        if (rowItem && rowItem !== hlItem) {
                             rowItem.classList.remove("av__row--hl");
                         }
                     });

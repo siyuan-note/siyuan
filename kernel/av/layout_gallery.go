@@ -29,6 +29,7 @@ type LayoutGallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小，0：小卡片，1：中卡片，2：大卡片
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
 
 	CardFields []*ViewGalleryCardField `json:"fields"` // 卡片字段
 
@@ -94,6 +95,7 @@ type Gallery struct {
 	CardAspectRatio     CardAspectRatio `json:"cardAspectRatio"`               // 卡片宽高比
 	CardSize            CardSize        `json:"cardSize"`                      // 卡片大小
 	FitImage            bool            `json:"fitImage"`                      // 是否适应封面图片大小
+	DisplayFieldName    bool            `json:"displayFieldName"`              // 是否显示字段名称
 	Fields              []*GalleryField `json:"fields"`                        // 卡片字段
 	Cards               []*GalleryCard  `json:"cards"`                         // 卡片
 	CardCount           int             `json:"cardCount"`                     // 总卡片数
@@ -165,6 +167,10 @@ func (gallery *Gallery) SetItems(items []Item) {
 	}
 }
 
+func (gallery *Gallery) CountItems() int {
+	return len(gallery.Cards)
+}
+
 func (gallery *Gallery) GetFields() (ret []Field) {
 	ret = []Field{}
 	for _, field := range gallery.Fields {
@@ -180,6 +186,15 @@ func (gallery *Gallery) GetField(id string) (ret Field, fieldIndex int) {
 		}
 	}
 	return nil, -1
+}
+
+func (gallery *Gallery) GetValue(itemID, keyID string) (ret *Value) {
+	for _, card := range gallery.Cards {
+		if card.ID == itemID {
+			return card.GetValue(keyID)
+		}
+	}
+	return nil
 }
 
 func (gallery *Gallery) GetType() LayoutType {

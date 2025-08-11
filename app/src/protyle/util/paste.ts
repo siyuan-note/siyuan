@@ -245,11 +245,7 @@ const readLocalFile = async (protyle: IProtyle, localFiles: string[]) => {
     uploadLocalFiles(localFiles, protyle, true);
 };
 
-export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | {
-    textHTML?: string,
-    textPlain?: string,
-    files?: File[],
-}) & {
+export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEvent | IClipboardData) & {
     target: HTMLElement
 }) => {
     if ("clipboardData" in event || "dataTransfer" in event) {
@@ -275,6 +271,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     } else {
         textHTML = event.textHTML;
         textPlain = event.textPlain;
+        siyuanHTML = event.siyuanHTML;
         files = event.files;
     }
 
@@ -374,7 +371,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     protyle.wysiwyg.element.querySelectorAll(".protyle-wysiwyg--hl").forEach(item => {
         item.classList.remove("protyle-wysiwyg--hl");
     });
-    const code = processPasteCode(textHTML, textPlain);
+    const code = processPasteCode(textHTML, textPlain, protyle);
     const range = getEditorRange(protyle.wysiwyg.element);
     if (nodeElement.getAttribute("data-type") === "NodeCodeBlock" ||
         protyle.toolbar.getCurrentType(range).includes("code")) {

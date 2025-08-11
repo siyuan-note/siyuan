@@ -151,7 +151,7 @@ func ReloadProtyle(rootID string) {
 }
 
 // refreshRefCount 用于刷新定义块处的引用计数。
-func refreshRefCount(rootID, blockID string) {
+func refreshRefCount(blockID string) {
 	sql.FlushQueue()
 
 	bt := treenode.GetBlockTree(blockID)
@@ -177,7 +177,7 @@ func refreshRefCount(rootID, blockID string) {
 		defIDs = append(defIDs, bt.ID)
 	}
 
-	util.PushSetDefRefCount(rootID, blockID, defIDs, refCount, rootRefCount)
+	util.PushSetDefRefCount(bt.RootID, blockID, defIDs, refCount, rootRefCount)
 }
 
 // refreshDynamicRefText 用于刷新块引用的动态锚文本。
@@ -206,9 +206,10 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 
 	// 1. 更新引用的动态锚文本
 	treeRefNodeIDs := map[string]*hashset.Set{}
-	var changedParentNodes []*ast.Node
+	var changedNodes []*ast.Node
+	var refs []*sql.Ref
 	for _, updateNode := range updatedDefNodes {
-		refs, parentNodes := getRefsCacheByDefNode(updateNode)
+		refs, changedNodes = getRefsCacheByDefNode(updateNode)
 		for _, ref := range refs {
 			if refIDs, ok := treeRefNodeIDs[ref.RootID]; !ok {
 				refIDs = hashset.New()
@@ -218,14 +219,9 @@ func refreshDynamicRefTexts0(updatedDefNodes map[string]*ast.Node, updatedTrees 
 				refIDs.Add(ref.BlockID)
 			}
 		}
-		if 0 < len(parentNodes) {
-			changedParentNodes = append(changedParentNodes, parentNodes...)
-		}
 	}
-	if 0 < len(changedParentNodes) {
-		for _, parent := range changedParentNodes {
-			updatedDefNodes[parent.ID] = parent
-		}
+	for _, n := range changedNodes {
+		updatedDefNodes[n.ID] = n
 	}
 
 	changedRefTree := map[string]*parse.Tree{}

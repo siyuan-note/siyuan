@@ -196,7 +196,7 @@ export const getViewHTML = (data: IAV) => {
 </button>
 <button class="b3-menu__separator"></button>
 <button class="b3-menu__item" data-type="go-properties">
-    <svg class="b3-menu__icon"></svg>
+    <svg class="b3-menu__icon"><use xlink:href="#iconList"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.fields}</span>
     <span class="b3-menu__accelerator">${fields.filter((item: IAVColumn) => !item.hidden).length}/${fields.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
@@ -213,10 +213,10 @@ export const getViewHTML = (data: IAV) => {
     <span class="b3-menu__accelerator">${view.sorts.length}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
-<button class="b3-menu__item fn__none" data-type="goGroups">
+<button class="b3-menu__item" data-type="goGroups">
     <svg class="b3-menu__icon"><use xlink:href="#iconGroups"></use></svg>
     <span class="b3-menu__label">${window.siyuan.languages.group}</span>
-    <span class="b3-menu__accelerator">${data.view.group ? fields.filter((item: IAVColumn) => item.id === data.view.group.field)[0].name : ""}</span>
+    <span class="b3-menu__accelerator">${(data.view.group && data.view.group.field) ? fields.filter((item: IAVColumn) => item.id === data.view.group.field)[0].name : ""}</span>
     <svg class="b3-menu__icon b3-menu__icon--small"><use xlink:href="#iconRight"></use></svg>
 </button>
 <button class="b3-menu__separator"></button>
@@ -408,17 +408,17 @@ export const dragoverTab = (event: DragEvent) => {
     if (!target) {
         return;
     }
-    if (!viewTabElement.isSameNode(window.siyuan.dragElement.parentElement) || target.isSameNode(window.siyuan.dragElement)) {
+    if (viewTabElement !== window.siyuan.dragElement.parentElement || (target === window.siyuan.dragElement)) {
         return;
     }
     const targetRect = target.getBoundingClientRect();
     if (targetRect.left + targetRect.width / 2 < event.clientX) {
-        if (target.nextElementSibling?.isSameNode(window.siyuan.dragElement)) {
+        if (target.nextElementSibling && target.nextElementSibling === window.siyuan.dragElement) {
             return;
         }
         target.after(window.siyuan.dragElement);
     } else {
-        if (target.previousElementSibling?.isSameNode(window.siyuan.dragElement)) {
+        if (target.previousElementSibling && target.previousElementSibling === window.siyuan.dragElement) {
             return;
         }
         target.before(window.siyuan.dragElement);

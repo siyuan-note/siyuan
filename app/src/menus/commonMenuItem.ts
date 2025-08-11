@@ -6,7 +6,7 @@ import {getSearch, isMobile, isValidAttrName} from "../util/functions";
 import {isLocalPath, movePathTo, moveToPath, pathPosix} from "../util/pathName";
 import {MenuItem} from "./Menu";
 import {saveExport} from "../protyle/export";
-import {isInAndroid, isInHarmony, openByMobile} from "../protyle/util/compatibility";
+import {isInAndroid, isInHarmony, openByMobile, writeText} from "../protyle/util/compatibility";
 import {fetchPost, fetchSyncPost} from "../util/fetch";
 import {hideMessage, showMessage} from "../dialog/message";
 import {Dialog} from "../dialog";
@@ -259,7 +259,7 @@ export const openFileAttr = (attrs: IObject, focusName = "bookmark", protyle?: I
         if (typeof event.detail === "string") {
             target = dialog.element.querySelector(`.item--full[data-type="${event.detail}"]`);
         }
-        while (!target.isSameNode(dialog.element)) {
+        while (target !== dialog.element) {
             const type = target.dataset.action;
             if (target.classList.contains("item--full")) {
                 target.parentElement.querySelector(".item--focus").classList.remove("item--focus");
@@ -380,8 +380,8 @@ export const openAttr = (nodeElement: Element, focusName = "bookmark", protyle?:
     });
 };
 
-export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element) => {
-    return [{
+export const copySubMenu = (ids: string[], accelerator = true, focusElement?: Element, stdMarkdownId?: string) => {
+    const menuItems = [{
         id: "copyBlockRef",
         iconHTML: "",
         accelerator: accelerator ? window.siyuan.config.keymap.editor.general.copyBlockRef.custom : undefined,
@@ -448,6 +448,32 @@ export const copySubMenu = (ids: string[], accelerator = true, focusElement?: El
             }
         }
     }];
+    
+    if (stdMarkdownId) {
+        menuItems.push({
+            id: "copyMarkdown",
+            iconHTML: "",
+            label: window.siyuan.languages.copyMarkdown,
+            accelerator: undefined,
+            click: async () => {
+                const response = await fetchSyncPost("/api/export/exportMdContent", {
+                    id: stdMarkdownId,
+                    refMode: 3,
+                    embedMode: 1,
+                    yfm: false,
+                    fillCSSVar: false,
+                    adjustHeadingLevel: false
+                });
+                const text = response.data.content;
+                writeText(text);
+                if (focusElement) {
+                    focusBlock(focusElement);
+                }
+            }
+        });
+    }
+    
+    return menuItems;
 };
 
 export const exportMd = (id: string) => {

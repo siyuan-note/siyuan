@@ -23,7 +23,7 @@ import {Constants} from "../../../constants";
 import {hideElements} from "../../ui/hideElements";
 import {isLocalPath, pathPosix} from "../../../util/pathName";
 import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
-import {getSearch} from "../../../util/functions";
+import {getSearch, isMobile} from "../../../util/functions";
 /// #if !MOBILE
 import {openAsset} from "../../../editor/util";
 /// #endif
@@ -32,7 +32,8 @@ import {assetMenu} from "../../../menus/protyle";
 import {
     addView,
     bindSwitcherEvent,
-    bindViewEvent, getFieldsByData,
+    bindViewEvent,
+    getFieldsByData,
     getSwitcherHTML,
     getViewHTML,
     openViewMenu
@@ -47,7 +48,14 @@ import {escapeAttr, escapeHtml} from "../../../util/escape";
 import {Dialog} from "../../../dialog";
 import {bindLayoutEvent, getLayoutHTML, updateLayout} from "./layout";
 import {setGalleryCover, setGalleryRatio, setGallerySize} from "./gallery/util";
-import {bindGroupsEvent, getGroupsHTML, getGroupsMethodHTML, setGroupMethod} from "./groups";
+import {
+    bindGroupsEvent, bindGroupsNumber,
+    getGroupsHTML,
+    getGroupsMethodHTML, getGroupsNumberHTML, getLanguageByIndex, getPageSize,
+    goGroupsDate,
+    goGroupsSort,
+    setGroupMethod
+} from "./groups";
 
 export const openMenuPanel = (options: {
     protyle: IProtyle,
@@ -68,10 +76,12 @@ export const openMenuPanel = (options: {
         return;
     }
     const avID = options.blockElement.getAttribute("data-av-id");
+    const avPageSize = getPageSize(options.blockElement);
     fetchPost("/api/av/renderAttributeView", {
         id: avID,
         query: (options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement)?.value.trim() || "",
-        pageSize: parseInt(options.blockElement.getAttribute("data-page-size")) || undefined,
+        pageSize: avPageSize.unGroupPageSize,
+        groupPaging: avPageSize.groupPageSize,
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW)
     }, (response) => {
         avPanelElement = document.querySelector(".av__panel");
@@ -135,9 +145,9 @@ export const openMenuPanel = (options: {
             }
         }
 
-        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex}">
+        document.body.insertAdjacentHTML("beforeend", `<div class="av__panel" style="z-index: ${++window.siyuan.zIndex};">
     <div class="b3-dialog__scrim" data-type="close"></div>
-    <div class="b3-menu">${html}</div>
+    <div class="b3-menu" ${["select", "date", "asset", "relation", "rollup"].includes(options.type) ? `style="min-width: 200px;${isMobile() ? "max-width: 90vw;" : "max-width: 50vw;"}"` : ""}>${html}</div>
 </div>`);
         avPanelElement = document.querySelector(".av__panel");
         let closeCB: () => void;
@@ -423,9 +433,8 @@ export const openMenuPanel = (options: {
                 }, options.cellElements);
                 return;
             }
-
             if (targetElement.getAttribute("data-type") === "editCol") {
-                const previousID = (targetElement.classList.contains("dragover__top") ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
+                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
                 const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
                 if (previousID !== undoPreviousID && previousID !== sourceId) {
                     transaction(options.protyle, [{
@@ -462,6 +471,50 @@ export const openMenuPanel = (options: {
                 menuElement.innerHTML = getPropertiesHTML(fields);
                 return;
             }
+            if (targetElement.querySelector('[data-type="hideGroup"]')) {
+                const previousID = (isTop ? targetElement.previousElementSibling?.getAttribute("data-id") : targetElement.getAttribute("data-id")) || "";
+                const undoPreviousID = sourceElement.previousElementSibling?.getAttribute("data-id") || "";
+                if (previousID !== undoPreviousID && previousID !== sourceId) {
+                    transaction(options.protyle, [{
+                        action: "sortAttrViewGroup",
+                        avID,
+                        blockID,
+                        previousID,
+                        id: sourceId,
+                    }], [{
+                        action: "sortAttrViewGroup",
+                        avID,
+                        blockID,
+                        previousID: undoPreviousID,
+                        id: sourceId,
+                    }]);
+                    menuElement.querySelector('[data-type="goGroupsSort"] .b3-menu__accelerator').textContent = getLanguageByIndex(2, "sort");
+                    data.view.group.order = 2;
+                    data.view.groups.find((group, index) => {
+                        if (group.id === sourceId) {
+                            const groupData = data.view.groups.splice(index, 1)[0];
+                            data.view.groups.find((item, index: number) => {
+                                if (item.id === targetId) {
+                                    if (isTop) {
+                                        data.view.groups.splice(index, 0, groupData);
+                                    } else {
+                                        data.view.groups.splice(index + 1, 0, groupData);
+                                    }
+                                    return true;
+                                }
+                            });
+                            return true;
+                        }
+                    });
+                    if (isTop) {
+                        targetElement.before(sourceElement);
+                    } else {
+                        targetElement.after(sourceElement);
+                    }
+                }
+                targetElement.classList.remove("dragover__top", "dragover__bottom");
+                return;
+            }
         });
         let dragoverElement: HTMLElement;
         avPanelElement.addEventListener("dragover", (event: DragEvent) => {
@@ -474,11 +527,11 @@ export const openMenuPanel = (options: {
             if (!targetElement) {
                 targetElement = hasClosestByAttribute(document.elementFromPoint(event.clientX, event.clientY - 1), "draggable", "true");
             }
-            if (!targetElement || targetElement.isSameNode(window.siyuan.dragElement)) {
+            if (!targetElement || targetElement === window.siyuan.dragElement) {
                 return;
             }
             event.preventDefault();
-            if (dragoverElement && targetElement.isSameNode(dragoverElement)) {
+            if (dragoverElement && targetElement === dragoverElement) {
                 const nodeRect = targetElement.getBoundingClientRect();
                 avPanelElement.querySelectorAll(".dragover__bottom, .dragover__top").forEach((item: HTMLElement) => {
                     item.classList.remove("dragover__bottom", "dragover__top");
@@ -525,7 +578,7 @@ export const openMenuPanel = (options: {
                 type = (event.detail as { type: string }).type;
                 target = (event.detail as { target: HTMLElement }).target;
             }
-            while (target && !target.isSameNode(avPanelElement) || type) {
+            while (target && target !== avPanelElement || type) {
                 type = target?.dataset.type || type;
                 if (type === "close") {
                     if (!options.protyle.toolbar.subElement.classList.contains("fn__none")) {
@@ -573,31 +626,6 @@ export const openMenuPanel = (options: {
                     bindSortsEvent(options.protyle, menuElement, data, blockID);
                     setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "goGroups") {
-                    menuElement.innerHTML = getGroupsHTML(fields, data.view.group);
-                    bindGroupsEvent(options.protyle, menuElement, data, blockID);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    window.siyuan.menus.menu.remove();
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "goGroupsMethod") {
-                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
-                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
-                    event.preventDefault();
-                    event.stopPropagation();
-                    break;
-                } else if (type === "setGroupMethod") {
-                    setGroupMethod({
-                        protyle: options.protyle,
-                        fieldId: target.getAttribute("data-id"),
-                        data,
-                        menuElement,
-                        blockElement: options.blockElement,
-                    });
                     event.preventDefault();
                     event.stopPropagation();
                     break;
@@ -961,7 +989,7 @@ export const openMenuPanel = (options: {
                             type: target.dataset.oldType as TAVCol,
                         }]);
 
-                        // 需要取消 lineNumber 列的排序和过滤
+                        // 需要取消行号列的筛选和排序
                         if (target.dataset.newType === "lineNumber") {
                             const sortExist = data.view.sorts.find((sort) => sort.column === colId);
                             if (sortExist) {
@@ -1180,7 +1208,7 @@ export const openMenuPanel = (options: {
                         dialog.element.addEventListener("click", (dialogEvent) => {
                             let target = dialogEvent.target as HTMLElement;
                             const isDispatch = typeof dialogEvent.detail === "string";
-                            while (target && !target.isSameNode(dialog.element) || isDispatch) {
+                            while (target && target !== dialog.element || isDispatch) {
                                 const action = target.getAttribute("data-action");
                                 if (action === "delete" || (isDispatch && dialogEvent.detail === "Enter")) {
                                     removeCol({
@@ -1440,9 +1468,165 @@ export const openMenuPanel = (options: {
                         target,
                         protyle: options.protyle,
                         nodeElement: options.blockElement,
-                        data: data
+                        data
                     });
                     fields = getFieldsByData(data);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsDate") {
+                    goGroupsDate({
+                        target,
+                        menuElement,
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        data
+                    });
+                    fields = getFieldsByData(data);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "goGroupsSort") {
+                    goGroupsSort({
+                        target,
+                        menuElement,
+                        protyle: options.protyle,
+                        blockElement: options.blockElement,
+                        data
+                    });
+                    fields = getFieldsByData(data);
+                    event.stopPropagation();
+                    event.preventDefault();
+                    break;
+                } else if (type === "setGroupMethod") {
+                    setGroupMethod({
+                        protyle: options.protyle,
+                        fieldId: target.getAttribute("data-id"),
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement,
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroups") {
+                    if (menuElement.querySelector('[data-type="avGroupRange"]') && closeCB) {
+                        await closeCB();
+                    }
+                    closeCB = undefined;
+                    if ((data.view.group && data.view.group.field) || target.classList.contains("block__icon")) {
+                        menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                        bindGroupsEvent({
+                            protyle: options.protyle,
+                            menuElement: menuElement,
+                            blockElement: options.blockElement,
+                            data
+                        });
+                    } else {
+                        menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    }
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "goGroupsMethod") {
+                    window.siyuan.menus.menu.remove();
+                    menuElement.innerHTML = getGroupsMethodHTML(fields, data.view.group);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "getGroupsNumber") {
+                    window.siyuan.menus.menu.remove();
+                    menuElement.innerHTML = getGroupsNumberHTML(data.view.group);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
+                    closeCB = bindGroupsNumber({
+                        protyle: options.protyle,
+                        data,
+                        menuElement,
+                        blockElement: options.blockElement
+                    });
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "hideGroup") {
+                    window.siyuan.menus.menu.remove();
+                    const useElement = target.firstElementChild;
+                    const isHide = useElement.getAttribute("xlink:href") !== "#iconEye";
+                    useElement.setAttribute("xlink:href", isHide ? "#iconEye" : "#iconEyeoff");
+                    let oldGroupHidden;
+                    let showCount = 0;
+                    data.view.groups.forEach((item) => {
+                        if (item.id === target.dataset.id) {
+                            oldGroupHidden = item.groupHidden;
+                            item.groupHidden = isHide ? 0 : 2;
+                        }
+                        if (item.groupHidden === 0) {
+                            showCount++;
+                        }
+                    });
+                    target.parentElement.classList[isHide ? "remove" : "add"]("b3-menu__item--hidden");
+                    menuElement.querySelector('[data-type="hideGroups"]').innerHTML = `${window.siyuan.languages[showCount === 0 ? "showAll" : "hideAll"]}
+<span class="fn__space"></span>
+<svg><use xlink:href="#iconEye${showCount === 0 ? "" : "off"}"></use></svg>`;
+                    transaction(options.protyle, [{
+                        action: "hideAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                        id: target.dataset.id,
+                        data: isHide ? 0 : 2,
+                    }], [{
+                        action: "hideAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                        id: target.dataset.id,
+                        data: oldGroupHidden
+                    }]);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "hideGroups") {
+                    window.siyuan.menus.menu.remove();
+                    const isShow = target.querySelector("use").getAttribute("xlink:href") === "#iconEyeoff";
+                    target.innerHTML = `${window.siyuan.languages[isShow ? "showAll" : "hideAll"]}
+<span class="fn__space"></span>
+<svg><use xlink:href="#iconEye${isShow ? "" : "off"}"></use></svg>`;
+                    data.view.groups.forEach((item) => {
+                        item.groupHidden = isShow ? 2 : 0;
+                        const itemElement = target.parentElement.parentElement.querySelector(`.b3-menu__item[data-id="${item.id}"]`);
+                        itemElement.classList[isShow ? "add" : "remove"]("b3-menu__item--hidden");
+                        itemElement.querySelector(".b3-menu__action use")?.setAttribute("xlink:href", `#iconEye${isShow ? "off" : ""}`);
+                    });
+                    transaction(options.protyle, [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: isShow,
+                    }], [{
+                        action: "hideAttrViewAllGroups",
+                        avID: data.id,
+                        blockID,
+                        data: !isShow
+                    }]);
+                    event.preventDefault();
+                    event.stopPropagation();
+                    break;
+                } else if (type === "removeGroups") {
+                    window.siyuan.menus.menu.remove();
+                    transaction(options.protyle, [{
+                        action: "removeAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                    }], [{
+                        action: "setAttrViewGroup",
+                        avID: data.id,
+                        blockID,
+                        data: data.view.group
+                    }]);
+                    data.view.group = null;
+                    delete data.view.groups;
+                    menuElement.innerHTML = getGroupsHTML(fields, data.view);
+                    setPosition(menuElement, tabRect.right - menuElement.clientWidth, tabRect.bottom, tabRect.height);
                     event.preventDefault();
                     event.stopPropagation();
                     break;

@@ -764,6 +764,11 @@ func loadNodesByStartEnd(tree *parse.Tree, startID, endID string) (nodes []*ast.
 			}
 			break
 		}
+
+		if len(nodes) >= Conf.Editor.DynamicLoadBlocks {
+			// 如果加载到指定数量的块则停止加载
+			break
+		}
 	}
 	return
 }
@@ -962,8 +967,13 @@ func DuplicateDoc(tree *parse.Tree) {
 	msgId := util.PushMsg(Conf.Language(116), 30000)
 	defer util.PushClearMsg(msgId)
 
+	previousPath := tree.Path
 	resetTree(tree, "Duplicated", false)
 	createTreeTx(tree)
+	box := Conf.Box(tree.Box)
+	if nil != box {
+		box.addSort(previousPath, tree.ID)
+	}
 	FlushTxQueue()
 
 	// 复制为副本时将该副本块插入到数据库中 https://github.com/siyuan-note/siyuan/issues/11959
@@ -981,7 +991,7 @@ func DuplicateDoc(tree *parse.Tree) {
 			AddAttributeViewBlock(nil, []map[string]interface{}{{
 				"id":         n.ID,
 				"isDetached": false,
-			}}, avID, "", "", false)
+			}}, avID, "", "", "")
 			ReloadAttrView(avID)
 		}
 		return ast.WalkContinue
@@ -1599,13 +1609,7 @@ func removeDoc0(tree *parse.Tree, childrenDir string) {
 	refDefIDs := getRefDefIDs(tree.Root)
 	// 推送定义节点引用计数
 	for _, defID := range refDefIDs {
-		defTree, _ := LoadTreeByBlockID(defID)
-		if nil != defTree {
-			defNode := treenode.GetNodeInTree(defTree, defID)
-			if nil != defNode {
-				task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defTree.ID, defNode.ID)
-			}
-		}
+		task.AppendAsyncTaskWithDelay(task.SetDefRefCount, util.SQLFlushInterval, refreshRefCount, defID)
 	}
 
 	treenode.RemoveBlockTreesByPathPrefix(childrenDir)

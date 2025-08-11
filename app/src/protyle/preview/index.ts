@@ -184,7 +184,7 @@ export class Preview {
         }
         this.mdTimeoutId = window.setTimeout(() => {
             fetchPost("/api/export/preview", {
-                id: protyle.block.parentID || protyle.options.blockId,
+                id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
             }, response => {
                 const oldScrollTop = protyle.preview.previewElement.scrollTop;
                 protyle.preview.previewElement.innerHTML = response.data.html;
@@ -277,14 +277,17 @@ export class Preview {
             this.processZHTable(copyElement);
         } else if (type === "yuque") {
             fetchPost("/api/lute/copyStdMarkdown", {
-                id: protyle.block.rootID,
+                id: protyle.block.id || protyle.options.blockId || protyle.block.parentID,
                 assetsDestSpace2Underscore: true,
+                fillCSSVar: true,
+                adjustHeadingLevel: true,
             }, (response) => {
                 writeText(response.data);
                 showMessage(`${window.siyuan.languages.pasteToYuque}`);
             });
             return;
         }
+
         // 防止背景色被粘贴到公众号中
         copyElement.style.backgroundColor = "#fff";
         // 代码背景

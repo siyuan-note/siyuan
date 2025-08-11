@@ -439,7 +439,7 @@ ${genHintItemHTML(item)}
             if (!rowElement) {
                 return;
             }
-            const previousID = cellElement.dataset.blockId;
+            const previousID = rowElement.dataset.id;
             const avID = nodeElement.getAttribute("data-av-id");
             let tempElement = document.createElement("div");
             tempElement.innerHTML = value.replace(/<mark>/g, "").replace(/<\/mark>/g, "");

@@ -33,10 +33,10 @@ import (
 
 type Value struct {
 	ID         string  `json:"id,omitempty"`
-	KeyID      string  `json:"keyID,omitempty"`
-	BlockID    string  `json:"blockID,omitempty"`
-	Type       KeyType `json:"type,omitempty"`
-	IsDetached bool    `json:"isDetached,omitempty"`
+	KeyID      string  `json:"keyID,omitempty"`      // 字段 ID
+	BlockID    string  `json:"blockID,omitempty"`    // 项目 ID
+	Type       KeyType `json:"type,omitempty"`       // 字段类型
+	IsDetached bool    `json:"isDetached,omitempty"` // 是否为非绑定块，注意这个字段只能在主键（KeyTypeBlock）上使用，其他类型的值不要使用
 
 	CreatedAt int64 `json:"createdAt,omitempty"`
 	UpdatedAt int64 `json:"updatedAt,omitempty"`
@@ -210,7 +210,7 @@ func (value *Value) IsEdited() bool {
 	}
 
 	if KeyTypeCheckbox == value.Type {
-		// 勾选框不会为空，即使勾选框未勾选，也不算是空，所以不能用下面的 IsEmpty 判断，这里使用更新时间判断是否编辑过 https://github.com/siyuan-note/siyuan/issues/11016
+		// 复选框不会为空，即使复选框未勾选，也不算是空，所以不能用下面的 IsEmpty 判断，这里使用更新时间判断是否编辑过 https://github.com/siyuan-note/siyuan/issues/11016
 		return value.CreatedAt != value.UpdatedAt
 	}
 
@@ -289,7 +289,7 @@ func (value *Value) IsEmpty() bool {
 		if nil == value.Checkbox {
 			return true
 		}
-		return false // 勾选框不会为空
+		return false // 复选框不会为空
 	case KeyTypeRelation:
 		return 1 > len(value.Relation.Contents)
 	case KeyTypeRollup:
@@ -374,7 +374,7 @@ func (value *Value) GetValByType(typ KeyType) (ret interface{}) {
 }
 
 type ValueBlock struct {
-	ID      string `json:"id"`
+	ID      string `json:"id"` // 绑定的块 ID，非绑定块时为空
 	Icon    string `json:"icon"`
 	Content string `json:"content"`
 	Created int64  `json:"created"`

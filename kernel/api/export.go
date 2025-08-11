@@ -29,6 +29,7 @@ import (
 	"github.com/88250/gulu"
 	"github.com/88250/lute/parse"
 	"github.com/gin-gonic/gin"
+	"github.com/mssola/useragent"
 	"github.com/siyuan-note/logging"
 	"github.com/siyuan-note/siyuan/kernel/model"
 	"github.com/siyuan-note/siyuan/kernel/util"
@@ -431,7 +432,17 @@ func exportMdContent(c *gin.Context) {
 		fillCSSVar = arg["fillCSSVar"].(bool)
 	}
 
-	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar)
+	adjustHeadingLevel := false
+	if nil != arg["adjustHeadingLevel"] {
+		adjustHeadingLevel = arg["adjustHeadingLevel"].(bool)
+	}
+
+	imgTag := false
+	if nil != arg["imgTag"] {
+		imgTag = arg["imgTag"].(bool)
+	}
+
+	hPath, content := model.ExportMarkdownContent(id, refMode, embedMode, yfm, fillCSSVar, adjustHeadingLevel, imgTag)
 	ret.Data = map[string]interface{}{
 		"hPath":   hPath,
 		"content": content,
@@ -622,9 +633,22 @@ func exportPreview(c *gin.Context) {
 	}
 
 	id := arg["id"].(string)
-	stdHTML := model.Preview(id)
+
+	userAgentStr := c.GetHeader("User-Agent")
+	fillCSSVar := true
+	if userAgentStr != "" {
+		ua := useragent.New(userAgentStr)
+		name, _ := ua.Browser()
+		// Chrome、Edge、SiYuan 桌面端不需要替换 CSS 变量
+		if !ua.Mobile() && (name == "Chrome" || name == "Edge" || strings.Contains(userAgentStr, "Electron") || strings.Contains(userAgentStr, "SiYuan/")) {
+			fillCSSVar = false
+		}
+	}
+
+	stdHTML := model.Preview(id, fillCSSVar)
 	ret.Data = map[string]interface{}{
-		"html": stdHTML,
+		"html":       stdHTML,
+		"fillCSSVar": fillCSSVar,
 	}
 }
 

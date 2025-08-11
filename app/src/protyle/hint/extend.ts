@@ -332,6 +332,7 @@ export const hintSlash = (key: string, protyle: IProtyle) => {
         plugin.protyleSlash.forEach(slash => {
             allList.push({
                 filter: slash.filter,
+                id: slash.id,
                 value: `plugin${Constants.ZWSP}${plugin.name}${Constants.ZWSP}${slash.id}`,
                 html: slash.html
             });
@@ -564,7 +565,7 @@ export const hintMoveBlock = (pathString: string, sourceElements: Element[], pro
             item.parentElement) {
             topSourceElement = getTopAloneElement(item);
             sideElement = topSourceElement.nextElementSibling || topSourceElement.previousElementSibling;
-            if (topSourceElement.isSameNode(item)) {
+            if (topSourceElement === item) {
                 topSourceElement = undefined;
             }
         }

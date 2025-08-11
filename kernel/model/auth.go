@@ -46,8 +46,7 @@ const (
 
 var (
 	accountsMap = AccountsMap{}
-
-	key = make([]byte, 32)
+	jwtKey      = make([]byte, 32)
 )
 
 func GetBasicAuthAccount(username string) *Account {
@@ -69,7 +68,7 @@ func InitAccounts() {
 }
 
 func InitJWT() {
-	if _, err := rand.Read(key); err != nil {
+	if _, err := rand.Read(jwtKey); err != nil {
 		logging.LogErrorf("generate JWT signing key failed: %s", err)
 		return
 	}
@@ -87,7 +86,7 @@ func InitJWT() {
 				ClaimsKeyRole: RoleReader,
 			},
 		)
-		if token, err := t.SignedString(key); err != nil {
+		if token, err := t.SignedString(jwtKey); err != nil {
 			logging.LogErrorf("JWT signature failed: %s", err)
 			return
 		} else {
@@ -101,7 +100,7 @@ func ParseJWT(tokenString string) (*jwt.Token, error) {
 	return jwt.Parse(
 		tokenString,
 		func(token *jwt.Token) (interface{}, error) {
-			return key, nil
+			return jwtKey, nil
 		},
 		jwt.WithIssuer(iss),
 		jwt.WithSubject(sub),

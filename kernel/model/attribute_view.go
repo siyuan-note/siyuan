@@ -1010,7 +1010,7 @@ func GetAttributeViewPrimaryKeyValues(avID, keyword string, page, pageSize int) 
 	keyValues = attrView.GetBlockKeyValues()
 	var values []*av.Value
 	for _, kv := range keyValues.Values {
-		if !kv.IsDetached && !treenode.ExistBlockTree(kv.BlockID) {
+		if !kv.IsDetached && !treenode.ExistBlockTree(kv.Block.ID) {
 			continue
 		}
 

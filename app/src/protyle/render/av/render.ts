@@ -17,6 +17,7 @@ import {renderGallery} from "./gallery/render";
 import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
+import {clearSelect} from "../../util/clearSelect";
 
 interface ITableOptions {
     protyle: IProtyle,
@@ -679,7 +680,9 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         const avID = operation.action === "setAttrViewName" ? operation.id : operation.avID;
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${avID}"]`)).forEach((item: HTMLElement) => {
             item.removeAttribute("data-render");
-            if (operation.action === "sortAttrViewCol" || operation.action === "sortAttrViewRow") {
+            if (operation.action === "sortAttrViewRow") {
+                clearSelect(["cell"], item);
+            } else if (operation.action === "sortAttrViewCol") {
                 item.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
                     item.classList.remove("av__cell--active");
                     item.querySelector(".av__drag-fill")?.remove();

@@ -3043,7 +3043,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 						if nil != tree {
 							trees[bt.RootID] = tree
-							if node := treenode.GetNodeInTree(tree, val.BlockID); nil != node {
+							if node := treenode.GetNodeInTree(tree, val.Block.ID); nil != node {
 								if err = removeNodeAvID(node, avID, tx, tree); err != nil {
 									return
 								}

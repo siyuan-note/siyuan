@@ -853,6 +853,11 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		}
 	}
 
+	if FilterOperatorIsNotEmpty == filter.Operator {
+		// 在过滤非空值的情况下，不设置默认值 https://github.com/siyuan-note/siyuan/issues/15540
+		return nil
+	}
+
 	ret = filter.Value.Clone()
 	ret.ID = ast.NewNodeID()
 	ret.KeyID = key.ID

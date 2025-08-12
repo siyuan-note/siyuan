@@ -595,6 +595,15 @@ type ValueSelect struct {
 	Color   string `json:"color"`
 }
 
+func MSelectExistOption(mSelect []*ValueSelect, opt string) bool {
+	for _, s := range mSelect {
+		if s.Content == opt {
+			return true
+		}
+	}
+	return false
+}
+
 type ValueURL struct {
 	Content string `json:"content"`
 }

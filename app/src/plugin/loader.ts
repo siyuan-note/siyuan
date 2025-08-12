@@ -9,7 +9,7 @@ import {getFrontend, isMobile, isWindow} from "../util/functions";
 import {Constants} from "../constants";
 import {uninstall} from "./uninstall";
 import {setStorageVal} from "../protyle/util/compatibility";
-import { getAllEditor } from "../layout/getAll";
+import {getAllEditor} from "../layout/getAll";
 
 const requireFunc = (key: string) => {
     const modules = {
@@ -92,7 +92,7 @@ export const loadPlugin = async (app: App, item: IPluginData) => {
     afterLoadPlugin(plugin);
     saveLayout();
     getAllEditor().forEach(editor => {
-      editor.protyle.toolbar.update(editor.protyle);
+        editor.protyle.toolbar.update(editor.protyle);
     });
     return plugin;
 };
@@ -129,6 +129,9 @@ export const afterLoadPlugin = (plugin: Plugin) => {
 
     if (!isWindow() || isMobile()) {
         plugin.topBarIcons.forEach(element => {
+            if (document.contains(element)) {
+                return;
+            }
             if (isMobile()) {
                 if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(element.id)) {
                     document.querySelector("#menuAbout").after(element);
@@ -144,6 +147,9 @@ export const afterLoadPlugin = (plugin: Plugin) => {
     /// #if !MOBILE
     resizeTopBar();
     plugin.statusBarIcons.forEach(element => {
+        if (document.contains(element)) {
+            return;
+        }
         const statusElement = document.getElementById("status");
         if (element.getAttribute("data-location") === "right") {
             statusElement.insertAdjacentElement("beforeend", element);
@@ -167,7 +173,7 @@ export const afterLoadPlugin = (plugin: Plugin) => {
         updateDock(dockItem, index, plugin, "Bottom");
     });
     Object.keys(plugin.docks).forEach(key => {
-        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name]  && window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
+        if (window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name] && window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key]) {
             plugin.docks[key].config = window.siyuan.storage[Constants.LOCAL_PLUGIN_DOCKS][plugin.name][key];
         }
         const dock = plugin.docks[key];

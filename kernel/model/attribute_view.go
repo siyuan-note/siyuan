@@ -125,7 +125,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	groupKey := view.GetGroupKey(attrView)
-	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
+	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ && nil != nearItem {
 		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
 			newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
@@ -2965,17 +2965,18 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 }
 
 func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) (ret *av.Value) {
-	if nil != nearItem {
-		defaultVal := nearItem.GetValue(key.ID)
-		ret = defaultVal.Clone()
-		ret.ID = ast.NewNodeID()
-		ret.KeyID = key.ID
-		ret.BlockID = addingBlockID
-		ret.CreatedAt = util.CurrentTimeMillis()
-		ret.UpdatedAt = ret.CreatedAt + 1000
+	if nil == nearItem {
 		return
 	}
-	return av.GetAttributeViewDefaultValue(ast.NewNodeID(), key.ID, addingBlockID, key.Type)
+
+	defaultVal := nearItem.GetValue(key.ID)
+	ret = defaultVal.Clone()
+	ret.ID = ast.NewNodeID()
+	ret.KeyID = key.ID
+	ret.BlockID = addingBlockID
+	ret.CreatedAt = util.CurrentTimeMillis()
+	ret.UpdatedAt = ret.CreatedAt + 1000
+	return
 }
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {

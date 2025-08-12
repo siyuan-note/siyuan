@@ -667,7 +667,9 @@ export const resizeTopBar = () => {
         return;
     }
     const dragElement = toolbarElement.querySelector("#drag") as HTMLElement;
-
+    if (!dragElement) {
+        return;
+    }
     dragElement.style.padding = "";
     const barMoreElement = toolbarElement.querySelector("#barMore");
     barMoreElement.classList.remove("fn__none");

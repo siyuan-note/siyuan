@@ -196,11 +196,11 @@ export class Plugin {
             iconElement.setAttribute("data-location", options.position || "right");
             resizeTopBar();
         }
-        if (isMobile()) {
+        if (isMobile() && window.siyuan.storage) {
             if (!window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
                 document.querySelector("#menuAbout")?.after(iconElement);
             }
-        } else if (!isWindow()) {
+        } else if (!isWindow() && window.siyuan.storage) {
             if (window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(iconElement.id)) {
                 iconElement.classList.add("fn__none");
             }

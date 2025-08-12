@@ -155,8 +155,19 @@ export class Plugin {
     }
 
     public addIcons(svg: string) {
-        document.body.insertAdjacentHTML("afterbegin", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+        const svgElement = document.querySelector(`svg[data-name="${this.name}"] defs`);
+        if (svgElement) {
+            svgElement.innerHTML = svg;
+        } else {
+            const lastSvgElement = document.querySelector("body > svg:last-of-type");
+            if (lastSvgElement) {
+                lastSvgElement.insertAdjacentHTML("afterend", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
 <defs>${svg}</defs></svg>`);
+            } else {
+                document.body.insertAdjacentHTML("afterbegin", `<svg data-name="${this.name}" style="position: absolute; width: 0; height: 0; overflow: hidden;" xmlns="http://www.w3.org/2000/svg">
+<defs>${svg}</defs></svg>`);
+            }
+        }
     }
 
     public addTopBar(options: {

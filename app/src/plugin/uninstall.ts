@@ -62,6 +62,8 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             });
             // rm plugin
             app.plugins.splice(index, 1);
+            // rm icons
+            document.querySelector(`svg[data-name="${plugin.name}"]`)?.remove();
             // rm protyle toolbar
             getAllEditor().forEach(editor => {
                 editor.protyle.toolbar.update(editor.protyle);

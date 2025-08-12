@@ -1826,9 +1826,14 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	av.Filter(table, attrView)
 	av.Sort(table, attrView)
 
+	ids:= map[string]bool{}
+	for _, column := range table.Columns { 
+		ids[column.ID] = column.Hidden
+	}
+
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
-			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset {
+			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset && !ids[cell.Value.KeyID]{
 				for _, a := range cell.Value.MAsset {
 					if av.AssetTypeImage == a.Type {
 						ret = append(ret, a.Content)

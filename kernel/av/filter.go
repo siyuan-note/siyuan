@@ -268,63 +268,11 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other && nil != other.Block {
-			switch operator {
-			case FilterOperatorIsEqual:
-				return value.Block.Content == other.Block.Content
-			case FilterOperatorIsNotEqual:
-				return value.Block.Content != other.Block.Content
-			case FilterOperatorContains:
-				return strings.Contains(value.Block.Content, other.Block.Content)
-			case FilterOperatorDoesNotContain:
-				return !strings.Contains(value.Block.Content, other.Block.Content)
-			case FilterOperatorStartsWith:
-				return strings.HasPrefix(value.Block.Content, other.Block.Content)
-			case FilterOperatorEndsWith:
-				return strings.HasSuffix(value.Block.Content, other.Block.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.Block.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.Block.Content)
-			}
+			return filterTextContent(operator, value.Block.Content, other.Block.Content)
 		}
 	case KeyTypeText:
 		if nil != value.Text && nil != other && nil != other.Text {
-			switch operator {
-			case FilterOperatorIsEqual:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return value.Text.Content == other.Text.Content
-			case FilterOperatorIsNotEqual:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return value.Text.Content != other.Text.Content
-			case FilterOperatorContains:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return strings.Contains(value.Text.Content, other.Text.Content)
-			case FilterOperatorDoesNotContain:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return !strings.Contains(value.Text.Content, other.Text.Content)
-			case FilterOperatorStartsWith:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return strings.HasPrefix(value.Text.Content, other.Text.Content)
-			case FilterOperatorEndsWith:
-				if "" == strings.TrimSpace(other.Text.Content) {
-					return true
-				}
-				return strings.HasSuffix(value.Text.Content, other.Text.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.Text.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.Text.Content)
-			}
+			return filterTextContent(operator, value.Text.Content, other.Text.Content)
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other && nil != other.Number {
@@ -448,66 +396,15 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other && nil != other.URL {
-			switch operator {
-			case FilterOperatorIsEqual:
-				return value.URL.Content == other.URL.Content
-			case FilterOperatorIsNotEqual:
-				return value.URL.Content != other.URL.Content
-			case FilterOperatorContains:
-				return strings.Contains(value.URL.Content, other.URL.Content)
-			case FilterOperatorDoesNotContain:
-				return !strings.Contains(value.URL.Content, other.URL.Content)
-			case FilterOperatorStartsWith:
-				return strings.HasPrefix(value.URL.Content, other.URL.Content)
-			case FilterOperatorEndsWith:
-				return strings.HasSuffix(value.URL.Content, other.URL.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.URL.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.URL.Content)
-			}
+			return filterTextContent(operator, value.URL.Content, other.URL.Content)
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other && nil != other.Email {
-			switch operator {
-			case FilterOperatorIsEqual:
-				return value.Email.Content == other.Email.Content
-			case FilterOperatorIsNotEqual:
-				return value.Email.Content != other.Email.Content
-			case FilterOperatorContains:
-				return strings.Contains(value.Email.Content, other.Email.Content)
-			case FilterOperatorDoesNotContain:
-				return !strings.Contains(value.Email.Content, other.Email.Content)
-			case FilterOperatorStartsWith:
-				return strings.HasPrefix(value.Email.Content, other.Email.Content)
-			case FilterOperatorEndsWith:
-				return strings.HasSuffix(value.Email.Content, other.Email.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.Email.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.Email.Content)
-			}
+			return filterTextContent(operator, value.Email.Content, other.URL.Content)
 		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other && nil != other.Phone {
-			switch operator {
-			case FilterOperatorIsEqual:
-				return value.Phone.Content == other.Phone.Content
-			case FilterOperatorIsNotEqual:
-				return value.Phone.Content != other.Phone.Content
-			case FilterOperatorContains:
-				return strings.Contains(value.Phone.Content, other.Phone.Content)
-			case FilterOperatorDoesNotContain:
-				return !strings.Contains(value.Phone.Content, other.Phone.Content)
-			case FilterOperatorStartsWith:
-				return strings.HasPrefix(value.Phone.Content, other.Phone.Content)
-			case FilterOperatorEndsWith:
-				return strings.HasSuffix(value.Phone.Content, other.Phone.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.Phone.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.Phone.Content)
-			}
+			return filterTextContent(operator, value.Phone.Content, other.Phone.Content)
 		}
 	case KeyTypeMAsset:
 		if nil != value.MAsset && nil != other && nil != other.MAsset && 0 < len(value.MAsset) && 0 < len(other.MAsset) {
@@ -615,6 +512,46 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		return value.IsEmpty()
 	case FilterOperatorIsNotEmpty:
 		return !value.IsEmpty()
+	}
+	return false
+}
+
+func filterTextContent(operator FilterOperator, valueContent, otherValueContent string) bool {
+	switch operator {
+	case FilterOperatorIsEqual:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return valueContent == otherValueContent
+	case FilterOperatorIsNotEqual:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return valueContent != otherValueContent
+	case FilterOperatorContains:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return strings.Contains(valueContent, otherValueContent)
+	case FilterOperatorDoesNotContain:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return !strings.Contains(valueContent, otherValueContent)
+	case FilterOperatorStartsWith:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return strings.HasPrefix(valueContent, otherValueContent)
+	case FilterOperatorEndsWith:
+		if "" == strings.TrimSpace(otherValueContent) {
+			return true
+		}
+		return strings.HasSuffix(valueContent, otherValueContent)
+	case FilterOperatorIsEmpty:
+		return "" == strings.TrimSpace(valueContent)
+	case FilterOperatorIsNotEmpty:
+		return "" != strings.TrimSpace(valueContent)
 	}
 	return false
 }

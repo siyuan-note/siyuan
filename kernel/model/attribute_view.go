@@ -125,26 +125,42 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	groupKey := view.GetGroupKey(attrView)
-	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ && nil != nearItem {
-		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
-			newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
-			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
-				// 因为单选或多选只能按选项分组，并且可能存在空白分组（前面可能找不到临近项） ，所以单选或多选类型的分组字段使用分组值内容对应的选项
-				if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
-					exists := false
-					for _, s := range newValue.MSelect {
-						if s.Content == groupView.GetGroupValue() {
-							exists = true
-						}
-					}
-					if !exists {
-						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
-					}
-				}
+	if nil == groupKey {
+		return
+	}
+
+	keyValues, _ := attrView.GetKeyValues(groupKey.ID)
+	if nil == keyValues {
+		return
+	}
+
+	newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
+	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type { // 单独处理单选或多选
+		// 因为单选或多选只能按选项分组，并且可能存在空白分组（找不到临近项），所以单选或多选类型的分组字段使用分组值内容对应的选项
+		if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
+			if nil == newValue {
+				// 如果没有临近项，则尝试从过滤结果中获取
+				newValue = ret[groupKey.ID]
 			}
 
+			if nil != newValue {
+				if !av.MSelectExistOption(newValue.MSelect, groupView.GetGroupValue()) {
+					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+				}
+			} else {
+				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type)
+				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+			}
+		}
+
+		if nil != newValue {
 			ret[groupKey.ID] = newValue
 		}
+		return
+	}
+
+	if nil != newValue && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
+		ret[groupKey.ID] = newValue
 	}
 	return
 }
@@ -1753,10 +1769,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 
 // GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
 type GroupState struct {
-	ID     string
-	Folded bool
-	Hidden int
-	Sort   int
+	ID      string
+	Folded  bool
+	Hidden  int
+	Sort    int
+	ItemIDs []string
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -1767,10 +1784,11 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 
 	for _, groupView := range view.Groups {
 		groupStates[groupView.GetGroupValue()] = &GroupState{
-			ID:     groupView.ID,
-			Folded: groupView.GroupFolded,
-			Hidden: groupView.GroupHidden,
-			Sort:   groupView.GroupSort,
+			ID:      groupView.ID,
+			Folded:  groupView.GroupFolded,
+			Hidden:  groupView.GroupHidden,
+			Sort:    groupView.GroupSort,
+			ItemIDs: groupView.GroupItemIDs,
 		}
 	}
 	return
@@ -1783,6 +1801,15 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
+
+			itemIDsSort := map[string]int{}
+			for i, itemID := range state.ItemIDs {
+				itemIDsSort[itemID] = i
+			}
+
+			sort.SliceStable(groupView.GroupItemIDs, func(i, j int) bool {
+				return itemIDsSort[groupView.GroupItemIDs[i]] < itemIDsSort[groupView.GroupItemIDs[j]]
+			})
 		}
 	}
 
@@ -1826,14 +1853,14 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	av.Filter(table, attrView)
 	av.Sort(table, attrView)
 
-	ids:= map[string]bool{}
-	for _, column := range table.Columns { 
+	ids := map[string]bool{}
+	for _, column := range table.Columns {
 		ids[column.ID] = column.Hidden
 	}
 
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
-			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset && !ids[cell.Value.KeyID]{
+			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset && !ids[cell.Value.KeyID] {
 				for _, a := range cell.Value.MAsset {
 					if av.AssetTypeImage == a.Type {
 						ret = append(ret, a.Content)
@@ -2945,12 +2972,10 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 			continue
 		}
 
-		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
+		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) && groupValueDefault != groupView.GetGroupValue() {
 			// 单选或多选类型的值可能需要从分组条件中获取默认值
-			if groupValueDefault != groupView.GetGroupValue() {
-				if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
-					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
-				}
+			if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
+				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 			}
 		}
 
@@ -3470,7 +3495,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
 			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
-				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView {
+				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
 
 					for i, r := range targetGroupView.GroupItemIDs {
@@ -3480,6 +3505,11 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+
+					if groupKey := view.GetGroupKey(attrView); av.KeyTypeMSelect == groupKey.Type {
+						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+						regenAttrViewGroups(attrView, "force")
+					}
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

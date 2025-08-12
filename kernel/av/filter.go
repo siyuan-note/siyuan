@@ -328,6 +328,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeNumber:
 		if nil != value.Number && nil != other && nil != other.Number {
+			if !other.Number.IsNotEmpty {
+				return true
+			}
+
 			switch operator {
 			case FilterOperatorIsEqual:
 				return value.Number.Content == other.Number.Content && value.Number.IsNotEmpty == other.Number.IsNotEmpty
@@ -402,48 +406,39 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
-			if nil != other && nil != other.MSelect {
-				switch operator {
-				case FilterOperatorIsEqual, FilterOperatorContains:
-					contains := false
-					for _, v := range value.MSelect {
-						for _, v2 := range other.MSelect {
-							if v.Content == v2.Content {
-								contains = true
-								break
-							}
-						}
-					}
-					return contains
-				case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
-					contains := false
-					for _, v := range value.MSelect {
-						for _, v2 := range other.MSelect {
-							if v.Content == v2.Content {
-								contains = true
-								break
-							}
-						}
-					}
-					return !contains
-				case FilterOperatorIsEmpty:
-					return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
-				case FilterOperatorIsNotEmpty:
-					return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
-				}
-				return false
+			if nil == other || nil == other.MSelect || 1 > len(other.MSelect) {
+				return true
 			}
 
-			// 没有设置比较值
-
 			switch operator {
-			case FilterOperatorIsEqual, FilterOperatorIsNotEqual, FilterOperatorContains, FilterOperatorDoesNotContain:
-				return true
+			case FilterOperatorIsEqual, FilterOperatorContains:
+				contains := false
+				for _, v := range value.MSelect {
+					for _, v2 := range other.MSelect {
+						if v.Content == v2.Content {
+							contains = true
+							break
+						}
+					}
+				}
+				return contains
+			case FilterOperatorIsNotEqual, FilterOperatorDoesNotContain:
+				contains := false
+				for _, v := range value.MSelect {
+					for _, v2 := range other.MSelect {
+						if v.Content == v2.Content {
+							contains = true
+							break
+						}
+					}
+				}
+				return !contains
 			case FilterOperatorIsEmpty:
 				return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
 			case FilterOperatorIsNotEmpty:
 				return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
 			}
+			return false
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other && nil != other.URL {
@@ -854,7 +849,6 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 	ret.CreatedAt = util.CurrentTimeMillis()
 	ret.UpdatedAt = ret.CreatedAt + 1000
 
-	// 没有默认值则使用过滤条件的值
 	switch filter.Value.Type {
 	case KeyTypeBlock:
 		switch filter.Operator {
@@ -947,9 +941,13 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 			}
 			ret.MSelect = []*ValueSelect{valueSelect}
 		case FilterOperatorIsNotEqual:
+			return nil
+		case FilterOperatorContains:
 			if 0 < len(filter.Value.MSelect) {
-				ret.MSelect = []*ValueSelect{}
+				ret.MSelect = []*ValueSelect{{Content: filter.Value.MSelect[0].Content, Color: filter.Value.MSelect[0].Color}}
 			}
+		case FilterOperatorDoesNotContain:
+			return nil
 		case FilterOperatorIsEmpty:
 			ret.MSelect = []*ValueSelect{}
 		case FilterOperatorIsNotEmpty:

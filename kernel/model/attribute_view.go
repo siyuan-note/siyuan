@@ -3523,6 +3523,13 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	if nil != view.Group && "" != operation.GroupID {
 		if groupView := view.GetGroupByID(operation.GroupID); nil != groupView {
+			groupKey := view.GetGroupKey(attrView)
+			isAcrossGroup := operation.GroupID != operation.TargetGroupID
+			if isAcrossGroup && (av.KeyTypeTemplate == groupKey.Type || av.KeyTypeRollup == groupKey.Type || av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
+				// 这些字段类型不支持跨分组移动，因为它们的值是自动计算生成的
+				return
+			}
+
 			for i, id := range groupView.GroupItemIDs {
 				if id == operation.ID {
 					itemID = id
@@ -3537,9 +3544,15 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			}
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
-			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
+			if isAcrossGroup {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
+
+					if av.KeyTypeMSelect == groupKey.Type {
+						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+						regenAttrViewGroups(attrView, "force")
+						return
+					}
 
 					for i, r := range targetGroupView.GroupItemIDs {
 						if r == operation.PreviousID {
@@ -3548,11 +3561,6 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
-
-					if groupKey := view.GetGroupKey(attrView); av.KeyTypeMSelect == groupKey.Type {
-						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
-						regenAttrViewGroups(attrView, "force")
-					}
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

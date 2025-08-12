@@ -86,10 +86,6 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	nearItem := getNearItem(attrView, view, groupView, previousItemID)
-	filterKeyIDs := map[string]bool{}
-	for _, f := range view.Filters {
-		filterKeyIDs[f.Column] = true
-	}
 
 	// 对库中存在模板字段和汇总字段的情况进行处理（尽量从临近项获取新值，获取不到的话直接返回）
 	existSpecialField := false
@@ -111,19 +107,17 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		}
 	}
 
+	filterKeyIDs := map[string]bool{}
 	for _, filter := range view.Filters {
+		filterKeyIDs[filter.Column] = true
 		keyValues, _ := attrView.GetKeyValues(filter.Column)
 		if nil == keyValues {
 			continue
 		}
 
-		var newValue *av.Value
-		if nil != nearItem {
-			// 存在临近项时优先通过临近项获取新值
+		newValue := filter.GetAffectValue(keyValues.Key, addingItemID)
+		if nil == newValue {
 			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-		} else {
-			// 不存在临近项时通过过滤条件计算新值
-			newValue = filter.GetAffectValue(keyValues.Key, addingItemID)
 		}
 		if nil != newValue {
 			ret[keyValues.Key.ID] = newValue
@@ -131,7 +125,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	groupKey := view.GetGroupKey(attrView)
-	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
+	if nil != groupKey && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ && nil != nearItem {
 		if keyValues, _ := attrView.GetKeyValues(groupKey.ID); nil != keyValues {
 			newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
 			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
@@ -1832,9 +1826,14 @@ func GetCurrentAttributeViewImages(avID, viewID, query string) (ret []string, er
 	av.Filter(table, attrView)
 	av.Sort(table, attrView)
 
+	ids:= map[string]bool{}
+	for _, column := range table.Columns { 
+		ids[column.ID] = column.Hidden
+	}
+
 	for _, row := range table.Rows {
 		for _, cell := range row.Cells {
-			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset {
+			if nil != cell.Value && av.KeyTypeMAsset == cell.Value.Type && nil != cell.Value.MAsset && !ids[cell.Value.KeyID]{
 				for _, a := range cell.Value.MAsset {
 					if av.AssetTypeImage == a.Type {
 						ret = append(ret, a.Content)
@@ -2971,17 +2970,18 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 }
 
 func getNewValueByNearItem(nearItem av.Item, key *av.Key, addingBlockID string) (ret *av.Value) {
-	if nil != nearItem {
-		defaultVal := nearItem.GetValue(key.ID)
-		ret = defaultVal.Clone()
-		ret.ID = ast.NewNodeID()
-		ret.KeyID = key.ID
-		ret.BlockID = addingBlockID
-		ret.CreatedAt = util.CurrentTimeMillis()
-		ret.UpdatedAt = ret.CreatedAt + 1000
+	if nil == nearItem {
 		return
 	}
-	return av.GetAttributeViewDefaultValue(ast.NewNodeID(), key.ID, addingBlockID, key.Type)
+
+	defaultVal := nearItem.GetValue(key.ID)
+	ret = defaultVal.Clone()
+	ret.ID = ast.NewNodeID()
+	ret.KeyID = key.ID
+	ret.BlockID = addingBlockID
+	ret.CreatedAt = util.CurrentTimeMillis()
+	ret.UpdatedAt = ret.CreatedAt + 1000
+	return
 }
 
 func getNearItem(attrView *av.AttributeView, view, groupView *av.View, previousItemID string) (ret av.Item) {

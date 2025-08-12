@@ -3548,12 +3548,6 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
 
-					if av.KeyTypeMSelect == groupKey.Type {
-						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
-						regenAttrViewGroups(attrView, "force")
-						return
-					}
-
 					for i, r := range targetGroupView.GroupItemIDs {
 						if r == operation.PreviousID {
 							previousIndex = i + 1
@@ -3561,6 +3555,13 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+
+					if av.KeyTypeMSelect == groupKey.Type {
+						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+						regenAttrViewGroups(attrView, "force")
+						return
+					}
+
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

@@ -4499,7 +4499,7 @@ func regenAttrViewGroups(attrView *av.AttributeView, keyID string) {
 		}
 
 		if "force" != keyID {
-			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
+			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeRollup != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
 				view.Group.Field != keyID {
 				continue
 			}

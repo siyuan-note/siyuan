@@ -195,6 +195,9 @@ const transformCellValue = (colType: TAVCol, value: IAVCellValue): IAVCellValue 
             content: getCellValueContent(value).toString(),
             color: "1"
         }];
+        if (!newValue.mSelect[0].content) {
+            newValue.mSelect = [];
+        }
     } else if (colType === "rollup") {
         newValue.rollup = {contents: [value]};
     } else if (colType === "checkbox") {

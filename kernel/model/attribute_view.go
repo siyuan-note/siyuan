@@ -2961,12 +2961,10 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 			continue
 		}
 
-		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) {
+		if (av.KeyTypeSelect == newValue.Type || av.KeyTypeMSelect == newValue.Type) && 1 > len(newValue.MSelect) && groupValueDefault != groupView.GetGroupValue() {
 			// 单选或多选类型的值可能需要从分组条件中获取默认值
-			if groupValueDefault != groupView.GetGroupValue() {
-				if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
-					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
-				}
+			if opt := keyValues.Key.GetOption(groupView.GetGroupValue()); nil != opt {
+				newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
 			}
 		}
 
@@ -3486,18 +3484,16 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
 			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
-				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView {
-					if !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
-						fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
+				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
+					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
 
-						for i, r := range targetGroupView.GroupItemIDs {
-							if r == operation.PreviousID {
-								previousIndex = i + 1
-								break
-							}
+					for i, r := range targetGroupView.GroupItemIDs {
+						if r == operation.PreviousID {
+							previousIndex = i + 1
+							break
 						}
-						targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 					}
+					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

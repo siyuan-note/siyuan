@@ -330,15 +330,9 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		if nil != value.Number && nil != other && nil != other.Number {
 			switch operator {
 			case FilterOperatorIsEqual:
-				if !other.Number.IsNotEmpty {
-					return true
-				}
-				return value.Number.Content == other.Number.Content
+				return value.Number.Content == other.Number.Content && value.Number.IsNotEmpty == other.Number.IsNotEmpty
 			case FilterOperatorIsNotEqual:
-				if !other.Number.IsNotEmpty {
-					return true
-				}
-				return value.Number.Content != other.Number.Content
+				return value.Number.Content != other.Number.Content || value.Number.IsNotEmpty != other.Number.IsNotEmpty
 			case FilterOperatorIsGreater:
 				return value.Number.Content > other.Number.Content
 			case FilterOperatorIsGreaterOrEqual:
@@ -853,11 +847,6 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		}
 	}
 
-	if FilterOperatorIsNotEmpty == filter.Operator {
-		// 在过滤非空值的情况下，不设置默认值 https://github.com/siyuan-note/siyuan/issues/15540
-		return nil
-	}
-
 	ret = filter.Value.Clone()
 	ret.ID = ast.NewNodeID()
 	ret.KeyID = key.ID
@@ -884,7 +873,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 		case FilterOperatorIsNotEmpty:
-			ret.Block = &ValueBlock{Content: "", Created: ret.CreatedAt, Updated: ret.UpdatedAt}
+			return nil
 		}
 	case KeyTypeText:
 		switch filter.Operator {
@@ -903,18 +892,14 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Text = &ValueText{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			ret.Text = &ValueText{Content: ""}
+			return nil
 		}
 	case KeyTypeNumber:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
 			ret.Number = &ValueNumber{Content: filter.Value.Number.Content, IsNotEmpty: false}
 		case FilterOperatorIsNotEqual:
-			if 0 == filter.Value.Number.Content {
-				ret.Number = &ValueNumber{Content: 1, IsNotEmpty: true}
-			} else {
-				ret.Number = &ValueNumber{Content: 0, IsNotEmpty: true}
-			}
+			ret.Number = &ValueNumber{Content: 0, IsNotEmpty: false}
 		case FilterOperatorIsGreater:
 			ret.Number = &ValueNumber{Content: filter.Value.Number.Content + 1, IsNotEmpty: true}
 		case FilterOperatorIsGreaterOrEqual:
@@ -970,6 +955,8 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsNotEmpty:
 			if 0 < len(key.Options) {
 				ret.MSelect = []*ValueSelect{{Content: key.Options[0].Name, Color: key.Options[0].Color}}
+			} else {
+				return nil
 			}
 		}
 	case KeyTypeURL:
@@ -977,7 +964,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEqual:
 			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
 		case FilterOperatorIsNotEqual:
-			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
+			ret.URL = &ValueURL{Content: ""}
 		case FilterOperatorContains:
 			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
 		case FilterOperatorDoesNotContain:
@@ -987,16 +974,16 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorEndsWith:
 			ret.URL = &ValueURL{Content: filter.Value.URL.Content}
 		case FilterOperatorIsEmpty:
-			ret.URL = &ValueURL{}
+			ret.URL = &ValueURL{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			ret.URL = &ValueURL{}
+			return nil
 		}
 	case KeyTypeEmail:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
 			ret.Email = &ValueEmail{Content: filter.Value.Email.Content}
 		case FilterOperatorIsNotEqual:
-			ret.Email = &ValueEmail{Content: filter.Value.Email.Content}
+			ret.Email = &ValueEmail{Content: ""}
 		case FilterOperatorContains:
 			ret.Email = &ValueEmail{Content: filter.Value.Email.Content}
 		case FilterOperatorDoesNotContain:
@@ -1008,14 +995,14 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Email = &ValueEmail{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			ret.Email = &ValueEmail{Content: ""}
+			return nil
 		}
 	case KeyTypePhone:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
 			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content}
 		case FilterOperatorIsNotEqual:
-			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content + ""}
+			ret.Phone = &ValuePhone{Content: ""}
 		case FilterOperatorContains:
 			ret.Phone = &ValuePhone{Content: filter.Value.Phone.Content}
 		case FilterOperatorDoesNotContain:
@@ -1027,7 +1014,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsEmpty:
 			ret.Phone = &ValuePhone{Content: ""}
 		case FilterOperatorIsNotEmpty:
-			ret.Phone = &ValuePhone{Content: ""}
+			return nil
 		}
 	case KeyTypeMAsset:
 		switch filter.Operator {

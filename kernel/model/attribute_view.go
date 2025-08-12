@@ -86,10 +86,6 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	nearItem := getNearItem(attrView, view, groupView, previousItemID)
-	filterKeyIDs := map[string]bool{}
-	for _, f := range view.Filters {
-		filterKeyIDs[f.Column] = true
-	}
 
 	// 对库中存在模板字段和汇总字段的情况进行处理（尽量从临近项获取新值，获取不到的话直接返回）
 	existSpecialField := false
@@ -111,20 +107,30 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		}
 	}
 
+	filterKeyIDs := map[string]bool{}
 	for _, filter := range view.Filters {
+		filterKeyIDs[filter.Column] = true
 		keyValues, _ := attrView.GetKeyValues(filter.Column)
 		if nil == keyValues {
 			continue
 		}
 
 		var newValue *av.Value
-		if nil != nearItem {
-			// 存在临近项时优先通过临近项获取新值
-			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-		} else {
-			// 不存在临近项时通过过滤条件计算新值
+
+		switch keyValues.Key.Type {
+		case av.KeyTypeNumber:
 			newValue = filter.GetAffectValue(keyValues.Key, addingItemID)
+			if nil == newValue {
+				newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
+			}
+		default:
+			if nil != nearItem {
+				newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
+			} else {
+				newValue = filter.GetAffectValue(keyValues.Key, addingItemID)
+			}
 		}
+
 		if nil != newValue {
 			ret[keyValues.Key.ID] = newValue
 		}

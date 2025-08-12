@@ -23,6 +23,7 @@ import {globalCommand} from "./global";
 import {getDisplayName, getNotebookName, getTopPaths, movePathTo, moveToPath, pathPosix} from "../../../util/pathName";
 import {hintMoveBlock} from "../../../protyle/hint/extend";
 import {fetchSyncPost} from "../../../util/fetch";
+import {focusByRange} from "../../../protyle/util/selection";
 
 export const commandPanel = (app: App) => {
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : undefined;
@@ -41,7 +42,12 @@ export const commandPanel = (app: App) => {
         <kbd>${window.siyuan.languages.enterKey}/${window.siyuan.languages.click}</kbd> ${window.siyuan.languages.confirm}
         <kbd>Esc</kbd> ${window.siyuan.languages.close}
     </div>
-</div>`
+</div>`,
+        destroyCallback() {
+            if (range) {
+                focusByRange(range);
+            }
+        },
     });
     dialog.element.setAttribute("data-key", Constants.DIALOG_COMMANDPANEL);
     const listElement = dialog.element.querySelector("#commands");

@@ -3559,9 +3559,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					if av.KeyTypeMSelect == groupKey.Type {
 						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
 						regenAttrViewGroups(attrView, "force")
-						return
 					}
-
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

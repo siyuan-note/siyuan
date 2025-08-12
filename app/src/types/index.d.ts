@@ -81,7 +81,7 @@ type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
     "paste" |
     "input-search" |
     "loaded-protyle-dynamic" | "loaded-protyle-static" |
-    "switch-protyle" |
+    "switch-protyle" | "switch-protyle-mode" |
     "destroy-protyle" |
     "lock-screen" |
     "mobile-keyboard-show" | "mobile-keyboard-hide"

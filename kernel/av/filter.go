@@ -352,6 +352,12 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 			}
 		}
 	case KeyTypeDate:
+		if nil != value.Date && nil != other && nil != other.Date {
+			if !other.Date.IsNotEmpty {
+				return true
+			}
+		}
+
 		if nil != value.Date {
 			switch operator {
 			case FilterOperatorIsEmpty:

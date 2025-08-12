@@ -1769,10 +1769,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 
 // GroupState 用于临时记录每个分组视图的状态，以便后面重新生成分组后可以恢复这些状态。
 type GroupState struct {
-	ID     string
-	Folded bool
-	Hidden int
-	Sort   int
+	ID      string
+	Folded  bool
+	Hidden  int
+	Sort    int
+	ItemIDs []string
 }
 
 func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) {
@@ -1783,10 +1784,11 @@ func getAttrViewGroupStates(view *av.View) (groupStates map[string]*GroupState) 
 
 	for _, groupView := range view.Groups {
 		groupStates[groupView.GetGroupValue()] = &GroupState{
-			ID:     groupView.ID,
-			Folded: groupView.GroupFolded,
-			Hidden: groupView.GroupHidden,
-			Sort:   groupView.GroupSort,
+			ID:      groupView.ID,
+			Folded:  groupView.GroupFolded,
+			Hidden:  groupView.GroupHidden,
+			Sort:    groupView.GroupSort,
+			ItemIDs: groupView.GroupItemIDs,
 		}
 	}
 	return
@@ -1799,6 +1801,15 @@ func setAttrViewGroupStates(view *av.View, groupStates map[string]*GroupState) {
 			groupView.GroupFolded = state.Folded
 			groupView.GroupHidden = state.Hidden
 			groupView.GroupSort = state.Sort
+
+			itemIDsSort := map[string]int{}
+			for i, itemID := range state.ItemIDs {
+				itemIDsSort[itemID] = i
+			}
+
+			sort.SliceStable(groupView.GroupItemIDs, func(i, j int) bool {
+				return itemIDsSort[groupView.GroupItemIDs[i]] < itemIDsSort[groupView.GroupItemIDs[j]]
+			})
 		}
 	}
 
@@ -3494,6 +3505,11 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+
+					if groupKey := view.GetGroupKey(attrView); av.KeyTypeMSelect == groupKey.Type {
+						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+						regenAttrViewGroups(attrView, "force")
+					}
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

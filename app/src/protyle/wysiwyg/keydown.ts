@@ -691,8 +691,8 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 } else {
                                     // 修正光标上移至 \n 结尾的块时落点错误 https://github.com/siyuan-note/siyuan/issues/14443
                                     const prevEditableElement = getContenteditableElement(previousElement) as HTMLElement;
-                                    if (prevEditableElement && prevEditableElement.lastChild.nodeType === 3 &&
-                                        prevEditableElement.lastChild.textContent.endsWith("\n")) {
+                                    if (prevEditableElement && prevEditableElement.lastChild?.nodeType === 3 &&
+                                        prevEditableElement.lastChild?.textContent.endsWith("\n")) {
                                         //  不能移除 /n, 否则两个 /n 导致界面异常
                                         focusBlock(previousElement, undefined, false);
                                         event.preventDefault();

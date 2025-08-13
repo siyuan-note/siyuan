@@ -453,6 +453,23 @@ export const removeBlock = async (protyle: IProtyle, blockElement: Element, rang
         range.selectNodeContents(previousLastEditElement);
         range.collapse(false);
         range.insertNode(leftNodes);
+        const previousHTML = previousLastEditElement.innerHTML.trimStart();
+        const previousText = previousLastEditElement.textContent.trimStart();
+        // https://github.com/siyuan-note/siyuan/issues/15554
+        if (previousHTML.startsWith("```") || previousHTML.startsWith("···") || previousHTML.startsWith("~~~") ||
+            (previousHTML.indexOf("\n```") > -1 && previousText.indexOf("\n```") > -1) ||
+            (previousHTML.indexOf("\n~~~") > -1 && previousText.indexOf("\n~~~") > -1) ||
+            (previousHTML.indexOf("\n···") > -1 && previousText.indexOf("\n···") > -1)) {
+            if (previousHTML.indexOf("\n") === -1 && previousHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+                // ```test` 不处理，正常渲染为段落块
+            } else {
+                let replaceNewHTML = previousLastEditElement.innerHTML.replace(/\n(~|·|`){3,}/g, "\n```").trim().replace(/^(~|·|`){3,}/g, "```");
+                if (!replaceNewHTML.endsWith("\n```")) {
+                    replaceNewHTML += "\n```";
+                }
+                previousLastEditElement.innerHTML = replaceNewHTML;
+            }
+        }
         // 图片前删除到上一个文字块时，图片前有 zwsp
         previousLastElement.outerHTML = protyle.lute.SpinBlockDOM(previousLastElement.outerHTML);
         mathRender(getPreviousBlock(removeElement) as HTMLElement);

@@ -52,11 +52,14 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
     if (blockElement.getAttribute("data-type") === "NodeAttributeView") {
         return true;
     }
-    // 代码块
-    const trimStartText = editableElement.innerHTML.trimStart();
-    if (trimStartText.startsWith("```") || trimStartText.startsWith("···") || trimStartText.startsWith("~~~") ||
-        trimStartText.indexOf("\n```") > -1 || trimStartText.indexOf("\n~~~") > -1 || trimStartText.indexOf("\n···") > -1) {
-        if (trimStartText.indexOf("\n") === -1 && trimStartText.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
+
+    const trimStartHTML = editableElement.innerHTML.trimStart();
+    const trimStartText = editableElement.textContent.trimStart();
+    if (trimStartHTML.startsWith("```") || trimStartHTML.startsWith("···") || trimStartHTML.startsWith("~~~") ||
+        (trimStartHTML.indexOf("\n```") > -1 && trimStartText.indexOf("\n```") > -1) ||
+        (trimStartHTML.indexOf("\n~~~") > -1 && trimStartText.indexOf("\n~~~") > -1) ||
+        (trimStartHTML.indexOf("\n···") > -1 && trimStartText.indexOf("\n···") > -1)) {
+        if (trimStartHTML.indexOf("\n") === -1 && trimStartHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else if (blockElement.classList.contains("p")) { // https://github.com/siyuan-note/siyuan/issues/6953
             const oldHTML = blockElement.outerHTML;
@@ -93,6 +96,7 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
             return true;
         }
     }
+    // 代码块
     if (blockElement.getAttribute("data-type") === "NodeCodeBlock") {
         const wbrElement = document.createElement("wbr");
         range.insertNode(wbrElement);
@@ -224,9 +228,12 @@ export const enter = (blockElement: HTMLElement, range: Range, protyle: IProtyle
         selectWbrElement.parentElement.outerHTML = "<wbr>";
     }
     const newHTML = newEditableElement.innerHTML.trimStart();
+    const newText = newEditableElement.textContent.trimStart();
     // https://github.com/siyuan-note/siyuan/issues/10759
     if (newHTML.startsWith("```") || newHTML.startsWith("···") || newHTML.startsWith("~~~") ||
-        newHTML.indexOf("\n```") > -1 || newHTML.indexOf("\n~~~") > -1 || newHTML.indexOf("\n···") > -1) {
+        (newHTML.indexOf("\n```") > -1 && newText.indexOf("\n```") > -1) ||
+        (newHTML.indexOf("\n~~~") > -1 && newText.indexOf("\n~~~") > -1) ||
+        (newHTML.indexOf("\n···") > -1 && newText.indexOf("\n···") > -1)) {
         if (newHTML.indexOf("\n") === -1 && newHTML.replace(/·|~/g, "`").replace(/^`{3,}/g, "").indexOf("`") > -1) {
             // ```test` 不处理，正常渲染为段落块
         } else {

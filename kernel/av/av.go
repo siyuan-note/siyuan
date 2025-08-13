@@ -23,6 +23,8 @@ import (
 	"path/filepath"
 	"sort"
 	"strings"
+	"text/template"
+	"text/template/parse"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -747,12 +749,64 @@ func (av *AttributeView) GetTemplateKeyRelevantKeys(templateKey *Key) (ret []*Ke
 		return
 	}
 
+	vars, err := getTemplateVars(templateKey.Template)
+	if nil != err {
+		return
+	}
+
 	for _, kValues := range av.KeyValues {
-		if strings.Contains(templateKey.Template, "."+kValues.Key.Name) {
+		if gulu.Str.Contains(kValues.Key.Name, vars) {
 			ret = append(ret, kValues.Key)
 		}
 	}
 	return
+}
+
+func getTemplateVars(tplContent string) ([]string, error) {
+	goTpl := template.New("").Delims(".action{", "}")
+	tpl, err := goTpl.Parse(tplContent)
+	if err != nil {
+		return nil, err
+	}
+	vars := make(map[string]struct{})
+	collectVars(tpl.Tree.Root, vars)
+	var result []string
+	for v := range vars {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func collectVars(node parse.Node, vars map[string]struct{}) {
+	switch n := node.(type) {
+	case *parse.ListNode:
+		for _, child := range n.Nodes {
+			collectVars(child, vars)
+		}
+	case *parse.ActionNode:
+		collectVars(n.Pipe, vars)
+	case *parse.PipeNode:
+		for _, cmd := range n.Cmds {
+			collectVars(cmd, vars)
+		}
+	case *parse.CommandNode:
+		for _, arg := range n.Args {
+			collectVars(arg, vars)
+		}
+
+		if 3 <= len(n.Args) && n.Args[0].Type() == parse.NodeIdentifier && n.Args[1].Type() == parse.NodeDot && n.Args[2].Type() == parse.NodeString {
+			vars[n.Args[2].(*parse.StringNode).Text] = struct{}{}
+		}
+
+	case *parse.FieldNode:
+		if len(n.Ident) > 0 {
+			vars[n.Ident[0]] = struct{}{}
+		}
+	case *parse.VariableNode:
+		if len(n.Ident) > 0 {
+			vars[n.Ident[0]] = struct{}{}
+		}
+	}
 }
 
 func GetAttributeViewDataPath(avID string) (ret string) {

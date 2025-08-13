@@ -691,24 +691,25 @@ export const getFiltersHTML = (data: IAV) => {
                         filterText = ` ≤ ${filterValue.number.content}`;
                     }
                 } else if (["text", "block", "url", "phone", "email", "relation", "template"].includes(filterValue.type) && filterValue[filterValue.type as "text"]) {
-                    const content = filterValue[filterValue.type as "text"].content ||
-                        filterValue.relation?.blockIDs[0] || "";
-                    if (["=", "Contains"].includes(filter.operator)) {
-                        filterText = `: ${content}`;
-                    } else if (filter.operator === "Does not contains") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
-                    } else if (filter.operator === "!=") {
-                        filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
-                    } else if ("Starts with" === filter.operator) {
-                        filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
-                    } else if ("Ends with" === filter.operator) {
-                        filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
-                    } else if ([">", "<"].includes(filter.operator)) {
-                        filterText = ` ${filter.operator} ${content}`;
-                    } else if (">=" === filter.operator) {
-                        filterText = ` ≥ ${content}`;
-                    } else if ("<=" === filter.operator) {
-                        filterText = ` ≤ ${content}`;
+                    const content = filterValue[filterValue.type as "text"].content || filterValue.relation?.blockIDs[0] || "";
+                    if (content) {
+                        if (["=", "Contains"].includes(filter.operator)) {
+                            filterText = `: ${content}`;
+                        } else if (filter.operator === "Does not contains") {
+                            filterText = ` ${window.siyuan.languages.filterOperatorDoesNotContain} ${content}`;
+                        } else if (filter.operator === "!=") {
+                            filterText = ` ${window.siyuan.languages.filterOperatorIsNot} ${content}`;
+                        } else if ("Starts with" === filter.operator) {
+                            filterText = ` ${window.siyuan.languages.filterOperatorStartsWith} ${content}`;
+                        } else if ("Ends with" === filter.operator) {
+                            filterText = ` ${window.siyuan.languages.filterOperatorEndsWith} ${content}`;
+                        } else if ([">", "<"].includes(filter.operator)) {
+                            filterText = ` ${filter.operator} ${content}`;
+                        } else if (">=" === filter.operator) {
+                            filterText = ` ≥ ${content}`;
+                        } else if ("<=" === filter.operator) {
+                            filterText = ` ≤ ${content}`;
+                        }
                     }
                 }
                 filterHTML += `<span data-type="setFilter" class="b3-chip${filterText ? " b3-chip--primary" : ""}">

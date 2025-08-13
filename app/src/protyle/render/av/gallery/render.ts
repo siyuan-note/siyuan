@@ -13,6 +13,11 @@ import {getColIconByType, getColNameByType} from "../col";
 import {getCompressURL} from "../../../../util/image";
 import {getPageSize} from "../groups";
 
+interface IIds {
+    groupId: string,
+    fieldId: string,
+}
+
 interface ITableOptions {
     protyle: IProtyle,
     blockElement: HTMLElement,
@@ -21,20 +26,40 @@ interface ITableOptions {
     renderAll: boolean,
     resetData: {
         alignSelf: string,
-        selectItemIds: string[],
+        selectItemIds: IIds[],
+        editIds: IIds[],
         isSearching: boolean,
-        editIds: string[],
         pageSizes: { [key: string]: string },
         query: string,
         oldOffset: number,
     }
 }
 
-const getGalleryHTML = (data: IAVGallery, selectItemIds: string[], editIds: string[]) => {
+const getGalleryHTML = (data: IAVGallery, selectItemIds: IIds[], editIds: IIds[], groupId: string) => {
     let galleryHTML = "";
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-        galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${selectItemIds.includes(item.id) ? " av__gallery-item--select" : ""}">`;
+        let hasSelected = selectItemIds.find(selectId => {
+            if (selectId.groupId === groupId && selectId.fieldId === item.id) {
+                return true;
+            }
+        });
+        hasSelected = selectItemIds.find(selectId => {
+            if (selectId.fieldId === item.id) {
+                return true;
+            }
+        });
+        let hasEdit = editIds.find(edit => {
+            if (edit.groupId === groupId && edit.fieldId === item.id) {
+                return true;
+            }
+        });
+        hasEdit= editIds.find(edit => {
+            if (edit.fieldId === item.id) {
+                return true;
+            }
+        });
+        galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${hasSelected ? " av__gallery-item--select" : ""}">`;
         if (data.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + data.cardAspectRatio;
             if (item.coverURL) {
@@ -49,7 +74,7 @@ const getGalleryHTML = (data: IAVGallery, selectItemIds: string[], editIds: stri
                 galleryHTML += `<div class="${coverClass}"></div>`;
             }
         }
-        galleryHTML += `<div class="av__gallery-fields${editIds.includes(item.id) ? " av__gallery-fields--edit" : ""}">`;
+        galleryHTML += `<div class="av__gallery-fields${hasEdit ? " av__gallery-fields--edit" : ""}">`;
         item.values.forEach((cell, fieldsIndex) => {
             if (data.fields[fieldsIndex].hidden) {
                 return;
@@ -107,7 +132,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds, group.id)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -228,15 +253,21 @@ export const renderGallery = async (options: {
     data?: IAV,
 }) => {
     const searchInputElement = options.blockElement.querySelector('[data-type="av-search"]') as HTMLInputElement;
-    const editIds: string[] = [];
+    const editIds: IIds[] = [];
     options.blockElement.querySelectorAll(".av__gallery-fields--edit").forEach(item => {
-        editIds.push(item.parentElement.getAttribute("data-id"));
+        editIds.push({
+            groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
+            fieldId: item.parentElement.getAttribute("data-id"),
+        });
     });
-    const selectItemIds: string[] = [];
-    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(rowItem => {
-        const rowId = rowItem.getAttribute("data-id");
-        if (rowId) {
-            selectItemIds.push(rowId);
+    const selectItemIds: IIds[] = [];
+    options.blockElement.querySelectorAll(".av__gallery-item--select").forEach(galleryItem => {
+        const fieldId = galleryItem.getAttribute("data-id");
+        if (fieldId) {
+            selectItemIds.push({
+                groupId: (hasClosestByClassName(galleryItem, "av__body") as HTMLElement).dataset.groupId || "",
+                fieldId
+            });
         }
     });
     const pageSizes: { [key: string]: string } = {};
@@ -294,12 +325,12 @@ export const renderGallery = async (options: {
         });
         return;
     }
-    const bodyHTML = getGalleryHTML(view, selectItemIds, editIds);
+    const bodyHTML = getGalleryHTML(view, selectItemIds, editIds, "");
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}
     <div>
-        <div class="av__body" data-page-size="${view.pageSize}">
+        <div class="av__body" data-group-id="" data-page-size="${view.pageSize}">
             ${bodyHTML}
         </div>
     </div>

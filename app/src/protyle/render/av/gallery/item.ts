@@ -39,7 +39,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     let html = "";
     const coverClass = sideItemElement?.querySelector(".av__gallery-cover")?.className || "fn__none";
     options.srcIDs.forEach(() => {
-            html += `<div class="av__gallery-item" data-type="ghost">
+        html += `<div class="av__gallery-item" data-type="ghost">
     <div class="${coverClass}"><span style="width: 100%;height: 100%;border-radius: var(--b3-border-radius) var(--b3-border-radius) 0 0;" class="av__pulse"></span></div>
     <div class="av__gallery-fields">${cellsHTML}</div>
 </div>`;
@@ -55,11 +55,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {
-        if (!response.data.values) {
-            if (!response.data.ignore) {
-                showMessage(window.siyuan.languages.insertRowTip);
-            }
-        } else {
+        if (response.data.values) {
             let popCellElement: HTMLElement;
             const updateIds = Object.keys(response.data.values);
             options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {

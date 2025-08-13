@@ -166,11 +166,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
         groupID: options.groupID,
         previousID: options.previousId,
     }, (response) => {
-        if (!response.data.values) {
-            if (!response.data.ignore) {
-                showMessage(window.siyuan.languages.insertRowTip);
-            }
-        } else {
+        if (response.data.values) {
             let popCellElement: HTMLElement;
             const updateIds = Object.keys(response.data.values);
             options.blockElement.querySelectorAll('[data-type="ghost"]').forEach(rowItem => {

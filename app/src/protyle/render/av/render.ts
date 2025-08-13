@@ -18,6 +18,7 @@ import {getFieldsByData, getViewIcon} from "./view";
 import {openMenuPanel} from "./openMenuPanel";
 import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clearSelect";
+import {showMessage} from "../../../dialog/message";
 
 interface ITableOptions {
     protyle: IProtyle,
@@ -739,6 +740,12 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 popTextCell(protyle, [popCellElement], "block");
                             }
                         }
+                        operation.srcs.find((idItem) => {
+                            if (!item.querySelector(`.av__body [data-id="${idItem}"]`)) {
+                                showMessage(window.siyuan.languages.insertRowTip);
+                                return true;
+                            }
+                        });
                     } else if (operation.action === "addAttrViewView") {
                         if (item.getAttribute("data-node-id") === operation.blockID) {
                             openMenuPanel({protyle, blockElement: item, type: "config"});

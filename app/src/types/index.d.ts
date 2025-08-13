@@ -864,6 +864,7 @@ interface IAVView {
     sorts: IAVSort[],
     groups: IAVView[]
     group: IAVGroup
+    groupKey: IAVColumn
     groupValue: IAVCellValue
 }
 

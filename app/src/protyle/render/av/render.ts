@@ -728,7 +728,13 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                             });
                         }
                         if (operation.srcs.length === 1) {
-                            const popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+                            let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+                            if (!popCellElement) {
+                                const popCellElements = item.querySelectorAll(`.av__body [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`);
+                                if (popCellElements.length === 1) {
+                                    popCellElement = popCellElements[0] as HTMLElement;
+                                }
+                            }
                             if (popCellElement && popCellElement.getAttribute("data-detached") === "true") {
                                 popTextCell(protyle, [popCellElement], "block");
                             }

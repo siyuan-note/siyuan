@@ -91,7 +91,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	templateRelevantKeys, rollupRelevantKeys := map[string][]*av.Key{}, map[string]*av.Key{}
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeTemplate == keyValues.Key.Type {
-			if tplRelevantKeys := attrView.GetTemplateKeyRelevantKeys(keyValues.Key); 0 < len(tplRelevantKeys) {
+			if tplRelevantKeys := sql.GetTemplateKeyRelevantKeys(attrView, keyValues.Key); 0 < len(tplRelevantKeys) {
 				for _, k := range tplRelevantKeys {
 					templateRelevantKeys[keyValues.Key.ID] = append(templateRelevantKeys[keyValues.Key.ID], k)
 				}

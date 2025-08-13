@@ -3442,7 +3442,7 @@ func getAttrViewTable(attrView *av.AttributeView, view *av.View, query string) (
 	}
 
 	depth := 1
-	ret = sql.RenderAttributeViewTable(attrView, view, query, &depth)
+	ret = sql.RenderAttributeViewTable(attrView, view, query, &depth, map[string]*av.AttributeView{})
 	return
 }
 

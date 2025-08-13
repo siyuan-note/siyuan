@@ -197,6 +197,7 @@ type View struct {
 	Groups       []*View    `json:"groups,omitempty"`    // 分组视图列表
 	GroupItemIDs []string   `json:"groupItemIds"`        // 分组项目 ID 列表，用于维护分组中的所有项目
 	GroupCalc    *GroupCalc `json:"groupCalc,omitempty"` // 分组计算规则
+	GroupKey     *Key       `json:"groupKey,omitempty"`  // 分组字段
 	GroupVal     *Value     `json:"groupVal,omitempty"`  // 分组值
 	GroupFolded  bool       `json:"groupFolded"`         // 分组是否折叠
 	GroupHidden  int        `json:"groupHidden"`         // 分组是否隐藏，0：显示，1：空白隐藏，2：手动隐藏

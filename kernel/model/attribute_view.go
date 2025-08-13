@@ -1648,6 +1648,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		return
 	}
 
+	var relationDestAv *av.AttributeView
+	if av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
+		relationDestAv, _ = av.ParseAttributeView(groupKey.Relation.AvID)
+	}
+
 	var rangeStart, rangeEnd float64
 	switch group.Method {
 	case av.GroupMethodValue:
@@ -1695,9 +1700,18 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		var groupVal string
 		switch group.Method {
 		case av.GroupMethodValue:
-			if av.KeyTypeMSelect == groupKey.Type {
+			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 				for _, s := range value.MSelect {
 					groupItemsMap[s.Content] = append(groupItemsMap[s.Content], item)
+				}
+				continue
+			} else if av.KeyTypeRelation == groupKey.Type {
+				if nil == relationDestAv {
+					continue
+				}
+
+				for _, bID := range value.Relation.BlockIDs {
+					groupItemsMap[bID] = append(groupItemsMap[bID], item)
 				}
 				continue
 			}
@@ -1800,6 +1814,16 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 				v.GroupVal.Text = nil
 				v.GroupVal.Type = av.KeyTypeSelect
 				v.GroupVal.MSelect = []*av.ValueSelect{{Content: opt.Name, Color: opt.Color}}
+			}
+		} else if av.KeyTypeRelation == groupKey.Type {
+			if relationDestAv != nil && groupValueDefault != groupValue {
+				v.GroupVal.Text = nil
+				v.GroupVal.Type = av.KeyTypeRelation
+				v.GroupVal.Relation = &av.ValueRelation{BlockIDs: []string{groupValue}}
+
+				if destBlock := relationDestAv.GetBlockValue(groupValue); nil != destBlock {
+					v.GroupVal.Relation.Contents = []*av.Value{destBlock}
+				}
 			}
 		}
 		v.GroupSort = -1
@@ -3556,7 +3580,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 
-					if av.KeyTypeMSelect == groupKey.Type {
+					if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
 						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
 						regenAttrViewGroups(attrView, "force")
 					}

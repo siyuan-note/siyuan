@@ -2990,11 +2990,13 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			dateVal := &av.Value{
-				ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
-				Date: &av.ValueDate{Content: now, IsNotEmpty: true},
+			if nil == keyValues.GetValue(addingItemID) { // 避免覆盖已有值（可能前面已经通过过滤或者分组条件填充了值）
+				dateVal := &av.Value{
+					ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
+					Date: &av.ValueDate{Content: now, IsNotEmpty: true},
+				}
+				keyValues.Values = append(keyValues.Values, dateVal)
 			}
-			keyValues.Values = append(keyValues.Values, dateVal)
 		}
 	}
 

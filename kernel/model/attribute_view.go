@@ -74,6 +74,11 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	}
 
 	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	if 1 > len(ret) {
+		if 2 > len(view.Groups) && 1 > len(groupView.GroupItemIDs) { // 少于两个分组并且没有项目时忽略
+			ignore = true
+		}
+	}
 	return
 }
 
@@ -3601,11 +3606,11 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+				}
 
-					if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
-						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
-						regenAttrViewGroups(attrView, "force")
-					}
+				if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
+					// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+					regenAttrViewGroups(attrView, "force")
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {
@@ -4702,10 +4707,26 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		return
 	}
 
-	for _, keyValues := range attrView.KeyValues {
-		if keyValues.Key.ID == operation.ID {
-			keyValues.Key.Options = options
-			break
+	selectKey, _ := attrView.GetKey(operation.ID)
+	if nil == selectKey {
+		return
+	}
+	existingOptions := map[string]*av.SelectOption{}
+	for _, opt := range selectKey.Options {
+		existingOptions[opt.Name] = opt
+	}
+	for _, opt := range options {
+		if existingOpt, exists := existingOptions[opt.Name]; exists {
+			// 如果选项已经存在则更新颜色和描述
+			existingOpt.Color = opt.Color
+			existingOpt.Desc = opt.Desc
+		} else {
+			// 如果选项不存在则添加新选项
+			selectKey.Options = append(selectKey.Options, &av.SelectOption{
+				Name:  opt.Name,
+				Color: opt.Color,
+				Desc:  opt.Desc,
+			})
 		}
 	}
 

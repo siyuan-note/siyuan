@@ -741,20 +741,6 @@ func (av *AttributeView) Clone() (ret *AttributeView) {
 	return
 }
 
-func (av *AttributeView) GetTemplateKeyRelevantKeys(templateKey *Key) (ret []*Key) {
-	ret = []*Key{}
-	if nil == templateKey || "" == templateKey.Template {
-		return
-	}
-
-	for _, kValues := range av.KeyValues {
-		if strings.Contains(templateKey.Template, "."+kValues.Key.Name) {
-			ret = append(ret, kValues.Key)
-		}
-	}
-	return
-}
-
 func GetAttributeViewDataPath(avID string) (ret string) {
 	av := filepath.Join(util.DataDir, "storage", "av")
 	ret = filepath.Join(av, avID+".json")

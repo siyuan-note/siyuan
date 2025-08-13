@@ -22,8 +22,10 @@ import (
 	"sort"
 	"strings"
 	"text/template"
+	"text/template/parse"
 	"time"
 
+	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
 	"github.com/jinzhu/copier"
 	"github.com/siyuan-note/logging"
@@ -745,4 +747,86 @@ func manualSort(view *av.View, collection av.Collection) {
 		return iv < jv
 	})
 	collection.SetItems(items)
+}
+
+func GetTemplateKeyRelevantKeys(attrView *av.AttributeView, templateKey *av.Key) (ret []*av.Key) {
+	ret = []*av.Key{}
+	if nil == templateKey || "" == templateKey.Template {
+		return
+	}
+
+	vars, err := getTemplateVars(templateKey.Template)
+	if nil != err {
+		return
+	}
+
+	for _, kValues := range attrView.KeyValues {
+		if gulu.Str.Contains(kValues.Key.Name, vars) {
+			ret = append(ret, kValues.Key)
+		}
+	}
+
+	if 1 > len(ret) {
+		// 没有相关字段情况下直接尝试解析模板，如果能解析成功则返回模板字段本身 https://github.com/siyuan-note/siyuan/issues/15560#issuecomment-3182691193
+		goTpl := template.New("").Delims(".action{", "}")
+		tplFuncMap := filesys.BuiltInTemplateFuncs()
+		SQLTemplateFuncs(&tplFuncMap)
+		goTpl = goTpl.Funcs(tplFuncMap)
+		_, parseErr := goTpl.Funcs(tplFuncMap).Parse(templateKey.Template)
+		if nil != parseErr {
+			return
+		}
+		ret = append(ret, templateKey)
+	}
+	return
+}
+
+func getTemplateVars(tplContent string) ([]string, error) {
+	goTpl := template.New("").Delims(".action{", "}")
+	tplFuncMap := filesys.BuiltInTemplateFuncs()
+	SQLTemplateFuncs(&tplFuncMap)
+	goTpl = goTpl.Funcs(tplFuncMap)
+	tpl, parseErr := goTpl.Funcs(tplFuncMap).Parse(tplContent)
+	if parseErr != nil {
+		return nil, parseErr
+	}
+	vars := make(map[string]struct{})
+	collectVars(tpl.Tree.Root, vars)
+	var result []string
+	for v := range vars {
+		result = append(result, v)
+	}
+	return result, nil
+}
+
+func collectVars(node parse.Node, vars map[string]struct{}) {
+	switch n := node.(type) {
+	case *parse.ListNode:
+		for _, child := range n.Nodes {
+			collectVars(child, vars)
+		}
+	case *parse.ActionNode:
+		collectVars(n.Pipe, vars)
+	case *parse.PipeNode:
+		for _, cmd := range n.Cmds {
+			collectVars(cmd, vars)
+		}
+	case *parse.CommandNode:
+		for _, arg := range n.Args {
+			collectVars(arg, vars)
+		}
+
+		if 3 <= len(n.Args) && n.Args[0].Type() == parse.NodeIdentifier && n.Args[1].Type() == parse.NodeDot && n.Args[2].Type() == parse.NodeString {
+			vars[n.Args[2].(*parse.StringNode).Text] = struct{}{}
+		}
+
+	case *parse.FieldNode:
+		if len(n.Ident) > 0 {
+			vars[n.Ident[0]] = struct{}{}
+		}
+	case *parse.VariableNode:
+		if len(n.Ident) > 0 {
+			vars[n.Ident[0]] = struct{}{}
+		}
+	}
 }

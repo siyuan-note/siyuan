@@ -3549,7 +3549,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 		if groupView := view.GetGroupByID(operation.GroupID); nil != groupView {
 			groupKey := view.GetGroupKey(attrView)
 			isAcrossGroup := operation.GroupID != operation.TargetGroupID
-			if isAcrossGroup && (av.KeyTypeTemplate == groupKey.Type || av.KeyTypeRollup == groupKey.Type || av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
+			if isAcrossGroup && (av.KeyTypeTemplate == groupKey.Type || av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
 				// 这些字段类型不支持跨分组移动，因为它们的值是自动计算生成的
 				return
 			}

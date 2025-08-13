@@ -2990,11 +2990,13 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 	// The database date field supports filling the current time by default https://github.com/siyuan-note/siyuan/issues/10823
 	for _, keyValues := range attrView.KeyValues {
 		if av.KeyTypeDate == keyValues.Key.Type && nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
-			dateVal := &av.Value{
-				ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
-				Date: &av.ValueDate{Content: now, IsNotEmpty: true},
+			if nil == keyValues.GetValue(addingItemID) { // 避免覆盖已有值（可能前面已经通过过滤或者分组条件填充了值）
+				dateVal := &av.Value{
+					ID: ast.NewNodeID(), KeyID: keyValues.Key.ID, BlockID: addingItemID, Type: av.KeyTypeDate, IsDetached: isDetached, CreatedAt: now, UpdatedAt: now + 1000,
+					Date: &av.ValueDate{Content: now, IsNotEmpty: true},
+				}
+				keyValues.Values = append(keyValues.Values, dateVal)
 			}
-			keyValues.Values = append(keyValues.Values, dateVal)
 		}
 	}
 
@@ -3019,6 +3021,25 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 		} else {
 			v.ItemIDs = append([]string{addingItemID}, v.ItemIDs...)
 		}
+
+		// 在所有分组视图中添加，目的是为了在重新分组的过程中保住排序状态 https://github.com/siyuan-note/siyuan/issues/15560
+		for _, g := range v.Groups {
+			if "" != previousItemID {
+				changed := false
+				for i, id := range g.GroupItemIDs {
+					if id == previousItemID {
+						g.GroupItemIDs = append(g.GroupItemIDs[:i+1], append([]string{addingItemID}, g.GroupItemIDs[i+1:]...)...)
+						changed = true
+						break
+					}
+				}
+				if !changed {
+					g.GroupItemIDs = append(g.GroupItemIDs, addingItemID)
+				}
+			} else {
+				g.GroupItemIDs = append([]string{addingItemID}, g.GroupItemIDs...)
+			}
+		}
 	}
 
 	regenAttrViewGroups(attrView, "force")
@@ -3026,10 +3047,10 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 	return
 }
 
-func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousBlockID, addingBlockID string) {
-	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, previousItemID, addingItemID string) {
+	defaultValues := getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousItemID, addingItemID)
 	for keyID, newValue := range defaultValues {
-		newValue.BlockID = addingBlockID
+		newValue.BlockID = addingItemID
 		keyValues, getErr := attrView.GetKeyValues(keyID)
 		if nil != getErr {
 			continue
@@ -3052,7 +3073,7 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 			updateTwoWayRelationDestAttrView(attrView, keyValues.Key, newValue, 1, []string{})
 		}
 
-		existingVal := keyValues.GetValue(addingBlockID)
+		existingVal := keyValues.GetValue(addingItemID)
 		if nil == existingVal {
 			keyValues.Values = append(keyValues.Values, newValue)
 		} else {

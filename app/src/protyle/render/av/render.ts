@@ -20,6 +20,12 @@ import {getPageSize} from "./groups";
 import {clearSelect} from "../../util/clearSelect";
 import {showMessage} from "../../../dialog/message";
 
+interface IIds {
+    groupId: string,
+    rowId: string,
+    colId?: string
+}
+
 interface ITableOptions {
     protyle: IProtyle,
     blockElement: HTMLElement,
@@ -31,11 +37,11 @@ interface ITableOptions {
         alignSelf: string,
         headerTransform: string,
         footerTransform: string,
-        selectCellId: string,
         isSearching: boolean,
-        selectRowIds: string[],
-        dragFillId: string,
-        activeIds: string[],
+        selectCellId: IIds,
+        selectRowIds: IIds[],
+        dragFillId: IIds,
+        activeIds: IIds[],
         query: string,
         pageSizes: { [key: string]: string },
     }
@@ -300,7 +306,10 @@ const afterRenderTable = (options: ITableOptions) => {
         }, Constants.TIMEOUT_LOAD);
     }
     if (options.resetData.selectCellId) {
-        const newCellElement = options.blockElement.querySelector(`.av__row[data-id="${options.resetData.selectCellId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.selectCellId.split(Constants.ZWSP)[1]}"]`);
+        let newCellElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.selectCellId.groupId}"] .av__row[data-id="${options.resetData.selectCellId.rowId}"] .av__cell[data-col-id="${options.resetData.selectCellId.colId}"]`);
+        if (!newCellElement) {
+            newCellElement = options.blockElement.querySelector(`.av__row[data-id="${options.resetData.selectCellId.rowId}"] .av__cell[data-col-id="${options.resetData.selectCellId.colId}"]`);
+        }
         if (newCellElement) {
             newCellElement.classList.add("av__cell--select");
             cellScrollIntoView(options.blockElement, newCellElement);
@@ -320,7 +329,10 @@ const afterRenderTable = (options: ITableOptions) => {
         }
     }
     options.resetData.selectRowIds.forEach((selectRowId, index) => {
-        const rowElement = options.blockElement.querySelector(`.av__row[data-id="${selectRowId}"]`) as HTMLElement;
+        let rowElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectRowId.groupId}"] .av__row[data-id="${selectRowId.rowId}"]`) as HTMLElement;
+        if (!rowElement) {
+            rowElement = options.blockElement.querySelector(`.av__row[data-id="${selectRowId.rowId}"]`) as HTMLElement;
+        }
         if (rowElement) {
             rowElement.classList.add("av__row--select");
             rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
@@ -340,10 +352,18 @@ const afterRenderTable = (options: ITableOptions) => {
         }
     });
     if (options.resetData.dragFillId) {
-        addDragFill(options.blockElement.querySelector(`.av__row[data-id="${options.resetData.dragFillId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${options.resetData.dragFillId.split(Constants.ZWSP)[1]}"]`));
+        let dragCellElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.resetData.dragFillId.groupId}"] .av__row[data-id="${options.resetData.dragFillId.rowId}"] .av__cell[data-col-id="${options.resetData.dragFillId.colId}"]`);
+        if (!dragCellElement) {
+            dragCellElement = options.blockElement.querySelector(`.av__row[data-id="${options.resetData.dragFillId.rowId}"] .av__cell[data-col-id="${options.resetData.dragFillId.colId}"]`);
+        }
+        addDragFill(dragCellElement);
     }
     options.resetData.activeIds.forEach(activeId => {
-        options.blockElement.querySelector(`.av__row[data-id="${activeId.split(Constants.ZWSP)[0]}"] .av__cell[data-col-id="${activeId.split(Constants.ZWSP)[1]}"]`)?.classList.add("av__cell--active");
+        let activeCellElement = options.blockElement.querySelector(`.av__body[data-group-id="${activeId.groupId}"] .av__row[data-id="${activeId.rowId}"] .av__cell[data-col-id="${activeId.colId}"]`);
+        if (!activeCellElement) {
+            activeCellElement = options.blockElement.querySelector(`.av__row[data-id="${activeId.rowId}"] .av__cell[data-col-id="${activeId.colId}"]`);
+        }
+        activeCellElement?.classList.add("av__cell--active");
     });
     if (getSelection().rangeCount > 0) {
         // 修改表头后光标重新定位
@@ -444,26 +464,41 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                 return;
             }
 
-            let selectCellId = "";
+            let selectCellId;
             const selectCellElement = e.querySelector(".av__cell--select") as HTMLElement;
             if (selectCellElement) {
-                selectCellId = (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + selectCellElement.getAttribute("data-col-id");
+                selectCellId = {
+                    groupId: (hasClosestByClassName(selectCellElement, "av__body") as HTMLElement).dataset.groupId || "",
+                    rowId: (hasClosestByClassName(selectCellElement, "av__row") as HTMLElement).dataset.id,
+                    colId: selectCellElement.getAttribute("data-col-id"),
+                };
             }
-            const selectRowIds: string[] = [];
+            const selectRowIds: IIds[] = [];
             e.querySelectorAll(".av__row--select").forEach(rowItem => {
                 const rowId = rowItem.getAttribute("data-id");
                 if (rowId) {
-                    selectRowIds.push(rowId);
+                    selectRowIds.push({
+                        groupId: (hasClosestByClassName(rowItem, "av__body") as HTMLElement).dataset.groupId || "",
+                        rowId
+                    });
                 }
             });
-            let dragFillId = "";
+            let dragFillId;
             const dragFillElement = e.querySelector(".av__drag-fill") as HTMLElement;
             if (dragFillElement) {
-                dragFillId = (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + dragFillElement.parentElement.getAttribute("data-col-id");
+                dragFillId = {
+                    groupId: (hasClosestByClassName(dragFillElement, "av__body") as HTMLElement).dataset.groupId || "",
+                    rowId: (hasClosestByClassName(dragFillElement, "av__row") as HTMLElement).dataset.id,
+                    colId: dragFillElement.parentElement.getAttribute("data-col-id"),
+                };
             }
-            const activeIds: string[] = [];
+            const activeIds: IIds[] = [];
             e.querySelectorAll(".av__cell--active").forEach((item: HTMLElement) => {
-                activeIds.push((hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id + Constants.ZWSP + item.getAttribute("data-col-id"));
+                activeIds.push({
+                    groupId: (hasClosestByClassName(item, "av__body") as HTMLElement).dataset.groupId || "",
+                    rowId: (hasClosestByClassName(item, "av__row") as HTMLElement).dataset.id,
+                    colId: item.getAttribute("data-col-id"),
+                });
             });
             const searchInputElement = e.querySelector('[data-type="av-search"]') as HTMLInputElement;
             const pageSizes: { [key: string]: string } = {};
@@ -520,7 +555,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
                     renderGroupTable({blockElement: e, protyle, cb, renderAll, data: response.data, resetData});
                     return;
                 }
-                const avBodyHTML = `<div class="av__body" data-page-size="${data.pageSize}" style="float: left">
+                const avBodyHTML = `<div class="av__body" data-group-id="" data-page-size="${data.pageSize}" style="float: left">
     ${getTableHTMLs(data, e)}
 </div>`;
                 if (renderAll) {

@@ -43,7 +43,7 @@ import (
 	"github.com/xrash/smetrics"
 )
 
-func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value, ignore bool) {
+func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
 	attrView, err := av.ParseAttributeView(avID)
@@ -60,7 +60,6 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 
 	if 1 > len(view.Filters) && nil == view.Group {
 		// 没有过滤条件也没有分组条件时忽略
-		ignore = true
 		return
 	}
 
@@ -74,11 +73,6 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	}
 
 	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
-	if 1 > len(ret) {
-		if 2 > len(view.Groups) && 1 > len(groupView.GroupItemIDs) { // 少于两个分组并且没有项目时忽略
-			ignore = true
-		}
-	}
 	return
 }
 

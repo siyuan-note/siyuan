@@ -630,6 +630,20 @@ func (av *AttributeView) GetBlockKeyValues() (ret *KeyValues) {
 	return
 }
 
+func (av *AttributeView) GetBlockValue(itemID string) (ret *Value) {
+	for _, kv := range av.KeyValues {
+		if KeyTypeBlock == kv.Key.Type && 0 < len(kv.Values) {
+			for _, v := range kv.Values {
+				if v.BlockID == itemID {
+					ret = v
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
 func (av *AttributeView) GetKeyValues(keyID string) (ret *KeyValues, err error) {
 	for _, kv := range av.KeyValues {
 		if kv.Key.ID == keyID {

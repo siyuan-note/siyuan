@@ -3083,7 +3083,10 @@ func fillDefaultValue(attrView *av.AttributeView, view, groupView *av.View, prev
 			keyValues.Values = append(keyValues.Values, newValue)
 		} else {
 			newValueRaw := newValue.GetValByType(keyValues.Key.Type)
-			existingVal.SetValByType(keyValues.Key.Type, newValueRaw)
+			if av.KeyTypeBlock != existingVal.Type || (av.KeyTypeBlock == existingVal.Type && existingVal.IsDetached) {
+				// 非主键的值直接覆盖，主键的值只覆盖非绑定块
+				existingVal.SetValByType(keyValues.Key.Type, newValueRaw)
+			}
 		}
 	}
 }

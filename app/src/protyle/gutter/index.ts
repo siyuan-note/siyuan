@@ -94,11 +94,13 @@ export class Gutter {
                         return true;
                     }
                 });
-                if (avElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
+                if (avElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active") ||
+                    ["template", "created", "updated"].includes(avElement.querySelector(".av__group-title")?.getAttribute("data-dtype"))) {
                     event.preventDefault();
                     event.stopPropagation();
                     return;
                 }
+
                 const rowElement = avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 if (!rowElement.classList.contains("av__row--select")) {
                     avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {

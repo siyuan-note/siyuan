@@ -234,7 +234,7 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     } else {
         nameHTML = group.name;
     }
-    return `<div class="av__group-title">
+    return `<div class="av__group-title" data-dtype="${group.groupValue.type}">
     <div class="av__group-icon" data-type="av-group-fold" data-id="${group.id}">
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div>

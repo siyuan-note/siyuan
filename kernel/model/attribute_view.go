@@ -87,23 +87,26 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 	nearItem := getNearItem(attrView, view, groupView, previousItemID)
 
-	// 对库中存在模板字段和汇总字段的情况进行处理（尽量从临近项获取新值，获取不到的话直接返回）
-	existSpecialField := false
+	// 使用模板或汇总进行过滤或分组时，需要解析涉及到的其他字段
+	templateRelevantKeys, rollupRelevantKeys := map[string][]*av.Key{}, map[string]*av.Key{}
 	for _, keyValues := range attrView.KeyValues {
-		if av.KeyTypeTemplate == keyValues.Key.Type || av.KeyTypeRollup == keyValues.Key.Type {
-			existSpecialField = true
-			break
-		}
-	}
-	if existSpecialField {
-		if nil != nearItem {
-			// 存在临近项时从临近项获取新值
-			for _, keyValues := range attrView.KeyValues {
-				newValue := getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
-				ret[keyValues.Key.ID] = newValue
+		if av.KeyTypeTemplate == keyValues.Key.Type {
+			if tplRelevantKeys := attrView.GetTemplateKeyRelevantKeys(keyValues.Key); 0 < len(tplRelevantKeys) {
+				for _, k := range tplRelevantKeys {
+					templateRelevantKeys[keyValues.Key.ID] = append(templateRelevantKeys[keyValues.Key.ID], k)
+				}
 			}
-		} else { // 不存在临近项时不生成任何新值
-			return
+		} else if av.KeyTypeRollup == keyValues.Key.Type {
+			if nil != keyValues.Key.Rollup {
+				relKey, _ := attrView.GetKey(keyValues.Key.Rollup.RelationKeyID)
+				if nil != relKey && nil != relKey.Relation {
+					if attrView.ID == relKey.Relation.AvID {
+						if k, _ := attrView.GetKey(keyValues.Key.Rollup.KeyID); nil != k {
+							rollupRelevantKeys[k.ID] = k
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -112,6 +115,26 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		filterKeyIDs[filter.Column] = true
 		keyValues, _ := attrView.GetKeyValues(filter.Column)
 		if nil == keyValues {
+			continue
+		}
+
+		if av.KeyTypeTemplate == keyValues.Key.Type && nil != nearItem {
+			if keys := templateRelevantKeys[keyValues.Key.ID]; 0 < len(keys) {
+				for _, k := range keys {
+					if nil == ret[k.ID] {
+						ret[k.ID] = getNewValueByNearItem(nearItem, k, addingItemID)
+					}
+				}
+			}
+			continue
+		}
+
+		if av.KeyTypeRollup == keyValues.Key.Type && nil != nearItem {
+			if relKey, ok := rollupRelevantKeys[keyValues.Key.ID]; ok {
+				if nil == ret[relKey.ID] {
+					ret[relKey.ID] = getNewValueByNearItem(nearItem, relKey, addingItemID)
+				}
+			}
 			continue
 		}
 
@@ -135,7 +158,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 	}
 
 	newValue := getNewValueByNearItem(nearItem, groupKey, addingItemID)
-	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type { // 单独处理单选或多选
+	if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
 		// 因为单选或多选只能按选项分组，并且可能存在空白分组（找不到临近项），所以单选或多选类型的分组字段使用分组值内容对应的选项
 		if opt := groupKey.GetOption(groupView.GetGroupValue()); nil != opt && groupValueDefault != groupView.GetGroupValue() {
 			if nil == newValue {
@@ -155,6 +178,26 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 		if nil != newValue {
 			ret[groupKey.ID] = newValue
+		}
+		return
+	}
+
+	if av.KeyTypeTemplate == keyValues.Key.Type && nil != nearItem {
+		if keys := templateRelevantKeys[keyValues.Key.ID]; 0 < len(keys) {
+			for _, k := range keys {
+				if nil == ret[k.ID] {
+					ret[k.ID] = getNewValueByNearItem(nearItem, k, addingItemID)
+				}
+			}
+		}
+		return
+	}
+
+	if av.KeyTypeRollup == keyValues.Key.Type && nil != nearItem {
+		if relKey, ok := rollupRelevantKeys[keyValues.Key.ID]; ok {
+			if nil == ret[relKey.ID] {
+				ret[relKey.ID] = getNewValueByNearItem(nearItem, relKey, addingItemID)
+			}
 		}
 		return
 	}
@@ -3480,6 +3523,13 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 	if nil != view.Group && "" != operation.GroupID {
 		if groupView := view.GetGroupByID(operation.GroupID); nil != groupView {
+			groupKey := view.GetGroupKey(attrView)
+			isAcrossGroup := operation.GroupID != operation.TargetGroupID
+			if isAcrossGroup && (av.KeyTypeTemplate == groupKey.Type || av.KeyTypeRollup == groupKey.Type || av.KeyTypeCreated == groupKey.Type || av.KeyTypeUpdated == groupKey.Type) {
+				// 这些字段类型不支持跨分组移动，因为它们的值是自动计算生成的
+				return
+			}
+
 			for i, id := range groupView.GroupItemIDs {
 				if id == operation.ID {
 					itemID = id
@@ -3494,7 +3544,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 			}
 			groupView.GroupItemIDs = append(groupView.GroupItemIDs[:idx], groupView.GroupItemIDs[idx+1:]...)
 
-			if operation.GroupID != operation.TargetGroupID { // 跨分组排序
+			if isAcrossGroup {
 				if targetGroupView := view.GetGroupByID(operation.TargetGroupID); nil != targetGroupView && !gulu.Str.Contains(itemID, targetGroupView.GroupItemIDs) {
 					fillDefaultValue(attrView, view, targetGroupView, operation.PreviousID, itemID)
 
@@ -3506,7 +3556,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
 
-					if groupKey := view.GetGroupKey(attrView); av.KeyTypeMSelect == groupKey.Type {
+					if av.KeyTypeMSelect == groupKey.Type {
 						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
 						regenAttrViewGroups(attrView, "force")
 					}
@@ -4447,7 +4497,7 @@ func regenAttrViewGroups(attrView *av.AttributeView, keyID string) {
 		}
 
 		if "force" != keyID {
-			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
+			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeRollup != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
 				view.Group.Field != keyID {
 				continue
 			}

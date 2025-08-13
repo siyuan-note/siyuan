@@ -3606,11 +3606,11 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 						}
 					}
 					targetGroupView.GroupItemIDs = util.InsertElem(targetGroupView.GroupItemIDs, previousIndex, itemID)
+				}
 
-					if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
-						// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
-						regenAttrViewGroups(attrView, "force")
-					}
+				if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
+					// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
+					regenAttrViewGroups(attrView, "force")
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {

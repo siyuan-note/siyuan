@@ -740,8 +740,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 popTextCell(protyle, [popCellElement], "block");
                             }
                         }
-                        operation.srcs.find((idItem) => {
-                            if (!item.querySelector(`.av__body [data-id="${idItem}"]`)) {
+                        operation.srcs.find((srcItem) => {
+                            if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`)) {
                                 showMessage(window.siyuan.languages.insertRowTip);
                                 return true;
                             }

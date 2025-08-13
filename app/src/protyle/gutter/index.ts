@@ -100,8 +100,7 @@ export class Gutter {
                     event.stopPropagation();
                     return;
                 }
-
-                const rowElement = avElement.querySelector(`.av__row[data-id="${buttonElement.dataset.rowId}"]`);
+                const rowElement = avElement.querySelector(`.av__body${buttonElement.dataset.groupId ? `[data-group-id="${buttonElement.dataset.groupId}"]` : ""} .av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 if (!rowElement.classList.contains("av__row--select")) {
                     avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
                         item.classList.remove("av__row--select");
@@ -112,7 +111,8 @@ export class Gutter {
                 rowElement.querySelector(".av__firstcol use").setAttribute("xlink:href", "#iconCheck");
                 updateHeader(rowElement as HTMLElement);
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
-                    selectIds.push(item.getAttribute("data-id"));
+                    const groupId = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId || "";
+                    selectIds.push(item.getAttribute("data-id") + (groupId ? "@"+groupId : ""));
                     selectElements.push(item);
                 });
             } else {
@@ -2315,9 +2315,9 @@ export class Gutter {
                         } else if (rowElement.querySelector('[data-dtype="block"]')?.getAttribute("data-detached") === "true") {
                             iconAriaLabel = window.siyuan.languages.rowTip.substring(0, window.siyuan.languages.rowTip.lastIndexOf("<br"));
                         }
-                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" data-group-id="${bodyElement.dataset.groupId}" class="ariaLabel" data-position="parentW" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
+                        html = `<button data-type="NodeAttributeViewRowMenu" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" data-group-id="${bodyElement.dataset.groupId || ""}" class="ariaLabel" data-position="parentW" aria-label="${iconAriaLabel}"><svg><use xlink:href="#iconDrag"></use></svg><span ${protyle.disabled ? "" : 'draggable="true" class="fn__grab"'}></span></button>`;
                         if (!protyle.disabled) {
-                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" data-group-id="${bodyElement.dataset.groupId}" class="ariaLabel" data-position="parentW" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
+                            html = `<button data-type="NodeAttributeViewRow" data-node-id="${dataNodeId}" data-row-id="${rowElement.dataset.id}" data-group-id="${bodyElement.dataset.groupId || ""}" class="ariaLabel" data-position="parentW" aria-label="${isMac() ? window.siyuan.languages.addBelowAbove : window.siyuan.languages.addBelowAbove.replace("⌥", "Alt+")}"><svg><use xlink:href="#iconAdd"></use></svg></button>${html}`;
                         }
                         break;
                     }

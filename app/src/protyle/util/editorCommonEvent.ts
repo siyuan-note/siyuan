@@ -1093,18 +1093,20 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 行内拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__row[data-id="${selectedIds[0]}"]`).previousElementSibling.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                const groupID = blockElement.querySelector(`.av__row[data-id="${item}"]`).parentElement.getAttribute("data-group-id");
-                                if (previousID !== item && undoPreviousId !== previousID || (
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling.getAttribute("data-id") || "";
+                                if (previousID !== id && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {
                                     doOperations.push({
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID,
                                         targetGroupID,
@@ -1113,7 +1115,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID: targetGroupID,
                                         targetGroupID: groupID,

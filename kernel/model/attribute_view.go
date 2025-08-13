@@ -74,6 +74,11 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	}
 
 	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	if 1 > len(ret) {
+		if 2 > len(view.Groups) && 1 > len(groupView.GroupItemIDs) { // 只有一个分组并且没有项目时忽略
+			ignore = true
+		}
+	}
 	return
 }
 

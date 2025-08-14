@@ -2618,10 +2618,6 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 					} else if av.KeyTypeTemplate == cell.Value.Type {
 						if nil != cell.Value.Template {
 							val = cell.Value.Template.Content
-							if "<no value>" == val {
-								val = ""
-							}
-
 							val = strings.ReplaceAll(val, "\\|", "|")
 							val = strings.ReplaceAll(val, "|", "\\|")
 							col := table.GetColumn(cell.Value.KeyID)

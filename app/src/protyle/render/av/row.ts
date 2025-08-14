@@ -10,7 +10,6 @@ import {
     renderCellAttr
 } from "./cell";
 import {fetchPost} from "../../../util/fetch";
-import {showMessage} from "../../../dialog/message";
 import * as dayjs from "dayjs";
 import {Constants} from "../../../constants";
 import {insertGalleryItemAnimation} from "./gallery/item";
@@ -116,7 +115,7 @@ export const setPage = (blockElement: Element) => {
 export const insertAttrViewBlockAnimation = (options: {
     protyle: IProtyle,
     blockElement: Element,
-    srcIDs: string[],
+    srcIDs: string[],   // node id
     previousId: string,
     groupID?: string
 }) => {
@@ -170,6 +169,7 @@ ${colType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
         groupID: options.groupID,
         previousID: options.previousId,
+        srcIDs: options.srcIDs,
     }, (response) => {
         if (response.data.values) {
             let popCellElement: HTMLElement;

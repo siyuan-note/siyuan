@@ -58,7 +58,6 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
         viewID: options.blockElement.getAttribute(Constants.CUSTOM_SY_AV_VIEW),
         groupID: options.groupID,
         previousID: options.previousId,
-        srcIDs: options.srcIDs
     }, (response) => {
         if (response.data.values) {
             let popCellElement: HTMLElement;

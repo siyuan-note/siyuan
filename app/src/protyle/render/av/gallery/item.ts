@@ -19,6 +19,11 @@ export const insertGalleryItemAnimation = (options: {
     if (hasSort) {
         sideItemElement = options.blockElement.querySelector(groupQuery + ".av__gallery-add").previousElementSibling;
     }
+    const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
+    if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
+        bodyElement.getAttribute("data-content") !== "_@today@_") {
+        sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add').previousElementSibling;
+    }
     let cellsHTML = "";
     sideItemElement?.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {
         let lineNumber = 1;

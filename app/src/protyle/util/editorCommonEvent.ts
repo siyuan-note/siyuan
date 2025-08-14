@@ -1496,6 +1496,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             event.preventDefault();
             return;
         }
+        const gutterTypes = gutterType ? gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP) : [];
         const fileTreeIds = (event.dataTransfer.types.includes(Constants.SIYUAN_DROP_FILE) && window.siyuan.dragElement) ? window.siyuan.dragElement.innerText : "";
         if (event.shiftKey || (event.altKey && fileTreeIds.indexOf("-") === -1)) {
             const targetAssetElement = hasClosestBlock(event.target);
@@ -1567,7 +1568,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 targetElement = hasTopClosestByAttribute(targetElement, "data-node-id", null);
             }
         } else if (targetElement && targetElement.classList.contains("list")) {
-            if (gutterType && gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP)[0] !== "nodelistitem") {
+            if (gutterTypes[0] !== "nodelistitem") {
                 targetElement = hasClosestBlock(document.elementFromPoint(event.clientX, event.clientY - 6));
             } else {
                 targetElement = hasClosestByClassName(document.elementFromPoint(event.clientX, event.clientY - 6), "li");
@@ -1586,10 +1587,25 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeViewRowMenu${Constants.ZWSP}`.toLowerCase())) {
-            // 行只能拖拽当前 av 中
             if ((!targetElement.classList.contains("av__row") && !targetElement.classList.contains("av__row--util")) ||
                 (window.siyuan.dragElement && !window.siyuan.dragElement.contains(targetElement))) {
+                // 行只能拖拽当前 av 中
                 targetElement = false;
+            } else {
+                // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement && ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"))) {
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    gutterTypes[2].split(",").find(item => {
+                        if (item && item.split("@")[1] !== groupID) {
+                            targetElement = false;
+                            editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
+                                item.classList.remove("dragover__top", "dragover__bottom", "dragover");
+                            });
+                            return true;
+                        }
+                    });
+                }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
             // gallery item 只能拖拽当前 av 中
@@ -1718,13 +1734,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
             disabledPosition = "";
             // gutter 文档内拖拽限制
             // 排除自己及子孙
-            const gutterTypes = gutterType.replace(Constants.SIYUAN_DROP_GUTTER, "").split(Constants.ZWSP);
             if (gutterTypes[0] === "nodeattributeview" && gutterTypes[1] === "col" && targetElement.getAttribute("data-id") === gutterTypes[2]) {
                 // 表头不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;
             }
-            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2] === targetElement.getAttribute("data-id")) {
+            if (gutterTypes[0] === "nodeattributeviewrowmenu" && gutterTypes[2].split("@")[0] === targetElement.getAttribute("data-id")) {
                 // 行不能拖到自己上
                 clearDragoverElement(dragoverElement);
                 return;

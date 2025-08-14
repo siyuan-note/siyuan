@@ -1551,33 +1551,34 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 再处理模板字段
-
-		// 渲染模板
+		templateKeys, _ := sql.GetTemplateKeysByResolutionOrder(attrView)
 		var renderTemplateErr error
-		for _, kv := range keyValues {
-			switch kv.Key.Type {
-			case av.KeyTypeTemplate:
-				if 0 < len(kv.Values) {
-					var ial map[string]string
-					block := av.GetKeyBlockValue(keyValues)
-					if nil != block && !block.IsDetached {
-						ial = sql.GetBlockAttrs(block.BlockID)
-					}
-					if nil == ial {
-						ial = map[string]string{}
-					}
-					if nil == kv.Values[0].Template {
-						kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, nodeID, kv.Key.Type)
-					}
+		for _, templateKey := range templateKeys {
+			for _, kv := range keyValues {
+				if kv.Key.ID != templateKey.ID || 1 > len(kv.Values) {
+					continue
+				}
 
-					var renderErr error
-					kv.Values[0].Template.Content, renderErr = sql.RenderTemplateField(ial, keyValues, kv.Key.Template)
-					if nil != renderErr {
-						renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), kv.Key.Name, renderErr)
-					}
+				var ial map[string]string
+				block := av.GetKeyBlockValue(keyValues)
+				if nil != block && !block.IsDetached {
+					ial = sql.GetBlockAttrs(block.BlockID)
+				}
+				if nil == ial {
+					ial = map[string]string{}
+				}
+				if nil == kv.Values[0].Template {
+					kv.Values[0] = av.GetAttributeViewDefaultValue(kv.Values[0].ID, kv.Key.ID, nodeID, kv.Key.Type)
+				}
+
+				var renderErr error
+				kv.Values[0].Template.Content, renderErr = sql.RenderTemplateField(ial, keyValues, kv.Key.Template)
+				if nil != renderErr {
+					renderTemplateErr = fmt.Errorf("database [%s] template field [%s] rendering failed: %s", getAttrViewName(attrView), kv.Key.Name, renderErr)
 				}
 			}
 		}
+
 		if nil != renderTemplateErr {
 			util.PushErrMsg(fmt.Sprintf(Conf.Language(44), util.EscapeHTML(renderTemplateErr.Error())), 30000)
 		}

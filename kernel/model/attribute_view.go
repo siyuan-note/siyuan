@@ -73,6 +73,12 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	}
 
 	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	for _, value := range ret {
+		// 主键都不返回内容，避免闪烁 https://github.com/siyuan-note/siyuan/issues/15561#issuecomment-3184746195
+		if av.KeyTypeBlock == value.Type {
+			value.Block.Content = ""
+		}
+	}
 	return
 }
 
@@ -4718,6 +4724,12 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		return
 	}
 
+	optionSorts := map[string]int{}
+	for i, opt := range options {
+		optionSorts[opt.Name] = i
+	}
+
+	addNew := false
 	selectKey, _ := attrView.GetKey(operation.ID)
 	if nil == selectKey {
 		return
@@ -4738,7 +4750,14 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 				Color: opt.Color,
 				Desc:  opt.Desc,
 			})
+			addNew = true
 		}
+	}
+
+	if !addNew {
+		sort.SliceStable(selectKey.Options, func(i, j int) bool {
+			return optionSorts[selectKey.Options[i].Name] < optionSorts[selectKey.Options[j].Name]
+		})
 	}
 
 	regenAttrViewGroups(attrView, operation.ID)

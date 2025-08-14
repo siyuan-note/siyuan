@@ -1470,8 +1470,21 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 
 					destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
 					if nil != destKey {
+						var furtherCollection av.Collection
+						if av.KeyTypeTemplate == destKey.Type {
+							// 渲染目标视图，这样才能汇总渲染后的模板字段值
+							viewable := sql.RenderView(destAv, destAv.Views[0], "")
+							if nil != viewable {
+								furtherCollection = viewable.(av.Collection)
+							}
+						}
+
 						for _, bID := range relVal.Relation.BlockIDs {
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
+							if nil != furtherCollection && av.KeyTypeTemplate == destKey.Type {
+								destVal = furtherCollection.GetValue(bID, destKey.ID)
+							}
+
 							if nil == destVal {
 								if destAv.ExistItem(bID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
 									destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.Rollup.KeyID, bID, destKey.Type)

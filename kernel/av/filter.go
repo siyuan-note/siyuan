@@ -360,10 +360,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
-			if nil == other || nil == other.MSelect || 1 > len(other.MSelect) {
-				return true
-			}
-
 			switch operator {
 			case FilterOperatorIsEqual, FilterOperatorContains:
 				contains := false
@@ -387,12 +383,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 					}
 				}
 				return !contains
-			case FilterOperatorIsEmpty:
-				return 0 == len(value.MSelect) || 1 == len(value.MSelect) && "" == value.MSelect[0].Content
-			case FilterOperatorIsNotEmpty:
-				return 0 != len(value.MSelect) && !(1 == len(value.MSelect) && "" == value.MSelect[0].Content)
 			}
-			return false
 		}
 	case KeyTypeURL:
 		if nil != value.URL && nil != other && nil != other.URL {

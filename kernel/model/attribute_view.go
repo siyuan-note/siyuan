@@ -73,6 +73,12 @@ func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID,
 	}
 
 	ret = getAttrViewAddingBlockDefaultValues(attrView, view, groupView, previousBlockID, addingBlockID)
+	for _, value := range ret {
+		// 主键都不返回内容，避免闪烁 https://github.com/siyuan-note/siyuan/issues/15561#issuecomment-3184746195
+		if av.KeyTypeBlock == value.Type {
+			value.Block.Content = ""
+		}
+	}
 	return
 }
 

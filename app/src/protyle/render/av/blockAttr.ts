@@ -143,7 +143,7 @@ export const genAVValueHTML = (value: IAVCellValue) => {
             break;
         case "rollup":
             value?.rollup?.contents?.forEach((item) => {
-                const rollupText = ["select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
+                const rollupText = ["template", "select", "mSelect", "mAsset", "checkbox", "relation"].includes(item.type) ? genAVValueHTML(item) : genAVRollupHTML(item);
                 if (rollupText) {
                     html += rollupText + ",&nbsp;";
                 }

@@ -868,7 +868,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.stopPropagation();
                         return;
                     }
-                    target.classList.add("av__gallery-item--select");
+                    if (!target.classList.contains("av__gallery-item--select")) {
+                        blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
+                            item.classList.remove("av__gallery-item--select");
+                        })
+                        target.classList.add("av__gallery-item--select");
+                    }
                     const ghostElement = document.createElement("div");
                     ghostElement.className = "protyle-wysiwyg protyle-wysiwyg--attr";
                     const selectElements = blockElement.querySelectorAll(".av__gallery-item--select");
@@ -900,11 +905,6 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const groupId = bodyElement.getAttribute("data-group-id");
                         selectIds.push(item.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
                     });
-                    if (selectIds.length === 0) {
-                        const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
-                        const groupId = bodyElement.getAttribute("data-group-id");
-                        selectIds.push(target.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
-                    }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
                 }

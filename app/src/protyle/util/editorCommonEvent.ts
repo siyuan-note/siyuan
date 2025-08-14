@@ -896,10 +896,14 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     window.siyuan.dragElement = target;
                     const selectIds: string[] = [];
                     blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
-                        selectIds.push(item.getAttribute("data-id"));
+                        const bodyElement = hasClosestByClassName(item, "av__body") as HTMLElement;
+                        const groupId = bodyElement.getAttribute("data-group-id");
+                        selectIds.push(item.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
                     });
                     if (selectIds.length === 0) {
-                        selectIds.push(target.getAttribute("data-id"));
+                        const bodyElement = hasClosestByClassName(target, "av__body") as HTMLElement;
+                        const groupId = bodyElement.getAttribute("data-group-id");
+                        selectIds.push(target.getAttribute("data-id") + (groupId ? `@${groupId}` : ""));
                     }
                     event.dataTransfer.setData(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}${selectIds}`,
                         ghostElement.outerHTML);
@@ -1172,10 +1176,12 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // gallery item 内部拖拽
                             const doOperations: IOperation[] = [];
                             const undoOperations: IOperation[] = [];
-                            const undoPreviousId = blockElement.querySelector(`.av__gallery-item[data-id="${selectedIds[0]}"]`).previousElementSibling?.getAttribute("data-id") || "";
                             const targetGroupID = targetElement.parentElement.parentElement.getAttribute("data-group-id");
                             selectedIds.reverse().forEach(item => {
-                                const groupID = blockElement.querySelector(`.av__gallery-item[data-id="${item}"]`).parentElement.parentElement.getAttribute("data-group-id");
+                                const items = item.split("@");
+                                const id = items[0];
+                                const groupID = items[1] || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling.getAttribute("data-id") || "";
                                 if (previousID !== item && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {
@@ -1183,7 +1189,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID,
                                         targetGroupID,
@@ -1192,7 +1198,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                         action: "sortAttrViewRow",
                                         avID,
                                         previousID: undoPreviousId,
-                                        id: item,
+                                        id,
                                         blockID: blockElement.dataset.nodeId,
                                         groupID: targetGroupID,
                                         targetGroupID: groupID,
@@ -1599,27 +1605,36 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     gutterTypes[2].split(",").find(item => {
                         if (item && item.split("@")[1] !== groupID) {
                             targetElement = false;
-                            editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover").forEach((item: HTMLElement) => {
-                                item.classList.remove("dragover__top", "dragover__bottom", "dragover");
-                            });
                             return true;
                         }
                     });
                 }
             }
         } else if (targetElement && gutterType && gutterType.startsWith(`${Constants.SIYUAN_DROP_GUTTER}NodeAttributeView${Constants.ZWSP}GalleryItem${Constants.ZWSP}`.toLowerCase())) {
-            // gallery item 只能拖拽当前 av 中
             const containerElement = hasClosestByClassName(event.target, "av__container");
             if (targetElement.classList.contains("av") || !containerElement ||
                 !containerElement.contains(window.siyuan.dragElement) || targetElement === window.siyuan.dragElement) {
+                // gallery item 只能拖拽当前 av 中
                 targetElement = false;
-                editorElement.querySelectorAll(".dragover__left, .dragover__right").forEach((item: HTMLElement) => {
-                    item.classList.remove("dragover__left", "dragover__right");
-                });
+            } else {
+                // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                const bodyElement = hasClosestByClassName(targetElement, "av__body");
+                if (bodyElement && ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"))) {
+                    const groupID = bodyElement.getAttribute("data-group-id");
+                    gutterTypes[2].split(",").find(item => {
+                        if (item && item.split("@")[1] !== groupID) {
+                            targetElement = false;
+                            return true;
+                        }
+                    });
+                }
             }
         }
 
         if (!targetElement) {
+            editorElement.querySelectorAll(".dragover__bottom, .dragover__top, .dragover, .dragover__left, .dragover__right").forEach((item: HTMLElement) => {
+                item.classList.remove("dragover__top", "dragover__bottom", "dragover", "dragover__left", "dragover__right");
+            });
             return;
         }
         const isNotAvItem = !targetElement.classList.contains("av__row") &&

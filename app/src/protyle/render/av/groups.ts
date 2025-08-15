@@ -135,9 +135,13 @@ export const getGroupsNumberHTML = (group: IAVGroup) => {
     </button>
     <button class="b3-menu__separator"></button>
     <div class="b3-menu__item" data-type="nobg">
-        <div>
+        <div class="fn__block">
             <div class="b3-menu__labels">${window.siyuan.languages.groupRange}</div>
-            <input data-type="avGroupRange" class="b3-text-field fn__size96" value="${group?.range?.numStart || 0}"> - <input class="b3-text-field fn__size96" value="${group?.range?.numEnd || 1000}">
+            <div class="fn__flex">
+                <input data-type="avGroupRange" class="b3-text-field fn__flex-1" value="${group?.range?.numStart || 0}">
+                <span class="fn__space"></span>-<span class="fn__space"></span>
+                <input class="b3-text-field fn__flex-1" value="${group?.range?.numEnd || 1000}">            
+            </div>
             <div class="fn__hr"></div>
             <div class="b3-menu__labels">${window.siyuan.languages.groupStep}</div>
             <input class="b3-text-field fn__block" value="${group?.range?.numStep || 100}">

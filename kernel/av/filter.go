@@ -825,7 +825,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 	case KeyTypeNumber:
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Number = &ValueNumber{Content: filter.Value.Number.Content, IsNotEmpty: false}
+			ret.Number = &ValueNumber{Content: filter.Value.Number.Content, IsNotEmpty: true}
 		case FilterOperatorIsNotEqual:
 			ret.Number = &ValueNumber{Content: 0, IsNotEmpty: false}
 		case FilterOperatorIsGreater:

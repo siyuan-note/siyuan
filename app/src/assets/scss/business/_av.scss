@@ -109,6 +109,7 @@
     &:empty::after {
       color: var(--b3-theme-on-surface-light);
       content: attr(data-tip);
+      pointer-events: none;
     }
   }
 
@@ -383,19 +384,19 @@
       transition: background 100ms ease-out;
       white-space: nowrap;
       font-size: 85%;
-      min-height: 23px;
-      padding: 5px 4px;
+      padding: 10px 5px;
 
       &:hover {
         .b3-chip[data-type="block-more"] {
-          top: 4px;
           display: block;
+          top: 5px;
+          margin: 0;
           z-index: 1;
         }
       }
 
       .av__cell {
-        padding: 2px 4px;
+        padding: 2px 5px;
         border-right: 0;
         min-height: calc(1.625em + 4px);
 
@@ -420,22 +421,18 @@
           cursor: default;
         }
 
-        &[data-dtype="mAsset"],
-        &[data-dtype="mSelect"],
-        &[data-dtype="select"] {
-          margin-left: -2px;
+        .b3-chip {
+          margin: 3px 6px 3px 0;
+        }
+
+        .av__cellassetimg {
+          margin: 3px 6px 3px 0;
         }
       }
 
       &--edit .av__cell {
         padding: 2px 4px !important;
         min-height: calc(1.625em + 4px) !important;
-
-        &[data-dtype="mAsset"][data-empty="true"],
-        &[data-dtype="mSelect"][data-empty="true"],
-        &[data-dtype="select"][data-empty="true"] {
-          margin-left: 0;
-        }
 
         .b3-menu__avemoji {
           display: none;
@@ -704,7 +701,7 @@
     }
 
     .b3-chip {
-      margin: 1px 2px;
+      margin: 1px 4px 1px 0;
       padding: 2px 6px;
       line-height: calc(1.625em - 6px);
       font-size: inherit;
@@ -984,7 +981,7 @@
 img.av__cellassetimg {
   max-height: calc(1.625em - 2px);
   border-radius: var(--b3-border-radius);
-  margin: 1px 2px;
+  margin: 1px 4px 1px 0;
   max-width: none;
   vertical-align: top;
   font-size: inherit;

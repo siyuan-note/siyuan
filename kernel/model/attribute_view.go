@@ -2433,6 +2433,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	}
 
 	if nil != masterView.Group {
+		view.Group = &av.ViewGroup{}
 		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
 			logging.LogErrorf("copy group failed: %s", copyErr)
 			return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: copyErr.Error()}

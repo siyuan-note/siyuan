@@ -427,6 +427,7 @@ export class WYSIWYG {
                         if (isEndOfBlock(range)) {
                             textPlain = textPlain.replace(/\n$/, "");
                         }
+                        html = textPlain;
                     } else if (hasClosestByTag(range.startContainer, "TD") || hasClosestByTag(range.startContainer, "TH")) {
                         tempElement.innerHTML = tempElement.innerHTML.replace(/<br>/g, "\n").replace(/<br\/>/g, "\n");
                         textPlain = tempElement.textContent.endsWith("\n") ? tempElement.textContent.replace(/\n$/, "") : tempElement.textContent;

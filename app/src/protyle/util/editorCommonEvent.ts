@@ -871,7 +871,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                     if (!target.classList.contains("av__gallery-item--select")) {
                         blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
                             item.classList.remove("av__gallery-item--select");
-                        })
+                        });
                         target.classList.add("av__gallery-item--select");
                     }
                     const ghostElement = document.createElement("div");
@@ -1102,7 +1102,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const items = item.split("@");
                                 const id = items[0];
                                 const groupID = items[1] || "";
-                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling.getAttribute("data-id") || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body${groupID ? `[data-group-id="${groupID}"]` : ""} .av__row[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
                                 if (previousID !== id && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {
@@ -1181,7 +1181,7 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                                 const items = item.split("@");
                                 const id = items[0];
                                 const groupID = items[1] || "";
-                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling.getAttribute("data-id") || "";
+                                const undoPreviousId = blockElement.querySelector(`.av__body[data-group-id="${groupID}"] .av__gallery-item[data-id="${id}"]`).previousElementSibling?.getAttribute("data-id") || "";
                                 if (previousID !== item && undoPreviousId !== previousID || (
                                     (undoPreviousId === "" && previousID === "" && targetGroupID !== groupID)
                                 )) {

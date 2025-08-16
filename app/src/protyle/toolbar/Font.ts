@@ -58,7 +58,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     let lastColorHTML = "";
     const lastFonts = window.siyuan.storage[Constants.LOCAL_FONTSTYLES];
     if (lastFonts.length > 0) {
-        lastColorHTML = `<div class="fn__flex">
+        lastColorHTML = `<div data-id="lastUsed" class="fn__flex">
     ${window.siyuan.languages.lastUsed}
     <span class="fn__space"></span>
     <kbd class="fn__kbd fn__flex-center${window.siyuan.config.keymap.editor.insert.lastUsed.custom ? "" : " fn__none"}">${updateHotkeyTip(window.siyuan.config.keymap.editor.insert.lastUsed.custom)}</kbd>
@@ -110,7 +110,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     }
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.color}</div>
+<div data-id="color">${window.siyuan.languages.color}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex fn__flex-wrap">
     <button class="color__square ariaLabel" data-position="3south" data-type="style1" aria-label="${window.siyuan.languages.default}">A</button>
@@ -120,26 +120,26 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     <button class="color__square" data-type="style1" style="color: var(--b3-card-success-color);background-color: var(--b3-card-success-background);">A</button>
 </div>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.colorFont}</div>
+<div data-id="colorFont">${window.siyuan.languages.colorFont}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex fn__flex-wrap">
     ${colorHTML}
 </div>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.colorPrimary}</div>
+<div data-id="colorPrimary">${window.siyuan.languages.colorPrimary}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex fn__flex-wrap">
     ${bgHTML}
 </div>
 <div class="fn__hr"></div>
-<div>${window.siyuan.languages.fontStyle}</div>
+<div data-id="fontStyle">${window.siyuan.languages.fontStyle}</div>
 <div class="fn__hr--small"></div>
 <div class="fn__flex">
     <button data-type="style2" class="protyle-font__style" style="-webkit-text-stroke: 0.2px var(--b3-theme-on-background);-webkit-text-fill-color : transparent;">${window.siyuan.languages.hollow}</button>
     <button data-type="style4" class="protyle-font__style" style="text-shadow: 1px 1px var(--b3-theme-surface-lighter), 2px 2px var(--b3-theme-surface-lighter), 3px 3px var(--b3-theme-surface-lighter), 4px 4px var(--b3-theme-surface-lighter)">${window.siyuan.languages.shadow}</button>
 </div>
 <div class="fn__hr${disableFont ? " fn__none" : ""}"></div>
-<div class="fn__flex${disableFont ? " fn__none" : ""}">
+<div data-id="fontSize" class="fn__flex${disableFont ? " fn__none" : ""}">
     ${window.siyuan.languages.fontSize}
     <span class="fn__flex-1"></span>
     <label class="fn__flex">
@@ -159,7 +159,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     </div>
 </div>
 <div class="fn__hr--b"></div>
-<div class="fn__flex">
+<div data-id="clearFontStyle" class="fn__flex">
     <div class="fn__space--small"></div>
     <button class="b3-button b3-button--remove fn__block" data-type="clear">
         <svg><use xlink:href="#iconTrashcan"></use></svg>${window.siyuan.languages.clearFontStyle}

@@ -124,6 +124,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     }
     let textElement: HTMLElement;
     let fontSize = "16px";
+    let textColor: string;
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
     } else {
@@ -134,6 +135,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     }
     if (textElement) {
         fontSize = textElement.style.fontSize || "16px";
+        textColor = textElement.style.color;
     }
     const utilElement = toolbarElement.querySelector(".keyboard__util") as HTMLElement;
     utilElement.innerHTML = `${lastColorHTML}
@@ -165,7 +167,7 @@ export const renderTextMenu = (protyle: IProtyle, toolbarElement: Element) => {
     ${colorHTML}
 </div>
 <div data-id="colorPrimary" class="keyboard__slash-title">${window.siyuan.languages.colorPrimary}</div>
-<div data-id="colorPrimaryWrap" class="keyboard__slash-block">
+<div data-id="colorPrimaryWrap" class="keyboard__slash-block"${textColor ? ` style="--b3-color-text: ${textColor};"` : ""}>
     ${bgHTML}
 </div>
 <div data-id="fontStyle" class="keyboard__slash-title">${window.siyuan.languages.fontStyle}</div>
@@ -561,14 +563,17 @@ export const initKeyboardToolbar = () => {
         if (["clear", "style2", "style4", "color", "backgroundColor", "fontSize", "style1"].includes(type)) {
             const nodeElements = getFontNodeElements(protyle);
             const itemElement = buttonElement.firstElementChild as HTMLElement;
+            const colorPrimaryWrap = toolbarElement.querySelector("[data-id='colorPrimaryWrap']") as HTMLElement;
             if (type === "style1") {
                 fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor + Constants.ZWSP + itemElement.style.color);
+                colorPrimaryWrap.style.setProperty("--b3-color-text", itemElement.style.color);
             } else if (type === "fontSize") {
                 fontEvent(protyle, nodeElements, type, itemElement.textContent.trim());
             } else if (type === "backgroundColor") {
                 fontEvent(protyle, nodeElements, type, itemElement.style.backgroundColor);
             } else if (type === "color") {
                 fontEvent(protyle, nodeElements, type, itemElement.style.color);
+                colorPrimaryWrap.style.setProperty("--b3-color-text", itemElement.style.color);
             } else {
                 fontEvent(protyle, nodeElements, type);
             }

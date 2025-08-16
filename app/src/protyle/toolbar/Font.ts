@@ -97,6 +97,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     }
     let textElement: HTMLElement;
     let fontSize = window.siyuan.config.editor.fontSize + "px";
+    let textColor: string;
     if (nodeElements && nodeElements.length > 0) {
         textElement = nodeElements[0] as HTMLElement;
     } else {
@@ -107,6 +108,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     }
     if (textElement) {
         fontSize = textElement.style.fontSize || window.siyuan.config.editor.fontSize + "px";
+        textColor = textElement.style.color;
     }
     element.innerHTML = `${lastColorHTML}
 <div class="fn__hr"></div>
@@ -128,7 +130,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
 <div class="fn__hr"></div>
 <div data-id="colorPrimary">${window.siyuan.languages.colorPrimary}</div>
 <div class="fn__hr--small"></div>
-<div data-id="colorPrimaryWrap" class="fn__flex fn__flex-wrap">
+<div data-id="colorPrimaryWrap" class="fn__flex fn__flex-wrap"${textColor ? ` style="--b3-color-text: ${textColor};"` : ""}>
     ${bgHTML}
 </div>
 <div class="fn__hr"></div>
@@ -166,6 +168,7 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
     </button>
     <div class="fn__space--small"></div>
 </div>`;
+    const colorPrimaryWrap = element.querySelector("[data-id='colorPrimaryWrap']") as HTMLElement;
     element.addEventListener("click", function (event: Event) {
         let target = event.target as HTMLElement;
         while (target && !target.isEqualNode(element)) {
@@ -173,12 +176,14 @@ export const appearanceMenu = (protyle: IProtyle, nodeElements?: Element[]) => {
             if (target.tagName === "BUTTON") {
                 if (dataType === "style1") {
                     fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor + Constants.ZWSP + target.style.color);
+                    colorPrimaryWrap.style.setProperty("--b3-color-text", target.style.color);
                 } else if (dataType === "fontSize") {
                     fontEvent(protyle, nodeElements, dataType, target.textContent.trim());
                 } else if (dataType === "backgroundColor") {
                     fontEvent(protyle, nodeElements, dataType, target.style.backgroundColor);
                 } else if (dataType === "color") {
                     fontEvent(protyle, nodeElements, dataType, target.style.color);
+                    colorPrimaryWrap.style.setProperty("--b3-color-text", target.style.color);
                 } else {
                     fontEvent(protyle, nodeElements, dataType);
                 }

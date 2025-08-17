@@ -77,14 +77,14 @@ export const getLayoutHTML = (data: IAV) => {
     </label>
     ${html}
     <label class="b3-menu__item">
-        <span class="fn__flex-center">${window.siyuan.languages.showAllFieldsIcon}</span>
+        <span class="fn__flex-center">${window.siyuan.languages.showAllEntriesIcons}</span>
         <span class="fn__space fn__flex-1"></span>
-        <input data-type="toggle-gallery-icon" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
+        <input data-type="toggle-entries-icons" type="checkbox" class="b3-switch b3-switch--menu" ${view.showIcon ? "checked" : ""}>
     </label>
     <label class="b3-menu__item">
         <span class="fn__flex-center">${window.siyuan.languages.wrapAllFields}</span>
         <span class="fn__space fn__flex-1"></span>
-        <input data-type="toggle-gallery-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
+        <input data-type="toggle-entries-wrap" type="checkbox" class="b3-switch b3-switch--menu" ${view.wrapField ? "checked" : ""}>
     </label>
     <button class="b3-menu__item" data-type="set-page-size" data-size="${view.pageSize}">
         <span class="fn__flex-center">${window.siyuan.languages.entryNum}</span>
@@ -118,7 +118,7 @@ export const bindLayoutEvent = (options: {
             data: checked
         }]);
     });
-    const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
+    const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-icons"]') as HTMLInputElement;
     toggleIconElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
         const blockID = options.blockElement.getAttribute("data-node-id");
@@ -135,7 +135,7 @@ export const bindLayoutEvent = (options: {
             data: !checked
         }]);
     });
-    const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-wrap"]') as HTMLInputElement;
+    const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-entries-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {
         const avID = options.blockElement.getAttribute("data-av-id");
         const blockID = options.blockElement.getAttribute("data-node-id");

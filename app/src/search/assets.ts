@@ -132,7 +132,7 @@ export const openSearchAsset = (element: HTMLElement, isStick: boolean) => {
             moveEvent.stopPropagation();
             const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
             const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-            if (previousNowSize < 120 || nextNowSize < 120) {
+            if (nextNowSize < 120 || (previousNowSize < 120 && (previousSize >= 120 || previousNowSize < previousSize))) {
                 return;
             }
             previewElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";

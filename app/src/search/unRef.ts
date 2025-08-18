@@ -52,7 +52,8 @@ export const openSearchUnRef = (element: HTMLElement, editor: Protyle) => {
             moveEvent.stopPropagation();
             const previousNowSize = (previousSize + (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
             const nextNowSize = (nextSize - (moveEvent[direction === "lr" ? "clientX" : "clientY"] - x));
-            if (previousNowSize < 120 || nextNowSize < 120) {
+            // 编辑器 scroll 最小高度 155px https://github.com/siyuan-note/siyuan/issues/8519
+            if (nextNowSize < 155 || (previousNowSize < 120 && (previousSize >= 120 || previousNowSize < previousSize))) {
                 return;
             }
             nextElement.style[direction === "lr" ? "width" : "height"] = nextNowSize + "px";

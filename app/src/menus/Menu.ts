@@ -146,7 +146,25 @@ export class Menu {
         this.element.style.zIndex = (++window.siyuan.zIndex).toString();
         this.element.classList.remove("fn__none");
         setPosition(this.element, options.x - (options.isLeft ? this.element.clientWidth : 0), options.y, options.h, options.w);
-        this.element.style.setProperty("--b3-menu-position-top", this.element.style.top);
+        const menuTop = parseInt(this.element.style.top) || options.y;
+        const availableHeight = window.innerHeight - menuTop - Constants.SIZE_TOOLBAR_HEIGHT;
+        (this.element.lastElementChild as HTMLElement).style.maxHeight = Math.max(availableHeight, 0) + "px";
+    }
+
+    public resetPosition() {
+        if (this.element.classList.contains("fn__none")) {
+            return;
+        }
+        
+        setPosition(this.element, parseInt(this.element.style.left) || 0, parseInt(this.element.style.top) || 0, 0, 0);
+        const menuTop = parseInt(this.element.style.top) || 0;
+        const availableHeight = window.innerHeight - menuTop - Constants.SIZE_TOOLBAR_HEIGHT;
+        (this.element.lastElementChild as HTMLElement).style.maxHeight = Math.max(availableHeight, 0) + "px";
+        
+        const showSubMenus = this.element.querySelectorAll(".b3-menu__item--show .b3-menu__submenu");
+        showSubMenus.forEach((subMenuElement) => {
+            this.showSubMenu(subMenuElement as HTMLElement);
+        });
     }
 
     public fullscreen(position: "bottom" | "all" = "all") {

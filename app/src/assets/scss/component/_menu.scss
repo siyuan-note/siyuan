@@ -169,7 +169,7 @@
   }
 
   &__items {
-    max-height: min(80vh, calc(100vh - 20px - var(--b3-menu-position-top, 0px))); // 20px 是 .b3-menu 的上下 padding
+    max-height: 80vh;
     overflow: auto;
     padding: 0 8px;
   }

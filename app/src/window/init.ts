@@ -61,6 +61,7 @@ export const init = (app: App) => {
         resizeTimeout = window.setTimeout(() => {
             adjustLayout(window.siyuan.layout.centerLayout);
             resizeTabs();
+            window.siyuan.menus.menu.resetPosition();
         }, 200);
     });
 };

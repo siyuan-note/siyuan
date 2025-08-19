@@ -21,7 +21,10 @@ export const insertGalleryItemAnimation = (options: {
     const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${options.groupID}"] `);
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
-        sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add').previousElementSibling;
+        sideItemElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__gallery-add')?.previousElementSibling;
+        if (!sideItemElement) {
+            return;
+        }
     }
     let cellsHTML = "";
     sideItemElement?.querySelectorAll(".av__cell").forEach((item: HTMLElement) => {

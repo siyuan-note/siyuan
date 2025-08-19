@@ -78,6 +78,7 @@ export class Undo {
             });
             transaction(protyle, state.doOperations);
         }
+        document.querySelector(".av__panel")?.remove();
         preventScroll(protyle);
         scrollCenter(protyle);
     }

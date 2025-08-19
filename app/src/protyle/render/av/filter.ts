@@ -75,7 +75,8 @@ export const setFilter = async (options: {
     protyle: IProtyle,
     data: IAV,
     target: HTMLElement,
-    blockElement: Element
+    blockElement: Element,
+    empty: boolean
 }) => {
     let rectTarget = options.target.getBoundingClientRect();
     if (rectTarget.height === 0) {
@@ -175,7 +176,7 @@ export const setFilter = async (options: {
                 return true;
             }
         });
-        if (isSame || !hasMatch) {
+        if (!options.empty && (isSame || !hasMatch)) {
             return;
         }
         transaction(options.protyle, [{
@@ -598,6 +599,7 @@ export const addFilter = (options: {
                     setPosition(options.menuElement, options.tabRect.right - options.menuElement.clientWidth, options.tabRect.bottom, options.tabRect.height);
                     const filterElement = options.menuElement.querySelector(`[data-id="${column.id}"] .b3-chip`) as HTMLElement;
                     setFilter({
+                        empty: true,
                         filter,
                         protyle: options.protyle,
                         data: options.data,

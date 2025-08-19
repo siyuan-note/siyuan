@@ -754,6 +754,7 @@ export const openMenuPanel = (options: {
                     data.view.filters.find((item: IAVFilter) => {
                         if (item.column === target.parentElement.parentElement.dataset.id && item.value.type === target.parentElement.parentElement.dataset.filterType) {
                             setFilter({
+                                empty: false,
                                 filter: item,
                                 protyle: options.protyle,
                                 data,

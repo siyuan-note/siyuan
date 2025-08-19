@@ -805,7 +805,9 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                                 return true;
                             }
                         });
+                        let empty = false;
                         if (!filter) {
+                            empty = true;
                             filter = {
                                 column: colId,
                                 operator: getDefaultOperatorByType(type),
@@ -814,6 +816,7 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                             avData.view.filters.push(filter);
                         }
                         setFilter({
+                            empty,
                             filter,
                             protyle,
                             data: avData,

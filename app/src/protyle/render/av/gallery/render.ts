@@ -35,31 +35,11 @@ interface ITableOptions {
     }
 }
 
-const getGalleryHTML = (data: IAVGallery, selectItemIds: IIds[], editIds: IIds[], groupId: string) => {
+const getGalleryHTML = (data: IAVGallery) => {
     let galleryHTML = "";
     // body
     data.cards.forEach((item: IAVGalleryItem, rowIndex: number) => {
-        let hasSelected = selectItemIds.find(selectId => {
-            if (selectId.groupId === groupId && selectId.fieldId === item.id) {
-                return true;
-            }
-        });
-        hasSelected = selectItemIds.find(selectId => {
-            if (selectId.fieldId === item.id) {
-                return true;
-            }
-        });
-        let hasEdit = editIds.find(edit => {
-            if (edit.groupId === groupId && edit.fieldId === item.id) {
-                return true;
-            }
-        });
-        hasEdit= editIds.find(edit => {
-            if (edit.fieldId === item.id) {
-                return true;
-            }
-        });
-        galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item${hasSelected ? " av__gallery-item--select" : ""}">`;
+        galleryHTML += `<div data-id="${item.id}" draggable="true" class="av__gallery-item">`;
         if (data.coverFrom !== 0) {
             const coverClass = "av__gallery-cover av__gallery-cover--" + data.cardAspectRatio;
             if (item.coverURL) {
@@ -74,7 +54,7 @@ const getGalleryHTML = (data: IAVGallery, selectItemIds: IIds[], editIds: IIds[]
                 galleryHTML += `<div class="${coverClass}"></div>`;
             }
         }
-        galleryHTML += `<div class="av__gallery-fields${hasEdit ? " av__gallery-fields--edit" : ""}">`;
+        galleryHTML += '<div class="av__gallery-fields">';
         item.values.forEach((cell, fieldsIndex) => {
             if (data.fields[fieldsIndex].hidden) {
                 return;
@@ -132,7 +112,7 @@ const renderGroupGallery = (options: ITableOptions) => {
     options.data.view.groups.forEach((group: IAVGallery) => {
         if (group.groupHidden === 0) {
             avBodyHTML += `${getGroupTitleHTML(group, group.cards.length)}
-<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${group.groupValue.text?.content}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group, options.resetData.selectItemIds, options.resetData.editIds, group.id)}</div>`;
+<div data-group-id="${group.id}" data-page-size="${group.pageSize}" data-dtype="${group.groupKey.type}" data-content="${group.groupValue.text?.content}" class="av__body${group.groupFolded ? " fn__none" : ""}">${getGalleryHTML(group)}</div>`;
         }
     });
     if (options.renderAll) {
@@ -161,6 +141,24 @@ const afterRenderGallery = (options: ITableOptions) => {
     if (options.resetData.alignSelf) {
         options.blockElement.style.alignSelf = options.resetData.alignSelf;
     }
+    options.resetData.selectItemIds.find(selectId => {
+        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        if (!itemElement) {
+            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        }
+        if (itemElement) {
+            itemElement.classList.add("av__gallery-item--select");
+        }
+    });
+    options.resetData.editIds.find(selectId => {
+        let itemElement = options.blockElement.querySelector(`.av__body[data-group-id="${selectId.groupId}"] .av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        if (!itemElement) {
+            itemElement = options.blockElement.querySelector(`.av__gallery-item[data-id="${selectId.fieldId}"]`) as HTMLElement;
+        }
+        if (itemElement) {
+            itemElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
+        }
+    });
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {
         if (groupId === "unGroup") {
             (options.blockElement.querySelector(".av__body") as HTMLElement).dataset.pageSize = options.resetData.pageSizes[groupId];
@@ -325,7 +323,7 @@ export const renderGallery = async (options: {
         });
         return;
     }
-    const bodyHTML = getGalleryHTML(view, selectItemIds, editIds, "");
+    const bodyHTML = getGalleryHTML(view);
     if (options.renderAll) {
         options.blockElement.firstElementChild.outerHTML = `<div class="av__container fn__block">
     ${genTabHeaderHTML(data, resetData.isSearching || !!resetData.query, !options.protyle.disabled && !hasClosestByAttribute(options.blockElement, "data-type", "NodeBlockQueryEmbed"))}

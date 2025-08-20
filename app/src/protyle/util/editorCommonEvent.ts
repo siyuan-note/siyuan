@@ -864,9 +864,16 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 const blockElement = hasClosestBlock(target);
                 if (blockElement) {
                     if (blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
-                        event.preventDefault();
-                        event.stopPropagation();
-                        return;
+                        const bodyElements = blockElement.querySelectorAll(".av__body");
+                        if (bodyElements.length === 1) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                            event.preventDefault();
+                            event.stopPropagation();
+                            return;
+                        }
                     }
                     if (!target.classList.contains("av__gallery-item--select")) {
                         blockElement.querySelectorAll(".av__gallery-item--select").forEach(item => {
@@ -1598,12 +1605,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // 行只能拖拽当前 av 中
                 targetElement = false;
             } else {
-                // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
                 const bodyElement = hasClosestByClassName(targetElement, "av__body");
-                if (bodyElement && ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"))) {
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
-                        if (item && item.split("@")[1] !== groupID) {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
                             targetElement = false;
                             return true;
                         }
@@ -1617,12 +1633,21 @@ export const dropEvent = (protyle: IProtyle, editorElement: HTMLElement) => {
                 // gallery item 只能拖拽当前 av 中
                 targetElement = false;
             } else {
-                // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
                 const bodyElement = hasClosestByClassName(targetElement, "av__body");
-                if (bodyElement && ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"))) {
+                if (bodyElement) {
+                    const blockElement = hasClosestBlock(bodyElement) as HTMLElement;
                     const groupID = bodyElement.getAttribute("data-group-id");
+                    // 模板、创建时间、更新时间 字段作为分组方式时不允许跨分组拖拽 https://github.com/siyuan-note/siyuan/issues/15553
+                    const isTCU = ["template", "created", "updated"].includes(bodyElement.getAttribute("data-dtype"));
+                    // 排序只能夸组拖拽
+                    const hasSort = blockElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active");
                     gutterTypes[2].split(",").find(item => {
-                        if (item && item.split("@")[1] !== groupID) {
+                        const sourceGroupID = item ? item.split("@")[1] : "";
+                        if (sourceGroupID !== groupID && isTCU) {
+                            targetElement = false;
+                            return true;
+                        }
+                        if (sourceGroupID === groupID && hasSort) {
                             targetElement = false;
                             return true;
                         }

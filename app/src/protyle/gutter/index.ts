@@ -95,9 +95,16 @@ export class Gutter {
                     }
                 });
                 if (avElement.querySelector('.block__icon[data-type="av-sort"]')?.classList.contains("block__icon--active")) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                    return;
+                    const bodyElements = avElement.querySelectorAll(".av__body");
+                    if (bodyElements.length === 1) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    } else if (["template", "created", "updated"].includes(bodyElements[0].getAttribute("data-dtype"))) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        return;
+                    }
                 }
                 const rowElement = avElement.querySelector(`.av__body${buttonElement.dataset.groupId ? `[data-group-id="${buttonElement.dataset.groupId}"]` : ""} .av__row[data-id="${buttonElement.dataset.rowId}"]`);
                 if (!rowElement.classList.contains("av__row--select")) {
@@ -111,7 +118,7 @@ export class Gutter {
                 updateHeader(rowElement as HTMLElement);
                 avElement.querySelectorAll(".av__row--select:not(.av__row--header)").forEach(item => {
                     const groupId = (hasClosestByClassName(item, "av__body") as HTMLElement)?.dataset.groupId || "";
-                    selectIds.push(item.getAttribute("data-id") + (groupId ? "@"+groupId : ""));
+                    selectIds.push(item.getAttribute("data-id") + (groupId ? "@" + groupId : ""));
                     selectElements.push(item);
                 });
             } else {

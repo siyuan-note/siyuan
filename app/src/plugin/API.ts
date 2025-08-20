@@ -19,7 +19,7 @@ import {Protyle} from "../protyle";
 import {openMobileFileById} from "../mobile/editor";
 import {lockScreen, exitSiYuan} from "../dialog/processSystem";
 import {Model} from "../layout/Model";
-import {getDockByType} from "../layout/tabUtil";
+import {getActiveTab, getDockByType} from "../layout/tabUtil";
 /// #if !MOBILE
 import {getAllModels} from "../layout/getAll";
 /// #endif
@@ -226,6 +226,7 @@ export const API = {
     getModelByDockType,
     openTab,
     openWindow,
+    getActiveTab,
     openMobileFileById,
     lockScreen,
     exitSiYuan,

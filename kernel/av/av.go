@@ -26,6 +26,7 @@ import (
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
+	"github.com/jinzhu/copier"
 	jsoniter "github.com/json-iterator/go"
 	"github.com/siyuan-note/filelock"
 	"github.com/siyuan-note/logging"
@@ -34,13 +35,14 @@ import (
 
 // AttributeView 描述了属性视图的结构。
 type AttributeView struct {
-	Spec      int          `json:"spec"`      // 格式版本
-	ID        string       `json:"id"`        // 属性视图 ID
-	Name      string       `json:"name"`      // 属性视图名称
-	KeyValues []*KeyValues `json:"keyValues"` // 属性视图属性键值
-	KeyIDs    []string     `json:"keyIDs"`    // 属性视图属性键 ID，用于排序
-	ViewID    string       `json:"viewID"`    // 当前视图 ID
-	Views     []*View      `json:"views"`     // 视图
+	Spec              int          `json:"spec"`      // 格式版本
+	ID                string       `json:"id"`        // 属性视图 ID
+	Name              string       `json:"name"`      // 属性视图名称
+	KeyValues         []*KeyValues `json:"keyValues"` // 属性视图属性键值
+	OriginalKeyValues []*KeyValues `json:"-"`         // 原始属性视图属性键值
+	KeyIDs            []string     `json:"keyIDs"`    // 属性视图属性键 ID，用于排序
+	ViewID            string       `json:"viewID"`    // 当前视图 ID
+	Views             []*View      `json:"views"`     // 视图
 }
 
 // KeyValues 描述了属性视图属性键值列表的结构。
@@ -469,6 +471,13 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 			logging.LogErrorf("unmarshal attribute view [%s] failed: %s", avID, err)
 			return
 		}
+	}
+
+	ret.OriginalKeyValues = []*KeyValues{}
+	for _, keyValues := range ret.KeyValues {
+		cloned := &KeyValues{}
+		copier.CopyWithOption(cloned, keyValues, copier.Option{DeepCopy: true})
+		ret.OriginalKeyValues = append(ret.OriginalKeyValues, cloned)
 	}
 	return
 }

@@ -249,7 +249,7 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 
 func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.KeyValues {
+	for _, keyValues := range attrView.OriginalKeyValues {
 		for _, val := range keyValues.Values {
 			values := ret[val.BlockID]
 			if nil == values {

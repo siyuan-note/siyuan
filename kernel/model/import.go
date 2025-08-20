@@ -1382,6 +1382,14 @@ func htmlBlock2Inline(tree *parse.Tree) {
 			ial := &ast.Node{Type: ast.NodeKramdownSpanIAL, Tokens: parse.IAL2Tokens([][]string{{"style", style}})}
 			img.SetIALAttr("style", style)
 			img.InsertAfter(ial)
+		} else if height := domAttrValue(htmlImg, "height"); "" != height {
+			if util2.IsDigit(height) {
+				height += "px"
+			}
+			style := "height: " + height + ";"
+			ial := &ast.Node{Type: ast.NodeKramdownSpanIAL, Tokens: parse.IAL2Tokens([][]string{{"style", style}})}
+			img.SetIALAttr("style", style)
+			img.InsertAfter(ial)
 		}
 
 		if nil != n.Parent && ast.NodeText == n.Type {

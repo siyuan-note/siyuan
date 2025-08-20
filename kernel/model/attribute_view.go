@@ -1485,6 +1485,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 							}
 						}
 
+						kv.Values[0].Rollup.Contents = nil
 						for _, bID := range relVal.Relation.BlockIDs {
 							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
 							if nil != furtherCollection && av.KeyTypeTemplate == destKey.Type {

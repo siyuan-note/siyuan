@@ -80,7 +80,7 @@ func (value *Value) String(format bool) string {
 		if nil == value.Text {
 			return ""
 		}
-		return strings.TrimSpace(value.Text.Content)
+		return value.Text.Content
 	case KeyTypeNumber:
 		if nil == value.Number {
 			return ""

@@ -1,4 +1,5 @@
 {
+  "displayFieldName": "Display field name",
   "sortBySelectOption": "Sort by option",
   "groupStep": "Group interval",
   "groupRange": "Group range",

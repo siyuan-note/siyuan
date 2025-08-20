@@ -1,4 +1,5 @@
 {
+  "displayFieldName": "顯示欄位名稱",
   "sortBySelectOption": "按選項排序",
   "groupStep": "分組間隔",
   "groupRange": "分組範圍",

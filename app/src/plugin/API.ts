@@ -226,7 +226,6 @@ export const API = {
     getModelByDockType,
     openTab,
     openWindow,
-    getActiveTab,
     openMobileFileById,
     lockScreen,
     exitSiYuan,
@@ -237,6 +236,7 @@ export const API = {
     Setting,
     getAllEditor,
     /// #if !MOBILE
+    getActiveTab,
     getAllModels,
     /// #endif
     platformUtils,

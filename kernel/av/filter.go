@@ -559,7 +559,7 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterOperator, otherValueStart, otherValueEnd time.Time, direction RelativeDateDirection, otherValueStart2, otherValueEnd2 time.Time, direction2 RelativeDateDirection) bool {
 	valueTime := time.UnixMilli(valueMills)
 
-	if otherValueStart.After(otherValueStart2) {
+	if otherValueStart.After(otherValueStart2) && FilterOperatorIsBetween == operator {
 		tmpStart, tmpEnd := otherValueStart2, otherValueEnd2
 		otherValueStart2, otherValueEnd2 = otherValueStart, otherValueEnd
 		otherValueStart, otherValueEnd = tmpStart, tmpEnd
@@ -657,7 +657,7 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueMills, otherValueMills2 int64, operator FilterOperator) bool {
 	valueTime := time.UnixMilli(valueMills)
 
-	if 0 != otherValueMills2 && otherValueMills > otherValueMills2 {
+	if 0 != otherValueMills2 && otherValueMills > otherValueMills2 && FilterOperatorIsBetween == operator {
 		tmp := otherValueMills2
 		otherValueMills2 = otherValueMills
 		otherValueMills = tmp
@@ -787,16 +787,11 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 	}
 
 	if nil == filter.Value {
-		if nil != filter.RelativeDate {
-			// 相对日期今天的动态日期不设置默认值
-			return nil
-		}
-		// 两个值都空的情况下也不设置默认值
 		return nil
 	}
 
 	if FilterOperatorIsEmpty != filter.Operator && FilterOperatorIsNotEmpty != filter.Operator {
-		if filter.Value.IsEmpty() {
+		if filter.Value.IsEmpty() && nil == filter.RelativeDate {
 			// 在不是过滤空值和非空值的情况下，空值不设置默认值 https://github.com/siyuan-note/siyuan/issues/11297
 			return nil
 		}
@@ -868,33 +863,51 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 			ret.Number = &ValueNumber{Content: 0, IsNotEmpty: true}
 		}
 	case KeyTypeDate:
+		start := time.Now()
+		end := start
+		start2 := start
+		end2 := end
+
+		if nil != filter.Value.Date {
+			start = time.UnixMilli(filter.Value.Date.Content)
+			end = time.UnixMilli(filter.Value.Date.Content2)
+		}
+
+		if nil != filter.RelativeDate {
+			start, end = calcRelativeTimeRegion(filter.RelativeDate.Count, filter.RelativeDate.Unit, filter.RelativeDate.Direction)
+			if FilterOperatorIsBetween == filter.Operator {
+				start2, end2 = calcRelativeTimeRegion(filter.RelativeDate2.Count, filter.RelativeDate2.Unit, filter.RelativeDate2.Direction)
+			}
+		}
+		if start.After(start2) {
+			tmp := start2
+			start2 = start
+			start = tmp
+		}
+		if end.Before(end2) {
+			tmp := end2
+			end2 = end
+			end = tmp
+		}
+
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content, IsNotEmpty: true}
-		case FilterOperatorIsNotEqual:
-			ret.Date = &ValueDate{Content: util.CurrentTimeMillis(), IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsGreater:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content + 1000*60*60*24, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsGreaterOrEqual:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsLess:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content - 1000*60*60*24, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsLessOrEqual:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsBetween:
-			start := filter.Value.Date.Content
-			end := filter.Value.Date.Content2
-			if start > end {
-				tmp := end
-				end = start
-				start = tmp
-			}
-			now := util.CurrentTimeMillis()
-			if start <= now && now <= end {
-				ret.Date = &ValueDate{Content: now, IsNotEmpty: true}
+			now := time.Now()
+			if start.Before(now) && now.Before(end) {
+				ret.Date = &ValueDate{Content: now.UnixMilli(), IsNotEmpty: true}
 				return
 			}
-			ret.Date = &ValueDate{Content: start, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsEmpty:
 			ret.Date = &ValueDate{Content: 0, IsNotEmpty: false}
 		case FilterOperatorIsNotEmpty:

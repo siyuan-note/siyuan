@@ -213,20 +213,28 @@ const saveLayout = (cb: () => void) => {
     /// #endif
 };
 
-const getActiveEditor = () => {
+const getActiveEditor = (wndActive = true) => {
     let editor;
     /// #if !MOBILE
     const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
+    const allEditor = getAllEditor();
     if (range) {
-        editor = getAllEditor().find(item => {
+        editor = allEditor.find(item => {
             if (item.protyle.element.contains(range.startContainer)) {
                 return true;
             }
         });
     }
     if (!editor) {
-        editor = getAllEditor().find(item => {
+        editor = allEditor.find(item => {
             if (hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
+                return true;
+            }
+        });
+    }
+    if (!editor && !wndActive) {
+        editor = allEditor.find(item => {
+            if (item.protyle?.model.parent.headElement?.classList.contains("item--focus")) {
                 return true;
             }
         });

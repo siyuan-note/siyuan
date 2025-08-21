@@ -361,7 +361,12 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
 			if 1 > len(other.MSelect) {
-				return true
+				switch operator {
+				case FilterOperatorIsEmpty:
+					return value.IsEmpty()
+				case FilterOperatorIsNotEmpty:
+					return !value.IsEmpty()
+				}
 			}
 
 			switch operator {

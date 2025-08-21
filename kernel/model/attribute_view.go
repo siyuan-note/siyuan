@@ -562,9 +562,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为按选项排序 https://github.com/siyuan-note/siyuan/issues/15534
 			view.Group.Order = av.GroupOrderSelectOption
 			sortGroupsBySelectOption(view, groupKey)
-			for i, g := range view.Groups {
-				g.GroupSort = i
-			}
+		}
+
+		for i, g := range view.Groups {
+			g.GroupSort = i
 		}
 	}
 

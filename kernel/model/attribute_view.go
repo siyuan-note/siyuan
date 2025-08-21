@@ -215,7 +215,32 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		return
 	}
 
-	if nil != newValue && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
+	if nil == nearItem && !filterKeyIDs[groupKey.ID] {
+		// 没有临近项并且分组字段和过滤字段不同时，使用分组值
+		newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type)
+		if av.KeyTypeText == groupView.GroupVal.Type {
+			content := groupView.GroupVal.Text.Content
+			switch newValue.Type {
+			case av.KeyTypeBlock:
+				newValue.Block.Content = content
+			case av.KeyTypeText:
+				newValue.Text.Content = content
+			case av.KeyTypeURL:
+				newValue.URL.Content = content
+			case av.KeyTypeEmail:
+				newValue.Email.Content = content
+			case av.KeyTypePhone:
+				newValue.Phone.Content = content
+			case av.KeyTypeCheckbox:
+				newValue.Checkbox.Checked = "" != content
+			}
+		}
+
+		ret[groupKey.ID] = newValue
+		return
+	}
+
+	if nil != newValue && !filterKeyIDs[groupKey.ID] {
 		ret[groupKey.ID] = newValue
 	}
 	return

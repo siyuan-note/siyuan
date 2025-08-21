@@ -978,6 +978,8 @@ func GetAttributeViewDefaultValue(valueID, keyID, blockID string, typ KeyType) (
 	}
 
 	switch typ {
+	case KeyTypeBlock:
+		ret.Block = &ValueBlock{Created: ret.CreatedAt, Updated: ret.UpdatedAt}
 	case KeyTypeText:
 		ret.Text = &ValueText{}
 	case KeyTypeNumber:

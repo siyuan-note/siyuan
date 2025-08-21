@@ -249,7 +249,7 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 
 func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[string][]*av.KeyValues) {
 	ret = map[string][]*av.KeyValues{}
-	for _, keyValues := range attrView.OriginalKeyValues {
+	for _, keyValues := range attrView.KeyValues {
 		for _, val := range keyValues.Values {
 			values := ret[val.BlockID]
 			if nil == values {
@@ -533,17 +533,25 @@ func fillAttributeViewTemplateValues(attrView *av.AttributeView, view *av.View, 
 
 func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collection) {
 	fieldValues := map[string][]*av.Value{}
-	for _, card := range collection.GetItems() {
-		for _, val := range card.GetValues() {
+	for _, item := range collection.GetItems() {
+		for _, val := range item.GetValues() {
 			keyID := val.KeyID
 			fieldValues[keyID] = append(fieldValues[keyID], val)
 		}
 	}
 	for keyID, values := range fieldValues {
 		keyValues, _ := attrView.GetKeyValues(keyID)
-		keyValues.Values = nil
 		for _, val := range values {
-			keyValues.Values = append(keyValues.Values, val)
+			exist := false
+			for _, kv := range keyValues.Values {
+				if kv.ID == val.ID {
+					exist = true
+					break
+				}
+			}
+			if !exist {
+				keyValues.Values = append(keyValues.Values, val)
+			}
 		}
 	}
 }

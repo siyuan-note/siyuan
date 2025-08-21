@@ -9,16 +9,16 @@ import {Constants} from "../constants";
 export const openTopBarMenu = (app: App, target?: Element) => {
     const menu = new Menu("topBarPlugin");
     /// #if !MOBILE
-        menu.addItem({
-            id: "manage",
-            icon: "iconSettings",
-            label: window.siyuan.languages.manage,
-            ignore: isHuawei() || window.siyuan.config.readonly,
-            click() {
-                openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
-            }
-        });
-        menu.addSeparator({id: "separator_1"}, isHuawei() || window.siyuan.config.readonly);
+    menu.addItem({
+        id: "manage",
+        icon: "iconSettings",
+        label: window.siyuan.languages.manage,
+        ignore: isHuawei() || window.siyuan.config.readonly,
+        click() {
+            openSetting(app).element.querySelector('.b3-tab-bar [data-name="bazaar"]').dispatchEvent(new CustomEvent("click"));
+        }
+    });
+    menu.addSeparator({id: "separator_1"}, isHuawei() || window.siyuan.config.readonly);
     /// #endif
     let hasPlugin = false;
     app.plugins.forEach((plugin) => {
@@ -26,6 +26,9 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
         let hasTopBar = false;
         plugin.topBarIcons.forEach(item => {
+            if (!document.contains(item)) {
+                return;
+            }
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
                 id: hasUnpin ? "pin" : "unpin",

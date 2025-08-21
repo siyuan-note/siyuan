@@ -680,6 +680,9 @@ func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueMills, otherVa
 	case FilterOperatorIsLessOrEqual:
 		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
+		if 0 == otherValueMills || 0 == otherValueMills2 {
+			return true
+		}
 		otherValueTime2 := time.UnixMilli(otherValueMills2)
 		otherValueEnd2 := time.Date(otherValueTime2.Year(), otherValueTime2.Month(), otherValueTime2.Day(), 23, 59, 59, 999999999, otherValueTime2.Location())
 		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd2) || valueTime.Equal(otherValueEnd2))

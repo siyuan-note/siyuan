@@ -157,7 +157,7 @@ export class Plugin {
     public addIcons(svg: string) {
         const svgElement = document.querySelector(`svg[data-name="${this.name}"] defs`);
         if (svgElement) {
-            svgElement.insertAdjacentHTML("beforeend", svg);
+            svgElement.insertAdjacentHTML("afterbegin", svg);
         } else {
             const lastSvgElement = document.querySelector("body > svg:last-of-type");
             if (lastSvgElement) {

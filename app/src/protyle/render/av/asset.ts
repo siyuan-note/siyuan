@@ -21,7 +21,7 @@ import {renameAsset} from "../../../editor/rename";
 import * as dayjs from "dayjs";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
-import {getCompressURL} from "../../../util/image";
+import {getCompressURL, removeCompressURL} from "../../../util/image";
 
 export const bindAssetEvent = (options: {
     protyle: IProtyle,
@@ -197,7 +197,7 @@ export const editAssetItem = (options: {
     index: number,
     rect: DOMRect
 }) => {
-    const linkAddress = options.content;
+    const linkAddress = removeCompressURL(options.content);
     const type = options.type as "image" | "file";
     const menu = new Menu("av-asset-edit", () => {
         if ((!textElements[1] && textElements[0].value === linkAddress) ||

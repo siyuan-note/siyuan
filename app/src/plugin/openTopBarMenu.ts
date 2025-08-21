@@ -25,9 +25,12 @@ export const openTopBarMenu = (app: App, target?: Element) => {
         // @ts-ignore
         const hasSetting = plugin.setting || plugin.__proto__.hasOwnProperty("openSetting");
         let hasTopBar = false;
-        plugin.topBarIcons.forEach(item => {
+        for (let i = 0; i < plugin.topBarIcons.length; i++) {
+            const item = plugin.topBarIcons[i];
             if (!document.contains(item)) {
-                return;
+                plugin.topBarIcons.splice(i, 1);
+                i--;
+                continue;
             }
             const hasUnpin = window.siyuan.storage[Constants.LOCAL_PLUGINTOPUNPIN].includes(item.id);
             const submenu = [{
@@ -88,7 +91,7 @@ export const openTopBarMenu = (app: App, target?: Element) => {
             menu.addItem(menuOption);
             hasPlugin = true;
             hasTopBar = true;
-        });
+        }
         if (!hasTopBar && hasSetting) {
             hasPlugin = true;
             menu.addItem({

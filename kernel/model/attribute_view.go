@@ -1890,6 +1890,13 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 					v.GroupVal.Relation.Contents = []*av.Value{destBlock}
 				}
 			}
+		} else if av.KeyTypeCheckbox == groupKey.Type {
+			v.GroupVal.Text = nil
+			v.GroupVal.Type = av.KeyTypeCheckbox
+			v.GroupVal.Checkbox = &av.ValueCheckbox{}
+			if "" != groupValue {
+				v.GroupVal.Checkbox.Checked = true
+			}
 		}
 		v.GroupSort = -1
 		view.Groups = append(view.Groups, v)

@@ -224,6 +224,13 @@ func RenderTemplateField(ial map[string]string, keyValues []*av.KeyValues, tplCo
 				dataModel["entryUpdated"] = time.UnixMilli(v.Block.Updated)
 			}
 			dataModel[keyValue.Key.Name] = v.String(true)
+		} else if av.KeyTypeMSelect == v.Type {
+			dataModel[keyValue.Key.Name+"_str"] = v.String(true)
+			var contents []string
+			for _, s := range v.MSelect {
+				contents = append(contents, s.Content)
+			}
+			dataModel[keyValue.Key.Name] = contents
 		} else {
 			dataModel[keyValue.Key.Name] = v.String(true)
 		}

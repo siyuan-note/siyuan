@@ -65,12 +65,9 @@ const getGalleryHTML = (data: IAVGallery) => {
             }
             const isEmpty = cellValueIsEmpty(cell.value);
             // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
-            let ariaLabel = "";
-            if (!data.displayFieldName) {
-                ariaLabel = escapeAttr(data.fields[fieldsIndex].name) || getColNameByType(data.fields[fieldsIndex].type);
-                if (data.fields[fieldsIndex].desc) {
-                    ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
-                }
+            let ariaLabel = escapeAttr(data.fields[fieldsIndex].name) || getColNameByType(data.fields[fieldsIndex].type);
+            if (data.fields[fieldsIndex].desc) {
+                ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
             }
 
             if (cell.valueType === "checkbox" && !data.displayFieldName) {

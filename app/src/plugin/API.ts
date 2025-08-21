@@ -29,6 +29,7 @@ import {openAttr, openFileAttr} from "../menus/commonMenuItem";
 import {globalCommand} from "../boot/globalEvent/command/global";
 import {exportLayout} from "../layout/util";
 import {saveScroll} from "../protyle/scroll/saveScroll";
+import {hasClosestByClassName} from "../protyle/util/hasClosest";
 
 let openTab;
 let openWindow;
@@ -212,6 +213,30 @@ const saveLayout = (cb: () => void) => {
     /// #endif
 };
 
+const getActiveEditor = () => {
+    let editor;
+    /// #if !MOBILE
+    const range = getSelection().rangeCount > 0 ? getSelection().getRangeAt(0) : null;
+    if (range) {
+        editor = getAllEditor().find(item => {
+            if (item.protyle.element.contains(range.startContainer)) {
+                return true;
+            }
+        });
+    }
+    if (!editor) {
+        editor = getAllEditor().find(item => {
+            if (hasClosestByClassName(item.protyle.element, "layout__wnd--active", true)) {
+                return true;
+            }
+        });
+    }
+    /// #else
+    editor = window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
+    /// #endif
+    return editor;
+};
+
 export const API = {
     adaptHotkey: updateHotkeyTip,
     confirm: confirmDialog,
@@ -239,6 +264,7 @@ export const API = {
     getActiveTab,
     getAllModels,
     /// #endif
+    getActiveEditor,
     platformUtils,
     openSetting,
     openAttributePanel,

@@ -225,6 +225,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				newValue.Block.Content = content
 			case av.KeyTypeText:
 				newValue.Text.Content = content
+			case av.KeyTypeNumber:
+				num, _ := strconv.ParseFloat(strings.Split(content, " - ")[0], 64)
+				newValue.Number.Content = num
+				newValue.Number.IsNotEmpty = true
 			case av.KeyTypeURL:
 				newValue.URL.Content = content
 			case av.KeyTypeEmail:

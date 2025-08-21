@@ -874,15 +874,27 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 		case FilterOperatorIsNotEqual:
 			ret.Date = &ValueDate{Content: util.CurrentTimeMillis(), IsNotEmpty: true}
 		case FilterOperatorIsGreater:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content + 1000*60, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: filter.Value.Date.Content + 1000*60*60*24, IsNotEmpty: true}
 		case FilterOperatorIsGreaterOrEqual:
 			ret.Date = &ValueDate{Content: filter.Value.Date.Content, IsNotEmpty: true}
 		case FilterOperatorIsLess:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content - 1000*60, IsNotEmpty: true}
+			ret.Date = &ValueDate{Content: filter.Value.Date.Content - 1000*60*60*24, IsNotEmpty: true}
 		case FilterOperatorIsLessOrEqual:
 			ret.Date = &ValueDate{Content: filter.Value.Date.Content, IsNotEmpty: true}
 		case FilterOperatorIsBetween:
-			ret.Date = &ValueDate{Content: filter.Value.Date.Content - 1000*60, IsNotEmpty: true}
+			start := filter.Value.Date.Content
+			end := filter.Value.Date.Content2
+			if start > end {
+				tmp := end
+				end = start
+				start = tmp
+			}
+			now := util.CurrentTimeMillis()
+			if start <= now && now <= end {
+				ret.Date = &ValueDate{Content: now, IsNotEmpty: true}
+				return
+			}
+			ret.Date = &ValueDate{Content: start, IsNotEmpty: true}
 		case FilterOperatorIsEmpty:
 			ret.Date = &ValueDate{Content: 0, IsNotEmpty: false}
 		case FilterOperatorIsNotEmpty:

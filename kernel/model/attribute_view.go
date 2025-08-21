@@ -1846,7 +1846,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	if 1 > len(groupItemsMap[groupValueDefault]) {
+	if 1 > len(groupItemsMap[groupValueDefault]) && av.KeyTypeCheckbox != groupKey.Type {
 		// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
 		groupItemsMap[groupValueDefault] = []av.Item{}
 	}

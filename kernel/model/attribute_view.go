@@ -209,6 +209,12 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 		return
 	}
 
+	if nil != nearItem && filterKeyIDs[groupKey.ID] {
+		// 临近项不为空并且分组字段和过滤字段相同时，优先使用临近项 https://github.com/siyuan-note/siyuan/issues/15591
+		ret[groupKey.ID] = getNewValueByNearItem(nearItem, groupKey, addingItemID)
+		return
+	}
+
 	if nil != newValue && !filterKeyIDs[groupKey.ID] /* 命中了过滤条件的话就不重复处理了 */ {
 		ret[groupKey.ID] = newValue
 	}

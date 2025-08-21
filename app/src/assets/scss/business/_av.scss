@@ -7,17 +7,15 @@
   margin-bottom: 4px !important;
 
   &:hover {
-    .av__views .block__icon {
-      opacity: 1;
-    }
-
+    .av__views .block__icon,
     .av__group-icon--hover {
-      display: block;
+      opacity: 1;
     }
   }
 
   &--touch {
     .av__views .block__icon,
+    .av__group-icon--hover,
     .av__row--footer .av__calc {
       opacity: 1;
     }
@@ -954,7 +952,7 @@
     &-icon {
       cursor: pointer;
       color: var(--b3-theme-on-surface-light);
-      translate: var(--b3-transition);
+      transition: var(--b3-transition), opacity 0.3s cubic-bezier(0, 0, 0.2, 1) 0ms;
       border-radius: var(--b3-border-radius);
 
       &:hover {
@@ -967,12 +965,12 @@
         float: left;
         width: calc(1.625em - 12px);
         height: calc(1.625em - 12px);
-        transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1), opacity 1s cubic-bezier(0, 0, 0.2, 1);
+        transition: transform 0.15s cubic-bezier(0, 0, 0.2, 1);
         font-size: 87.5%;
       }
 
       &--hover {
-        display: none;
+        opacity: 0;
 
         svg {
           padding: 4px;

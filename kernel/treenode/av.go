@@ -90,6 +90,10 @@ func BatchGetMirrorAttrViewBlocks(avIDs []string) (ret []*AvBlock) {
 		for blockID := range bts {
 			blockIDs = append(blockIDs, blockID)
 		}
+		if 1 > len(blockIDs) {
+			continue
+		}
+
 		avBlock := &AvBlock{
 			AvID:     avID,
 			BlockIDs: blockIDs,

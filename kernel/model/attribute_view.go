@@ -1275,6 +1275,10 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 
 	trees := filesys.LoadTrees(blockIDs)
 	for _, avBlock := range avBlocks {
+		if 1 > len(avBlock.BlockIDs) {
+			continue
+		}
+
 		parentResult := buildSearchAttributeViewResult(avSearchTmpResults, avBlock.BlockIDs[0], trees, excludeAvIDs)
 		if nil == parentResult {
 			continue

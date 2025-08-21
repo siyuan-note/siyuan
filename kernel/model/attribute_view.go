@@ -4826,6 +4826,10 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 			}
 
 			if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+				if av.FilterOperatorIsEmpty == filter.Operator || av.FilterOperatorIsNotEmpty == filter.Operator {
+					continue
+				}
+
 				for i, opt := range filter.Value.MSelect {
 					if optName == opt.Content {
 						filter.Value.MSelect = append(filter.Value.MSelect[:i], filter.Value.MSelect[i+1:]...)

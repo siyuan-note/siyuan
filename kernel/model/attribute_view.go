@@ -148,6 +148,13 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 			newValue = getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
 		}
 		if nil != newValue {
+			if av.KeyTypeDate == keyValues.Key.Type {
+				if nil != nearItem {
+					nearValue := getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
+					newValue.Date.IsNotTime = nearValue.Date.IsNotTime
+				}
+			}
+
 			ret[keyValues.Key.ID] = newValue
 		}
 	}

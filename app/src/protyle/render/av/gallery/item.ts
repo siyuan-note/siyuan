@@ -36,11 +36,23 @@ export const insertGalleryItemAnimation = (options: {
                 lineNumber = parseInt(lineNumberValue);
             }
         }
-        cellsHTML += `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" data-field-id="${item.dataset.fieldId}" 
+
+        const cellHTML = `<div class="av__cell${fieldType === "checkbox" ? " av__cell-uncheck" : ""}" 
+data-field-id="${item.dataset.fieldId}" 
 data-wrap="${item.dataset.wrap}" 
 data-dtype="${item.dataset.dtype}" 
-data-empty="${item.dataset.empty}"
 ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValue(fieldType, null), lineNumber, false, "gallery")}</div>`;
+        if (item.previousElementSibling.classList.contains("av__gallery-name")) {
+            cellsHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${item.parentElement.dataset.empty}">
+    ${item.previousElementSibling.outerHTML}
+    ${cellHTML}
+</div>`;
+        } else {
+            cellsHTML += `<div class="av__gallery-field" data-empty="${item.parentElement.dataset.empty}">
+    ${item.previousElementSibling.outerHTML}
+    ${cellHTML}
+</div>`;
+        }
     });
     clearSelect(["galleryItem"], options.blockElement);
     let html = "";
@@ -72,8 +84,8 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
                     }
                     if (updateIds.includes(cellItem.dataset.fieldId)) {
                         const cellValue = response.data.values[cellItem.dataset.fieldId];
-                        if (cellValue.type === "checkbox") {
-                            cellValue.checkbox.content = cellItem.getAttribute("aria-label");
+                        if (cellValue.type === "checkbox" && cellItem.parentElement.querySelector(".av__gallery-tip")) {
+                            cellValue.checkbox.content = cellItem.getAttribute("aria-label").split('<div class="ft__on-surface">')[0];
                         }
                         cellItem.innerHTML = renderCell(cellValue, undefined, false, "gallery");
                         renderCellAttr(cellItem, cellValue);

@@ -399,11 +399,6 @@
         border-right: 0;
         min-height: calc(1.625em + 4px);
 
-        &:not([data-dtype="block"])[data-empty="true"] {
-          padding: 0 4px;
-          min-height: auto;
-        }
-
         &:hover {
           background-color: var(--b3-list-hover);
           border-radius: var(--b3-border-radius);
@@ -420,30 +415,62 @@
           cursor: default;
         }
 
-        &[data-dtype="mAsset"],
-        &[data-dtype="mSelect"],
-        &[data-dtype="select"] {
-          margin-left: -2px;
+        &[data-dtype="mAsset"] .av__cellassetimg:first-child,
+        &[data-dtype="mAsset"] .b3-chip:first-child,
+        &[data-dtype="mSelect"] .b3-chip:first-child,
+        &[data-dtype="select"] .b3-chip:first-child {
+          margin-left: 0;
         }
       }
 
-      &--edit .av__cell {
-        padding: 2px 4px !important;
-        min-height: calc(1.625em + 4px) !important;
+      &--edit .av__gallery-field[data-empty="true"] .av__gallery-tip {
+        display: flex;
+      }
 
-        &[data-dtype="mAsset"][data-empty="true"],
-        &[data-dtype="mSelect"][data-empty="true"],
-        &[data-dtype="select"][data-empty="true"] {
-          margin-left: 0;
-        }
+      &:not(.av__gallery-fields--edit) [data-empty="true"] {
+        display: none;
+      }
+    }
 
-        .b3-menu__avemoji {
-          display: none;
-        }
+    &-field {
+      position: relative;
+    }
 
-        &[data-empty="true"] .av__gallery-tip {
-          display: flex;
-        }
+    &-name {
+      display: flex;
+      align-items: center;
+      opacity: 0.38;
+      padding: 2px 4px;
+      width: 100%;
+      flex-wrap: wrap;
+      white-space: normal;
+      word-break: break-all;
+    }
+
+    &-tip {
+      display: none;
+      align-items: center;
+      opacity: 0.38;
+      padding: 2px 4px;
+      width: 100%;
+      position: absolute;
+      top: 0;
+    }
+
+    &-tip,
+    &-name {
+      img:first-child, svg:first-child {
+        height: calc(1.625em - 10px);
+        width: calc(1.625em - 10px);
+        margin: 0 5px 0 0;
+        font-size: 1em;
+      }
+
+      span:first-child {
+        width: calc(1.9em - 10px);
+        margin: 0 5px 0 0;
+        height: 1.625em;
+        font-size: .85em;
       }
     }
 
@@ -477,26 +504,6 @@
       opacity: 0;
       transition: var(--b3-transition);
       z-index: 2;
-    }
-
-    &-tip {
-      display: none;
-      align-items: center;
-      opacity: 0.38;
-
-      img, svg {
-        height: calc(1.625em - 10px);
-        width: calc(1.625em - 10px);
-        margin: 0 5px 0 0;
-        font-size: 1em;
-      }
-
-      span {
-        width: calc(1.9em - 10px);
-        margin: 0 5px 0 0;
-        height: 1.625em;
-        font-size: .85em;
-      }
     }
 
     &-item, &-add {

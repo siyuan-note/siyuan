@@ -65,15 +65,19 @@ const getGalleryHTML = (data: IAVGallery) => {
             }
             const isEmpty = cellValueIsEmpty(cell.value);
             // NOTE: innerHTML 中不能换行否则 https://github.com/siyuan-note/siyuan/issues/15132
-            let ariaLabel = escapeAttr(data.fields[fieldsIndex].name) || getColNameByType(data.fields[fieldsIndex].type);
-            if (data.fields[fieldsIndex].desc) {
-                ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
+            let ariaLabel = "";
+            if (!data.displayFieldName) {
+                ariaLabel = escapeAttr(data.fields[fieldsIndex].name) || getColNameByType(data.fields[fieldsIndex].type);
+                if (data.fields[fieldsIndex].desc) {
+                    ariaLabel += escapeAttr(`<div class="ft__on-surface">${data.fields[fieldsIndex].desc}</div>`);
+                }
             }
-            if (cell.valueType === "checkbox") {
-                cell.value["checkbox"].content = data.fields[fieldsIndex].name || getColNameByType(data.fields[fieldsIndex].type);
+
+            if (cell.valueType === "checkbox" && !data.displayFieldName) {
+                cell.value.checkbox.content = data.fields[fieldsIndex].name || getColNameByType(data.fields[fieldsIndex].type);
             }
-            galleryHTML += `<div class="av__cell${checkClass} ariaLabel" data-wrap="${data.fields[fieldsIndex].wrap}" 
-data-empty="${isEmpty}" 
+            const cellHTML = `<div class="av__cell${checkClass}${data.displayFieldName ? "" : " ariaLabel"}" 
+data-wrap="${data.fields[fieldsIndex].wrap}" 
 aria-label="${ariaLabel}" 
 data-position="5west"
 data-id="${cell.id}" 
@@ -81,7 +85,26 @@ data-field-id="${data.fields[fieldsIndex].id}"
 data-dtype="${cell.valueType}" 
 ${cell.value?.isDetached ? ' data-detached="true"' : ""} 
 style="${cell.bgColor ? `background-color:${cell.bgColor};` : ""}
-${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon, "gallery")}<div class="av__gallery-tip">${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}</div></div>`;
+${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, data.showIcon, "gallery")}</div>`;
+            if (data.displayFieldName) {
+                galleryHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
+    <div class="av__gallery-name">
+        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`} 
+        ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
+        <span class="fn__space"></span>
+        <span class="ft__smaller">${data.fields[fieldsIndex].desc || ""}</span>
+    </div>
+    ${cellHTML}
+</div>`;
+            } else {
+                galleryHTML += `<div class="av__gallery-field" data-empty="${isEmpty}">
+    <div class="av__gallery-tip">
+        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`}
+        ${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
+    </div>
+    ${cellHTML}
+</div>`;
+            }
         });
         galleryHTML += `</div>
     <div class="av__gallery-actions">

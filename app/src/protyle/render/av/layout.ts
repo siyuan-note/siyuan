@@ -45,6 +45,11 @@ export const getLayoutHTML = (data: IAV) => {
     <span class="fn__flex-center">${window.siyuan.languages.fitImage}</span>
     <span class="fn__space fn__flex-1"></span>
     <input data-type="toggle-gallery-fit" type="checkbox" class="b3-switch b3-switch--menu" ${view.fitImage ? "checked" : ""}>
+</label>
+<label class="b3-menu__item">
+    <span class="fn__flex-center">${window.siyuan.languages.displayFieldName}</span>
+    <span class="fn__space fn__flex-1"></span>
+    <input data-type="toggle-gallery-name" type="checkbox" class="b3-switch b3-switch--menu" ${view.displayFieldName ? "checked" : ""}>
 </label>`;
     }
     return `<div class="b3-menu__items">
@@ -117,6 +122,7 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: checked
         }]);
+        options.data.view.hideAttrViewName = !checked;
     });
     const toggleIconElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-icon"]') as HTMLInputElement;
     toggleIconElement.addEventListener("change", () => {
@@ -134,6 +140,7 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
+        options.data.view.showIcon = checked;
     });
     const toggleWrapElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-wrap"]') as HTMLInputElement;
     toggleWrapElement.addEventListener("change", () => {
@@ -175,13 +182,25 @@ export const bindLayoutEvent = (options: {
             blockID,
             data: !checked
         }]);
-        options.blockElement.querySelectorAll(".av__gallery-img").forEach(item => {
-            if (checked) {
-                item.classList.add("av__gallery-img--fit");
-            } else {
-                item.classList.remove("av__gallery-img--fit");
-            }
-        });
+        (options.data.view as IAVGallery).fitImage = checked;
+    });
+    const toggleNameElement = options.menuElement.querySelector('.b3-switch[data-type="toggle-gallery-name"]') as HTMLInputElement;
+    toggleNameElement.addEventListener("change", () => {
+        const avID = options.blockElement.getAttribute("data-av-id");
+        const blockID = options.blockElement.getAttribute("data-node-id");
+        const checked = toggleNameElement.checked;
+        transaction(options.protyle, [{
+            action: "setDisplayFieldName",
+            avID,
+            blockID,
+            data: checked
+        }], [{
+            action: "setDisplayFieldName",
+            avID,
+            blockID,
+            data: !checked
+        }]);
+        (options.data.view as IAVGallery).displayFieldName = checked;
     });
 };
 

@@ -69,6 +69,7 @@ type TOperation =
     | "hideAttrViewGroup"
     | "sortAttrViewGroup"
     | "foldAttrViewGroup"
+    | "setDisplayFieldName"
 type TBazaarType = "templates" | "icons" | "widgets" | "themes" | "plugins"
 type TCardType = "doc" | "notebook" | "all"
 type TEventBus = "ws-main" | "sync-start" | "sync-end" | "sync-fail" |
@@ -879,6 +880,7 @@ interface IAVGallery extends IAVView {
     coverFromAssetKeyID?: string;
     cardSize: number;   // 0：小卡片，1：中卡片，2：大卡片
     cardAspectRatio: number;
+    displayFieldName: boolean;
     fitImage: boolean;
     cards: IAVGalleryItem[],
     desc: string

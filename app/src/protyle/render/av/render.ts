@@ -673,6 +673,16 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
         });
         return;
     }
+    if (operation.action === "setAttrViewFitImage") {
+        Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"] .av__gallery-img`)).forEach((item: HTMLElement) => {
+            if (operation.data) {
+                item.classList.add("av__gallery-img--fit");
+            } else {
+                item.classList.remove("av__gallery-img--fit");
+            }
+        });
+        return;
+    }
     if (operation.action === "setAttrViewShowIcon") {
         Array.from(protyle.wysiwyg.element.querySelectorAll(`.av[data-av-id="${operation.avID}"]`)).forEach((item: HTMLElement) => {
             item.querySelectorAll('.av__cell[data-dtype="block"] .b3-menu__avemoji, .av__cell[data-dtype="relation"] .b3-menu__avemoji').forEach(cellItem => {
@@ -758,7 +768,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                         if (item.getAttribute("data-av-type") === "gallery") {
                             operation.srcs.forEach(srcItem => {
                                 const filesElement = item.querySelector(`.av__body${groupQuery} .av__gallery-item[data-id="${srcItem.itemID}"]`)?.querySelector(".av__gallery-fields");
-                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.getAttribute("data-empty") === "true") {
+                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.parentElement.getAttribute("data-empty") === "true") {
                                     filesElement.classList.add("av__gallery-fields--edit");
                                 }
                             });

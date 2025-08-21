@@ -714,11 +714,11 @@ ${window.siyuan.languages[avType === "table" ? "insertRowAfter" : "insertItemAft
                 const selectElements: HTMLElement[] = Array.from(blockElement.querySelectorAll(`.av__gallery-item--select .av__cell[data-field-id="${cellElement.dataset.fieldId}"]`));
                 const type = cellElement.getAttribute("data-dtype") as TAVCol;
                 if (!["updated", "created"].includes(type)) {
-                    const iconElement = cellElement.querySelector(".av__gallery-tip").firstElementChild.cloneNode(true) as HTMLElement;
+                    const iconElement = cellElement.parentElement.querySelector(".av__gallery-tip, .av__gallery-name").firstElementChild.cloneNode(true) as HTMLElement;
                     iconElement.classList.add("b3-menu__icon");
                     editAttrSubmenu.push({
                         iconHTML: iconElement.outerHTML,
-                        label: escapeHtml(cellElement.getAttribute("aria-label")),
+                        label: escapeHtml(cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0]),
                         click() {
                             rowElement.querySelector(".av__gallery-fields").classList.add("av__gallery-fields--edit");
                             rowElement.querySelector('[data-type="av-gallery-edit"]').setAttribute("aria-label", window.siyuan.languages.hideEmptyFields);
@@ -829,12 +829,11 @@ export const updateAttrViewCellAnimation = (cellElement: HTMLElement, value: IAV
             if (value.type === "checkbox") {
                 value.checkbox = {
                     checked: value.checkbox?.checked || false,
-                    content: cellElement.getAttribute("aria-label"),
+                    content: cellElement.getAttribute("aria-label").split('<div class="ft__on-surface">')[0],
                 };
             }
-            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType) +
-                cellElement.querySelector(".av__gallery-tip").outerHTML;
-            cellElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
+            cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false, viewType);
+            cellElement.parentElement.setAttribute("data-empty", cellValueIsEmpty(value).toString());
         } else {
             cellElement.innerHTML = renderCell(value, 0, iconElement ? !iconElement.classList.contains("fn__none") : false);
         }

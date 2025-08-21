@@ -460,7 +460,7 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
 };
 
 export const getTypeByCellElement = (cellElement: Element) => {
-    if (cellElement.parentElement.classList.contains("av__gallery-fields")) {
+    if (cellElement.parentElement.classList.contains("av__gallery-field")) {
         return cellElement.getAttribute("data-dtype") as TAVCol;
     }
     const scrollElement = hasClosestByClassName(cellElement, "av__scroll");

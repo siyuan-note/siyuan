@@ -26,11 +26,11 @@ import (
 
 // ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
-	Column        string         `json:"column"`        // 列（字段）ID
-	Operator      FilterOperator `json:"operator"`      // 过滤操作符
-	Value         *Value         `json:"value"`         // 过滤值
-	RelativeDate  *RelativeDate  `json:"relativeDate"`  // 相对时间
-	RelativeDate2 *RelativeDate  `json:"relativeDate2"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
+	Column        string         `json:"column"`                  // 列（字段）ID
+	Operator      FilterOperator `json:"operator"`                // 过滤操作符
+	Value         *Value         `json:"value"`                   // 过滤值
+	RelativeDate  *RelativeDate  `json:"relativeDate,omitempty"`  // 相对时间
+	RelativeDate2 *RelativeDate  `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
 }
 
 type RelativeDateUnit int
@@ -360,6 +360,10 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
+			if 1 > len(other.MSelect) {
+				return true
+			}
+
 			switch operator {
 			case FilterOperatorIsEqual, FilterOperatorContains:
 				contains := false

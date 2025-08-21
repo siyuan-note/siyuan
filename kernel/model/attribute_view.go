@@ -173,7 +173,9 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 			if nil != newValue {
 				if !av.MSelectExistOption(newValue.MSelect, groupView.GetGroupValue()) {
-					newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					if 1 > len(newValue.MSelect) || av.KeyTypeMSelect == groupKey.Type {
+						newValue.MSelect = append(newValue.MSelect, &av.ValueSelect{Content: opt.Name, Color: opt.Color})
+					}
 				}
 			} else {
 				newValue = av.GetAttributeViewDefaultValue(ast.NewNodeID(), groupKey.ID, addingItemID, groupKey.Type)
@@ -204,6 +206,12 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				ret[relKey.ID] = getNewValueByNearItem(nearItem, relKey, addingItemID)
 			}
 		}
+		return
+	}
+
+	if nil != nearItem && filterKeyIDs[groupKey.ID] {
+		// 临近项不为空并且分组字段和过滤字段相同时，优先使用临近项 https://github.com/siyuan-note/siyuan/issues/15591
+		ret[groupKey.ID] = getNewValueByNearItem(nearItem, groupKey, addingItemID)
 		return
 	}
 
@@ -1797,6 +1805,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
+	if 1 > len(groupItemsMap[groupValueDefault]) {
+		// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
+		groupItemsMap[groupValueDefault] = []av.Item{}
+	}
+
 	for groupValue, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {
@@ -1816,7 +1829,8 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 
-		v.Name = "" // 分组视图的名称在渲染时才填充
+		v.Name = ""       // 分组视图的名称在渲染时才填充
+		v.GroupHidden = 1 // 默认隐藏空白分组
 		v.GroupKey = groupKey
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
 		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
@@ -4812,6 +4826,10 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 			}
 
 			if nil != filter.Value && (av.KeyTypeSelect == filter.Value.Type || av.KeyTypeMSelect == filter.Value.Type) {
+				if av.FilterOperatorIsEmpty == filter.Operator || av.FilterOperatorIsNotEmpty == filter.Operator {
+					continue
+				}
+
 				for i, opt := range filter.Value.MSelect {
 					if optName == opt.Content {
 						filter.Value.MSelect = append(filter.Value.MSelect[:i], filter.Value.MSelect[i+1:]...)

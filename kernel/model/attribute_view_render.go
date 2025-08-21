@@ -185,11 +185,14 @@ func hideEmptyGroupViews(view *av.View, viewable av.Viewable) {
 	}
 
 	if !view.Group.HideEmpty {
+		if 2 != viewable.GetGroupHidden() {
+			viewable.SetGroupHidden(0)
+		}
 		return
 	}
 
-	if 2 != viewable.GetGroupHidden() && 1 > viewable.(av.Collection).CountItems() {
-		viewable.SetGroupHidden(1)
+	if 1 == viewable.GetGroupHidden() && 0 < viewable.(av.Collection).CountItems() {
+		viewable.SetGroupHidden(0)
 	}
 }
 

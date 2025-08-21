@@ -395,7 +395,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 	case KeyTypeEmail:
 		if nil != value.Email && nil != other && nil != other.Email {
-			return filterTextContent(operator, value.Email.Content, other.URL.Content)
+			return filterTextContent(operator, value.Email.Content, other.Email.Content)
 		}
 	case KeyTypePhone:
 		if nil != value.Phone && nil != other && nil != other.Phone {

@@ -32,9 +32,12 @@ export const uninstall = (app: App, name: string, isUninstall = false) => {
             });
             /// #endif
             // rm topBar
-            plugin.topBarIcons.forEach(item => {
+            for (let i = 0; i < plugin.topBarIcons.length; i++) {
+                const item = plugin.topBarIcons[i];
                 item.remove();
-            });
+                plugin.topBarIcons.splice(i, 1);
+                i--;
+            }
             /// #if !MOBILE
             resizeTopBar();
             // rm statusBar

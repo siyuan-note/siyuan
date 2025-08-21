@@ -242,9 +242,9 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				newValue.Email.Content = content
 			case av.KeyTypePhone:
 				newValue.Phone.Content = content
-			case av.KeyTypeCheckbox:
-				newValue.Checkbox.Checked = "" != content
 			}
+		} else if av.KeyTypeCheckbox == groupView.GroupVal.Type {
+			newValue.Checkbox.Checked = groupView.GroupVal.Checkbox.Checked
 		}
 
 		ret[groupKey.ID] = newValue

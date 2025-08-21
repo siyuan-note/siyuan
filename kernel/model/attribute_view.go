@@ -538,14 +538,19 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	if view.Group.HideEmpty != oldHideEmpty {
 		if !oldHideEmpty && view.Group.HideEmpty { // 启用隐藏空分组
 			for _, g := range view.Groups {
-				if g.GroupHidden == 0 && 1 > len(g.GroupItemIDs) {
+				groupViewable := sql.RenderGroupView(attrView, view, g, "")
+				// 必须经过渲染才能得到最终的条目数
+				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 1
 				}
 			}
 		}
 		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
 			for _, g := range view.Groups {
-				if g.GroupHidden == 1 && 1 > len(g.GroupItemIDs) {
+				groupViewable := sql.RenderGroupView(attrView, view, g, "")
+				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 0
 				}
 			}

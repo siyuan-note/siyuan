@@ -2418,6 +2418,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	view.HideAttrViewName = masterView.HideAttrViewName
 	view.Desc = masterView.Desc
 	view.LayoutType = masterView.LayoutType
+	view.PageSize = masterView.PageSize
 
 	for _, filter := range masterView.Filters {
 		view.Filters = append(view.Filters, &av.ViewFilter{
@@ -2435,16 +2436,6 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 			Order:  s.Order,
 		})
 	}
-
-	if nil != masterView.Group {
-		view.Group = &av.ViewGroup{}
-		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
-			logging.LogErrorf("copy group failed: %s", copyErr)
-			return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: copyErr.Error()}
-		}
-	}
-
-	view.PageSize = masterView.PageSize
 
 	switch masterView.LayoutType {
 	case av.LayoutTypeTable:
@@ -2486,6 +2477,17 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	}
 
 	view.ItemIDs = masterView.ItemIDs
+
+	if nil != masterView.Group {
+		view.Group = &av.ViewGroup{}
+		if copyErr := copier.Copy(view.Group, masterView.Group); nil != copyErr {
+			logging.LogErrorf("copy group failed: %s", copyErr)
+			return &TxErr{code: TxErrHandleAttributeView, id: avID, msg: copyErr.Error()}
+		}
+
+		view.GroupItemIDs = masterView.GroupItemIDs
+		regenAttrViewGroups(attrView, "force")
+	}
 
 	if err = av.SaveAttributeView(attrView); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)

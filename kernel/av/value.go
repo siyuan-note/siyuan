@@ -75,12 +75,12 @@ func (value *Value) String(format bool) string {
 		if nil == value.Block {
 			return ""
 		}
-		return value.Block.Content
+		return strings.TrimSpace(value.Block.Content)
 	case KeyTypeText:
 		if nil == value.Text {
 			return ""
 		}
-		return value.Text.Content
+		return strings.TrimSpace(value.Text.Content)
 	case KeyTypeNumber:
 		if nil == value.Number {
 			return ""
@@ -113,17 +113,17 @@ func (value *Value) String(format bool) string {
 		if nil == value.URL {
 			return ""
 		}
-		return value.URL.Content
+		return strings.TrimSpace(value.URL.Content)
 	case KeyTypeEmail:
 		if nil == value.Email {
 			return ""
 		}
-		return value.Email.Content
+		return strings.TrimSpace(value.Email.Content)
 	case KeyTypePhone:
 		if nil == value.Phone {
 			return ""
 		}
-		return value.Phone.Content
+		return strings.TrimSpace(value.Phone.Content)
 	case KeyTypeMAsset:
 		if 1 > len(value.MAsset) {
 			return ""

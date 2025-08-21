@@ -106,7 +106,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 	fixDev := false
 	for _, groupView := range view.Groups {
-		if ("" == groupView.GetGroupValue() || nil == groupView.GroupKey) && !fixDev {
+		if (nil == groupView.GroupVal || nil == groupView.GroupKey) && !fixDev {
 			// TODO 分组上线后删除，预计 2025 年 9 月后可以删除
 			regenAttrViewGroups(attrView, "force")
 			av.SaveAttributeView(attrView)

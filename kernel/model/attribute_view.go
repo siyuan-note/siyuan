@@ -1846,9 +1846,19 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	if 1 > len(groupItemsMap[groupValueDefault]) && av.KeyTypeCheckbox != groupKey.Type {
-		// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
-		groupItemsMap[groupValueDefault] = []av.Item{}
+	if av.KeyTypeCheckbox != groupKey.Type {
+		if 1 > len(groupItemsMap[groupValueDefault]) {
+			// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
+			groupItemsMap[groupValueDefault] = []av.Item{}
+		}
+	} else {
+		// 对于复选框分组，空白分组表示未选中状态，始终保留 https://github.com/siyuan-note/siyuan/issues/15650
+		if nil == groupItemsMap[""] {
+			groupItemsMap[""] = []av.Item{}
+		}
+		if nil == groupItemsMap["√"] {
+			groupItemsMap["√"] = []av.Item{}
+		}
 	}
 
 	for groupValue, groupItems := range groupItemsMap {

@@ -893,7 +893,7 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 					start = start2
 					start2 = tmp
 				}
-				if end.After(end2) {
+				if end.Before(end2) {
 					tmp := end
 					end = end2
 					end2 = tmp

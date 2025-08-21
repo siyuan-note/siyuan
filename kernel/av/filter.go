@@ -865,43 +865,47 @@ func (filter *ViewFilter) GetAffectValue(key *Key, addingBlockID string) (ret *V
 	case KeyTypeDate:
 		start := time.Now()
 		end := start
-		start2 := start
-		end2 := end
-
 		if nil != filter.Value.Date {
 			start = time.UnixMilli(filter.Value.Date.Content)
 			end = time.UnixMilli(filter.Value.Date.Content2)
 		}
-
 		if nil != filter.RelativeDate {
 			start, end = calcRelativeTimeRegion(filter.RelativeDate.Count, filter.RelativeDate.Unit, filter.RelativeDate.Direction)
-			if FilterOperatorIsBetween == filter.Operator {
-				start2, end2 = calcRelativeTimeRegion(filter.RelativeDate2.Count, filter.RelativeDate2.Unit, filter.RelativeDate2.Direction)
-			}
-		}
-		if start.After(start2) {
-			tmp := start2
-			start2 = start
-			start = tmp
-		}
-		if end.Before(end2) {
-			tmp := end2
-			end2 = end
-			end = tmp
 		}
 
 		switch filter.Operator {
 		case FilterOperatorIsEqual:
-			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
-		case FilterOperatorIsGreater:
-			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
-		case FilterOperatorIsGreaterOrEqual:
-			ret.Date = &ValueDate{Content: end.UnixMilli(), IsNotEmpty: true}
-		case FilterOperatorIsLess:
 			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+		case FilterOperatorIsGreater:
+			ret.Date = &ValueDate{Content: end.Add(24 * time.Hour).UnixMilli(), IsNotEmpty: true}
+		case FilterOperatorIsGreaterOrEqual:
+			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
+		case FilterOperatorIsLess:
+			ret.Date = &ValueDate{Content: start.Add(-24 * time.Hour).UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsLessOrEqual:
 			ret.Date = &ValueDate{Content: start.UnixMilli(), IsNotEmpty: true}
 		case FilterOperatorIsBetween:
+			start2, end2 := start, end
+			if nil != filter.RelativeDate2 {
+				start2, end2 = calcRelativeTimeRegion(filter.RelativeDate2.Count, filter.RelativeDate2.Unit, filter.RelativeDate2.Direction)
+				if start.After(start2) {
+					tmp := start
+					start = start2
+					start2 = tmp
+				}
+				if end.After(end2) {
+					tmp := end
+					end = end2
+					end2 = tmp
+				}
+			} else {
+				if start.After(end) {
+					tmp := start
+					start = end
+					end = tmp
+				}
+			}
+
 			now := time.Now()
 			if start.Before(now) && now.Before(end) {
 				ret.Date = &ValueDate{Content: now.UnixMilli(), IsNotEmpty: true}

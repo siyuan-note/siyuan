@@ -233,8 +233,11 @@ const getActiveEditor = (wndActive = true) => {
         });
     }
     if (!editor && !wndActive) {
+        let activeTime = 0;
         editor = allEditor.find(item => {
-            if (item.protyle?.model.parent.headElement?.classList.contains("item--focus")) {
+            const headerElement = item.protyle?.model.parent.headElement;
+            if (headerElement && headerElement.classList.contains("item--focus") && parseInt(headerElement.dataset.activetime) > activeTime) {
+                activeTime = parseInt(headerElement.dataset.activetime);
                 return true;
             }
         });

@@ -1816,7 +1816,8 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 			v.GroupItemIDs = append(v.GroupItemIDs, item.GetID())
 		}
 
-		v.Name = "" // 分组视图的名称在渲染时才填充
+		v.Name = ""       // 分组视图的名称在渲染时才填充
+		v.GroupHidden = 1 // 默认隐藏空白分组
 		v.GroupKey = groupKey
 		v.GroupVal = &av.Value{Type: av.KeyTypeText, Text: &av.ValueText{Content: groupValue}}
 		if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {

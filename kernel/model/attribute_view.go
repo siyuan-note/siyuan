@@ -1805,6 +1805,11 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
+	if 1 > len(groupItemsMap[groupValueDefault]) {
+		// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
+		groupItemsMap[groupValueDefault] = []av.Item{}
+	}
+
 	for groupValue, groupItems := range groupItemsMap {
 		var v *av.View
 		switch view.LayoutType {

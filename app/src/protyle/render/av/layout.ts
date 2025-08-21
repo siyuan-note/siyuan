@@ -190,12 +190,12 @@ export const bindLayoutEvent = (options: {
         const blockID = options.blockElement.getAttribute("data-node-id");
         const checked = toggleNameElement.checked;
         transaction(options.protyle, [{
-            action: "setDisplayFieldName",
+            action: "setAttrViewDisplayFieldName",
             avID,
             blockID,
             data: checked
         }], [{
-            action: "setDisplayFieldName",
+            action: "setAttrViewDisplayFieldName",
             avID,
             blockID,
             data: !checked

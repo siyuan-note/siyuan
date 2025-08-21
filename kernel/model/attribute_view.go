@@ -1174,6 +1174,7 @@ type AvSearchResult struct {
 	AvID     string            `json:"avID"`
 	AvName   string            `json:"avName"`
 	ViewName string            `json:"viewName"`
+	ViewID   string            `json:"viewID"`
 	BlockID  string            `json:"blockID"`
 	HPath    string            `json:"hPath"`
 	Children []*AvSearchResult `json:"children,omitempty"`
@@ -1264,92 +1265,80 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 		avIDs = append(avIDs, a.AvID)
 	}
 
-	avBlocks := treenode.BatchGetMirrorAttrViewBlocks(avIDs)
 	var blockIDs []string
-	for _, avBlock := range avBlocks {
-		blockIDs = append(blockIDs, avBlock.BlockIDs...)
+	for _, bIDs := range avBlockRels {
+		blockIDs = append(blockIDs, bIDs...)
 	}
 	blockIDs = gulu.Str.RemoveDuplicatedElem(blockIDs)
 
 	trees := filesys.LoadTrees(blockIDs)
-	for _, avBlock := range avBlocks {
-		parentResult := buildSearchAttributeViewResult(avSearchTmpResults, avBlock.BlockIDs[0], trees, excludeAvIDs)
-		if nil == parentResult {
+	hitAttrViews := map[string]bool{}
+	for _, blockID := range blockIDs {
+		tree := trees[blockID]
+		if nil == tree {
 			continue
 		}
-		ret = append(ret, parentResult)
-		for _, blockID := range avBlock.BlockIDs {
-			result := buildSearchAttributeViewResult(avSearchTmpResults, blockID, trees, excludeAvIDs)
-			if nil != result {
-				parentResult.Children = append(parentResult.Children, result)
+
+		node := treenode.GetNodeInTree(tree, blockID)
+		if nil == node || "" == node.AttributeViewID {
+			continue
+		}
+
+		avID := node.AttributeViewID
+		var existAv *AvSearchTempResult
+		for _, tmpResult := range avSearchTmpResults {
+			if tmpResult.AvID == avID {
+				existAv = tmpResult
+				break
 			}
 		}
-	}
-	return
-}
-
-func buildSearchAttributeViewResult(avSearchTempResults []*AvSearchTempResult, blockID string, trees map[string]*parse.Tree, excludeAvIDs []string) (ret *AvSearchResult) {
-	tree := trees[blockID]
-	if nil == tree {
-		return
-	}
-
-	node := treenode.GetNodeInTree(tree, blockID)
-	if nil == node {
-		return
-	}
-
-	if "" == node.AttributeViewID {
-		return
-	}
-
-	avID := node.AttributeViewID
-	var existAv *AvSearchTempResult
-	for _, tmpResult := range avSearchTempResults {
-		if tmpResult.AvID == avID {
-			existAv = tmpResult
-			break
+		if nil == existAv || gulu.Str.Contains(avID, excludeAvIDs) {
+			continue
 		}
-	}
-	if nil == existAv {
-		return
-	}
 
-	attrView, _ := av.ParseAttributeView(avID)
-	if nil == attrView {
-		return
-	}
-	viewID := node.IALAttr(av.NodeAttrView)
-	if "" == viewID {
-		viewID = attrView.ViewID
-	}
-	view, _ := attrView.GetCurrentView(viewID)
-	if nil == view {
-		return
-	}
+		if hitAttrViews[avID] {
+			continue
+		}
+		hitAttrViews[avID] = true
 
-	var hPath string
-	baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
-	if nil != baseBlock {
-		hPath = baseBlock.HPath
-	}
-	box := Conf.Box(node.Box)
-	if nil != box {
-		hPath = box.Name + hPath
-	}
+		attrView, _ := av.ParseAttributeView(avID)
+		if nil == attrView {
+			continue
+		}
 
-	name := existAv.AvName
-	if "" == name {
-		name = Conf.language(267)
-	}
+		var hPath string
+		baseBlock := treenode.GetBlockTreeRootByPath(node.Box, node.Path)
+		if nil != baseBlock {
+			hPath = baseBlock.HPath
+		}
+		box := Conf.Box(node.Box)
+		if nil != box {
+			hPath = box.Name + hPath
+		}
 
-	if !gulu.Str.Contains(avID, excludeAvIDs) {
-		ret = &AvSearchResult{
-			AvID:     avID,
-			AvName:   existAv.AvName,
-			ViewName: view.Name,
-			BlockID:  blockID,
-			HPath:    hPath,
+		name := existAv.AvName
+		if "" == name {
+			name = Conf.language(267)
+		}
+
+		parent := &AvSearchResult{
+			AvID:    avID,
+			AvName:  existAv.AvName,
+			BlockID: blockID,
+			HPath:   hPath,
+		}
+		ret = append(ret, parent)
+
+		for _, view := range attrView.Views {
+			child := &AvSearchResult{
+				AvID:     avID,
+				AvName:   existAv.AvName,
+				ViewName: view.Name,
+				ViewID:   view.ID,
+				BlockID:  blockID,
+				HPath:    hPath,
+			}
+			parent.Children = append(parent.Children, child)
 		}
 	}
 	return

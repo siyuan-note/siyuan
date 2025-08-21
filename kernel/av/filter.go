@@ -558,6 +558,13 @@ func filterTextContent(operator FilterOperator, valueContent, otherValueContent 
 
 func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterOperator, otherValueStart, otherValueEnd time.Time, direction RelativeDateDirection, otherValueStart2, otherValueEnd2 time.Time, direction2 RelativeDateDirection) bool {
 	valueTime := time.UnixMilli(valueMills)
+
+	if otherValueStart.After(otherValueStart2) {
+		tmpStart, tmpEnd := otherValueStart2, otherValueEnd2
+		otherValueStart2, otherValueEnd2 = otherValueStart, otherValueEnd
+		otherValueStart, otherValueEnd = tmpStart, tmpEnd
+	}
+
 	switch operator {
 	case FilterOperatorIsEqual:
 		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd)
@@ -649,6 +656,13 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 
 func filterTime(valueMills int64, valueIsNotEmpty bool, otherValueMills, otherValueMills2 int64, operator FilterOperator) bool {
 	valueTime := time.UnixMilli(valueMills)
+
+	if 0 != otherValueMills2 && otherValueMills > otherValueMills2 {
+		tmp := otherValueMills2
+		otherValueMills2 = otherValueMills
+		otherValueMills = tmp
+	}
+
 	otherValueTime := time.UnixMilli(otherValueMills)
 	otherValueStart := time.Date(otherValueTime.Year(), otherValueTime.Month(), otherValueTime.Day(), 0, 0, 0, 0, otherValueTime.Location())
 	otherValueEnd := time.Date(otherValueTime.Year(), otherValueTime.Month(), otherValueTime.Day(), 23, 59, 59, 999999999, otherValueTime.Location())

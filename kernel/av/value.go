@@ -220,6 +220,84 @@ func (value *Value) IsEdited() bool {
 	return value.CreatedAt != value.UpdatedAt
 }
 
+func (value *Value) IsBlank() bool {
+	if nil == value {
+		return true
+	}
+
+	switch value.Type {
+	case KeyTypeBlock:
+		if nil == value.Block {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Block.Content)
+	case KeyTypeText:
+		if nil == value.Text {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Text.Content)
+	case KeyTypeNumber:
+		if nil == value.Number {
+			return true
+		}
+		return !value.Number.IsNotEmpty
+	case KeyTypeDate:
+		if nil == value.Date {
+			return true
+		}
+		return !value.Date.IsNotEmpty
+	case KeyTypeSelect:
+		if 1 > len(value.MSelect) {
+			return true
+		}
+		return "" == strings.TrimSpace(value.MSelect[0].Content)
+	case KeyTypeMSelect:
+		return 1 > len(value.MSelect)
+	case KeyTypeURL:
+		if nil == value.URL {
+			return true
+		}
+		return "" == strings.TrimSpace(value.URL.Content)
+	case KeyTypeEmail:
+		if nil == value.Email {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Email.Content)
+	case KeyTypePhone:
+		if nil == value.Phone {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Phone.Content)
+	case KeyTypeMAsset:
+		return 1 > len(value.MAsset)
+	case KeyTypeTemplate:
+		if nil == value.Template {
+			return true
+		}
+		return "" == strings.TrimSpace(value.Template.Content)
+	case KeyTypeCreated:
+		if nil == value.Created {
+			return true
+		}
+		return !value.Created.IsNotEmpty
+	case KeyTypeUpdated:
+		if nil == value.Updated {
+			return true
+		}
+		return !value.Updated.IsNotEmpty
+	case KeyTypeCheckbox:
+		if nil == value.Checkbox {
+			return true
+		}
+		return false // 复选框不会为空
+	case KeyTypeRelation:
+		return 1 > len(value.Relation.Contents)
+	case KeyTypeRollup:
+		return 1 > len(value.Rollup.Contents)
+	}
+	return false
+}
+
 func (value *Value) IsEmpty() bool {
 	if nil == value {
 		return true

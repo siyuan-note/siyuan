@@ -1751,7 +1751,7 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
 		value := item.GetValue(group.Field)
-		if value.IsEmpty() {
+		if value.IsBlank() {
 			groupItemsMap[groupValueDefault] = append(groupItemsMap[groupValueDefault], item)
 			continue
 		}

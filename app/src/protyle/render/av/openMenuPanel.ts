@@ -112,6 +112,9 @@ export const openMenuPanel = (options: {
             html = getAssetHTML(options.cellElements);
         } else if (options.type === "edit") {
             if (options.editData) {
+                if (typeof options.editData.colData.wrap === "undefined") {
+                    options.editData.colData.wrap = data.view.wrapField;
+                }
                 if (options.editData.previousID) {
                     fields.find((item, index) => {
                         if (item.id === options.editData.previousID) {

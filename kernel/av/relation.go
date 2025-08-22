@@ -16,7 +16,7 @@ var (
 	attributeViewRelationsLock = sync.Mutex{}
 )
 
-func GetSrcAvIDs(destAvID string) []string {
+func GetSrcAvIDs(destAvID string, excludeSelfAv bool) []string {
 	attributeViewRelationsLock.Lock()
 	defer attributeViewRelationsLock.Unlock()
 
@@ -42,8 +42,9 @@ func GetSrcAvIDs(destAvID string) []string {
 		return nil
 	}
 
-	// 排除自己
-	srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID)
+	if excludeSelfAv {
+		srcAvIDs = gulu.Str.RemoveElem(srcAvIDs, destAvID)
+	}
 	return srcAvIDs
 }
 

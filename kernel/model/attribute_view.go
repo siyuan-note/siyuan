@@ -1534,29 +1534,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 							}
 						}
 
-						kv.Values[0].Rollup.Contents = nil
-						for _, bID := range relVal.Relation.BlockIDs {
-							destVal := destAv.GetValue(kv.Key.Rollup.KeyID, bID)
-							if nil != furtherCollection && av.KeyTypeTemplate == destKey.Type {
-								destVal = furtherCollection.GetValue(bID, destKey.ID)
-							}
-
-							if nil == destVal {
-								if destAv.ExistItem(bID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
-									destVal = av.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.Rollup.KeyID, bID, destKey.Type)
-								}
-								if nil == destVal {
-									continue
-								}
-							}
-							if av.KeyTypeNumber == destKey.Type {
-								destVal.Number.Format = destKey.NumberFormat
-								destVal.Number.FormatNumber()
-							}
-
-							kv.Values[0].Rollup.Contents = append(kv.Values[0].Rollup.Contents, destVal.Clone())
-						}
-						kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc, destKey)
+						kv.Values[0].Rollup.BuildContents(destAv, destKey, relVal, kv.Key.Rollup.Calc, furtherCollection)
 					}
 				}
 			case av.KeyTypeRelation:

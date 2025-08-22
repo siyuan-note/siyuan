@@ -796,7 +796,34 @@ type ValueRollup struct {
 	Contents []*Value `json:"contents"`
 }
 
-func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
+func (r *ValueRollup) BuildContents(destAv *AttributeView, destKey *Key, relationVal *Value, calc *RollupCalc, furtherCollection Collection) {
+	r.Contents = nil
+	for _, blockID := range relationVal.Relation.BlockIDs {
+		destVal := destAv.GetValue(destKey.ID, blockID)
+		if nil != furtherCollection && KeyTypeTemplate == destKey.Type {
+			destVal = furtherCollection.GetValue(blockID, destKey.ID)
+		}
+
+		if nil == destVal {
+			if destAv.ExistItem(blockID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
+				destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), destKey.ID, blockID, destKey.Type)
+			}
+			if nil == destVal {
+				continue
+			}
+		}
+		if KeyTypeNumber == destKey.Type {
+			destVal.Number.Format = destKey.NumberFormat
+			destVal.Number.FormatNumber()
+		}
+
+		r.Contents = append(r.Contents, destVal.Clone())
+	}
+
+	r.calcContents(calc, destKey)
+}
+
+func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	if nil == calc {
 		return
 	}

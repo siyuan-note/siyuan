@@ -182,29 +182,20 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		for _, blockID := range relVal.Relation.BlockIDs {
-			destVal := destAv.GetValue(key.Rollup.KeyID, blockID)
-			if nil == destVal {
-				if destAv.ExistItem(blockID) { // 数据库中存在项目但是字段值不存在是数据未初始化，这里补一个默认值
-					destVal = GetAttributeViewDefaultValue(ast.NewNodeID(), key.Rollup.KeyID, blockID, destKey.Type)
-				}
-				if nil == destVal {
-					continue
-				}
-			}
-
+		value.Rollup.BuildContents(destAv, destKey, relVal, key.Rollup.Calc, nil)
+		for _, content := range value.Rollup.Contents {
 			switch filter.Operator {
 			case FilterOperatorContains:
-				if destVal.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return true
 				}
 			case FilterOperatorDoesNotContain:
-				ret := destVal.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
+				ret := content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
 				if !ret {
 					return false
 				}
 			default:
-				if destVal.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
 					return true
 				}
 			}

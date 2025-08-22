@@ -964,6 +964,12 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             return;
                         }
+                        // https://github.com/siyuan-note/siyuan/issues/15424
+                        if (position.start === 1 && rangeNextElement && rangeNextElement.nodeType === 1 &&
+                            rangeNextElement.dataset.type === "code") {
+                            range.insertNode(document.createTextNode(Constants.ZWSP));
+                            range.collapse(true);
+                        }
                     }
                     // 代码块中空行 ⌘+Del 异常 https://ld246.com/article/1663166544901
                     if (nodeElement.classList.contains("code-block") && isOnlyMeta(event) &&

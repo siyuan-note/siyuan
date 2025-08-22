@@ -964,7 +964,7 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             event.preventDefault();
                             return;
                         }
-                        // https://github.com/siyuan-note/siyuan/issues/15424
+                        // 1`2` 1后按 Backspace 光标错误 https://github.com/siyuan-note/siyuan/issues/15424
                         if (position.start === 1 && rangeNextElement && rangeNextElement.nodeType === 1 &&
                             rangeNextElement.dataset.type === "code") {
                             range.insertNode(document.createTextNode(Constants.ZWSP));

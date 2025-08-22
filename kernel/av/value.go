@@ -800,7 +800,7 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 	r.Contents = nil
 	for _, blockID := range relationVal.Relation.BlockIDs {
 		destVal := GetValue(keyValues, destKey.ID, blockID)
-		if nil != furtherCollection && KeyTypeTemplate == destKey.Type {
+		if nil != furtherCollection && (KeyTypeTemplate == destKey.Type || KeyTypeUpdated == destKey.Type || KeyTypeCreated == destKey.Type) {
 			destVal = furtherCollection.GetValue(blockID, destKey.ID)
 		}
 

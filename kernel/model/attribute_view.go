@@ -1551,9 +1551,9 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 
 					destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
 					if nil != destKey {
+						isSameAv := destAv.ID == attrView.ID
 						var furtherCollection av.Collection
-						if av.KeyTypeTemplate == destKey.Type {
-							// 渲染目标视图，这样才能汇总渲染后的模板字段值
+						if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type)) {
 							viewable := sql.RenderView(destAv, destAv.Views[0], "")
 							if nil != viewable {
 								furtherCollection = viewable.(av.Collection)

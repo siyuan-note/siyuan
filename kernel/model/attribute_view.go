@@ -1534,8 +1534,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 							}
 						}
 
-						kv.Values[0].Rollup.Contents = av.GetRollupContents(destAv, destKey, relVal.Relation.BlockIDs, furtherCollection)
-						kv.Values[0].Rollup.RenderContents(kv.Key.Rollup.Calc, destKey)
+						kv.Values[0].Rollup.BuildContents(destAv, destKey, relVal, kv.Key.Rollup.Calc, furtherCollection)
 					}
 				}
 			case av.KeyTypeRelation:

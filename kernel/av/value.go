@@ -796,9 +796,9 @@ type ValueRollup struct {
 	Contents []*Value `json:"contents"`
 }
 
-func GetRollupContents(destAv *AttributeView, destKey *Key, relationBlockIDs []string, furtherCollection Collection) (ret []*Value) {
-	ret = []*Value{}
-	for _, blockID := range relationBlockIDs {
+func (r *ValueRollup) BuildContents(destAv *AttributeView, destKey *Key, relationVal *Value, calc *RollupCalc, furtherCollection Collection) {
+	r.Contents = nil
+	for _, blockID := range relationVal.Relation.BlockIDs {
 		destVal := destAv.GetValue(destKey.ID, blockID)
 		if nil != furtherCollection && KeyTypeTemplate == destKey.Type {
 			destVal = furtherCollection.GetValue(blockID, destKey.ID)
@@ -817,12 +817,13 @@ func GetRollupContents(destAv *AttributeView, destKey *Key, relationBlockIDs []s
 			destVal.Number.FormatNumber()
 		}
 
-		ret = append(ret, destVal.Clone())
+		r.Contents = append(r.Contents, destVal.Clone())
 	}
-	return
+
+	r.calcContents(calc, destKey)
 }
 
-func (r *ValueRollup) RenderContents(calc *RollupCalc, destKey *Key) {
+func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 	if nil == calc {
 		return
 	}

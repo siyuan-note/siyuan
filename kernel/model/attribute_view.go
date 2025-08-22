@@ -1695,11 +1695,6 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		return
 	}
 
-	var relationDestAv *av.AttributeView
-	if av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
-		relationDestAv, _ = av.ParseAttributeView(groupKey.Relation.AvID)
-	}
-
 	var rangeStart, rangeEnd float64
 	switch group.Method {
 	case av.GroupMethodValue:
@@ -1735,6 +1730,15 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 
 	todayStart := time.Now()
 	todayStart = time.Date(todayStart.Year(), todayStart.Month(), todayStart.Day(), 0, 0, 0, 0, time.Local)
+
+	var relationDestAv *av.AttributeView
+	if av.KeyTypeRelation == groupKey.Type && nil != groupKey.Relation {
+		if attrView.ID == groupKey.Relation.AvID {
+			relationDestAv = attrView
+		} else {
+			relationDestAv, _ = av.ParseAttributeView(groupKey.Relation.AvID)
+		}
+	}
 
 	groupItemsMap := map[string][]av.Item{}
 	for _, item := range items {
@@ -3254,7 +3258,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	regenAttrViewGroups(attrView, "force")
 
-	relatedAvIDs := av.GetSrcAvIDs(avID)
+	relatedAvIDs := av.GetSrcAvIDs(avID, true)
 	for _, relatedAvID := range relatedAvIDs {
 		ReloadAttrView(relatedAvID)
 	}
@@ -4328,7 +4332,7 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 		return
 	}
 
-	relatedAvIDs := av.GetSrcAvIDs(avID)
+	relatedAvIDs := av.GetSrcAvIDs(avID, true)
 	for _, relatedAvID := range relatedAvIDs {
 		ReloadAttrView(relatedAvID)
 	}
@@ -4350,7 +4354,7 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 		return
 	}
 
-	relatedAvIDs := av.GetSrcAvIDs(avID)
+	relatedAvIDs := av.GetSrcAvIDs(avID, true)
 	for _, relatedAvID := range relatedAvIDs {
 		ReloadAttrView(relatedAvID)
 	}
@@ -4541,7 +4545,23 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		updateTwoWayRelationDestAttrView(attrView, key, val, relationChangeMode, oldRelationBlockIDs)
 	}
 
-	regenAttrViewGroups(attrView, keyID)
+	if isUpdatingBlockKey {
+		relatedAvIDs := av.GetSrcAvIDs(avID, false)
+		if gulu.Str.Contains(avID, relatedAvIDs) {
+			regenAttrViewGroups(attrView, "force")
+		}
+
+		relatedAvIDs = gulu.Str.RemoveElem(relatedAvIDs, avID)
+		for _, relatedAvID := range relatedAvIDs {
+			destAv, _ := av.ParseAttributeView(relatedAvID)
+			if nil == destAv {
+				continue
+			}
+			regenAttrViewGroups(destAv, "force")
+		}
+	} else {
+		regenAttrViewGroups(attrView, keyID)
+	}
 	return
 }
 
@@ -5084,7 +5104,7 @@ func getAttrViewName(attrView *av.AttributeView) string {
 func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []string) {
 	// The database relation fields follow the change after the primary key field is changed https://github.com/siyuan-note/siyuan/issues/11117
 
-	srcAvIDs := av.GetSrcAvIDs(avID)
+	srcAvIDs := av.GetSrcAvIDs(avID, true)
 	for _, srcAvID := range srcAvIDs {
 		srcAv, parseErr := av.ParseAttributeView(srcAvID)
 		changed := false

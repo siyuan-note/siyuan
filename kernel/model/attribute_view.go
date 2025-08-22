@@ -242,9 +242,9 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 				newValue.Email.Content = content
 			case av.KeyTypePhone:
 				newValue.Phone.Content = content
-			case av.KeyTypeCheckbox:
-				newValue.Checkbox.Checked = "" != content
 			}
+		} else if av.KeyTypeCheckbox == groupView.GroupVal.Type {
+			newValue.Checkbox.Checked = groupView.GroupVal.Checkbox.Checked
 		}
 
 		ret[groupKey.ID] = newValue
@@ -538,14 +538,19 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 	if view.Group.HideEmpty != oldHideEmpty {
 		if !oldHideEmpty && view.Group.HideEmpty { // 启用隐藏空分组
 			for _, g := range view.Groups {
-				if g.GroupHidden == 0 && 1 > len(g.GroupItemIDs) {
+				groupViewable := sql.RenderGroupView(attrView, view, g, "")
+				// 必须经过渲染才能得到最终的条目数
+				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				if g.GroupHidden == 0 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 1
 				}
 			}
 		}
 		if oldHideEmpty && !view.Group.HideEmpty { // 禁用隐藏空分组
 			for _, g := range view.Groups {
-				if g.GroupHidden == 1 && 1 > len(g.GroupItemIDs) {
+				groupViewable := sql.RenderGroupView(attrView, view, g, "")
+				renderViewableInstance(groupViewable, view, attrView, 1, -1)
+				if g.GroupHidden == 1 && 1 > groupViewable.(av.Collection).CountItems() {
 					g.GroupHidden = 0
 				}
 			}
@@ -557,9 +562,10 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为按选项排序 https://github.com/siyuan-note/siyuan/issues/15534
 			view.Group.Order = av.GroupOrderSelectOption
 			sortGroupsBySelectOption(view, groupKey)
-			for i, g := range view.Groups {
-				g.GroupSort = i
-			}
+		}
+
+		for i, g := range view.Groups {
+			g.GroupSort = i
 		}
 	}
 
@@ -1841,9 +1847,19 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		}
 	}
 
-	if 1 > len(groupItemsMap[groupValueDefault]) {
-		// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
-		groupItemsMap[groupValueDefault] = []av.Item{}
+	if av.KeyTypeCheckbox != groupKey.Type {
+		if 1 > len(groupItemsMap[groupValueDefault]) {
+			// 始终保留默认分组 https://github.com/siyuan-note/siyuan/issues/15587
+			groupItemsMap[groupValueDefault] = []av.Item{}
+		}
+	} else {
+		// 对于复选框分组，空白分组表示未选中状态，始终保留 https://github.com/siyuan-note/siyuan/issues/15650
+		if nil == groupItemsMap[""] {
+			groupItemsMap[""] = []av.Item{}
+		}
+		if nil == groupItemsMap["√"] {
+			groupItemsMap["√"] = []av.Item{}
+		}
 	}
 
 	for groupValue, groupItems := range groupItemsMap {
@@ -1884,6 +1900,13 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 				if destBlock := relationDestAv.GetBlockValue(groupValue); nil != destBlock {
 					v.GroupVal.Relation.Contents = []*av.Value{destBlock}
 				}
+			}
+		} else if av.KeyTypeCheckbox == groupKey.Type {
+			v.GroupVal.Text = nil
+			v.GroupVal.Type = av.KeyTypeCheckbox
+			v.GroupVal.Checkbox = &av.ValueCheckbox{}
+			if "" != groupValue {
+				v.GroupVal.Checkbox.Checked = true
 			}
 		}
 		v.GroupSort = -1

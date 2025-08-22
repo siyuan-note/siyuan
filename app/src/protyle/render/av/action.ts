@@ -199,7 +199,7 @@ export const avClick = (protyle: IProtyle, event: MouseEvent & { target: HTMLEle
             return true;
         } else if (target.classList.contains("b3-menu__avemoji") && !protyle.disabled) {
             const rect = target.getBoundingClientRect();
-            openEmojiPanel(target.parentElement.getAttribute("data-block-id"), "doc", {
+            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
                 x: rect.left,
                 y: rect.bottom,
                 h: rect.height,

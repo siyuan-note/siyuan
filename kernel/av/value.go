@@ -65,6 +65,8 @@ func (value *Value) SetUpdatedAt(mills int64) {
 	}
 }
 
+const CheckboxCheckedStr = "√"
+
 func (value *Value) String(format bool) string {
 	if nil == value {
 		return ""
@@ -153,7 +155,7 @@ func (value *Value) String(format bool) string {
 			return ""
 		}
 		if value.Checkbox.Checked {
-			return "√"
+			return CheckboxCheckedStr
 		}
 		return ""
 	case KeyTypeRelation:

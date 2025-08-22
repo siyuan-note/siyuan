@@ -557,11 +557,21 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 		}
 	}
 
-	if firstInit || changeGroupField {
-		if groupKey := view.GetGroupKey(attrView); nil != groupKey && (av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type) {
-			// 首次设置分组时，如果分组字段是单选或多选类型，则将分组方式改为按选项排序 https://github.com/siyuan-note/siyuan/issues/15534
-			view.Group.Order = av.GroupOrderSelectOption
-			sortGroupsBySelectOption(view, groupKey)
+	if firstInit || changeGroupField { // 首次设置分组时
+		if groupKey := view.GetGroupKey(attrView); nil != groupKey {
+			if av.KeyTypeSelect == groupKey.Type || av.KeyTypeMSelect == groupKey.Type {
+				// 如果分组字段是单选或多选，则将分组排序方式改为按选项排序 https://github.com/siyuan-note/siyuan/issues/15534
+				view.Group.Order = av.GroupOrderSelectOption
+				sortGroupsBySelectOption(view, groupKey)
+			} else if av.KeyTypeCheckbox == groupKey.Type {
+				// 如果分组字段是复选框，则将分组排序改为手动排序，并且已勾选在前面
+				view.Group.Order = av.GroupOrderMan
+				checked := view.GetGroupByGroupValue(av.CheckboxCheckedStr)
+				unchecked := view.GetGroupByGroupValue("")
+				view.Groups = nil
+				view.Groups = append(view.Groups, checked, unchecked)
+			}
+
 		}
 
 		for i, g := range view.Groups {
@@ -1857,8 +1867,8 @@ func genAttrViewGroups(view *av.View, attrView *av.AttributeView) {
 		if nil == groupItemsMap[""] {
 			groupItemsMap[""] = []av.Item{}
 		}
-		if nil == groupItemsMap["√"] {
-			groupItemsMap["√"] = []av.Item{}
+		if nil == groupItemsMap[av.CheckboxCheckedStr] {
+			groupItemsMap[av.CheckboxCheckedStr] = []av.Item{}
 		}
 	}
 

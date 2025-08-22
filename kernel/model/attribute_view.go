@@ -2100,18 +2100,31 @@ func updateAttributeViewColRollup(operation *Operation) (err error) {
 		KeyID:         operation.KeyID,
 	}
 
-	if nil != operation.Data {
-		data := operation.Data.(map[string]interface{})
-		if nil != data["calc"] {
-			calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])
-			if nil != jsonErr {
-				err = jsonErr
-				return
+	if nil == operation.Data {
+		return
+	}
+
+	data := operation.Data.(map[string]interface{})
+	if nil != data["calc"] {
+		calcData, jsonErr := gulu.JSON.MarshalJSON(data["calc"])
+		if nil != jsonErr {
+			err = jsonErr
+			return
+		}
+		if jsonErr = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != jsonErr {
+			err = jsonErr
+			return
+		}
+	}
+
+	// 如果存在该汇总字段的过滤条件，则移除该过滤条件 https://github.com/siyuan-note/siyuan/issues/15660
+	for _, view := range attrView.Views {
+		for i, filter := range view.Filters {
+			if filter.Column != rollUpKey.ID {
+				continue
 			}
-			if jsonErr = gulu.JSON.UnmarshalJSON(calcData, &rollUpKey.Rollup.Calc); nil != jsonErr {
-				err = jsonErr
-				return
-			}
+
+			view.Filters = append(view.Filters[:i], view.Filters[i+1:]...)
 		}
 	}
 

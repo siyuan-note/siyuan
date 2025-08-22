@@ -4,7 +4,7 @@
   "description": "Refactor your thinking",
   "homepage": "https://b3log.org/siyuan",
   "main": "./electron/main.js",
-  "packageManager": "pnpm@10.14.0",
+  "packageManager": "pnpm@10.15.0",
   "scripts": {
     "lint": "eslint . --fix --cache",
     "dev": "webpack --mode development",
@@ -58,7 +58,7 @@
     "clean-webpack-plugin": "^4.0.0",
     "css-loader": "^7.1.2",
     "dayjs": "^1.11.5",
-    "electron": "37.2.6",
+    "electron": "37.3.1",
     "electron-builder": "26.0.12",
     "encoding": "^0.1.13",
     "esbuild-loader": "^3.0.1",

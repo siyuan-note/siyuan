@@ -935,10 +935,18 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         event.preventDefault();
                         return;
                     }
+                    const rangeNextElement = hasNextSibling(range.startContainer) as HTMLElement;
+                    // \n1`2` 1后按 Backspace 光标错误 https://github.com/siyuan-note/siyuan/issues/15424
+                    if (rangeNextElement && rangeNextElement.nodeType === 1 &&
+                        ["code", "tag", "kbd"].includes(rangeNextElement.dataset.type)) {
+                        if (position.start === 1 || range.startContainer.textContent.slice(-2, -1) === "\n") {
+                            range.insertNode(document.createTextNode(Constants.ZWSP));
+                            range.collapse(true);
+                        }
+                    }
                     if (range.startOffset === 1 && range.startContainer.textContent.length === 1) {
                         // 图片后为空格，在空格后删除 https://github.com/siyuan-note/siyuan/issues/13949
                         const rangePreviousElement = hasPreviousSibling(range.startContainer) as HTMLElement;
-                        const rangeNextElement = hasNextSibling(range.startContainer) as HTMLElement;
                         if (rangePreviousElement && rangePreviousElement.nodeType === 1 && rangePreviousElement.classList.contains("img") &&
                             rangeNextElement && rangeNextElement.nodeType === 1 && rangeNextElement.classList.contains("img")) {
                             const wbrElement = document.createElement("wbr");
@@ -963,12 +971,6 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             focusByWbr(nodeElement, range);
                             event.preventDefault();
                             return;
-                        }
-                        // 1`2` 1后按 Backspace 光标错误 https://github.com/siyuan-note/siyuan/issues/15424
-                        if (position.start === 1 && rangeNextElement && rangeNextElement.nodeType === 1 &&
-                            rangeNextElement.dataset.type === "code") {
-                            range.insertNode(document.createTextNode(Constants.ZWSP));
-                            range.collapse(true);
                         }
                     }
                     // 代码块中空行 ⌘+Del 异常 https://ld246.com/article/1663166544901

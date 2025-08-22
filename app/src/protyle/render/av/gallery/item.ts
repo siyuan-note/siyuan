@@ -66,7 +66,7 @@ ${fieldType === "block" ? ' data-detached="true"' : ""}>${renderCell(genCellValu
     if (sideItemElement) {
         sideItemElement.insertAdjacentHTML("afterend", html);
     } else {
-        options.blockElement.querySelector(groupQuery + ".av__gallery").insertAdjacentHTML("afterbegin", html);
+        options.blockElement.querySelector(groupQuery + ".av__gallery")?.insertAdjacentHTML("afterbegin", html);
     }
     fetchPost("/api/av/getAttributeViewAddingBlockDefaultValues", {
         avID: options.blockElement.getAttribute("data-av-id"),

@@ -131,9 +131,9 @@ export const insertAttrViewBlockAnimation = (options: {
     if (bodyElement && ["updated", "created"].includes(bodyElement.getAttribute("data-dtype")) &&
         bodyElement.getAttribute("data-content") !== "_@today@_") {
         previousElement = options.blockElement.querySelector('.av__body[data-content="_@today@_"] .av__row--util')?.previousElementSibling;
-        if (!previousElement) {
-            return;
-        }
+    }
+    if (!previousElement) {
+        return;
     }
     let cellsHTML = '<div class="av__colsticky"><div class="av__firstcol"><svg><use xlink:href="#iconUncheck"></use></svg></div></div>';
     const pinIndex = previousElement.querySelectorAll(".av__colsticky .av__cell").length - 1;

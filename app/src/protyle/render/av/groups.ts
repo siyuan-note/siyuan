@@ -194,13 +194,21 @@ export const getGroupsHTML = (columns: IAVColumn[], view: IAVView) => {
                 if (item.groupHidden === 0) {
                     showCount++;
                 }
-                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
-    ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
-    ${item.groupValue?.mSelect?.length > 0 ? `<div class="fn__flex-1">
+                let titleHTML = `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`;
+                if (item.groupValue?.mSelect?.length > 0) {
+                    titleHTML = `<div class="fn__flex-1">
         <span class="b3-chip" style="background-color:var(--b3-font-background${item.groupValue.mSelect[0].color});color:var(--b3-font-color${item.groupValue.mSelect[0].color})">
             <span class="fn__ellipsis">${escapeHtml(item.groupValue.mSelect[0].content)}</span>
         </span>
-    </div>` : `<div class="b3-menu__label fn__flex-1 fn__ellipsis">${item.name || ""}</div>`}
+    </div>`;
+                } else if (item.groupValue?.type == "checkbox") {
+                    titleHTML = `<div class="b3-menu__label fn__flex">
+<svg class="b3-menu__icon"><use xlink:href="#icon${item.groupValue.checkbox.checked ? "Check" : "Uncheck"}"></use></svg> ${column.name || ""}
+</div>`;
+                }
+                groupHTML += `<button class="b3-menu__item${item.groupHidden === 0 ? "" : " b3-menu__item--hidden"}" draggable="${disabledDrag ? "false" : "true"}" data-id="${item.id}">
+    ${disabledDrag ? "" : '<svg class="b3-menu__icon fn__grab"><use xlink:href="#iconDrag"></use></svg>'}
+    ${titleHTML}
     <svg class="b3-menu__action b3-menu__action--show" data-type="hideGroup" data-id="${item.id}"><use xlink:href="#iconEye${item.groupHidden === 0 ? "" : "off"}"></use></svg>
 </button>`;
             });

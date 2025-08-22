@@ -35,6 +35,8 @@ const genAVRollupHTML = (value: IAVCellValue) => {
             html = value.number.formattedContent || value.number.content.toString();
             break;
         case "date":
+        case "updated":
+        case "created":
             if (value[value.type] && value[value.type].isNotEmpty) {
                 html = dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
             }

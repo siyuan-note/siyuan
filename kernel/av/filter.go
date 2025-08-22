@@ -182,7 +182,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		value.Rollup.BuildContents(destAv, destKey, relVal, key.Rollup.Calc, nil)
+		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, nil)
 		for _, content := range value.Rollup.Contents {
 			switch filter.Operator {
 			case FilterOperatorContains:

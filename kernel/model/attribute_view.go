@@ -1491,8 +1491,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 渲染自动生成的字段值，比如模板字段、关联字段、汇总字段、创建时间字段和更新时间字段
-		// 先处理关联字段、汇总字段、创建时间字段和更新时间字段
+		// 先渲染主键、创建时间、更新时间
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
@@ -1502,6 +1501,33 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 						kv.Values[0].Block.Content = v
 					}
 				}
+			case av.KeyTypeCreated:
+				createdStr := nodeID[:len("20060102150405")]
+				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
+				if nil == parseErr {
+					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
+					kv.Values[0].Created.IsNotEmpty = true
+				} else {
+					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
+					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
+				}
+			case av.KeyTypeUpdated:
+				ial := sql.GetBlockAttrs(nodeID)
+				updatedStr := ial["updated"]
+				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
+				if nil == parseErr {
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
+					kv.Values[0].Updated.IsNotEmpty = true
+				} else {
+					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
+					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
+				}
+			}
+		}
+
+		// 再渲染汇总和关联
+		for _, kv := range keyValues {
+			switch kv.Key.Type {
 			case av.KeyTypeRollup:
 				if nil == kv.Key.Rollup {
 					break
@@ -1534,7 +1560,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 							}
 						}
 
-						kv.Values[0].Rollup.BuildContents(destAv, destKey, relVal, kv.Key.Rollup.Calc, furtherCollection)
+						kv.Values[0].Rollup.BuildContents(keyValues, destKey, relVal, kv.Key.Rollup.Calc, furtherCollection)
 					}
 				}
 			case av.KeyTypeRelation:
@@ -1560,31 +1586,10 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 				for _, bID := range kv.Values[0].Relation.BlockIDs {
 					kv.Values[0].Relation.Contents = append(kv.Values[0].Relation.Contents, blocks[bID])
 				}
-			case av.KeyTypeCreated:
-				createdStr := nodeID[:len("20060102150405")]
-				created, parseErr := time.ParseInLocation("20060102150405", createdStr, time.Local)
-				if nil == parseErr {
-					kv.Values[0].Created = av.NewFormattedValueCreated(created.UnixMilli(), 0, av.CreatedFormatNone)
-					kv.Values[0].Created.IsNotEmpty = true
-				} else {
-					logging.LogWarnf("parse created [%s] failed: %s", createdStr, parseErr)
-					kv.Values[0].Created = av.NewFormattedValueCreated(time.Now().UnixMilli(), 0, av.CreatedFormatNone)
-				}
-			case av.KeyTypeUpdated:
-				ial := sql.GetBlockAttrs(nodeID)
-				updatedStr := ial["updated"]
-				updated, parseErr := time.ParseInLocation("20060102150405", updatedStr, time.Local)
-				if nil == parseErr {
-					kv.Values[0].Updated = av.NewFormattedValueUpdated(updated.UnixMilli(), 0, av.UpdatedFormatNone)
-					kv.Values[0].Updated.IsNotEmpty = true
-				} else {
-					logging.LogWarnf("parse updated [%s] failed: %s", updatedStr, parseErr)
-					kv.Values[0].Updated = av.NewFormattedValueUpdated(time.Now().UnixMilli(), 0, av.UpdatedFormatNone)
-				}
 			}
 		}
 
-		// 再处理模板字段
+		// 最后渲染模板
 		templateKeys, _ := sql.GetTemplateKeysByResolutionOrder(attrView)
 		var renderTemplateErr error
 		for _, templateKey := range templateKeys {

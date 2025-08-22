@@ -79,6 +79,20 @@ func GetKeyBlockValue(blockKeyValues []*KeyValues) (ret *Value) {
 	return
 }
 
+func GetValue(keyValues []*KeyValues, keyID, itemID string) (ret *Value) {
+	for _, kv := range keyValues {
+		if kv.Key.ID == keyID {
+			for _, v := range kv.Values {
+				if v.BlockID == itemID {
+					ret = v
+					return
+				}
+			}
+		}
+	}
+	return
+}
+
 // KeyType 描述了属性视图属性字段的类型。
 type KeyType string
 
@@ -563,15 +577,6 @@ func (av *AttributeView) GetCurrentView(viewID string) (ret *View, err error) {
 	}
 	ret = av.Views[0]
 	return
-}
-
-func (av *AttributeView) ExistItem(itemID string) bool {
-	for _, blockVal := range av.GetBlockKeyValues().Values {
-		if blockVal.BlockID == itemID {
-			return true
-		}
-	}
-	return false
 }
 
 func (av *AttributeView) ExistBoundBlock(nodeID string) bool {

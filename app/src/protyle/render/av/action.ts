@@ -356,7 +356,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
     const menu = new Menu();
     const rowElements = blockElement.querySelectorAll(".av__row--select:not(.av__row--header), .av__gallery-item--select");
     const keyCellElement = rowElements[0].querySelector('.av__cell[data-dtype="block"]') as HTMLElement;
-    const ids = Array.from(rowElements).map(item => item.getAttribute("data-id"));
+    const ids = Array.from(rowElements).map(item => item.querySelector('[data-dtype="block"] .av__celltext').getAttribute("data-id"));
     if (rowElements.length === 1 && keyCellElement.getAttribute("data-detached") !== "true") {
         /// #if !MOBILE
         const blockId = ids[0];

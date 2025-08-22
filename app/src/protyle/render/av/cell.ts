@@ -1039,8 +1039,14 @@ const renderRollup = (cellValue: IAVCellValue) => {
         }
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
-    } else if (cellValue.type === "date") {
-        const dataValue = cellValue ? cellValue.date : null;
+    } else if (["date", "updated", "created"].includes(cellValue.type)) {
+        let dataValue = cellValue ? cellValue.date : null;
+        if (!dataValue) {
+            dataValue = cellValue.updated;
+        }
+        if (!dataValue) {
+            dataValue = cellValue.created;
+        }
         if (dataValue.formattedContent) {
             text = dataValue.formattedContent;
         } else {

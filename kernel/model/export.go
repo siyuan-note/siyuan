@@ -604,6 +604,21 @@ func Preview(id string, fillCSSVar bool) (retStdHTML string) {
 		unlink.Unlink()
 	}
 
+	ast.Walk(tree.Root, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering {
+			return ast.WalkContinue
+		}
+
+		if ast.NodeFootnotesRef == n.Type && nil != n.Next {
+			// https://github.com/siyuan-note/siyuan/issues/15654
+			nextText := n.NextNodeText()
+			if strings.HasPrefix(nextText, "(") && strings.HasSuffix(nextText, ")") {
+				n.InsertAfter(&ast.Node{Type: ast.NodeText, Tokens: []byte(editor.Zwsp)})
+			}
+		}
+		return ast.WalkContinue
+	})
+
 	md := treenode.FormatNode(tree.Root, luteEngine)
 	tree = parse.Parse("", []byte(md), luteEngine.ParseOptions)
 	// 使用实际主题样式值替换样式变量 Use real theme style value replace var in preview mode https://github.com/siyuan-note/siyuan/issues/11458

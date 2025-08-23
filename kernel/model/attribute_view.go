@@ -3278,15 +3278,12 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	regenAttrViewGroups(attrView, "force")
 
-	relatedAvIDs := av.GetSrcAvIDs(avID)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
-	}
-
 	err = av.SaveAttributeView(attrView)
 	if nil != err {
 		return
 	}
+
+	refreshRelatedSrcAvs(avID)
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
 	if err != nil {
@@ -4216,7 +4213,11 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		}
 	}
 
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	refreshRelatedSrcAvs(avID)
 	return
 }
 
@@ -4346,11 +4347,6 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 		if err != nil {
 			return
 		}
-	}
-
-	relatedAvIDs := av.GetSrcAvIDs(avID)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
 	}
 	return
 }
@@ -4557,7 +4553,12 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		return
 	}
 
-	relatedAvIDs := av.GetSrcAvIDs(avID)
+	refreshRelatedSrcAvs(avID)
+	return
+}
+
+func refreshRelatedSrcAvs(destAvID string) {
+	relatedAvIDs := av.GetSrcAvIDs(destAvID)
 	for _, relatedAvID := range relatedAvIDs {
 		destAv, _ := av.ParseAttributeView(relatedAvID)
 		if nil == destAv {
@@ -4567,7 +4568,6 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		av.SaveAttributeView(destAv)
 		ReloadAttrView(relatedAvID)
 	}
-	return
 }
 
 // relationChangeMode

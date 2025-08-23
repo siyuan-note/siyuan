@@ -310,7 +310,7 @@ func updateAttributeViewBlockText(updatedDefNodes map[string]*ast.Node) {
 
 			for _, blockValue := range blockValues.Values {
 				if blockValue.Block.ID == updatedDefNode.ID {
-					newIcon, newContent := getNodeAvBlockText(updatedDefNode)
+					newIcon, newContent := getNodeAvBlockText(updatedDefNode, avID)
 					if newIcon != blockValue.Block.Icon {
 						blockValue.Block.Icon = newIcon
 						changedAv = true

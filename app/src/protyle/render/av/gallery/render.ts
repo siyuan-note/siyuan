@@ -86,18 +86,15 @@ ${cell.color ? `color:${cell.color};` : ""}">${renderCell(cell.value, rowIndex, 
             if (data.displayFieldName) {
                 galleryHTML += `<div class="av__gallery-field av__gallery-field--name" data-empty="${isEmpty}">
     <div class="av__gallery-name">
-        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`} 
-        ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
-        <span class="fn__space"></span>
-        <span class="ft__smaller">${data.fields[fieldsIndex].desc || ""}</span>
+        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`}${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
+        ${data.fields[fieldsIndex].desc ? `<svg aria-label="${data.fields[fieldsIndex].desc}" data-position="north" class="ariaLabel"><use xlink:href="#iconInfo"></use></svg>` : ""}
     </div>
     ${cellHTML}
 </div>`;
             } else {
                 galleryHTML += `<div class="av__gallery-field" data-empty="${isEmpty}">
     <div class="av__gallery-tip">
-        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`}
-        ${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
+        ${data.fields[fieldsIndex].icon ? unicode2Emoji(data.fields[fieldsIndex].icon, undefined, true) : `<svg><use xlink:href="#${getColIconByType(data.fields[fieldsIndex].type)}"></use></svg>`}${window.siyuan.languages.edit} ${Lute.EscapeHTMLStr(data.fields[fieldsIndex].name)}
     </div>
     ${cellHTML}
 </div>`;

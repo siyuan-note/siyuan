@@ -1008,7 +1008,7 @@ func syncDelete2AttributeView(node *ast.Node) (changedAvIDs []string) {
 			}
 
 			if changedAv {
-				regenAttrViewGroups(attrView, "force")
+				regenAttrViewGroups(attrView)
 				av.SaveAttributeView(attrView)
 				changedAvIDs = append(changedAvIDs, avID)
 			}
@@ -1569,7 +1569,7 @@ func upsertAvBlockRel(node *ast.Node) {
 		for _, avID := range affectedAvIDs {
 			attrView, _ := av.ParseAttributeView(avID)
 			if nil != attrView {
-				regenAttrViewGroups(attrView, "force")
+				regenAttrViewGroups(attrView)
 				av.SaveAttributeView(attrView)
 			}
 

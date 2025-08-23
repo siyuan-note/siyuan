@@ -532,7 +532,7 @@ func SetAttributeViewGroup(avID, blockID string, group *av.ViewGroup) (err error
 
 	groupStates := getAttrViewGroupStates(view)
 	view.Group = group
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 	setAttrViewGroupStates(view, groupStates)
 
 	if view.Group.HideEmpty != oldHideEmpty {
@@ -715,7 +715,7 @@ func ChangeAttrViewLayout(blockID, avID string, layout av.LayoutType) (err error
 		}
 	}
 
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 
 	if err = av.SaveAttributeView(attrView); nil != err {
 		logging.LogErrorf("save attribute view [%s] failed: %s", avID, err)
@@ -2292,13 +2292,13 @@ func updateAttributeViewColRelation(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewGroups(srcAv, "force")
+	regenAttrViewGroups(srcAv)
 	err = av.SaveAttributeView(srcAv)
 	if err != nil {
 		return
 	}
 	if !isSameAv {
-		regenAttrViewGroups(destAv, "force")
+		regenAttrViewGroups(destAv)
 		err = av.SaveAttributeView(destAv)
 		ReloadAttrView(destAv.ID)
 	}
@@ -2555,7 +2555,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 		}
 
 		view.GroupItemIDs = masterView.GroupItemIDs
-		regenAttrViewGroups(attrView, "force")
+		regenAttrViewGroups(attrView)
 	}
 
 	if err = av.SaveAttributeView(attrView); err != nil {
@@ -3140,7 +3140,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 		}
 	}
 
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -3277,7 +3277,7 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 		}
 	}
 
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 
 	err = av.SaveAttributeView(attrView)
 	if nil != err {
@@ -3703,7 +3703,7 @@ func sortAttributeViewRow(operation *Operation) (err error) {
 
 				if av.KeyTypeMSelect == groupKey.Type || av.KeyTypeRelation == groupKey.Type {
 					// 跨多选分组时一个项目可能会同时存在于多个分组中，需要重新生成分组
-					regenAttrViewGroups(attrView, "force")
+					regenAttrViewGroups(attrView)
 				}
 			} else { // 同分组内排序
 				for i, r := range groupView.GroupItemIDs {
@@ -4006,7 +4006,7 @@ func updateAttributeViewColTemplate(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4108,7 +4108,7 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 				}
 			}
 
-			regenAttrViewGroups(destAv, "force")
+			regenAttrViewGroups(destAv)
 			av.SaveAttributeView(destAv)
 			ReloadAttrView(destAv.ID)
 		}
@@ -4260,7 +4260,7 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 			}
 		}
 
-		regenAttrViewGroups(destAv, "force")
+		regenAttrViewGroups(destAv)
 		av.SaveAttributeView(destAv)
 		ReloadAttrView(destAv.ID)
 	}
@@ -4309,7 +4309,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 			content = util.UnescapeHTML(content)
 			blockVal.Block.Icon, blockVal.Block.Content = icon, content
 			blockVal.UpdatedAt = now
-			regenAttrViewGroups(attrView, "force")
+			regenAttrViewGroups(attrView)
 			return
 		}
 	}
@@ -4339,7 +4339,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newNodeI
 		}
 	}
 
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 	return
 }
 
@@ -4587,7 +4587,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		updateTwoWayRelationDestAttrView(attrView, key, val, relationChangeMode, oldRelationBlockIDs)
 	}
 
-	regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView)
 	if err = av.SaveAttributeView(attrView); nil != err {
 		return
 	}
@@ -4604,7 +4604,7 @@ func refreshRelatedSrcAvs(destAvID string) {
 			continue
 		}
 
-		regenAttrViewGroups(destAv, "force")
+		regenAttrViewGroups(destAv)
 		av.SaveAttributeView(destAv)
 		ReloadAttrView(relatedAvID)
 	}
@@ -4674,25 +4674,17 @@ func updateTwoWayRelationDestAttrView(attrView *av.AttributeView, relKey *av.Key
 	}
 
 	if destAv != attrView {
-		regenAttrViewGroups(destAv, "force")
+		regenAttrViewGroups(destAv)
 		av.SaveAttributeView(destAv)
 	}
 }
 
 // regenAttrViewGroups 重新生成分组视图。
-// keyID: 如果是 "force" 则强制重新生成所有分组视图，否则只生成 keyID 指定的分组字段的分组视图
-func regenAttrViewGroups(attrView *av.AttributeView, keyID string) {
+func regenAttrViewGroups(attrView *av.AttributeView) {
 	for _, view := range attrView.Views {
 		groupKey := view.GetGroupKey(attrView)
 		if nil == groupKey {
 			continue
-		}
-
-		if "force" != keyID {
-			if av.KeyTypeTemplate != groupKey.Type && av.KeyTypeRollup != groupKey.Type && av.KeyTypeCreated != groupKey.Type && av.KeyTypeUpdated != groupKey.Type &&
-				view.Group.Field != keyID {
-				continue
-			}
 		}
 
 		genAttrViewGroups(view, attrView)
@@ -4884,7 +4876,7 @@ func updateAttributeViewColumnOptions(operation *Operation) (err error) {
 		})
 	}
 
-	regenAttrViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -4968,7 +4960,7 @@ func removeAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
 }
@@ -5087,7 +5079,7 @@ func updateAttributeViewColumnOption(operation *Operation) (err error) {
 		}
 	}
 
-	regenAttrViewGroups(attrView, operation.ID)
+	regenAttrViewGroups(attrView)
 	err = av.SaveAttributeView(attrView)
 	return
 }

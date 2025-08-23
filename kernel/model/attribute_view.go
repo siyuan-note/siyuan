@@ -4086,7 +4086,33 @@ func updateAttributeViewColumn(operation *Operation) (err error) {
 		}
 	}
 
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	if changeType {
+		relatedAvIDs := av.GetSrcAvIDs(attrView.ID)
+		for _, relatedAvID := range relatedAvIDs {
+			destAv, _ := av.ParseAttributeView(relatedAvID)
+			if nil == destAv {
+				continue
+			}
+
+			for _, keyValues := range destAv.KeyValues {
+				if av.KeyTypeRollup == keyValues.Key.Type && keyValues.Key.Rollup.KeyID == operation.ID {
+					// 置空关联过来的汇总
+					for _, val := range keyValues.Values {
+						val.Rollup.Contents = nil
+					}
+					keyValues.Key.Rollup.Calc = &av.RollupCalc{Operator: av.CalcOperatorNone}
+				}
+			}
+
+			regenAttrViewGroups(destAv, "force")
+			av.SaveAttributeView(destAv)
+			ReloadAttrView(destAv.ID)
+		}
+	}
 	return
 }
 

@@ -2969,11 +2969,7 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 
 	now := time.Now().UnixMilli()
 	for _, src := range srcs {
-		srcID := src["id"].(string)
-		if !ast.IsNodeIDPattern(srcID) {
-			continue
-		}
-
+		boundBlockID := ""
 		srcItemID := ast.NewNodeID()
 		if nil != src["itemID"] {
 			srcItemID = src["itemID"].(string)
@@ -2982,14 +2978,19 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		isDetached := src["isDetached"].(bool)
 		var tree *parse.Tree
 		if !isDetached {
+			boundBlockID = src["id"].(string)
+			if !ast.IsNodeIDPattern(boundBlockID) {
+				continue
+			}
+
 			var loadErr error
 			if nil != tx {
-				tree, loadErr = tx.loadTree(srcID)
+				tree, loadErr = tx.loadTree(boundBlockID)
 			} else {
-				tree, loadErr = LoadTreeByBlockID(srcID)
+				tree, loadErr = LoadTreeByBlockID(boundBlockID)
 			}
 			if nil != loadErr {
-				logging.LogErrorf("load tree [%s] failed: %s", srcID, loadErr)
+				logging.LogErrorf("load tree [%s] failed: %s", boundBlockID, loadErr)
 				return loadErr
 			}
 		}
@@ -2998,7 +2999,7 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, groupID, previousItemID, srcItemID, srcID, srcContent, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
 			return avErr
 		}
 	}

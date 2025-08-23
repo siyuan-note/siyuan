@@ -4307,7 +4307,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
 
-				avIDs := replaceRelationAvValues(avID, oldBlockID, newBlockID)
+				avIDs := replaceRelationAvValues(avID, blockVal.Block.ID, newBlockID)
 				changedAvIDs = append(changedAvIDs, avIDs...)
 			} else {
 				blockVal.Block.ID = ""

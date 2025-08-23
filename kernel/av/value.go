@@ -19,6 +19,7 @@ package av
 import (
 	"fmt"
 	"math"
+	"reflect"
 	"sort"
 	"strconv"
 	"strings"
@@ -807,6 +808,12 @@ func (r *ValueRollup) BuildContents(keyValues []*KeyValues, destKey *Key, relati
 		if nil == destVal {
 			continue
 		}
+
+		if val := destVal.GetValByType(destKey.Type); nil == val || reflect.ValueOf(val).IsNil() {
+			// 目标字段因为修改类型导致空值
+			continue
+		}
+
 		if KeyTypeNumber == destKey.Type {
 			destVal.Number.Format = destKey.NumberFormat
 			destVal.Number.FormatNumber()

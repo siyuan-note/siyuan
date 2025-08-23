@@ -975,16 +975,55 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == earliest || v.Updated.Content < earliest {
+					earliest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+				if 0 == latest || v.Updated.Content > latest {
+					latest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == earliest || v.Created.Content < earliest {
+					earliest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+				if 0 == latest || v.Created.Content > latest {
+					latest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
 			}
 		}
 
-		if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
-			r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
-		}
-		if 0 != earliest && 0 != latest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeNumber:
+			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+				r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
+			}
+		case KeyTypeDate:
+			if 0 != earliest && 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != earliest && 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeCreated:
+			if 0 != earliest && 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+			}
 		}
 	case CalcOperatorEarliest:
+		if 1 > len(r.Contents) {
+			return
+		}
+
 		earliest := int64(0)
 		var isNotTime, hasEndDate bool
 		for _, v := range r.Contents {
@@ -994,12 +1033,41 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == earliest || v.Updated.Content < earliest {
+					earliest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == earliest || v.Created.Content < earliest {
+					earliest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
 			}
 		}
-		if 0 != earliest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeDate:
+			if 0 != earliest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != earliest {
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeCreated:
+			if 0 != earliest {
+				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
 		}
 	case CalcOperatorLatest:
+		if 1 > len(r.Contents) {
+			return
+		}
+
 		latest := int64(0)
 		var isNotTime, hasEndDate bool
 		for _, v := range r.Contents {
@@ -1009,10 +1077,35 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = v.Date.IsNotTime
 					hasEndDate = v.Date.HasEndDate
 				}
+			} else if KeyTypeUpdated == v.Type && nil != v.Updated && v.Updated.IsNotEmpty {
+				if 0 == latest || latest < v.Updated.Content {
+					latest = v.Updated.Content
+					isNotTime = true
+					hasEndDate = false
+				}
+			} else if KeyTypeCreated == v.Type && nil != v.Created && v.Created.IsNotEmpty {
+				if 0 == latest || latest < v.Created.Content {
+					latest = v.Created.Content
+					isNotTime = true
+					hasEndDate = false
+				}
 			}
 		}
-		if 0 != latest {
-			r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+
+		typ := r.Contents[0].Type
+		switch typ {
+		case KeyTypeDate:
+			if 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeDate, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeUpdated:
+			if 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
+		case KeyTypeCreated:
+			if 0 != latest {
+				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+			}
 		}
 	case CalcOperatorChecked:
 		countChecked := 0

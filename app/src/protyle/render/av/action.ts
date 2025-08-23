@@ -573,7 +573,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         srcs.push({
                             itemID: Lute.NewNodeID(),
                             content: blockValue.block.content,
-                            id: rowId,
+                            id: blockValue.block.id || "",
                             isDetached: blockValue.isDetached,
                         });
                         sourceIds.push(rowId);

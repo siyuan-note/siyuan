@@ -462,7 +462,7 @@
         vertical-align: bottom;
       }
 
-      img:first-child{
+      img:first-child {
         height: calc(1.625em - 10px);
         float: left;
         margin-top: 5px;
@@ -587,23 +587,6 @@
 
     .popover__block {
       color: var(--b3-protyle-inline-blockref-color);
-    }
-
-    .b3-menu__avemoji {
-      display: inline-block;
-      font-size: 1em;
-      line-height: 1.625;
-      height: auto;
-      margin: 0 5px 0 -4px;
-      vertical-align: top;
-
-      img {
-        height: calc(1.625em - 8px);
-        font-size: 1em;
-        width: calc(1.625em - 8px);
-        float: left;
-        margin: 4px 0;
-      }
     }
 
     &[data-wrap="true"] {
@@ -999,4 +982,22 @@ img.av__cellassetimg {
   vertical-align: top;
   font-size: inherit;
   cursor: zoom-in;
+}
+
+.av__cell,
+.custom-attr__avvalue {
+  .b3-menu__avemoji {
+    font-size: 1em;
+    line-height: 1.625;
+    height: auto;
+    margin: 0 5px 0 -4px;
+    vertical-align: top;
+
+    img {
+      height: calc(1.625em - 8px);
+      font-size: 1em;
+      width: calc(1.625em - 8px);
+      margin: 4px 0;
+    }
+  }
 }

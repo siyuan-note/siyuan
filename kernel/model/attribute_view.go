@@ -3040,7 +3040,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 	// 检查是否重复添加相同的块
 	blockValues := attrView.GetBlockKeyValues()
 	for _, blockValue := range blockValues.Values {
-		if blockValue.Block.ID == addingBoundBlockID {
+		if "" != addingBoundBlockID && blockValue.Block.ID == addingBoundBlockID {
 			if !isDetached {
 				// 重复绑定一下，比如剪切数据库块、取消绑定块后再次添加的场景需要
 				bindBlockAv0(tx, avID, node, tree)

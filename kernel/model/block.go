@@ -763,6 +763,9 @@ func GetBlockKramdown(id, mode string) (ret string) {
 	root.PrependChild(node)
 	luteEngine := NewLute()
 	if "md" == mode {
+		// `/api/block/getBlockKramdown` link/image URLs are no longer encoded with spaces https://github.com/siyuan-note/siyuan/issues/15611
+		luteEngine.SetPreventEncodeLinkSpace(true)
+		
 		ret = treenode.ExportNodeStdMd(root, luteEngine)
 	} else {
 		tree.Root = root

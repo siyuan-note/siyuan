@@ -3278,15 +3278,12 @@ func removeAttributeViewBlock(srcIDs []string, avID string, tx *Transaction) (er
 
 	regenAttrViewGroups(attrView, "force")
 
-	relatedAvIDs := av.GetSrcAvIDs(avID, true)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
-	}
-
 	err = av.SaveAttributeView(attrView)
 	if nil != err {
 		return
 	}
+
+	refreshRelatedSrcAvs(avID)
 
 	historyDir, err := GetHistoryDir(HistoryOpUpdate)
 	if err != nil {
@@ -4216,7 +4213,30 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		}
 	}
 
-	err = av.SaveAttributeView(attrView)
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	relatedAvIDs := av.GetSrcAvIDs(avID)
+	for _, relatedAvID := range relatedAvIDs {
+		destAv, _ := av.ParseAttributeView(relatedAvID)
+		if nil == destAv {
+			continue
+		}
+
+		for _, keyValues := range destAv.KeyValues {
+			if av.KeyTypeRollup == keyValues.Key.Type && keyValues.Key.Rollup.KeyID == keyID {
+				// 置空关联过来的汇总
+				for _, val := range keyValues.Values {
+					val.Rollup.Contents = nil
+				}
+			}
+		}
+
+		regenAttrViewGroups(destAv, "force")
+		av.SaveAttributeView(destAv)
+		ReloadAttrView(destAv.ID)
+	}
 	return
 }
 
@@ -4347,15 +4367,6 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 			return
 		}
 	}
-
-	if err = av.SaveAttributeView(attrView); err != nil {
-		return
-	}
-
-	relatedAvIDs := av.GetSrcAvIDs(avID, true)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
-	}
 	return
 }
 
@@ -4368,15 +4379,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 	val, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
 	if nil != err {
 		return
-	}
-
-	if err = av.SaveAttributeView(attrView); err != nil {
-		return
-	}
-
-	relatedAvIDs := av.GetSrcAvIDs(avID, true)
-	for _, relatedAvID := range relatedAvIDs {
-		ReloadAttrView(relatedAvID)
 	}
 	return
 }
@@ -4565,24 +4567,27 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		updateTwoWayRelationDestAttrView(attrView, key, val, relationChangeMode, oldRelationBlockIDs)
 	}
 
-	if isUpdatingBlockKey {
-		relatedAvIDs := av.GetSrcAvIDs(avID, false)
-		if gulu.Str.Contains(avID, relatedAvIDs) {
-			regenAttrViewGroups(attrView, "force")
+	regenAttrViewGroups(attrView, "force")
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
+
+	refreshRelatedSrcAvs(avID)
+	return
+}
+
+func refreshRelatedSrcAvs(destAvID string) {
+	relatedAvIDs := av.GetSrcAvIDs(destAvID)
+	for _, relatedAvID := range relatedAvIDs {
+		destAv, _ := av.ParseAttributeView(relatedAvID)
+		if nil == destAv {
+			continue
 		}
 
-		relatedAvIDs = gulu.Str.RemoveElem(relatedAvIDs, avID)
-		for _, relatedAvID := range relatedAvIDs {
-			destAv, _ := av.ParseAttributeView(relatedAvID)
-			if nil == destAv {
-				continue
-			}
-			regenAttrViewGroups(destAv, "force")
-		}
-	} else {
-		regenAttrViewGroups(attrView, keyID)
+		regenAttrViewGroups(destAv, "force")
+		av.SaveAttributeView(destAv)
+		ReloadAttrView(relatedAvID)
 	}
-	return
 }
 
 // relationChangeMode
@@ -5124,7 +5129,7 @@ func getAttrViewName(attrView *av.AttributeView) string {
 func replaceRelationAvValues(avID, previousID, nextID string) (changedSrcAvID []string) {
 	// The database relation fields follow the change after the primary key field is changed https://github.com/siyuan-note/siyuan/issues/11117
 
-	srcAvIDs := av.GetSrcAvIDs(avID, true)
+	srcAvIDs := av.GetSrcAvIDs(avID)
 	for _, srcAvID := range srcAvIDs {
 		srcAv, parseErr := av.ParseAttributeView(srcAvID)
 		changed := false

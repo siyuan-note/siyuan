@@ -650,12 +650,16 @@ export const getFiltersHTML = (data: IAV) => {
  ${filter.relativeDate2.direction ? filter.relativeDate2.count : ""}
  ${window.siyuan.languages[["day", "week", "month", "year"][filter.relativeDate2.unit]]}`;
                         }
-                    } else if (filterValue && filterValue[filterValue.type as "date"]?.content) {
-                        dateValue = dayjs(filterValue[filterValue.type as "date"].content).format("YYYY-MM-DD");
-                        dateValue2 = dayjs(filterValue[filterValue.type as "date"].content2).format("YYYY-MM-DD");
+                    } else if (filterValue) {
+                        if (filterValue[filterValue.type as "date"]?.content) {
+                            dateValue = dayjs(filterValue[filterValue.type as "date"].content).format("YYYY-MM-DD");
+                        }
+                        if (filterValue && filterValue[filterValue.type as "date"]?.content2) {
+                            dateValue2 = dayjs(filterValue[filterValue.type as "date"].content2).format("YYYY-MM-DD");
+                        }
                     }
                     if (dateValue) {
-                        if (filter.operator === "Is between") {
+                        if (filter.operator === "Is between" && dateValue2) {
                             filterText = ` ${window.siyuan.languages.filterOperatorIsBetween} ${dateValue} ${dateValue2}`;
                         } else if ("=" === filter.operator) {
                             filterText = `: ${dateValue}`;

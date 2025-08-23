@@ -727,7 +727,7 @@ ${genHintItemHTML(item)}
                 focusByRange(range);
                 this.genEmojiHTML(protyle);
                 return;
-            } else if (value.indexOf("style") > -1) {
+            } else if (value.startsWith("style")) {
                 range.deleteContents();
                 this.fixImageCursor(range);
                 nodeElement.setAttribute("style", value.split(Constants.ZWSP)[1] || "");

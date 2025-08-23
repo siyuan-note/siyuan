@@ -864,9 +864,10 @@ export const onTransaction = (protyle: IProtyle, operation: IOperation, isUndo: 
         "duplicateAttrViewKey", "setAttrViewViewDesc", "setAttrViewCoverFrom", "setAttrViewCoverFromAssetKeyID",
         "setAttrViewBlockView", "setAttrViewCardSize", "setAttrViewCardAspectRatio", "hideAttrViewName", "setAttrViewShowIcon",
         "setAttrViewWrapField", "setAttrViewGroup", "removeAttrViewGroup", "hideAttrViewGroup", "sortAttrViewGroup",
-        "foldAttrViewGroup", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName"].includes(operation.action)) {
+        "foldAttrViewGroup", "hideAttrViewAllGroups", "setAttrViewFitImage", "setAttrViewDisplayFieldName",
+        "insertAttrViewBlock"].includes(operation.action)) {
+        // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
         if (!isUndo) {
-            // 撤销 transaction 会进行推送，需使用推送来进行刷新最新数据 https://github.com/siyuan-note/siyuan/issues/13607
             refreshAV(protyle, operation);
         } else if (operation.action === "setAttrViewName") {
             // setAttrViewName 同文档不会推送，需手动刷新
@@ -1327,8 +1328,6 @@ export const transaction = (protyle: IProtyle, doOperations: IOperation[], undoO
                             blockRender(protyle, item);
                         }
                     });
-                } else if (operation.action === "insertAttrViewBlock") {
-                    refreshAV(protyle, operation);
                 }
             });
         });

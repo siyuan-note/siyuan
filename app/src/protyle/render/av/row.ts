@@ -17,7 +17,7 @@ import {clearSelect} from "../../util/clearSelect";
 
 export const getFieldIdByCellElement = (cellElement: Element, viewType: TAVView): string => {
     if (hasClosestByClassName(cellElement, "custom-attr")) {
-        return (hasClosestByClassName(cellElement, "av__row") as HTMLElement).dataset.id;
+        return cellElement.getAttribute("data-row-id");
     }
     return (hasClosestByClassName(cellElement, viewType === "table" ? "av__row" : "av__gallery-item") as HTMLElement).dataset.id;
 };

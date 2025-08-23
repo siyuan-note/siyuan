@@ -129,12 +129,14 @@ export const genAVValueHTML = (value: IAVCellValue) => {
 <a ${value.email.content ? `href="mailto:${value.email.content}"` : ""} target="_blank" aria-label="${window.siyuan.languages.openBy}" class="block__icon block__icon--show fn__flex-center b3-tooltips__w b3-tooltips"><svg><use xlink:href="#iconEmail"></use></svg></a>`;
             break;
         case "relation":
-            value?.relation?.contents?.forEach((item) => {
+            value?.relation?.contents?.forEach((item, index) => {
                 if (item && item.block) {
+                    const rowID = value.relation.blockIDs[index];
                     if (item?.isDetached) {
-                        html += `<span class="av__cell--relation"><span>➖ </span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                        html += `<span data-row-id="${rowID}" class="av__cell--relation"><span class="b3-menu__avemoji">➖</span><span class="av__celltext">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     } else {
-                        html += `<span class="av__cell--relation"><span data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)} </span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
+                        // data-block-id 用于更新 emoji
+                        html += `<span data-row-id="${rowID}" class="av__cell--relation" data-block-id="${item.block.id}"><span class="b3-menu__avemoji" data-unicode="${item.block.icon || ""}">${unicode2Emoji(item.block.icon || window.siyuan.storage[Constants.LOCAL_IMAGES].file)}</span><span data-type="block-ref" data-id="${item.block.id}" data-subtype="s" class="av__celltext av__celltext--ref">${Lute.EscapeHTMLStr(item.block.content || window.siyuan.languages.untitled)}</span></span>`;
                     }
                 }
             });
@@ -212,7 +214,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
 
             if (element.innerHTML) {
                 // 防止 blockElement 找不到
-                element.querySelector(`.av[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
+                element.querySelector(`[data-node-id="${id}"][data-av-id="${table.avID}"]`).innerHTML = innerHTML;
             }
         });
         if (element.innerHTML === "") {

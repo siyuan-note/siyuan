@@ -759,7 +759,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                 }
             }
             avRender(item, protyle, () => {
-                const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .av[data-av-id="${avID}"]`) as HTMLElement;
+                const attrElement = document.querySelector(`.b3-dialog--open[data-key="${Constants.DIALOG_ATTR}"] .custom-attr > [data-av-id="${avID}"]`) as HTMLElement;
                 if (attrElement) {
                     // 更新属性面板
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);

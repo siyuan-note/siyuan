@@ -51,6 +51,13 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 	}
 	view.Sorts = tmpSorts
 
+	// 字段删除以后需要删除设置的分组
+	if nil != view.Group {
+		if k, _ := attrView.GetKey(view.Group.Field); nil == k {
+			view.Group = nil
+		}
+	}
+
 	// 订正视图类型
 	for i, v := range attrView.Views {
 		if av.LayoutTypeGallery == v.LayoutType && nil == v.Gallery {

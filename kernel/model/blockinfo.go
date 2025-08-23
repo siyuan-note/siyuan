@@ -288,7 +288,7 @@ func getNodeRefText(node *ast.Node) string {
 	return getNodeRefText0(node, Conf.Editor.BlockRefDynamicAnchorTextMaxLen, true)
 }
 
-func getNodeAvBlockText(node *ast.Node) (icon, content string) {
+func getNodeAvBlockText(node *ast.Node, avID string) (icon, content string) {
 	if nil == node {
 		return
 	}
@@ -303,6 +303,11 @@ func getNodeAvBlockText(node *ast.Node) (icon, content string) {
 	}
 
 	content = strings.TrimSpace(content)
+	if "" != avID {
+		if staticText := node.IALAttr(av.NodeAttrViewStaticText + "-" + avID); "" != staticText {
+			content = staticText
+		}
+	}
 	if "" == content {
 		content = Conf.language(105)
 	}

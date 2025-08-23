@@ -3032,7 +3032,7 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 
 	var blockIcon string
 	if !isDetached {
-		blockIcon, addingBlockContent = getNodeAvBlockText(node)
+		blockIcon, addingBlockContent = getNodeAvBlockText(node, "")
 		addingBlockContent = util.UnescapeHTML(addingBlockContent)
 	}
 
@@ -4278,7 +4278,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 		if !isDetached && blockVal.Block.ID == newBlockID && nil != node && nil != tree {
 			bindBlockAv0(tx, avID, node, tree)
 			blockVal.IsDetached = false
-			icon, content := getNodeAvBlockText(node)
+			icon, content := getNodeAvBlockText(node, "")
 			content = util.UnescapeHTML(content)
 			blockVal.Block.Icon, blockVal.Block.Content = icon, content
 			blockVal.UpdatedAt = now
@@ -4302,7 +4302,7 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 				bindBlockAv(tx, avID, newBlockID)
 
 				blockVal.Block.ID = newBlockID
-				icon, content := getNodeAvBlockText(node)
+				icon, content := getNodeAvBlockText(node, "")
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
 
@@ -4539,7 +4539,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 				} else { // 之前绑定的块和现在绑定的块一样
 					content := strings.TrimSpace(val.Block.Content)
 					node, tree, _ := getNodeByBlockID(tx, val.Block.ID)
-					_, blockText := getNodeAvBlockText(node)
+					_, blockText := getNodeAvBlockText(node, "")
 					if "" == content {
 						// 使用动态锚文本
 						val.Block.Content = util.UnescapeHTML(blockText)

@@ -4302,12 +4302,11 @@ func replaceAttributeViewBlock0(attrView *av.AttributeView, oldBlockID, newBlock
 				}
 				bindBlockAv(tx, avID, newBlockID)
 
-				blockVal.Block.ID = newBlockID
 				icon, content := getNodeAvBlockText(node, "")
 				content = util.UnescapeHTML(content)
 				blockVal.Block.Icon, blockVal.Block.Content = icon, content
-
 				avIDs := replaceRelationAvValues(avID, blockVal.Block.ID, newBlockID)
+				blockVal.Block.ID = newBlockID
 				changedAvIDs = append(changedAvIDs, avIDs...)
 			} else {
 				blockVal.Block.ID = ""

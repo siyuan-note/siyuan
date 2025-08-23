@@ -1012,11 +1012,11 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, latest, UpdatedFormatDuration)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest && 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(earliest, latest, DateFormatDuration, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}}
 			}
 		}
 	case CalcOperatorEarliest:
@@ -1056,11 +1056,11 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(earliest, 0, UpdatedFormatNone)}}
 			}
 		case KeyTypeCreated:
 			if 0 != earliest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(earliest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, 0, CreatedFormatNone)}}
 			}
 		}
 	case CalcOperatorLatest:
@@ -1100,11 +1100,11 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			}
 		case KeyTypeUpdated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeUpdated, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeUpdated, Updated: NewFormattedValueUpdated(latest, 0, UpdatedFormatNone)}}
 			}
 		case KeyTypeCreated:
 			if 0 != latest {
-				r.Contents = []*Value{{Type: KeyTypeCreated, Date: NewFormattedValueDate(latest, 0, DateFormatNone, isNotTime, hasEndDate)}}
+				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(latest, 0, CreatedFormatNone)}}
 			}
 		}
 	case CalcOperatorChecked:

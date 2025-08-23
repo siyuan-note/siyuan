@@ -4217,7 +4217,26 @@ func RemoveAttributeViewKey(avID, keyID string, removeRelationDest bool) (err er
 		return
 	}
 
-	refreshRelatedSrcAvs(avID)
+	relatedAvIDs := av.GetSrcAvIDs(avID)
+	for _, relatedAvID := range relatedAvIDs {
+		destAv, _ := av.ParseAttributeView(relatedAvID)
+		if nil == destAv {
+			continue
+		}
+
+		for _, keyValues := range destAv.KeyValues {
+			if av.KeyTypeRollup == keyValues.Key.Type && keyValues.Key.Rollup.KeyID == keyID {
+				// 置空关联过来的汇总
+				for _, val := range keyValues.Values {
+					val.Rollup.Contents = nil
+				}
+			}
+		}
+
+		regenAttrViewGroups(destAv, "force")
+		av.SaveAttributeView(destAv)
+		ReloadAttrView(destAv.ID)
+	}
 	return
 }
 
@@ -4564,6 +4583,7 @@ func refreshRelatedSrcAvs(destAvID string) {
 		if nil == destAv {
 			continue
 		}
+
 		regenAttrViewGroups(destAv, "force")
 		av.SaveAttributeView(destAv)
 		ReloadAttrView(relatedAvID)

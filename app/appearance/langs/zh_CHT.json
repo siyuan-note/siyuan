@@ -29,7 +29,7 @@
   "small": "小",
   "fitImage": "自動調整圖片大小",
   "showIcon": "顯示圖標",
-  "showAllFieldsIcon": "顯示字段圖標",
+  "showAllEntriesIcons": "顯示條目圖標",
   "wrapAllFields": "字段自動換行",
   "gallery": "卡片",
   "newTag": "新建標籤",

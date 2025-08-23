@@ -1040,13 +1040,7 @@ const renderRollup = (cellValue: IAVCellValue) => {
     } else if (cellValue.type === "number") {
         text = cellValue?.number.formattedContent || cellValue?.number.content.toString() || "";
     } else if (["date", "updated", "created"].includes(cellValue.type)) {
-        let dataValue = cellValue ? cellValue.date : null;
-        if (!dataValue) {
-            dataValue = cellValue.updated;
-        }
-        if (!dataValue) {
-            dataValue = cellValue.created;
-        }
+        const dataValue = cellValue ? cellValue[cellValue.type as "date"] : null;
         if (dataValue.formattedContent) {
             text = dataValue.formattedContent;
         } else {

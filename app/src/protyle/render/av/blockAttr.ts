@@ -20,6 +20,7 @@ import {getCompressURL} from "../../../util/image";
 
 const genAVRollupHTML = (value: IAVCellValue) => {
     let html = "";
+    const dataValue: IAVCellDateValue = value[value.type as "date"];
     switch (value.type) {
         case "block":
             if (value?.isDetached) {
@@ -37,11 +38,15 @@ const genAVRollupHTML = (value: IAVCellValue) => {
         case "date":
         case "updated":
         case "created":
-            if (value[value.type] && value[value.type].isNotEmpty) {
-                html = dayjs(value[value.type].content).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
-            }
-            if (value[value.type] && value[value.type].hasEndDate && value[value.type].isNotEmpty && value[value.type].isNotEmpty2) {
-                html += `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(value[value.type].content2).format(value[value.type].isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+            if (dataValue.formattedContent) {
+                html = dataValue.formattedContent;
+            } else {
+                if (dataValue && dataValue.isNotEmpty) {
+                    html = dayjs(dataValue.content).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm");
+                }
+                if (dataValue && dataValue.hasEndDate && dataValue.isNotEmpty && dataValue.isNotEmpty2) {
+                    html = `<svg class="av__cellicon"><use xlink:href="#iconForward"></use></svg>${dayjs(dataValue.content2).format(dataValue.isNotTime ? "YYYY-MM-DD" : "YYYY-MM-DD HH:mm")}`;
+                }
             }
             if (html) {
                 html = `<span class="av__celltext">${html}</span>`;

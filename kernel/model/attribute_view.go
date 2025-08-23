@@ -4348,10 +4348,6 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 		}
 	}
 
-	if err = av.SaveAttributeView(attrView); err != nil {
-		return
-	}
-
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
 		ReloadAttrView(relatedAvID)
@@ -4367,10 +4363,6 @@ func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueDa
 
 	val, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
 	if nil != err {
-		return
-	}
-
-	if err = av.SaveAttributeView(attrView); err != nil {
 		return
 	}
 
@@ -4566,6 +4558,9 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 	}
 
 	regenAttrViewGroups(attrView, "force")
+	if err = av.SaveAttributeView(attrView); nil != err {
+		return
+	}
 
 	relatedAvIDs := av.GetSrcAvIDs(avID)
 	for _, relatedAvID := range relatedAvIDs {
@@ -4574,6 +4569,8 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 			continue
 		}
 		regenAttrViewGroups(destAv, "force")
+		av.SaveAttributeView(destAv)
+		ReloadAttrView(relatedAvID)
 	}
 	return
 }

@@ -430,14 +430,18 @@ export const cellScrollIntoView = (blockElement: HTMLElement, cellElement: Eleme
         // 属性面板
         return;
     }
-    const avHeaderRect = blockElement.querySelector(".av__row--header").getBoundingClientRect();
+    const bodyElement = hasClosestByClassName(cellElement, "av__body");
+    if (!bodyElement) {
+        return;
+    }
+    const avHeaderRect = bodyElement.querySelector(".av__row--header").getBoundingClientRect();
     if (avHeaderRect.bottom > cellRect.top) {
         const contentElement = hasClosestByClassName(blockElement, "protyle-content", true);
         if (contentElement) {
             contentElement.scrollTop = contentElement.scrollTop + cellRect.top - avHeaderRect.bottom;
         }
     } else {
-        const footerElement = blockElement.querySelector(".av__row--footer");
+        const footerElement = bodyElement.querySelector(".av__row--footer");
         if (footerElement?.querySelector(".av__calc--ashow")) {
             const avFooterRect = footerElement.getBoundingClientRect();
             if (avFooterRect.top < cellRect.bottom) {

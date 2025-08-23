@@ -1392,11 +1392,18 @@ func htmlBlock2Inline(tree *parse.Tree) {
 			img.InsertAfter(ial)
 		}
 
-		if nil != n.Parent && ast.NodeText == n.Type {
-			// 行级 HTML 会被解析为文本，所以这里要在父级段落前面插入，避免形成段落嵌套 https://github.com/siyuan-note/siyuan/issues/13080
-			n.Parent.InsertBefore(p)
-		} else {
+		if ast.NodeHTMLBlock == n.Type {
 			n.InsertBefore(p)
+		} else if ast.NodeText == n.Type {
+			if nil != n.Parent {
+				if n.Parent.IsContainerBlock() {
+					n.InsertBefore(p)
+				} else {
+					n.InsertBefore(img)
+				}
+			} else {
+				n.InsertBefore(p)
+			}
 		}
 		unlinks = append(unlinks, n)
 	}

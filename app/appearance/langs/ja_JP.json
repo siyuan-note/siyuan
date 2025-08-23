@@ -29,7 +29,7 @@
   "small": "小",
   "fitImage": "画像サイズを自動調整",
   "showIcon": "アイコンを表示",
-  "showAllFieldsIcon": "フィールドアイコンを表示",
+  "showAllEntriesIcons": "エントリアイコンを表示",
   "wrapAllFields": "フィールドを自動折り返し",
   "gallery": "カード",
   "newTag": "新しいタグ",

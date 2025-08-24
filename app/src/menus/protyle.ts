@@ -66,6 +66,7 @@ import {showMessage} from "../dialog/message";
 import {img3115} from "../boot/compatibleVersion";
 import {hideTooltip} from "../dialog/tooltip";
 import {clearSelect} from "../protyle/util/clearSelect";
+import {scrollCenter} from "../util/highlightById";
 
 const renderAssetList = (element: Element, k: string, position: IPosition, exts: string[] = []) => {
     fetchPost("/api/search/searchAsset", {
@@ -1020,7 +1021,7 @@ export const zoomOut = (options: {
                 }
                 focusBlock(showElement);
                 const resizeObserver = new ResizeObserver(() => {
-                    focusElement.scrollIntoView();
+                    scrollCenter(options.protyle, focusElement, true, "smooth");
                 });
                 resizeObserver.observe(options.protyle.wysiwyg.element);
                 setTimeout(() => {

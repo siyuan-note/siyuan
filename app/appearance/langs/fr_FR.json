@@ -431,7 +431,7 @@
   "apiKey": "Clé API",
   "apiKeyTip": "Il est recommandé d'attribuer une clé API à SiYuan séparément pour une gestion ultérieure. Si cet élément est laissé vide, les fonctions liées à l'IA seront désactivées",
   "apiTimeout": "Délai d'expiration",
-  "apiTimeoutTip": "Le délai d'attente pour lancer une requête, unité : seconde",
+  "apiTimeoutTip": "Le délai d'attente pour lancer une requête",
   "apiProxy": "Proxy Web",
   "apiProxyTip": "Le proxy réseau qui lance la requête, tel que <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Modelo",

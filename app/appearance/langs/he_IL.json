@@ -431,7 +431,7 @@
   "apiKey": "מפתח API",
   "apiKeyTip": "מומלץ להקצות מפתח API לסִייוּן בנפרד לשם ניהול מאוחר יותר. אם פריט זה נשאר ריק, הפונקציות הקשורות ל-AI יידחו",
   "apiTimeout": "זמן החזרה",
-  "apiTimeoutTip": "תקופת הזמן ליזום בקשה, יחידה: שנייה",
+  "apiTimeoutTip": "הבקשה פגה",
   "apiProxy": "פרוקסי רשת",
   "apiProxyTip": "הפרוקסי רשת המוזמן, כמו <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "מודל",

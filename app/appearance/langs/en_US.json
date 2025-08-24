@@ -431,7 +431,7 @@
   "apiKey": "API Key",
   "apiKeyTip": "It is recommended to assign an API Key to SiYuan separately for subsequent management. If this item is left blank, AI-related functions will be disabled",
   "apiTimeout": "Timeout",
-  "apiTimeoutTip": "The timeout period for initiating a request, unit: second",
+  "apiTimeoutTip": "The timeout period for initiating a request",
   "apiProxy": "Network Proxy",
   "apiProxyTip": "The network proxy that initiates the request, such as <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Model",

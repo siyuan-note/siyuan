@@ -33,7 +33,11 @@ export const initFileTree = () => {
 <div class="b3-label">
     ${window.siyuan.languages.fileTree22}
     <span class="fn__hr"></span>
-    <input class="b3-text-field fn__block" id="largeFileWarningSize" type="number" min="2" max="10240" value="${window.siyuan.config.fileTree.largeFileWarningSize}">
+    <div class="fn__flex">
+        <input class="b3-text-field fn__flex-1" id="largeFileWarningSize" type="number" min="2" max="10240" value="${window.siyuan.config.fileTree.largeFileWarningSize}">
+        <span class="fn__space"></span>
+        <span class="ft__on-surface fn__flex-center">MB</span>
+    </div>
     <div class="b3-label__text">${window.siyuan.languages.fileTree23}</div>
 </div>
 <div class="b3-label">

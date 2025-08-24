@@ -431,7 +431,7 @@
   "apiKey": "Chave API",
   "apiKeyTip": "Recomenda-se atribuir uma Chave API separada ao SiYuan para gerenciamento subsequente. Se este item estiver em branco, as funções relacionadas à IA serão desativadas",
   "apiTimeout": "Tempo limite",
-  "apiTimeoutTip": "O período de tempo limite para iniciar uma solicitação, unidade: segundo",
+  "apiTimeoutTip": "O período de tempo limite para iniciar uma solicitação",
   "apiProxy": "Proxy de rede",
   "apiProxyTip": "O proxy de rede que inicia a solicitação, como <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Modelo",

@@ -431,7 +431,7 @@
   "apiKey": "Klucz API",
   "apiKeyTip": "Zaleca się przypisanie klucza API do SiYuan oddzielnie do późniejszego zarządzania. Jeśli ten element jest pusty, funkcje związane z AI będą wyłączone",
   "apiTimeout": "Limit czasu",
-  "apiTimeoutTip": "Okres timeoutu dla inicjowania zapytania, jednostka: sekunda",
+  "apiTimeoutTip": "Okres timeoutu dla inicjowania zapytania",
   "apiProxy": "Proxy sieciowe",
   "apiProxyTip": "Proxy sieciowe, które inicjuje zapytanie, np. <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>",
   "apiModel": "Model",

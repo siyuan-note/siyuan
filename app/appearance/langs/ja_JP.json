@@ -431,7 +431,7 @@
   "apiKey": "API キー",
   "apiKeyTip": "以降の管理のために SiYuan に API キーを個別に割り当てることをお勧めします。この項目を空白のままにすると AI 関連機能が無効になります",
   "apiTimeout": "タイムアウト",
-  "apiTimeoutTip": "リクエストのタイムアウト時間 (単位: 秒)",
+  "apiTimeoutTip": "リクエストのタイムアウト時間",
   "apiProxy": "ネットワークプロキシ",
   "apiProxyTip": "リクエストを開始するネットワークプロキシ (例: <code class='fn__code'>socks://user:pass@127.0.0.1:1080</code>)",
   "apiModel": "モデル",

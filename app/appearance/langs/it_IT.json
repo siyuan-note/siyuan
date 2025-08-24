@@ -1130,6 +1130,8 @@
   "fileTree19": "Alcuni sistemi operativi hanno limitazioni tecniche che possono impedire la copia manuale dei dati dell'area di lavoro dopo la creazione di sotto-documenti superiori a 7 livelli",
   "fileTree20": "Salva con una singola riga",
   "fileTree21": "Dopo l'abilitazione, il formato JSON a riga singola verrà utilizzato quando si salvano documenti .sy e file di database .json, il che può ridurre le dimensioni del file del 30% circa e migliorare l'efficienza di lettura e scrittura del 50%",
+  "fileTree22": "Avviso file di grandi dimensioni",
+  "fileTree23": "Notifica quando i file .sy e il database .json superano questa dimensione",
   "export10": "Ad esempio <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, se vuoto, utilizza il testo della filigrana o il percorso del file della filigrana.",
   "export11": "Metodo di gestione del contenuto del blocco di riferimento durante l'esportazione",
   "export12": "Metodo di gestione del contenuto del blocco incorporato durante l'esportazione",
@@ -1646,6 +1648,7 @@
     "264": "Il campo [%s] è vuoto",
     "265": "Fuori intervallo",
     "266": "Tesseract OCR non è installato o configurato, fare riferimento alla Guida utente - Sezione file di risorse per la configurazione",
-    "267": "Database senza nome"
+    "267": "Database senza nome",
+    "268": "Attenzione: il file [%s] ha già superato [%d MB], il che potrebbe causare un calo delle prestazioni"
   }
 }

@@ -19,6 +19,7 @@ package av
 
 import (
 	"errors"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -542,6 +543,11 @@ func SaveAttributeView(av *AttributeView) (err error) {
 	if err = filelock.WriteFile(avJSONPath, data); err != nil {
 		logging.LogErrorf("save attribute view [%s] failed: %s", av.ID, err)
 		return
+	}
+
+	if util.ExceedLargeFileWarningSize(len(data)) {
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], av.Name+" "+filepath.Base(avJSONPath), util.LargeFileWarningSize)
+		util.PushErrMsg(msg, 7000)
 	}
 	return
 }

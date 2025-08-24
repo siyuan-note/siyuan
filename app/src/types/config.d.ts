@@ -643,6 +643,10 @@ declare namespace Config {
          * Whether to save the content of the .sy file as a single-line JSON object
          */
         useSingleLineSave: boolean;
+        /**
+         * The .sy and database .json files larger than this value will prompt a warning (unit: MB)
+         */
+        largeFileWarningSize: number;
     }
 
     /**

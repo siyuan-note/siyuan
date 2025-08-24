@@ -220,6 +220,11 @@ func WriteTree(tree *parse.Tree) (size uint64, err error) {
 		return
 	}
 
+	if util.ExceedLargeFileWarningSize(len(data)) {
+		msg := fmt.Sprintf(util.Langs[util.Lang][268], tree.Root.IALAttr("title")+" "+filepath.Base(filePath), util.LargeFileWarningSize)
+		util.PushErrMsg(msg, 7000)
+	}
+
 	afterWriteTree(tree)
 	return
 }

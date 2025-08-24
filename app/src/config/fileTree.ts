@@ -54,6 +54,14 @@ export const fileTree = {
 </label>
 <div class="fn__flex b3-label config__item">
     <div class="fn__flex-1">
+        ${window.siyuan.languages.fileTree22}
+        <div class="b3-label__text">${window.siyuan.languages.fileTree23}</div>
+    </div>
+    <span class="fn__space"></span>
+    <input class="b3-text-field fn__flex-center fn__size200" id="largeFileWarningSize" type="number" min="2" max="10240" value="${window.siyuan.config.fileTree.largeFileWarningSize}">
+</div>
+<div class="fn__flex b3-label config__item">
+    <div class="fn__flex-1">
         ${window.siyuan.languages.fileTree16}
         <div class="b3-label__text">${window.siyuan.languages.fileTree17}</div>
     </div>
@@ -113,6 +121,7 @@ export const fileTree = {
             allowCreateDeeper: (fileTree.element.querySelector("#allowCreateDeeper") as HTMLInputElement).checked,
             removeDocWithoutConfirm: (fileTree.element.querySelector("#removeDocWithoutConfirm") as HTMLInputElement).checked,
             useSingleLineSave: (fileTree.element.querySelector("#useSingleLineSave") as HTMLInputElement).checked,
+            largeFileWarningSize: parseInt((fileTree.element.querySelector("#largeFileWarningSize") as HTMLInputElement).value),
             maxListCount: parseInt((fileTree.element.querySelector("#maxListCount") as HTMLInputElement).value),
             maxOpenTabCount: inputMaxOpenTabCount,
         }, response => {

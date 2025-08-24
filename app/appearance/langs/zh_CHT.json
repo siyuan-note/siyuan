@@ -1130,6 +1130,8 @@
   "fileTree19": "一些操作系統存在技術限制導致建立大於 7 層的子文檔後可能無法正常手動複製工作空間資料",
   "fileTree20": "使用單行保存",
   "fileTree21": "啟用後儲存 .sy 文件和資料庫 .json 時將使用單行 JSON 格式，大約能減少 30% 檔案大小並提升 50% 讀寫效率",
+  "fileTree22": "超大檔案提醒",
+  "fileTree23": ".sy 文件和資料庫 .json 超過該大小時彈出通知提醒",
   "export10": "例如 <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code> ，為空時使用水印文字或浮水印檔案路徑。",
   "export11": "匯出時關於塊引用內容的處理方式",
   "export12": "匯出時關於嵌入塊內容的處理方式",
@@ -1646,6 +1648,7 @@
     "264": "字段 [%s] 為空",
     "265": "不在範圍內",
     "266": "Tesseract OCR 未安裝或未配置，請參考 用戶指南-資料文件 章節進行配置",
-    "267": "未命名資料庫"
+    "267": "未命名資料庫",
+    "268": "請注意該檔案 [%s] 已經超過 [%d MB]，可能會導致效能下降"
   }
 }

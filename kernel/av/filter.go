@@ -358,6 +358,7 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				case FilterOperatorIsNotEmpty:
 					return !value.IsEmpty()
 				}
+				return true
 			}
 
 			switch operator {

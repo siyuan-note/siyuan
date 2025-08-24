@@ -1131,7 +1131,7 @@
   "fileTree20": "Guardar con una sola línea",
   "fileTree21": "Después de habilitarlo, se utilizará el formato JSON de una sola línea al guardar documentos .sy y archivos .json de bases de datos, lo que puede reducir el tamaño del archivo en aproximadamente un 30 % y mejorar la eficiencia de lectura y escritura en un 50 %.",
   "fileTree22": "Aviso de archivo grande",
-  "fileTree23": "Notificar cuando los archivos .sy o la base de datos .json superen este tamaño. Unidad: MB",
+  "fileTree23": "Notificar cuando los archivos .sy o la base de datos .json superen este tamaño",
   "export10": "Por ejemplo <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, si está vacío, utilice texto de marca de agua o ruta del archivo de marca de agua.",
   "export11": "Método de manejo de contenido del bloque de referencia de contenido al exportar",
   "export12": "Método de manejo de contenido del bloque de incrustación de contenido al exportar",

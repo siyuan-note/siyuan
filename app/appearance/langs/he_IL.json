@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "אופטימיזציית אינדקס",
+  "vacuumDataIndexTip": "בדוק את אינדקס הנתונים, שחרר שטח אחסון ושפר את ביצועי האינדקס",
+  "rebuildDataIndex": "בנה מחדש את האינדקס",
+  "rebuildDataIndexTip": "בנייה מחדש מלאה של אינדקס הנתונים, עשוי להימשך זמן, נא להמתין",
   "displayFieldName": "הצג שם שדה",
   "sortBySelectOption": "מיין לפי אפשרות",
   "groupStep": "מרווח קיבוץ",

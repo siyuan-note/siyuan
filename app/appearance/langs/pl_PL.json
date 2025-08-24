@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Optymalizuj indeks",
+  "vacuumDataIndexTip": "Sprawdź indeks danych, zwolnij miejsce i popraw wydajność indeksu",
+  "rebuildDataIndex": "Odbuduj indeks",
+  "rebuildDataIndexTip": "Pełna odbudowa indeksu danych, może to potrwać, proszę czekać",
   "displayFieldName": "Wyświetl nazwę pola",
   "sortBySelectOption": "Sortuj według opcji",
   "groupStep": "Odstęp grupowania",

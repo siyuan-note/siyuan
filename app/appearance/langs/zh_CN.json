@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "优化索引",
+  "vacuumDataIndexTip": "校验数据索引，释放存储空间并提升索引性能",
+  "rebuildDataIndex": "重建索引",
+  "rebuildDataIndexTip": "完全重建数据索引，较为耗时，请耐心等待",
   "displayFieldName": "显示字段名称",
   "sortBySelectOption": "按选项排序",
   "groupStep": "分组间隔",

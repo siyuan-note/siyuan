@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Optimiser l’index",
+  "vacuumDataIndexTip": "Vérifiez l’index des données, libérez de l’espace et améliorez les performances de l’index",
+  "rebuildDataIndex": "Reconstruire l’index",
+  "rebuildDataIndexTip": "Reconstruction complète de l’index des données, cela peut prendre du temps, veuillez patienter",
   "displayFieldName": "Afficher le nom du champ",
   "sortBySelectOption": "Trier par option",
   "groupStep": "Intervalle de regroupement",

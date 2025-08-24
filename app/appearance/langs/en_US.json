@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Optimize Index",
+  "vacuumDataIndexTip": "Check data index, free up storage, and improve index performance",
+  "rebuildDataIndex": "Rebuild Index",
+  "rebuildDataIndexTip": "Fully rebuild the data index, which may take some time. Please wait",
   "displayFieldName": "Display field name",
   "sortBySelectOption": "Sort by option",
   "groupStep": "Group interval",

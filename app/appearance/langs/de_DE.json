@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Index optimieren",
+  "vacuumDataIndexTip": "Datenindex prüfen, Speicherplatz freigeben und Indexleistung verbessern",
+  "rebuildDataIndex": "Index neu erstellen",
+  "rebuildDataIndexTip": "Kompletter Neuaufbau des Datenindex, dies kann einige Zeit dauern. Bitte warten",
   "displayFieldName": "Feldnamen anzeigen",
   "sortBySelectOption": "Nach Option sortieren",
   "groupStep": "Gruppierungsintervall",

@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "インデックスの最適化",
+  "vacuumDataIndexTip": "データインデックスを検証し、ストレージを解放してインデックス性能を向上させます",
+  "rebuildDataIndex": "インデックスの再構築",
+  "rebuildDataIndexTip": "データインデックスを完全に再構築します。時間がかかる場合がありますのでお待ちください",
   "displayFieldName": "フィールド名を表示",
   "sortBySelectOption": "オプションで並べ替え",
   "groupStep": "グループ間隔",

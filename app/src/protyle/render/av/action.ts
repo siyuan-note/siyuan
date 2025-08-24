@@ -583,6 +583,7 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         action: "insertAttrViewBlock",
                         avID,
                         srcs,
+                        context: {ignoreTip: "true"},
                         blockID: listItemElement.dataset.blockId,
                         groupID: rowElement.parentElement.getAttribute("data-group-id")
                     }, {

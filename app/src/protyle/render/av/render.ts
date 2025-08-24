@@ -764,7 +764,7 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     // 更新属性面板
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
-                    if (operation.action === "insertAttrViewBlock") {
+                    if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
                         const groupQuery = operation.groupID ? `[data-group-id="${operation.groupID}"]` : "";
                         if (item.getAttribute("data-av-type") === "gallery") {
                             operation.srcs.forEach(srcItem => {

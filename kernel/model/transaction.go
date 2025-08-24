@@ -1728,6 +1728,8 @@ type Operation struct {
 	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
 	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
 	IgnoreDefaultFill bool                     `json:"ignoreDefaultFill"` // 是否忽略默认填充
+
+	Context map[string]interface{} `json:"context"` // 上下文信息
 }
 
 type Transaction struct {

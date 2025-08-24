@@ -299,6 +299,16 @@ export const initAbout = () => {
                         event.preventDefault();
                         event.stopPropagation();
                         break;
+                    } else if (target.id === "vacuumDataIndex") {
+                        fetchPost("/api/system/vacuumDataIndex", {}, (response) => {});
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (target.id === "exportLog") {
+                        fetchPost("/api/system/rebuildDataIndex", {}, (response) => {});
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
                     } else if (target.id === "exportLog") {
                         fetchPost("/api/system/exportLog", {}, (response) => {
                             openByMobile(response.data.zip);

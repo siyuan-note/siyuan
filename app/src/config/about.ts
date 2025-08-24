@@ -254,6 +254,12 @@ ${checkUpdateHTML}
                 about.element.querySelector("#tokenTip").innerHTML = window.siyuan.languages.about14.replace("${token}", window.siyuan.config.api.token);
             });
         });
+        about.element.querySelector("#vacuumDataIndex").addEventListener("click", () => {
+            fetchPost("/api/system/vacuumDataIndex", {}, (response) => {});
+        });
+        about.element.querySelector("#rebuildDataIndex").addEventListener("click", () => {
+            fetchPost("/api/system/rebuildDataIndex", {}, (response) => {});
+        });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {
                 openByMobile(response.data.zip);

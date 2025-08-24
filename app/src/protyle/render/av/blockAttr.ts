@@ -4,7 +4,7 @@ import {escapeAriaLabel, escapeAttr, escapeHtml} from "../../../util/escape";
 import * as dayjs from "dayjs";
 import {popTextCell, updateCellsValue} from "./cell";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "../../util/hasClosest";
-import {unicode2Emoji} from "../../../emoji";
+import {openEmojiPanel, unicode2Emoji} from "../../../emoji";
 import {transaction} from "../../wysiwyg/transaction";
 import {openMenuPanel} from "./openMenuPanel";
 import {uploadFiles} from "../../upload";
@@ -465,7 +465,20 @@ const openEdit = (protyle: IProtyle, element: HTMLElement, event: MouseEvent) =>
     }
     while (target && element !== target) {
         const type = target.getAttribute("data-type");
-        if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
+        if (target.classList.contains("b3-menu__avemoji")) {
+            const rect = target.getBoundingClientRect();
+            openEmojiPanel(target.nextElementSibling.getAttribute("data-id"), "doc", {
+                x: rect.left,
+                y: rect.bottom,
+                h: rect.height,
+                w: rect.width,
+            }, (unicode) => {
+                target.innerHTML = unicode2Emoji(unicode || window.siyuan.storage[Constants.LOCAL_IMAGES].file);
+            }, target.querySelector("img"));
+            event.preventDefault();
+            event.stopPropagation();
+            return true;
+        } else if (target.classList.contains("av__celltext--url") || target.classList.contains("av__cellassetimg")) {
             if (event.type === "contextmenu" || (!target.dataset.url && target.tagName !== "IMG")) {
                 let index = 0;
                 Array.from(target.parentElement.children).find((item, i) => {

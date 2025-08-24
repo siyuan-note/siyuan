@@ -27,6 +27,7 @@ import (
 	"strconv"
 	"strings"
 	"time"
+	"unicode/utf8"
 
 	"github.com/88250/gulu"
 	"github.com/88250/lute/ast"
@@ -2745,7 +2746,7 @@ func (tx *Transaction) setAttributeViewName(operation *Operation) (err error) {
 
 	attrView.Name = strings.TrimSpace(operation.Data.(string))
 	attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
-	if 512 < len(attrView.Name) {
+	if 512 < utf8.RuneCountInString(attrView.Name) {
 		attrView.Name = gulu.Str.SubStr(attrView.Name, 512)
 	}
 	err = av.SaveAttributeView(attrView)

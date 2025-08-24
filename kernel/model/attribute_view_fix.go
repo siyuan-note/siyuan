@@ -101,9 +101,12 @@ func checkAttrView(attrView *av.AttributeView, view *av.View) {
 		}
 	}
 
+	if strings.Contains(attrView.Name, "\n") {
+		attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
+	}
+
 	// 截断超长的数据库标题 Limit the database title to 512 characters https://github.com/siyuan-note/siyuan/issues/15459
 	if 512 < utf8.RuneCountInString(attrView.Name) {
-		attrView.Name = strings.ReplaceAll(attrView.Name, "\n", " ")
 		attrView.Name = gulu.Str.SubStr(attrView.Name, 512)
 		changed = true
 	}

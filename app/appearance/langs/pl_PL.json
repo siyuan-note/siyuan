@@ -1130,6 +1130,8 @@
   "fileTree19": "Niektóre systemy operacyjne mają ograniczenia techniczne, które mogą uniemożliwić ręczne kopiowanie danych obszaru roboczego po utworzeniu poddokumentów głębszych niż 7 poziomów",
   "fileTree20": "Zapisz w pojedynczej linii",
   "fileTree21": "Po włączeniu, format JSON w pojedynczej linii będzie używany przy zapisywaniu .sy dokumentów i plików .json bazy danych, co może zmniejszyć rozmiar pliku o około 30% i poprawić wydajność odczytu i zapisu o 50%",
+  "fileTree22": "Powiadomienie o dużym pliku",
+  "fileTree23": "Powiadom, gdy plik .sy lub baza danych .json przekroczy ten rozmiar",
   "export10": "Na przykład <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, jeśli jest puste, użyj tekstu znaków wodnych lub ścieżki pliku znaku wodnego.",
   "export11": "Sposób obsługi treści bloku odniesienia podczas eksportu",
   "export12": "Sposób obsługi treści bloku osadzonego podczas eksportu",
@@ -1646,6 +1648,7 @@
     "264": "Pole [%s] jest puste",
     "265": "Poza zakresem",
     "266": "Tesseract OCR nie jest zainstalowany lub skonfigurowany, zapoznaj się z Podręcznikiem użytkownika - Sekcja plików zasobów, aby skonfigurować",
-    "267": "Nienazwana baza danych"
+    "267": "Nienazwana baza danych",
+    "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności"
   }
 }

@@ -46,8 +46,14 @@ func DisableFeature(feature string) {
 	DisabledFeatures = gulu.Str.RemoveDuplicatedElem(DisabledFeatures)
 }
 
-// UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
-var UseSingleLineSave = true
+var (
+	UseSingleLineSave    = true // UseSingleLineSave 是否使用单行保存 .sy 和数据库 .json 文件。
+	LargeFileWarningSize = 8    // LargeFileWarningSize 大文件警告大小，单位：MB
+)
+
+func ExceedLargeFileWarningSize(fileSize int) bool {
+	return fileSize > LargeFileWarningSize*1024*1024
+}
 
 // IsUILoaded 是否已经加载了 UI。
 var IsUILoaded = false

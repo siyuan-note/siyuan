@@ -1130,6 +1130,8 @@
   "fileTree19": "Some operating systems have technical limitations that may prevent manual copying of workspace data after creating sub-documents greater than 7 levels",
   "fileTree20": "Save with a single line",
   "fileTree21": "When enabled, the single-line JSON format will be used when saving .sy docs and database .json files, which can reduce the file size by about 30% and improve read and write efficiency by 50%",
+  "fileTree22": "Large File Warning",
+  "fileTree23": "Notify when .sy files or database .json exceed this size",
   "export10": "For example <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, if empty, use watermark text or watermark file path.",
   "export11": "Content handling method of content ref block when exporting",
   "export12": "Content handling method of content embed block when exporting",
@@ -1646,6 +1648,7 @@
     "264": "Field [%s] is empty",
     "265": "Out of range",
     "266": "Tesseract OCR is not installed or configured, please refer to the User Guide - Assets section for configuration",
-    "267": "Unnamed database"
+    "267": "Unnamed database",
+    "268": "Please note that the file [%s] has already exceeded [%d MB], which may cause performance degradation"
   }
 }

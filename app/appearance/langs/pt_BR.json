@@ -1130,6 +1130,8 @@
   "fileTree19": "Alguns sistemas operacionais têm limitações técnicas que podem impedir a cópia manual de dados do espaço de trabalho após a criação de subdocumentos maiores que 7 níveis",
   "fileTree20": "Salvar com uma única linha",
   "fileTree21": "Quando ativado, o formato JSON de linha única será usado ao salvar documentos .sy e arquivos .json de banco de dados, o que pode reduzir o tamanho do arquivo em cerca de 30% e melhorar a eficiência de leitura/gravação em 50%",
+  "fileTree22": "Aviso de arquivo grande",
+  "fileTree23": "Notificar quando arquivos .sy e banco de dados .json excederem este tamanho",
   "export10": "Por exemplo <code class='fn__code'>&lt;span style=\"color: #fff;background-color: black;padding: 4px;border-radius: 5px;float:right;\"&gt;SiYuan&lt;/span&gt;</code>, se vazio, use texto de marca d'água ou caminho do arquivo de marca d'água.",
   "export11": "Método de manipulação de conteúdo do bloco de referência ao exportar",
   "export12": "Método de manipulação de conteúdo do bloco incorporado ao exportar",
@@ -1646,6 +1648,7 @@
     "264": "O campo [%s] está vazio",
     "265": "Fora do intervalo",
     "266": "Tesseract OCR não está instalado ou configurado, consulte o Guia do Usuário - Seção de Arquivos de Recursos para configuração",
-    "267": "Banco de dados sem nome"
+    "267": "Banco de dados sem nome",
+    "268": "Atenção: o arquivo [%s] já excedeu [%d MB], o que pode causar queda de desempenho"
   }
 }

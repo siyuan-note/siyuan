@@ -579,8 +579,11 @@ export const avContextmenu = (protyle: IProtyle, rowElement: HTMLElement, positi
                         sourceIds.push(rowId);
                     });
                     const avID = listItemElement.dataset.avId;
+                    const viewID = listItemElement.dataset.viewId;
                     transaction(protyle, [{
                         action: "insertAttrViewBlock",
+                        ignoreDefaultFill: viewID ? false : true,
+                        viewID,
                         avID,
                         srcs,
                         context: {ignoreTip: "true"},

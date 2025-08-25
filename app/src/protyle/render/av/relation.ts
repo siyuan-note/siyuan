@@ -12,6 +12,16 @@ import * as dayjs from "dayjs";
 import {getFieldsByData} from "./view";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
+import {isMobile} from "../../../util/functions";
+
+interface IAVItem {
+    avID: string;
+    avName: string;
+    blockID: string;
+    hPath: string;
+    viewName: string;
+    viewID: string;
+}
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
     fetchPost("/api/av/searchAttributeView", {
@@ -19,13 +29,13 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         excludes: (excludes && avId) ? [avId] : undefined
     }, (response) => {
         let html = "";
-        response.data.results.forEach((item: {
-            avID: string
-            avName: string
-            blockID: string
-            hPath: string
-        }, index: number) => {
+        response.data.results.forEach((item: IAVItem & { children: IAVItem[] }, index: number) => {
+            const hasChildren = item.children && item.children.length > 0 && excludes;
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl${excludes ? "" : " fn__none"}" style="align-self: flex-start;margin-top: 4px;">
+        <svg class="b3-list-item__arrow">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
+    </span>
+    <span class="fn__space"></span>
     <div class="b3-list-item--two fn__flex-1">
         <div class="b3-list-item__first">
             <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>
@@ -34,6 +44,16 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
     </div>
     <svg aria-label="${window.siyuan.languages.thisDatabase}" style="margin: 0 0 0 4px" class="b3-list-item__hinticon ariaLabel${item.avID === avId ? "" : " fn__none"}"><use xlink:href="#iconInfo"></use></svg>
 </div>`;
+            if (hasChildren) {
+                html += '<div class="fn__none">';
+                item.children.forEach((subItem) => {
+                    html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
+<span class="b3-list-item__text">${escapeHtml(subItem.avName || window.siyuan.languages._kernel[267])}</span> 
+<span class="b3-list-item__meta">${escapeHtml(subItem.viewName)}</span>
+</div>`;
+                });
+                html += "</div>";
+            }
         });
         element.innerHTML = html;
         if (cb) {
@@ -58,7 +78,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
     menu.addItem({
         iconHTML: "",
         type: "empty",
-        label: `<div class="fn__flex-column b3-menu__filter">
+        label: `<div class="fn__flex-column b3-menu__filter"${isMobile() ? "" : ' style="width: 50vw"'} >
     <input class="b3-text-field fn__flex-shrink"/>
     <div class="fn__hr"></div>
     <div class="b3-list fn__flex-1 b3-list--background">
@@ -99,15 +119,31 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 genSearchList(listElement, inputElement.value, avId, excludes);
             });
             element.lastElementChild.addEventListener("click", (event) => {
-                const listItemElement = hasClosestByClassName(event.target as HTMLElement, "b3-list-item");
-                if (listItemElement) {
-                    event.stopPropagation();
-                    if (cb) {
-                        cb(listItemElement);
-                    } else {
-                        setDatabase(avId, target, listItemElement);
+                let clickTarget = event.target as HTMLElement;
+                while (clickTarget && !clickTarget.classList.contains("b3-list")) {
+                    if (clickTarget.classList.contains("b3-list-item__toggle")) {
+                        if (clickTarget.firstElementChild.classList.contains("b3-list-item__arrow--open")) {
+                            clickTarget.firstElementChild.classList.remove("b3-list-item__arrow--open");
+                            clickTarget.parentElement.nextElementSibling.classList.add("fn__none");
+                        } else {
+                            clickTarget.firstElementChild.classList.add("b3-list-item__arrow--open");
+                            clickTarget.parentElement.nextElementSibling.classList.remove("fn__none");
+                        }
+                        event.preventDefault();
+                        event.stopPropagation();
+                        break;
+                    } else if (clickTarget.classList.contains("b3-list-item")) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                        if (cb) {
+                            cb(clickTarget);
+                        } else {
+                            setDatabase(avId, target, clickTarget);
+                        }
+                        window.siyuan.menus.menu.remove();
+                        break;
                     }
-                    window.siyuan.menus.menu.remove();
+                    clickTarget = clickTarget.parentElement;
                 }
             });
             genSearchList(listElement, "", avId, excludes, () => {

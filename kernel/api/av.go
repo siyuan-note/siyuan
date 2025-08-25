@@ -351,7 +351,7 @@ func addAttributeViewBlocks(c *gin.Context) {
 		ignoreDefaultFill = arg["ignoreDefaultFill"].(bool)
 	}
 
-	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, groupID, previousID, ignoreDefaultFill, nil)
+	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, groupID, previousID, ignoreDefaultFill, map[string]interface{}{})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

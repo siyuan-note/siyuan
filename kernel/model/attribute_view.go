@@ -2958,6 +2958,10 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
+	if nil == operation.Context {
+		operation.Context = map[string]interface{}{}
+	}
+
 	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.Context)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
@@ -3008,10 +3012,6 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 }
 
 func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, context map[string]interface{}) (err error) {
-	if nil == context {
-		context = map[string]any{}
-	}
-
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)

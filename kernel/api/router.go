@@ -123,7 +123,6 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/doc2Heading", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, doc2Heading)
 	ginServer.Handle("POST", "/api/filetree/heading2Doc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, heading2Doc)
 	ginServer.Handle("POST", "/api/filetree/li2Doc", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, li2Doc)
-	ginServer.Handle("POST", "/api/filetree/refreshFiletree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, refreshFiletree)
 	ginServer.Handle("POST", "/api/filetree/upsertIndexes", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, upsertIndexes)
 	ginServer.Handle("POST", "/api/filetree/removeIndexes", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeIndexes)
 	ginServer.Handle("POST", "/api/filetree/listDocTree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, listDocTree)

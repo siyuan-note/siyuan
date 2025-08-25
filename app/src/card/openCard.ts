@@ -492,6 +492,29 @@ export const bindCardEvent = async (options: {
             if (sticktabElement) {
                 const stickMenu = new Menu();
                 stickMenu.addItem({
+                    id: "openInNewTab",
+                    icon: "iconOpen",
+                    label: window.siyuan.languages.openInNewTab,
+                    click() {
+                        openFile({
+                            app: options.app,
+                            custom: {
+                                icon: "iconRiffCard",
+                                title: window.siyuan.languages.spaceRepetition,
+                                data: {
+                                    cardsData: options.cardsData,
+                                    index,
+                                    cardType: filterElement.getAttribute("data-cardtype") as TCardType,
+                                    id: docId,
+                                    title: options.title
+                                },
+                                id: "siyuan-card"
+                            },
+                        });
+                        options.dialog.destroy();
+                    }
+                });
+                stickMenu.addItem({
                     id: "insertRight",
                     icon: "iconLayoutRight",
                     label: window.siyuan.languages.insertRight,
@@ -529,6 +552,8 @@ export const bindCardEvent = async (options: {
                                 "instance": "Custom",
                                 "customModelType": "siyuan-card",
                                 "customModelData": {
+                                    "cardsData": options.cardsData,
+                                    "index": index,
                                     "cardType": filterElement.getAttribute("data-cardtype"),
                                     "id": docId,
                                     "title": options.title

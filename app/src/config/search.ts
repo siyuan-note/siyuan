@@ -101,8 +101,8 @@ export const initConfigSearch = (element: HTMLElement, app: App) => {
             "systemLog", "importKey", "genKey", "genKeyByPW", "copyKey", "resetRepo", "systemLogTip", "export",
             "downloadLatestVer", "safeQuit", "directConnection", "siyuanNote", "key", "password", "copied", "resetRepoTip",
             "autoDownloadUpdatePkg", "autoDownloadUpdatePkgTip", "networkProxy", "keyPlaceholder", "initRepoKeyTip",
-            "dataRepoPurge", "dataRepoPurgeTip", "dataRepoAutoPurgeIndexRetentionDays",
-            "dataRepoAutoPurgeRetentionIndexesDaily"]),
+            "dataRepoPurge", "dataRepoPurgeTip", "dataRepoAutoPurgeIndexRetentionDays", "dataRepoAutoPurgeRetentionIndexesDaily",
+            "vacuumDataIndex", "vacuumDataIndexTip", "rebuildDataIndex", "rebuildDataIndexTip"]),
     ];
     const inputElement = element.querySelector(".b3-form__icon input") as HTMLInputElement;
     /// #if !BROWSER

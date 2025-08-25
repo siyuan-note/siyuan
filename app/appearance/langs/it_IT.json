@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Ottimizza indice",
+  "vacuumDataIndexTip": "Verifica l'indice dei dati, libera spazio e migliora le prestazioni dell'indice",
+  "rebuildDataIndex": "Ricostruisci indice",
+  "rebuildDataIndexTip": "Ricostruzione completa dell'indice dei dati, potrebbe richiedere tempo, attendere prego",
   "displayFieldName": "Mostra nome campo",
   "sortBySelectOption": "Ordina per opzione",
   "groupStep": "Intervallo di raggruppamento",
@@ -1649,6 +1653,9 @@
     "265": "Fuori intervallo",
     "266": "Tesseract OCR non è installato o configurato, fare riferimento alla Guida utente - Sezione file di risorse per la configurazione",
     "267": "Database senza nome",
-    "268": "Attenzione: il file [%s] ha già superato [%d MB], il che potrebbe causare un calo delle prestazioni"
+    "268": "Attenzione: il file [%s] ha già superato [%d MB], il che potrebbe causare un calo delle prestazioni",
+    "269": "Questo blocco è già stato aggiunto al database [%s]",
+    "270": "Ottimizzazione dell'indice dei dati in corso, attendere prego...",
+    "271": "Ottimizzazione dell'indice dei dati completata, liberati [%s] di spazio su disco"
   }
 }

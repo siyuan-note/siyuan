@@ -221,13 +221,6 @@ func removeIndexes(c *gin.Context) {
 	model.RemoveIndexes(paths)
 }
 
-func refreshFiletree(c *gin.Context) {
-	ret := gulu.Ret.NewResult()
-	defer c.JSON(http.StatusOK, ret)
-
-	model.FullReindex()
-}
-
 func doc2Heading(c *gin.Context) {
 	ret := gulu.Ret.NewResult()
 	defer c.JSON(http.StatusOK, ret)
@@ -548,15 +541,26 @@ func moveDocsByID(c *gin.Context) {
 	}
 	fromPaths = gulu.Str.RemoveDuplicatedElem(fromPaths)
 
+	var box *model.Box
 	toTree, err := model.LoadTreeByBlockID(toID)
 	if err != nil {
-		ret.Code = -1
-		ret.Msg = err.Error()
-		ret.Data = map[string]interface{}{"closeTimeout": 7000}
-		return
+		box = model.Conf.Box(toID)
+		if nil == box {
+			ret.Code = -1
+			ret.Msg = "can't found box or tree by id [" + toID + "]"
+			ret.Data = map[string]interface{}{"closeTimeout": 7000}
+			return
+		}
 	}
-	toNotebook := toTree.Box
-	toPath := toTree.Path
+
+	var toNotebook, toPath string
+	if nil != toTree {
+		toNotebook = toTree.Box
+		toPath = toTree.Path
+	} else if nil != box {
+		toNotebook = box.ID
+		toPath = "/"
+	}
 	callback := arg["callback"]
 	err = model.MoveDocs(fromPaths, toNotebook, toPath, callback)
 	if err != nil {

@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Optymalizuj indeks",
+  "vacuumDataIndexTip": "Sprawdź indeks danych, zwolnij miejsce i popraw wydajność indeksu",
+  "rebuildDataIndex": "Odbuduj indeks",
+  "rebuildDataIndexTip": "Pełna odbudowa indeksu danych, może to potrwać, proszę czekać",
   "displayFieldName": "Wyświetl nazwę pola",
   "sortBySelectOption": "Sortuj według opcji",
   "groupStep": "Odstęp grupowania",
@@ -1649,6 +1653,9 @@
     "265": "Poza zakresem",
     "266": "Tesseract OCR nie jest zainstalowany lub skonfigurowany, zapoznaj się z Podręcznikiem użytkownika - Sekcja plików zasobów, aby skonfigurować",
     "267": "Nienazwana baza danych",
-    "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności"
+    "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności",
+    "269": "Ten blok został już dodany do bazy danych [%s]",
+    "270": "Optymalizacja indeksu danych, proszę czekać...",
+    "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku"
   }
 }

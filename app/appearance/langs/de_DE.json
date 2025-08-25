@@ -1,4 +1,8 @@
 {
+  "vacuumDataIndex": "Index optimieren",
+  "vacuumDataIndexTip": "Datenindex prüfen, Speicherplatz freigeben und Indexleistung verbessern",
+  "rebuildDataIndex": "Index neu erstellen",
+  "rebuildDataIndexTip": "Kompletter Neuaufbau des Datenindex, dies kann einige Zeit dauern. Bitte warten",
   "displayFieldName": "Feldnamen anzeigen",
   "sortBySelectOption": "Nach Option sortieren",
   "groupStep": "Gruppierungsintervall",
@@ -1649,6 +1653,9 @@
     "265": "Außerhalb des Bereichs",
     "266": "Tesseract OCR ist nicht installiert oder konfiguriert, bitte lesen Sie das Benutzerhandbuch - Abschnitt Ressourcen-Dateien zur Konfiguration",
     "267": "Unbenannte Datenbank",
-    "268": "Bitte beachten Sie, dass die Datei [%s] bereits [%d MB] überschritten hat, was die Leistung beeinträchtigen kann"
+    "268": "Bitte beachten Sie, dass die Datei [%s] bereits [%d MB] überschritten hat, was die Leistung beeinträchtigen kann",
+    "269": "Dieser Block wurde bereits zur Datenbank [%s] hinzugefügt",
+    "270": "Datenindex wird optimiert, bitte warten...",
+    "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben"
   }
 }

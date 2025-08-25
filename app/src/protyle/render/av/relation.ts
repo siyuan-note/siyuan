@@ -1,6 +1,6 @@
 import {Menu} from "../../../plugin/Menu";
 import {hasClosestByClassName, hasTopClosestByClassName} from "../../util/hasClosest";
-import {upDownHint} from "../../../util/upDownHint";
+import {UDLRHint, upDownHint} from "../../../util/upDownHint";
 import {fetchPost} from "../../../util/fetch";
 import {escapeGreat, escapeHtml} from "../../../util/escape";
 import {transaction} from "../../wysiwyg/transaction";
@@ -92,10 +92,7 @@ export const openSearchAV = (avId: string, target: HTMLElement, cb?: (element: H
                 if (event.isComposing) {
                     return;
                 }
-                const currentElement = upDownHint(listElement, event);
-                if (currentElement) {
-                    event.stopPropagation();
-                }
+                UDLRHint(listElement, event);
                 if (event.key === "Enter") {
                     event.preventDefault();
                     event.stopPropagation();

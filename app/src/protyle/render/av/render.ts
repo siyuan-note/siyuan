@@ -791,7 +791,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                 }
                             }
                             operation.srcs.find((srcItem) => {
-                                if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`)) {
+                                if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`) &&
+                                    !item.querySelector(`.av__body [data-dtype="block"] .av__celltext--ref[data-id="${srcItem.id}"]`)) {
                                     showMessage(window.siyuan.languages.insertRowTip);
                                     return true;
                                 }

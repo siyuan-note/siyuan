@@ -3056,8 +3056,8 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 				err = av.SaveAttributeView(attrView)
 			}
 
-			msg := fmt.Sprintf(Conf.language(269), attrView.Name)
-			context["message"] = msg
+			msg := fmt.Sprintf(Conf.language(269), getAttrViewName(attrView))
+			util.PushMsg(msg, 5000)
 			return
 		}
 	}

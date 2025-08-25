@@ -1533,3 +1533,22 @@ func SQLTemplateFuncs(templateFuncMap *template.FuncMap) {
 		return
 	}
 }
+
+func Vacuum() {
+	if nil != db {
+		if _, err := db.Exec("VACUUM"); nil != err {
+			logging.LogErrorf("vacuum database failed: %s", err)
+		}
+	}
+	if nil != historyDB {
+		if _, err := historyDB.Exec("VACUUM"); nil != err {
+			logging.LogErrorf("vacuum history database failed: %s", err)
+		}
+	}
+	if nil != assetContentDB {
+		if _, err := assetContentDB.Exec("VACUUM"); nil != err {
+			logging.LogErrorf("vacuum asset content database failed: %s", err)
+		}
+	}
+	return
+}

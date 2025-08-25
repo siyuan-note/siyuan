@@ -1654,6 +1654,8 @@
     "266": "Tesseract OCR non è installato o configurato, fare riferimento alla Guida utente - Sezione file di risorse per la configurazione",
     "267": "Database senza nome",
     "268": "Attenzione: il file [%s] ha già superato [%d MB], il che potrebbe causare un calo delle prestazioni",
-    "269": "Questo blocco è già stato aggiunto al database [%s]"
+    "269": "Questo blocco è già stato aggiunto al database [%s]",
+    "270": "Ottimizzazione dell'indice dei dati in corso, attendere prego...",
+    "271": "Ottimizzazione dell'indice dei dati completata, liberati [%s] di spazio su disco"
   }
 }

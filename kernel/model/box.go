@@ -664,7 +664,46 @@ func normalizeTree(tree *parse.Tree) (yfmRootID, yfmTitle, yfmUpdated string) {
 }
 
 func VacuumDataIndex() {
-	
+	util.PushEndlessProgress(Conf.language(270))
+	defer util.PushClearProgress()
+
+	var oldsyDbSize, newSyDbSize, oldHistoryDbSize, newHistoryDbSize, oldAssetContentDbSize, newAssetContentDbSize int64
+	info, _ := os.Stat(util.DBPath)
+	if nil != info {
+		oldsyDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.HistoryDBPath)
+	if nil != info {
+		oldHistoryDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.AssetContentDBPath)
+	if nil != info {
+		oldAssetContentDbSize = info.Size()
+	}
+
+	sql.Vacuum()
+
+	info, _ = os.Stat(util.DBPath)
+	if nil != info {
+		newSyDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.HistoryDBPath)
+	if nil != info {
+		newHistoryDbSize = info.Size()
+	}
+	info, _ = os.Stat(util.AssetContentDBPath)
+	if nil != info {
+		newAssetContentDbSize = info.Size()
+	}
+
+	logging.LogInfof("vacuum database [siyuan.db: %s -> %s, history.db: %s -> %s, asset_content.db: %s -> %s]",
+		humanize.BytesCustomCeil(uint64(oldsyDbSize), 2), humanize.BytesCustomCeil(uint64(newSyDbSize), 2),
+		humanize.BytesCustomCeil(uint64(oldHistoryDbSize), 2), humanize.BytesCustomCeil(uint64(newHistoryDbSize), 2),
+		humanize.BytesCustomCeil(uint64(oldAssetContentDbSize), 2), humanize.BytesCustomCeil(uint64(newAssetContentDbSize), 2))
+
+	releaseSize := (oldsyDbSize - newSyDbSize) + (oldHistoryDbSize - newHistoryDbSize) + (oldAssetContentDbSize - newAssetContentDbSize)
+	msg := fmt.Sprintf(Conf.language(271), humanize.BytesCustomCeil(uint64(releaseSize), 2))
+	util.PushMsg(msg, 7000)
 }
 
 func FullReindex() {

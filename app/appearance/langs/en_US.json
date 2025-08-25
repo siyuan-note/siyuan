@@ -1654,6 +1654,8 @@
     "266": "Tesseract OCR is not installed or configured, please refer to the User Guide - Assets section for configuration",
     "267": "Unnamed database",
     "268": "Please note that the file [%s] has already exceeded [%d MB], which may cause performance degradation",
-    "269": "This block has already been added to the database [%s]"
+    "269": "This block has already been added to the database [%s]",
+    "270": "Optimizing data index, please wait...",
+    "271": "Data index optimization completed, [%s] disk space freed"
   }
 }

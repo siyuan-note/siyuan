@@ -344,10 +344,7 @@ const afterRenderTable = (options: ITableOptions) => {
         }
     });
     Object.keys(options.resetData.pageSizes).forEach((groupId) => {
-        if (groupId === "unGroup") {
-            groupId = "";
-        }
-        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId}"]`) as HTMLElement;
+        const bodyElement = options.blockElement.querySelector(`.av__body[data-group-id="${groupId === "unGroup" ? "" : groupId}"]`) as HTMLElement;
         if (bodyElement) {
             bodyElement.dataset.pageSize = options.resetData.pageSizes[groupId];
         }

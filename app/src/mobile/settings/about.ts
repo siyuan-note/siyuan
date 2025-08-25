@@ -304,7 +304,7 @@ export const initAbout = () => {
                         event.preventDefault();
                         event.stopPropagation();
                         break;
-                    } else if (target.id === "exportLog") {
+                    } else if (target.id === "rebuildDataIndex") {
                         fetchPost("/api/system/rebuildDataIndex", {}, (response) => {});
                         event.preventDefault();
                         event.stopPropagation();

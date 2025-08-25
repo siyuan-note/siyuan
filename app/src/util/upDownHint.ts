@@ -122,8 +122,8 @@ export const UDLRHint = (listElement: Element, event: KeyboardEvent, classActive
             currentHintElement = currentHintElement.parentElement.previousElementSibling as HTMLElement;
         }
         currentHintElement.classList.add(classActiveName);
-        const overTop = listElement.scrollTop > currentHintElement.offsetTop - (currentHintElement.previousElementSibling?.clientHeight || 0);
-        if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight || overTop) {
+        const overTop = listElement.scrollTop > currentHintElement.offsetTop - 46 - (currentHintElement.previousElementSibling?.clientHeight || 0);
+        if (listElement.scrollTop < currentHintElement.offsetTop - 46 - listElement.clientHeight + currentHintElement.clientHeight || overTop) {
             currentHintElement.scrollIntoView(overTop);
         }
         return currentHintElement;
@@ -148,9 +148,9 @@ export const UDLRHint = (listElement: Element, event: KeyboardEvent, classActive
             }
         }
         currentHintElement.classList.add(classActiveName);
-        if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight ||
-            listElement.scrollTop > currentHintElement.offsetTop) {
-            currentHintElement.scrollIntoView(listElement.scrollTop > currentHintElement.offsetTop);
+        if (listElement.scrollTop < currentHintElement.offsetTop - 46 - listElement.clientHeight + currentHintElement.clientHeight ||
+            listElement.scrollTop > currentHintElement.offsetTop - 46) {
+            currentHintElement.scrollIntoView(listElement.scrollTop > currentHintElement.offsetTop - 46);
         }
         return currentHintElement;
     } else if (event.key === "ArrowDown") {
@@ -173,9 +173,9 @@ export const UDLRHint = (listElement: Element, event: KeyboardEvent, classActive
             }
         }
         currentHintElement.classList.add(classActiveName);
-        if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight ||
-            listElement.scrollTop > currentHintElement.offsetTop) {
-            currentHintElement.scrollIntoView(listElement.scrollTop > currentHintElement.offsetTop);
+        if (listElement.scrollTop < currentHintElement.offsetTop - 46 - listElement.clientHeight + currentHintElement.clientHeight ||
+            listElement.scrollTop > currentHintElement.offsetTop - 46) {
+            currentHintElement.scrollIntoView(listElement.scrollTop > currentHintElement.offsetTop - 46);
         }
         return currentHintElement;
     } else if (event.key === "ArrowUp") {
@@ -203,8 +203,8 @@ export const UDLRHint = (listElement: Element, event: KeyboardEvent, classActive
             }
         }
         currentHintElement.classList.add(classActiveName);
-        const overTop = listElement.scrollTop > currentHintElement.offsetTop - (currentHintElement.previousElementSibling?.clientHeight || 0);
-        if (listElement.scrollTop < currentHintElement.offsetTop - listElement.clientHeight + currentHintElement.clientHeight || overTop) {
+        const overTop = listElement.scrollTop > currentHintElement.offsetTop - 46 - (currentHintElement.previousElementSibling?.clientHeight || 0);
+        if (listElement.scrollTop < currentHintElement.offsetTop - 46 - listElement.clientHeight + currentHintElement.clientHeight || overTop) {
             currentHintElement.scrollIntoView(overTop);
         }
         return currentHintElement;

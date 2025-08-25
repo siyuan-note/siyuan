@@ -163,7 +163,7 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <button id="vacuumDataIndex" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.vacuumDataIndex}
+        <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.vacuumDataIndex}
     </button>
 </div>
 <div class="fn__flex b3-label config__item">
@@ -173,7 +173,7 @@ export const about = {
     </div>
     <div class="fn__space"></div>
     <button id="rebuildDataIndex" class="b3-button b3-button--outline fn__size200 fn__flex-center">
-        <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.rebuildDataIndex}
+        <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.rebuildDataIndex}
     </button>
 </div>
 <div class="fn__flex b3-label config__item">

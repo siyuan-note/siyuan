@@ -98,7 +98,7 @@ export const initAbout = () => {
     ${window.siyuan.languages.vacuumDataIndex}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="vacuumDataIndex">
-       <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.vacuumDataIndex}
+       <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.vacuumDataIndex}
     </button>
     <div class="b3-label__text">${window.siyuan.languages.vacuumDataIndexTip}</div>
 </div>
@@ -106,7 +106,7 @@ export const initAbout = () => {
     ${window.siyuan.languages.rebuildDataIndex}
     <div class="fn__hr"></div>
     <button class="b3-button b3-button--outline fn__block" id="rebuildDataIndex">
-       <svg><use xlink:href="#iconUpload"></use></svg>${window.siyuan.languages.rebuildDataIndex}
+       <svg><use xlink:href="#iconRefresh"></use></svg>${window.siyuan.languages.rebuildDataIndex}
     </button>
     <div class="b3-label__text">${window.siyuan.languages.rebuildDataIndexTip}</div>
 </div>

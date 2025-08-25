@@ -127,6 +127,7 @@ func ServeAPI(ginServer *gin.Engine) {
 	ginServer.Handle("POST", "/api/filetree/removeIndexes", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, removeIndexes)
 	ginServer.Handle("POST", "/api/filetree/listDocTree", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, listDocTree)
 	ginServer.Handle("POST", "/api/filetree/moveLocalShorthands", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, moveLocalShorthands)
+	ginServer.Handle("POST", "/api/filetree/refreshFiletree ", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, rebuildDataIndex) // TODO 请使用 /api/system/rebuildDataIndex，该端点计划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15663#issuecomment-3219296189
 
 	ginServer.Handle("POST", "/api/format/autoSpace", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, autoSpace)
 	ginServer.Handle("POST", "/api/format/netImg2LocalAssets", model.CheckAuth, model.CheckAdminRole, model.CheckReadonly, netImg2LocalAssets)

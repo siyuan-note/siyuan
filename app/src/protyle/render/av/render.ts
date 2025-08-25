@@ -765,34 +765,38 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                     renderAVAttribute(attrElement.parentElement, attrElement.dataset.nodeId, protyle);
                 } else {
                     if (operation.action === "insertAttrViewBlock" && operation.context?.ignoreTip !== "true") {
-                        const groupQuery = operation.groupID ? `[data-group-id="${operation.groupID}"]` : "";
-                        if (item.getAttribute("data-av-type") === "gallery") {
-                            operation.srcs.forEach(srcItem => {
-                                const filesElement = item.querySelector(`.av__body${groupQuery} .av__gallery-item[data-id="${srcItem.itemID}"]`)?.querySelector(".av__gallery-fields");
-                                if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.parentElement.getAttribute("data-empty") === "true") {
-                                    filesElement.classList.add("av__gallery-fields--edit");
+                        if (operation.context?.message) {
+                            showMessage(operation.context.message);
+                        } else {
+                            const groupQuery = operation.groupID ? `[data-group-id="${operation.groupID}"]` : "";
+                            if (item.getAttribute("data-av-type") === "gallery") {
+                                operation.srcs.forEach(srcItem => {
+                                    const filesElement = item.querySelector(`.av__body${groupQuery} .av__gallery-item[data-id="${srcItem.itemID}"]`)?.querySelector(".av__gallery-fields");
+                                    if (filesElement && filesElement.querySelector('[data-dtype="block"]')?.parentElement.getAttribute("data-empty") === "true") {
+                                        filesElement.classList.add("av__gallery-fields--edit");
+                                    }
+                                });
+                            }
+                            if (operation.srcs.length === 1) {
+                                let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
+                                if (!popCellElement) {
+                                    const popCellElements = item.querySelectorAll(`.av__body [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`);
+                                    if (popCellElements.length === 1) {
+                                        popCellElement = popCellElements[0] as HTMLElement;
+                                    }
+                                }
+                                if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
+                                    popCellElement.querySelector(".av__celltext").textContent === "") {
+                                    popTextCell(protyle, [popCellElement], "block");
+                                }
+                            }
+                            operation.srcs.find((srcItem) => {
+                                if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`)) {
+                                    showMessage(window.siyuan.languages.insertRowTip);
+                                    return true;
                                 }
                             });
                         }
-                        if (operation.srcs.length === 1) {
-                            let popCellElement = item.querySelector(`.av__body${groupQuery} [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`) as HTMLElement;
-                            if (!popCellElement) {
-                                const popCellElements = item.querySelectorAll(`.av__body [data-id="${operation.srcs[0].itemID}"] .av__cell[data-dtype="block"]`);
-                                if (popCellElements.length === 1) {
-                                    popCellElement = popCellElements[0] as HTMLElement;
-                                }
-                            }
-                            if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
-                                popCellElement.querySelector(".av__celltext").textContent === "") {
-                                popTextCell(protyle, [popCellElement], "block");
-                            }
-                        }
-                        operation.srcs.find((srcItem) => {
-                            if (!item.querySelector(`.av__body [data-id="${srcItem.itemID}"]`)) {
-                                showMessage(window.siyuan.languages.insertRowTip);
-                                return true;
-                            }
-                        });
                     } else if (operation.action === "addAttrViewView") {
                         if (item.getAttribute("data-node-id") === operation.blockID) {
                             openMenuPanel({protyle, blockElement: item, type: "config"});

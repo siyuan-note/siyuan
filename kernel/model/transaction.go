@@ -1099,7 +1099,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 			AddAttributeViewBlock(tx, []map[string]interface{}{{
 				"id":         insertedNode.ID,
 				"isDetached": false,
-			}}, avID, "", "", previousID, false)
+			}}, avID, "", "", previousID, false, nil)
 			ReloadAttrView(avID)
 		}
 
@@ -1284,7 +1284,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", "", previousID, false)
+		}}, avID, "", "", previousID, false, nil)
 		ReloadAttrView(avID)
 	}
 

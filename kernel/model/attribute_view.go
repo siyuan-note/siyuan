@@ -2958,14 +2958,14 @@ func setAttributeViewColumnCalc(operation *Operation) (err error) {
 }
 
 func (tx *Transaction) doInsertAttrViewBlock(operation *Operation) (ret *TxErr) {
-	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill)
+	err := AddAttributeViewBlock(tx, operation.Srcs, operation.AvID, operation.BlockID, operation.GroupID, operation.PreviousID, operation.IgnoreDefaultFill, operation.Context)
 	if err != nil {
 		return &TxErr{code: TxErrHandleAttributeView, id: operation.AvID, msg: err.Error()}
 	}
 	return
 }
 
-func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, groupID, previousItemID string, ignoreDefaultFill bool) (err error) {
+func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID, dbBlockID, groupID, previousItemID string, ignoreDefaultFill bool, context map[string]interface{}) (err error) {
 	slices.Reverse(srcs) // https://github.com/siyuan-note/siyuan/issues/11286
 
 	now := time.Now().UnixMilli()
@@ -3000,14 +3000,18 @@ func AddAttributeViewBlock(tx *Transaction, srcs []map[string]interface{}, avID,
 		if nil != src["content"] {
 			srcContent = src["content"].(string)
 		}
-		if avErr := addAttributeViewBlock(now, avID, dbBlockID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx); nil != avErr {
+		if avErr := addAttributeViewBlock(now, avID, dbBlockID, groupID, previousItemID, srcItemID, boundBlockID, srcContent, isDetached, ignoreDefaultFill, tree, tx, context); nil != avErr {
 			return avErr
 		}
 	}
 	return
 }
 
-func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction) (err error) {
+func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, addingItemID, addingBoundBlockID, addingBlockContent string, isDetached, ignoreDefaultFill bool, tree *parse.Tree, tx *Transaction, context map[string]interface{}) (err error) {
+	if nil == context {
+		context = map[string]any{}
+	}
+
 	var node *ast.Node
 	if !isDetached {
 		node = treenode.GetNodeInTree(tree, addingBoundBlockID)
@@ -3051,6 +3055,9 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, groupID, previousItemID, 
 				blockValue.UpdatedAt = now
 				err = av.SaveAttributeView(attrView)
 			}
+
+			msg := fmt.Sprintf(Conf.language(269), attrView.Name)
+			context["message"] = msg
 			return
 		}
 	}

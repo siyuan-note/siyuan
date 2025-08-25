@@ -1653,6 +1653,7 @@
     "265": "Poza zakresem",
     "266": "Tesseract OCR nie jest zainstalowany lub skonfigurowany, zapoznaj się z Podręcznikiem użytkownika - Sekcja plików zasobów, aby skonfigurować",
     "267": "Nienazwana baza danych",
-    "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności"
+    "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności",
+    "269": "Ten blok został już dodany do bazy danych [%s]"
   }
 }

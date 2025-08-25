@@ -991,7 +991,7 @@ func DuplicateDoc(tree *parse.Tree) {
 			AddAttributeViewBlock(nil, []map[string]interface{}{{
 				"id":         n.ID,
 				"isDetached": false,
-			}}, avID, "", "", "", false)
+			}}, avID, "", "", "", false, nil)
 			ReloadAttrView(avID)
 		}
 		return ast.WalkContinue

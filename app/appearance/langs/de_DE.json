@@ -1653,6 +1653,7 @@
     "265": "Außerhalb des Bereichs",
     "266": "Tesseract OCR ist nicht installiert oder konfiguriert, bitte lesen Sie das Benutzerhandbuch - Abschnitt Ressourcen-Dateien zur Konfiguration",
     "267": "Unbenannte Datenbank",
-    "268": "Bitte beachten Sie, dass die Datei [%s] bereits [%d MB] überschritten hat, was die Leistung beeinträchtigen kann"
+    "268": "Bitte beachten Sie, dass die Datei [%s] bereits [%d MB] überschritten hat, was die Leistung beeinträchtigen kann",
+    "269": "Dieser Block wurde bereits zur Datenbank [%s] hinzugefügt"
   }
 }

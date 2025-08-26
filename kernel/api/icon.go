@@ -25,10 +25,9 @@ import (
 	"strings"
 	"time"
 
-	"github.com/siyuan-note/siyuan/kernel/util"
-
 	"github.com/gin-gonic/gin"
 	"github.com/siyuan-note/siyuan/kernel/model"
+	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
 type ColorScheme struct {

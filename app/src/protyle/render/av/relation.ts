@@ -9,7 +9,7 @@ import {updateAttrViewCellAnimation} from "./action";
 import {focusBlock} from "../../util/selection";
 import {setPosition} from "../../../util/setPosition";
 import * as dayjs from "dayjs";
-import {getFieldsByData} from "./view";
+import {getFieldsByData, getViewName} from "./view";
 import {getColId} from "./col";
 import {getFieldIdByCellElement} from "./row";
 import {isMobile} from "../../../util/functions";
@@ -21,6 +21,7 @@ interface IAVItem {
     hPath: string;
     viewName: string;
     viewID: string;
+    viewLayout: string;
 }
 
 const genSearchList = (element: Element, keyword: string, avId?: string, excludes = true, cb?: () => void) => {
@@ -47,9 +48,10 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
             if (hasChildren) {
                 html += '<div class="fn__none">';
                 item.children.forEach((subItem) => {
+                    const viewDefaultName = getViewName(subItem.viewLayout);
                     html += `<div style="padding-left: 48px;" class="b3-list-item b3-list-item--narrow" data-av-id="${subItem.avID}" data-view-id="${subItem.viewID}">
 <span class="b3-list-item__text">${escapeHtml(subItem.avName || window.siyuan.languages._kernel[267])}</span> 
-<span class="b3-list-item__meta">${escapeHtml(subItem.viewName)}</span>
+<span class="b3-list-item__meta">${escapeHtml(subItem.viewName)}${viewDefaultName === subItem.viewName ? "" : " - " + viewDefaultName}</span>
 </div>`;
                 });
                 html += "</div>";

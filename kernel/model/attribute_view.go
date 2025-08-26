@@ -1232,13 +1232,14 @@ func GetAttributeView(avID string) (ret *av.AttributeView) {
 }
 
 type AvSearchResult struct {
-	AvID     string            `json:"avID"`
-	AvName   string            `json:"avName"`
-	ViewName string            `json:"viewName"`
-	ViewID   string            `json:"viewID"`
-	BlockID  string            `json:"blockID"`
-	HPath    string            `json:"hPath"`
-	Children []*AvSearchResult `json:"children,omitempty"`
+	AvID       string            `json:"avID"`
+	AvName     string            `json:"avName"`
+	ViewName   string            `json:"viewName"`
+	ViewID     string            `json:"viewID"`
+	ViewLayout av.LayoutType     `json:"viewLayout"`
+	BlockID    string            `json:"blockID"`
+	HPath      string            `json:"hPath"`
+	Children   []*AvSearchResult `json:"children,omitempty"`
 }
 
 type AvSearchTempResult struct {
@@ -1392,12 +1393,13 @@ func SearchAttributeView(keyword string, excludeAvIDs []string) (ret []*AvSearch
 
 		for _, view := range attrView.Views {
 			child := &AvSearchResult{
-				AvID:     avID,
-				AvName:   existAv.AvName,
-				ViewName: view.Name,
-				ViewID:   view.ID,
-				BlockID:  blockID,
-				HPath:    hPath,
+				AvID:       avID,
+				AvName:     existAv.AvName,
+				ViewName:   view.Name,
+				ViewID:     view.ID,
+				ViewLayout: view.LayoutType,
+				BlockID:    blockID,
+				HPath:      hPath,
 			}
 			parent.Children = append(parent.Children, child)
 		}

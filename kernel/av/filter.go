@@ -138,17 +138,16 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		return true
 	}
 
+	switch filter.Operator {
+	case FilterOperatorIsEmpty:
+		return value.IsEmpty()
+	case FilterOperatorIsNotEmpty:
+		return !value.IsEmpty()
+	}
+
 	if nil != value.Rollup && KeyTypeRollup == value.Type && nil != filter.Value && KeyTypeRollup == filter.Value.Type &&
 		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
 		// 单独处理汇总类型的比较
-
-		// 处理为空和不为空
-		switch filter.Operator {
-		case FilterOperatorIsEmpty:
-			return 0 == len(value.Rollup.Contents)
-		case FilterOperatorIsNotEmpty:
-			return 0 != len(value.Rollup.Contents)
-		}
 
 		// 处理值比较
 		key, _ := attrView.GetKey(value.KeyID)
@@ -215,14 +214,6 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		nil != filter.Value.Relation && 0 < len(filter.Value.Relation.BlockIDs) {
 		// 单独处理关联类型的比较
 
-		// 处理为空和不为空
-		switch filter.Operator {
-		case FilterOperatorIsEmpty:
-			return 0 == len(value.Relation.Contents)
-		case FilterOperatorIsNotEmpty:
-			return 0 != len(value.Relation.Contents)
-		}
-
 		for _, relationValue := range value.Relation.Contents {
 			filterValue := &Value{Type: KeyTypeBlock, Block: &ValueBlock{Content: filter.Value.Relation.BlockIDs[0]}}
 
@@ -256,6 +247,13 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 }
 
 func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDate, operator FilterOperator) bool {
+	switch operator {
+	case FilterOperatorIsEmpty:
+		return value.IsEmpty()
+	case FilterOperatorIsNotEmpty:
+		return !value.IsEmpty()
+	}
+
 	switch value.Type {
 	case KeyTypeBlock:
 		if nil != value.Block && nil != other && nil != other.Block {
@@ -284,10 +282,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return value.Number.Content < other.Number.Content
 			case FilterOperatorIsLessOrEqual:
 				return value.Number.Content <= other.Number.Content
-			case FilterOperatorIsEmpty:
-				return !value.Number.IsNotEmpty
-			case FilterOperatorIsNotEmpty:
-				return value.Number.IsNotEmpty
 			}
 		}
 	case KeyTypeDate:
@@ -298,13 +292,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 		}
 
 		if nil != value.Date {
-			switch operator {
-			case FilterOperatorIsEmpty:
-				return !value.Date.IsNotEmpty
-			case FilterOperatorIsNotEmpty:
-				return value.Date.IsNotEmpty
-			}
-
 			if !value.Date.IsNotEmpty {
 				// 空值不进行比较，直接排除
 				// Database date filter excludes empty values https://github.com/siyuan-note/siyuan/issues/11061
@@ -352,12 +339,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 	case KeyTypeSelect, KeyTypeMSelect:
 		if nil != value.MSelect {
 			if 1 > len(other.MSelect) {
-				switch operator {
-				case FilterOperatorIsEmpty:
-					return value.IsEmpty()
-				case FilterOperatorIsNotEmpty:
-					return !value.IsEmpty()
-				}
 				return true
 			}
 
@@ -423,10 +404,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 					}
 				}
 				return !contains
-			case FilterOperatorIsEmpty:
-				return 0 == len(value.MAsset) || 1 == len(value.MAsset) && "" == value.MAsset[0].Content
-			case FilterOperatorIsNotEmpty:
-				return 0 != len(value.MAsset) && !(1 == len(value.MAsset) && "" == value.MAsset[0].Content)
 			}
 		}
 	case KeyTypeTemplate:
@@ -482,10 +459,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 					return true
 				}
 				return strings.HasSuffix(value.Template.Content, other.Template.Content)
-			case FilterOperatorIsEmpty:
-				return "" == strings.TrimSpace(value.Template.Content)
-			case FilterOperatorIsNotEmpty:
-				return "" != strings.TrimSpace(value.Template.Content)
 			}
 		}
 	case KeyTypeCheckbox:
@@ -497,13 +470,6 @@ func (value *Value) filter(other *Value, relativeDate, relativeDate2 *RelativeDa
 				return !value.Checkbox.Checked
 			}
 		}
-	}
-
-	switch operator {
-	case FilterOperatorIsEmpty:
-		return value.IsEmpty()
-	case FilterOperatorIsNotEmpty:
-		return !value.IsEmpty()
 	}
 	return false
 }

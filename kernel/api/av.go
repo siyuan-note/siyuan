@@ -331,6 +331,10 @@ func addAttributeViewBlocks(c *gin.Context) {
 	if blockIDArg := arg["blockID"]; nil != blockIDArg {
 		blockID = blockIDArg.(string)
 	}
+	var viewID string
+	if viewIDArg := arg["viewID"]; nil != viewIDArg {
+		viewID = viewIDArg.(string)
+	}
 	var groupID string
 	if groupIDArg := arg["groupID"]; nil != groupIDArg {
 		groupID = groupIDArg.(string)
@@ -351,7 +355,7 @@ func addAttributeViewBlocks(c *gin.Context) {
 		ignoreDefaultFill = arg["ignoreDefaultFill"].(bool)
 	}
 
-	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, groupID, previousID, ignoreDefaultFill, map[string]interface{}{})
+	err := model.AddAttributeViewBlock(nil, srcs, avID, blockID, viewID, groupID, previousID, ignoreDefaultFill, map[string]interface{}{})
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

@@ -355,7 +355,7 @@ func (value *Value) IsEmpty() bool {
 		if nil == value.Template {
 			return true
 		}
-		return "" == value.Template.Content
+		return "" == strings.TrimSpace(value.Template.Content)
 	case KeyTypeCreated:
 		if nil == value.Created {
 			return true

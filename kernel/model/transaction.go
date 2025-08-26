@@ -1099,7 +1099,7 @@ func (tx *Transaction) doLargeInsert(previousID string) (ret *TxErr) {
 			AddAttributeViewBlock(tx, []map[string]interface{}{{
 				"id":         insertedNode.ID,
 				"isDetached": false,
-			}}, avID, "", "", previousID, false, map[string]interface{}{})
+			}}, avID, "", "", "", previousID, false, map[string]interface{}{})
 			ReloadAttrView(avID)
 		}
 
@@ -1284,7 +1284,7 @@ func (tx *Transaction) doInsert(operation *Operation) (ret *TxErr) {
 		AddAttributeViewBlock(tx, []map[string]interface{}{{
 			"id":         insertedNode.ID,
 			"isDetached": false,
-		}}, avID, "", "", previousID, false, map[string]interface{}{})
+		}}, avID, "", "", "", previousID, false, map[string]interface{}{})
 		ReloadAttrView(avID)
 	}
 
@@ -1727,6 +1727,7 @@ type Operation struct {
 	Layout            av.LayoutType            `json:"layout"`            // 属性视图布局类型
 	GroupID           string                   `json:"groupID"`           // 属性视图分组视图 ID
 	TargetGroupID     string                   `json:"targetGroupID"`     // 属性视图目标分组视图 ID
+	ViewID            string                   `json:"viewID"`            // 属性视图视图 ID
 	IgnoreDefaultFill bool                     `json:"ignoreDefaultFill"` // 是否忽略默认填充
 
 	Context map[string]interface{} `json:"context"` // 上下文信息

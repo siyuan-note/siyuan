@@ -33,10 +33,10 @@ const genSearchList = (element: Element, keyword: string, avId?: string, exclude
         response.data.results.forEach((item: IAVItem & { children: IAVItem[] }, index: number) => {
             const hasChildren = item.children && item.children.length > 0 && excludes;
             html += `<div class="b3-list-item b3-list-item--narrow${index === 0 ? " b3-list-item--focus" : ""}" data-av-id="${item.avID}" data-block-id="${item.blockID}">
-    <span class="b3-list-item__toggle b3-list-item__toggle--hl${excludes ? "" : " fn__none"}" style="align-self: flex-start;margin-top: 4px;">
+    <span class="b3-list-item__toggle b3-list-item__toggle--hl${excludes ? "" : " fn__none"}" style="height:auto;align-self: stretch;margin: 4px 0;">
         <svg class="b3-list-item__arrow">${hasChildren ? '<use xlink:href="#iconRight"></use>' : ""}</svg>
     </span>
-    <span class="fn__space"></span>
+    <span class="fn__space--small"></span>
     <div class="b3-list-item--two fn__flex-1">
         <div class="b3-list-item__first">
             <span class="b3-list-item__text">${escapeHtml(item.avName || window.siyuan.languages._kernel[267])}</span>

@@ -300,12 +300,12 @@ export const initAbout = () => {
                         event.stopPropagation();
                         break;
                     } else if (target.id === "vacuumDataIndex") {
-                        fetchPost("/api/system/vacuumDataIndex", {}, (response) => {});
+                        fetchPost("/api/system/vacuumDataIndex", {}, () => {});
                         event.preventDefault();
                         event.stopPropagation();
                         break;
                     } else if (target.id === "rebuildDataIndex") {
-                        fetchPost("/api/system/rebuildDataIndex", {}, (response) => {});
+                        fetchPost("/api/system/rebuildDataIndex", {}, () => {});
                         event.preventDefault();
                         event.stopPropagation();
                         break;

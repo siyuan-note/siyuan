@@ -255,10 +255,10 @@ ${checkUpdateHTML}
             });
         });
         about.element.querySelector("#vacuumDataIndex").addEventListener("click", () => {
-            fetchPost("/api/system/vacuumDataIndex", {}, (response) => {});
+            fetchPost("/api/system/vacuumDataIndex", {}, () => {});
         });
         about.element.querySelector("#rebuildDataIndex").addEventListener("click", () => {
-            fetchPost("/api/system/rebuildDataIndex", {}, (response) => {});
+            fetchPost("/api/system/rebuildDataIndex", {}, () => {});
         });
         about.element.querySelector("#exportLog").addEventListener("click", () => {
             fetchPost("/api/system/exportLog", {}, (response) => {

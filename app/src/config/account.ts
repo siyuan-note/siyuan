@@ -480,6 +480,7 @@ ${renewHTML}<div class="fn__hr--b"></div>`;
         if (window.siyuan.config.system.container === "ios") {
             return;
         }
+        return;
         let html = "";
         if (window.siyuan.config.account.displayVIP) {
             if (window.siyuan.user) {

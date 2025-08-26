@@ -1,0 +1,79 @@
+# 使用国内 Node.js 镜像（如淘宝 NPM 镜像）
+FROM node:21 AS NODE_BUILD
+WORKDIR /go/src/github.com/siyuan-note/siyuan/
+ADD . /go/src/github.com/siyuan-note/siyuan/
+
+# 使用阿里云 Debian 镜像并安装 jq
+# 确保 /etc/apt/sources.list 存在，并替换为阿里云 Debian 镜像
+RUN { \
+    echo "deb http://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib"; \
+    echo "deb-src http://mirrors.aliyun.com/debian/ bookworm main non-free non-free-firmware contrib"; \
+    echo "deb http://mirrors.aliyun.com/debian-security/ bookworm-security main"; \
+    echo "deb-src http://mirrors.aliyun.com/debian-security/ bookworm-security main"; \
+    echo "deb http://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib"; \
+    echo "deb-src http://mirrors.aliyun.com/debian/ bookworm-updates main non-free non-free-firmware contrib"; \
+} > /etc/apt/sources.list && \
+    apt-get update && \
+    apt-get install -y jq
+
+# 使用国内 PNPM 镜像（淘宝源）
+RUN cd app && \
+    packageManager=$(jq -r '.packageManager' package.json) && \
+    if [ -n "$packageManager" ]; then \
+        npm install -g $packageManager --registry=https://registry.npmmirror.com; \
+    else \
+        echo "No packageManager field found in package.json"; \
+        npm install -g pnpm --registry=https://registry.npmmirror.com; \
+    fi && \
+    pnpm config set registry https://registry.npmmirror.com && \
+    pnpm install --silent && \
+    pnpm run build
+
+# 清理临时文件
+RUN apt-get purge -y jq && \
+    apt-get autoremove -y && \
+    rm -rf /var/lib/apt/lists/*
+
+# 使用国内 Golang 镜像（中科大源）
+FROM golang:1.24-alpine AS GO_BUILD
+WORKDIR /go/src/github.com/siyuan-note/siyuan/
+COPY --from=NODE_BUILD /go/src/github.com/siyuan-note/siyuan/ /go/src/github.com/siyuan-note/siyuan/
+
+# 使用阿里云 Alpine 镜像并编译
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache gcc musl-dev && \
+    cd kernel && \
+    go env -w GOPROXY=https://goproxy.cn,direct && \
+    go build --tags fts5 -v -ldflags "-s -w" && \
+    mkdir /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/app/appearance/ /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/app/stage/ /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/app/guide/ /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/app/changelogs/ /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/kernel/kernel /opt/siyuan/ && \
+    mv /go/src/github.com/siyuan-note/siyuan/kernel/entrypoint.sh /opt/siyuan/entrypoint.sh && \
+    find /opt/siyuan/ -name .git | xargs rm -rf
+
+# 最终阶段：使用 Alpine 国内镜像
+FROM alpine:latest
+LABEL maintainer="Liang Ding<845765@qq.com>"
+LABEL modifier="ulquiola<ulquiola@163.com>"
+WORKDIR /opt/siyuan/
+COPY --from=GO_BUILD /opt/siyuan/ /opt/siyuan/
+
+# 配置时区和语言环境
+RUN sed -i 's/dl-cdn.alpinelinux.org/mirrors.aliyun.com/g' /etc/apk/repositories && \
+    apk add --no-cache ca-certificates tzdata && \
+    chmod +x /opt/siyuan/entrypoint.sh && \
+    echo "Asia/Shanghai" > /etc/timezone && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
+
+ENV TZ=Asia/Shanghai
+ENV RUN_IN_CONTAINER=true
+ENV LANG=zh_CN.UTF-8
+ENV LC_ALL=zh_CN.UTF-8
+EXPOSE 6806
+VOLUME /siyuan/workspace
+ENTRYPOINT ["/opt/siyuan/entrypoint.sh"]
+CMD ["--workspace=/siyuan/workspace", "--accessAuthCode=password"]
+

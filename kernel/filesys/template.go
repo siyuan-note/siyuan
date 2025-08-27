@@ -46,6 +46,7 @@ func BuiltInTemplateFuncs() (ret template.FuncMap) {
 	ret["ISOWeek"] = util.ISOWeek
 	ret["ISOYear"] = util.ISOYear
 	ret["ISOMonth"] = util.ISOMonth
+	ret["ISOWeekDate"] = util.ISOWeekDate
 	ret["pow"] = pow
 	ret["powf"] = powf
 	ret["log"] = log

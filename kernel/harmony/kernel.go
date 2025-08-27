@@ -93,18 +93,18 @@ func SetHttpServerPort(port int) {
 }
 
 //export GetCurrentWorkspacePath
-func GetCurrentWorkspacePath() string {
-	return util.WorkspaceDir
+func GetCurrentWorkspacePath() *C.char {
+	return C.CString(util.WorkspaceDir)
 }
 
 //export GetAssetAbsPath
-func GetAssetAbsPath(asset string) (ret string) {
-	ret, err := model.GetAssetAbsPath(asset)
-	if err != nil {
-		logging.LogErrorf("get asset [%s] abs path failed: %s", asset, err)
-		ret = asset
+func GetAssetAbsPath(relativePath *C.char) *C.char {
+	absPath, err := model.GetAssetAbsPath(C.GoString(relativePath))
+	if nil != err {
+		logging.LogErrorf("get asset abs path failed: %s", err)
+		return relativePath
 	}
-	return
+	return C.CString(absPath)
 }
 
 //export GetMimeTypeByExt

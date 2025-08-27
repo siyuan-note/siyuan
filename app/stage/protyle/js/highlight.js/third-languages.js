@@ -140,12 +140,28 @@ hljs.registerLanguage("gdscript",function(){"use strict";var e=e||{};function r(
 hljs.registerLanguage('template', function (hljs) {
 
     const markdownRules = hljs.getLanguage('markdown') || { contains: [] };
+
+    // Filter out the indented code block rule from Markdown's code block definitions
+    const filteredMarkdownContains = (markdownRules.contains || []).map(rule => {
+        // The rule for code blocks in Markdown has className: 'code'
+        if (rule.className === 'code' && Array.isArray(rule.variants)) {
+            // Create a new rule object to avoid modifying the original Markdown language definition
+            const newRule = { ...rule };
+            // Filter out the variant that matches indented code blocks
+            newRule.variants = rule.variants.filter(variant => {
+                return variant.begin !== '(?=^( {4}|\\t))';
+            });
+            return newRule;
+        }
+        return rule;
+    });
+
     const goRules = hljs.getLanguage('go') || { contains: [] };
 
     // 内置函数规则
     const BUILT_IN_FUNCTIONS = {
         className: 'built_in',
-        begin: /\b(queryBlocks|querySpans|querySQL|getHPathByID|getBlock|statBlock|runeCount|wordCount|toPrettyJson|parseTime|Weekday|WeekdayCN|WeekdayCN2|ISOWeek|pow|powf|log|logf|FormatFloat|now|date|toDate|duration|AddDate|Sub|sub|add|mul|mod|div|min|max|Compare|Year|Month|Day|Hour|Minute|Second|Hours|Minutes|Seconds|String|trim|repeat|substr|trunc|abbrev|contains|cat|replace|join|splitList|list|first|last|append|prepend|concat|reverse|has|index|slice|len|atoi|float64|int|int64|toDecimal|toString|toStrings|dict|get)\b/,
+        begin: /\b(queryBlocks|querySpans|querySQL|getHPathByID|getBlock|statBlock|runeCount|wordCount|toPrettyJson|parseTime|Weekday|WeekdayCN|WeekdayCN2|ISOWeek|ISOYear|ISOMonth|ISOWeekDate|pow|powf|log|logf|FormatFloat|now|date|toDate|duration|AddDate|Sub|sub|add|mul|mod|div|min|max|Compare|Year|Month|Day|Hour|Minute|Second|Hours|Minutes|Seconds|String|trim|repeat|substr|trunc|abbrev|contains|cat|replace|join|splitList|list|first|last|append|prepend|concat|reverse|has|index|slice|len|atoi|float64|int|int64|toDecimal|toString|toStrings|dict|get)\b/,
         relevance: 10
     };
 
@@ -361,7 +377,7 @@ hljs.registerLanguage('template', function (hljs) {
             ACTION_BLOCK,
             CURLY_BLOCK,
             BLOCK_ATTR_RULE,
-            ...markdownRules.contains,
+            ...filteredMarkdownContains,
         ]
     };
 });

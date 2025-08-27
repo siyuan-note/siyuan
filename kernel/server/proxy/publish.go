@@ -170,6 +170,7 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 			cookie := &http.Cookie{
 				Name:     model.SessionIdCookieName,
 				Value:    sessionID,
+				Path:     "/",
 				HttpOnly: true,
 			}
 			model.AddSession(sessionID, username)

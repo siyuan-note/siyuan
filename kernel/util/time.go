@@ -70,11 +70,14 @@ func ISOYear(date time.Time) int {
 
 // ISOMonth returns the month in which the first day of the ISO 8601 week of date occurs.
 func ISOMonth(date time.Time) int {
-	year, week := date.ISOWeek()
-	// ISO 8601 week starts from Monday
-	isoWeekStart := time.Date(year, 0, (week-1)*7+
-		1-(int(time.Date(year, 0, (week-1)*7+1, 0, 0, 0, 0, time.Local).Weekday())+6)%7, 0, 0, 0, 0, time.Local)
-	return int(isoWeekStart.Month())
+	weekday := int(date.Weekday())
+	if weekday == 0 {
+		weekday = 7
+	}
+
+	daysToMonday := weekday - 1
+	monday := date.AddDate(0, 0, -daysToMonday)
+	return int(monday.Month())
 }
 
 func Millisecond2Time(t int64) time.Time {

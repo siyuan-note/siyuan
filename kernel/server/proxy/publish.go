@@ -125,11 +125,26 @@ func rewrite(r *httputil.ProxyRequest) {
 
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
 	if model.Conf.Publish.Auth.Enable {
-		// TODO: Auth with cookies
+		// Session Auth
+		sessionIdCookie, cookieErr := request.Cookie(model.SessionIdCookieName)
+		if cookieErr == nil {
+			// Check session ID
+			sessionID := sessionIdCookie.Value
+			if username := model.GetBasicAuthUsernameBySessionID(sessionID); username != "" {
+				// Valid session
+				if account := model.GetBasicAuthAccount(username); account != nil {
+					// Valid account
+					request.Header.Set(model.XAuthTokenKey, account.Token)
+
+					response, err = http.DefaultTransport.RoundTrip(request)
+					return
+				}
+			}
+		}
+
 		// Basic Auth
 		username, password, ok := request.BasicAuth()
 		account := model.GetBasicAuthAccount(username)
-
 		if !ok ||
 			account == nil ||
 			account.Username == "" || // 匿名用户
@@ -150,13 +165,26 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 				ContentLength: -1,
 			}, nil
 		} else {
+			// set session cookie
+			sessionID := model.GetNewSessionID()
+			cookie := &http.Cookie{
+				Name:     model.SessionIdCookieName,
+				Value:    sessionID,
+				HttpOnly: true,
+			}
+			model.AddSession(sessionID, username)
+
 			// set JWT
 			request.Header.Set(model.XAuthTokenKey, account.Token)
+			response, err = http.DefaultTransport.RoundTrip(request)
+
+			response.Header.Add("Set-Cookie", cookie.String())
+			return
 		}
 	} else {
 		request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)
-	}
 
-	response, err = http.DefaultTransport.RoundTrip(request)
-	return
+		response, err = http.DefaultTransport.RoundTrip(request)
+		return
+	}
 }

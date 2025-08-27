@@ -899,6 +899,10 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				sum += v.Number.Content
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				sum += f
 			}
 		}
 		r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(sum, destKey.NumberFormat)}}
@@ -908,6 +912,11 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				sum += v.Number.Content
+				count++
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				sum += f
 				count++
 			}
 		}
@@ -919,6 +928,10 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		for _, v := range r.Contents {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				numbers = append(numbers, v.Number.Content)
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				numbers = append(numbers, f)
 			}
 		}
 		sort.Float64s(numbers)
@@ -936,6 +949,12 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 				if v.Number.Content < minVal {
 					minVal = v.Number.Content
 				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f < minVal {
+					minVal = f
+				}
 			}
 		}
 		if math.MaxFloat64 != minVal {
@@ -947,6 +966,12 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 			if KeyTypeNumber == v.Type && nil != v.Number && v.Number.IsNotEmpty {
 				if v.Number.Content > maxVal {
 					maxVal = v.Number.Content
+				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f > maxVal {
+					maxVal = f
 				}
 			}
 		}
@@ -1004,6 +1029,15 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 					isNotTime = true
 					hasEndDate = false
 				}
+			} else {
+				content := v.String(false)
+				f, _ := util.Convert2Float(content)
+				if f < minVal {
+					minVal = f
+				}
+				if f > maxVal {
+					maxVal = f
+				}
 			}
 		}
 
@@ -1024,6 +1058,10 @@ func (r *ValueRollup) calcContents(calc *RollupCalc, destKey *Key) {
 		case KeyTypeCreated:
 			if 0 != earliest && 0 != latest {
 				r.Contents = []*Value{{Type: KeyTypeCreated, Created: NewFormattedValueCreated(earliest, latest, CreatedFormatDuration)}}
+			}
+		default:
+			if math.MaxFloat64 != minVal && -math.MaxFloat64 != maxVal {
+				r.Contents = []*Value{{Type: KeyTypeNumber, Number: NewFormattedValueNumber(maxVal-minVal, destKey.NumberFormat)}}
 			}
 		}
 	case CalcOperatorEarliest:

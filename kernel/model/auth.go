@@ -76,7 +76,7 @@ func AddSession(sessionID, username string) {
 	sessionsMap[sessionID] = username
 }
 
-func RemoveSession(sessionID string) {
+func DeleteSession(sessionID string) {
 	sessionLock.Lock()
 	defer sessionLock.Unlock()
 	delete(sessionsMap, sessionID)

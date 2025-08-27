@@ -135,9 +135,11 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 				if account := model.GetBasicAuthAccount(username); account != nil {
 					// Valid account
 					request.Header.Set(model.XAuthTokenKey, account.Token)
-
 					response, err = http.DefaultTransport.RoundTrip(request)
 					return
+				} else {
+					// Invalid account, remove session
+					model.DeleteSession(sessionID)
 				}
 			}
 		}
@@ -184,7 +186,6 @@ func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.
 		}
 	} else {
 		request.Header.Set(model.XAuthTokenKey, model.GetBasicAuthAccount("").Token)
-
 		response, err = http.DefaultTransport.RoundTrip(request)
 		return
 	}

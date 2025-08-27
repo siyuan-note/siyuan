@@ -125,6 +125,7 @@ func rewrite(r *httputil.ProxyRequest) {
 
 func (PublishServiceTransport) RoundTrip(request *http.Request) (response *http.Response, err error) {
 	if model.Conf.Publish.Auth.Enable {
+		// TODO: Auth with cookies
 		// Basic Auth
 		username, password, ok := request.BasicAuth()
 		account := model.GetBasicAuthAccount(username)

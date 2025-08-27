@@ -240,7 +240,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     const dynamicCurrentObj: IObject = {
         color: "#d23f31",
         lang: "",
-        date: "",
+        date: dayjs().format("YYYY-MM-DD"),
         weekdayType: "1",
         type: "1",
         content: "SiYuan",

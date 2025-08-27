@@ -161,7 +161,7 @@ hljs.registerLanguage('template', function (hljs) {
     // 内置函数规则
     const BUILT_IN_FUNCTIONS = {
         className: 'built_in',
-        begin: /\b(queryBlocks|querySpans|querySQL|getHPathByID|getBlock|statBlock|runeCount|wordCount|toPrettyJson|parseTime|Weekday|WeekdayCN|WeekdayCN2|ISOWeek|ISOYear|ISOMonth|pow|powf|log|logf|FormatFloat|now|date|toDate|duration|AddDate|Sub|sub|add|mul|mod|div|min|max|Compare|Year|Month|Day|Hour|Minute|Second|Hours|Minutes|Seconds|String|trim|repeat|substr|trunc|abbrev|contains|cat|replace|join|splitList|list|first|last|append|prepend|concat|reverse|has|index|slice|len|atoi|float64|int|int64|toDecimal|toString|toStrings|dict|get)\b/,
+        begin: /\b(queryBlocks|querySpans|querySQL|getHPathByID|getBlock|statBlock|runeCount|wordCount|toPrettyJson|parseTime|Weekday|WeekdayCN|WeekdayCN2|ISOWeek|ISOYear|ISOMonth|ISOWeekDate|pow|powf|log|logf|FormatFloat|now|date|toDate|duration|AddDate|Sub|sub|add|mul|mod|div|min|max|Compare|Year|Month|Day|Hour|Minute|Second|Hours|Minutes|Seconds|String|trim|repeat|substr|trunc|abbrev|contains|cat|replace|join|splitList|list|first|last|append|prepend|concat|reverse|has|index|slice|len|atoi|float64|int|int64|toDecimal|toString|toStrings|dict|get)\b/,
         relevance: 10
     };
 

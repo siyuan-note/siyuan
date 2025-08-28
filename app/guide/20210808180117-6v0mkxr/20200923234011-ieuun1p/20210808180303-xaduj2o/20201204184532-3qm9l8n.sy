@@ -6,7 +6,7 @@
 		"id": "20201204184532-3qm9l8n",
 		"title": "Template snippet",
 		"type": "doc",
-		"updated": "20250801152837"
+		"updated": "20250828155251"
 	},
 	"Children": [
 		{
@@ -57,7 +57,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20210104091444-jy56z0p",
-				"updated": "20250801152821"
+				"updated": "20250828155251"
 			},
 			"Children": [
 				{
@@ -215,7 +215,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20210104091444-mwbvc9m",
-				"updated": "20250801152821"
+				"updated": "20250828155251"
 			},
 			"Children": [
 				{
@@ -1190,7 +1190,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162632-akk8sxn",
-								"updated": "20240308162632"
+								"updated": "20250828155241"
 							},
 							"Children": [
 								{
@@ -1204,7 +1204,136 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​: This function is used to return the week"
+									"Data": "​: This function returns the current week"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155216-zn0i9zg",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155216-zn0i9zg",
+						"updated": "20250828155216"
+					},
+					"Children": [
+						{
+							"ID": "20250828155216-p5tgk3f",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155216-p5tgk3f",
+								"updated": "20250828155232"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the current month"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155242-k9x8rc7",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155242-k9x8rc7",
+						"updated": "20250828155242"
+					},
+					"Children": [
+						{
+							"ID": "20250828155242-zwalrdw",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155242-zwalrdw",
+								"updated": "20250828155246"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the current year"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828155247-992wou3",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828155247-992wou3",
+						"updated": "20250828155251"
+					},
+					"Children": [
+						{
+							"ID": "20250828155247-ow57gpr",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828155247-ow57gpr",
+								"updated": "20250828155251"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​: This function returns the date of a specified day of the week using "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​. For example, "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​ returns the date of this Thursday"
 								}
 							]
 						}

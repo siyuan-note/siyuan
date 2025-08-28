@@ -6,7 +6,7 @@
 		"id": "20211226123004-dplpw0o",
 		"title": "範本片段",
 		"type": "doc",
-		"updated": "20250801152721"
+		"updated": "20250828155154"
 	},
 	"Children": [
 		{
@@ -53,7 +53,7 @@
 			"HeadingLevel": 2,
 			"Properties": {
 				"id": "20211226123024-eyagqur",
-				"updated": "20250801152602"
+				"updated": "20250828155154"
 			},
 			"Children": [
 				{
@@ -208,7 +208,7 @@
 			"ListData": {},
 			"Properties": {
 				"id": "20211226123024-pjvw31z",
-				"updated": "20250801152602"
+				"updated": "20250828155154"
 			},
 			"Children": [
 				{
@@ -436,7 +436,19 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢資料庫，返回值為 blocks 列表"
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 blocks "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
 								}
 							]
 						},
@@ -501,7 +513,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於根據塊 ID 查詢資料庫，傳回值為 block"
+									"Data": "​：函數用於根據塊 ID 查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為 block"
 								}
 							]
 						},
@@ -565,7 +585,19 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：該函數用於查詢資料庫，返回值為 spans 列表"
+									"Data": "​：該函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，返回值為 spans "
+								},
+								{
+									"Type": "NodeText",
+									"Data": "列表"
 								}
 							]
 						},
@@ -630,7 +662,15 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：函數用於查詢資料庫，傳回值為結果集"
+									"Data": "​：函數用於查詢"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "資料庫"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "，傳回值為結果集"
 								}
 							]
 						},
@@ -1183,7 +1223,7 @@
 							"Type": "NodeParagraph",
 							"Properties": {
 								"id": "20240308162753-tde2ifs",
-								"updated": "20240308162753"
+								"updated": "20250828154943"
 							},
 							"Children": [
 								{
@@ -1197,7 +1237,136 @@
 								},
 								{
 									"Type": "NodeText",
-									"Data": "​：此函數用於傳回第幾週"
+									"Data": "​：此函數用於傳回目前週"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154909-wxnydc5",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154909-wxnydc5",
+						"updated": "20250828154909"
+					},
+					"Children": [
+						{
+							"ID": "20250828154909-3grwety",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154909-3grwety",
+								"updated": "20250828154910"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOMonth"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前月份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154911-8n67tvc",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154911-8n67tvc",
+						"updated": "20250828154911"
+					},
+					"Children": [
+						{
+							"ID": "20250828154911-bb7z59o",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154911-bb7z59o",
+								"updated": "20250828154916"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOYear"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回目前年份"
+								}
+							]
+						}
+					]
+				},
+				{
+					"ID": "20250828154949-xhbwn4e",
+					"Type": "NodeListItem",
+					"ListData": {
+						"BulletChar": 42,
+						"Marker": "Kg=="
+					},
+					"Properties": {
+						"id": "20250828154949-xhbwn4e",
+						"updated": "20250828155154"
+					},
+					"Children": [
+						{
+							"ID": "20250828154949-5lcfpbs",
+							"Type": "NodeParagraph",
+							"Properties": {
+								"id": "20250828154949-5lcfpbs",
+								"updated": "20250828155154"
+							},
+							"Children": [
+								{
+									"Type": "NodeText",
+									"Data": "​"
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "ISOWeekDate"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​：此函數用於傳回指定週幾的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": "time.Time"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​，例如傳回本週四的日期 "
+								},
+								{
+									"Type": "NodeTextMark",
+									"TextMarkType": "code",
+									"TextMarkTextContent": ".action{ now | ISOWeekDate 4 | date \"2006-01-02\" }"
+								},
+								{
+									"Type": "NodeText",
+									"Data": "​"
 								}
 							]
 						}

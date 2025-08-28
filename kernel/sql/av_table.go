@@ -84,7 +84,7 @@ func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query s
 			if nil == tableCell {
 				tableCell = &av.TableCell{
 					BaseValue: &av.BaseValue{
-						ID:        ast.NewNodeID(),
+						ID:        rowID[:14] + ast.NewNodeID()[14:],
 						ValueType: col.Type,
 					},
 				}

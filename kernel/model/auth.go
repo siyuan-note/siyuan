@@ -19,8 +19,10 @@ package model
 import (
 	"crypto/rand"
 	"net/http"
+	"sync"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 	"github.com/siyuan-note/logging"
 )
 
@@ -29,11 +31,14 @@ type Account struct {
 	Password string
 	Token    string
 }
-type AccountsMap map[string]*Account
+type AccountsMap map[string]*Account // username -> account
+type SessionsMap map[string]string   // sessionID -> username
 type ClaimsKeyType string
 
 const (
 	XAuthTokenKey = "X-Auth-Token"
+
+	SessionIdCookieName = "publish-visitor-session-id"
 
 	ClaimsContextKey = "claims"
 
@@ -46,11 +51,35 @@ const (
 
 var (
 	accountsMap = AccountsMap{}
-	jwtKey      = make([]byte, 32)
+	sessionsMap = SessionsMap{}
+	sessionLock = sync.Mutex{}
+
+	jwtKey = make([]byte, 32)
 )
 
 func GetBasicAuthAccount(username string) *Account {
 	return accountsMap[username]
+}
+
+func GetBasicAuthUsernameBySessionID(sessionID string) string {
+	return sessionsMap[sessionID]
+}
+
+func GetNewSessionID() string {
+	sessionID := uuid.New().String()
+	return sessionID
+}
+
+func AddSession(sessionID, username string) {
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	sessionsMap[sessionID] = username
+}
+
+func DeleteSession(sessionID string) {
+	sessionLock.Lock()
+	defer sessionLock.Unlock()
+	delete(sessionsMap, sessionID)
 }
 
 func InitAccounts() {

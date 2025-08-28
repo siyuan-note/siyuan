@@ -1226,24 +1226,24 @@ export class Toolbar {
         hideElements(["hint"], protyle);
         window.siyuan.menus.menu.remove();
         this.range = getEditorRange(nodeElement);
-        let html = `<div data-id="clear" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
+        let html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>`;
         let hljsLanguages = Constants.ALIAS_CODE_LANGUAGES.concat(window.hljs?.listLanguages() ?? []).sort();
-        
-        const eventDetail = { languages: hljsLanguages };
+
+        const eventDetail = {languages: hljsLanguages};
         if (protyle.app && protyle.app.plugins) {
             protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-languages-prepare", eventDetail);
+                plugin.eventBus.emit("code-language-before", eventDetail);
             });
         }
-        
+
         hljsLanguages = eventDetail.languages;
         hljsLanguages.forEach((item, index) => {
-            html += `<div data-id="${item}" class="b3-list-item">${item}</div>`;
+            html += `<div class="b3-list-item${index === 0 ? " b3-list-item--focus" : ""}">${item}</div>`;
         });
 
         this.subElement.style.width = "";
         this.subElement.style.padding = "";
-        this.subElement.innerHTML = `<div data-id="codeLanguage" class="fn__flex-column" style="max-height:50vh">
+        this.subElement.innerHTML = `<div class="fn__flex-column" style="max-height:50vh">
     <input placeholder="${window.siyuan.languages.search}" style="margin: 0 8px 4px 8px" class="b3-text-field"/>
     <div class="b3-list fn__flex-1 b3-list--background" style="position: relative">${html}</div>
 </div>`;
@@ -1269,47 +1269,41 @@ export class Toolbar {
         });
         inputElement.addEventListener("input", (event) => {
             const lowerCaseValue = inputElement.value.toLowerCase();
-            let html = `<div data-id="clear" class="b3-list-item">${window.siyuan.languages.clear}</div>`;
+            const matchLanguages = hljsLanguages.filter(item => item.includes(lowerCaseValue));
+            let html = "";
+            // sort
             let matchInput = false;
-            if (inputElement.value.trim()) {
-                const matchLanguages = hljsLanguages.filter(item => item.includes(lowerCaseValue));
-                // sort
-                matchLanguages.sort((a, b) => {
-                    if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
-                        if (a.length < b.length) {
-                            return -1;
-                        } else if (a.length === b.length) {
-                            return 0;
-                        } else {
-                            return 1;
-                        }
-                    } else if (a.startsWith(lowerCaseValue)) {
+            matchLanguages.sort((a, b) => {
+                if (a.startsWith(lowerCaseValue) && b.startsWith(lowerCaseValue)) {
+                    if (a.length < b.length) {
                         return -1;
-                    } else if (b.startsWith(lowerCaseValue)) {
-                        return 1;
-                    } else {
+                    } else if (a.length === b.length) {
                         return 0;
+                    } else {
+                        return 1;
                     }
-                }).forEach((item) => {
-                    if (inputElement.value === item) {
-                        matchInput = true;
-                    }
-                    html += `<div data-id="${item}" data-type="match" class="b3-list-item">${item.replace(lowerCaseValue, "<b>" + lowerCaseValue + "</b>")}</div>`;
-                });
-                if (!matchInput) {
-                    html += `<div data-id="custom" data-type="match" class="b3-list-item"><b>${escapeHtml(inputElement.value.replace(/`| /g, "_"))}</b></div>`;
+                } else if (a.startsWith(lowerCaseValue)) {
+                    return -1;
+                } else if (b.startsWith(lowerCaseValue)) {
+                    return 1;
+                } else {
+                    return 0;
                 }
-            } else {
-                hljsLanguages.forEach((item, index) => {
-                    html += `<div data-id="${item}" class="b3-list-item">${item}</div>`;
-                });
+            }).forEach((item) => {
+                if (inputElement.value === item) {
+                    matchInput = true;
+                }
+                html += `<div class="b3-list-item">${item.replace(lowerCaseValue, "<b>" + lowerCaseValue + "</b>")}</div>`;
+            });
+            if (inputElement.value.trim() && !matchInput) {
+                html = `<div class="b3-list-item"><b>${escapeHtml(inputElement.value.replace(/`| /g, "_"))}</b></div>${html}`;
             }
+            html = `<div class="b3-list-item">${window.siyuan.languages.clear}</div>` + html;
             listElement.innerHTML = html;
-            for (const item of listElement.children) {
-                if (item.getAttribute("data-id") !== "clear" && item.getBoundingClientRect().height !== 0) {
-                    item.classList.add("b3-list-item--focus");
-                    break;
-                }
+            if (listElement.childElementCount > 2 && !matchInput && inputElement.value.trim()) {
+                listElement.firstElementChild.nextElementSibling.nextElementSibling.classList.add("b3-list-item--focus");
+            } else {
+                listElement.firstElementChild.nextElementSibling.classList.add("b3-list-item--focus");
             }
             event.stopPropagation();
         });
@@ -1330,12 +1324,6 @@ export class Toolbar {
         /// #else
         setPosition(this.subElement, 0, 0);
         /// #endif
-        for (const item of listElement.children) {
-            if (item.getBoundingClientRect().height !== 0) {
-                item.classList.add("b3-list-item--focus");
-                break;
-            }
-        }
         this.element.classList.add("fn__none");
         inputElement.select();
     }
@@ -1767,24 +1755,17 @@ ${item.name}
 
     private updateLanguage(languageElements: HTMLElement[], protyle: IProtyle, selectedLang: string) {
         const currentLang = selectedLang === window.siyuan.languages.clear ? "" : selectedLang;
-        
+
         if (protyle.app && protyle.app.plugins) {
-            const languageChanges = languageElements.map(element => {
-                return {
-                    oldLanguage: element.textContent || "",
-                    languageElement: element
-                };
-            });
-            const eventDetail = {
-                language: currentLang,
-                languageChanges: languageChanges,
-                protyle: protyle
-            };
             protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-languages-change", eventDetail);
+                plugin.eventBus.emit("code-language-change", {
+                    language: currentLang,
+                    languageElements,
+                    protyle: protyle
+                });
             });
         }
-        
+
         if (!Constants.SIYUAN_RENDER_CODE_LANGUAGES.includes(currentLang)) {
             window.siyuan.storage[Constants.LOCAL_CODELANG] = currentLang;
             setStorageVal(Constants.LOCAL_CODELANG, window.siyuan.storage[Constants.LOCAL_CODELANG]);

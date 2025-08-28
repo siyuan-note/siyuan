@@ -154,6 +154,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 					nearValue := getNewValueByNearItem(nearItem, keyValues.Key, addingItemID)
 					newValue.Date.IsNotTime = nearValue.Date.IsNotTime
 				}
+
+				if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
+					newValue.Date.Content = time.Now().UnixMilli()
+				}
 			}
 
 			ret[keyValues.Key.ID] = newValue
@@ -219,7 +223,12 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 	if nil != nearItem && filterKeyIDs[groupKey.ID] {
 		// 临近项不为空并且分组字段和过滤字段相同时，优先使用临近项 https://github.com/siyuan-note/siyuan/issues/15591
-		ret[groupKey.ID] = getNewValueByNearItem(nearItem, groupKey, addingItemID)
+		newValue = getNewValueByNearItem(nearItem, groupKey, addingItemID)
+		ret[groupKey.ID] = newValue
+
+		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
+			newValue.Date.Content = time.Now().UnixMilli()
+		}
 		return
 	}
 
@@ -254,6 +263,10 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 	if nil != newValue && !filterKeyIDs[groupKey.ID] {
 		ret[groupKey.ID] = newValue
+
+		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
+			newValue.Date.Content = time.Now().UnixMilli()
+		}
 	}
 	return
 }

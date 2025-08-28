@@ -82,7 +82,7 @@ func ISOMonth(date time.Time) int {
 
 // ISOWeekDate returns the date of the specified day of the week in the ISO 8601 week of date.
 // day: Monday=1, ..., Sunday=7.
-func ISOWeekDate(date time.Time, day int) time.Time {
+func ISOWeekDate(day int, date time.Time) time.Time {
 	weekday := int(date.Weekday())
 	if weekday == 0 {
 		weekday = 7

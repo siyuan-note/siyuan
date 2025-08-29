@@ -50,6 +50,13 @@ func CreateBox(name string) (id string, err error) {
 	createDocLock.Lock()
 	defer createDocLock.Unlock()
 
+	boxes, _ := ListNotebooks()
+	for i, b := range boxes {
+		c := b.GetConf()
+		c.Sort = i + 1
+		b.SaveConf(c)
+	}
+
 	id = ast.NewNodeID()
 	boxLocalPath := filepath.Join(util.DataDir, id)
 	err = os.MkdirAll(boxLocalPath, 0755)

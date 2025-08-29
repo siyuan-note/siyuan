@@ -86,16 +86,16 @@
       & > div {
         padding-left: 100%;
         position: relative;
-        height: 26px;
+        min-height: 1.625em;
 
         &::after {
           position: absolute;
           content: " ";
-          height: 1px;
+          height: calc(1em / 16);
           background-color: var(--b3-theme-background-light);
           width: calc(100% - 1px);
           left: 0;
-          top: 13px;
+          top: calc(1.625em / 2);
         }
       }
     }

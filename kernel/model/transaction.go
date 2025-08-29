@@ -961,10 +961,8 @@ func (tx *Transaction) syncDelete2Block(node *ast.Node, nodeTree *parse.Tree) (c
 			pushBroadcastAttrTransactions(oldAttrs, toChangNode)
 		}
 
-		nodeTreeID := nodeTree.ID
 		for _, tree := range trees {
-			self := nodeTreeID == tree.ID
-			if !self {
+			if nodeTree.ID != tree.ID {
 				indexWriteTreeUpsertQueue(tree)
 			}
 		}
@@ -1461,6 +1459,11 @@ func (tx *Transaction) doUpdate(operation *Operation) (ret *TxErr) {
 		updatedNode.Tokens = []byte(strings.Join(newLines, "\n"))
 	}
 
+	removedNodes := getRemovedNodes(oldNode, updatedNode)
+	for _, n := range removedNodes {
+		syncDelete2AvBlock(n, tree, tx)
+	}
+
 	// 替换为新节点
 	oldNode.InsertAfter(updatedNode)
 	oldNode.Unlink()
@@ -1517,6 +1520,30 @@ func getRefDefIDs(node *ast.Node) (refDefIDs []string) {
 		return ast.WalkContinue
 	})
 	refDefIDs = gulu.Str.RemoveDuplicatedElem(refDefIDs)
+	return
+}
+
+func getRemovedNodes(oldNode, newNode *ast.Node) (ret []*ast.Node) {
+	oldNodes := map[string]*ast.Node{}
+	ast.Walk(oldNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+		oldNodes[n.ID] = n
+		return ast.WalkContinue
+	})
+	ast.Walk(newNode, func(n *ast.Node, entering bool) ast.WalkStatus {
+		if !entering || !n.IsBlock() {
+			return ast.WalkContinue
+		}
+		if _, ok := oldNodes[n.ID]; ok {
+			delete(oldNodes, n.ID)
+		}
+		return ast.WalkContinue
+	})
+	for _, n := range oldNodes {
+		ret = append(ret, n)
+	}
 	return
 }
 

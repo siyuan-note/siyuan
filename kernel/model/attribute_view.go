@@ -3027,11 +3027,6 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 		}
 	}
 
-	if addingItemID == addingBoundBlockID {
-		addingItemID = ast.NewNodeID()
-		logging.LogWarnf("the adding item ID is the same as the bound block ID [%s], generate a new one item id [%s]", addingBoundBlockID, addingItemID)
-	}
-
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return

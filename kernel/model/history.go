@@ -671,7 +671,6 @@ func (box *Box) generateDocHistory0() {
 
 func clearOutdatedHistoryDir(historyDir string) {
 	if !gulu.File.IsExist(historyDir) {
-		logging.LogWarnf("history dir [%s] not exist", historyDir)
 		return
 	}
 

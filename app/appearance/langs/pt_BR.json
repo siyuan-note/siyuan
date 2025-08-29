@@ -58,8 +58,9 @@
   "backlinkContainChildrenTip": "Quando ativado, os blocos filhos serão incluídos no cálculo do backlink",
   "entryNum": "Número de entradas",
   "workspaceData": "Dados do espaço de trabalho",
-  "confirmRemoveRelationField": "Tem certeza que deseja excluir o campo associado a <b>${x}</b>?",
-  "removeButKeepRelationField": "Remover, mas manter campo relacionado",
+  "confirmRemoveRelationField": "Tem certeza que deseja excluir o campo <b>${x}</b>? Após excluir este campo, o campo de relação bidirecional <b>${z}</b> no banco de dados <b>${y}</b> também será excluído de forma síncrona.",
+  "removeBothRelationField": "Remover ambos os campos",
+  "removeButKeepRelationField": "Remover apenas este campo, manter campo de relação bidirecional",
   "exportPDFLowMemory": "Memória disponível insuficiente para exportar este PDF, reduza o conteúdo ou aumente a memória disponível e tente exportar novamente",
   "exportConf": "Configurações de exportação",
   "exportConfTip": "Conta, código de autorização de acesso, sincronização, token de API e chave do repositório de dados não serão exportados",
@@ -129,6 +130,7 @@
   "updateLayout": "Atualizar layout",
   "dndFolderTip": "Observe que ${x} apenas insere o hiperlink file:// e não copia o arquivo",
   "removeCol": "Tem certeza que deseja excluir o campo <b>${x}</b> no banco de dados?",
+  "removeColConfirm": "⚠️ Excluir campo",
   "video": "Vídeo",
   "audio": "Áudio",
   "updateAll": "Atualizar tudo",
@@ -1656,6 +1658,7 @@
     "268": "Atenção: o arquivo [%s] já excedeu [%d MB], o que pode causar queda de desempenho",
     "269": "Este bloco já foi adicionado ao banco de dados [%s]",
     "270": "Otimizando o índice de dados, por favor aguarde...",
-    "271": "Otimização do índice de dados concluída, [%s] de espaço liberado"
+    "271": "Otimização do índice de dados concluída, [%s] de espaço liberado",
+    "272": "Campo sem nome"
   }
 }

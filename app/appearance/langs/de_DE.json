@@ -58,8 +58,9 @@
   "backlinkContainChildrenTip": "Wenn aktiviert, werden untergeordnete Blöcke in die Berechnung der Rückverweise einbezogen",
   "entryNum": "Anzahl der Einträge",
   "workspaceData": "Arbeitsbereichsdaten",
-  "confirmRemoveRelationField": "Sind Sie sicher, dass Sie das Feld, das mit <b>${x}</b> verknüpft ist, löschen möchten?",
-  "removeButKeepRelationField": "Entfernen, aber verknüpftes Feld behalten",
+  "confirmRemoveRelationField": "Sind Sie sicher, dass Sie das <b>${x}</b> Feld löschen möchten? Nach dem Löschen dieses Feldes wird das bidirektionale Beziehungsfeld <b>${z}</b> in der <b>${y}</b> Datenbank ebenfalls synchron gelöscht.",
+  "removeBothRelationField": "Beide Felder entfernen",
+  "removeButKeepRelationField": "Nur dieses Feld entfernen, bidirektionales Beziehungsfeld behalten",
   "exportPDFLowMemory": "Nicht genügend verfügbarer Speicher, um dieses PDF zu exportieren, bitte reduzieren Sie den Inhalt oder erhöhen Sie den verfügbaren Speicher und versuchen Sie es erneut",
   "exportConf": "Export-Einstellungen",
   "exportConfTip": "Konto, Zugriffscode, Synchronisation, API-Token und Daten-Repo-Schlüssel werden nicht exportiert",
@@ -129,6 +130,7 @@
   "updateLayout": "Layout aktualisieren",
   "dndFolderTip": "Bitte beachten Sie, dass ${x} nur den file:// Hyperlink einfügt und die Datei nicht kopiert.",
   "removeCol": "Sind Sie sicher, dass Sie die <b>${x}</b> Spalte in der Datenbank löschen möchten?",
+  "removeColConfirm": "⚠️ Spalte löschen",
   "video": "Video",
   "audio": "Audio",
   "updateAll": "Alle aktualisieren",
@@ -1656,6 +1658,7 @@
     "268": "Bitte beachten Sie, dass die Datei [%s] bereits [%d MB] überschritten hat, was die Leistung beeinträchtigen kann",
     "269": "Dieser Block wurde bereits zur Datenbank [%s] hinzugefügt",
     "270": "Datenindex wird optimiert, bitte warten...",
-    "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben"
+    "271": "Datenindex-Optimierung abgeschlossen, [%s] Speicherplatz freigegeben",
+    "272": "Unbenanntes Feld"
   }
 }

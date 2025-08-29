@@ -233,7 +233,7 @@ export class Plugin {
         if (!this.setting) {
             return;
         }
-        this.setting.open(this.displayName + " " + this.name);
+        this.setting.open(this.displayName || this.name);
     }
 
     public loadData(storageName: string) {

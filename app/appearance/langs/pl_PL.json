@@ -58,8 +58,9 @@
   "backlinkContainChildrenTip": "Po włączeniu bloki podrzędne zostaną uwzględnione w obliczeniach linków zwrotnych",
   "entryNum": "Количество записей",
   "workspaceData": "Dane przestrzeni roboczej",
-  "confirmRemoveRelationField": "Czy na pewno chcesz usunąć pole powiązane z <b>${x}</b>?",
-  "removeButKeepRelationField": "Usuń, ale zachowaj powiązane pole",
+  "confirmRemoveRelationField": "Czy na pewno chcesz usunąć pole <b>${x}</b>? Po usunięciu tego pola, dwukierunkowe pole relacji <b>${z}</b> w bazie danych <b>${y}</b> również zostanie usunięte synchronicznie.",
+  "removeBothRelationField": "Usuń oba pola",
+  "removeButKeepRelationField": "Usuń tylko to pole, zachowaj dwukierunkowe pole relacji",
   "exportPDFLowMemory": "Za mało dostępnej pamięci, aby wyeksportować ten PDF, proszę zmniejszyć zawartość lub zwiększyć dostępną pamięć i spróbować ponownie",
   "exportConf": "Ustawienia eksportu",
   "exportConfTip": "Konto, kod autoryzacji dostępu, synchronizacja, token API i klucz repozytorium danych nie będą eksportowane",
@@ -129,6 +130,7 @@
   "updateLayout": "Zaktualizuj układ",
   "dndFolderTip": "Proszę pamiętać, że ${x} tylko wstawia link file:// i nie kopiuje pliku",
   "removeCol": "Czy na pewno chcesz usunąć <b>${x}</b> kolumnę w bazie danych?",
+  "removeColConfirm": "⚠️ Usuń kolumnę",
   "video": "Wideo",
   "audio": "Audio",
   "updateAll": "Zaktualizuj wszystko",
@@ -1656,6 +1658,7 @@
     "268": "Uwaga: plik [%s] przekroczył już [%d MB], co może spowodować spadek wydajności",
     "269": "Ten blok został już dodany do bazy danych [%s]",
     "270": "Optymalizacja indeksu danych, proszę czekać...",
-    "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku"
+    "271": "Optymalizacja indeksu danych zakończona, zwolniono [%s] miejsca na dysku",
+    "272": "Nienazwane pole"
   }
 }

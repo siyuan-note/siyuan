@@ -58,8 +58,9 @@
   "backlinkContainChildrenTip": "When enabled, child blocks will be included in the backlink calculation",
   "entryNum": "Number of entries",
   "workspaceData": "Workspace data",
-  "confirmRemoveRelationField": "Are you sure you want to delete the field associated with <b>${x}</b>?",
-  "removeButKeepRelationField": "Remove, but keep related field",
+  "confirmRemoveRelationField": "Are you sure you want to delete the <b>${x}</b> field? After deleting this field, the bidirectional relation field <b>${z}</b> in the <b>${y}</b> database will also be deleted synchronously.",
+  "removeBothRelationField": "Remove both fields",
+  "removeButKeepRelationField": "Remove only this field, keep bidirectional relation field",
   "exportPDFLowMemory": "Insufficient available memory to export this PDF, please reduce the content or increase available memory and try exporting again",
   "exportConf": "Export settings",
   "exportConfTip": "Account, access authorization code, synchronization, API token and data repo key will not be exported",
@@ -129,6 +130,7 @@
   "updateLayout": "Update layout",
   "dndFolderTip": "Please note that ${x} only inserts the file:// hyperlink and does not copy the file",
   "removeCol": "Are you sure you want to delete the <b>${x}</b> field in the database?",
+  "removeColConfirm": "⚠️ Delete field",
   "video": "Video",
   "audio": "Audio",
   "updateAll": "Update all",
@@ -1656,6 +1658,7 @@
     "268": "Please note that the file [%s] has already exceeded [%d MB], which may cause performance degradation",
     "269": "This block has already been added to the database [%s]",
     "270": "Optimizing data index, please wait...",
-    "271": "Data index optimization completed, [%s] disk space freed"
+    "271": "Data index optimization completed, [%s] disk space freed",
+    "272": "Unnamed field"
   }
 }

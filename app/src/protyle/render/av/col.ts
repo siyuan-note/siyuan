@@ -468,11 +468,11 @@ export const bindEditEvent = (options: {
         });
         if (oldValue.avID) {
             fetchPost("/api/av/getAttributeView", {id: oldValue.avID}, (response) => {
-                goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages.title);
+                goSearchElement.querySelector(".b3-menu__accelerator").textContent = oldValue.avID === avID ? window.siyuan.languages.thisDatabase : (response.data.av.name || window.siyuan.languages._kernel[267]);
                 response.data.av.keyValues.find((item: { key: { id: string, name: string } }) => {
                     if (item.key.id === oldValue.backKeyID) {
-                        inputElement.setAttribute("data-old-value", item.key.name || window.siyuan.languages.title);
-                        inputElement.value = item.key.name || window.siyuan.languages.title;
+                        inputElement.setAttribute("data-old-value", item.key.name || window.siyuan.languages._kernel[272]);
+                        inputElement.value = item.key.name || window.siyuan.languages._kernel[272];
                         return true;
                     }
                 });
@@ -1003,16 +1003,20 @@ export const showColMenu = (protyle: IProtyle, blockElement: Element, cellElemen
                     if (colData.key.relation?.isTwoWay) {
                         const relResponse = await fetchSyncPost("/api/av/getAttributeView", {id: colData.key.relation.avID});
                         const dialog = new Dialog({
-                            title: window.siyuan.languages.removeCol.replace("${x}", colData.key.name),
+                            title: window.siyuan.languages.removeColConfirm,
                             content: `<div class="b3-dialog__content">
-    ${window.siyuan.languages.confirmRemoveRelationField.replace("${x}", relResponse.data.av.name)}
+    ${window.siyuan.languages.confirmRemoveRelationField
+        .replace("${x}", colData.key.name || window.siyuan.languages._kernel[272])
+        .replace("${y}", relResponse.data.av.name || window.siyuan.languages._kernel[267])
+        .replace("${z}", relResponse.data.av.keyValues.find((item: {key: {id: string}}) => item.key.id === colData.key.relation.backKeyID).key.name || window.siyuan.languages._kernel[272])}
     <div class="fn__hr--b"></div>
-    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.delete}</button>
+    <button class="fn__block b3-button b3-button--remove" data-action="delete">${window.siyuan.languages.removeBothRelationField}</button>
     <div class="fn__hr"></div>
     <button class="fn__block b3-button b3-button--remove" data-action="keep-relation">${window.siyuan.languages.removeButKeepRelationField}</button>
     <div class="fn__hr"></div>
     <button class="fn__block b3-button b3-button--cancel">${window.siyuan.languages.cancel}</button>
 </div>`,
+                            width: "520px",
                         });
                         dialog.element.addEventListener("click", (event) => {
                             let target = event.target as HTMLElement;

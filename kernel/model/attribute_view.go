@@ -44,6 +44,48 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func GetAttributeViewItemIDs(avID string, blockIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	for _, blockID := range blockIDs {
+		ret[blockID] = ""
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	blockKv := attrView.GetBlockKeyValues()
+	for _, b := range blockKv.Values {
+		if _, ok := ret[b.Block.ID]; ok {
+			ret[b.Block.ID] = b.BlockID
+		}
+	}
+	return
+}
+
+func GetAttributeViewBoundBlockIDs(avID string, itemIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	for _, itemID := range itemIDs {
+		ret[itemID] = ""
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	blockKv := attrView.GetBlockKeyValues()
+	for _, b := range blockKv.Values {
+		if _, ok := ret[b.BlockID]; ok {
+			ret[b.BlockID] = b.Block.ID
+		}
+	}
+	return
+}
+
 func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 

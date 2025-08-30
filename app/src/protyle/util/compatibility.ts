@@ -1,6 +1,9 @@
 import {focusByRange} from "./selection";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {Constants} from "../../constants";
+/// #if !BROWSER
+import {clipboard} from "electron";
+/// #endif
 
 export const encodeBase64 = (text: string): string => {
     if (typeof Buffer !== "undefined") {
@@ -92,6 +95,27 @@ export const readText = () => {
     return navigator.clipboard.readText();
 };
 
+/// #if !BROWSER
+export const getLocalFiles = async () => {
+    // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
+    let localFiles: string[] = [];
+    if ("darwin" === window.siyuan.config.system.os) {
+        const xmlString = clipboard.read("NSFilenamesPboardType");
+        const domParser = new DOMParser();
+        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
+        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
+            localFiles.push(item.childNodes[0].nodeValue);
+        });
+    } else {
+        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
+        if (xmlString.data.length > 0) {
+            localFiles = xmlString.data;
+        }
+    }
+    return localFiles;
+};
+/// #endif
+
 export const readClipboard = async () => {
     const text: IClipboardData = {textPlain: "", textHTML: "", siyuanHTML: ""};
     try {
@@ -111,6 +135,11 @@ export const readClipboard = async () => {
                 text.files = [new File([blob], "image.png", {type: "image/png", lastModified: Date.now()})];
             }
         }
+        /// #if !BROWSER
+        if (!text.textHTML && !text.files) {
+            text.localFiles = await getLocalFiles();
+        }
+        /// #endif
         return text;
     } catch (e) {
         if (isInAndroid()) {

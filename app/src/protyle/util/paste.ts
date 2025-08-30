@@ -1,15 +1,12 @@
 import {Constants} from "../../constants";
 import {uploadFiles, uploadLocalFiles} from "../upload";
 import {processPasteCode, processRender} from "./processCode";
-import {readText} from "./compatibility";
-/// #if !BROWSER
-import {clipboard} from "electron";
-/// #endif
+import {getLocalFiles, readText} from "./compatibility";
 import {hasClosestBlock, hasClosestByAttribute, hasClosestByClassName} from "./hasClosest";
 import {getEditorRange} from "./selection";
 import {blockRender} from "../render/blockRender";
 import {highlightRender} from "../render/highlightRender";
-import {fetchPost, fetchSyncPost} from "../../util/fetch";
+import {fetchPost} from "../../util/fetch";
 import {isDynamicRef, isFileAnnotation} from "../../util/functions";
 import {insertHTML} from "./insertHTML";
 import {scrollCenter} from "../../util/highlightById";
@@ -145,19 +142,7 @@ export const pasteEscaped = async (protyle: IProtyle, nodeElement: Element) => {
 export const pasteAsPlainText = async (protyle: IProtyle) => {
     let localFiles: string[] = [];
     /// #if !BROWSER
-    if ("darwin" === window.siyuan.config.system.os) {
-        const xmlString = clipboard.read("NSFilenamesPboardType");
-        const domParser = new DOMParser();
-        const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-        Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-            localFiles.push(item.childNodes[0].nodeValue);
-        });
-    } else {
-        const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-        if (xmlString.data.length > 0) {
-            localFiles = xmlString.data;
-        }
-    }
+    localFiles = await getLocalFiles();
     if (localFiles.length > 0) {
         uploadLocalFiles(localFiles, protyle, false);
         return;
@@ -269,6 +254,10 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.items;
         }
     } else {
+        if (event.localFiles.length > 0) {
+            readLocalFile(protyle, event.localFiles);
+            return;
+        }
         textHTML = event.textHTML;
         textPlain = event.textPlain;
         siyuanHTML = event.siyuanHTML;
@@ -279,26 +268,11 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
     textPlain = textPlain.replace(/\r\n|\r|\u2028|\u2029/g, "\n");
 
     /// #if !BROWSER
-    // 不再支持 PC 浏览器 https://github.com/siyuan-note/siyuan/issues/7206
     if (!siyuanHTML && !textHTML && !textPlain && ("clipboardData" in event)) {
-        if ("darwin" === window.siyuan.config.system.os) {
-            const xmlString = clipboard.read("NSFilenamesPboardType");
-            const domParser = new DOMParser();
-            const xmlDom = domParser.parseFromString(xmlString, "application/xml");
-            const localFiles: string[] = [];
-            Array.from(xmlDom.getElementsByTagName("string")).forEach(item => {
-                localFiles.push(item.childNodes[0].nodeValue);
-            });
-            if (localFiles.length > 0) {
-                readLocalFile(protyle, localFiles);
-                return;
-            }
-        } else {
-            const xmlString = await fetchSyncPost("/api/clipboard/readFilePaths", {});
-            if (xmlString.data.length > 0) {
-                readLocalFile(protyle, xmlString.data);
-                return;
-            }
+        const localFiles: string[] = await getLocalFiles();
+        if (localFiles.length > 0) {
+            readLocalFile(protyle, localFiles);
+            return;
         }
     }
     /// #endif

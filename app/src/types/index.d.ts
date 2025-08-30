@@ -274,6 +274,7 @@ interface IClipboardData {
     textPlain?: string,
     siyuanHTML?: string,
     files?: File[],
+    localFiles?: string[]
 }
 
 interface IRefDefs {

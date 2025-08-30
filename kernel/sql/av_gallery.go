@@ -96,7 +96,7 @@ func RenderAttributeViewGallery(attrView *av.AttributeView, view *av.View, query
 			if nil == fieldValue {
 				fieldValue = &av.GalleryFieldValue{
 					BaseValue: &av.BaseValue{
-						ID:        ast.NewNodeID(),
+						ID:        cardID[:14] + ast.NewNodeID()[14:],
 						ValueType: field.Type,
 					},
 				}

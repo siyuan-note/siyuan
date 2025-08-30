@@ -44,6 +44,48 @@ import (
 	"github.com/xrash/smetrics"
 )
 
+func GetAttributeViewItemIDs(avID string, blockIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	for _, blockID := range blockIDs {
+		ret[blockID] = ""
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	blockKv := attrView.GetBlockKeyValues()
+	for _, b := range blockKv.Values {
+		if _, ok := ret[b.Block.ID]; ok {
+			ret[b.Block.ID] = b.BlockID
+		}
+	}
+	return
+}
+
+func GetAttributeViewBoundBlockIDs(avID string, itemIDs []string) (ret map[string]string) {
+	ret = map[string]string{}
+	for _, itemID := range itemIDs {
+		ret[itemID] = ""
+	}
+
+	attrView, err := av.ParseAttributeView(avID)
+	if err != nil {
+		logging.LogErrorf("parse attribute view [%s] failed: %s", avID, err)
+		return
+	}
+
+	blockKv := attrView.GetBlockKeyValues()
+	for _, b := range blockKv.Values {
+		if _, ok := ret[b.BlockID]; ok {
+			ret[b.BlockID] = b.Block.ID
+		}
+	}
+	return
+}
+
 func GetAttrViewAddingBlockDefaultValues(avID, viewID, groupID, previousBlockID, addingBlockID string) (ret map[string]*av.Value) {
 	ret = map[string]*av.Value{}
 
@@ -1488,7 +1530,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 				keyValues = append(keyValues, kValues)
 			} else {
 				// 如果没有值，那么就补一个默认值
-				kValues.Values = append(kValues.Values, av.GetAttributeViewDefaultValue(ast.NewNodeID(), kv.Key.ID, itemID, kv.Key.Type))
+				kValues.Values = append(kValues.Values, av.GetAttributeViewDefaultValue(itemID[:14]+ast.NewNodeID()[14:], kv.Key.ID, itemID, kv.Key.Type))
 				keyValues = append(keyValues, kValues)
 			}
 		}
@@ -3027,11 +3069,6 @@ func addAttributeViewBlock(now int64, avID, dbBlockID, viewID, groupID, previous
 		}
 	}
 
-	if addingItemID == addingBoundBlockID {
-		addingItemID = ast.NewNodeID()
-		logging.LogWarnf("the adding item ID is the same as the bound block ID [%s], generate a new one item id [%s]", addingBoundBlockID, addingItemID)
-	}
-
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
@@ -4367,8 +4404,8 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 	}
 
 	for _, oldNewMap := range oldNew {
-		for oldBlockID, newBlockID := range oldNewMap {
-			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, nil); nil != err {
+		for oldBlockID, newNodeID := range oldNewMap {
+			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newNodeID, isDetached, nil); nil != err {
 				return
 			}
 		}

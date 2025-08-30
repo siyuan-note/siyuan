@@ -58,8 +58,9 @@
   "backlinkContainChildrenTip": "启用后子块将被纳入到反向链接计算中",
   "entryNum": "条目数",
   "workspaceData": "工作空间数据",
-  "confirmRemoveRelationField": "确定同时删除关联至 <b>${x}</b> 中的字段吗？",
-  "removeButKeepRelationField": "删除，但保留关联字段",
+  "confirmRemoveRelationField": "确定要删除 <b>${x}</b> 字段吗？删除本字段后，<b>${y}</b> 数据库中的双向关联字段 <b>${z}</b> 也会同步删除。",
+  "removeBothRelationField": "同时删除两个字段",
+  "removeButKeepRelationField": "仅删除本字段，保留双向关联字段",
   "exportPDFLowMemory": "系统可用内存不足，无法导出该 PDF，请减少内容或者增加可用内存后再尝试导出",
   "exportConf": "导出设置",
   "exportConfTip": "账号、访问授权码、同步、API token 和数据仓库密钥不会被导出",
@@ -129,6 +130,7 @@
   "updateLayout": "更新布局",
   "dndFolderTip": "请注意 ${x} 仅插入 file:// 超链接，不复制文件",
   "removeCol": "确定删除数据库中的 <b>${x}</b> 字段？",
+  "removeColConfirm": "⚠️ 删除字段",
   "video": "视频",
   "audio": "音频",
   "updateAll": "全部更新",
@@ -1656,6 +1658,7 @@
     "268": "请注意该文件 [%s] 已经超过 [%d MB]，可能会导致性能下降",
     "269": "该块已经添加到数据库 [%s] 中",
     "270": "正在优化数据索引，请稍等...",
-    "271": "数据索引优化完毕，共释放 [%s] 磁盘空间"
+    "271": "数据索引优化完毕，共释放 [%s] 磁盘空间",
+    "272": "未命名字段"
   }
 }

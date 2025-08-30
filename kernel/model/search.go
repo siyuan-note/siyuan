@@ -314,6 +314,9 @@ func buildEmbedBlock(embedBlockID string, excludeIDs []string, headingMode int, 
 
 func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets, isDatabase bool) (ret []*Block, newDoc bool) {
 	cachedTrees := map[string]*parse.Tree{}
+	nodeTrees := map[string]*parse.Tree{}
+	var nodeIDs []string
+	var nodes []*ast.Node
 
 	onlyDoc := false
 	if isSquareBrackets {
@@ -332,6 +335,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		}
 		btsID = gulu.Str.RemoveDuplicatedElem(btsID)
 		bts := treenode.GetBlockTrees(btsID)
+
 		for _, ref := range refs {
 			tree := cachedTrees[ref.DefBlockRootID]
 			if nil == tree {
@@ -347,6 +351,15 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 				continue
 			}
 
+			nodes = append(nodes, node)
+			nodeIDs = append(nodeIDs, node.ID)
+			nodeTrees[node.ID] = tree
+		}
+
+		refCount := sql.QueryRefCount(nodeIDs)
+
+		for _, node := range nodes {
+			tree := nodeTrees[node.ID]
 			sqlBlock := sql.BuildBlockFromNode(node, tree)
 			if nil == sqlBlock {
 				return
@@ -355,8 +368,10 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 			block := fromSQLBlock(sqlBlock, "", 0)
 			block.RefText = getNodeRefText(node)
 			block.RefText = maxContent(block.RefText, Conf.Editor.BlockRefDynamicAnchorTextMaxLen)
+			block.RefCount = refCount[node.ID]
 			ret = append(ret, block)
 		}
+
 		if 1 > len(ret) {
 			ret = []*Block{}
 		}
@@ -388,7 +403,7 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		hitFirstChildID := false
 		if b.IsContainerBlock() && "NodeDocument" != b.Type {
 			// `((` 引用候选中排除当前块的父块 https://github.com/siyuan-note/siyuan/issues/4538
-			tree := cachedTrees[b.RootID]
+			tree = cachedTrees[b.RootID]
 			if nil == tree {
 				tree, _ = loadTreeByBlockTree(bts[b.RootID])
 				cachedTrees[b.RootID] = tree
@@ -404,15 +419,24 @@ func SearchRefBlock(id, rootID, keyword string, beforeLen int, isSquareBrackets,
 		if "NodeAttributeView" == b.Type {
 			// 数据库块可以添加到自身数据库块中，当前文档也可以添加到自身数据库块中
 			tmp = append(tmp, b)
+			nodeIDs = append(nodeIDs, b.ID)
+			nodeTrees[b.ID] = tree
 		} else {
 			// 排除自身块、父块和根块
 			if b.ID != id && !hitFirstChildID && b.ID != rootID {
 				tmp = append(tmp, b)
+				nodeIDs = append(nodeIDs, b.ID)
+				nodeTrees[b.ID] = tree
 			}
 		}
 
 	}
 	ret = tmp
+
+	refCount := sql.QueryRefCount(nodeIDs)
+	for _, b := range ret {
+		b.RefCount = refCount[b.ID]
+	}
 
 	if !isDatabase {
 		// 如果非数据库中搜索块引，则不允许新建重名文档
@@ -1295,6 +1319,16 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 
 	if 0 == groupBy {
 		filterSelfHPath(ret)
+	}
+
+	var nodeIDs []string
+	for _, b := range ret {
+		nodeIDs = append(nodeIDs, b.ID)
+	}
+
+	refCount := sql.QueryRefCount(nodeIDs)
+	for _, b := range ret {
+		b.RefCount = refCount[b.ID]
 	}
 	return
 }

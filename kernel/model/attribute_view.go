@@ -4362,8 +4362,8 @@ func BatchReplaceAttributeViewBlocks(avID string, isDetached bool, oldNew []map[
 	}
 
 	for _, oldNewMap := range oldNew {
-		for oldBlockID, newBlockID := range oldNewMap {
-			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newBlockID, isDetached, nil); nil != err {
+		for oldBlockID, newNodeID := range oldNewMap {
+			if err = replaceAttributeViewBlock0(attrView, oldBlockID, newNodeID, isDetached, nil); nil != err {
 				return
 			}
 		}

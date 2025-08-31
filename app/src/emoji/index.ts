@@ -240,7 +240,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     const dynamicCurrentObj: IObject = {
         color: "#d23f31",
         lang: "",
-        date: "",
+        date: dayjs().format("YYYY-MM-DD"),
         weekdayType: "1",
         type: "1",
         content: "SiYuan",
@@ -268,7 +268,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
     <div class="emojis__tabheader">
         <div data-type="tab-emoji" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.emoji}"><svg><use xlink:href="#iconEmoji"></use></svg></div>
         <div class="fn__space"></div>
-        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicEmoji}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
+        <div data-type="tab-dynamic" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIcon}"><svg><use xlink:href="#iconCalendar"></use></svg></div>
         <div class="fn__flex-1"></div>
         <span class="block__icon block__icon--show fn__flex-center ariaLabel" data-action="remove" aria-label="${window.siyuan.languages.remove}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
     </div>
@@ -288,19 +288,19 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             <div class="emojis__panel">${filterEmoji()}</div>
             <div class="fn__flex">
                 ${[
-            ["2b50", window.siyuan.languages.recentEmoji],
-            ["1f527", getEmojiTitle(0)],
-            ["1f60d", getEmojiTitle(1)],
-            ["1f433", getEmojiTitle(2)],
-            ["1f96a", getEmojiTitle(3)],
-            ["1f3a8", getEmojiTitle(4)],
-            ["1f3dd-fe0f", getEmojiTitle(5)],
-            ["1f52e", getEmojiTitle(6)],
-            ["267e-fe0f", getEmojiTitle(7)],
-            ["1f6a9", getEmojiTitle(8)],
-        ].map(([unicode, title], index) =>
-            `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
-        ).join("")}
+                ["2b50", window.siyuan.languages.recentEmoji],
+                ["1f527", getEmojiTitle(0)],
+                ["1f60d", getEmojiTitle(1)],
+                ["1f433", getEmojiTitle(2)],
+                ["1f96a", getEmojiTitle(3)],
+                ["1f3a8", getEmojiTitle(4)],
+                ["1f3dd-fe0f", getEmojiTitle(5)],
+                ["1f52e", getEmojiTitle(6)],
+                ["267e-fe0f", getEmojiTitle(7)],
+                ["1f6a9", getEmojiTitle(8)],
+            ].map(([unicode, title], index) =>
+                `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
+            ).join("")}
             </div>
         </div>
         <div class="fn__none" data-type="tab-dynamic">
@@ -334,6 +334,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__flex-center ft__on-surface" style="width: 89px">${window.siyuan.languages.date}</span>
                 <span class="fn__space--small"></span>
                 <input type="date" max="9999-12-31" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
+                    <span class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIconDateEmptyInfo}"><svg><use xlink:href="#iconInfo"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>

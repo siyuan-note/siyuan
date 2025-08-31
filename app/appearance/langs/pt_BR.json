@@ -53,7 +53,8 @@
   "dataRepoAutoPurgeIndexRetentionDays": "Dias de retenção de instantâneos de dados",
   "dataRepoAutoPurgeRetentionIndexesDaily": "Instantâneos de dados por dia",
   "fields": "Campos",
-  "dynamicEmoji": "Ícone dinâmico",
+  "dynamicIcon": "Ícone dinâmico",
+  "dynamicIconDateEmptyInfo": "Se a data estiver vazia, o ícone do calendário exibirá dinamicamente a data atual",
   "backlinkContainChildren": "Os backlinks contêm blocos filhos",
   "backlinkContainChildrenTip": "Quando ativado, os blocos filhos serão incluídos no cálculo do backlink",
   "entryNum": "Número de entradas",
@@ -1353,7 +1354,7 @@
     "xy": "%d anos %s",
     "max": "há muito tempo %s"
   },
-"_taskAction": {
+  "_taskAction": {
     "task.repo.checkout": "Executar checkout do snapshot",
     "task.database.index.full": "Executar reconstrução do índice",
     "task.database.index": "Executar índice do banco de dados",

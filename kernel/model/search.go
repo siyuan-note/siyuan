@@ -1323,12 +1323,24 @@ func FullTextSearchBlock(query string, boxes, paths []string, types map[string]b
 
 	var nodeIDs []string
 	for _, b := range ret {
-		nodeIDs = append(nodeIDs, b.ID)
+		if 0 == groupBy {
+			nodeIDs = append(nodeIDs, b.ID)
+		} else {
+			for _, c := range b.Children {
+				nodeIDs = append(nodeIDs, c.ID)
+			}
+		}
 	}
 
 	refCount := sql.QueryRefCount(nodeIDs)
 	for _, b := range ret {
-		b.RefCount = refCount[b.ID]
+		if 0 == groupBy {
+			b.RefCount = refCount[b.ID]
+		} else {
+			for _, c := range b.Children {
+				c.RefCount = refCount[c.ID]
+			}
+		}
 	}
 	return
 }

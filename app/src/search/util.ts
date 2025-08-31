@@ -1324,7 +1324,7 @@ const onSearch = (data: IBlock[], edit: Protyle, element: Element, config: Confi
     let newData;
     data.forEach((item) => {
         const title = getNotebookName(item.box) + getDisplayName(item.hPath, false);
-        let countHTML = '';
+        let countHTML = "";
         if (item.children) {
             resultHTML += `<div class="b3-list-item">
 <span class="b3-list-item__toggle b3-list-item__toggle--hl">

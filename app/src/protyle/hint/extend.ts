@@ -415,7 +415,7 @@ export const genHintItemHTML = (item: IBlock) => {
     if (attrHTML) {
         attrHTML = `<div class="fn__flex b3-list-item__meta b3-list-item__showall">${attrHTML}</div>`;
     }
-    let countHTML = '';
+    let countHTML = "";
     if (item.refCount) {
         countHTML = `<span class="popover__block counter b3-tooltips b3-tooltips__w" aria-label="${window.siyuan.languages.ref}">${item.refCount}</span>`;
     }

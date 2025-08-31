@@ -772,6 +772,7 @@ interface IBlock {
     children?: IBlock[]
     length?: number
     ial: IObject
+    refCount?: number
 }
 
 interface IRiffCard {

@@ -845,7 +845,7 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 
 	avID := arg["avID"].(string)
 	keyID := arg["keyID"].(string)
-	rowID := arg["rowID"].(string)
+	rowID := arg["rowID"].(string) // 即 ItemID
 	value := arg["value"].(interface{})
 	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, value)
 	if err != nil {

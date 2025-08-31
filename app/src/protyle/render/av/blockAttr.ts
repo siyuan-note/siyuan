@@ -440,7 +440,7 @@ class="fn__flex-1 fn__flex${["url", "text", "number", "email", "phone", "block"]
                 fetchPost("/api/av/setAttributeViewBlockAttr", {
                     avID: item.parentElement.dataset.avId,
                     keyID: item.parentElement.dataset.colId,
-                    rowID: item.parentElement.dataset.rowId,
+                    itemID: item.parentElement.dataset.rowId,
                     value
                 }, (setResponse) => {
                     if (type === "number") {

@@ -4434,9 +4434,15 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 	for _, value := range values {
 		v := value.(map[string]interface{})
 		keyID := v["keyID"].(string)
-		rowID := v["rowID"].(string)
+		var itemID string
+		if _, ok := v["itemID"]; ok {
+			itemID = v["itemID"].(string)
+		} else if _, ok := v["rowID"]; ok {
+			// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15308#issuecomment-3077675356
+			itemID = v["rowID"].(string)
+		}
 		valueData := v["value"]
-		_, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
+		_, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)
 		if err != nil {
 			return
 		}

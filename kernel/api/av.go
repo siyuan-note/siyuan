@@ -845,9 +845,15 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 
 	avID := arg["avID"].(string)
 	keyID := arg["keyID"].(string)
-	rowID := arg["rowID"].(string) // 即 ItemID
+	var itemID string
+	if _, ok := arg["itemID"]; ok {
+		itemID = arg["itemID"].(string)
+	} else if _, ok := arg["rowID"]; ok {
+		// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15308#issuecomment-3077675356
+		itemID = arg["rowID"].(string)
+	}
 	value := arg["value"].(interface{})
-	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, rowID, value)
+	updatedVal, err := model.UpdateAttributeViewCell(nil, avID, keyID, itemID, value)
 	if err != nil {
 		ret.Code = -1
 		ret.Msg = err.Error()

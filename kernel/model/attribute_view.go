@@ -4444,26 +4444,26 @@ func BatchUpdateAttributeViewCells(tx *Transaction, avID string, values []interf
 	return
 }
 
-func UpdateAttributeViewCell(tx *Transaction, avID, keyID, rowID string, valueData interface{}) (val *av.Value, err error) {
+func UpdateAttributeViewCell(tx *Transaction, avID, keyID, itemID string, valueData interface{}) (val *av.Value, err error) {
 	attrView, err := av.ParseAttributeView(avID)
 	if err != nil {
 		return
 	}
 
-	val, err = updateAttributeViewValue(tx, attrView, keyID, rowID, valueData)
+	val, err = updateAttributeViewValue(tx, attrView, keyID, itemID, valueData)
 	if nil != err {
 		return
 	}
 	return
 }
 
-func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, blockID string, valueData interface{}) (val *av.Value, err error) {
+func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID, itemID string, valueData interface{}) (val *av.Value, err error) {
 	avID := attrView.ID
 	var blockVal *av.Value
 	for _, kv := range attrView.KeyValues {
 		if av.KeyTypeBlock == kv.Key.Type {
 			for _, v := range kv.Values {
-				if blockID == v.BlockID {
+				if itemID == v.BlockID {
 					blockVal = v
 					break
 				}
@@ -4485,7 +4485,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		}
 
 		for _, value := range keyValues.Values {
-			if blockID == value.BlockID {
+			if itemID == value.BlockID {
 				val = value
 				val.Type = keyValues.Key.Type
 				break
@@ -4493,7 +4493,7 @@ func updateAttributeViewValue(tx *Transaction, attrView *av.AttributeView, keyID
 		}
 
 		if nil == val {
-			val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: blockID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
+			val = &av.Value{ID: ast.NewNodeID(), KeyID: keyID, BlockID: itemID, Type: keyValues.Key.Type, CreatedAt: now, UpdatedAt: now}
 			keyValues.Values = append(keyValues.Values, val)
 		}
 		break

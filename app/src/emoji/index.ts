@@ -288,19 +288,19 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             <div class="emojis__panel">${filterEmoji()}</div>
             <div class="fn__flex">
                 ${[
-                ["2b50", window.siyuan.languages.recentEmoji],
-                ["1f527", getEmojiTitle(0)],
-                ["1f60d", getEmojiTitle(1)],
-                ["1f433", getEmojiTitle(2)],
-                ["1f96a", getEmojiTitle(3)],
-                ["1f3a8", getEmojiTitle(4)],
-                ["1f3dd-fe0f", getEmojiTitle(5)],
-                ["1f52e", getEmojiTitle(6)],
-                ["267e-fe0f", getEmojiTitle(7)],
-                ["1f6a9", getEmojiTitle(8)],
-            ].map(([unicode, title], index) =>
-                `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
-            ).join("")}
+            ["2b50", window.siyuan.languages.recentEmoji],
+            ["1f527", getEmojiTitle(0)],
+            ["1f60d", getEmojiTitle(1)],
+            ["1f433", getEmojiTitle(2)],
+            ["1f96a", getEmojiTitle(3)],
+            ["1f3a8", getEmojiTitle(4)],
+            ["1f3dd-fe0f", getEmojiTitle(5)],
+            ["1f52e", getEmojiTitle(6)],
+            ["267e-fe0f", getEmojiTitle(7)],
+            ["1f6a9", getEmojiTitle(8)],
+        ].map(([unicode, title], index) =>
+            `<div data-type="${index}" class="emojis__type ariaLabel" aria-label="${title}">${unicode2Emoji(unicode)}</div>`
+        ).join("")}
             </div>
         </div>
         <div class="fn__none" data-type="tab-dynamic">

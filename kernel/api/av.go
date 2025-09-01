@@ -849,7 +849,7 @@ func setAttributeViewBlockAttr(c *gin.Context) {
 	if _, ok := arg["itemID"]; ok {
 		itemID = arg["itemID"].(string)
 	} else if _, ok := arg["rowID"]; ok {
-		// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15308#issuecomment-3077675356
+		// TODO 划于 2026 年 6 月 30 日后删除 https://github.com/siyuan-note/siyuan/issues/15708#issuecomment-3239694546
 		itemID = arg["rowID"].(string)
 	}
 	value := arg["value"].(interface{})

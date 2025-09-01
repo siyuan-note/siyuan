@@ -159,50 +159,7 @@ export class Protyle {
                             }
                             break;
                         case "transactions":
-                            data.data[0].doOperations.find((item: IOperation) => {
-                                if (!this.protyle.preview.element.classList.contains("fn__none")) {
-                                    this.protyle.preview.render(this.protyle);
-                                } else if (options.backlinkData && ["delete", "move"].includes(item.action)) {
-                                    // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
-                                    /// #if !MOBILE
-                                    getAllModels().backlink.find(backlinkItem => {
-                                        if (backlinkItem.element.contains(this.protyle.element)) {
-                                            backlinkItem.refresh();
-                                            return true;
-                                        }
-                                    });
-                                    /// #endif
-                                    return true;
-                                } else {
-                                    onTransaction(this.protyle, item, false);
-                                    // 反链面板移除元素后，文档为空
-                                    if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID &&
-                                        !(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
-                                        if (item.action === "delete" && this.protyle.block.showAll) {
-                                            if (this.protyle.options.handleEmptyContent) {
-                                                this.protyle.options.handleEmptyContent();
-                                            } else {
-                                                zoomOut({
-                                                    protyle: this.protyle,
-                                                    id: this.protyle.block.rootID,
-                                                    focusId: this.protyle.block.id
-                                                });
-                                            }
-                                        } else {
-                                            const newID = Lute.NewNodeID();
-                                            const emptyElement = genEmptyElement(false, false, newID);
-                                            this.protyle.wysiwyg.element.append(emptyElement);
-                                            transaction(this.protyle, [{
-                                                action: "insert",
-                                                data: emptyElement.outerHTML,
-                                                id: newID,
-                                                parentID: this.protyle.block.parentID
-                                            }]);
-                                            this.protyle.undo.clear();
-                                        }
-                                    }
-                                }
-                            });
+                            this.onTransaction(data);
                             break;
                         case "readonly":
                             window.siyuan.config.editor.readOnly = data.data;
@@ -326,6 +283,49 @@ export class Protyle {
             }
         } else {
             this.protyle.contentElement.classList.add("protyle-content--transition");
+        }
+    }
+
+    private onTransaction(data: IWebSocketData) {
+        let needCreateAction = "";
+        data.data[0].doOperations.find((item: IOperation) => {
+            if (!this.protyle.preview.element.classList.contains("fn__none")) {
+                this.protyle.preview.render(this.protyle);
+            } else if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
+                // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
+                /// #if !MOBILE
+                getAllModels().backlink.find(backlinkItem => {
+                    if (backlinkItem.element.contains(this.protyle.element)) {
+                        backlinkItem.refresh();
+                        return true;
+                    }
+                });
+                /// #endif
+                return true;
+            } else {
+                onTransaction(this.protyle, item, false);
+                // 反链面板移除元素后，文档为空
+                if (!(item.action === "delete" && typeof item.data?.createEmptyParagraph === "boolean" && !item.data.createEmptyParagraph)) {
+                    needCreateAction = item.action;
+                }
+            }
+        });
+        if (this.protyle.wysiwyg.element.childElementCount === 0 && this.protyle.block.parentID && needCreateAction) {
+            if (needCreateAction === "delete" && this.protyle.block.showAll) {
+                if (this.protyle.options.handleEmptyContent) {
+                    this.protyle.options.handleEmptyContent();
+                } else {
+                    zoomOut({
+                        protyle: this.protyle,
+                        id: this.protyle.block.rootID,
+                        focusId: this.protyle.block.id
+                    });
+                }
+            } else {
+                // 不能使用 transaction，否则分屏后会重复添加
+                this.protyle.undo.clear();
+                this.reload(false);
+            }
         }
     }
 

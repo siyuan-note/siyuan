@@ -1232,7 +1232,7 @@ export class Toolbar {
         const eventDetail = {languages: hljsLanguages};
         if (protyle.app && protyle.app.plugins) {
             protyle.app.plugins.forEach((plugin: any) => {
-                plugin.eventBus.emit("code-language-before", eventDetail);
+                plugin.eventBus.emit("code-language-update", eventDetail);
             });
         }
 
@@ -1289,7 +1289,16 @@ export class Toolbar {
                 } else {
                     return 0;
                 }
-            }).forEach((item) => {
+            });
+
+            const eventDetail = {languages: matchLanguages};
+            if (protyle.app && protyle.app.plugins) {
+                protyle.app.plugins.forEach((plugin: any) => {
+                    plugin.eventBus.emit("code-language-update", eventDetail);
+                });
+            }
+
+            matchLanguages.forEach((item) => {
                 if (inputElement.value === item) {
                     matchInput = true;
                 }

@@ -79,7 +79,7 @@ func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av
 
 func renderView(attrView *av.AttributeView, view *av.View, query string,
 	depth *int, cachedAttrViews map[string]*av.AttributeView) (ret av.Viewable) {
-	if 2 < *depth {
+	if 7 < *depth {
 		return
 	}
 

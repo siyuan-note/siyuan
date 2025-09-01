@@ -88,6 +88,11 @@ func renderAttributeView(attrView *av.AttributeView, nodeID, viewID, query strin
 }
 
 func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView, view *av.View, query string, page, pageSize int, groupPaging map[string]interface{}) (err error) {
+	groupKey := view.GetGroupKey(attrView)
+	if nil == groupKey {
+		return
+	}
+
 	// 当前日期可能会变，所以如果是按日期分组则需要重新生成分组
 	if isGroupByDate(view) {
 		createdDate := time.UnixMilli(view.GroupCreated).Format("2006-01-02")
@@ -97,9 +102,10 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 		}
 	}
 
-	groupKey := view.GetGroupKey(attrView)
-	if nil == groupKey {
-		return
+	// 如果是按模板分组则需要重新生成分组
+	if isGroupByTemplate(attrView, view) {
+		regenAttrViewGroups(attrView)
+		av.SaveAttributeView(attrView)
 	}
 
 	// 如果存在分组的话渲染分组视图
@@ -350,6 +356,18 @@ func isGroupByDate(view *av.View) bool {
 		return false
 	}
 	return av.GroupMethodDateDay == view.Group.Method || av.GroupMethodDateWeek == view.Group.Method || av.GroupMethodDateMonth == view.Group.Method || av.GroupMethodDateYear == view.Group.Method || av.GroupMethodDateRelative == view.Group.Method
+}
+
+func isGroupByTemplate(attrView *av.AttributeView, view *av.View) bool {
+	if nil == view.Group {
+		return false
+	}
+
+	groupKey := view.GetGroupKey(attrView)
+	if nil == groupKey {
+		return false
+	}
+	return av.KeyTypeTemplate == groupKey.Type
 }
 
 func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.AttributeView, page, pageSize int) (err error) {

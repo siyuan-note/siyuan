@@ -254,7 +254,7 @@ export const paste = async (protyle: IProtyle, event: (ClipboardEvent | DragEven
             files = event.dataTransfer.items;
         }
     } else {
-        if (event.localFiles.length > 0) {
+        if (event.localFiles?.length > 0) {
             readLocalFile(protyle, event.localFiles);
             return;
         }

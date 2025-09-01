@@ -243,12 +243,13 @@ export const getGroupTitleHTML = (group: IAVView, counter: number) => {
     } else {
         nameHTML = group.name;
     }
+    // av__group-name 为第三方需求，本应用内没有使用，但不能移除 https://github.com/siyuan-note/siyuan/issues/15736
     return `<div class="av__group-title">
     <div class="av__group-icon" data-type="av-group-fold" data-id="${group.id}">
         <svg class="${group.groupFolded ? "" : "av__group-arrow--open"}"><use xlink:href="#iconRight"></use></svg>
     </div>
     <span class="fn__space"></span>
-    ${nameHTML}
+    <span class="av__group-name">${nameHTML}</span>
     ${counter === 0 ? '<span class="fn__space"></span>' : `<span class="av__group-counter">${counter}</span>`}
     <span class="av__group-icon av__group-icon--hover ariaLabel" data-type="av-add-top" data-position="north" aria-label="${window.siyuan.languages.newRow}"><svg><use xlink:href="#iconAdd"></use></svg></span>
 </div>`;

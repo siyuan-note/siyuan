@@ -1536,6 +1536,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 		}
 
 		// 先渲染主键、创建时间、更新时间
+
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeBlock: // 对于主键可能需要填充静态锚文本 Database-bound block primary key supports setting static anchor text https://github.com/siyuan-note/siyuan/issues/10049
@@ -1569,7 +1570,44 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 			}
 		}
 
-		// 再渲染汇总和关联
+		// 再渲染关联和汇总
+
+		rollupFurtherCollections := map[string]av.Collection{}
+		for _, kv := range keyValues {
+			if av.KeyTypeRollup != kv.Key.Type {
+				continue
+			}
+
+			relKey, _ := attrView.GetKey(kv.Key.Rollup.RelationKeyID)
+			if nil == relKey {
+				continue
+			}
+
+			destAv := attrViewCache[relKey.Relation.AvID]
+			if nil == destAv {
+				destAv, _ = av.ParseAttributeView(relKey.Relation.AvID)
+				if nil == destAv {
+					continue
+				}
+				attrViewCache[relKey.Relation.AvID] = destAv
+			}
+
+			destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
+			if nil == destKey {
+				continue
+			}
+			isSameAv := destAv.ID == attrView.ID
+
+			var furtherCollection av.Collection
+			if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type)) {
+				viewable := sql.RenderView(destAv, destAv.Views[0], "")
+				if nil != viewable {
+					furtherCollection = viewable.(av.Collection)
+				}
+			}
+			rollupFurtherCollections[kv.Key.ID] = furtherCollection
+		}
+
 		for _, kv := range keyValues {
 			switch kv.Key.Type {
 			case av.KeyTypeRollup:
@@ -1595,15 +1633,7 @@ func GetBlockAttributeViewKeys(nodeID string) (ret []*BlockAttributeViewKeys) {
 
 					destKey, _ := destAv.GetKey(kv.Key.Rollup.KeyID)
 					if nil != destKey {
-						isSameAv := destAv.ID == attrView.ID
-						var furtherCollection av.Collection
-						if av.KeyTypeTemplate == destKey.Type || (!isSameAv && (av.KeyTypeUpdated == destKey.Type || av.KeyTypeCreated == destKey.Type)) {
-							viewable := sql.RenderView(destAv, destAv.Views[0], "")
-							if nil != viewable {
-								furtherCollection = viewable.(av.Collection)
-							}
-						}
-
+						furtherCollection := rollupFurtherCollections[kv.Key.ID]
 						kv.Values[0].Rollup.BuildContents(keyValues, destKey, relVal, kv.Key.Rollup.Calc, furtherCollection)
 					}
 				}

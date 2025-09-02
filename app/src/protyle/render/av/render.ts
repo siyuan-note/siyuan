@@ -784,7 +784,8 @@ export const refreshAV = (protyle: IProtyle, operation: IOperation) => {
                                     }
                                 }
                                 if (popCellElement && popCellElement.getAttribute("data-detached") === "true" &&
-                                    popCellElement.querySelector(".av__celltext").textContent === "") {
+                                    popCellElement.querySelector(".av__celltext").textContent === "" &&
+                                    popCellElement.getBoundingClientRect().height !== 0) {
                                     popTextCell(protyle, [popCellElement], "block");
                                 }
                             }

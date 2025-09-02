@@ -280,10 +280,10 @@ func generateAttrViewItems(attrView *av.AttributeView, view *av.View) (ret map[s
 	return
 }
 
-func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
+func filterNotFoundAttrViewItems(keyValuesMap map[string][]*av.KeyValues) {
 	var notFound []string
 	var toCheckBlockIDs []string
-	for blockID, keyValues := range *keyValuesMap {
+	for blockID, keyValues := range keyValuesMap {
 		blockValue := getBlockValue(keyValues)
 		if nil == blockValue || nil == blockValue.Block {
 			notFound = append(notFound, blockID)
@@ -308,7 +308,7 @@ func filterNotFoundAttrViewItems(keyValuesMap *map[string][]*av.KeyValues) {
 		}
 	}
 	for _, blockID := range notFound {
-		delete(*keyValuesMap, blockID)
+		delete(keyValuesMap, blockID)
 	}
 }
 

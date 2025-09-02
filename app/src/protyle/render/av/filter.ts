@@ -219,33 +219,46 @@ export const setFilter = async (options: {
             });
             return;
         }
-        let targetAVId = "";
-        fields.find((column) => {
-            if (column.id === colData.rollup.relationKeyID) {
-                targetAVId = column.relation.avID;
-                return true;
+        if (colData.rollup.calc?.operator && colData.rollup.calc.operator !== "Range") {
+            if (["Count all", "Count empty", "Count not empty", "Count values", "Count unique values", "Percent empty",
+                "Percent not empty", "Percent unique values", "Percent checked", "Percent unchecked", "Sum", "Average", "Median",
+                "Min", "Max"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "number";
+            } else if (["Checked", "Unchecked"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "checkbox";
+            } else if (["Earliest", "Latest"].includes(colData.rollup.calc.operator)) {
+                filterValue.type = "date";
             }
-        });
-        const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
-        response.data.av.keyValues.find((item: {
-            key: {
-                id: string,
-                name: string,
-                type: TAVCol,
-                options: {
-                    name: string,
-                    color: string,
-                }[]
-            }
-        }) => {
-            if (item.key.id === colData.rollup.keyID) {
-                filterValue.type = item.key.type;
-                if (item.key.type === "select") {
-                    colData.options = item.key.options;
+        } else {
+            let targetAVId = "";
+            fields.find((column) => {
+                if (column.id === colData.rollup.relationKeyID) {
+                    targetAVId = column.relation.avID;
+                    return true;
                 }
-                return true;
-            }
-        });
+            });
+            const response = await fetchSyncPost("/api/av/getAttributeView", {id: targetAVId});
+            response.data.av.keyValues.find((item: {
+                key: {
+                    id: string,
+                    name: string,
+                    type: TAVCol,
+                    options: {
+                        name: string,
+                        color: string,
+                    }[]
+                }
+            }) => {
+                if (item.key.id === colData.rollup.keyID) {
+                    filterValue.type = item.key.type;
+                    if (item.key.type === "select") {
+                        colData.options = item.key.options;
+                    }
+                    return true;
+                }
+            });
+        }
+
         options.data.view.filters.find(item => {
             if (item.column === colData.id && item.value.type === "rollup") {
                 if (!item.value.rollup || !item.value.rollup.contents || item.value.rollup.contents.length === 0) {

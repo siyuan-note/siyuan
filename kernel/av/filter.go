@@ -76,7 +76,7 @@ const (
 	FilterOperatorIsFalse          FilterOperator = "Is false"
 )
 
-func Filter(viewable Viewable, attrView *AttributeView) {
+func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) {
 	collection := viewable.(Collection)
 	filters := collection.GetFilters()
 	if 1 > len(filters) {
@@ -94,8 +94,6 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 	}
 
 	var items []Item
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
 	for _, item := range collection.GetItems() {
 		pass := true
 		values := item.GetValues()
@@ -116,7 +114,7 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 				break
 			}
 
-			if !values[index].Filter(filters[j], attrView, item.GetID(), &attrViewCache) {
+			if !values[index].Filter(filters[j], attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
 				pass = false
 				break
 			}
@@ -128,7 +126,7 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 	collection.SetItems(items)
 }
 
-func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID string, attrViewCache *map[string]*AttributeView) bool {
+func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
@@ -160,16 +158,16 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		relVal := attrView.GetValue(relKey.ID, rowID)
+		relVal := attrView.GetValue(relKey.ID, itemID)
 		if nil == relVal || nil == relVal.Relation {
 			return false
 		}
 
-		destAv := (*attrViewCache)[relKey.Relation.AvID]
+		destAv := cachedAttrViews[relKey.Relation.AvID]
 		if nil == destAv {
 			destAv, _ = ParseAttributeView(relKey.Relation.AvID)
 			if nil != destAv {
-				(*attrViewCache)[relKey.Relation.AvID] = destAv
+				cachedAttrViews[relKey.Relation.AvID] = destAv
 			}
 		}
 		if nil == destAv {
@@ -181,7 +179,7 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, nil)
+		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupFurtherCollections[key.ID])
 		for _, content := range value.Rollup.Contents {
 			switch filter.Operator {
 			case FilterOperatorContains:

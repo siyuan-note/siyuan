@@ -83,7 +83,9 @@ func ExportAv2CSV(avID, blockID string) (zipPath string, err error) {
 	table := getAttrViewTable(attrView, view, "")
 
 	// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
-	av.Filter(table, attrView)
+	cachedAttrViews := map[string]*av.AttributeView{}
+	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+	av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(table, attrView)
 
 	exportFolder := filepath.Join(util.TempDir, "export", "csv", name)
@@ -2544,7 +2546,9 @@ func exportTree(tree *parse.Tree, wysiwyg, keepFold, avHiddenCol bool,
 		table := getAttrViewTable(attrView, view, "")
 
 		// 遵循视图过滤和排序规则 Use filtering and sorting of current view settings when exporting database blocks https://github.com/siyuan-note/siyuan/issues/10474
-		av.Filter(table, attrView)
+		cachedAttrViews := map[string]*av.AttributeView{}
+		rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+		av.Filter(table, attrView, rollupFurtherCollections, cachedAttrViews)
 		av.Sort(table, attrView)
 
 		var aligns []int

@@ -47,7 +47,6 @@ import {getAllModels} from "../layout/getAll";
 /// #endif
 import {isSupportCSSHL} from "./render/searchMarkRender";
 import {renderAVAttribute} from "./render/av/blockAttr";
-import {genEmptyElement} from "../block/util";
 import {zoomOut} from "../menus/protyle";
 
 export class Protyle {

@@ -26,11 +26,12 @@ import (
 
 // ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
-	Column        string         `json:"column"`                  // 列（字段）ID
-	Operator      FilterOperator `json:"operator"`                // 过滤操作符
-	Value         *Value         `json:"value"`                   // 过滤值
-	RelativeDate  *RelativeDate  `json:"relativeDate,omitempty"`  // 相对时间
-	RelativeDate2 *RelativeDate  `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
+	Column        string           `json:"column"`                  // 列（字段）ID
+	Qualifier     FilterQuantifier `json:"quantifier,omitempty"`    // 量词
+	Operator      FilterOperator   `json:"operator"`                // 操作符
+	Value         *Value           `json:"value"`                   // 过滤值
+	RelativeDate  *RelativeDate    `json:"relativeDate,omitempty"`  // 相对时间
+	RelativeDate2 *RelativeDate    `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
 }
 
 type RelativeDateUnit int
@@ -74,6 +75,15 @@ const (
 	FilterOperatorIsBetween        FilterOperator = "Is between"
 	FilterOperatorIsTrue           FilterOperator = "Is true"
 	FilterOperatorIsFalse          FilterOperator = "Is false"
+)
+
+type FilterQuantifier string
+
+const (
+	FilterQuantifierUndefined FilterQuantifier = ""
+	FilterQuantifierAny       FilterQuantifier = "Any"
+	FilterQuantifierAll       FilterQuantifier = "All"
+	FilterQuantifierNone      FilterQuantifier = "None"
 )
 
 func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) {
@@ -147,7 +157,6 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
 		// 单独处理汇总类型的比较
 
-		// 处理值比较
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -180,31 +189,39 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID s
 		}
 
 		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupFurtherCollections[key.ID])
-		for _, content := range value.Rollup.Contents {
-			switch filter.Operator {
-			case FilterOperatorContains:
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-					return true
-				}
-			case FilterOperatorDoesNotContain:
-				ret := content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
-				if !ret {
-					return false
-				}
-			default:
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-					return true
+
+		switch filter.Qualifier {
+		case FilterQuantifierUndefined, FilterQuantifierAny:
+			for _, content := range value.Rollup.Contents {
+				switch filter.Operator {
+				case FilterOperatorContains:
+					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return true
+					}
+				case FilterOperatorDoesNotContain:
+					if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return false
+					}
+				default:
+					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return true
+					}
 				}
 			}
-		}
-
-		switch filter.Operator {
-		case FilterOperatorContains:
-			return false
-		case FilterOperatorDoesNotContain:
+		case FilterQuantifierAll:
+			for _, content := range value.Rollup.Contents {
+				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+					return false
+				}
+			}
 			return true
-		default:
-			return false
+		case FilterQuantifierNone:
+			for _, content := range value.Rollup.Contents {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+					return false
+				}
+			}
+			return true
 		}
 	}
 

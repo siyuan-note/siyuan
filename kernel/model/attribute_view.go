@@ -2533,6 +2533,7 @@ func (tx *Transaction) doDuplicateAttrViewView(operation *Operation) (ret *TxErr
 	for _, filter := range masterView.Filters {
 		view.Filters = append(view.Filters, &av.ViewFilter{
 			Column:        filter.Column,
+			Qualifier:     filter.Qualifier,
 			Operator:      filter.Operator,
 			Value:         filter.Value,
 			RelativeDate:  filter.RelativeDate,

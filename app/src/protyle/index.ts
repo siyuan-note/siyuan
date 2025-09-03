@@ -290,6 +290,9 @@ export class Protyle {
         data.data[0].doOperations.find((item: IOperation) => {
             if (!this.protyle.preview.element.classList.contains("fn__none")) {
                 this.protyle.preview.render(this.protyle);
+                if (item.action === "updateAttrs") {
+                    onTransaction(this.protyle, item, false);
+                }
             } else if (this.protyle.options.backlinkData && ["delete", "move"].includes(item.action)) {
                 // 只对特定情况刷新，否则展开、编辑等操作刷新会频繁
                 /// #if !MOBILE

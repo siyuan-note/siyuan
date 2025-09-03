@@ -866,7 +866,7 @@ data-type="navigation-root" data-path="/">
         }
         window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
             item.openPaths.forEach((openPath) => {
-                this.selectItem(item.notebookId, openPath, undefined, false);
+                this.selectItem(item.notebookId, openPath, undefined, false, false);
             });
         });
         if (!init) {
@@ -1081,7 +1081,11 @@ data-type="navigation-root" data-path="/">
         }, 2);
     }
 
-    private onLsSelect(data: { files: IFile[], box: string, path: string }, filePath: string, setStorage: boolean) {
+    private async onLsSelect(data: {
+        files: IFile[],
+        box: string,
+        path: string
+    }, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
@@ -1102,28 +1106,30 @@ data-type="navigation-root" data-path="/">
             emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
         liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
-        data.files.forEach((item: IFile) => {
+        let newLiElement;
+        for (let i = 0; i < data.files.length; i++) {
+            const item = data.files[i];
             if (filePath === item.path) {
-                this.selectItem(data.box, filePath, undefined, setStorage);
+                newLiElement = await this.selectItem(data.box, filePath, undefined, setStorage, isSetCurrent);
             } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
-                fetchPost("/api/filetree/listDocsByPath", {
+                const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                     notebook: data.box,
                     path: item.path
-                }, response => {
-                    this.selectItem(response.data.box, filePath, response.data, setStorage);
                 });
+                newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
             }
-        });
-        if (setStorage) {
-            this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
         }
+        if (isSetCurrent) {
+            this.setCurrent(newLiElement);
+        }
+        return newLiElement;
     }
 
-    private setCurrent(target: HTMLElement, isScroll = true) {
+    public setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {
             return;
         }
-        this.element.querySelectorAll("li").forEach((liItem) => {
+        this.element.querySelectorAll("li.b3-list-item--focus").forEach((liItem) => {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
@@ -1155,11 +1161,11 @@ data-type="navigation-root" data-path="/">
         });
     }
 
-    public selectItem(notebookId: string, filePath: string, data?: {
+    public async selectItem(notebookId: string, filePath: string, data?: {
         files: IFile[],
         box: string,
         path: string
-    }, setStorage = true) {
+    }, setStorage = true, isSetCurrent = true) {
         const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
         if (!treeElement) {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
@@ -1181,24 +1187,24 @@ data-type="navigation-root" data-path="/">
 
         if (liElement.getAttribute("data-path") === filePath) {
             if (setStorage) {
-                this.setCurrent(liElement);
                 this.getOpenPaths();
-            } else {
-                this.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             }
-            return;
+            if (isSetCurrent) {
+                this.setCurrent(liElement);
+            }
+            return liElement;
         }
 
         if (data && data.path === currentPath) {
-            this.onLsSelect(data, filePath, setStorage);
+            liElement = await this.onLsSelect(data, filePath, setStorage, isSetCurrent);
         } else {
-            fetchPost("/api/filetree/listDocsByPath", {
+            const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
                 path: currentPath
-            }, response => {
-                this.onLsSelect(response.data, filePath, setStorage);
             });
+            liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }
+        return liElement;
     }
 
     private getOpenPaths() {

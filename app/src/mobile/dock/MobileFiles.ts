@@ -5,7 +5,7 @@ import {Constants} from "../../constants";
 import {getDisplayName, pathPosix, setNoteBook} from "../../util/pathName";
 import {initFileMenu, initNavigationMenu, sortMenu} from "../../menus/navigation";
 import {showMessage} from "../../dialog/message";
-import {fetchPost} from "../../util/fetch";
+import {fetchPost, fetchSyncPost} from "../../util/fetch";
 import {genUUID} from "../../util/genID";
 import {openMobileFileById} from "../editor";
 import {unicode2Emoji} from "../../emoji";
@@ -361,7 +361,7 @@ export class MobileFiles extends Model {
         }
         window.siyuan.storage[Constants.LOCAL_FILESPATHS].forEach((item: IFilesPath) => {
             item.openPaths.forEach((openPath) => {
-                this.selectItem(item.notebookId, openPath, undefined, false);
+                this.selectItem(item.notebookId, openPath, undefined, false, false);
             });
         });
         if (!init) {
@@ -577,20 +577,14 @@ export class MobileFiles extends Model {
         }, 2);
     }
 
-    private onLsSelect(data: { files: IFile[], box: string, path: string }, filePath: string, setStorage: boolean) {
+    private async onLsSelect(data: {
+        files: IFile[],
+        box: string,
+        path: string
+    }, filePath: string, setStorage: boolean, isSetCurrent: boolean) {
         let fileHTML = "";
         data.files.forEach((item: IFile) => {
             fileHTML += this.genFileHTML(item);
-            if (filePath === item.path) {
-                this.selectItem(data.box, filePath, undefined, setStorage);
-            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
-                fetchPost("/api/filetree/listDocsByPath", {
-                    notebook: data.box,
-                    path: item.path
-                }, response => {
-                    this.selectItem(response.data.box, filePath, response.data, setStorage);
-                });
-            }
         });
         if (fileHTML === "") {
             return;
@@ -600,26 +594,45 @@ export class MobileFiles extends Model {
             // 文件展开时，刷新
             liElement.nextElementSibling.remove();
         }
-        liElement.querySelector(".b3-list-item__arrow").classList.add("b3-list-item__arrow--open");
-        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
-        if (setStorage) {
-            this.setCurrent(this.element.querySelector(`ul[data-url="${data.box}"] li[data-path="${filePath}"]`));
+        const arrowElement = liElement.querySelector(".b3-list-item__arrow");
+        arrowElement.classList.add("b3-list-item__arrow--open");
+        arrowElement.parentElement.classList.remove("fn__hidden");
+        const emojiElement = liElement.querySelector(".b3-list-item__icon");
+        if (emojiElement.textContent === unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].file)) {
+            emojiElement.textContent = unicode2Emoji(window.siyuan.storage[Constants.LOCAL_IMAGES].folder);
         }
+        liElement.insertAdjacentHTML("afterend", `<ul>${fileHTML}</ul>`);
+        let newLiElement;
+        for (let i = 0; i < data.files.length; i++) {
+            const item = data.files[i];
+            if (filePath === item.path) {
+                newLiElement = await this.selectItem(data.box, filePath, undefined, setStorage, isSetCurrent);
+            } else if (filePath.startsWith(item.path.replace(".sy", ""))) {
+                const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
+                    notebook: data.box,
+                    path: item.path
+                });
+                newLiElement = await this.selectItem(response.data.box, filePath, response.data, setStorage, isSetCurrent);
+            }
+        }
+        if (isSetCurrent) {
+            this.setCurrent(newLiElement);
+        }
+        return newLiElement;
     }
 
-    private setCurrent(target: HTMLElement) {
+    public setCurrent(target: HTMLElement, isScroll = true) {
         if (!target) {
             return;
         }
-        this.element.querySelectorAll("li").forEach((liItem) => {
+        this.element.querySelectorAll("li.b3-list-item--focus").forEach((liItem) => {
             liItem.classList.remove("b3-list-item--focus");
         });
         target.classList.add("b3-list-item--focus");
-        const titleHeight = this.actionsElement.clientHeight;
-        if (target.offsetTop - titleHeight < this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - titleHeight;
-        } else if (target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight > this.element.scrollTop) {
-            this.element.scrollTop = target.offsetTop - this.element.clientHeight - titleHeight + target.clientHeight;
+
+        if (isScroll) {
+            const elementRect = this.element.getBoundingClientRect();
+            this.element.scrollTop = this.element.scrollTop + (target.getBoundingClientRect().top - (elementRect.top + elementRect.height / 2));
         }
     }
 
@@ -644,11 +657,11 @@ export class MobileFiles extends Model {
         });
     }
 
-    public selectItem(notebookId: string, filePath: string, data?: {
+    public async selectItem(notebookId: string, filePath: string, data?: {
         files: IFile[],
         box: string,
         path: string
-    }, setStorage = true) {
+    }, setStorage = true, isSetCurrent = true) {
         const treeElement = this.element.querySelector(`[data-url="${notebookId}"]`);
         if (!treeElement) {
             // 有文件树和编辑器的布局初始化时，文件树还未挂载
@@ -670,24 +683,24 @@ export class MobileFiles extends Model {
 
         if (liElement.getAttribute("data-path") === filePath) {
             if (setStorage) {
-                this.setCurrent(liElement);
                 this.getOpenPaths();
-            } else {
-                this.element.querySelector(".b3-list-item--focus")?.classList.remove("b3-list-item--focus");
             }
-            return;
+            if (isSetCurrent) {
+                this.setCurrent(liElement);
+            }
+            return liElement;
         }
 
         if (data && data.path === currentPath) {
-            this.onLsSelect(data, filePath, setStorage);
+            liElement = await this.onLsSelect(data, filePath, setStorage, isSetCurrent);
         } else {
-            fetchPost("/api/filetree/listDocsByPath", {
+            const response = await fetchSyncPost("/api/filetree/listDocsByPath", {
                 notebook: notebookId,
                 path: currentPath
-            }, response => {
-                this.onLsSelect(response.data, filePath, setStorage);
             });
+            liElement = await this.onLsSelect(response.data, filePath, setStorage, isSetCurrent);
         }
+        return liElement;
     }
 
     private getOpenPaths() {

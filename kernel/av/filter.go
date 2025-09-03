@@ -538,17 +538,17 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 
 	switch operator {
 	case FilterOperatorIsEqual:
-		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd)
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))
 	case FilterOperatorIsNotEqual:
 		return valueTime.Before(otherValueStart) || valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreater:
-		return valueTime.After(otherValueStart)
+		return valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreaterOrEqual:
 		return valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)
 	case FilterOperatorIsLess:
 		return valueTime.Before(otherValueStart)
 	case FilterOperatorIsLessOrEqual:
-		return valueTime.Before(otherValueStart) || valueTime.Equal(otherValueStart)
+		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
 		if RelativeDateDirectionBefore == direction {
 			if RelativeDateDirectionBefore == direction2 {

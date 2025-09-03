@@ -6,6 +6,8 @@ import {updateHotkeyTip} from "../util/compatibility";
 /// #if !MOBILE
 import {openBacklink, openGraph, openOutline} from "../../layout/dock/util";
 import * as path from "path";
+/// #else
+import {openMobileFileById} from "../../mobile/editor";
 /// #endif
 import {Constants} from "../../constants";
 import {openCardByData} from "../../card/openCard";
@@ -24,7 +26,6 @@ import {transferBlockRef} from "../../menus/block";
 import {addEditorToDatabase} from "../render/av/addToDatabase";
 import {openFileById} from "../../editor/util";
 import {hasTopClosestByClassName} from "../util/hasClosest";
-import {openMobileFileById} from "../../mobile/editor";
 
 export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
     hideTooltip();
@@ -228,7 +229,7 @@ export const openTitleMenu = (protyle: IProtyle, position: IPosition) => {
                         action: protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT],
                     });
                     /// #else
-                    openMobileFileById(protyle.app, protyle.block.id, protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL, Constants.CB_GET_FOCUS] : [Constants.CB_GET_CONTEXT]);
+                    openMobileFileById(protyle.app, protyle.block.id, protyle.block.rootID !== protyle.block.id ? [Constants.CB_GET_ALL] : [Constants.CB_GET_CONTEXT]);
                     /// #endif
                 }
             }).element);

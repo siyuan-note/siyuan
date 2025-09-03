@@ -455,6 +455,7 @@ interface IProtyleOptions {
     render?: {
         background?: boolean
         title?: boolean
+        titleShowTop?: boolean
         gutter?: boolean
         scroll?: boolean
         breadcrumb?: boolean

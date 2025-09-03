@@ -41,7 +41,7 @@
   "reconnectPrompt": "Após alternar aplicativos, levará algum tempo para restaurar a operação do kernel SiYuan. Por favor, aguarde alguns segundos ou clique no botão \"Tentar novamente\"",
   "relativeFontSize": "relativo ao tamanho da fonte do editor",
   "localFileSystem": "Sistema de arquivos local",
-  "deviceNotSupport": "O dispositivo atual não é suportado",
+  "mobileNotSupport": "O recurso não é suportado em dispositivos móveis (celular ou tablet) no momento,",
   "second": "segundo",
   "syncInterval": "intervalo de sincronização",
   "syncIntervalTip": "Sincronizar dados automaticamente após parar de alterar",

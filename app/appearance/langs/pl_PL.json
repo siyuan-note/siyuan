@@ -41,7 +41,7 @@
   "reconnectPrompt": "Po przełączeniu aplikacji ponowne uruchomienie jądra SiYuan może zająć trochę czasu. Proszę poczekać kilka sekund lub kliknąć przycisk „Ponów próbę”",
   "relativeFontSize": "względem rozmiaru czcionki edytora",
   "localFileSystem": "Lokalny system plików",
-  "deviceNotSupport": "Bieżące urządzenie nie jest obsługiwane",
+  "mobileNotSupport": "Funkcja nie jest obecnie obsługiwana na urządzeniach mobilnych (telefon lub tablet)",
   "second": "sekunda",
   "syncInterval": "interwał synchronizacji",
   "syncIntervalTip": "Automatyczna synchronizacja danych po zaprzestaniu zmian",

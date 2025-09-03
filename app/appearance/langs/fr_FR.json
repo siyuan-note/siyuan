@@ -41,7 +41,7 @@
   "reconnectPrompt": "Après avoir changé d'application, il faudra un certain temps pour rétablir le fonctionnement du noyau SiYuan. Veuillez patienter quelques secondes ou cliquer sur le bouton « Réessayer »",
   "relativeFontSize": "par rapport à la taille de la police de l'éditeur",
   "localFileSystem": "Système de fichiers local",
-  "deviceNotSupport": "L'appareil actuel n'est pas pris en charge",
+  "mobileNotSupport": "Cette fonctionnalité n'est pas prise en charge sur les appareils mobiles (téléphone ou tablette) pour le moment",
   "second": "seconde",
   "syncInterval": "intervalle de synchronisation",
   "syncIntervalTip": "Synchronisation automatique des données après l'arrêt des modifications",

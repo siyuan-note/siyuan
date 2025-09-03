@@ -41,7 +41,7 @@
   "reconnectPrompt": "切換應用後再次進入需要一些時間恢復思源內核運行，請稍等幾秒或者點擊“重試”按鈕",
   "relativeFontSize": "相對於編輯器字號",
   "localFileSystem": "本地檔案系統",
-  "deviceNotSupport": "當前設備不支援",
+  "mobileNotSupport": "行動裝置（手機或平板）目前不支援此功能，",
   "second": "秒",
   "syncInterval": "同步間隔",
   "syncIntervalTip": "數據不再變動後自動進行數據同步",

@@ -41,7 +41,7 @@
   "reconnectPrompt": "アプリを切り替えた後、思源カーネルの実行を再開するには少し時間がかかります。数秒待つか、「再試行」ボタンをクリックしてください",
   "relativeFontSize": "エディターのフォントサイズに対して",
   "localFileSystem": "ローカルファイルシステム",
-  "deviceNotSupport": "現在のデバイスはサポートされていません",
+  "mobileNotSupport": "モバイル端末（スマートフォンまたはタブレット）では現在この機能はサポートされていません",
   "second": "秒",
   "syncInterval": "同期間隔",
   "syncIntervalTip": "データが変動しなくなった後に自動的にデータを同期します",

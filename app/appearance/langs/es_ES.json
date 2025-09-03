@@ -41,7 +41,7 @@
   "reconnectPrompt": "Después de cambiar de aplicación, tomará algún tiempo restaurar el funcionamiento del núcleo de SiYuan. Espere unos segundos o haga clic en el botón \"Reintentar\"",
   "relativeFontSize": "en relación con el tamaño de fuente del editor",
   "localFileSystem": "Sistema de archivos local",
-  "deviceNotSupport": "El dispositivo actual no es compatible",
+  "mobileNotSupport": "Esta función no está disponible actualmente en dispositivos móviles (teléfono o tableta)",
   "second": "segundo",
   "syncInterval": "intervalo de sincronización",
   "syncIntervalTip": "Sincronización automática de datos después de que los datos dejen de cambiar",

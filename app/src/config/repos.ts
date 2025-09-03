@@ -41,7 +41,13 @@ const renderProvider = (provider: number) => {
 </div>`;
     }
     if (!isPaidUser()) {
-        return `<div class="b3-label b3-label--inner">${window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL(""))}</div>`;
+        return `<div>
+    ${window.siyuan.languages["_kernel"][214].replaceAll("${accountServer}", getCloudURL(""))}
+</div>
+<div class="ft__error${provider == 4 ? "" : " fn__none"}">
+    <div class="fn__hr--b"></div>
+    ${window.siyuan.languages.mobileNotSupport}
+</div>`;
     }
     if (provider === 2) {
         return `<div class="b3-label b3-label--inner">
@@ -180,16 +186,11 @@ const renderProvider = (provider: number) => {
     </button>
 </div>`;
     } else if (provider === 4) {
-        if (isKernelInMobile()) {
-            return `<div class="b3-label b3-label--inner">
-    ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
-    <div class="fn__hr"></div>
-    <em>${window.siyuan.languages.proFeature}</em>
-    <div class="fn__hr"></div>
-    ${window.siyuan.languages.deviceNotSupport}
-</div>`;
-        }
         return `<div class="b3-label b3-label--inner">
+    <div class="ft__error">
+        ${window.siyuan.languages.mobileNotSupport}
+    </div>
+    <div class="fn__hr"></div>
     ${window.siyuan.languages.syncThirdPartyProviderLocalIntro}
     <div class="fn__hr"></div>
     <em>${window.siyuan.languages.proFeature}</em>

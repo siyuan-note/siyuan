@@ -197,8 +197,8 @@ func Upload(c *gin.Context) {
 			succMap[baseName] = existAsset.Path
 		} else {
 			if skipIfDuplicated {
-				// https://github.com/siyuan-note/siyuan/issues/10666
-				matches, globErr := filepath.Glob(assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext) + "*")
+				// 复制 PDF 矩形注解时不再重复插入图片 No longer upload image repeatedly when copying PDF rectangle annotation https://github.com/siyuan-note/siyuan/issues/10666
+				matches, globErr := filepath.Glob(assetsDirPath + string(os.PathSeparator) + strings.TrimSuffix(fName, ext) + "*" + ext)
 				if nil != globErr {
 					logging.LogErrorf("glob failed: %s", globErr)
 				} else {

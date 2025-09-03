@@ -309,7 +309,7 @@ export const genCellValue = (colType: TAVCol, value: string | any) => {
                         content2: dateObj2.valueOf() || 0,
                         isNotEmpty2: !isNaN(dateObj2.valueOf()),
                         hasEndDate: !isNaN(dateObj2.valueOf()),
-                        isNotTime: dateObj1.hour() === 0,
+                        isNotTime: dateObj1.hour() === 0 && values[0].split(":").length === 1,
                         formattedContent: "",
                     }
                 };

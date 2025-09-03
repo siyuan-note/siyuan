@@ -128,7 +128,7 @@ func listDocTree(c *gin.Context) {
 			doctree = append(doctree, parent)
 
 			subPath := filepath.Join(root, entry.Name())
-			if err = walkDocTree(subPath, parent, &ids); err != nil {
+			if err = walkDocTree(subPath, parent, ids); err != nil {
 				ret.Code = -1
 				ret.Msg = err.Error()
 				return
@@ -152,7 +152,7 @@ type DocFile struct {
 	Children []*DocFile `json:"children,omitempty"`
 }
 
-func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
+func walkDocTree(p string, docFile *DocFile, ids map[string]bool) (err error) {
 	dir, err := os.ReadDir(p)
 	if err != nil {
 		return
@@ -169,7 +169,7 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 
 			parent := &DocFile{ID: entry.Name()}
-			(*ids)[parent.ID] = true
+			ids[parent.ID] = true
 			docFile.Children = append(docFile.Children, parent)
 
 			subPath := filepath.Join(p, entry.Name())
@@ -178,10 +178,10 @@ func walkDocTree(p string, docFile *DocFile, ids *map[string]bool) (err error) {
 			}
 		} else {
 			doc := &DocFile{ID: strings.TrimSuffix(entry.Name(), ".sy")}
-			if !(*ids)[doc.ID] {
+			if !ids[doc.ID] {
 				docFile.Children = append(docFile.Children, doc)
 			}
-			(*ids)[doc.ID] = true
+			ids[doc.ID] = true
 		}
 	}
 	return

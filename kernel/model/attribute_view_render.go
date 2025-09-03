@@ -377,7 +377,9 @@ func renderViewableInstance(viewable av.Viewable, view *av.View, attrView *av.At
 		return
 	}
 
-	av.Filter(viewable, attrView)
+	cachedAttrViews := map[string]*av.AttributeView{}
+	rollupFurtherCollections := sql.GetFurtherCollections(attrView, cachedAttrViews)
+	av.Filter(viewable, attrView, rollupFurtherCollections, cachedAttrViews)
 	av.Sort(viewable, attrView)
 	av.Calc(viewable, attrView)
 

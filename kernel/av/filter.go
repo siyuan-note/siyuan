@@ -26,11 +26,12 @@ import (
 
 // ViewFilter 描述了视图过滤规则的结构。
 type ViewFilter struct {
-	Column        string         `json:"column"`                  // 列（字段）ID
-	Operator      FilterOperator `json:"operator"`                // 过滤操作符
-	Value         *Value         `json:"value"`                   // 过滤值
-	RelativeDate  *RelativeDate  `json:"relativeDate,omitempty"`  // 相对时间
-	RelativeDate2 *RelativeDate  `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
+	Column        string           `json:"column"`                  // 列（字段）ID
+	Qualifier     FilterQuantifier `json:"quantifier,omitempty"`    // 量词
+	Operator      FilterOperator   `json:"operator"`                // 操作符
+	Value         *Value           `json:"value"`                   // 过滤值
+	RelativeDate  *RelativeDate    `json:"relativeDate,omitempty"`  // 相对时间
+	RelativeDate2 *RelativeDate    `json:"relativeDate2,omitempty"` // 第二个相对时间，用于某些操作符，比如 FilterOperatorIsBetween
 }
 
 type RelativeDateUnit int
@@ -76,7 +77,16 @@ const (
 	FilterOperatorIsFalse          FilterOperator = "Is false"
 )
 
-func Filter(viewable Viewable, attrView *AttributeView) {
+type FilterQuantifier string
+
+const (
+	FilterQuantifierUndefined FilterQuantifier = ""
+	FilterQuantifierAny       FilterQuantifier = "Any"
+	FilterQuantifierAll       FilterQuantifier = "All"
+	FilterQuantifierNone      FilterQuantifier = "None"
+)
+
+func Filter(viewable Viewable, attrView *AttributeView, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) {
 	collection := viewable.(Collection)
 	filters := collection.GetFilters()
 	if 1 > len(filters) {
@@ -94,8 +104,6 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 	}
 
 	var items []Item
-	attrViewCache := map[string]*AttributeView{}
-	attrViewCache[attrView.ID] = attrView
 	for _, item := range collection.GetItems() {
 		pass := true
 		values := item.GetValues()
@@ -116,7 +124,7 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 				break
 			}
 
-			if !values[index].Filter(filters[j], attrView, item.GetID(), &attrViewCache) {
+			if !values[index].Filter(filters[j], attrView, item.GetID(), rollupFurtherCollections, cachedAttrViews) {
 				pass = false
 				break
 			}
@@ -128,7 +136,7 @@ func Filter(viewable Viewable, attrView *AttributeView) {
 	collection.SetItems(items)
 }
 
-func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID string, attrViewCache *map[string]*AttributeView) bool {
+func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, itemID string, rollupFurtherCollections map[string]Collection, cachedAttrViews map[string]*AttributeView) bool {
 	if nil == filter || (nil == filter.Value && nil == filter.RelativeDate) {
 		return true
 	}
@@ -149,7 +157,6 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 		nil != filter.Value.Rollup && 0 < len(filter.Value.Rollup.Contents) {
 		// 单独处理汇总类型的比较
 
-		// 处理值比较
 		key, _ := attrView.GetKey(value.KeyID)
 		if nil == key {
 			return false
@@ -160,16 +167,16 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		relVal := attrView.GetValue(relKey.ID, rowID)
+		relVal := attrView.GetValue(relKey.ID, itemID)
 		if nil == relVal || nil == relVal.Relation {
 			return false
 		}
 
-		destAv := (*attrViewCache)[relKey.Relation.AvID]
+		destAv := cachedAttrViews[relKey.Relation.AvID]
 		if nil == destAv {
 			destAv, _ = ParseAttributeView(relKey.Relation.AvID)
 			if nil != destAv {
-				(*attrViewCache)[relKey.Relation.AvID] = destAv
+				cachedAttrViews[relKey.Relation.AvID] = destAv
 			}
 		}
 		if nil == destAv {
@@ -181,32 +188,40 @@ func (value *Value) Filter(filter *ViewFilter, attrView *AttributeView, rowID st
 			return false
 		}
 
-		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, nil)
-		for _, content := range value.Rollup.Contents {
-			switch filter.Operator {
-			case FilterOperatorContains:
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-					return true
-				}
-			case FilterOperatorDoesNotContain:
-				ret := content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator)
-				if !ret {
-					return false
-				}
-			default:
-				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
-					return true
+		value.Rollup.BuildContents(destAv.KeyValues, destKey, relVal, key.Rollup.Calc, rollupFurtherCollections[key.ID])
+
+		switch filter.Qualifier {
+		case FilterQuantifierUndefined, FilterQuantifierAny:
+			for _, content := range value.Rollup.Contents {
+				switch filter.Operator {
+				case FilterOperatorContains:
+					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return true
+					}
+				case FilterOperatorDoesNotContain:
+					if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return false
+					}
+				default:
+					if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+						return true
+					}
 				}
 			}
-		}
-
-		switch filter.Operator {
-		case FilterOperatorContains:
-			return false
-		case FilterOperatorDoesNotContain:
+		case FilterQuantifierAll:
+			for _, content := range value.Rollup.Contents {
+				if !content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+					return false
+				}
+			}
 			return true
-		default:
-			return false
+		case FilterQuantifierNone:
+			for _, content := range value.Rollup.Contents {
+				if content.filter(filter.Value.Rollup.Contents[0], filter.RelativeDate, filter.RelativeDate2, filter.Operator) {
+					return false
+				}
+			}
+			return true
 		}
 	}
 
@@ -523,17 +538,17 @@ func filterRelativeTime(valueMills int64, valueIsNotEmpty bool, operator FilterO
 
 	switch operator {
 	case FilterOperatorIsEqual:
-		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && valueTime.Before(otherValueEnd)
+		return (valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)) && (valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd))
 	case FilterOperatorIsNotEqual:
 		return valueTime.Before(otherValueStart) || valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreater:
-		return valueTime.After(otherValueStart)
+		return valueTime.After(otherValueEnd)
 	case FilterOperatorIsGreaterOrEqual:
 		return valueTime.After(otherValueStart) || valueTime.Equal(otherValueStart)
 	case FilterOperatorIsLess:
 		return valueTime.Before(otherValueStart)
 	case FilterOperatorIsLessOrEqual:
-		return valueTime.Before(otherValueStart) || valueTime.Equal(otherValueStart)
+		return valueTime.Before(otherValueEnd) || valueTime.Equal(otherValueEnd)
 	case FilterOperatorIsBetween:
 		if RelativeDateDirectionBefore == direction {
 			if RelativeDateDirectionBefore == direction2 {

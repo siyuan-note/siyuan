@@ -855,15 +855,16 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                         const cloneRange = range.cloneRange();
                         const nextElement = getNextBlock(getTopAloneElement(nodeElement));
                         if (nextElement) {
-                            if (!nodeElement.classList.contains("code-block")) {
-                                const nextRange = focusBlock(nextElement);
-                                if (nextRange) {
-                                    const nextBlockElement = hasClosestBlock(nextRange.startContainer);
-                                    if (nextBlockElement) {
-                                        // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
-                                        cloneRange.insertNode(document.createElement("wbr"));
-                                        removeBlock(protyle, nextBlockElement, nextRange, "Delete");
-                                    }
+                            const nextRange = focusBlock(nextElement);
+                            if (nextRange) {
+                                const nextBlockElement = hasClosestBlock(nextRange.startContainer);
+                                if (nextBlockElement &&
+                                    (!nextBlockElement.classList.contains("code-block") ||
+                                        (nextBlockElement.classList.contains("code-block") && getContenteditableElement(nextBlockElement).textContent == "\n"))
+                                ) {
+                                    // 反向删除合并为一个块时，光标应保持在尾部 https://github.com/siyuan-note/siyuan/issues/14290#issuecomment-2849810529
+                                    cloneRange.insertNode(document.createElement("wbr"));
+                                    removeBlock(protyle, nextBlockElement, nextRange, "Delete");
                                 }
                             }
                             event.stopPropagation();
@@ -912,7 +913,9 @@ export const keydown = (protyle: IProtyle, editorElement: HTMLElement) => {
                             // 需使用 textContent，文本元素没有 innerText
                             currentNode.textContent === "") // https://ld246.com/article/1649251218696
                     )) {
-                        if (!nodeElement.classList.contains("code-block")) {
+                        if (!nodeElement.classList.contains("code-block") ||
+                            (nodeElement.classList.contains("code-block") && editElement.textContent == "\n")
+                        ) {
                             removeBlock(protyle, nodeElement, range, "Backspace");
                         }
                         event.stopPropagation();

@@ -154,7 +154,7 @@ func extensionCopy(c *gin.Context) {
 			fName += ext
 		}
 
-		fName = util.AssetName(fName)
+		fName = util.AssetName(fName, ast.NewNodeID())
 		writePath := filepath.Join(assets, fName)
 		if err = filelock.WriteFile(writePath, data); err != nil {
 			ret.Code = -1

@@ -172,12 +172,12 @@ func Ext(name string) (ret string) {
 	return
 }
 
-func AssetName(name string) string {
+func AssetName(name, newID string) string {
 	_, id := LastID(name)
 	ext := Ext(name)
 	name = name[0 : len(name)-len(ext)]
 	if !ast.IsNodeIDPattern(id) {
-		id = ast.NewNodeID()
+		id = newID
 		name = name + "-" + id + ext
 	} else {
 		if !ast.IsNodeIDPattern(name) {

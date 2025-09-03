@@ -981,7 +981,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 				if "" == existName {
 					name = filepath.Base(absolutePath)
 					name = util.FilterUploadFileName(name)
-					name = util.AssetName(name)
+					name = util.AssetName(name, ast.NewNodeID())
 					assetTargetPath := filepath.Join(assetDirPath, name)
 					if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
 						logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
@@ -1104,7 +1104,7 @@ func ImportFromLocalPath(boxID, localPath string, toPath string) (err error) {
 			if "" == existName {
 				name = filepath.Base(absolutePath)
 				name = util.FilterUploadFileName(name)
-				name = util.AssetName(name)
+				name = util.AssetName(name, ast.NewNodeID())
 				assetTargetPath := filepath.Join(assetDirPath, name)
 				if err = filelock.Copy(absolutePath, assetTargetPath); err != nil {
 					logging.LogErrorf("copy asset from [%s] to [%s] failed: %s", absolutePath, assetTargetPath, err)
@@ -1249,7 +1249,7 @@ func processBase64Img(n *ast.Node, dest string, assetDirPath string) {
 		name = alt.TokensStr() + ext
 	}
 	name = util.FilterUploadFileName(name)
-	name = util.AssetName(name)
+	name = util.AssetName(name, ast.NewNodeID())
 
 	tmp := filepath.Join(base64TmpDir, name)
 	tmpFile, openErr := os.OpenFile(tmp, os.O_RDWR|os.O_CREATE, 0644)

@@ -28,6 +28,7 @@ import (
 	"sync"
 
 	"github.com/88250/gulu"
+	"github.com/88250/lute/ast"
 	"github.com/emersion/go-vcard"
 	"github.com/emersion/go-webdav/carddav"
 	"github.com/siyuan-note/logging"
@@ -640,7 +641,7 @@ func (b *AddressBook) load() error {
 							addressesWaitGroup.Add(1)
 							go func() {
 								defer addressesWaitGroup.Done()
-								filename_ := util.AssetName(filename)
+								filename_ := util.AssetName(filename, ast.NewNodeID())
 								address := &AddressObject{
 									FilePath: path.Join(b.DirectoryPath, filename_),
 									BookPath: b.MetaData.Path,

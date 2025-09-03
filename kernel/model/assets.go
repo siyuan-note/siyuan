@@ -201,7 +201,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 				name := filepath.Base(u)
 				name = util.FilterUploadFileName(name)
 				name = "network-asset-" + name
-				name = util.AssetName(name)
+				name = util.AssetName(name, ast.NewNodeID())
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.Copy(u, writePath); err != nil {
 					logging.LogErrorf("copy [%s] to [%s] failed: %s", u, writePath, err)
@@ -303,7 +303,7 @@ func NetAssets2LocalAssets(rootID string, onlyImg bool, originalURL string) (err
 						name += ext
 					}
 				}
-				name = util.AssetName(name)
+				name = util.AssetName(name, ast.NewNodeID())
 				name = "network-asset-" + name
 				writePath := filepath.Join(assetsDirPath, name)
 				if err = filelock.WriteFile(writePath, data); err != nil {
@@ -737,7 +737,7 @@ func RenameAsset(oldPath, newName string) (newPath string, err error) {
 		return
 	}
 
-	newName = util.AssetName(newName + filepath.Ext(oldPath))
+	newName = util.AssetName(newName+filepath.Ext(oldPath), ast.NewNodeID())
 	parentDir := path.Dir(oldPath)
 	newPath = path.Join(parentDir, newName)
 	oldAbsPath, getErr := GetAssetAbsPath(oldPath)

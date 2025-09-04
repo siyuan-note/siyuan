@@ -51,7 +51,7 @@ type DisplayName struct {
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
 	PlPL    string `json:"pl_PL"`
-	ptBR    string `json:"pt_BR"`
+	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
@@ -68,7 +68,7 @@ type Description struct {
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
 	PlPL    string `json:"pl_PL"`
-	ptBR    string `json:"pt_BR"`
+	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
@@ -279,8 +279,8 @@ func GetPreferredName(pkg *Package) string {
 			ret = pkg.DisplayName.PlPL
 		}
 	case "pt_BR":
-		if "" != pkg.DisplayName.ptBR {
-			ret = pkg.DisplayName.ptBR
+		if "" != pkg.DisplayName.PtBR {
+			ret = pkg.DisplayName.PtBR
 		}
 	case "ru_RU":
 		if "" != pkg.DisplayName.RuRU {
@@ -349,8 +349,8 @@ func getPreferredDesc(desc *Description) string {
 			ret = desc.PlPL
 		}
 	case "pt_BR":
-		if "" != desc.ptBR {
-			ret = desc.ptBR
+		if "" != desc.PtBR {
+			ret = desc.PtBR
 		}
 	case "ru_RU":
 		if "" != desc.RuRU {

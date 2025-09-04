@@ -629,23 +629,6 @@ func fillAttributeViewKeyValues(attrView *av.AttributeView, collection av.Collec
 	}
 }
 
-func mergeKeyValues(kv1, kv2 []*av.KeyValues) (ret []*av.KeyValues) {
-	ret = kv2
-	for _, k1 := range kv1 {
-		found := false
-		for _, k2 := range kv2 {
-			if k1.Key.ID == k2.Key.ID {
-				found = true
-				break
-			}
-		}
-		if !found {
-			ret = append(ret, k1)
-		}
-	}
-	return
-}
-
 func FillAttributeViewNilValue(value *av.Value, typ av.KeyType) {
 	value.Type = typ
 	switch typ {

@@ -85,7 +85,7 @@ type Readme struct {
 	ItIT    string `json:"it_IT"`
 	JaJP    string `json:"ja_JP"`
 	PlPL    string `json:"pl_PL"`
-	ptBR    string `json:"pt_BR"`
+	PtBR    string `json:"pt_BR"`
 	RuRU    string `json:"ru_RU"`
 	ZhCHT   string `json:"zh_CHT"`
 	ZhCN    string `json:"zh_CN"`
@@ -209,8 +209,8 @@ func getPreferredReadme(readme *Readme) string {
 			ret = readme.PlPL
 		}
 	case "pt_BR":
-		if "" != readme.ptBR {
-			ret = readme.ptBR
+		if "" != readme.PtBR {
+			ret = readme.PtBR
 		}
 	case "ru_RU":
 		if "" != readme.RuRU {

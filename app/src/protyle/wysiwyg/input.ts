@@ -37,6 +37,10 @@ export const input = async (protyle: IProtyle, blockElement: HTMLElement, range:
         } else if (type === "NodeBlockQueryEmbed") {
             blockElement.lastElementChild.previousElementSibling.innerHTML = "<wbr>" + Constants.ZWSP;
         } else if (type === "NodeMathBlock" || type === "NodeHTMLBlock") {
+            // https://github.com/siyuan-note/siyuan/issues/15761
+            if (blockElement.firstElementChild.firstChild.nodeType === 3) {
+                blockElement.firstElementChild.firstChild.remove();
+            }
             blockElement.lastElementChild.previousElementSibling.lastElementChild.innerHTML = "<wbr>" + Constants.ZWSP;
         } else if (type === "NodeIFrame" || type === "NodeWidget") {
             blockElement.innerHTML = "<wbr>" + blockElement.firstElementChild.outerHTML + blockElement.lastElementChild.outerHTML;

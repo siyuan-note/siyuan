@@ -245,6 +245,9 @@ const getActiveEditor = (wndActive = true) => {
     }
     /// #else
     editor = window.siyuan.mobile.popEditor || window.siyuan.mobile.editor;
+    if (editor?.protyle.element.classList.contains("fn__none")) {
+        return undefined;
+    }
     /// #endif
     return editor;
 };

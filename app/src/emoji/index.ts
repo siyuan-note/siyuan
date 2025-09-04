@@ -335,7 +335,7 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
                 <span class="fn__space--small"></span>
                 <input type="date" max="9999-12-31" class="b3-text-field fn__flex-1" value="${dynamicCurrentObj.date}"/>
                 <span class="fn__space--small"></span>
-                <span class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIconDateEmptyInfo}"><svg><use xlink:href="#iconInfo"></use></svg></span>
+                <span data-action="clearDate" class="ariaLabel block__icon block__icon--show" aria-label="${window.siyuan.languages.dynamicIconDateEmptyInfo}"><svg><use xlink:href="#iconTrashcan"></use></svg></span>
                 <span class="fn__space"></span>
             </div>
             <div class="fn__hr"></div>
@@ -629,6 +629,10 @@ export const openEmojiPanel = (id: string, type: "doc" | "notebook" | "av", posi
             } else if (target.classList.contains("color__square")) {
                 dynamicTextElements[0].value = target.getAttribute("style").replace("background-color:", "");
                 dynamicTextElements[0].dispatchEvent(new CustomEvent("input"));
+                break;
+            } else if ("clearDate" === target.dataset.action) {
+                dynamicDateElement.value = "";
+                dynamicDateElement.dispatchEvent(new CustomEvent("change"));
                 break;
             }
             target = target.parentElement;

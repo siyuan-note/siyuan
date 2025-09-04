@@ -31,10 +31,11 @@ import (
 
 // Petal represents a plugin's management status.
 type Petal struct {
-	Name         string `json:"name"`         // Plugin name
-	DisplayName  string `json:"displayName"`  // Plugin display name
-	Enabled      bool   `json:"enabled"`      // Whether enabled
-	Incompatible bool   `json:"incompatible"` // Whether incompatible
+	Name              string `json:"name"`              // Plugin name
+	DisplayName       string `json:"displayName"`       // Plugin display name
+	Enabled           bool   `json:"enabled"`           // Whether enabled
+	Incompatible      bool   `json:"incompatible"`      // Whether incompatible
+	DisabledInPublish bool   `json:"disabledInPublish"` // Whether disabled in publish mode
 
 	JS   string                 `json:"js"`   // JS code
 	CSS  string                 `json:"css"`  // CSS code
@@ -44,7 +45,7 @@ type Petal struct {
 func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, err error) {
 	petals := getPetals()
 
-	found, displayName, incompatible := bazaar.ParseInstalledPlugin(name, frontend)
+	found, displayName, incompatible, disabledInPublish := bazaar.ParseInstalledPlugin(name, frontend)
 	if !found {
 		logging.LogErrorf("plugin [%s] not found", name)
 		return
@@ -60,6 +61,7 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	ret.DisplayName = displayName
 	ret.Enabled = enabled
 	ret.Incompatible = incompatible
+	ret.DisabledInPublish = disabledInPublish
 
 	if incompatible {
 		err = fmt.Errorf(Conf.Language(205))
@@ -72,7 +74,7 @@ func SetPetalEnabled(name string, enabled bool, frontend string) (ret *Petal, er
 	return
 }
 
-func LoadPetals(frontend string) (ret []*Petal) {
+func LoadPetals(frontend string, isPublish bool) (ret []*Petal) {
 	ret = []*Petal{}
 
 	if Conf.Bazaar.PetalDisabled {
@@ -93,8 +95,8 @@ func LoadPetals(frontend string) (ret []*Petal) {
 			continue
 		}
 
-		_, petal.DisplayName, petal.Incompatible = bazaar.ParseInstalledPlugin(petal.Name, frontend)
-		if !petal.Enabled || petal.Incompatible {
+		_, petal.DisplayName, petal.Incompatible, petal.DisabledInPublish = bazaar.ParseInstalledPlugin(petal.Name, frontend)
+		if !petal.Enabled || petal.Incompatible || (isPublish && petal.DisabledInPublish) {
 			continue
 		}
 

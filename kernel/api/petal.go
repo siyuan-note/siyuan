@@ -35,9 +35,9 @@ func loadPetals(c *gin.Context) {
 	}
 
 	frontend := arg["frontend"].(string)
+	isPublish := model.IsReadOnlyRole(model.GetGinContextRole(c))
 
-	petals := model.LoadPetals(frontend)
-	ret.Data = petals
+	ret.Data = model.LoadPetals(frontend, isPublish)
 }
 
 func setPetalEnabled(c *gin.Context) {

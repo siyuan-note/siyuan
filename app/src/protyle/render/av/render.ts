@@ -451,6 +451,7 @@ export const avRender = (element: Element, protyle: IProtyle, cb?: (data: IAV) =
     }
     if (avElements.length > 0) {
         avElements.forEach((e: HTMLElement) => {
+            e.removeAttribute("data-rendering");
             if (e.getAttribute("data-render") === "true" || hasClosestByClassName(e, "av__gallery-content")) {
                 return;
             }

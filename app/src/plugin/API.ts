@@ -267,9 +267,12 @@ export const expandDocTree = async (options: {
         options.isSetCurrent = true;
     }
     if (isNotebook) {
-        liElement = file.element.querySelector(`.b3-list[data-url="${options.id}"]`).firstElementChild as HTMLElement;
+        liElement = file.element.querySelector(`.b3-list[data-url="${options.id}"]`)?.firstElementChild as HTMLElement;
     } else {
         const response = await fetchSyncPost("api/block/getBlockInfo", {id: options.id});
+        if (response.code === -1) {
+            return;
+        }
         notebookId = response.data.box;
         liElement = await file.selectItem(response.data.box, response.data.path, undefined, undefined, options.isSetCurrent);
     }

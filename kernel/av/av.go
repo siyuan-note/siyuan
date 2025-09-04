@@ -42,6 +42,8 @@ type AttributeView struct {
 	KeyIDs    []string     `json:"keyIDs"`    // 属性视图属性键 ID，用于排序
 	ViewID    string       `json:"viewID"`    // 当前视图 ID
 	Views     []*View      `json:"views"`     // 视图
+
+	RenderedViewables map[string]Viewable `json:"-"` // 已经渲染好的视图
 }
 
 // KeyValues 描述了属性视图属性键值列表的结构。
@@ -428,7 +430,7 @@ func ParseAttributeView(avID string) (ret *AttributeView, err error) {
 		return
 	}
 
-	ret = &AttributeView{}
+	ret = &AttributeView{RenderedViewables: map[string]Viewable{}}
 	if err = gulu.JSON.UnmarshalJSON(data, ret); err != nil {
 		if strings.Contains(err.Error(), ".relation.contents of type av.Value") {
 			mapAv := map[string]interface{}{}

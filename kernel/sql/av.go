@@ -76,6 +76,7 @@ func RenderView(attrView *av.AttributeView, view *av.View, query string) (ret av
 	ret = renderView(attrView, view, query, &depth, renderedAttrViews)
 
 	attrView.RenderedViewables[ret.GetID()] = ret
+	renderedAttrViews[attrView.ID] = attrView
 	return
 }
 

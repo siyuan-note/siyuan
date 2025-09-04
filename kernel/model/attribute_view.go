@@ -199,6 +199,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 				if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
 					newValue.Date.Content = time.Now().UnixMilli()
+					newValue.Date.IsNotEmpty = true
 				}
 			}
 
@@ -270,6 +271,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
 			newValue.Date.Content = time.Now().UnixMilli()
+			newValue.Date.IsNotEmpty = true
 		}
 		return
 	}
@@ -308,6 +310,7 @@ func getAttrViewAddingBlockDefaultValues(attrView *av.AttributeView, view, group
 
 		if nil != keyValues.Key.Date && keyValues.Key.Date.AutoFillNow {
 			newValue.Date.Content = time.Now().UnixMilli()
+			newValue.Date.IsNotEmpty = true
 		}
 	}
 	return

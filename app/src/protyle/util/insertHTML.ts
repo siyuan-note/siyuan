@@ -446,6 +446,10 @@ export const insertHTML = (html: string, protyle: IProtyle, isBlock = false,
             insertBefore = true;
         }
     }
+    // https://github.com/siyuan-note/siyuan/issues/15768
+    if (tempElement.content.firstChild.nodeType === 3 || (tempElement.content.firstChild.nodeType === 1 && tempElement.content.firstElementChild.tagName !== "DIV")) {
+        tempElement.innerHTML = protyle.lute.SpinBlockDOM(tempElement.innerHTML);
+    }
     (insertBefore ? Array.from(tempElement.content.children) : Array.from(tempElement.content.children).reverse()).forEach((item) => {
         // https://github.com/siyuan-note/siyuan/issues/13232
         if (item.getAttribute("data-type") === "NodeHeading" && item.getAttribute("fold") === "1") {

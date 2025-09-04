@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "Количество снимков данных в день",
   "fields": "Атрибут",
   "dynamicIcon": "Динамическая иконка",
-  "dynamicIconDateEmptyInfo": "Если дата пуста, иконка календаря будет динамически отображать сегодняшнюю дату",
+  "dynamicIconDateEmptyInfo": "Очистить дату, иконка календаря будет динамически отображать текущую дату",
   "backlinkContainChildren": "Включать ли дочерние блоки в обратные ссылки",
   "backlinkContainChildrenTip": "После включения дочерние блоки будут включены в расчет обратных ссылок",
   "entryNum": "Количество записей",

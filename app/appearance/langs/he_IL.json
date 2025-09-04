@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "מספר תמונות נתונים ביום",
   "fields": "מאפיין",
   "dynamicIcon": "אייקון דינמי",
-  "dynamicIconDateEmptyInfo": "אם התאריך ריק, סמל הלוח השנה יציג באופן דינמי את התאריך של היום",
+  "dynamicIconDateEmptyInfo": "נקה את התאריך, סמל לוח השנה יציג באופן דינמי את התאריך של היום",
   "backlinkContainChildren": "האם קישורים חוזרים כוללים בלוקים משניים",
   "backlinkContainChildrenTip": "לאחר ההפעלה, בלוקים משניים ייכללו בחישוב הקישורים החוזרים",
   "entryNum": "מספר ערכים",

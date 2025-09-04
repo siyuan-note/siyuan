@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "Liczba migawek danych dziennie",
   "fields": "Atrybut",
   "dynamicIcon": "Ikona dynamiczna",
-  "dynamicIconDateEmptyInfo": "Jeśli data jest pusta, ikona kalendarza będzie dynamicznie pokazywać dzisiejszą datę",
+  "dynamicIconDateEmptyInfo": "Wyczyść datę, ikona kalendarza będzie dynamicznie wyświetlać bieżącą datę",
   "backlinkContainChildren": "Czy linki zwrotne zawierają bloki podrzędne",
   "backlinkContainChildrenTip": "Po włączeniu bloki podrzędne zostaną uwzględnione w obliczeniach linków zwrotnych",
   "entryNum": "Количество записей",

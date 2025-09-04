@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "عدد لقطات البيانات في اليوم",
   "fields": "حقول",
   "dynamicIcon": "أيقونة ديناميكية",
-  "dynamicIconDateEmptyInfo": "إذا كان التاريخ فارغًا، فسيظهر أيقونة التقويم التاريخ الحالي بشكل ديناميكي",
+  "dynamicIconDateEmptyInfo": "مسح التاريخ، سيعرض رمز التقويم تاريخ اليوم ديناميكيًا",
   "backlinkContainChildren": "جعل الروابط المرجعية تحتوي على كتل فرعية",
   "backlinkContainChildrenTip": "عند التمكين، سيتم تضمين الكتل الفرعية في حساب الروابط المرجعية",
   "entryNum": "عدد المدخلات",

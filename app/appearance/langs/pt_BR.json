@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "Instantâneos de dados por dia",
   "fields": "Campos",
   "dynamicIcon": "Ícone dinâmico",
-  "dynamicIconDateEmptyInfo": "Se a data estiver vazia, o ícone do calendário exibirá dinamicamente a data atual",
+  "dynamicIconDateEmptyInfo": "Limpar a data, o ícone do calendário exibirá dinamicamente a data atual",
   "backlinkContainChildren": "Os backlinks contêm blocos filhos",
   "backlinkContainChildrenTip": "Quando ativado, os blocos filhos serão incluídos no cálculo do backlink",
   "entryNum": "Número de entradas",

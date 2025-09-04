@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "Data snapshots per day",
   "fields": "Fields",
   "dynamicIcon": "Dynamic icon",
-  "dynamicIconDateEmptyInfo": "When date is empty, the calendar icon will show today's date dynamically",
+  "dynamicIconDateEmptyInfo": "Clear the date, the calendar icon will dynamically display today’s date",
   "backlinkContainChildren": "Do backlinks contain child blocks",
   "backlinkContainChildrenTip": "When enabled, child blocks will be included in the backlink calculation",
   "entryNum": "Number of entries",

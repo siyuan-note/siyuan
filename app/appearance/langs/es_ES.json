@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "Número de instantáneas de datos por día",
   "fields": "Atributo",
   "dynamicIcon": "Icono dinámico",
-  "dynamicIconDateEmptyInfo": "Si la fecha está vacía, el icono del calendario mostrará dinámicamente la fecha de hoy",
+  "dynamicIconDateEmptyInfo": "Borrar la fecha, el icono del calendario mostrará dinámicamente la fecha actual",
   "backlinkContainChildren": "¿Los enlaces inversos contienen bloques secundarios?",
   "backlinkContainChildrenTip": "Una vez habilitado, los bloques secundarios se incluirán en el cálculo de los enlaces inversos",
   "entryNum": "Número de entradas",

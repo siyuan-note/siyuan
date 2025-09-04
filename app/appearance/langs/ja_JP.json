@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "データスナップショットの毎日の保持数",
   "fields": "属性",
   "dynamicIcon": "動的アイコン",
-  "dynamicIconDateEmptyInfo": "日付が空の場合、カレンダーアイコンは現在の日付を動的に表示します",
+  "dynamicIconDateEmptyInfo": "日付をクリアすると、カレンダーアイコンが当日の日付を動的に表示します",
   "backlinkContainChildren": "バックリンクに子ブロックを含めるかどうか",
   "backlinkContainChildrenTip": "有効にすると、子ブロックがバックリンク計算に含まれます",
   "entryNum": "エントリ数",

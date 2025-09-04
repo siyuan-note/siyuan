@@ -54,7 +54,7 @@
   "dataRepoAutoPurgeRetentionIndexesDaily": "數據快照每天保留個數",
   "fields": "欄位",
   "dynamicIcon": "動態圖標",
-  "dynamicIconDateEmptyInfo": "若日期為空，日曆圖示將動態顯示當天日期",
+  "dynamicIconDateEmptyInfo": "清除日期，日曆圖示將動態顯示當天日期",
   "backlinkContainChildren": "反向鏈接包含子塊",
   "backlinkContainChildrenTip": "啟用後子塊將被納入到反向鏈接計算中",
   "entryNum": "條目數",

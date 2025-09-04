@@ -22,8 +22,13 @@ import (
 	"github.com/siyuan-note/siyuan/kernel/util"
 )
 
-func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string,
-	depth *int, cachedAttrViews map[string]*av.AttributeView) (ret *av.Table) {
+func RenderAttributeViewTable(attrView *av.AttributeView, view *av.View, query string, depth *int, cachedAttrViews map[string]*av.AttributeView) (ret *av.Table) {
+	viewable := attrView.RenderedViewables[view.ID]
+	if nil != viewable {
+		ret = viewable.(*av.Table)
+		return
+	}
+
 	ret = &av.Table{
 		BaseInstance: av.NewViewBaseInstance(view),
 		Columns:      []*av.TableColumn{},

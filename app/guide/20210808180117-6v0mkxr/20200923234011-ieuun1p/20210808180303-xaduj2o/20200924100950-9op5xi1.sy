@@ -3820,7 +3820,7 @@
 							"Children": [
 								{
 									"Type": "NodeText",
-									"Data": "In the code block, only select the content of the code block"
+									"Data": "Double press to select all loaded content blocks in the document; in the code block, only select the content of the code block"
 								}
 							]
 						}

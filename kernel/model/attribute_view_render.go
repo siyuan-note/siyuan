@@ -110,15 +110,7 @@ func renderAttributeViewGroups(viewable av.Viewable, attrView *av.AttributeView,
 
 	// 如果存在分组的话渲染分组视图
 
-	fixDev := false
 	for _, groupView := range view.Groups {
-		if (nil == groupView.GroupVal || nil == groupView.GroupKey) && !fixDev {
-			// TODO 分组上线后删除，预计 2025 年 9 月后可以删除
-			regenAttrViewGroups(attrView)
-			av.SaveAttributeView(attrView)
-			fixDev = true
-		}
-
 		switch groupView.GetGroupValue() {
 		case groupValueDefault:
 			groupView.Name = fmt.Sprintf(Conf.language(264), groupKey.Name)

@@ -99,17 +99,18 @@ type Funding struct {
 }
 
 type Package struct {
-	Author        string       `json:"author"`
-	URL           string       `json:"url"`
-	Version       string       `json:"version"`
-	MinAppVersion string       `json:"minAppVersion"`
-	Backends      []string     `json:"backends"`
-	Frontends     []string     `json:"frontends"`
-	DisplayName   *DisplayName `json:"displayName"`
-	Description   *Description `json:"description"`
-	Readme        *Readme      `json:"readme"`
-	Funding       *Funding     `json:"funding"`
-	Keywords      []string     `json:"keywords"`
+	Author            string       `json:"author"`
+	URL               string       `json:"url"`
+	Version           string       `json:"version"`
+	MinAppVersion     string       `json:"minAppVersion"`
+	DisabledInPublish bool         `json:"disabledInPublish"`
+	Backends          []string     `json:"backends"`
+	Frontends         []string     `json:"frontends"`
+	DisplayName       *DisplayName `json:"displayName"`
+	Description       *Description `json:"description"`
+	Readme            *Readme      `json:"readme"`
+	Funding           *Funding     `json:"funding"`
+	Keywords          []string     `json:"keywords"`
 
 	PreferredFunding string `json:"preferredFunding"`
 	PreferredName    string `json:"preferredName"`
@@ -875,9 +876,10 @@ func getBazaarIndex() map[string]*bazaarPackage {
 const defaultMinAppVersion = "2.9.0"
 
 func disallowDisplayBazaarPackage(pkg *Package) bool {
-	if "" == pkg.MinAppVersion { // TODO: 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
-		return false
+	if "" == pkg.MinAppVersion {
+		pkg.MinAppVersion = defaultMinAppVersion
 	}
+
 	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
 		return true
 	}

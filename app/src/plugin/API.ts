@@ -236,9 +236,13 @@ const getActiveEditor = (wndActive = true) => {
     if (!editor && !wndActive) {
         let activeTime = 0;
         allEditor.forEach(item => {
-            const headerElement = item.protyle?.model.parent.headElement;
-            if (headerElement && headerElement.classList.contains("item--focus") && parseInt(headerElement.dataset.activetime) > activeTime) {
-                activeTime = parseInt(headerElement.dataset.activetime);
+            const headerElement = item.protyle.model?.parent.headElement;
+            if (headerElement) {
+                if (headerElement.classList.contains("item--focus") && parseInt(headerElement.dataset.activetime) > activeTime) {
+                    activeTime = parseInt(headerElement.dataset.activetime);
+                    editor = item;
+                }
+            } else if (item.protyle.element.getBoundingClientRect().height > 0) {
                 editor = item;
             }
         });

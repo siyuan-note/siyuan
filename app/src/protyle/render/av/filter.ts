@@ -132,8 +132,8 @@ export const setFilter = async (options: {
                 newValue = genCellValue(filterValue.type, {
                     isNotEmpty2: textElements[2].value !== "",
                     isNotEmpty: textElements[0].value !== "",
-                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : null,
-                    content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : null,
+                    content: textElements[0].value ? new Date(textElements[0].value + " 00:00").getTime() : 0,
+                    content2: textElements[2].value ? new Date(textElements[2].value + " 00:00").getTime() : 0,
                     hasEndDate: newFilter.operator === "Is between",
                     isNotTime: true,
                 });

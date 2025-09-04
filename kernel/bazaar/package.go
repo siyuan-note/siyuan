@@ -875,9 +875,10 @@ func getBazaarIndex() map[string]*bazaarPackage {
 const defaultMinAppVersion = "2.9.0"
 
 func disallowDisplayBazaarPackage(pkg *Package) bool {
-	if "" == pkg.MinAppVersion { // TODO: 目前暂时放过所有不带 minAppVersion 的集市包，后续版本会使用 defaultMinAppVersion
-		return false
+	if "" == pkg.MinAppVersion {
+		pkg.MinAppVersion = defaultMinAppVersion
 	}
+
 	if 0 < semver.Compare("v"+pkg.MinAppVersion, "v"+util.Ver) {
 		return true
 	}
